@@ -324,7 +324,7 @@ export default function TrabajaConNosotros() {
                     alt="AntiAgencia"
                     className="h-10 w-auto"
                   />
-                  <span className="font-bold text-gray-900 text-xl tracking-wide" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Antiagencia</span>
+                  <span className="font-bold text-gray-900 text-xl tracking-wide" style={{ fontFamily: "'Rubik', monospace" }}>Antiagencia</span>
                 </div>
               </div>
 
