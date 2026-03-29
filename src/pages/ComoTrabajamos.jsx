@@ -49,7 +49,7 @@ function CalendlyPopup({ onClose }) {
       >
         <button
           onClick={onClose}
-          className="absolute top-3 right-4 text-[#121212] text-2xl font-bold hover:text-[#0055FF] z-10"
+          className="absolute top-3 right-4 text-[#121212] text-2xl font-bold hover:text-[#0067FD] z-10"
         >
           ×
         </button>
@@ -109,7 +109,7 @@ export default function ComoTrabajamos() {
         </h1>
 
         {/* Subtítulo */}
-        <p className="font-headline font-bold text-[#0055FF] text-sm md:text-2xl text-center mb-10">
+        <p className="font-headline font-bold text-[#0067FD] text-sm md:text-2xl text-center mb-10">
           Y cómo lo implementaremos GRATIS en tu tienda
         </p>
 
@@ -126,7 +126,7 @@ export default function ComoTrabajamos() {
         {/* Botón CTA */}
         <button
           onClick={() => setShowCalendly(true)}
-          className="font-headline font-bold text-white bg-[#0055FF] hover:bg-[#7000FF] transition-colors text-base md:text-lg px-10 py-4 rounded-full tracking-widest mb-14"
+          className="font-headline font-bold text-white bg-[#0067FD] hover:bg-[#7000FF] transition-colors text-base md:text-lg px-10 py-4 rounded-full tracking-widest mb-14"
         >
           AGENDAR LLAMADA
         </button>

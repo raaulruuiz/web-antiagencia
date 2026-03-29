@@ -44,7 +44,7 @@ export default function TimelineSection() {
           <p className="text-white text-xl md:text-2xl leading-relaxed max-w-2xl font-light">
             Diseñamos tu estrategia creativa y de alto rendimiento, para que más gente te compre, se gasten más y vuelvan una y otra vez.
           </p>
-          <p className="text-[#0055FF] font-bold font-headline text-xl md:text-2xl mt-3 tracking-wide md:self-center self-start">
+          <p className="text-[#0067FD] font-bold font-headline text-xl md:text-2xl mt-3 tracking-wide md:self-center self-start">
             Y GANES MÁS TRABAJANDO MENOS
           </p>
         </div>
@@ -71,7 +71,7 @@ export default function TimelineSection() {
                 >
                   {/* Content */}
                   <div className={`w-full md:w-[45%] ${isLeft ? "md:text-right md:pr-10" : "md:text-left md:pl-10"} pl-8 md:pl-0`}>
-                    <h3 className="font-headline text-[#0055FF] text-lg md:text-xl tracking-widest uppercase mb-2">
+                    <h3 className="font-headline text-[#0067FD] text-lg md:text-xl tracking-widest uppercase mb-2">
                       {step.title}
                     </h3>
                     <p className="text-white text-sm leading-relaxed">
@@ -81,13 +81,13 @@ export default function TimelineSection() {
 
                   {/* Center dot + horizontal line */}
                   <div className="hidden md:flex w-[10%] flex-col items-center justify-center relative">
-                    <div className="w-3 h-3 rounded-full bg-[#0055FF] border-2 border-[#0055FF] z-10" />
-                    <div className={`absolute top-1/2 -translate-y-1/2 h-px w-8 bg-[#0055FF]/40 ${isLeft ? "right-full" : "left-full"}`} />
+                    <div className="w-3 h-3 rounded-full bg-[#0067FD] border-2 border-[#0067FD] z-10" />
+                    <div className={`absolute top-1/2 -translate-y-1/2 h-px w-8 bg-[#0067FD]/40 ${isLeft ? "right-full" : "left-full"}`} />
                   </div>
 
                   {/* Mobile: left accent line */}
-                  <div className="absolute left-0 top-0 h-full w-px bg-[#0055FF]/30 md:hidden" />
-                  <div className="absolute left-0 top-2 w-2 h-2 rounded-full bg-[#0055FF] md:hidden" />
+                  <div className="absolute left-0 top-0 h-full w-px bg-[#0067FD]/30 md:hidden" />
+                  <div className="absolute left-0 top-2 w-2 h-2 rounded-full bg-[#0067FD] md:hidden" />
 
                   {/* Empty side */}
                   <div className="hidden md:block md:w-[45%]" />
@@ -101,7 +101,7 @@ export default function TimelineSection() {
         <div className="mt-16 flex md:justify-center justify-start">
           <a
             href="/Contacto"
-            className="font-headline font-bold tracking-widest text-base px-10 py-4 rounded-lg border-2 border-[#0055FF] text-white bg-[#0055FF] transition-all duration-300 hover:bg-[#7000FF] hover:border-[#7000FF] hover:text-white"
+            className="font-headline font-bold tracking-widest text-base px-10 py-4 rounded-lg border-2 border-[#0067FD] text-white bg-[#0067FD] transition-all duration-300 hover:bg-[#7000FF] hover:border-[#7000FF] hover:text-white"
           >
             ¿HABLAMOS?
           </a>

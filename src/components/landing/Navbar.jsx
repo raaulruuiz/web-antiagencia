@@ -145,8 +145,8 @@ export default function Navbar() {
                       }}
                       className="group flex items-center gap-3 py-3.5 px-4 rounded-xl hover:bg-white/5 transition-all duration-200 text-left w-full"
                     >
-                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.accent ? "bg-[#0055FF]" : "bg-white/20 group-hover:bg-[#0055FF]"} transition-colors`} />
-                      <span className={`font-headline text-base tracking-wider transition-colors ${item.accent ? "text-[#0055FF] group-hover:text-white" : "text-white/60 group-hover:text-white"}`}>
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.accent ? "bg-[#0067FD]" : "bg-white/20 group-hover:bg-[#0067FD]"} transition-colors`} />
+                      <span className={`font-headline text-base tracking-wider transition-colors ${item.accent ? "text-[#0067FD] group-hover:text-white" : "text-white/60 group-hover:text-white"}`}>
                         {item.label}
                       </span>
                     </button>

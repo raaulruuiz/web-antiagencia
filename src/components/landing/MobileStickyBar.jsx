@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function MobileStickyBar() {
   return (
@@ -6,18 +7,18 @@ export default function MobileStickyBar() {
       <p className="font-headline text-white text-sm font-bold tracking-wider">
         ¿Listo para escalar?
       </p>
-      <a
-        href="/Contacto"
-        className="w-full text-center font-headline font-bold text-sm tracking-widest py-3 rounded-lg bg-[#0055FF] text-white hover:bg-[#7000FF] transition-colors duration-300"
+      <Link
+        to="/Contacto"
+        className="w-full text-center font-headline font-bold text-sm tracking-widest py-3 rounded-lg bg-[#0067FD] text-white hover:bg-[#7000FF] transition-colors duration-300"
       >
         Agenda tu llamada
-      </a>
-      <a
-        href="/Newsletter"
+      </Link>
+      <Link
+        to="/Newsletter"
         className="font-body text-white/50 text-xs hover:text-white transition-colors duration-200"
       >
         O empieza gratis aquí
-      </a>
+      </Link>
     </div>
   );
 }

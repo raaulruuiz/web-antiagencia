@@ -24,7 +24,7 @@ function VuestrasText() {
       ))}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="self-start mt-1 font-headline font-bold text-[#0055FF] text-sm underline underline-offset-4 hover:text-[#7000FF] transition-colors"
+        className="self-start mt-1 font-headline font-bold text-[#0067FD] text-sm underline underline-offset-4 hover:text-[#7000FF] transition-colors"
       >
         {expanded ? "Leer menos" : "Leer más"}
       </button>
@@ -59,7 +59,7 @@ function StoryText() {
 
       <button
         onClick={() => setExpanded(!expanded)}
-        className="self-start mt-1 font-headline font-bold text-[#0055FF] text-sm underline underline-offset-4 hover:text-[#7000FF] transition-colors"
+        className="self-start mt-1 font-headline font-bold text-[#0067FD] text-sm underline underline-offset-4 hover:text-[#7000FF] transition-colors"
       >
         {expanded ? "Leer menos" : "Leer más"}
       </button>

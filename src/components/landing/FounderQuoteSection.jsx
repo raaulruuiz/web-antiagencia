@@ -30,14 +30,14 @@ export default function FounderQuoteSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="border-l-4 border-[#0055FF] pl-6 mb-4"
+          className="border-l-4 border-[#0067FD] pl-6 mb-4"
         >
           <p className="text-white text-2xl md:text-3xl lg:text-4xl leading-relaxed font-bold mb-2">
             Somos una agencia de ecommerce que no funciona como una agencia tradicional.
           </p>
           <p className="text-white text-2xl md:text-3xl lg:text-4xl leading-relaxed font-light">
             Nos enfocamos en construir a largo plazo y nos alineamos contigo para que{" "}
-            <span className="text-[#0055FF] font-bold">tu marca CREZCA y genere BENEFICIO.</span>
+            <span className="text-[#0067FD] font-bold">tu marca CREZCA y genere BENEFICIO.</span>
           </p>
         </motion.blockquote>
 
@@ -62,10 +62,10 @@ export default function FounderQuoteSection() {
               transition={{ duration: 0.5, delay: index * 0.15 }}
               className="flex flex-col items-center text-center gap-2 px-8 py-8"
             >
-              <div className="w-10 h-10 rounded-full border border-[#0055FF]/40 flex items-center justify-center mb-1">
-                <item.icon className="w-5 h-5 text-[#0055FF]" />
+              <div className="w-10 h-10 rounded-full border border-[#0067FD]/40 flex items-center justify-center mb-1">
+                <item.icon className="w-5 h-5 text-[#0067FD]" />
               </div>
-              <span className="font-headline text-[#0055FF] text-lg md:text-xl tracking-widest uppercase">
+              <span className="font-headline text-[#0067FD] text-lg md:text-xl tracking-widest uppercase">
                 {item.title}
               </span>
               <span className="text-white text-sm font-normal leading-snug">

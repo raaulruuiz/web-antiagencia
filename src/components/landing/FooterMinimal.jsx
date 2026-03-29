@@ -22,9 +22,9 @@ export default function FooterMinimal() {
     <footer className="bg-[#0a0a0a] text-white">
       {/* Divisor */}
       <div className="flex items-center gap-4 px-6">
-        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#0055FF] to-[#7000FF]" />
-        <div className="w-2 h-2 rounded-full bg-[#0055FF]" />
-        <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#0055FF] to-[#7000FF]" />
+        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#0067FD] to-[#7000FF]" />
+        <div className="w-2 h-2 rounded-full bg-[#0067FD]" />
+        <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#0067FD] to-[#7000FF]" />
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-12 flex flex-col items-center gap-8">

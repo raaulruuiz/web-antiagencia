@@ -25,12 +25,12 @@ export default function YaPorFin() {
 
           <ul className="text-left space-y-4">
             <li className="flex items-start gap-3">
-              <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#0055FF] flex items-center justify-center text-white text-xs font-bold">✓</span>
+              <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#0067FD] flex items-center justify-center text-white text-xs font-bold">✓</span>
               <a
                 href="https://docs.google.com/document/d/1xJHqXnAIyR04FZAYzXF4oDBeOHLktN3dyEEBdXLMDvM/edit?tab=t.0"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#0055FF] hover:text-[#7000FF] transition-colors underline underline-offset-2"
+                className="text-[#0067FD] hover:text-[#7000FF] transition-colors underline underline-offset-2"
               >
                 El paso a paso para escribir tus mails que aprendí de un calvo cabrón para no sonar como un SPAMMER desesperado que solo manda promociones y cada vez vende menos
               </a>

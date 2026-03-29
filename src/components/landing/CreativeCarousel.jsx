@@ -159,14 +159,14 @@ function CarouselSection({ isMobile }) {
     <div className="relative">
       <button
         onClick={() => scroll(-1)}
-        className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-[#0055FF] text-white rounded-full transition-colors ${isMobile ? "p-1.5" : "p-2"}`}
+        className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-[#0067FD] text-white rounded-full transition-colors ${isMobile ? "p-1.5" : "p-2"}`}
       >
         <ChevronLeft size={isMobile ? 20 : 28} />
       </button>
       <CarouselTrack scrollRef={scrollRef} isMobile={isMobile} centerIndex={centerIndex} handleScroll={handleScroll} />
       <button
         onClick={() => scroll(1)}
-        className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-[#0055FF] text-white rounded-full transition-colors ${isMobile ? "p-1.5" : "p-2"}`}
+        className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-[#0067FD] text-white rounded-full transition-colors ${isMobile ? "p-1.5" : "p-2"}`}
       >
         <ChevronRight size={isMobile ? 20 : 28} />
       </button>

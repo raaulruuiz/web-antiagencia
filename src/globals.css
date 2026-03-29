@@ -3,7 +3,7 @@
 /* =====================
    BRAND DESIGN SYSTEM
    =====================
-   Primary (CTAs, links, accents): #0055FF
+   Primary (CTAs, links, accents): #0067FD
    Background (off-black):         #121212
    Text / white space:             #FFFFFF
    Secondary accent (hover):       #7000FF
@@ -22,15 +22,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 :root {
-  --color-brand: #0055FF;
+  --color-brand: #0067FD;
   --color-bg: #121212;
   --color-white: #FFFFFF;
   --color-accent: #7000FF;
 }
 
 /* Utility classes */
-.text-brand { color: #0055FF; }
-.bg-brand { background-color: #0055FF; }
+.text-brand { color: #0067FD; }
+.bg-brand { background-color: #0067FD; }
 .text-accent-purple { color: #7000FF; }
 .bg-accent-purple { background-color: #7000FF; }
 .bg-site { background-color: #121212; }

@@ -66,9 +66,9 @@ export default function BrandsSection() {
 
         {/* Línea divisoria */}
         <div className="mt-16 mb-16 flex items-center gap-4">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#0055FF] to-[#7000FF]" />
-          <div className="w-2 h-2 rounded-full bg-[#0055FF]" />
-          <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#0055FF] to-[#7000FF]" />
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#0067FD] to-[#7000FF]" />
+          <div className="w-2 h-2 rounded-full bg-[#0067FD]" />
+          <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#0067FD] to-[#7000FF]" />
         </div>
       </div>
 

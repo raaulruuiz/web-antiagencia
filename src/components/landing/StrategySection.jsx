@@ -71,7 +71,7 @@ export default function StrategySection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          className="font-headline text-[#0055FF] text-3xl md:text-5xl leading-tight"
+          className="font-headline text-[#0067FD] text-3xl md:text-5xl leading-tight"
         >
           Diseñamos la estrategia, desde la raíz hasta la creatividad para maximizar beneficios.
         </motion.p>
@@ -96,7 +96,7 @@ export default function StrategySection() {
               >
                 <motion.span
                   animate={{
-                    color: isOpen ? "#0055FF" : "#FFFFFF",
+                    color: isOpen ? "#0067FD" : "#FFFFFF",
                     fontSize: isOpen ? "1.35rem" : "1.1rem",
                   }}
                   transition={{ duration: 0.25 }}
@@ -107,9 +107,9 @@ export default function StrategySection() {
                 <motion.div
                   animate={{ rotate: isOpen ? 45 : 0 }}
                   transition={{ duration: 0.25 }}
-                  className="flex-shrink-0 w-7 h-7 rounded-full border border-[#0055FF] flex items-center justify-center"
+                  className="flex-shrink-0 w-7 h-7 rounded-full border border-[#0067FD] flex items-center justify-center"
                 >
-                  <Plus className="w-4 h-4 text-[#0055FF]" />
+                  <Plus className="w-4 h-4 text-[#0067FD]" />
                 </motion.div>
               </button>
 

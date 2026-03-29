@@ -67,7 +67,7 @@ function QuadrantText({ title, subtitle, items, align }) {
       <h3 className="font-headline font-bold text-white text-lg md:text-2xl tracking-widest whitespace-nowrap">
         {title}
       </h3>
-      <p className="font-headline text-[#0055FF] text-sm md:text-base font-normal mb-1 whitespace-nowrap">
+      <p className="font-headline text-[#0067FD] text-sm md:text-base font-normal mb-1 whitespace-nowrap">
         {subtitle}
       </p>
       <div className={`flex flex-col gap-1 ${isRight ? "items-end" : "items-start"}`}>

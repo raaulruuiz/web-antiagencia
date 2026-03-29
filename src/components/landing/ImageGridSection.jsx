@@ -88,7 +88,7 @@ function Lightbox({ index, onClose, onPrev, onNext }) {
       >
         <button
           onClick={onClose}
-          className="absolute -top-10 right-0 text-white hover:text-[#0055FF] transition-colors"
+          className="absolute -top-10 right-0 text-white hover:text-[#0067FD] transition-colors"
         >
           <X size={28} />
         </button>
@@ -100,7 +100,7 @@ function Lightbox({ index, onClose, onPrev, onNext }) {
         />
 
         <div className="bg-[#121212] px-6 py-4 text-center">
-          <p className="font-headline font-bold text-lg tracking-widest text-[#0055FF] mb-1">
+          <p className="font-headline font-bold text-lg tracking-widest text-[#0067FD] mb-1">
             {img.sector}
           </p>
           <p className="font-body text-white text-sm">{img.texto}</p>
@@ -112,13 +112,13 @@ function Lightbox({ index, onClose, onPrev, onNext }) {
 
         <button
           onClick={onPrev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 text-white hover:text-[#0055FF] transition-colors hidden md:block"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 text-white hover:text-[#0067FD] transition-colors hidden md:block"
         >
           <ChevronLeft size={40} />
         </button>
         <button
           onClick={onNext}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 text-white hover:text-[#0055FF] transition-colors hidden md:block"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 text-white hover:text-[#0067FD] transition-colors hidden md:block"
         >
           <ChevronRight size={40} />
         </button>
@@ -161,7 +161,7 @@ function ImageCard({ src, sector, texto, onClick }) {
       >
         <span
           className="font-headline font-bold text-2xl tracking-widest mb-2"
-          style={{ color: "#0055FF" }}
+          style={{ color: "#0067FD" }}
         >
           {sector}
         </span>

@@ -64,8 +64,8 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/Newsletter" element={<LayoutWrapper currentPageName="Newsletter"><Newsletter /></LayoutWrapper>} />
       <Route path="/UltimoPaso" element={<LayoutWrapper currentPageName="UltimoPaso"><UltimoPaso /></LayoutWrapper>} />
-      <Route path="/yaporfin" element={<LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper>} />
-      <Route path="/trabajaconnosotros" element={<LayoutWrapper currentPageName="TrabajaConNosotros"><TrabajaConNosotros /></LayoutWrapper>} />
+      <Route path="/YaPorFin" element={<LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper>} />
+      <Route path="/TrabajaConNosotros" element={<LayoutWrapper currentPageName="TrabajaConNosotros"><TrabajaConNosotros /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
     <CookieBanner />

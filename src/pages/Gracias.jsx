@@ -16,7 +16,7 @@ export default function Gracias() {
         {/* Título */}
         <h1 className="font-headline font-bold text-white text-2xl md:text-4xl text-center leading-tight mb-8">
           ¡ENHORABUENA!{" "}
-          <span className="text-[#0055FF]">Nos vemos dentro de nada</span>
+          <span className="text-[#0067FD]">Nos vemos dentro de nada</span>
         </h1>
 
         {/* Texto principal */}
@@ -39,7 +39,7 @@ export default function Gracias() {
               </p>
               <p className="font-body text-white/80 text-sm md:text-base leading-relaxed">
                 Valoro y respeto enormemente tu tiempo y el mío por lo que si por algún motivo no puedes asistir a la llamada, te agradezco que me lo comuniques escribiéndome a{" "}
-                <a href="mailto:raul@antiagencia.es" className="text-[#0055FF] underline hover:text-[#7000FF] transition-colors">
+                <a href="mailto:raul@antiagencia.es" className="text-[#0067FD] underline hover:text-[#7000FF] transition-colors">
                   raul@antiagencia.es
                 </a>{" "}
                 o modificando el horario en el correo que te acaba de llegar.

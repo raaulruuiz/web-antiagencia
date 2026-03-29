@@ -28,9 +28,9 @@ export default function PhilosophySection() {
             transition={{ duration: 0.5 }}
             className="font-headline text-white text-base md:text-lg tracking-widest font-normal mb-4"
           >
-            <span className="text-[#0055FF]">XX</span>
+            <span className="text-[#0067FD]">XX</span>
             {" "}NUESTRA FILOSOFÍA{" "}
-            <span className="text-[#0055FF]">XX</span>
+            <span className="text-[#0067FD]">XX</span>
           </motion.p>
 
           {/* Título */}
@@ -61,11 +61,11 @@ export default function PhilosophySection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="border-l-4 border-[#0055FF] pl-6"
+            className="border-l-4 border-[#0067FD] pl-6"
           >
             <p className="font-headline text-white text-xl md:text-2xl lg:text-3xl leading-relaxed font-normal">
               A CORTO PLAZO POCO,{" "}
-              <span className="text-[#0055FF]">A LARGO PLAZO TODO</span>
+              <span className="text-[#0067FD]">A LARGO PLAZO TODO</span>
             </p>
           </motion.blockquote>
         </div>

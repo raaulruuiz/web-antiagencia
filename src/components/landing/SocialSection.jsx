@@ -54,7 +54,7 @@ export default function SocialSection() {
           <h2 className="font-headline font-bold text-white text-3xl md:text-5xl leading-tight mb-3">
             ESCUCHA LO QUE DECIMOS
           </h2>
-          <p className="font-headline text-[#0055FF] text-xl md:text-2xl">
+          <p className="font-headline text-[#0067FD] text-xl md:text-2xl">
             y aprende gratis
           </p>
         </motion.div>
@@ -80,7 +80,7 @@ export default function SocialSection() {
                   className="w-full h-auto object-contain"
                 />
               </div>
-              <span className="flex items-center gap-1.5 font-headline font-bold text-white text-sm group-hover:text-[#0055FF] transition-colors">
+              <span className="flex items-center gap-1.5 font-headline font-bold text-white text-sm group-hover:text-[#0067FD] transition-colors">
                 {social.handle}
                 <ExternalLink className="w-3 h-3 opacity-70" />
               </span>
@@ -99,7 +99,7 @@ export default function SocialSection() {
           <h3 className="font-headline font-bold text-white text-2xl md:text-3xl mb-2">
             Apúntate a nuestra newsletter
           </h3>
-          <p className="font-body text-[#0055FF] text-sm md:text-base">
+          <p className="font-body text-[#0067FD] text-sm md:text-base">
             Te aporto valor, te doy mi opinión y te entretengo, con un mail al día
           </p>
         </motion.div>
@@ -122,7 +122,7 @@ export default function SocialSection() {
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody, #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-successBody { padding: 0; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedContent, #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-successBody .ml-form-successContent { text-align: center; margin: 0 0 20px 0; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-successBody .ml-form-successContent h4 { color: #ffffff; font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; margin: 0 0 10px 0; text-align: center; }
-            #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-successBody .ml-form-successContent p { color: #0055FF; font-family: 'Rubik', sans-serif; font-size: 14px; text-align: center; }
+            #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-successBody .ml-form-successContent p { color: #0067FD; font-family: 'Rubik', sans-serif; font-size: 14px; text-align: center; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody form { margin: 0; width: 100%; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-formContent.horozintalForm { margin: 0; padding: 0 0 10px 0; width: 100%; float: left; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-horizontalRow { height: auto; width: 100%; float: left; display: flex; gap: 10px; }
@@ -131,7 +131,7 @@ export default function SocialSection() {
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-horizontalRow input { background-color: #1e1e1e !important; color: #ffffff !important; border-color: #333333; border-radius: 8px !important; border-style: solid !important; border-width: 1px !important; font-family: 'Rubik', sans-serif; font-size: 14px !important; line-height: 21px !important; padding: 12px 16px !important; width: 100%; box-sizing: border-box; overflow-y: initial; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-horizontalRow input::placeholder { color: #888888; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-horizontalRow button { background-color: #7000FF !important; border-color: #7000FF; border-style: solid; border-width: 1px; border-radius: 8px; box-shadow: none; color: #ffffff !important; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 14px !important; font-weight: 700; line-height: 20px; margin: 0 !important; padding: 12px 16px !important; width: 100%; height: auto; transition: background-color 0.2s; }
-            #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-horizontalRow button:hover { background-color: #0055FF !important; border-color: #0055FF !important; }
+            #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-horizontalRow button:hover { background-color: #0067FD !important; border-color: #0067FD !important; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow { float: left; width: 100%; margin: 0 0 10px 0; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow label { font-weight: normal; margin: 0; padding: 0; position: relative; display: block; min-height: 24px; padding-left: 24px; cursor: pointer; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow input[type="checkbox"] { box-sizing: border-box; padding: 0; position: absolute; z-index: -1; opacity: 0; margin-top: 5px; margin-left: -1.5rem; overflow: visible; }
@@ -141,7 +141,7 @@ export default function SocialSection() {
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow input[type=checkbox]:checked~.label-description::before { border-color: #7000FF !important; background-color: #7000FF !important; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow .label-description::after { position: absolute; top: 0px; left: -1.5rem; display: block; width: 1rem; height: 1rem; content: ""; background: no-repeat 50%/50% 50%; }
             #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow label p { color: #ffffff !important; font-family: 'Rubik', sans-serif !important; font-size: 12px !important; font-weight: normal !important; line-height: 18px !important; padding: 0 !important; margin: 0 5px 0 0 !important; }
-            #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow label a { color: #0055FF; text-decoration: underline; }
+            #mlb2-37838971.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow label a { color: #0067FD; text-decoration: underline; }
             .ml-subscribe-close { display: none; }
             .ml-mobileButton-horizontal { display: none; }
             #mlb2-37838971 .ml-mobileButton-horizontal button { background-color: #7000FF !important; border-color: #7000FF !important; border-style: solid !important; border-width: 1px !important; border-radius: 8px !important; box-shadow: none !important; color: #ffffff !important; cursor: pointer; font-family: 'JetBrains Mono', monospace !important; font-size: 14px !important; font-weight: 700 !important; line-height: 20px !important; padding: 12px 16px !important; width: 100% !important; }
@@ -198,7 +198,7 @@ export default function SocialSection() {
                         <div className="label-description">
                           <p>
                             <span style={{ color: "rgb(255,255,255)" }}>Acepto la </span>
-                            <a href="https://antiagencia.es/PoliticaPrivacidad" style={{ color: "#0055FF" }}>política de privacidad</a>
+                            <a href="https://antiagencia.es/PoliticaPrivacidad" style={{ color: "#0067FD" }}>política de privacidad</a>
                           </p>
                         </div>
                       </label>

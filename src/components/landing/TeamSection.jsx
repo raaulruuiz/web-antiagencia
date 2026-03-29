@@ -75,7 +75,7 @@ export default function TeamSection() {
           </p>
           <a
             href="mailto:raul@antiagencia.es?subject=Currículum"
-            className="inline-block font-headline font-bold text-white bg-[#0055FF] hover:bg-[#7000FF] transition-colors px-6 py-3 rounded-lg text-sm"
+            className="inline-block font-headline font-bold text-white bg-[#0067FD] hover:bg-[#7000FF] transition-colors px-6 py-3 rounded-lg text-sm"
           >
             Envía tu currículum
           </a>
@@ -87,7 +87,7 @@ export default function TeamSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="border-l-4 border-[#0055FF] pl-5 mt-10"
+          className="border-l-4 border-[#0067FD] pl-5 mt-10"
         >
           <p className="font-body text-[#121212]/80 text-base md:text-lg italic leading-relaxed">
             "No somos perfectos, a veces nos equivocamos, pero siempre aprendemos y damos el 200% en lo que hacemos."

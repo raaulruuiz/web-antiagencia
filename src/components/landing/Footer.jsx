@@ -22,9 +22,9 @@ export default function Footer() {
     <footer className="bg-[#0a0a0a] text-white">
       {/* Divisor */}
       <div className="flex items-center gap-4 px-6">
-        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#0055FF] to-[#7000FF]" />
-        <div className="w-2 h-2 rounded-full bg-[#0055FF]" />
-        <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#0055FF] to-[#7000FF]" />
+        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#0067FD] to-[#7000FF]" />
+        <div className="w-2 h-2 rounded-full bg-[#0067FD]" />
+        <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#0067FD] to-[#7000FF]" />
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-12 flex flex-col items-center gap-8">
@@ -34,7 +34,7 @@ export default function Footer() {
           <p className="font-headline text-white/50 text-xs uppercase tracking-widest mb-2">¿Quieres escalar tu tienda?</p>
           <a
             href="mailto:raul@antiagencia.es"
-            className="inline-block bg-[#0055FF] hover:bg-[#7000FF] transition-colors text-white font-headline font-bold text-sm px-6 py-3 rounded-full"
+            className="inline-block bg-[#0067FD] hover:bg-[#7000FF] transition-colors text-white font-headline font-bold text-sm px-6 py-3 rounded-full"
           >
             Habla con nosotros
           </a>
