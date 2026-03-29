@@ -20,7 +20,7 @@ export default function TeamSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/cf4d75d1a_freepik__background__33914.png"
+          src="/images/cf4d75d1a_freepik__background__33914.png"
           alt="AntiAgencia Logo"
           className="w-20 mb-8"
         />

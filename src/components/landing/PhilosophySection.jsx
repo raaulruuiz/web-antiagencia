@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const IMAGE_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/e46285170_ChatGPTImage28feb202623_13_30.png";
+const IMAGE_URL = "/images/e46285170_ChatGPTImage28feb202623_13_30.png";
 
 export default function PhilosophySection() {
   return (

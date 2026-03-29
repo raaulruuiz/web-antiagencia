@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/01d58b46c_AALogo.png";
+const LOGO_URL = "/images/01d58b46c_AALogo.png";
 
 const quadrants = [
   {

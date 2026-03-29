@@ -98,7 +98,7 @@ export default function ComoTrabajamos() {
 
         {/* Logo */}
         <img
-          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/6130113b7_AALogo.png"
+          src="/images/6130113b7_AALogo.png"
           alt="AntiAgencia"
           className="h-10 md:h-16 w-auto mb-4 md:mb-10"
         />

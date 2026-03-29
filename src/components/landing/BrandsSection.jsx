@@ -2,24 +2,24 @@ import React from "react";
 import { motion } from "framer-motion";
 
 const logos = [
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/1d35fcfde_2.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/925d2e366_5.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/feb6a7e82_6.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/27da1a01b_7.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/d56e9bda8_8.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/e74634f76_9.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/c90eea9db_10.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/c76a986cd_11.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/681ebb5ff_12.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/74d74a730_13.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/8eb055b58_14.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/9be34152d_15.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/88226b1df_16.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/9fc9800e2_17.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/c4b2bae5c_18.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/c83094243_freepik__background__51066.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/0b43c4068_freepik__background__52042.png",
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/bdf322e31_PRUEBASOCIAL1.png",
+  "/images/1d35fcfde_2.png",
+  "/images/925d2e366_5.png",
+  "/images/feb6a7e82_6.png",
+  "/images/27da1a01b_7.png",
+  "/images/d56e9bda8_8.png",
+  "/images/e74634f76_9.png",
+  "/images/c90eea9db_10.png",
+  "/images/c76a986cd_11.png",
+  "/images/681ebb5ff_12.png",
+  "/images/74d74a730_13.png",
+  "/images/8eb055b58_14.png",
+  "/images/9be34152d_15.png",
+  "/images/88226b1df_16.png",
+  "/images/9fc9800e2_17.png",
+  "/images/c4b2bae5c_18.png",
+  "/images/c83094243_freepik__background__51066.png",
+  "/images/0b43c4068_freepik__background__52042.png",
+  "/images/bdf322e31_PRUEBASOCIAL1.png",
 ];
 
 export default function BrandsSection() {
@@ -32,7 +32,7 @@ export default function BrandsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/6c70532bf_AALogo.png"
+          src="/images/6c70532bf_AALogo.png"
           alt="AntiAgencia Logo"
           className="w-20 mb-8"
         />
@@ -83,7 +83,7 @@ export default function BrandsSection() {
         {/* Imagen pegada al borde derecho — desktop */}
         <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[60%]">
           <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/33ec26cba_ChatGPTImage4mar202616_54_57.png"
+            src="/images/33ec26cba_ChatGPTImage4mar202616_54_57.png"
             alt="Combinamos lo mejor de cada mundo"
             className="w-full h-full object-cover object-right"
           />
@@ -92,7 +92,7 @@ export default function BrandsSection() {
         {/* Imagen + texto superpuesto — móvil */}
         <div className="md:hidden w-full relative">
           <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/33ec26cba_ChatGPTImage4mar202616_54_57.png"
+            src="/images/33ec26cba_ChatGPTImage4mar202616_54_57.png"
             alt="Combinamos lo mejor de cada mundo"
             className="w-full object-cover max-h-72 block"
           />

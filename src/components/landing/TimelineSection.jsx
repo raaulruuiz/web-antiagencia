@@ -37,7 +37,7 @@ export default function TimelineSection() {
         {/* Logo + Intro */}
         <div className="flex flex-col items-center md:text-center text-left mb-16">
           <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/9563e10d2_AALogo.png"
+            src="/images/9563e10d2_AALogo.png"
             alt="AntiAgencia Logo"
             className="w-20 mb-8 md:self-center self-start"
           />

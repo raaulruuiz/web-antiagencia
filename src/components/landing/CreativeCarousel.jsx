@@ -2,17 +2,17 @@ import React, { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const items = [
-  { type: "image", src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/1c5a59a79_freepik__qutame-la-barra-lateral-izquierda-negra__8754.jpg", aspect: "9:16" },
+  { type: "image", src: "/images/1c5a59a79_freepik__qutame-la-barra-lateral-izquierda-negra__8754.jpg", aspect: "9:16" },
   { type: "video", mediaId: "vznbn3i524", aspect: "9:16" },
-  { type: "image", src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/d2cb955d2_elarmariodetuhermana-5.png", aspect: "9:16" },
+  { type: "image", src: "/images/d2cb955d2_elarmariodetuhermana-5.png", aspect: "9:16" },
   { type: "video", mediaId: "all2lrk3fr", aspect: "9:16" },
-  { type: "image", src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/0b01b9426_freepik__contexto-roleres-un-editor-creativo-especializado-__20058.png", aspect: "1:1" },
+  { type: "image", src: "/images/0b01b9426_freepik__contexto-roleres-un-editor-creativo-especializado-__20058.png", aspect: "1:1" },
   { type: "video", mediaId: "xszqjjlzzz", aspect: "9:16" },
-  { type: "image", src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/5d471c27c_freepik__qutale-las-uas-pintadas-a-la-imagen-y-djalas-natur__20048.png", aspect: "1:1" },
+  { type: "image", src: "/images/5d471c27c_freepik__qutale-las-uas-pintadas-a-la-imagen-y-djalas-natur__20048.png", aspect: "1:1" },
   { type: "video", mediaId: "ekhwn3lku2", aspect: "1:1" },
-  { type: "image", src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/3271260bf_freepik__recrame-la-misma-imagen-con-formato-916__28813.png", aspect: "9:16" },
+  { type: "image", src: "/images/3271260bf_freepik__recrame-la-misma-imagen-con-formato-916__28813.png", aspect: "9:16" },
   { type: "video", mediaId: "7vbne10byj", aspect: "9:16" },
-  { type: "image", src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/b6cc57beb_freepik__recrame-la-misma-imagen-con-formato-916__28815.png", aspect: "9:16" },
+  { type: "image", src: "/images/b6cc57beb_freepik__recrame-la-misma-imagen-con-formato-916__28815.png", aspect: "9:16" },
 ];
 
 function WistiaEmbed({ mediaId }) {

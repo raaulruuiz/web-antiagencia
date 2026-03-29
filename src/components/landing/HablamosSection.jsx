@@ -78,7 +78,7 @@ export default function HablamosSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/cf4d75d1a_freepik__background__33914.png"
+          src="/images/cf4d75d1a_freepik__background__33914.png"
           alt="AntiAgencia Logo"
           className="w-20 mb-8"
         />
@@ -116,7 +116,7 @@ export default function HablamosSection() {
           >
             <div className="relative group w-full rounded-lg overflow-hidden">
               <img
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/4ef0eef4e_LCDW1080x1080px.jpg"
+                src="/images/4ef0eef4e_LCDW1080x1080px.jpg"
                 alt="Nuestras tiendas online"
                 className="w-full object-cover transition-all duration-500 group-hover:grayscale"
               />
@@ -154,7 +154,7 @@ export default function HablamosSection() {
           >
             <div className="relative group w-full rounded-lg overflow-hidden">
               <img
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/ec2de592f_LCDW1080x1080px1.jpg"
+                src="/images/ec2de592f_LCDW1080x1080px1.jpg"
                 alt="Vuestras tiendas online"
                 className="w-full object-cover transition-all duration-500 group-hover:grayscale"
               />

@@ -3,62 +3,62 @@ import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const images = [
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/1a14eae26_1.jpg",
+    src: "/images/1a14eae26_1.jpg",
     sector: "SECTOR HOGAR",
     texto: "Impacto en la facturación mensual de meta ads",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/59c747f1c_2.jpg",
+    src: "/images/59c747f1c_2.jpg",
     sector: "SECTOR MODA",
     texto: "Crecimiento anual de tienda en woocommerce",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/046b6a166_3.jpg",
+    src: "/images/046b6a166_3.jpg",
     sector: "SECTOR BISUTERÍA",
     texto: "Impacto del email marketing en la facturación mensual",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/5d15cfff8_4.jpg",
+    src: "/images/5d15cfff8_4.jpg",
     sector: "SECTOR MODA",
     texto: "Crecimiento mensual del impacto de meta ads",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/cfa7966f1_5.jpg",
+    src: "/images/cfa7966f1_5.jpg",
     sector: "SECTOR JOYERÍA",
     texto: "Crecimiento anual de tienda en shopify",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/e72630296_6.jpg",
+    src: "/images/e72630296_6.jpg",
     sector: "SECTOR HOGAR",
     texto: "Impacto del email marketing en la facturación mensual",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/71fc73e3a_7.jpg",
+    src: "/images/71fc73e3a_7.jpg",
     sector: "SECTOR BELLEZA",
     texto: "Impacto en la facturación mensual de meta ads",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/5eecc381a_8.jpg",
+    src: "/images/5eecc381a_8.jpg",
     sector: "SECTOR RESTAURACIÓN",
     texto: "Crecimiento mensual de tienda en woocommerce",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/e91f544be_9.jpg",
+    src: "/images/e91f544be_9.jpg",
     sector: "SECTOR CALZADO",
     texto: "Impacto del email marketing en la facturación mensual",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/0355afb57_10.jpg",
+    src: "/images/0355afb57_10.jpg",
     sector: "SECTOR COMPLEMENTOS",
     texto: "Impacto en la facturación mensual de meta ads",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/ac2a85402_11.jpg",
+    src: "/images/ac2a85402_11.jpg",
     sector: "SECTOR DEPORTE",
     texto: "Crecimiento mensual de tienda en shopify",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/35fd9bd9e_12.jpg",
+    src: "/images/35fd9bd9e_12.jpg",
     sector: "SECTOR TECNOLOGÍA",
     texto: "Crecimiento anual de tienda en shopify",
   },
@@ -185,7 +185,7 @@ export default function ImageGridSection() {
         <div className="max-w-7xl mx-auto">
           <div className="mb-12">
             <img
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/82b3b8d5c_freepik__background__33914.png"
+              src="/images/82b3b8d5c_freepik__background__33914.png"
               alt="Logo"
               className="w-20 mb-6"
             />

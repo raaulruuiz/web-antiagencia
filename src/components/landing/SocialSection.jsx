@@ -4,22 +4,22 @@ import { ExternalLink } from "lucide-react";
 
 const socials = [
   {
-    img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/a4823a37f_1.png",
+    img: "/images/a4823a37f_1.png",
     handle: "@raaulruuiz",
     url: "https://www.instagram.com/raaulruuiz/",
   },
   {
-    img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/5d0ae39e1_2.png",
+    img: "/images/5d0ae39e1_2.png",
     handle: "@raaulruuiz",
     url: "https://www.linkedin.com/in/raaulruuiz/",
   },
   {
-    img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/8eb37bde2_3.png",
+    img: "/images/8eb37bde2_3.png",
     handle: "@raaulruuiz3",
     url: "https://www.tiktok.com/@raaulruuiz3",
   },
   {
-    img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/233633487_4.png",
+    img: "/images/233633487_4.png",
     handle: "@raaulruuiz",
     url: "https://www.youtube.com/@raaulruuiz",
   },

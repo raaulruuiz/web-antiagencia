@@ -143,17 +143,17 @@ export default function StrategySection() {
         <div className="border-t border-white/10 mt-16 mb-10" />
         <div className="flex flex-row items-center justify-center gap-4 md:gap-10 px-4 md:px-0">
           <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/ba579be86_1.png"
+            src="/images/ba579be86_1.png"
             alt="Shopify Partner"
             className="h-12 md:h-24 w-auto object-contain"
           />
           <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/4e87c3fd2_2.png"
+            src="/images/4e87c3fd2_2.png"
             alt="Badge"
             className="h-12 md:h-24 w-auto object-contain"
           />
           <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/a44f7d6fd_PRUEBASOCIAL.png"
+            src="/images/a44f7d6fd_PRUEBASOCIAL.png"
             alt="Klaviyo Partner"
             className="h-12 md:h-24 w-auto object-contain"
           />
@@ -163,7 +163,7 @@ export default function StrategySection() {
       {/* Image + overlapping text block */}
       <div className="relative mt-10 overflow-hidden" style={{ marginLeft: "-1.5rem", marginRight: "-1.5rem", paddingBottom: "0" }}>
         <img
-          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/5584544ee_ChatGPTImage1mar202618_42_12.png"
+          src="/images/5584544ee_ChatGPTImage1mar202618_42_12.png"
           alt="Hacemos ecommerce, no solo marketing"
           className="w-full md:w-1/2 h-auto object-cover block ml-auto mb-0"
         />

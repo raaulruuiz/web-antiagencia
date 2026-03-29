@@ -4,15 +4,15 @@ import { createPageUrl } from "@/utils";
 
 const partnerLogos = [
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/2a57c54d9_1.png",
+    src: "/images/2a57c54d9_1.png",
     alt: "Shopify Partner",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/032d0e683_2.png",
+    src: "/images/032d0e683_2.png",
     alt: "Partner 2",
   },
   {
-    src: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697678eac9cf34e2aefb7d57/45e269286_PRUEBASOCIAL.png",
+    src: "/images/45e269286_PRUEBASOCIAL.png",
     alt: "Klaviyo Partner",
   },
 ];
