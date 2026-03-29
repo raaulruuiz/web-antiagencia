@@ -173,7 +173,7 @@ export default function TrabajaConNosotros() {
                 ))}
               </ul>
 
-              <img src="https://media.base44.com/images/public/697678eac9cf34e2aefb7d57/0061dfecb_375433225_983597182754607_3041268400962209270_njpg_efgeyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0_nc_htscontent-nrt1-1cdninstagramcom_nc_cat103_nc_ocQ6cZ2QG8JoswV4MRy67QCc6UBMuINwhT7F-smSCHW2fCspuT9GRVX1JSe9oly3wDBPQH55k_nc_.png" alt="Raúl presentando" className="w-1/2 rounded-lg my-6 mx-auto block" />
+              <img src="https://media.base44.com/images/public/697678eac9cf34e2aefb7d57/0061dfecb_375433225_983597182754607_3041268400962209270_njpg_efgeyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0_nc_htscontent-nrt1-1cdninstagramcom_nc_cat103_nc_ocQ6cZ2QG8JoswV4MRy67QCc6UBMuINwhT7F-smSCHW2fCspuT9GRVX1JSe9oly3wDBPQH55k_nc_.png" alt="Raúl presentando" className="w-full md:w-1/2 rounded-lg my-6 mx-auto block" />
 
               <ul className="mb-10 space-y-4 list-none pl-0">
                 {[
