@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
-
-const BACKEND = import.meta.env.VITE_BACKEND_URL;
-const API_KEY = import.meta.env.VITE_LOOM_API_KEY;
+import { useState } from 'react';
+import META from './automatizaciones-meta.json';
 
 const TIPO_LABEL = { cron: 'Cron', webhook: 'Webhook', bot: 'Bot' };
 const TIPO_COLOR = {
@@ -11,26 +9,14 @@ const TIPO_COLOR = {
 };
 
 export default function Automatizaciones() {
-  const [items, setItems]       = useState([]);
+  const items = META;
   const [expanded, setExpanded] = useState(null);
-  const [loading, setLoading]   = useState(true);
-
-  useEffect(() => {
-    fetch(`${BACKEND}/admin/automatizaciones`, {
-      headers: { 'x-api-key': API_KEY },
-    })
-      .then(r => r.json())
-      .then(data => { setItems(data); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
 
   const toggle = (id) => setExpanded(prev => prev === id ? null : id);
 
   return (
     <div className="p-8 max-w-4xl">
       <h1 className="text-white text-2xl font-semibold mb-6">Automatizaciones</h1>
-
-      {loading && <p className="text-zinc-500 text-sm">Cargando...</p>}
 
       <div className="flex flex-col gap-2">
         {items.map(item => {

@@ -1,0 +1,178 @@
+[
+  {
+    "id": "calendar-tareas",
+    "nombre": "Tareas de reuniones",
+    "descripcion": "Crea tareas en Notion para las reuniones y reuniones de venta del día desde Google Calendar. Se ejecuta cada día a las 06:00.",
+    "tipo": "cron",
+    "schedule": "Diario · 06:00",
+    "apps": ["Google Calendar", "Notion"]
+  },
+  {
+    "id": "triaje-email",
+    "nombre": "Triaje de email",
+    "descripcion": "Marca automáticamente como leídos los emails de remitentes conocidos (DMARC, mailer-daemon) y los registra en Notion. Se ejecuta cada 10 minutos.",
+    "tipo": "cron",
+    "schedule": "Cada 10 minutos",
+    "apps": ["Gmail", "Notion"]
+  },
+  {
+    "id": "triaje-resumen",
+    "nombre": "Resumen triaje email",
+    "descripcion": "Envía por Discord un resumen diario de los emails marcados como leídos automáticamente durante el día. Se ejecuta cada día a las 08:00.",
+    "tipo": "cron",
+    "schedule": "Diario · 08:00",
+    "apps": ["Notion", "Discord"]
+  },
+  {
+    "id": "briefing-noticias",
+    "nombre": "Briefing diario de noticias",
+    "descripcion": "Recopila noticias del día anterior desde RSS de medios especializados, Google News y newsletters recibidas por email. Envía el briefing por email y Telegram a las 07:00.",
+    "tipo": "cron",
+    "schedule": "Diario · 07:00",
+    "apps": ["RSS", "Google News", "Gmail", "Telegram"]
+  },
+  {
+    "id": "tareas-discord",
+    "nombre": "Recordatorio de tareas",
+    "descripcion": "Publica en Discord las tareas que empiezan hoy, vencen hoy o están bloqueadas. Se ejecuta cada día a las 08:00.",
+    "tipo": "cron",
+    "schedule": "Diario · 08:00",
+    "apps": ["Notion", "Discord"]
+  },
+  {
+    "id": "tareas-atrasadas",
+    "nombre": "Mover tareas atrasadas",
+    "descripcion": "Detecta tareas de Notion con fecha de inicio pasada y las mueve automáticamente a hoy. Se ejecuta cada día a las 00:00.",
+    "tipo": "cron",
+    "schedule": "Diario · 00:00",
+    "apps": ["Notion"]
+  },
+  {
+    "id": "prioridad-urgente",
+    "nombre": "Marcar tareas urgentes",
+    "descripcion": "Marca como urgentes las tareas de Notion cuya fecha de entrega es hoy. Se ejecuta cada día a las 00:00.",
+    "tipo": "cron",
+    "schedule": "Diario · 00:00",
+    "apps": ["Notion"]
+  },
+  {
+    "id": "renombrar-dia",
+    "nombre": "Renombrar entrada diaria",
+    "descripcion": "Renombra la entrada del día en Notion con la fecha de hoy. Se ejecuta cada día a las 03:00.",
+    "tipo": "cron",
+    "schedule": "Diario · 03:00",
+    "apps": ["Notion"]
+  },
+  {
+    "id": "meta-discord",
+    "nombre": "Métricas Meta Ads diarias",
+    "descripcion": "Obtiene las métricas del día de Meta Ads desde Google Sheets y las publica en Discord. Se ejecuta cada día a las 00:15.",
+    "tipo": "cron",
+    "schedule": "Diario · 00:15",
+    "apps": ["Google Sheets", "Meta Ads", "Discord"]
+  },
+  {
+    "id": "reporte-semanal",
+    "nombre": "Reporte semanal de clientes",
+    "descripcion": "Genera un informe semanal por cliente con métricas de Meta Ads, WooCommerce y Klaviyo. Lo escribe en Google Sheets y lo envía por email. Se ejecuta los lunes a las 08:00.",
+    "tipo": "cron",
+    "schedule": "Lunes · 08:00",
+    "apps": ["Google Sheets", "Meta Ads", "WooCommerce", "Klaviyo", "Gmail"]
+  },
+  {
+    "id": "rendimiento-equipo",
+    "nombre": "Rendimiento del equipo",
+    "descripcion": "Genera con IA un informe de productividad del equipo basado en las tareas de Notion, lo escribe en Google Sheets y lo envía por email. Se ejecuta los domingos a las 23:59.",
+    "tipo": "cron",
+    "schedule": "Domingos · 23:59",
+    "apps": ["Notion", "Google Sheets", "Gmail", "OpenAI"]
+  },
+  {
+    "id": "tracking-prospeccion-semanal",
+    "nombre": "Tracking prospección semanal",
+    "descripcion": "Registra los contactos y seguimientos de prospección de la semana desde Instantly en Notion. Se ejecuta los domingos a las 20:00.",
+    "tipo": "cron",
+    "schedule": "Domingos · 20:00",
+    "apps": ["Instantly", "Notion"]
+  },
+  {
+    "id": "tracking-finanzas-mensual",
+    "nombre": "Tracking finanzas mensual",
+    "descripcion": "Genera el resumen financiero mensual desde los movimientos de Notion, lo registra en el tracking y envía informe por email y Discord. Se ejecuta el día 1 de cada mes.",
+    "tipo": "cron",
+    "schedule": "Mensual · día 1",
+    "apps": ["Notion", "Gmail", "Discord"]
+  },
+  {
+    "id": "tracking-prospeccion-mensual",
+    "nombre": "Tracking prospección mensual",
+    "descripcion": "Agrega las métricas semanales de prospección en un resumen mensual y envía informe por email. Se ejecuta el día 1 de cada mes.",
+    "tipo": "cron",
+    "schedule": "Mensual · día 1",
+    "apps": ["Notion", "Gmail"]
+  },
+  {
+    "id": "tracking-finanzas-trimestral",
+    "nombre": "Tracking finanzas trimestral",
+    "descripcion": "Agrega los datos financieros mensuales en un resumen trimestral y envía informe por email y Discord. Se ejecuta el día 1 de enero, abril, julio y octubre.",
+    "tipo": "cron",
+    "schedule": "Trimestral · día 1",
+    "apps": ["Notion", "Gmail", "Discord"]
+  },
+  {
+    "id": "tracking-prospeccion-trimestral",
+    "nombre": "Tracking prospección trimestral",
+    "descripcion": "Agrega las métricas mensuales de prospección en un resumen trimestral y envía informe por email. Se ejecuta el día 1 de enero, abril, julio y octubre.",
+    "tipo": "cron",
+    "schedule": "Trimestral · día 1",
+    "apps": ["Notion", "Gmail"]
+  },
+  {
+    "id": "tracking-finanzas-anual",
+    "nombre": "Tracking finanzas anual",
+    "descripcion": "Agrega los datos trimestrales en un resumen financiero anual y envía informe por email y Discord. Se ejecuta el 1 de enero.",
+    "tipo": "cron",
+    "schedule": "Anual · 1 enero",
+    "apps": ["Notion", "Gmail", "Discord"]
+  },
+  {
+    "id": "tracking-prospeccion-anual",
+    "nombre": "Tracking prospección anual",
+    "descripcion": "Agrega las métricas trimestrales en un resumen anual de prospección y envía informe por email. Se ejecuta el 1 de enero.",
+    "tipo": "cron",
+    "schedule": "Anual · 1 enero",
+    "apps": ["Notion", "Gmail"]
+  },
+  {
+    "id": "calendly-crm",
+    "nombre": "Calendly → CRM",
+    "descripcion": "Cuando se reserva una reunión en Calendly, crea el contacto en el CRM de Notion y lo añade al grupo de Newsletter en MailerLite.",
+    "tipo": "webhook",
+    "schedule": "Webhook · POST /webhooks/calendly",
+    "apps": ["Calendly", "Notion", "MailerLite"]
+  },
+  {
+    "id": "instantly-webhook",
+    "nombre": "Instantly → seguimiento",
+    "descripcion": "Cuando una campaña de Instantly finaliza, envía notificación por email y crea una tarea de seguimiento en Notion.",
+    "tipo": "webhook",
+    "schedule": "Webhook · POST /webhooks/instantly",
+    "apps": ["Instantly", "Gmail", "Notion"]
+  },
+  {
+    "id": "telegram-movimientos",
+    "nombre": "Bot Telegram · Movimientos",
+    "descripcion": "Bot de Telegram que interpreta mensajes con IA para crear facturas, contratos y movimientos financieros en Notion y Google Drive.",
+    "tipo": "bot",
+    "schedule": "Tiempo real",
+    "apps": ["Telegram", "OpenAI", "Notion", "Google Drive", "Google Docs"]
+  },
+  {
+    "id": "discord-facturas",
+    "nombre": "Bot Discord · Gestión",
+    "descripcion": "Bot de Discord con comandos para generar facturas y contratos, gestionar altas y bajas de clientes y acceder al historial de operaciones.",
+    "tipo": "bot",
+    "schedule": "Tiempo real",
+    "apps": ["Discord", "OpenAI", "Notion", "Google Docs", "Google Drive"]
+  }
+]
