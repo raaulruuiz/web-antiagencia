@@ -18,6 +18,12 @@ function timeAgo(dateStr) {
   return `Hace ${d} días`;
 }
 
+const INVITE_EXPIRY_DAYS = 7;
+
+function daysAgo(dateStr) {
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+}
+
 function RoleBadge({ role }) {
   const styles = role === 'admin'
     ? 'bg-amber-900 text-amber-300'
@@ -25,6 +31,17 @@ function RoleBadge({ role }) {
   return (
     <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${styles}`}>
       {role === 'admin' ? 'Admin' : 'Lector'}
+    </span>
+  );
+}
+
+function StatusBadge({ confirmed, invitedAt }) {
+  if (confirmed) return null;
+  const days = daysAgo(invitedAt);
+  const expired = days >= INVITE_EXPIRY_DAYS;
+  return (
+    <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${expired ? 'bg-red-900 text-red-300' : 'bg-yellow-900 text-yellow-300'}`}>
+      {expired ? `Invitación expirada (${days}d)` : `Pendiente (${days}d)`}
     </span>
   );
 }
@@ -175,6 +192,25 @@ export default function AdminUsers() {
         </div>
       )}
 
+      {/* Limpiar expirados */}
+      {isAdmin && users.some(u => !u.confirmed && daysAgo(u.invited_at) >= INVITE_EXPIRY_DAYS) && (
+        <div className="flex items-center justify-between rounded-xl border border-red-900 bg-red-950/30 px-5 py-3 mb-2">
+          <p className="text-red-300 text-sm">Hay invitaciones que llevan más de {INVITE_EXPIRY_DAYS} días sin aceptarse.</p>
+          <button
+            onClick={async () => {
+              const expired = users.filter(u => !u.confirmed && daysAgo(u.invited_at) >= INVITE_EXPIRY_DAYS);
+              for (const u of expired) {
+                await fetch(`${BACKEND}/admin/users/${u.id}`, { method: 'DELETE', headers: { 'x-api-key': API_KEY } });
+              }
+              fetchUsers();
+            }}
+            className="text-red-300 hover:text-red-100 text-xs border border-red-800 rounded-lg px-3 py-1 transition-colors ml-4 flex-shrink-0"
+          >
+            Eliminar expiradas
+          </button>
+        </div>
+      )}
+
       {/* Lista */}
       <div className="flex flex-col gap-3">
         {loading && <p className="text-zinc-500 text-sm px-1">Cargando...</p>}
@@ -186,8 +222,9 @@ export default function AdminUsers() {
             <div key={u.id} className="rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-4">
               <div className="flex items-center gap-3">
                 <span className="text-white text-sm flex-1">{u.email}</span>
+                <StatusBadge confirmed={u.confirmed} invitedAt={u.invited_at} />
                 <RoleBadge role={isEditing ? editState.role : u.role} />
-                <span className="text-zinc-500 text-xs">{timeAgo(u.last_sign_in)}</span>
+                <span className="text-zinc-500 text-xs">{u.confirmed ? timeAgo(u.last_sign_in) : '—'}</span>
                 {isAdmin && !isEditing && (
                   <button
                     onClick={() => startEdit(u)}
