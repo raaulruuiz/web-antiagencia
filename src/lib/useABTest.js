@@ -9,12 +9,21 @@ function getSessionId() {
 
 /**
  * Asigna variante A/B (50/50) y registra la visita.
+ * Acepta ?variant=A o ?variant=B en la URL para forzar una variante concreta.
  * @param {string} testId  - identificador del test (ej. 'home-hero')
  * @param {string} url     - URL de la página (ej. '/')
  * @returns {'A'|'B'}
  */
 export function useABTest(testId, url) {
   const key = `_ab_${testId}`;
+
+  // Si viene ?variant=A o ?variant=B en la URL, usar esa variante y guardarla
+  const params = new URLSearchParams(window.location.search);
+  const forced = params.get('variant')?.toUpperCase();
+  if (forced === 'A' || forced === 'B') {
+    localStorage.setItem(key, forced);
+  }
+
   let variant = localStorage.getItem(key);
   if (!variant) {
     variant = Math.random() < 0.5 ? 'A' : 'B';
