@@ -82,8 +82,9 @@ export default function AdminUsers() {
   const [inviting, setInviting]   = useState(false);
 
   // Editing state: { [userId]: { role, pages } }
-  const [editing, setEditing] = useState({});
-  const [saving, setSaving]   = useState({});
+  const [editing, setEditing]   = useState({});
+  const [saving, setSaving]     = useState({});
+  const [resetting, setResetting] = useState({});
 
   useEffect(() => { fetchUsers(); }, []);
 
@@ -266,13 +267,29 @@ export default function AdminUsers() {
                       />
                     </div>
                   )}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => saveEdit(u)}
                       disabled={saving[u.id]}
                       className="bg-white text-black rounded-lg px-4 py-1.5 text-xs font-medium hover:bg-zinc-100 disabled:opacity-50 transition-colors"
                     >
                       {saving[u.id] ? 'Guardando...' : 'Guardar'}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setResetting(prev => ({ ...prev, [u.id]: true }));
+                        await fetch(`${BACKEND}/admin/users/${u.id}/reset-password`, {
+                          method: 'POST',
+                          headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ email: u.email }),
+                        });
+                        setResetting(prev => ({ ...prev, [u.id]: 'done' }));
+                        setTimeout(() => setResetting(prev => { const n = { ...prev }; delete n[u.id]; return n; }), 3000);
+                      }}
+                      disabled={resetting[u.id] === true}
+                      className="border border-zinc-600 text-zinc-400 hover:text-white rounded-lg px-4 py-1.5 text-xs transition-colors disabled:opacity-50"
+                    >
+                      {resetting[u.id] === 'done' ? 'Email enviado' : resetting[u.id] === true ? 'Enviando...' : 'Restablecer contraseña'}
                     </button>
                     <button
                       onClick={() => cancelEdit(u.id)}
