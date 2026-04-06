@@ -3,7 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -16,10 +16,17 @@ import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotros from './pages/TrabajaConNosotros';
 import LoomLogin from './pages/LoomLogin';
 import Loom from './pages/Loom';
-import AdminLayout from './pages/admin/AdminLayout';
+import AdminLayout, { useAdmin } from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import Automatizaciones from './pages/admin/Automatizaciones';
+
+// Guard para rutas de lector: redirige a /admin/users si no tiene permiso
+function RequirePage({ page, children }) {
+  const { role, pages } = useAdmin();
+  if (role === 'admin' || pages.includes(page)) return children;
+  return <Navigate to="/admin/users" replace />;
+}
 import { trackPageView } from './lib/pageTracker';
 
 function PageViewTracker() {
@@ -100,10 +107,10 @@ function App() {
             <Route path="/admin/login" element={<LoomLogin redirectTo="/admin/dashboard" />} />
             <Route path="/loom-login"  element={<LoomLogin redirectTo="/admin/dashboard" />} />
             <Route path="/admin" element={<AdminLayout />}>
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="loom"             element={<Loom />} />
+              <Route path="dashboard"        element={<RequirePage page="dashboard"><Dashboard /></RequirePage>} />
+              <Route path="loom"             element={<RequirePage page="loom"><Loom /></RequirePage>} />
               <Route path="users"            element={<AdminUsers />} />
-              <Route path="automatizaciones" element={<Automatizaciones />} />
+              <Route path="automatizaciones" element={<RequirePage page="automatizaciones"><Automatizaciones /></RequirePage>} />
             </Route>
             <Route path="/loom" element={<Loom />} />
             <Route path="*" element={<AuthenticatedApp />} />
