@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-
 import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
+
+// Tests A/B activos — añade aquí cada test cuando lo actives
+const AB_TESTS = [
+  // { id: 'home-hero', label: 'Home · Hero', url: '/' },
+];
 
 // URLs reales del sitio (extraídas de App.jsx + pages.config)
 const VALID_URLS = [
@@ -57,6 +61,7 @@ export default function Dashboard() {
   const [pageMetrics, setPageMetrics] = useState(null);
   const [mailerlite, setMailerlite]   = useState(null);
   const [loading, setLoading]     = useState(false);
+  const [abStats, setAbStats]     = useState({});
 
   // Cargar URLs que han tenido visitas, filtradas por las reales del sitio
   useEffect(() => {
@@ -104,6 +109,20 @@ export default function Dashboard() {
     } catch (_) {}
 
     setLoading(false);
+
+    // A/B stats
+    if (AB_TESTS.length > 0) {
+      const results = {};
+      await Promise.all(AB_TESTS.map(async test => {
+        try {
+          const r = await fetch(`${BACKEND}/admin/ab-tests?test_id=${encodeURIComponent(test.url)}`, {
+            headers: { 'x-api-key': API_KEY },
+          });
+          if (r.ok) results[test.id] = await r.json();
+        } catch (_) {}
+      }));
+      setAbStats(results);
+    }
   }
 
   const activePreset = PRESETS.find(p => p.days === preset);
@@ -175,6 +194,49 @@ export default function Dashboard() {
                       <p className="text-white text-3xl font-semibold">{g.unique}</p>
                       <p className="text-zinc-500 text-xs mt-1">Únicos</p>
                     </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Tests A/B */}
+      {AB_TESTS.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-3">
+            Tests A/B
+          </h2>
+          <div className="flex flex-col gap-4">
+            {AB_TESTS.map(test => {
+              const stats = abStats[test.id] ?? {};
+              return (
+                <div key={test.id} className="rounded-xl border border-zinc-800 bg-zinc-900 px-6 py-5">
+                  <p className="text-zinc-400 text-sm mb-4">{test.label}</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {['A', 'B'].map(v => {
+                      const s = stats[v] ?? { visits: 0, conversions: 0, conversion_rate: '0.0' };
+                      return (
+                        <div key={v} className="bg-zinc-800 rounded-lg px-4 py-3">
+                          <p className="text-zinc-400 text-xs font-semibold mb-3">Variante {v}</p>
+                          <div className="flex gap-6">
+                            <div>
+                              <p className="text-white text-2xl font-semibold">{s.visits}</p>
+                              <p className="text-zinc-500 text-xs mt-1">Visitas</p>
+                            </div>
+                            <div>
+                              <p className="text-white text-2xl font-semibold">{s.conversions}</p>
+                              <p className="text-zinc-500 text-xs mt-1">Registros</p>
+                            </div>
+                            <div>
+                              <p className="text-white text-2xl font-semibold">{s.conversion_rate}%</p>
+                              <p className="text-zinc-500 text-xs mt-1">Conversión</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
