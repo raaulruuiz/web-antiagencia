@@ -13,7 +13,7 @@
   {
     "id": "triaje-email",
     "nombre": "Triaje de email",
-    "descripcion": "Marca automáticamente como leídos los emails de remitentes conocidos (DMARC, mailer-daemon) y los registra en Notion. Se ejecuta cada 10 minutos.",
+    "descripcion": "Marca automáticamente como leídos los emails de remitentes conocidos (DMARC, mailer-daemon, Skool, Circle) y los registra en Notion. Se ejecuta cada 10 minutos.",
     "tipo": "cron",
     "schedule": "Cada 10 minutos",
     "apps": [
