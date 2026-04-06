@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { BACKEND_URL, LOOM_API_KEY } from '@/lib/config';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
@@ -559,9 +560,9 @@ export default function Loom() {
       form.append('file', blob, fileName);
       form.append('fileName', fileName);
 
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/loom/upload`, {
+      const res = await fetch(`${BACKEND_URL}/loom/upload`, {
         method: 'POST',
-        headers: { 'x-api-key': import.meta.env.VITE_LOOM_API_KEY },
+        headers: { 'x-api-key': LOOM_API_KEY },
         body: form,
       });
 

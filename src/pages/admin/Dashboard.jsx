@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL;
-const API_KEY = import.meta.env.VITE_LOOM_API_KEY;
+import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
 
 // URLs reales del sitio (extraídas de App.jsx + pages.config)
 const VALID_URLS = [

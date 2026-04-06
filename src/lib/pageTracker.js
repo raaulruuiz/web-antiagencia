@@ -1,4 +1,4 @@
-const BACKEND = import.meta.env.VITE_BACKEND_URL;
+import { BACKEND_URL as BACKEND } from './config';
 
 function getSessionId() {
   let id = localStorage.getItem('_session_id');
