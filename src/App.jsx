@@ -3,7 +3,8 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -13,6 +14,19 @@ import YaPorFin from './pages/YaPorFin';
 import Home from './pages/Home';
 import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotros from './pages/TrabajaConNosotros';
+import LoomLogin from './pages/LoomLogin';
+import Loom from './pages/Loom';
+import AdminLayout from './pages/admin/AdminLayout';
+import Dashboard from './pages/admin/Dashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import Automatizaciones from './pages/admin/Automatizaciones';
+import { trackPageView } from './lib/pageTracker';
+
+function PageViewTracker() {
+  const location = useLocation();
+  useEffect(() => { trackPageView(location.pathname); }, [location.pathname]);
+  return null;
+}
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -81,7 +95,19 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <NavigationTracker />
-          <AuthenticatedApp />
+          <PageViewTracker />
+          <Routes>
+            <Route path="/admin/login" element={<LoomLogin redirectTo="/admin/dashboard" />} />
+            <Route path="/loom-login"  element={<LoomLogin redirectTo="/admin/dashboard" />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="loom"             element={<Loom />} />
+              <Route path="users"            element={<AdminUsers />} />
+              <Route path="automatizaciones" element={<Automatizaciones />} />
+            </Route>
+            <Route path="/loom" element={<Loom />} />
+            <Route path="*" element={<AuthenticatedApp />} />
+          </Routes>
         </Router>
         <Toaster />
       </QueryClientProvider>

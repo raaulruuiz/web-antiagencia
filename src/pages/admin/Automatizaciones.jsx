@@ -1,0 +1,73 @@
+import { useState, useEffect } from 'react';
+
+const BACKEND = import.meta.env.VITE_BACKEND_URL;
+const API_KEY = import.meta.env.VITE_LOOM_API_KEY;
+
+const TIPO_LABEL = { cron: 'Cron', webhook: 'Webhook', bot: 'Bot' };
+const TIPO_COLOR = {
+  cron:    'bg-blue-900 text-blue-300',
+  webhook: 'bg-purple-900 text-purple-300',
+  bot:     'bg-green-900 text-green-300',
+};
+
+export default function Automatizaciones() {
+  const [items, setItems]       = useState([]);
+  const [expanded, setExpanded] = useState(null);
+  const [loading, setLoading]   = useState(true);
+
+  useEffect(() => {
+    fetch(`${BACKEND}/admin/automatizaciones`, {
+      headers: { 'x-api-key': API_KEY },
+    })
+      .then(r => r.json())
+      .then(data => { setItems(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const toggle = (id) => setExpanded(prev => prev === id ? null : id);
+
+  return (
+    <div className="p-8 max-w-4xl">
+      <h1 className="text-white text-2xl font-semibold mb-6">Automatizaciones</h1>
+
+      {loading && <p className="text-zinc-500 text-sm">Cargando...</p>}
+
+      <div className="flex flex-col gap-2">
+        {items.map(item => {
+          const isOpen = expanded === item.id;
+          return (
+            <div
+              key={item.id}
+              className="rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden"
+            >
+              <button
+                onClick={() => toggle(item.id)}
+                className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-zinc-800 transition-colors"
+              >
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${TIPO_COLOR[item.tipo] ?? 'bg-zinc-700 text-zinc-300'}`}>
+                  {TIPO_LABEL[item.tipo] ?? item.tipo}
+                </span>
+                <span className="text-white text-sm font-medium flex-1">{item.nombre}</span>
+                <span className="text-zinc-500 text-xs">{item.schedule}</span>
+                <span className="text-zinc-600 ml-2">{isOpen ? '▲' : '▼'}</span>
+              </button>
+
+              {isOpen && (
+                <div className="px-5 pb-5 border-t border-zinc-800">
+                  <p className="text-zinc-300 text-sm mt-4 mb-4 leading-relaxed">{item.descripcion}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {item.apps.map(app => (
+                      <span key={app} className="text-xs bg-zinc-800 text-zinc-300 border border-zinc-700 px-3 py-1 rounded-full">
+                        {app}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
