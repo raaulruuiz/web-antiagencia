@@ -39,7 +39,7 @@ export default function UltimoPaso() {
         {/* Botones de confirmación */}
         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mb-6">
           <a
-            href="https://accounts.google.com/ServiceLogin/identifier?service=mail&passive=true&rm=false&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&ss=1&scc=1&ltmpl=default&ltmplcache=2&emr=1&osid=1&flowName=GlifWebSignIn&flowEntry=AddSession"
+            href="https://mail.google.com/mail/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 text-center font-headline font-bold text-white bg-[#EA4335] hover:bg-[#c5362a] transition-colors text-sm md:text-base px-6 py-4 rounded-lg tracking-widest"
@@ -47,7 +47,7 @@ export default function UltimoPaso() {
             Confirmar registro en Gmail
           </a>
           <a
-            href="https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=13&ct=1515432288&rver=6.7.6640.0&wp=MBI_SSL&wreply=https%3a%2f%2foutlook.live.com%2fowa%2f%3fauthRedirect%3dtrue%26RpsCsrfState%3dc7e7df42-2b76-1fea-435a-fce96b8b24e3&id=292841&whr=hotmail.com&CBCXT=out&lw=1&fl=dob%2cflname%2cwld&cobrandid=90015"
+            href="https://outlook.live.com/mail/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 text-center font-headline font-bold text-white bg-[#0078D4] hover:bg-[#005fa3] transition-colors text-sm md:text-base px-6 py-4 rounded-lg tracking-widest"
