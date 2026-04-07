@@ -278,7 +278,7 @@
       { "nombre": "/enviarfactura", "descripcion": "Adjunta el PDF de una factura y crea un borrador de email en contabilidad@antiagencia.es para enviársela al cliente." },
       { "nombre": "/enviarcontrato", "descripcion": "Adjunta el PDF de un contrato y crea un borrador de email en contabilidad@antiagencia.es para enviárselo al cliente." },
       { "nombre": "/enviarcontratoyfactura", "descripcion": "Adjunta contrato y factura en PDF y crea un borrador con ambos adjuntos en contabilidad@antiagencia.es." },
-      { "nombre": "/onboarding", "descripcion": "Inicia el onboarding completo de un cliente nuevo: crea la carpeta de Drive, sube los PDFs y genera el email de bienvenida." },
+      { "nombre": "/onboarding", "descripcion": "Atajo para cuando ya tienes contrato firmado y factura en PDF: crea la carpeta de Drive, el canal de Discord y genera el email de bienvenida con ambos adjuntos, todo en un paso." },
       { "nombre": "/offboarding", "descripcion": "Gestiona la salida de un cliente: mueve la carpeta de Drive a EX-CLIENTES y el canal de Discord a la categoría correspondiente." },
       { "nombre": "/trackingsemanal", "descripcion": "Inicia el flujo paso a paso para completar los campos de ventas del tracking semanal de prospección." },
       { "nombre": "/transcribir", "descripcion": "Detecta la última grabación de Google Meet, la transcribe con IA y envía el resumen por Discord, email o ambos." },
