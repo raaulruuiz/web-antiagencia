@@ -16,6 +16,7 @@ import HomeABTest from './pages/HomeABTest';
 import AudioSecreto from './pages/AudioSecreto';
 import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotros from './pages/TrabajaConNosotros';
+import PixelLayout from './Layout';
 import LoomLogin from './pages/LoomLogin';
 import Loom from './pages/Loom';
 import AdminLayout, { useAdmin } from './pages/admin/AdminLayout';
@@ -72,7 +73,7 @@ const AuthenticatedApp = () => {
   return (
     <>
     <Routes>
-      <Route path="/" element={<HomeABTest />} />
+      <Route path="/" element={<PixelLayout><HomeABTest /></PixelLayout>} />
       <Route path="/webtipica" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
