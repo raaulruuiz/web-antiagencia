@@ -12,6 +12,8 @@ import Newsletter from './pages/Newsletter';
 import UltimoPaso from './pages/UltimoPaso';
 import YaPorFin from './pages/YaPorFin';
 import Home from './pages/Home';
+import HomeABTest from './pages/HomeABTest';
+import AudioSecreto from './pages/AudioSecreto';
 import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotros from './pages/TrabajaConNosotros';
 import LoomLogin from './pages/LoomLogin';
@@ -70,7 +72,7 @@ const AuthenticatedApp = () => {
   return (
     <>
     <Routes>
-      <Route path="/" element={<LayoutWrapper currentPageName="Newsletter"><Newsletter /></LayoutWrapper>} />
+      <Route path="/" element={<HomeABTest />} />
       <Route path="/webtipica" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
@@ -83,7 +85,8 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="/Newsletter" element={<LayoutWrapper currentPageName="Newsletter"><Newsletter /></LayoutWrapper>} />
+      <Route path="/newsletter-vieja" element={<LayoutWrapper currentPageName="Newsletter"><Newsletter /></LayoutWrapper>} />
+      <Route path="/audiosecreto" element={<AudioSecreto />} />
       <Route path="/UltimoPaso" element={<LayoutWrapper currentPageName="UltimoPaso"><UltimoPaso /></LayoutWrapper>} />
       <Route path="/YaPorFin" element={<LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper>} />
       <Route path="/TrabajaConNosotros" element={<LayoutWrapper currentPageName="TrabajaConNosotros"><TrabajaConNosotros /></LayoutWrapper>} />

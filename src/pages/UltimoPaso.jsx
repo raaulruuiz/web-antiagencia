@@ -20,7 +20,7 @@ export default function UltimoPaso() {
 
         {/* Texto principal */}
         <p className="font-body text-white/70 text-base md:text-lg text-center max-w-xl leading-relaxed mb-10">
-          Te acaba de llegar a tu mail un correo donde podrás confirmar tu correo para recibir los regalos.
+          Te acaba de llegar a tu mail un correo donde podrás confirmar tu correo para recibir el audio de 18 minutos y 3 segundos que te dará la misma o más información que formaciones y consultorías de miles de euros.
           <br /><br />
           Puede que esté en spam o en la bandeja de notificaciones, en ese caso añade la dirección raul@antiagencia.es a tu lista de contactos.
         </p>
@@ -32,8 +32,8 @@ export default function UltimoPaso() {
 
         {/* Texto regalo secreto */}
         <p className="font-body text-white/70 text-base md:text-lg text-center max-w-xl leading-relaxed mb-10">
-          Una vez confirmes tu suscripción se abrirá una nueva página (no la cierres) donde tendrás acceso a un{" "}
-          <strong className="text-white">REGALO SECRETO</strong>
+          Una vez confirmes tu suscripción se abrirá una nueva página (no la cierres) donde tendrás acceso a unos{" "}
+          <strong className="text-white">REGALOS SECRETOS</strong>
         </p>
 
         {/* Botones de confirmación */}

@@ -4,7 +4,7 @@ import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
 
 // Tests A/B activos — añade aquí cada test cuando lo actives
 const AB_TESTS = [
-  // { id: 'home-hero', label: 'Home · Hero', url: '/' },
+  { id: 'home-cta', label: 'Home · CTA', url: '/' },
 ];
 
 // URLs reales del sitio (extraídas de App.jsx + pages.config)
