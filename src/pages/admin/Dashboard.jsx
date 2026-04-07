@@ -84,19 +84,25 @@ export default function Dashboard() {
     const to   = new Date();
 
     // Page views desde Supabase
-    let query = supabase
+    const { data: allViews } = await supabase
       .from('page_views')
-      .select('session_id')
+      .select('session_id, url')
       .gte('created_at', from.toISOString())
       .lte('created_at', to.toISOString());
 
-    if (selectedUrl !== 'all') query = query.eq('url', selectedUrl);
+    if (allViews) {
+      const filtered = selectedUrl === 'all' ? allViews : allViews.filter(v => v.url === selectedUrl);
+      const total  = filtered.length;
+      const unique = new Set(filtered.map(v => v.session_id)).size;
 
-    const { data: views } = await query;
-    if (views) {
-      const total  = views.length;
-      const unique = new Set(views.map(v => v.session_id)).size;
-      setPageMetrics({ total, unique });
+      // Tasa de rebote: sesiones que solo visitaron 1 página en total
+      const sessionCounts = {};
+      allViews.forEach(v => { sessionCounts[v.session_id] = (sessionCounts[v.session_id] || 0) + 1; });
+      const relevantSessions = [...new Set(filtered.map(v => v.session_id))];
+      const bounced = relevantSessions.filter(sid => sessionCounts[sid] === 1).length;
+      const bounceRate = relevantSessions.length > 0 ? Math.round((bounced / relevantSessions.length) * 100) : null;
+
+      setPageMetrics({ total, unique, bounceRate });
     }
 
     // MailerLite desde Railway
@@ -166,9 +172,10 @@ export default function Dashboard() {
         <h2 className="text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-3">
           Visitas · {selectedUrl === 'all' ? 'Todas las páginas' : selectedUrl} · {activePreset?.label}
         </h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <MetricCard label="Visitas totales"  value={pageMetrics?.total}  />
           <MetricCard label="Visitas únicas"   value={pageMetrics?.unique} sub="por navegador" />
+          <MetricCard label="Tasa de rebote"   value={pageMetrics?.bounceRate != null ? `${pageMetrics.bounceRate}%` : '—'} sub="1 sola página por sesión" />
         </div>
       </section>
 
