@@ -232,7 +232,7 @@
   {
     "id": "telegram-movimientos",
     "nombre": "Bot Telegram · Movimientos",
-    "descripcion": "Bot de Telegram que interpreta mensajes con IA para crear facturas, contratos y movimientos financieros en Notion y Google Drive.",
+    "descripcion": "Bot de Telegram que interpreta mensajes con IA para crear facturas, contratos, presupuestos y movimientos financieros en Notion y Google Drive.",
     "tipo": "bot",
     "schedule": "Tiempo real",
     "apps": [
@@ -241,12 +241,23 @@
       "Notion",
       "Google Drive",
       "Google Docs"
+    ],
+    "comandos": [
+      { "nombre": "/factura", "descripcion": "Crea una factura en Notion. Sin argumentos inicia el flujo paso a paso; con texto libre usa modo rápido (ej: /factura 800€ para Forcar)." },
+      { "nombre": "/contrato", "descripcion": "Genera un contrato en Google Docs. Sin argumentos inicia el flujo interactivo; con 'NombreCliente | instrucción' usa modo rápido." },
+      { "nombre": "/presupuesto", "descripcion": "Genera un presupuesto personalizado en Google Docs paso a paso (empresa, cliente, género, importe, fechas, causa benéfica)." },
+      { "nombre": "/enviarpresupuesto", "descripcion": "Detecta el presupuesto más reciente, pide confirmación y crea un borrador de envío en raul@antiagencia.es con el PDF adjunto." },
+      { "nombre": "/enviarfactura", "descripcion": "Adjunta el PDF de una factura y crea un borrador de email en contabilidad@antiagencia.es para enviársela al cliente." },
+      { "nombre": "/enviarcontrato", "descripcion": "Adjunta el PDF de un contrato y crea un borrador de email en contabilidad@antiagencia.es para enviárselo al cliente." },
+      { "nombre": "/trackingsemanal", "descripcion": "Inicia el flujo paso a paso para completar los campos de ventas del tracking semanal de prospección." },
+      { "nombre": "/transcribir", "descripcion": "Detecta la última grabación de Google Meet, la transcribe con IA y envía el resumen por Discord, email o ambos." },
+      { "nombre": "(JSON)", "descripcion": "Registra movimientos financieros en Notion enviando un mensaje en formato JSON con los campos name, type, account, amount_eur y date." }
     ]
   },
   {
     "id": "discord-facturas",
     "nombre": "Bot Discord · Gestión",
-    "descripcion": "Bot de Discord con comandos para generar facturas y contratos, gestionar altas y bajas de clientes y acceder al historial de operaciones.",
+    "descripcion": "Bot de Discord con comandos para generar facturas, contratos y presupuestos, gestionar altas y bajas de clientes y hacer seguimiento del equipo.",
     "tipo": "bot",
     "schedule": "Tiempo real",
     "apps": [
@@ -255,6 +266,23 @@
       "Notion",
       "Google Docs",
       "Google Drive"
+    ],
+    "comandos": [
+      { "nombre": "/factura", "descripcion": "Crea una factura en Notion. Sin argumentos inicia el flujo paso a paso; con instrucción usa modo rápido (ej: /factura instruccion:800€ para Forcar)." },
+      { "nombre": "/contrato", "descripcion": "Genera un contrato en Google Docs. Sin texto libre inicia el flujo interactivo preguntando campo a campo." },
+      { "nombre": "/contratoyfactura", "descripcion": "Genera contrato + factura en un único flujo interactivo paso a paso." },
+      { "nombre": "/nuevoclientepaso1", "descripcion": "Crea contrato, factura, carpeta de Drive y canal de Discord para un cliente nuevo en un solo flujo." },
+      { "nombre": "/nuevoclientepaso2", "descripcion": "Envía el email de bienvenida con contrato firmado y factura adjuntos desde contabilidad@antiagencia.es." },
+      { "nombre": "/presupuesto", "descripcion": "Genera un presupuesto personalizado en Google Docs paso a paso (empresa, cliente, género, importe, fechas, causa benéfica)." },
+      { "nombre": "/enviarpresupuesto", "descripcion": "Detecta el presupuesto más reciente, pide confirmación y crea un borrador de envío en raul@antiagencia.es con el PDF adjunto." },
+      { "nombre": "/enviarfactura", "descripcion": "Adjunta el PDF de una factura y crea un borrador de email en contabilidad@antiagencia.es para enviársela al cliente." },
+      { "nombre": "/enviarcontrato", "descripcion": "Adjunta el PDF de un contrato y crea un borrador de email en contabilidad@antiagencia.es para enviárselo al cliente." },
+      { "nombre": "/enviarcontratoyfactura", "descripcion": "Adjunta contrato y factura en PDF y crea un borrador con ambos adjuntos en contabilidad@antiagencia.es." },
+      { "nombre": "/onboarding", "descripcion": "Inicia el onboarding completo de un cliente nuevo: crea la carpeta de Drive, sube los PDFs y genera el email de bienvenida." },
+      { "nombre": "/offboarding", "descripcion": "Gestiona la salida de un cliente: mueve la carpeta de Drive a EX-CLIENTES y el canal de Discord a la categoría correspondiente." },
+      { "nombre": "/trackingsemanal", "descripcion": "Inicia el flujo paso a paso para completar los campos de ventas del tracking semanal de prospección." },
+      { "nombre": "/transcribir", "descripcion": "Detecta la última grabación de Google Meet, la transcribe con IA y envía el resumen por Discord, email o ambos." },
+      { "nombre": "/facturaalejandro", "descripcion": "Crea una factura para Alejandro en Notion especificando fecha e importe en dólares." }
     ]
   }
 ]

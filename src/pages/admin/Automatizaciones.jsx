@@ -41,13 +41,26 @@ export default function Automatizaciones() {
               {isOpen && (
                 <div className="px-5 pb-5 border-t border-zinc-800">
                   <p className="text-zinc-300 text-sm mt-4 mb-4 leading-relaxed">{item.descripcion}</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-4">
                     {item.apps.map(app => (
                       <span key={app} className="text-xs bg-zinc-800 text-zinc-300 border border-zinc-700 px-3 py-1 rounded-full">
                         {app}
                       </span>
                     ))}
                   </div>
+                  {item.comandos && item.comandos.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-zinc-500 text-xs font-medium uppercase tracking-wide mb-2">Comandos</p>
+                      <div className="flex flex-col gap-1">
+                        {item.comandos.map(cmd => (
+                          <div key={cmd.nombre} className="flex gap-3 text-sm">
+                            <span className="text-violet-400 font-mono shrink-0">{cmd.nombre}</span>
+                            <span className="text-zinc-400">{cmd.descripcion}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
