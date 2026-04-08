@@ -121,7 +121,8 @@ export default function Dashboard() {
       const results = {};
       await Promise.all(AB_TESTS.map(async test => {
         try {
-          const r = await fetch(`${BACKEND}/admin/ab-tests?test_id=${encodeURIComponent(test.url)}`, {
+          const params = new URLSearchParams({ test_id: test.id, url: test.url });
+          const r = await fetch(`${BACKEND}/admin/ab-tests?${params}`, {
             headers: { 'x-api-key': API_KEY },
           });
           if (r.ok) results[test.id] = await r.json();
@@ -210,13 +211,18 @@ export default function Dashboard() {
       )}
 
       {/* Tests A/B */}
-      {AB_TESTS.length > 0 && (
+      {(() => {
+        const visibleTests = selectedUrl === 'all'
+          ? AB_TESTS
+          : AB_TESTS.filter(t => t.url === selectedUrl);
+        if (visibleTests.length === 0) return null;
+        return (
         <section className="mt-8">
           <h2 className="text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-3">
             Tests A/B
           </h2>
           <div className="flex flex-col gap-4">
-            {AB_TESTS.map(test => {
+            {visibleTests.map(test => {
               const stats = abStats[test.id] ?? {};
               return (
                 <div key={test.id} className="rounded-xl border border-zinc-800 bg-zinc-900 px-6 py-5">
@@ -250,7 +256,8 @@ export default function Dashboard() {
             })}
           </div>
         </section>
-      )}
+        );
+      })()}
     </div>
   );
 }
