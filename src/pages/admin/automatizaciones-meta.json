@@ -282,7 +282,20 @@
       { "nombre": "/offboarding", "descripcion": "Gestiona la salida de un cliente: mueve la carpeta de Drive a EX-CLIENTES y el canal de Discord a la categoría correspondiente." },
       { "nombre": "/trackingsemanal", "descripcion": "Inicia el flujo paso a paso para completar los campos de ventas del tracking semanal de prospección." },
       { "nombre": "/transcribir", "descripcion": "Detecta la última grabación de Google Meet, la transcribe con IA y envía el resumen por Discord, email o ambos." },
-      { "nombre": "/facturaalejandro", "descripcion": "Crea una factura para Alejandro en Notion especificando fecha e importe en dólares." }
+      { "nombre": "/facturaalejandro", "descripcion": "Crea una factura para Alejandro en Notion especificando fecha e importe en dólares." },
+      { "nombre": "/programarcontenido", "descripcion": "Flujo interactivo para programar vídeos de Google Drive en Notion: muestra los vídeos disponibles, pide plataformas, descripción y fecha (o 'auto' para calcular la siguiente automáticamente), y mueve el vídeo a la carpeta SUBIDOS." },
+      { "nombre": "/publicar", "descripcion": "Publica o programa en Publer los vídeos pendientes de Notion en todas las plataformas seleccionadas. Si hay entradas con error previo, pregunta qué hacer con cada una antes de continuar." }
+    ]
+  },
+  {
+    "id": "verificar-publicaciones",
+    "nombre": "Verificar publicaciones programadas",
+    "descripcion": "Cada hora comprueba en Publer si los posts programados ya se han publicado o han dado error, y actualiza el estado en Notion (Programado → Publicado o Error).",
+    "tipo": "cron",
+    "schedule": "Cada hora",
+    "apps": [
+      "Publer",
+      "Notion"
     ]
   }
 ]
