@@ -52,8 +52,8 @@ export default function Automatizaciones() {
                     <div className="mt-4">
                       <p className="text-zinc-500 text-xs font-medium uppercase tracking-wide mb-2">Comandos</p>
                       <div className="flex flex-col gap-1">
-                        {item.comandos.map(cmd => (
-                          <div key={cmd.nombre} className="flex gap-3 text-sm">
+                        {item.comandos.map((cmd, i) => (
+                          <div key={`${cmd.nombre}-${i}`} className="flex gap-3 text-sm">
                             <span className="text-violet-400 font-mono shrink-0">{cmd.nombre}</span>
                             <span className="text-zinc-400">{cmd.descripcion}</span>
                           </div>

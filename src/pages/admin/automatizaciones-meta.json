@@ -89,7 +89,7 @@
   {
     "id": "meta-discord",
     "nombre": "Métricas Meta Ads diarias",
-    "descripcion": "Obtiene las métricas del día de Meta Ads desde Google Sheets y las publica en Discord. Se ejecuta cada día a las 00:15.",
+    "descripcion": "Obtiene las métricas del día directamente desde la API de Meta Ads (configuración de cuentas en Google Sheets) y las publica en Discord. Se ejecuta cada día a las 00:15.",
     "tipo": "cron",
     "schedule": "Diario · 00:15",
     "apps": [
