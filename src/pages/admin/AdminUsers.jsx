@@ -7,6 +7,7 @@ const PAGE_OPTIONS = [
   { value: 'dashboard',        label: 'Dashboard' },
   { value: 'loom',             label: 'Loom' },
   { value: 'automatizaciones', label: 'Automatizaciones' },
+  { value: 'gym',              label: 'Entrenos' },
 ];
 
 function timeAgo(dateStr) {
