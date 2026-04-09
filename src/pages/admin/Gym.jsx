@@ -382,200 +382,223 @@ function ExerciseFormModal({ exercise, routineId, order, onClose, onSave }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FILE IMPORT
+   FILE IMPORT (IA-powered)
 ═══════════════════════════════════════════════════════════════ */
-const COL_MAP = {
-  nombre:    ['nombre','name','ejercicio','exercise','ejercicios','exercises'],
-  series:    ['series','sets','bloques'],
-  reps:      ['reps','repeticiones','repetitions','rep'],
-  peso:      ['peso','weight','kg','kilos'],
-  distancia: ['distancia','distance','km','kilometros'],
-  tiempo:    ['tiempo','time','minutos','minutes','min','duracion','duration'],
-  variantes: ['variantes','variants','alternativas','alternatives'],
-  notas:     ['notas','notes','nota','note'],
-};
+const METRICA_LABELS_SHORT = { fuerza: 'Fuerza', cardio: 'Cardio', tiempo: 'Tiempo', libre: 'Libre' };
 
-function detectColumns(headers) {
-  const map = {};
-  headers.forEach((h, i) => {
-    const norm = String(h).toLowerCase().trim();
-    for (const [field, aliases] of Object.entries(COL_MAP)) {
-      if (aliases.includes(norm) && !map[field]) map[field] = i;
-    }
-  });
-  return map;
-}
-
-function detectMetrica(row, colMap) {
-  if (colMap.distancia != null && row[colMap.distancia]) return 'cardio';
-  if (colMap.tiempo != null && row[colMap.tiempo] && colMap.peso == null) return 'tiempo';
-  if (colMap.peso != null && row[colMap.peso]) return 'fuerza';
-  if (colMap.reps != null && row[colMap.reps]) return 'fuerza';
-  return 'libre';
-}
-
-function parseSheet(rows) {
-  if (rows.length < 2) return [];
-  const headers = rows[0].map(String);
-  const colMap  = detectColumns(headers);
-  const results = [];
-
-  for (let i = 1; i < rows.length; i++) {
-    const row    = rows[i];
-    const nombre = colMap.nombre != null ? String(row[colMap.nombre] ?? '').trim() : '';
-    if (!nombre) continue;
-
-    const metrica   = detectMetrica(row, colMap);
-    const variantes = colMap.variantes != null && row[colMap.variantes]
-      ? String(row[colMap.variantes]).split(/[,;]/).map(v => v.trim()).filter(Boolean)
-      : [];
-
-    results.push({
-      nombre,
-      tipo_metrica:       metrica,
-      series_objetivo:    colMap.series    != null ? parseInt(row[colMap.series])     || null : null,
-      reps_objetivo:      colMap.reps      != null ? parseInt(row[colMap.reps])       || null : null,
-      peso_objetivo:      colMap.peso      != null ? parseFloat(row[colMap.peso])     || null : null,
-      distancia_objetivo: colMap.distancia != null ? parseFloat(row[colMap.distancia])|| null : null,
-      tiempo_objetivo_seg: colMap.tiempo   != null && row[colMap.tiempo]
-        ? Math.round(parseFloat(row[colMap.tiempo]) * 60) : null,
-      variantes: variantes.length > 0 ? variantes : null,
-      notas:     colMap.notas != null ? String(row[colMap.notas] ?? '').trim() || null : null,
-    });
-  }
-  return results;
-}
-
-async function parseFile(file) {
+async function readFileAsText(file) {
   const ext = file.name.split('.').pop().toLowerCase();
-
   if (ext === 'xlsx' || ext === 'xls') {
     const buf  = await file.arrayBuffer();
     const wb   = XLSX.read(buf, { type: 'array' });
-    const ws   = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-    return parseSheet(rows);
+    // Convert all sheets to CSV text
+    return wb.SheetNames.map(name => {
+      const ws   = wb.Sheets[name];
+      return `=== Hoja: ${name} ===\n` + XLSX.utils.sheet_to_csv(ws);
+    }).join('\n\n');
   }
-
-  // CSV / TXT
-  const text = await file.text();
-  const sep  = text.includes('\t') ? '\t' : text.includes(';') ? ';' : ',';
-  const rows = text.trim().split('\n').map(line =>
-    line.split(sep).map(c => c.replace(/^"|"$/g, '').trim())
-  );
-  return parseSheet(rows);
+  return file.text();
 }
 
-const METRICA_LABELS_SHORT = { fuerza: 'Fuerza', cardio: 'Cardio', tiempo: 'Tiempo', libre: 'Libre' };
+function ExercisePreviewCard({ ex, index, onRemove }) {
+  return (
+    <div style={{ ...S.card, padding: 10, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+      <span style={{ color: '#52525b', fontSize: 12, minWidth: 22, paddingTop: 2 }}>{index + 1}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: 600, fontSize: 13 }}>{ex.nombre}</div>
+        <div style={{ fontSize: 11, color: '#71717a', marginTop: 2 }}>
+          <span style={{ marginRight: 8, color: '#52525b' }}>{METRICA_LABELS_SHORT[ex.tipo_metrica] ?? ex.tipo_metrica}</span>
+          {ex.series_objetivo     ? `${ex.series_objetivo} series · ` : ''}
+          {ex.reps_objetivo       ? `${ex.reps_objetivo} reps · ` : ''}
+          {ex.peso_objetivo       ? `${ex.peso_objetivo}kg · ` : ''}
+          {ex.distancia_objetivo  ? `${ex.distancia_objetivo}km · ` : ''}
+          {ex.tiempo_objetivo_seg ? `${Math.floor(ex.tiempo_objetivo_seg / 60)}min · ` : ''}
+          {ex.variantes?.length   ? `var: ${ex.variantes.join(', ')} · ` : ''}
+          {ex.notas               ? <span style={{ color: '#52525b' }}>{ex.notas}</span> : ''}
+        </div>
+      </div>
+      <button style={{ color: '#52525b', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, paddingTop: 2 }}
+        onClick={() => onRemove(index)}>✕</button>
+    </div>
+  );
+}
 
 function FileImportModal({ userId, onClose, onSave }) {
-  const [step,      setStep]      = useState('upload'); // 'upload' | 'preview' | 'saving'
-  const [nombre,    setNombre]    = useState('');
-  const [exercises, setExercises] = useState([]);
-  const [error,     setError]     = useState(null);
+  const [step,     setStep]     = useState('upload'); // upload | parsing | select | preview | saving
+  const [rutinas,  setRutinas]  = useState([]);       // parsed from AI
+  const [selected, setSelected] = useState([]);       // indices of routines to import
+  const [editing,  setEditing]  = useState(null);     // { idx, nombre, ejercicios }
+  const [error,    setError]    = useState(null);
   const fileRef = useRef();
+  const { VITE_BACKEND_URL: BACKEND, VITE_LOOM_API_KEY: API_KEY } = import.meta.env;
 
   const handleFile = async (file) => {
     if (!file) return;
     setError(null);
+    setStep('parsing');
     try {
-      const exs = await parseFile(file);
-      if (exs.length === 0) { setError('No se detectaron ejercicios. Revisa el formato del archivo.'); return; }
-      const nameGuess = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
-      setNombre(nameGuess);
-      setExercises(exs);
-      setStep('preview');
+      const content = await readFileAsText(file);
+      const res = await fetch(`${BACKEND}/admin/parse-routine`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+        body: JSON.stringify({ content, filename: file.name }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      if (!data.rutinas?.length) throw new Error('No se detectaron rutinas en el archivo');
+      setRutinas(data.rutinas);
+      // Pre-select all
+      setSelected(data.rutinas.map((_, i) => i));
+      setStep(data.rutinas.length > 1 ? 'select' : 'preview');
+      if (data.rutinas.length === 1) setEditing({ idx: 0, nombre: data.rutinas[0].nombre, ejercicios: data.rutinas[0].ejercicios });
     } catch (e) {
-      setError('Error leyendo el archivo: ' + e.message);
+      setError(e.message);
+      setStep('upload');
     }
   };
 
-  const save = async () => {
-    if (!nombre.trim() || exercises.length === 0) return;
+  const saveAll = async () => {
     setStep('saving');
-    const { data: routine } = await supabase
-      .from('routines').insert({ nombre: nombre.trim(), user_id: userId }).select().single();
-    if (routine) {
-      await supabase.from('routine_exercises').insert(
-        exercises.map((ex, i) => ({ ...ex, routine_id: routine.id, orden: i }))
-      );
+    for (const idx of selected) {
+      const r = idx === editing?.idx
+        ? { nombre: editing.nombre, ejercicios: editing.ejercicios }
+        : rutinas[idx];
+      const { data: routine } = await supabase
+        .from('routines').insert({ nombre: r.nombre.trim(), user_id: userId }).select().single();
+      if (routine && r.ejercicios?.length) {
+        await supabase.from('routine_exercises').insert(
+          r.ejercicios.map((ex, i) => ({ ...ex, routine_id: routine.id, orden: i }))
+        );
+      }
     }
     onSave();
   };
 
   return (
     <Modal onClose={onClose} wide>
+      {/* UPLOAD */}
       {step === 'upload' && (
         <>
-          <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 700 }}>Importar rutina desde archivo</h3>
+          <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 700 }}>Importar rutina con IA</h3>
           <p style={{ color: '#71717a', fontSize: 13, margin: '0 0 20px' }}>
-            Sube un archivo CSV, TXT o Excel. Columnas reconocidas:{' '}
-            <span style={{ color: '#a1a1aa' }}>nombre, series, reps, peso, distancia, tiempo, variantes, notas</span>
+            Sube cualquier archivo de rutina. La IA detectará los ejercicios automáticamente sin importar el formato.
           </p>
-
           <div
             style={{ border: '2px dashed #3f3f46', borderRadius: 10, padding: 40, textAlign: 'center', cursor: 'pointer' }}
             onClick={() => fileRef.current?.click()}
             onDragOver={e => e.preventDefault()}
             onDrop={e => { e.preventDefault(); handleFile(e.dataTransfer.files[0]); }}>
             <div style={{ fontSize: 36, marginBottom: 8 }}>📂</div>
-            <div style={{ color: '#71717a', fontSize: 14 }}>Arrastra el archivo aquí o haz clic para seleccionarlo</div>
+            <div style={{ color: '#a1a1aa', fontSize: 14 }}>Arrastra el archivo o haz clic para seleccionarlo</div>
             <div style={{ color: '#52525b', fontSize: 12, marginTop: 4 }}>.csv · .txt · .xlsx · .xls</div>
           </div>
           <input ref={fileRef} type="file" accept=".csv,.txt,.xlsx,.xls" style={{ display: 'none' }}
             onChange={e => handleFile(e.target.files[0])} />
-
-          {error && <div style={{ color: '#f87171', fontSize: 13, marginTop: 12 }}>{error}</div>}
-
+          {error && <div style={{ color: '#f87171', fontSize: 13, marginTop: 12 }}>⚠ {error}</div>}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
             <button style={S.ghost} onClick={onClose}>Cancelar</button>
           </div>
         </>
       )}
 
-      {step === 'preview' && (
+      {/* PARSING */}
+      {step === 'parsing' && <Loader text="Analizando archivo con IA..." />}
+      {step === 'saving'  && <Loader text="Creando rutinas..." />}
+
+      {/* SELECT (multiple routines detected) */}
+      {step === 'select' && (
         <>
-          <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700 }}>
-            Vista previa — {exercises.length} ejercicio{exercises.length !== 1 ? 's' : ''} detectado{exercises.length !== 1 ? 's' : ''}
+          <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 700 }}>
+            {rutinas.length} rutinas detectadas
           </h3>
-
-          <Field label="Nombre de la rutina">
-            <input style={{ ...S.input, marginBottom: 16 }} value={nombre}
-              onChange={e => setNombre(e.target.value)} autoFocus />
-          </Field>
-
-          <div style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
-            {exercises.map((ex, i) => (
-              <div key={i} style={{ ...S.card, padding: 10, display: 'flex', gap: 10, alignItems: 'center' }}>
-                <span style={{ color: '#52525b', fontSize: 12, minWidth: 22 }}>{i + 1}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>{ex.nombre}</div>
-                  <div style={{ fontSize: 11, color: '#71717a', marginTop: 2 }}>
-                    <span style={{ marginRight: 8, color: '#52525b' }}>{METRICA_LABELS_SHORT[ex.tipo_metrica]}</span>
-                    {ex.series_objetivo    && `${ex.series_objetivo} series · `}
-                    {ex.reps_objetivo      && `${ex.reps_objetivo} reps · `}
-                    {ex.peso_objetivo      && `${ex.peso_objetivo}kg · `}
-                    {ex.distancia_objetivo && `${ex.distancia_objetivo}km · `}
-                    {ex.tiempo_objetivo_seg && `${Math.floor(ex.tiempo_objetivo_seg / 60)}min · `}
-                    {ex.variantes?.length  && `var: ${ex.variantes.join(', ')}`}
+          <p style={{ color: '#71717a', fontSize: 13, margin: '0 0 16px' }}>Selecciona cuáles importar:</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+            {rutinas.map((r, i) => {
+              const checked = selected.includes(i);
+              return (
+                <div key={i}
+                  style={{ ...S.card, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', borderColor: checked ? '#0067FD' : '#27272a' }}
+                  onClick={() => setSelected(prev => checked ? prev.filter(x => x !== i) : [...prev, i])}>
+                  <div style={{ width: 18, height: 18, borderRadius: 4, border: `2px solid ${checked ? '#0067FD' : '#52525b'}`, background: checked ? '#0067FD' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {checked && <span style={{ color: 'white', fontSize: 12 }}>✓</span>}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>{r.nombre}</div>
+                    <div style={{ fontSize: 12, color: '#71717a' }}>{r.ejercicios?.length ?? 0} ejercicios</div>
                   </div>
                 </div>
-                <button style={{ color: '#52525b', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16 }}
-                  onClick={() => setExercises(prev => prev.filter((_, j) => j !== i))}>✕</button>
-              </div>
-            ))}
+              );
+            })}
           </div>
-
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <button style={S.ghost} onClick={() => setStep('upload')}>← Volver</button>
-            <button style={S.primary} onClick={save} disabled={!nombre.trim()}>
-              Crear rutina
+            <button style={S.primary} disabled={selected.length === 0}
+              onClick={() => {
+                const first = selected[0];
+                setEditing({ idx: first, nombre: rutinas[first].nombre, ejercicios: rutinas[first].ejercicios });
+                setStep('preview');
+              }}>
+              Revisar selección →
             </button>
           </div>
         </>
       )}
 
-      {step === 'saving' && <Loader text="Creando rutina..." />}
+      {/* PREVIEW */}
+      {step === 'preview' && editing && (
+        <>
+          <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700 }}>
+            Vista previa{selected.length > 1 ? ` (${selected.indexOf(editing.idx) + 1}/${selected.length})` : ''}
+          </h3>
+          <p style={{ color: '#71717a', fontSize: 13, margin: '0 0 14px' }}>
+            {editing.ejercicios.length} ejercicios detectados. Puedes eliminar los que no quieras.
+          </p>
+
+          <Field label="Nombre de la rutina">
+            <input style={{ ...S.input, marginBottom: 14 }} value={editing.nombre}
+              onChange={e => setEditing(prev => ({ ...prev, nombre: e.target.value }))} autoFocus />
+          </Field>
+
+          <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+            {editing.ejercicios.map((ex, i) => (
+              <ExercisePreviewCard key={i} ex={ex} index={i}
+                onRemove={idx => setEditing(prev => ({ ...prev, ejercicios: prev.ejercicios.filter((_, j) => j !== idx) }))} />
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button style={S.ghost} onClick={() => setStep(rutinas.length > 1 ? 'select' : 'upload')}>← Volver</button>
+            {/* If more routines to review, go to next; otherwise save all */}
+            {(() => {
+              const currentPos = selected.indexOf(editing.idx);
+              const nextIdx    = selected[currentPos + 1];
+              if (nextIdx != null) {
+                return (
+                  <button style={S.primary} onClick={() => {
+                    // Save current edits back
+                    const updated = [...rutinas];
+                    updated[editing.idx] = { nombre: editing.nombre, ejercicios: editing.ejercicios };
+                    setRutinas(updated);
+                    setEditing({ idx: nextIdx, nombre: rutinas[nextIdx].nombre, ejercicios: rutinas[nextIdx].ejercicios });
+                  }}>
+                    Siguiente →
+                  </button>
+                );
+              }
+              return (
+                <button style={S.primary} disabled={!editing.nombre.trim()} onClick={() => {
+                  const updated = [...rutinas];
+                  updated[editing.idx] = { nombre: editing.nombre, ejercicios: editing.ejercicios };
+                  setRutinas(updated);
+                  saveAll();
+                }}>
+                  {selected.length > 1 ? `Crear ${selected.length} rutinas` : 'Crear rutina'}
+                </button>
+              );
+            })()}
+          </div>
+        </>
+      )}
     </Modal>
   );
 }
