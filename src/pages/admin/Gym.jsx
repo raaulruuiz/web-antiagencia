@@ -438,21 +438,35 @@ function FileImportModal({ userId, onClose, onSave }) {
     setStep('parsing');
     try {
       const content = await readFileAsText(file);
+      console.log('[parse-routine] contenido leído, chars:', content.length);
+
       const res = await fetch(`${BACKEND_URL}/admin/parse-routine`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': LOOM_API_KEY },
         body: JSON.stringify({ content, filename: file.name }),
       });
-      if (!res.ok) throw new Error(await res.text());
+
+      console.log('[parse-routine] respuesta status:', res.status);
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`Error del servidor (${res.status}): ${txt}`);
+      }
+
       const data = await res.json();
+      console.log('[parse-routine] rutinas detectadas:', data.rutinas?.length);
+
       if (!data.rutinas?.length) throw new Error('No se detectaron rutinas en el archivo');
+
       setRutinas(data.rutinas);
-      // Pre-select all
       setSelected(data.rutinas.map((_, i) => i));
       setStep(data.rutinas.length > 1 ? 'select' : 'preview');
-      if (data.rutinas.length === 1) setEditing({ idx: 0, nombre: data.rutinas[0].nombre, ejercicios: data.rutinas[0].ejercicios });
+      if (data.rutinas.length === 1) {
+        setEditing({ idx: 0, nombre: data.rutinas[0].nombre, ejercicios: data.rutinas[0].ejercicios });
+      }
     } catch (e) {
-      setError(e.message);
+      console.error('[parse-routine] error:', e);
+      setError(e.message || e.toString() || 'Error desconocido. Revisa la consola del navegador.');
       setStep('upload');
     }
   };
