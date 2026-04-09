@@ -227,6 +227,16 @@
     ]
   },
   {
+    "id": "sync-automatizaciones-meta",
+    "nombre": "Sync panel automatizaciones",
+    "descripcion": "GitHub Actions workflow que se dispara en cada push a la rama main del repo automatizaciones y actualiza automáticamente el panel de admin en web-antiagencia con los cambios.",
+    "tipo": "workflow",
+    "schedule": "En cada push a main",
+    "apps": [
+      "GitHub Actions"
+    ]
+  },
+  {
     "id": "calendly-crm",
     "nombre": "Calendly → CRM",
     "descripcion": "Cuando se reserva una reunión en Calendly, crea el contacto en el CRM de Notion y lo añade al grupo de Newsletter en MailerLite.",
