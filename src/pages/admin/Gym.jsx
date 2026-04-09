@@ -65,6 +65,13 @@ function displayName(email) {
   return email?.split('@')[0] ?? 'Usuario';
 }
 
+function fmtRepsEx(ex) {
+  if (ex.reps_min && ex.reps_max) return `${ex.reps_min}-${ex.reps_max} reps`;
+  if (ex.reps_min) return `${ex.reps_min} reps`;
+  if (ex.reps_objetivo) return `${ex.reps_objetivo} reps`; // retrocompat
+  return '? reps';
+}
+
 /* ─── shared styles ───────────────────────────────────────────── */
 const S = {
   card:    { background: '#161616', border: '1px solid #27272a', borderRadius: 12, padding: 16 },
@@ -247,7 +254,7 @@ function RoutineDetail({ routine, onBack, onStart }) {
                   <div style={{ fontWeight: 600, marginBottom: 2 }}>{ex.nombre}</div>
                   <div style={{ fontSize: 12, color: '#71717a' }}>
                     {ex.tipo_metrica === 'fuerza' &&
-                      `${ex.series_objetivo ?? '?'}×${ex.reps_objetivo ?? '?'} reps${ex.peso_objetivo ? ` · ${ex.peso_objetivo}kg` : ''}`}
+                      `${ex.series_objetivo ?? '?'} × ${fmtRepsEx(ex)}`}
                     {ex.tipo_metrica === 'cardio' &&
                       `${ex.distancia_objetivo ?? '?'}km${ex.tiempo_objetivo_seg ? ` · ${Math.floor(ex.tiempo_objetivo_seg / 60)}min` : ''}`}
                     {ex.tipo_metrica === 'tiempo' && ex.tiempo_objetivo_seg &&
@@ -286,8 +293,8 @@ function ExerciseFormModal({ exercise, routineId, order, onClose, onSave }) {
   const [nombre,    setNombre]    = useState(exercise?.nombre ?? '');
   const [tipo,      setTipo]      = useState(exercise?.tipo_metrica ?? 'fuerza');
   const [series,    setSeries]    = useState(exercise?.series_objetivo ?? '');
-  const [reps,      setReps]      = useState(exercise?.reps_objetivo ?? '');
-  const [peso,      setPeso]      = useState(exercise?.peso_objetivo ?? '');
+  const [repsMin,   setRepsMin]   = useState(exercise?.reps_min ?? exercise?.reps_objetivo ?? '');
+  const [repsMax,   setRepsMax]   = useState(exercise?.reps_max ?? '');
   const [dist,      setDist]      = useState(exercise?.distancia_objetivo ?? '');
   const [tMin,      setTMin]      = useState(exercise ? Math.floor((exercise.tiempo_objetivo_seg ?? 0) / 60) : '');
   const [tSeg,      setTSeg]      = useState(exercise ? (exercise.tiempo_objetivo_seg ?? 0) % 60 : '');
@@ -301,8 +308,8 @@ function ExerciseFormModal({ exercise, routineId, order, onClose, onSave }) {
       nombre,
       tipo_metrica:       tipo,
       series_objetivo:    series   ? parseInt(series)    : null,
-      reps_objetivo:      reps     ? parseInt(reps)      : null,
-      peso_objetivo:      peso     ? parseFloat(peso)    : null,
+      reps_min:           repsMin  ? parseInt(repsMin)   : null,
+      reps_max:           repsMax  ? parseInt(repsMax)   : null,
       distancia_objetivo: dist     ? parseFloat(dist)    : null,
       tiempo_objetivo_seg:(tMin || tSeg) ? (parseInt(tMin || 0) * 60 + parseInt(tSeg || 0)) : null,
       variantes: variantes.trim() ? variantes.split(',').map(v => v.trim()).filter(Boolean) : null,
@@ -338,11 +345,11 @@ function ExerciseFormModal({ exercise, routineId, order, onClose, onSave }) {
             <Field label="Series">
               <input style={S.input} type="number" placeholder="4" value={series} onChange={e => setSeries(e.target.value)} />
             </Field>
-            <Field label="Reps objetivo">
-              <input style={S.input} type="number" placeholder="10" value={reps} onChange={e => setReps(e.target.value)} />
+            <Field label="Reps mín">
+              <input style={S.input} type="number" placeholder="6" value={repsMin} onChange={e => setRepsMin(e.target.value)} />
             </Field>
-            <Field label="Peso (kg)">
-              <input style={S.input} type="number" placeholder="80" value={peso} onChange={e => setPeso(e.target.value)} />
+            <Field label="Reps máx (opcional)">
+              <input style={S.input} type="number" placeholder="8" value={repsMax} onChange={e => setRepsMax(e.target.value)} />
             </Field>
           </div>
         )}
@@ -663,7 +670,7 @@ function EntrenarView({ userId, userEmail, activeSession, setActiveSession, pend
   if (starting) return <Loader text="Iniciando sesión..." />;
 
   if (activeSession) {
-    return <ActiveSession session={activeSession} onFinish={finishSession} />;
+    return <ActiveSession session={activeSession} userId={userId} onFinish={finishSession} />;
   }
 
   return (
@@ -719,11 +726,12 @@ function EntrenarView({ userId, userEmail, activeSession, setActiveSession, pend
   );
 }
 
-function ActiveSession({ session, onFinish }) {
+function ActiveSession({ session, userId, onFinish }) {
   const [sets,      setSets]      = useState([]);
   const [timerOn,   setTimerOn]   = useState(false);
   const [timerSec,  setTimerSec]  = useState(0);
   const [elapsed,   setElapsed]   = useState(0);
+  const [guidance,  setGuidance]  = useState({});
   const timerRef   = useRef(null);
   const elapsedRef = useRef(null);
 
@@ -731,6 +739,34 @@ function ActiveSession({ session, onFinish }) {
     supabase.from('session_sets').select('*').eq('session_id', session.id)
       .order('created_at').then(({ data }) => setSets(data ?? []));
   }, [session.id]);
+
+  // Cargar PR y última sesión para cada ejercicio de la rutina
+  useEffect(() => {
+    const names = (session.exercises ?? []).map(e => e.nombre);
+    if (!names.length || !userId) return;
+    supabase.from('session_sets')
+      .select('exercise_nombre, variante_de, peso_kg, reps, distancia_km, tiempo_seg, created_at, workout_sessions!inner(user_id, terminada_at, id)')
+      .eq('workout_sessions.user_id', userId)
+      .not('workout_sessions.terminada_at', 'is', null)
+      .neq('workout_sessions.id', session.id)
+      .then(({ data }) => {
+        if (!data) return;
+        const g = {};
+        for (const name of names) {
+          const relevant = data.filter(s =>
+            s.exercise_nombre === name || s.variante_de === name
+          ).filter(s => s.peso_kg != null);
+          if (!relevant.length) continue;
+          const pr       = relevant.reduce((best, s) => s.peso_kg > (best?.peso_kg ?? 0) ? s : best, null);
+          const lastTime = [...relevant].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+          g[name] = {
+            pr:       pr       ? { peso: pr.peso_kg,       reps: pr.reps }       : null,
+            lastTime: lastTime ? { peso: lastTime.peso_kg, reps: lastTime.reps } : null,
+          };
+        }
+        setGuidance(g);
+      });
+  }, [session.exercises, session.id, userId]);
 
   // Rest timer
   useEffect(() => {
@@ -818,6 +854,7 @@ function ActiveSession({ session, onFinish }) {
             key={ex.id}
             exercise={ex}
             sets={sets.filter(s => s.exercise_nombre === ex.nombre || s.variante_de === ex.nombre)}
+            guidance={guidance[ex.nombre]}
             onAddSet={addSet}
             onDelSet={delSet}
           />
@@ -827,6 +864,7 @@ function ActiveSession({ session, onFinish }) {
             key={nombre}
             exercise={{ nombre, tipo_metrica: 'libre' }}
             sets={sets.filter(s => s.exercise_nombre === nombre)}
+            guidance={guidance[nombre]}
             onAddSet={addSet}
             onDelSet={delSet}
           />
@@ -849,7 +887,7 @@ function ActiveSession({ session, onFinish }) {
   );
 }
 
-function ExerciseCard({ exercise, sets, onAddSet, onDelSet }) {
+function ExerciseCard({ exercise, sets, guidance, onAddSet, onDelSet }) {
   const [showAdd,      setShowAdd]      = useState(false);
   const [isVariant,    setIsVariant]    = useState(false);
   const [variantName,  setVariantName]  = useState('');
@@ -859,7 +897,7 @@ function ExerciseCard({ exercise, sets, onAddSet, onDelSet }) {
   const [tiempo,       setTiempo]       = useState('');
   const [nota,         setNota]         = useState('');
 
-  const lastFuerza = [...sets].reverse().find(s => s.peso_kg);
+  const lastFuerza = guidance?.lastTime ?? [...sets].reverse().find(s => s.peso_kg);
 
   const submit = async () => {
     const exNombre  = isVariant && variantName.trim() ? variantName.trim() : exercise.nombre;
@@ -884,13 +922,29 @@ function ExerciseCard({ exercise, sets, onAddSet, onDelSet }) {
   return (
     <div style={S.card}>
       {/* Exercise header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: sets.length > 0 ? 10 : 0 }}>
-        <span style={{ fontWeight: 700, flex: 1 }}>{exercise.nombre}</span>
-        {exercise.series_objetivo && (
-          <span style={{ fontSize: 12, color: '#71717a' }}>
-            {exercise.series_objetivo}×{exercise.reps_objetivo}
-            {exercise.peso_objetivo ? ` · ${exercise.peso_objetivo}kg` : ''}
-          </span>
+      <div style={{ marginBottom: sets.length > 0 ? 10 : 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ fontWeight: 700, flex: 1 }}>{exercise.nombre}</span>
+          {exercise.series_objetivo && (
+            <span style={{ fontSize: 12, color: '#71717a' }}>
+              {exercise.series_objetivo} × {fmtRepsEx(exercise)}
+            </span>
+          )}
+        </div>
+        {/* Guidance: PR y última vez */}
+        {guidance && (
+          <div style={{ display: 'flex', gap: 12, fontSize: 11 }}>
+            {guidance.pr && (
+              <span style={{ color: '#f59e0b' }}>
+                🏆 PR: {guidance.pr.peso}kg × {guidance.pr.reps}
+              </span>
+            )}
+            {guidance.lastTime && (guidance.lastTime.peso !== guidance.pr?.peso || guidance.lastTime.reps !== guidance.pr?.reps) && (
+              <span style={{ color: '#71717a' }}>
+                Última vez: {guidance.lastTime.peso}kg × {guidance.lastTime.reps}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
@@ -981,7 +1035,7 @@ function ExerciseCard({ exercise, sets, onAddSet, onDelSet }) {
           </div>
           {exercise.tipo_metrica === 'fuerza' && lastFuerza && (
             <div style={{ fontSize: 11, color: '#52525b', marginTop: 6 }}>
-              Último: {lastFuerza.peso_kg}kg × {lastFuerza.reps} reps
+              Referencia: {lastFuerza.peso ?? lastFuerza.peso_kg}kg × {lastFuerza.reps} reps
             </div>
           )}
         </div>
