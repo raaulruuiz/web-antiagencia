@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import * as XLSX from 'xlsx';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart, Bar, CartesianGrid,
@@ -77,11 +78,12 @@ const S = {
    RUTINAS
 ═══════════════════════════════════════════════════════════════ */
 function RutinasView({ userId, onStartRoutine }) {
-  const [routines, setRoutines] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [detail, setDetail]     = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [editR, setEditR]       = useState(null);
+  const [routines,    setRoutines]    = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [detail,      setDetail]      = useState(null);
+  const [showForm,    setShowForm]    = useState(false);
+  const [editR,       setEditR]       = useState(null);
+  const [showImport,  setShowImport]  = useState(false);
 
   const load = useCallback(async () => {
     const { data } = await supabase
@@ -111,7 +113,10 @@ function RutinasView({ userId, onStartRoutine }) {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Mis rutinas</h2>
-        <button style={S.primary} onClick={() => { setEditR(null); setShowForm(true); }}>+ Nueva rutina</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button style={S.ghost} onClick={() => setShowImport(true)}>↑ Importar archivo</button>
+          <button style={S.primary} onClick={() => { setEditR(null); setShowForm(true); }}>+ Nueva rutina</button>
+        </div>
       </div>
 
       {routines.length === 0 && (
@@ -125,12 +130,9 @@ function RutinasView({ userId, onStartRoutine }) {
         {routines.map(r => (
           <div key={r.id} style={{ ...S.card, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
             onClick={() => setDetail(r)}>
-            <span style={{ fontSize: 24 }}>{TIPO_ICONS[r.tipo] ?? '💪'}</span>
+            <span style={{ fontSize: 24 }}>💪</span>
             <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{ fontWeight: 600 }}>{r.nombre}</span>
-                {tipoBadge(r.tipo)}
-              </div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>{r.nombre}</div>
               <div style={{ fontSize: 13, color: '#71717a' }}>
                 {r.routine_exercises?.length ?? 0} ejercicio{r.routine_exercises?.length !== 1 ? 's' : ''}
               </div>
@@ -153,22 +155,28 @@ function RutinasView({ userId, onStartRoutine }) {
           onSave={() => { setShowForm(false); load(); }}
         />
       )}
+      {showImport && (
+        <FileImportModal
+          userId={userId}
+          onClose={() => setShowImport(false)}
+          onSave={() => { setShowImport(false); load(); }}
+        />
+      )}
     </div>
   );
 }
 
 function RoutineFormModal({ routine, userId, onClose, onSave }) {
   const [nombre, setNombre] = useState(routine?.nombre ?? '');
-  const [tipo, setTipo]     = useState(routine?.tipo ?? 'gym');
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
     if (!nombre.trim()) return;
     setSaving(true);
     if (routine) {
-      await supabase.from('routines').update({ nombre, tipo }).eq('id', routine.id);
+      await supabase.from('routines').update({ nombre }).eq('id', routine.id);
     } else {
-      await supabase.from('routines').insert({ nombre, tipo, user_id: userId });
+      await supabase.from('routines').insert({ nombre, user_id: userId });
     }
     onSave();
   };
@@ -187,9 +195,6 @@ function RoutineFormModal({ routine, userId, onClose, onSave }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <input style={S.input} placeholder="Nombre de la rutina" value={nombre}
           onChange={e => setNombre(e.target.value)} autoFocus />
-        <select style={S.input} value={tipo} onChange={e => setTipo(e.target.value)}>
-          {TIPOS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
       </div>
       <div style={{ display: 'flex', gap: 8, marginTop: 20, justifyContent: 'flex-end' }}>
         {routine && <button style={S.danger} onClick={del}>Eliminar</button>}
@@ -224,10 +229,7 @@ function RoutineDetail({ routine, onBack, onStart }) {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
         <button style={{ ...S.ghost, padding: '6px 12px' }} onClick={onBack}>← Volver</button>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{routine.nombre}</h2>
-          {tipoBadge(routine.tipo)}
-        </div>
+        <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, flex: 1 }}>{routine.nombre}</h2>
         <button style={S.primary}
           onClick={() => onStart({ ...routine, routine_exercises: exercises })}>
           ▶ Entrenar
@@ -375,6 +377,205 @@ function ExerciseFormModal({ exercise, routineId, order, onClose, onSave }) {
           {saving ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
+    </Modal>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FILE IMPORT
+═══════════════════════════════════════════════════════════════ */
+const COL_MAP = {
+  nombre:    ['nombre','name','ejercicio','exercise','ejercicios','exercises'],
+  series:    ['series','sets','bloques'],
+  reps:      ['reps','repeticiones','repetitions','rep'],
+  peso:      ['peso','weight','kg','kilos'],
+  distancia: ['distancia','distance','km','kilometros'],
+  tiempo:    ['tiempo','time','minutos','minutes','min','duracion','duration'],
+  variantes: ['variantes','variants','alternativas','alternatives'],
+  notas:     ['notas','notes','nota','note'],
+};
+
+function detectColumns(headers) {
+  const map = {};
+  headers.forEach((h, i) => {
+    const norm = String(h).toLowerCase().trim();
+    for (const [field, aliases] of Object.entries(COL_MAP)) {
+      if (aliases.includes(norm) && !map[field]) map[field] = i;
+    }
+  });
+  return map;
+}
+
+function detectMetrica(row, colMap) {
+  if (colMap.distancia != null && row[colMap.distancia]) return 'cardio';
+  if (colMap.tiempo != null && row[colMap.tiempo] && colMap.peso == null) return 'tiempo';
+  if (colMap.peso != null && row[colMap.peso]) return 'fuerza';
+  if (colMap.reps != null && row[colMap.reps]) return 'fuerza';
+  return 'libre';
+}
+
+function parseSheet(rows) {
+  if (rows.length < 2) return [];
+  const headers = rows[0].map(String);
+  const colMap  = detectColumns(headers);
+  const results = [];
+
+  for (let i = 1; i < rows.length; i++) {
+    const row    = rows[i];
+    const nombre = colMap.nombre != null ? String(row[colMap.nombre] ?? '').trim() : '';
+    if (!nombre) continue;
+
+    const metrica   = detectMetrica(row, colMap);
+    const variantes = colMap.variantes != null && row[colMap.variantes]
+      ? String(row[colMap.variantes]).split(/[,;]/).map(v => v.trim()).filter(Boolean)
+      : [];
+
+    results.push({
+      nombre,
+      tipo_metrica:       metrica,
+      series_objetivo:    colMap.series    != null ? parseInt(row[colMap.series])     || null : null,
+      reps_objetivo:      colMap.reps      != null ? parseInt(row[colMap.reps])       || null : null,
+      peso_objetivo:      colMap.peso      != null ? parseFloat(row[colMap.peso])     || null : null,
+      distancia_objetivo: colMap.distancia != null ? parseFloat(row[colMap.distancia])|| null : null,
+      tiempo_objetivo_seg: colMap.tiempo   != null && row[colMap.tiempo]
+        ? Math.round(parseFloat(row[colMap.tiempo]) * 60) : null,
+      variantes: variantes.length > 0 ? variantes : null,
+      notas:     colMap.notas != null ? String(row[colMap.notas] ?? '').trim() || null : null,
+    });
+  }
+  return results;
+}
+
+async function parseFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'xlsx' || ext === 'xls') {
+    const buf  = await file.arrayBuffer();
+    const wb   = XLSX.read(buf, { type: 'array' });
+    const ws   = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    return parseSheet(rows);
+  }
+
+  // CSV / TXT
+  const text = await file.text();
+  const sep  = text.includes('\t') ? '\t' : text.includes(';') ? ';' : ',';
+  const rows = text.trim().split('\n').map(line =>
+    line.split(sep).map(c => c.replace(/^"|"$/g, '').trim())
+  );
+  return parseSheet(rows);
+}
+
+const METRICA_LABELS_SHORT = { fuerza: 'Fuerza', cardio: 'Cardio', tiempo: 'Tiempo', libre: 'Libre' };
+
+function FileImportModal({ userId, onClose, onSave }) {
+  const [step,      setStep]      = useState('upload'); // 'upload' | 'preview' | 'saving'
+  const [nombre,    setNombre]    = useState('');
+  const [exercises, setExercises] = useState([]);
+  const [error,     setError]     = useState(null);
+  const fileRef = useRef();
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    setError(null);
+    try {
+      const exs = await parseFile(file);
+      if (exs.length === 0) { setError('No se detectaron ejercicios. Revisa el formato del archivo.'); return; }
+      const nameGuess = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+      setNombre(nameGuess);
+      setExercises(exs);
+      setStep('preview');
+    } catch (e) {
+      setError('Error leyendo el archivo: ' + e.message);
+    }
+  };
+
+  const save = async () => {
+    if (!nombre.trim() || exercises.length === 0) return;
+    setStep('saving');
+    const { data: routine } = await supabase
+      .from('routines').insert({ nombre: nombre.trim(), user_id: userId }).select().single();
+    if (routine) {
+      await supabase.from('routine_exercises').insert(
+        exercises.map((ex, i) => ({ ...ex, routine_id: routine.id, orden: i }))
+      );
+    }
+    onSave();
+  };
+
+  return (
+    <Modal onClose={onClose} wide>
+      {step === 'upload' && (
+        <>
+          <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 700 }}>Importar rutina desde archivo</h3>
+          <p style={{ color: '#71717a', fontSize: 13, margin: '0 0 20px' }}>
+            Sube un archivo CSV, TXT o Excel. Columnas reconocidas:{' '}
+            <span style={{ color: '#a1a1aa' }}>nombre, series, reps, peso, distancia, tiempo, variantes, notas</span>
+          </p>
+
+          <div
+            style={{ border: '2px dashed #3f3f46', borderRadius: 10, padding: 40, textAlign: 'center', cursor: 'pointer' }}
+            onClick={() => fileRef.current?.click()}
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => { e.preventDefault(); handleFile(e.dataTransfer.files[0]); }}>
+            <div style={{ fontSize: 36, marginBottom: 8 }}>📂</div>
+            <div style={{ color: '#71717a', fontSize: 14 }}>Arrastra el archivo aquí o haz clic para seleccionarlo</div>
+            <div style={{ color: '#52525b', fontSize: 12, marginTop: 4 }}>.csv · .txt · .xlsx · .xls</div>
+          </div>
+          <input ref={fileRef} type="file" accept=".csv,.txt,.xlsx,.xls" style={{ display: 'none' }}
+            onChange={e => handleFile(e.target.files[0])} />
+
+          {error && <div style={{ color: '#f87171', fontSize: 13, marginTop: 12 }}>{error}</div>}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
+            <button style={S.ghost} onClick={onClose}>Cancelar</button>
+          </div>
+        </>
+      )}
+
+      {step === 'preview' && (
+        <>
+          <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700 }}>
+            Vista previa — {exercises.length} ejercicio{exercises.length !== 1 ? 's' : ''} detectado{exercises.length !== 1 ? 's' : ''}
+          </h3>
+
+          <Field label="Nombre de la rutina">
+            <input style={{ ...S.input, marginBottom: 16 }} value={nombre}
+              onChange={e => setNombre(e.target.value)} autoFocus />
+          </Field>
+
+          <div style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
+            {exercises.map((ex, i) => (
+              <div key={i} style={{ ...S.card, padding: 10, display: 'flex', gap: 10, alignItems: 'center' }}>
+                <span style={{ color: '#52525b', fontSize: 12, minWidth: 22 }}>{i + 1}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>{ex.nombre}</div>
+                  <div style={{ fontSize: 11, color: '#71717a', marginTop: 2 }}>
+                    <span style={{ marginRight: 8, color: '#52525b' }}>{METRICA_LABELS_SHORT[ex.tipo_metrica]}</span>
+                    {ex.series_objetivo    && `${ex.series_objetivo} series · `}
+                    {ex.reps_objetivo      && `${ex.reps_objetivo} reps · `}
+                    {ex.peso_objetivo      && `${ex.peso_objetivo}kg · `}
+                    {ex.distancia_objetivo && `${ex.distancia_objetivo}km · `}
+                    {ex.tiempo_objetivo_seg && `${Math.floor(ex.tiempo_objetivo_seg / 60)}min · `}
+                    {ex.variantes?.length  && `var: ${ex.variantes.join(', ')}`}
+                  </div>
+                </div>
+                <button style={{ color: '#52525b', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16 }}
+                  onClick={() => setExercises(prev => prev.filter((_, j) => j !== i))}>✕</button>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button style={S.ghost} onClick={() => setStep('upload')}>← Volver</button>
+            <button style={S.primary} onClick={save} disabled={!nombre.trim()}>
+              Crear rutina
+            </button>
+          </div>
+        </>
+      )}
+
+      {step === 'saving' && <Loader text="Creando rutina..." />}
     </Modal>
   );
 }
@@ -845,6 +1046,14 @@ function HistorialView({ userId }) {
       .then(({ data }) => { setSessions(data ?? []); setLoading(false); });
   }, [userId]);
 
+  const deleteSession = async (e, sessionId) => {
+    e.stopPropagation();
+    if (!confirm('¿Eliminar este entreno y todas sus series?')) return;
+    await supabase.from('workout_sessions').delete().eq('id', sessionId);
+    setSessions(prev => prev.filter(s => s.id !== sessionId));
+    if (expanded === sessionId) setExpanded(null);
+  };
+
   const toggle = async (session) => {
     if (expanded === session.id) { setExpanded(null); return; }
     setExpanded(session.id);
@@ -874,17 +1083,16 @@ function HistorialView({ userId }) {
         return (
           <div key={s.id} style={S.card}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => toggle(s)}>
-              <span style={{ fontSize: 22 }}>{TIPO_ICONS[s.tipo] ?? '💪'}</span>
+              <span style={{ fontSize: 22 }}>💪</span>
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                  <span style={{ fontWeight: 600 }}>{s.nombre}</span>
-                  {tipoBadge(s.tipo)}
-                </div>
+                <div style={{ fontWeight: 600, marginBottom: 3 }}>{s.nombre}</div>
                 <div style={{ fontSize: 12, color: '#71717a' }}>
                   {fmtDate(s.empezada_at)} · {fmtDuration(s.empezada_at, s.terminada_at)}
                   {isOpen && sets.length > 0 && ` · ${sets.length} series`}
                 </div>
               </div>
+              <button style={{ ...S.danger, padding: '4px 10px', fontSize: 12 }}
+                onClick={(e) => deleteSession(e, s.id)}>✕</button>
               <span style={{ color: '#71717a', fontSize: 12 }}>{isOpen ? '▲' : '▼'}</span>
             </div>
 
