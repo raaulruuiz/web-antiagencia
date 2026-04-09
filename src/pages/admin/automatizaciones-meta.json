@@ -253,7 +253,7 @@
   {
     "id": "telegram-movimientos",
     "nombre": "Bot Telegram · Movimientos",
-    "descripcion": "Bot de Telegram que interpreta mensajes con IA para crear facturas, contratos, presupuestos y movimientos financieros en Notion y Google Drive. También convierte libros epub a azw3 y los guarda en Drive.",
+    "descripcion": "Bot de Telegram que interpreta mensajes con IA para crear facturas, contratos, presupuestos y movimientos financieros en Notion y Google Drive. También convierte libros epub a azw3 con Calibre y los envía al Kindle.",
     "tipo": "bot",
     "schedule": "Tiempo real",
     "apps": [
@@ -262,7 +262,8 @@
       "Notion",
       "Google Drive",
       "Google Docs",
-      "api2convert"
+      "Calibre",
+      "Kindle"
     ],
     "comandos": [
       { "nombre": "/factura", "descripcion": "Crea una factura en Notion. Sin argumentos inicia el flujo paso a paso; con texto libre usa modo rápido (ej: /factura 800€ para Forcar)." },
@@ -274,7 +275,7 @@
       { "nombre": "/trackingsemanal", "descripcion": "Inicia el flujo paso a paso para completar los campos de ventas del tracking semanal de prospección." },
       { "nombre": "/transcribir", "descripcion": "Detecta la última grabación de Google Meet, la transcribe con IA y envía el resumen por Discord, email o ambos." },
       { "nombre": "(JSON)", "descripcion": "Registra movimientos financieros en Notion enviando un mensaje en formato JSON con los campos name, type, account, amount_eur y date." },
-      { "nombre": "(epub)", "descripcion": "Convierte cualquier archivo .epub a formato azw3 (Kindle) usando api2convert y lo guarda automáticamente en la carpeta de libros de Google Drive." }
+      { "nombre": "(epub)", "descripcion": "Convierte cualquier archivo .epub a formato azw3 usando Calibre, lo guarda en la carpeta de libros de Google Drive y lo envía automáticamente al Kindle por email." }
     ]
   },
   {
