@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { BACKEND_URL, LOOM_API_KEY } from '@/lib/config';
 import * as XLSX from 'xlsx';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -430,7 +431,6 @@ function FileImportModal({ userId, onClose, onSave }) {
   const [editing,  setEditing]  = useState(null);     // { idx, nombre, ejercicios }
   const [error,    setError]    = useState(null);
   const fileRef = useRef();
-  const { VITE_BACKEND_URL: BACKEND, VITE_LOOM_API_KEY: API_KEY } = import.meta.env;
 
   const handleFile = async (file) => {
     if (!file) return;
@@ -438,9 +438,9 @@ function FileImportModal({ userId, onClose, onSave }) {
     setStep('parsing');
     try {
       const content = await readFileAsText(file);
-      const res = await fetch(`${BACKEND}/admin/parse-routine`, {
+      const res = await fetch(`${BACKEND_URL}/admin/parse-routine`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+        headers: { 'Content-Type': 'application/json', 'x-api-key': LOOM_API_KEY },
         body: JSON.stringify({ content, filename: file.name }),
       });
       if (!res.ok) throw new Error(await res.text());
