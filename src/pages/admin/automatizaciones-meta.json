@@ -217,6 +217,16 @@
     ]
   },
   {
+    "id": "alerta-tiktok-aprobacion",
+    "nombre": "Alerta aprobación TikTok",
+    "descripcion": "Revisa raulruiztrafficker@gmail.com buscando emails de TikTok sobre la aprobación de la app. Si encuentra alguno, envía un aviso a raul@antiagencia.es. Se ejecuta a las 07:00, 14:00 y 21:00.",
+    "tipo": "cron",
+    "schedule": "Diario · 07:00, 14:00, 21:00",
+    "apps": [
+      "Gmail"
+    ]
+  },
+  {
     "id": "calendly-crm",
     "nombre": "Calendly → CRM",
     "descripcion": "Cuando se reserva una reunión en Calendly, crea el contacto en el CRM de Notion y lo añade al grupo de Newsletter en MailerLite.",
@@ -243,7 +253,7 @@
   {
     "id": "telegram-movimientos",
     "nombre": "Bot Telegram · Movimientos",
-    "descripcion": "Bot de Telegram que interpreta mensajes con IA para crear facturas, contratos, presupuestos y movimientos financieros en Notion y Google Drive.",
+    "descripcion": "Bot de Telegram que interpreta mensajes con IA para crear facturas, contratos, presupuestos y movimientos financieros en Notion y Google Drive. También convierte libros epub a azw3 y los guarda en Drive.",
     "tipo": "bot",
     "schedule": "Tiempo real",
     "apps": [
@@ -251,7 +261,8 @@
       "OpenAI",
       "Notion",
       "Google Drive",
-      "Google Docs"
+      "Google Docs",
+      "api2convert"
     ],
     "comandos": [
       { "nombre": "/factura", "descripcion": "Crea una factura en Notion. Sin argumentos inicia el flujo paso a paso; con texto libre usa modo rápido (ej: /factura 800€ para Forcar)." },
@@ -262,7 +273,8 @@
       { "nombre": "/enviarcontrato", "descripcion": "Adjunta el PDF de un contrato y crea un borrador de email en contabilidad@antiagencia.es para enviárselo al cliente." },
       { "nombre": "/trackingsemanal", "descripcion": "Inicia el flujo paso a paso para completar los campos de ventas del tracking semanal de prospección." },
       { "nombre": "/transcribir", "descripcion": "Detecta la última grabación de Google Meet, la transcribe con IA y envía el resumen por Discord, email o ambos." },
-      { "nombre": "(JSON)", "descripcion": "Registra movimientos financieros en Notion enviando un mensaje en formato JSON con los campos name, type, account, amount_eur y date." }
+      { "nombre": "(JSON)", "descripcion": "Registra movimientos financieros en Notion enviando un mensaje en formato JSON con los campos name, type, account, amount_eur y date." },
+      { "nombre": "(epub)", "descripcion": "Convierte cualquier archivo .epub a formato azw3 (Kindle) usando api2convert y lo guarda automáticamente en la carpeta de libros de Google Drive." }
     ]
   },
   {
@@ -295,7 +307,7 @@
       { "nombre": "/transcribir", "descripcion": "Detecta la última grabación de Google Meet, la transcribe con IA y envía el resumen por Discord, email o ambos." },
       { "nombre": "/facturaalejandro", "descripcion": "Crea una factura para Alejandro en Notion especificando fecha e importe en dólares." },
       { "nombre": "/programarcontenido", "descripcion": "Flujo interactivo para programar vídeos de Google Drive en Notion: muestra los vídeos disponibles, pide plataformas, descripción y fecha (o 'auto' para calcular la siguiente automáticamente), y mueve el vídeo a la carpeta SUBIDOS." },
-      { "nombre": "/publicar", "descripcion": "Publica o programa en Publer los vídeos pendientes de Notion en todas las plataformas seleccionadas. Si hay entradas con error previo, pregunta qué hacer con cada una antes de continuar." }
+      { "nombre": "/publicar", "descripcion": "Publica directamente los vídeos pendientes de Notion en Instagram, Facebook, YouTube, LinkedIn y TikTok sin pasar por Publer. Si hay entradas con error previo, pregunta qué hacer con cada una antes de continuar." }
     ]
   }
 ]
