@@ -23,6 +23,7 @@ import AdminLayout, { useAdmin } from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import Automatizaciones from './pages/admin/Automatizaciones';
+import Gym from './pages/admin/Gym';
 
 // Guard para rutas de lector: redirige a /admin/users si no tiene permiso
 function RequirePage({ page, children }) {
@@ -115,6 +116,7 @@ function App() {
               <Route path="loom"             element={<RequirePage page="loom"><Loom /></RequirePage>} />
               <Route path="users"            element={<AdminUsers />} />
               <Route path="automatizaciones" element={<RequirePage page="automatizaciones"><Automatizaciones /></RequirePage>} />
+              <Route path="gym"             element={<RequirePage page="gym"><Gym /></RequirePage>} />
             </Route>
             <Route path="/loom" element={<Loom />} />
             <Route path="*" element={<AuthenticatedApp />} />

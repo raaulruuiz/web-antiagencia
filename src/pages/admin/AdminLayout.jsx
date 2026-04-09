@@ -9,6 +9,7 @@ const ALL_NAV = [
   { to: '/admin/dashboard',        label: 'Dashboard',        icon: '📊', page: 'dashboard' },
   { to: '/admin/loom',             label: 'Loom',             icon: '🎥', page: 'loom' },
   { to: '/admin/automatizaciones', label: 'Automatizaciones', icon: '⚡', page: 'automatizaciones' },
+  { to: '/admin/gym',              label: 'Entrenos',         icon: '🏋️', page: 'gym' },
   { to: '/admin/users',            label: 'Usuarios',         icon: '👥', page: 'users' },
 ];
 
