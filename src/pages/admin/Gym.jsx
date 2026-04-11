@@ -75,7 +75,7 @@ function fmtRepsEx(ex) {
 /* ─── shared styles ───────────────────────────────────────────── */
 const S = {
   card:    { background: '#161616', border: '1px solid #27272a', borderRadius: 12, padding: 16 },
-  input:   { background: '#0d0d0d', border: '1px solid #3f3f46', borderRadius: 8, color: 'white', padding: '8px 12px', fontSize: 14, outline: 'none', width: '100%', boxSizing: 'border-box' },
+  input:   { background: '#0d0d0d', border: '1px solid #3f3f46', borderRadius: 8, color: 'white', padding: '8px 12px', fontSize: 16, outline: 'none', width: '100%', boxSizing: 'border-box' },
   primary: { background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
   ghost:   { background: 'transparent', color: '#71717a', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 16px', fontSize: 14, cursor: 'pointer' },
   danger:  { background: 'transparent', color: '#f87171', border: '1px solid #7f1d1d', borderRadius: 8, padding: '8px 16px', fontSize: 14, cursor: 'pointer' },
