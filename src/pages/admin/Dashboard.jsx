@@ -135,7 +135,7 @@ export default function Dashboard() {
   const activePreset = PRESETS.find(p => p.days === preset);
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="p-4 md:p-8 max-w-5xl">
       <h1 className="text-white text-2xl font-semibold mb-6">Dashboard</h1>
 
       {/* Filtros */}
@@ -173,7 +173,7 @@ export default function Dashboard() {
         <h2 className="text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-3">
           Visitas · {selectedUrl === 'all' ? 'Todas las páginas' : selectedUrl} · {activePreset?.label}
         </h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <MetricCard label="Visitas totales"  value={pageMetrics?.total}  />
           <MetricCard label="Visitas únicas"   value={pageMetrics?.unique} sub="por navegador" />
           <MetricCard label="Tasa de rebote"   value={pageMetrics?.bounceRate != null ? `${pageMetrics.bounceRate}%` : '—'} sub="1 sola página por sesión" />
@@ -186,7 +186,7 @@ export default function Dashboard() {
           <h2 className="text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-3">
             Registros MailerLite · {activePreset?.label}
           </h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {gruposParaUrl(selectedUrl).map(key => {
               const g = mailerlite[key];
               if (!g) return null;
@@ -227,7 +227,7 @@ export default function Dashboard() {
               return (
                 <div key={test.id} className="rounded-xl border border-zinc-800 bg-zinc-900 px-6 py-5">
                   <p className="text-zinc-400 text-sm mb-4">{test.label}</p>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {['A', 'B'].map(v => {
                       const s = stats[v] ?? { visits: 0, conversions: 0, conversion_rate: '0.0' };
                       return (

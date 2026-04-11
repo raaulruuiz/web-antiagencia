@@ -15,7 +15,7 @@ export default function Automatizaciones() {
   const toggle = (id) => setExpanded(prev => prev === id ? null : id);
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-4 md:p-8 max-w-4xl">
       <h1 className="text-white text-2xl font-semibold mb-6">Automatizaciones</h1>
 
       <div className="flex flex-col gap-2">

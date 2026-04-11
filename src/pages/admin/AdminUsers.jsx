@@ -150,7 +150,7 @@ export default function AdminUsers() {
   }
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 md:p-8 max-w-3xl">
       <h1 className="text-white text-2xl font-semibold mb-6">Usuarios</h1>
 
       {/* Invitar — solo admin */}
@@ -158,7 +158,7 @@ export default function AdminUsers() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-6 py-5 mb-8">
           <h2 className="text-white text-sm font-medium mb-4">Invitar usuario</h2>
           <form onSubmit={handleInvite} className="flex flex-col gap-4">
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
                 value={email}
@@ -167,21 +167,23 @@ export default function AdminUsers() {
                 required
                 className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white text-sm outline-none focus:border-zinc-500 placeholder:text-zinc-600"
               />
-              <select
-                value={inviteRole}
-                onChange={e => setInviteRole(e.target.value)}
-                className="bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 outline-none"
-              >
-                <option value="lector">Lector</option>
-                <option value="admin">Admin</option>
-              </select>
-              <button
-                type="submit"
-                disabled={inviting}
-                className="bg-white text-black rounded-lg px-5 py-2 text-sm font-medium hover:bg-zinc-100 transition-colors disabled:opacity-50"
-              >
-                {inviting ? 'Enviando...' : 'Invitar'}
-              </button>
+              <div className="flex gap-3">
+                <select
+                  value={inviteRole}
+                  onChange={e => setInviteRole(e.target.value)}
+                  className="flex-1 sm:flex-none bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 outline-none"
+                >
+                  <option value="lector">Lector</option>
+                  <option value="admin">Admin</option>
+                </select>
+                <button
+                  type="submit"
+                  disabled={inviting}
+                  className="bg-white text-black rounded-lg px-5 py-2 text-sm font-medium hover:bg-zinc-100 transition-colors disabled:opacity-50"
+                >
+                  {inviting ? 'Enviando...' : 'Invitar'}
+                </button>
+              </div>
             </div>
             {inviteRole === 'lector' && (
               <div>
@@ -222,27 +224,29 @@ export default function AdminUsers() {
 
           return (
             <div key={u.id} className="rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-4">
-              <div className="flex items-center gap-3">
-                <span className="text-white text-sm flex-1">{u.email}</span>
-                <StatusBadge confirmed={u.confirmed} invitedAt={u.invited_at} />
-                <RoleBadge role={isEditing ? editState.role : u.role} />
-                <span className="text-zinc-500 text-xs">{u.confirmed ? timeAgo(u.last_sign_in) : '—'}</span>
-                {isAdmin && !isEditing && (
-                  <button
-                    onClick={() => startEdit(u)}
-                    className="text-zinc-500 hover:text-white text-xs transition-colors"
-                  >
-                    Editar
-                  </button>
-                )}
-                {isAdmin && !isEditing && (
-                  <button
-                    onClick={() => handleDelete(u.id, u.email)}
-                    className="text-zinc-600 hover:text-red-400 text-xs transition-colors"
-                  >
-                    Eliminar
-                  </button>
-                )}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <span className="text-white text-sm flex-1 break-all">{u.email}</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <StatusBadge confirmed={u.confirmed} invitedAt={u.invited_at} />
+                  <RoleBadge role={isEditing ? editState.role : u.role} />
+                  <span className="text-zinc-500 text-xs">{u.confirmed ? timeAgo(u.last_sign_in) : '—'}</span>
+                  {isAdmin && !isEditing && (
+                    <button
+                      onClick={() => startEdit(u)}
+                      className="text-zinc-500 hover:text-white text-xs transition-colors"
+                    >
+                      Editar
+                    </button>
+                  )}
+                  {isAdmin && !isEditing && (
+                    <button
+                      onClick={() => handleDelete(u.id, u.email)}
+                      className="text-zinc-600 hover:text-red-400 text-xs transition-colors"
+                    >
+                      Eliminar
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Panel de edición inline */}
