@@ -75,7 +75,20 @@ export default function PoliticaPrivacidad() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">7. Cookies y Enlaces a Terceros</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">7. Aplicación de Shopify — Antiagencia</h2>
+            <p>La aplicación <strong className="text-white">Antiagencia</strong>, disponible en el Shopify App Store, accede a los datos de las tiendas Shopify de nuestros clientes exclusivamente para prestar los servicios contratados con Antiagencia. A continuación se detalla el uso que hacemos de dichos datos:</p>
+            <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
+              <li><strong className="text-white">Datos a los que accedemos:</strong> Productos, pedidos, clientes, inventario, descuentos y configuración de la tienda.</li>
+              <li><strong className="text-white">Finalidad:</strong> Gestión y automatización de operaciones de la tienda en nombre del comerciante (modificación de precios, creación de descuentos, gestión de stock, etc.).</li>
+              <li><strong className="text-white">Almacenamiento:</strong> Guardamos únicamente el token de acceso necesario para operar la tienda. No almacenamos datos de clientes finales de la tienda.</li>
+              <li><strong className="text-white">Compartición:</strong> No compartimos los datos de las tiendas con terceros. Los datos se procesan internamente en nuestros servidores (Railway) y base de datos (Supabase), bajo las mismas garantías de confidencialidad.</li>
+              <li><strong className="text-white">Eliminación:</strong> Al desinstalar la aplicación, el acceso queda revocado automáticamente. Para solicitar la eliminación de los datos almacenados, contacta con <a href="mailto:raul@antiagencia.es" className="text-[#0067FD] hover:underline">raul@antiagencia.es</a>.</li>
+            </ul>
+            <p className="mt-3">Para cualquier consulta sobre el uso de datos en el contexto de la aplicación de Shopify, puedes contactarnos en <a href="mailto:raul@antiagencia.es" className="text-[#0067FD] hover:underline">raul@antiagencia.es</a>.</p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold text-white mb-3">8. Cookies y Enlaces a Terceros</h2>
             <p>Este sitio web utiliza cookies propias y de terceros para mejorar la navegación y analizar el tráfico (Google Analytics). Para más información, consulte nuestra <Link to={createPageUrl("PoliticaCookies")} className="text-[#0067FD] hover:underline">Política de Cookies</Link>. Nuestra web puede contener enlaces a sitios externos cuyas políticas de privacidad son ajenas a Antiagencia.</p>
           </section>
 
