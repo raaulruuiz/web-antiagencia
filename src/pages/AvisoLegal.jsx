@@ -84,7 +84,20 @@ export default function AvisoLegal() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">10. Legislación Aplicable y Jurisdicción</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">10. Uso de la API de TikTok</h2>
+            <p>Antiagencia utiliza la API de TikTok para prestar servicios de gestión y publicación de contenido en dicha plataforma en nombre de sus clientes. El uso de esta integración está sujeto a las siguientes condiciones:</p>
+            <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
+              <li><strong className="text-white">Autorización expresa:</strong> La integración con TikTok se realiza únicamente bajo autorización expresa del cliente, quien debe conceder acceso a su cuenta de forma voluntaria.</li>
+              <li><strong className="text-white">Uso permitido:</strong> El acceso a la API de TikTok se utiliza exclusivamente para publicar y programar contenido de vídeo proporcionado por el cliente. No se utilizará para ningún otro fin no autorizado.</li>
+              <li><strong className="text-white">Responsabilidad del contenido:</strong> El cliente es responsable del contenido que facilita para su publicación en TikTok, debiendo asegurarse de que cumple con los <a href="https://www.tiktok.com/legal/page/global/terms-of-service/es" className="text-[#0067FD] hover:underline" target="_blank" rel="noopener noreferrer">Términos de Servicio de TikTok</a> y la legislación aplicable.</li>
+              <li><strong className="text-white">Revocación del acceso:</strong> El cliente puede revocar el acceso de Antiagencia a su cuenta de TikTok en cualquier momento desde la configuración de privacidad de la plataforma.</li>
+              <li><strong className="text-white">Cumplimiento normativo:</strong> Antiagencia cumple con las políticas de la plataforma TikTok for Developers y aplica las medidas de seguridad necesarias para proteger los datos de acceso.</li>
+            </ul>
+            <p className="mt-3">Para cualquier consulta relacionada con el uso de la API de TikTok, puedes contactarnos en <a href="mailto:raul@antiagencia.es" className="text-[#0067FD] hover:underline">raul@antiagencia.es</a>.</p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold text-white mb-3">11. Legislación Aplicable y Jurisdicción</h2>
             <p>La relación entre Antiagencia y el USUARIO se regirá por la normativa española vigente. Cualquier controversia se someterá a los Juzgados y tribunales de la ciudad de Granada, salvo que la Ley aplicable (especialmente en caso de consumidores finales) disponga otra cosa.</p>
           </section>
 
