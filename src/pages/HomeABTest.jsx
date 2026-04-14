@@ -325,6 +325,7 @@ export default function HomeABTest() {
 
     window.ml_webform_success_38376765 = function () {
       trackConversion(TEST_ID, TEST_URL);
+      window.umami?.track('registro-newsletter');
       try {
         window.top.location.href = "https://antiagencia.es/ultimopaso";
       } catch (e) {

@@ -25,6 +25,7 @@ export default function CTASection() {
     window.location.href = mailtoLink;
     setLoading(false);
     setSubmitted(true);
+    window.umami?.track('contacto-cta');
   };
 
   return (

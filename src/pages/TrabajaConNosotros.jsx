@@ -42,6 +42,7 @@ export default function TrabajaConNosotros() {
     document.head.appendChild(style);
 
     window.ml_webform_success_38800152 = function () {
+      window.umami?.track('registro-presupuesto');
       const $ = window.ml_jQuery || window.jQuery;
       if ($) {
         $('.ml-subscribe-form-38800152 .row-success').show();

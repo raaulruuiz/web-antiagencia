@@ -24,6 +24,7 @@ export default function Newsletter() {
     document.head.appendChild(style);
 
     window.ml_webform_success_38376765 = function () {
+      window.umami?.track('registro-newsletter');
       try {
         window.top.location.href = "https://antiagencia.es/ultimopaso";
       } catch (e) {
