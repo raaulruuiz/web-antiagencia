@@ -190,8 +190,8 @@ export default function Dashboard() {
             {gruposParaUrl(selectedUrl).map(key => {
               const g = mailerlite[key];
               if (!g) return null;
-              const cvr = pageMetrics?.total > 0
-                ? ((g.total / pageMetrics.total) * 100).toFixed(1)
+              const cvr = pageMetrics?.unique > 0
+                ? ((g.total / pageMetrics.unique) * 100).toFixed(1)
                 : null;
               return (
                 <div key={g.id} className="rounded-xl border border-zinc-800 bg-zinc-900 px-6 py-5">
