@@ -107,7 +107,7 @@ export default function Dashboard() {
 
     // MailerLite desde Railway
     try {
-      const params = new URLSearchParams({ from: fmt(from), to: fmt(to) });
+      const params = new URLSearchParams({ from: from.toISOString(), to: to.toISOString() });
       const res = await fetch(`${BACKEND}/admin/mailerlite?${params}`, {
         headers: { 'x-api-key': API_KEY },
       });
@@ -121,7 +121,7 @@ export default function Dashboard() {
       const results = {};
       await Promise.all(AB_TESTS.map(async test => {
         try {
-          const params = new URLSearchParams({ test_id: test.id, url: test.url, from: fmt(from), to: fmt(to) });
+          const params = new URLSearchParams({ test_id: test.id, url: test.url, from: from.toISOString(), to: to.toISOString() });
           const r = await fetch(`${BACKEND}/admin/ab-tests?${params}`, {
             headers: { 'x-api-key': API_KEY },
           });
@@ -190,6 +190,9 @@ export default function Dashboard() {
             {gruposParaUrl(selectedUrl).map(key => {
               const g = mailerlite[key];
               if (!g) return null;
+              const cvr = pageMetrics?.total > 0
+                ? ((g.total / pageMetrics.total) * 100).toFixed(1)
+                : null;
               return (
                 <div key={g.id} className="rounded-xl border border-zinc-800 bg-zinc-900 px-6 py-5">
                   <p className="text-zinc-400 text-sm mb-3">{g.name}</p>
@@ -202,6 +205,12 @@ export default function Dashboard() {
                       <p className="text-white text-3xl font-semibold">{g.unique}</p>
                       <p className="text-zinc-500 text-xs mt-1">Únicos</p>
                     </div>
+                    {cvr !== null && (
+                      <div>
+                        <p className="text-white text-3xl font-semibold">{cvr}%</p>
+                        <p className="text-zinc-500 text-xs mt-1">Conversión</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
