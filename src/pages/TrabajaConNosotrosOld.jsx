@@ -190,24 +190,31 @@ export default function TrabajaConNosotrosOld() {
 
               <p className="mb-4"><strong className="text-[#0067FD]">¿Que qué hacemos diferente?</strong> Ostias pues mira estas son algunas de las cosas que se salen de lo normal y que solemos aplicar y funcionan de puta madre no, lo siguiente…</p>
               <br />
-              <ul className="list-disc pl-6 mb-6 space-y-5">
-                <li>La estrategia que aprendimos de los mejores marketers muertos para <strong>vender cualquier producto</strong> aunque ahora mismo no te lo compre ni tu madre.</li>
-                <li><strong>Lo primero que debemos evitar a la hora de mandar un mail</strong>. </li>
-                <li>Cómo automatizar con IH (Inteligencia Humana) tus mensajes <strong>para que resuenen y vendan más</strong>.</li>
-                <li>Lo que aprendimos de la historia para contar historias que <strong>hará que tu tienda haga historia</strong>.</li>
-                <li>Cómo hacer que tus clientes <strong>te vuelvan a comprar en cuestión de días</strong> gracias a la estrategia del ratoncito pérez.</li>
-                <li><strong>Cómo manejar los anuncios como un trader criptobro</strong>, que lo hace mejor que el 90% de los mediabuyers.</li>
-                <li>Una forma de <strong>estar constantemente en la mente de la gente</strong> y que nos compren todo lo que tenemos.</li>
-                <li><strong>Evitamos el error</strong> (que todo el mundo comete) que hace que aunque vendas más tu marca sea cada vez menos valiosa.</li>
-                <li><strong>Si nunca mandaste un mail a tu lista, no lo hagas</strong>. Primero tenemos que hacer una cosa.</li>
-                <li>Lo que aprendí en el supermercado sobre <strong>cómo venderle más a la misma persona</strong> (aunque no quisiese comprar se verá atraído como polilla a la luz, y te lo agradecerá).</li>
-                <li>Cómo <strong>vender más que tus competidores</strong> aunque vendas exactamente el mismo producto y sea hasta más caro.</li>
-                <li>Si tienes familia <strong>hay algo que sabes que no debes hacer</strong> pero probablemente lo estás haciendo (le pasa a muchas tiendas).</li>
-                <li><strong>Cómo, dónde, cuándo, por qué y para qué usar los descuentos</strong>.</li>
-                <li>Y muchas más estrategias que van muriendo y que van surgiendo.</li>
+              <ul className="list-none pl-0 mb-6 space-y-5">
+                {[
+                  <>La estrategia que aprendimos de los mejores marketers muertos para <strong>vender cualquier producto</strong> aunque ahora mismo no te lo compre ni tu madre.</>,
+                  <><strong>Lo primero que debemos evitar a la hora de mandar un mail</strong>. </>,
+                  <>Cómo automatizar con IH (Inteligencia Humana) tus mensajes <strong>para que resuenen y vendan más</strong>.</>,
+                  <>Lo que aprendimos de la historia para contar historias que <strong>hará que tu tienda haga historia</strong>.</>,
+                  <>Cómo hacer que tus clientes <strong>te vuelvan a comprar en cuestión de días</strong> gracias a la estrategia del ratoncito pérez.</>,
+                  <><strong>Cómo manejar los anuncios como un trader criptobro</strong>, que lo hace mejor que el 90% de los mediabuyers.</>,
+                  <>Una forma de <strong>estar constantemente en la mente de la gente</strong> y que nos compren todo lo que tenemos.</>,
+                  <><strong>Evitamos el error</strong> (que todo el mundo comete) que hace que aunque vendas más tu marca sea cada vez menos valiosa.</>,
+                  <><strong>Si nunca mandaste un mail a tu lista, no lo hagas</strong>. Primero tenemos que hacer una cosa.</>,
+                  <>Lo que aprendí en el supermercado sobre <strong>cómo venderle más a la misma persona</strong> (aunque no quisiese comprar se verá atraído como polilla a la luz, y te lo agradecerá).</>,
+                  <>Cómo <strong>vender más que tus competidores</strong> aunque vendas exactamente el mismo producto y sea hasta más caro.</>,
+                  <>Si tienes familia <strong>hay algo que sabes que no debes hacer</strong> pero probablemente lo estás haciendo (le pasa a muchas tiendas).</>,
+                  <><strong>Cómo, dónde, cuándo, por qué y para qué usar los descuentos</strong>.</>,
+                  <>Y muchas más estrategias que van muriendo y que van surgiendo.</>,
+                ].map((text, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
+                    <span>{text}</span>
+                  </li>
+                ))}
               </ul>
 
-              <br /><br /><br /><br /><br />
+              <br /><br /><br />
 
               <p className="mb-4">¿Que si hay más? Cabrón, te parece poco? Pero sí, </p>
               <br />
