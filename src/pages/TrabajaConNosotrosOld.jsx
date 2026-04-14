@@ -74,7 +74,6 @@ export default function TrabajaConNosotrosOld() {
             <div className="text-gray-800 text-base leading-relaxed">
 
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">Tío, la IA ha DESTRUIDO mi agencia…</h1>
-              <p className="text-center text-xl text-gray-600 mb-8">Pero gracias a eso ahora es más humana que nunca.</p>
 
               <div className="flex justify-center my-8">
                 <img
@@ -84,12 +83,16 @@ export default function TrabajaConNosotrosOld() {
                 />
               </div>
 
+              <p className="text-center text-xl text-gray-600 mb-8">Pero gracias a eso ahora es más humana que nunca.</p>
+
               <p className="mb-4">No, no he dejado de dar servicio. Y tampoco lo hago todo con IA, eso es de pardillos que no saben de marketing jajaja.</p>
               <p className="mb-4">Lo que he hecho ha sido simplificar el negocio. Nos hemos quedado solo Pili y yo, tu sabes… el equipo es un coste bien alto.</p>
 
-              <br />
+              <br /><br /><br />
               <p className="mb-4">Claro tío, cualquier marca puede hacer ya la parte técnica con IA, ya estoy viendo marcas que están despidiendo a sus agencias y a sus empleados, entonces lo que estamos haciendo es centrarnos solo en la parte humana.</p>
               <p className="mb-4">La IA trabaja muy bien, pero pensar… sigue siendo mejor que lo hagamos nosotros.</p>
+
+              <br /><br /><br />
               <p className="mb-4">Jajaja, si si, ahora ves en todas las tiendas textos que están escritos por chatgpt y se nota a kilómetro.</p>
 
               <br />
@@ -103,16 +106,15 @@ export default function TrabajaConNosotrosOld() {
               <br />
               <p className="mb-4">No no no, ni chatgpt ni pollas, lo escribimos todo a mano Pili y yo, por eso te digo que ahora nuestra agencia es mas humana que nunca. Es cierto que no te lo montamos, que entre tu y yo, eso es lo más fácil una vez lo tienes todo escrito, y ahí si te puedes apoyar en la IA. Si quieres, luego te enseño o te lo monto, pero te lo cobro jeje.</p>
 
-              <br /><br />
-              <h2 className="text-2xl font-bold mt-8 mb-4">Las 3 fases</h2>
+              <br /><br /><br />
 
-              <h3 className="font-bold text-xl mt-8 mb-2">Fase 1: Investigación (2 semanas)</h3>
+              <p className="underline font-bold mt-8 mb-4">Fase 1: Investigación (2 semanas)</p>
               <p className="mb-4">Mira, las primeras dos semanas desde que nos contratas son investigación. Te pedimos datos, nos reunimos contigo, miramos amazon, tu competencia, hablamos con los viejos del pueblo, hasta vamos a verte.</p>
               <p className="mb-4">Como lo oyes, te visitamos para ver tu negocio por dentro. Eso son las primeras dos semanas.</p>
               <p className="mb-4">Y con eso te preparamos una carpeta con varios dossieres con el planning para los próximos 3 meses, en total son más de 100 páginas de contenido. Todo personalizado y escrito a mano, para tu tienda.</p>
               <p className="mb-4">Jajaja si si, estamos algo locos, pero creo que ahora con todo el ruido que hay, lo que destaca es ser natural y diferente al resto. Si quieres un más de lo mismo te vas a cualquier consultoría que te garantice 30k en 3 meses jajajaja.</p>
 
-              <h3 className="font-bold text-xl mt-8 mb-2">Fase 2: Los dossieres (+100 páginas)</h3>
+              <p className="underline font-bold mt-8 mb-4">Fase 2: Los dossieres (+100 páginas)</p>
               <p className="mb-4">Claro tío, es lo mismo que antes, web, mails y ads. Lo único que te lo damos todo escrito y te lo montas tú. Además luego estará Pili dando porculo para que cumplas plazos.</p>
               <p className="mb-4">Hombre… no esperarás que te lo de y te deje a tu aire, que esto no es un cursito, sigue siendo un servicio.</p>
               <p className="mb-4">Después de las dos primeras semanas, cuando te entreguemos todo el material, nos aseguramos de que lo implementas, y te analizamos los resultados. Todas las semanas te pasamos un informe por escrito y por vídeo de todas las métricas de la web, los anuncios y los emails.</p>
@@ -120,18 +122,18 @@ export default function TrabajaConNosotrosOld() {
 
               <p className="mb-4">En los dossieres te damos:</p>
               <ul className="list-disc pl-6 mb-6 space-y-3">
-                <li><strong>Análisis comparativo.</strong> Un análisis de lo que ya tienes en la web, los emails y los anuncios versus lo que hace la competencia y cómo mejorarlo para diferenciarte de ellos y vender más.</li>
-                <li><strong>Análisis de márgenes.</strong> Nos metemos en mirar tus márgenes, ya sabes que una estrategia que no se adapte a tus márgenes no vale de nada… al final de mes quieres beneficio, no facturar mucho pero perder pasta.</li>
-                <li><strong>Estrategia completa y textos.</strong> Toda la estrategia y la propuesta de cambios, con los textos escritos para que copies y pegues, las secciones que tienes que crear o cambiar en la web y como hacerlo, los mails escritos, todos — para que solo copies y programes las campañas. Obviamente los flujos y los formularios también.</li>
-                <li><strong>Plan de anuncios.</strong> Todos los cambios que tienes que hacer de estructura en la cuenta, que campañas montar, que configuración ponerle, que anuncios meter en cada una, con ejemplos para que no te cueste nada hacerlos, reglas de cuando parar, cuando escalar… aunque esto como luego vamos a estar encima, te iremos avisando.</li>
-                <li><strong>Plan trimestral.</strong> Los próximos tres meses, con las distintas promos, que días te conviene gastar más en anuncios, ejemplos de promociones que funcionan, y sin hacer descuentos, que así ganas mas.</li>
-                <li><strong>Plazos de ejecución.</strong> No tiene sentido que te diga y te de todo lo que tienes que hacer si no te digo para cuando lo tienes que tener, que si no luego te pilla el toro. Y ya te digo, vamos a estar muy encima para que cumplas jajaja.</li>
+                <li><strong className="text-[#0067FD]">Análisis comparativo.</strong> Un análisis de lo que ya tienes en la web, los emails y los anuncios versus lo que hace la competencia y cómo mejorarlo para diferenciarte de ellos y vender más.</li>
+                <li><strong className="text-[#0067FD]">Análisis de márgenes.</strong> Nos metemos en mirar tus márgenes, ya sabes que una estrategia que no se adapte a tus márgenes no vale de nada… al final de mes quieres beneficio, no facturar mucho pero perder pasta.</li>
+                <li><strong className="text-[#0067FD]">Estrategia completa y textos.</strong> Toda la estrategia y la propuesta de cambios, con los textos escritos para que copies y pegues, las secciones que tienes que crear o cambiar en la web y como hacerlo, los mails escritos, todos — para que solo copies y programes las campañas. Obviamente los flujos y los formularios también.</li>
+                <li><strong className="text-[#0067FD]">Plan de anuncios.</strong> Todos los cambios que tienes que hacer de estructura en la cuenta, que campañas montar, que configuración ponerle, que anuncios meter en cada una, con ejemplos para que no te cueste nada hacerlos, reglas de cuando parar, cuando escalar… aunque esto como luego vamos a estar encima, te iremos avisando.</li>
+                <li><strong className="text-[#0067FD]">Plan trimestral.</strong> Los próximos tres meses, con las distintas promos, que días te conviene gastar más en anuncios, ejemplos de promociones que funcionan, y sin hacer descuentos, que así ganas mas.</li>
+                <li><strong className="text-[#0067FD]">Plazos de ejecución.</strong> No tiene sentido que te diga y te de todo lo que tienes que hacer si no te digo para cuando lo tienes que tener, que si no luego te pilla el toro. Y ya te digo, vamos a estar muy encima para que cumplas jajaja.</li>
               </ul>
 
-              <h3 className="font-bold text-xl mt-8 mb-2">Fase 3: Revisión y análisis continuo</h3>
+              <p className="underline font-bold mt-8 mb-4">Fase 3: Revisión y análisis continuo</p>
               <p className="mb-4">Esto te diría que es lo más importante… Estar en el día a día. Cada semana te pasaremos el informe analizando los resultados y por supuesto si algo falla, lo corregimos, faltaría más. De hecho en los dossieres ya te metemos plan A y plan B por si algo no funciona, pero igualmente estamos en el día a día controlando.</p>
 
-              <br /><br />
+              <br /><br /><br />
               <p className="mb-4">¿Que si esto funciona? Joder si funciona, no ves la cantidad de tiendas que hay haciendo exactamente lo mismo? Con nada que te diferencies un poco los barres a todos.</p>
               <p className="mb-4">Lo he visto mil veces en los 7 años que llevo en le marketing online. Coño, lo hice yo con mi propia tienda…</p>
               <p className="mb-4">Si, la de termómetros infrarrojos. Si hasta a ti te vendí uno jeje. Así pasamos de 0 a más de 150.000€ en tres meses. Hay que hacer las cosas distintas tío.</p>
@@ -139,8 +141,7 @@ export default function TrabajaConNosotrosOld() {
               <p className="mb-4">Claro, me fui por eso, yo paso de que luego piensen que era yo el que ponía la estrategia jajaja. Prefiero diseñartela 1 a 1, te doy todo y tu ya te lo montas. Así es como debe ser. Y luego te acompaño 3 meses para asegurarme que lo haces bien, bueno, tú o tu equipo.</p>
               <p className="mb-4">Y hazme caso que no te lleva apenas tiempo. Lo sabes por experiencia, lo que lleva tiempo es pensar que hacer, escribirlo todo, plantear los anuncios… si lo tienes todo, montarlo es rápido.</p>
 
-              <br /><br />
-              <h2 className="text-2xl font-bold mt-8 mb-4">Algunas de las estrategias que aplicamos</h2>
+              <br /><br /><br />
               <p className="mb-4">¿Que qué hacemos diferente? Ostias pues mira estas son algunas de las cosas que se salen de lo normal y que solemos aplicar y funcionan de puta madre no, lo siguiente…</p>
               <ul className="list-disc pl-6 mb-6 space-y-3">
                 <li>La estrategia que aprendimos de los mejores marketers muertos para vender cualquier producto aunque ahora mismo no te lo compre ni tu madre.</li>
@@ -160,12 +161,12 @@ export default function TrabajaConNosotrosOld() {
               </ul>
 
               <br />
-              <p className="mb-4">¿Que si hay más? Cabrón, te parece poco? Pero sí, <strong>TODAVÍA HAY MÁS.</strong></p>
+              <p className="mb-4">¿Que si hay más? Cabrón, te parece poco? Pero sí, <strong className="text-[#0067FD]">TODAVÍA HAY MÁS.</strong></p>
               <p className="mb-4">Cómo te conté el otro día, el 10% de lo que nos pagas, lo donamos a causas benéficas en las que creemos y con las que queremos colaborar.</p>
               <p className="mb-4">Cada vez que nos pagas, donamos a la causa que hayas elegido, y si no eliges ninguna, a la que nosotros queramos, y te mandamos un comprobante de haberlo hecho.</p>
               <p className="mb-8">Así aportamos nuestro grano de arena tío, que para algo montamos un negocio.</p>
 
-              <br /><br />
+              <br /><br /><br />
               <h2 className="text-2xl font-bold mt-8 mb-6">¿Tienes más dudas o te puedo vender ya?</h2>
               <p className="mb-6">Bueno venga, te las respondo…</p>
 
@@ -190,7 +191,7 @@ export default function TrabajaConNosotrosOld() {
 
               <h3 className="font-bold text-xl mt-8 mb-2">¿Qué es eso de que donas el 10% de lo que te pague?</h3>
               <p className="mb-4">Exacto, hay proyectos en los que creemos y los que queremos apoyar. Por ello, en el formulario de abajo, vas a poder seleccionar entre las causas que apoyamos para que la parte correspondiente a tus pagos vaya ahí.</p>
-              <p className="mb-4"><strong>Cada vez que recibamos un pago por tu parte, te enviaremos un comprobante de la donación correspondiente.</strong></p>
+              <p className="mb-4"><strong className="text-[#0067FD]">Cada vez que recibamos un pago por tu parte, te enviaremos un comprobante de la donación correspondiente.</strong></p>
               <p className="mb-8">Actualmente colaboramos con dos causas principales: investigación contra el cáncer y protectoras de animales.</p>
 
               <h3 className="font-bold text-xl mt-8 mb-2">¿Qué precio tiene? ¿Se puede pagar a plazos? ¿Hay garantías?</h3>
@@ -298,11 +299,11 @@ export default function TrabajaConNosotrosOld() {
               <div className="mt-10 pt-8 border-t border-gray-200">
                 <p className="mb-4"><strong>PD:</strong> ¿Y si es verdad que puedes llevar a cabo una estrategia diferente y eso realmente marque la diferencia? ¿Y si es verdad que no hay nada más rentable para una tienda online? ¿Dejarás pasar seis meses? ¿Un año? ¿Vas a dejar que tus competidores sigan creciendo y viviendo de puta madre mientras tú esperas otra gran oportunidad, otra promesa de éxito rápido? Así es como crecen las grandes marcas.</p>
                 <p className="mb-4">Este servicio tiene TODO lo que necesitas para escalar sin dedicarle más tiempo del que ya te lleva (de hecho te lleva menos porque te ahorras el pensar), sea cual sea tu sector. Todo lo haremos para ti, personalizado. En definitiva, ¿y si saber hacer (BIEN) el marketing, cambia tu tienda?</p>
-                <br /><br />
+                <br /><br /><br />
                 <p className="mb-2">Pasa un buen día.</p>
                 <p className="mb-8">Raúl.</p>
 
-                <br /><br />
+                <br /><br /><br />
                 <div className="flex items-center justify-center gap-4 mt-4">
                   <img
                     src="https://media.base44.com/images/public/697678eac9cf34e2aefb7d57/82d53b854_logonegro.png"
