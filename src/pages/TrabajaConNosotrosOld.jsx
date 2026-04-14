@@ -190,7 +190,7 @@ export default function TrabajaConNosotrosOld() {
 
               <p className="mb-4"><strong className="text-[#0067FD]">¿Que qué hacemos diferente?</strong> Ostias pues mira estas son algunas de las cosas que se salen de lo normal y que solemos aplicar y funcionan de puta madre no, lo siguiente…</p>
               <br />
-              <ul className="list-disc pl-6 mb-6 space-y-3">
+              <ul className="list-disc pl-6 mb-6 space-y-5">
                 <li>La estrategia que aprendimos de los mejores marketers muertos para <strong>vender cualquier producto</strong> aunque ahora mismo no te lo compre ni tu madre.</li>
                 <li><strong>Lo primero que debemos evitar a la hora de mandar un mail</strong>. </li>
                 <li>Cómo automatizar con IH (Inteligencia Humana) tus mensajes <strong>para que resuenen y vendan más</strong>.</li>
@@ -221,7 +221,7 @@ export default function TrabajaConNosotrosOld() {
 
               <br /><br /><br /><br />
 
-              <p className="mb-4"><strong className="text-[#0067FD]">¿Tienes más dudas o te puedo vender ya?</strong></p>
+              <h4 className="font-bold text-lg mt-4 mb-2 text-[#0067FD]">¿Tienes más dudas o te puedo vender ya?</h4>
               <br />
               <p className="mb-4">Bueno venga, te las respondo…</p>
               <br />
