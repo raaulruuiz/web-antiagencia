@@ -267,6 +267,19 @@ export default function Dashboard() {
         </section>
         );
       })()}
+
+      {/* Umami Analytics */}
+      <section className="mt-8">
+        <h2 className="text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-3">
+          Analytics · Umami
+        </h2>
+        <iframe
+          src="https://umami-production-e9a9.up.railway.app/share/88a492b8d9a2c72c/AntiAgencia"
+          className="w-full rounded-xl border border-zinc-800"
+          style={{ height: '800px', colorScheme: 'dark' }}
+          title="Umami Analytics"
+        />
+      </section>
     </div>
   );
 }
