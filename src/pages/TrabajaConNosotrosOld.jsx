@@ -147,17 +147,17 @@ export default function TrabajaConNosotrosOld() {
 
               <p className="mb-4"><strong className="text-[#0067FD]">Si, mira, te resumo,</strong> es como si fuesen 3 fases, la primera es la investigación. No podemos hacer cosas distintas si no entendemos bien tu tienda, tu cliente, tu competencia y tu mercado. La segunda es la chica, más de 100 páginas de dossieres, ahí te damos</p>
               <br />
-              <p className="mb-4">- Un análisis de lo que ya tienes en la web, los emails y los anuncios versus lo que hace la competencia y cómo mejorarlo para diferenciarte de ellos y vender más. </p>
+              <p className="mb-4">- Un <strong>análisis de lo que ya tienes</strong> en la web, los emails y los anuncios versus lo que hace la competencia <strong>y cómo mejorarlo para diferenciarte</strong> de ellos y vender más. </p>
               <br />
-              <p className="mb-4">- Ah, y también nos metemos en mirar tus márgenes, ya sabes que una estrategia que no se adapte a tus márgenes no vale de nada… al final de mes quieres beneficio, no facturar mucho pero perder pasta.</p>
+              <p className="mb-4">- Ah, y también nos metemos en mirar tus márgenes, ya sabes que <strong>una estrategia que no se adapte a tus márgenes no vale de nada</strong>… al final de mes quieres beneficio, no facturar mucho pero perder pasta.</p>
               <br />
-              <p className="mb-4">- Toda la estrategia y la propuesta de cambios, con los textos escritos para que copies y pegues, las secciones que tienes que crear o cambiar en la web y como hacerlo, los mails escritos, todos, y creeme que no son pocos… para que solo copies y programes las campañas. Obviamente los flujos y los formularios también. </p>
+              <p className="mb-4">- Toda la <strong>estrategia y la propuesta de cambios</strong>, con los textos escritos para que copies y pegues, las secciones que tienes que crear o cambiar en la web y como hacerlo, los mails escritos, todos, y creeme que no son pocos… <strong>para que solo copies y programes las campañas</strong>. Obviamente los flujos y los formularios también. </p>
               <br />
-              <p className="mb-4">- Y los anuncios. Te damos todos los cambios que tienes que hacer de estructura en la cuenta, que campañas montar, que configuración ponerle, que anuncios meter en cada una, con ejemplos para que no te cueste nada hacerlos, reglas de cuando parar, cuando escalar… aunque esto como luego vamos a estar encima, te iremos avisando.</p>
+              <p className="mb-4">- Y los anuncios. <strong>Te damos todos los cambios que tienes que hacer de estructura en la cuenta, que campañas montar, que configuración ponerle, que anuncios meter en cada una, con ejemplos</strong> para que no te cueste nada hacerlos, reglas de cuando parar, cuando escalar… aunque esto como luego vamos a estar encima, te iremos avisando.</p>
               <br />
-              <p className="mb-4">- Y por supuesto, un plan trimestral. Te preparamos por avanzado los próximos tres meses, con las distintas promos, que días te conviene gastar más en anuncios, ejemplos de promociones que funcionan, y sin hacer descuentos, que así ganas mas.</p>
+              <p className="mb-4">- Y por supuesto, un plan trimestral. <strong>Te preparamos por avanzado los próximos tres meses, con las distintas promos, que días te conviene gastar más en anuncios</strong>, ejemplos de promociones que funcionan, y sin hacer descuentos, que así ganas mas.</p>
               <br />
-              <p className="mb-4">- Claro, claro, los plazos también. No tiene sentido que te diga y te de todo lo que tienes que hacer si no te digo para cuando lo tienes que tener, que si no luego te pilla el toro. Y ya te digo, vamos a estar muy encima para que cumplas jajaja.</p>
+              <p className="mb-4">- Claro, claro, <strong>los plazos también</strong>. No tiene sentido que te diga y te de todo lo que tienes que hacer si no te digo para cuando lo tienes que tener, <strong>que si no luego te pilla el toro</strong>. Y ya te digo, vamos a estar muy encima para que cumplas jajaja.</p>
 
               <br /><br /><br />
 
@@ -181,7 +181,6 @@ export default function TrabajaConNosotrosOld() {
 
               <p className="mb-4">Claro, me fui por eso, yo paso de que luego piensen que era yo el que ponía la estrategia jajaja. Prefiero diseñartela 1 a 1, te doy todo y tu ya te lo montas. Así es como debe ser. Y luego te acompaño 3 meses para asegurarme que lo haces bien, bueno, tú o tu equipo.</p>
 
-              <br /><br />
               <br />
 
               <p className="mb-4">Y hazme caso que no te lleva apenas tiempo. Lo sabes por experiencia, lo que lleva tiempo es pensar que hacer, escribirlo todo, plantear los anuncios… si lo tienes todo, montarlo es rápido.</p>
