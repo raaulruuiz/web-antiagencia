@@ -121,7 +121,7 @@ export default function Dashboard() {
       const results = {};
       await Promise.all(AB_TESTS.map(async test => {
         try {
-          const params = new URLSearchParams({ test_id: test.id, url: test.url });
+          const params = new URLSearchParams({ test_id: test.id, url: test.url, from: fmt(from), to: fmt(to) });
           const r = await fetch(`${BACKEND}/admin/ab-tests?${params}`, {
             headers: { 'x-api-key': API_KEY },
           });
