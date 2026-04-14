@@ -16,6 +16,7 @@ import HomeABTest from './pages/HomeABTest';
 import AudioSecreto from './pages/AudioSecreto';
 import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotros from './pages/TrabajaConNosotros'
+import TrabajaConNosotrosOld from './pages/TrabajaConNosotrosOld'
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import PixelLayout from './Layout';
 import LoomLogin from './pages/LoomLogin';
@@ -93,6 +94,7 @@ const AuthenticatedApp = () => {
       <Route path="/UltimoPaso" element={<LayoutWrapper currentPageName="UltimoPaso"><UltimoPaso /></LayoutWrapper>} />
       <Route path="/YaPorFin" element={<LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper>} />
       <Route path="/TrabajaConNosotros" element={<LayoutWrapper currentPageName="TrabajaConNosotros"><TrabajaConNosotros /></LayoutWrapper>} />
+      <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
       <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
