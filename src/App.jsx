@@ -18,6 +18,7 @@ import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotros from './pages/TrabajaConNosotros'
 import TrabajaConNosotrosOld from './pages/TrabajaConNosotrosOld'
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
+import TikTokConnect from './pages/TikTokConnect';
 import PixelLayout from './Layout';
 import LoomLogin from './pages/LoomLogin';
 import Loom from './pages/Loom';
@@ -96,6 +97,7 @@ const AuthenticatedApp = () => {
       <Route path="/TrabajaConNosotros" element={<LayoutWrapper currentPageName="TrabajaConNosotros"><TrabajaConNosotros /></LayoutWrapper>} />
       <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
       <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+      <Route path="/tiktok-connect" element={<TikTokConnect />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
     <CookieBanner />
