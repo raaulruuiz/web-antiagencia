@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import META from './automatizaciones-meta.json';
+import { useState, useEffect } from 'react';
+import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
 
 const TIPO_LABEL = { cron: 'Cron', webhook: 'Webhook', bot: 'Bot' };
 const TIPO_COLOR = {
@@ -9,8 +9,15 @@ const TIPO_COLOR = {
 };
 
 export default function Automatizaciones() {
-  const items = META;
+  const [items, setItems] = useState([]);
   const [expanded, setExpanded] = useState(null);
+
+  useEffect(() => {
+    fetch(`${BACKEND}/admin/automatizaciones`, { headers: { 'x-api-key': API_KEY } })
+      .then(r => r.json())
+      .then(setItems)
+      .catch(console.error);
+  }, []);
 
   const toggle = (id) => setExpanded(prev => prev === id ? null : id);
 
