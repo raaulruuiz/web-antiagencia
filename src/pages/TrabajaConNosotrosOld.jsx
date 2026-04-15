@@ -89,7 +89,7 @@ export default function TrabajaConNosotrosOld() {
 
               <p className="mb-4">No, no he dejado de dar servicio. Y tampoco lo hago todo con IA, eso es de pardillos que no saben de marketing jajaja.</p>
               <br />
-              <p className="mb-4">Lo que he hecho ha sido simplificar el negocio. Nos hemos quedado solo Pili y yo, tu sabes… el equipo es un coste bien alto.</p>
+              <p className="mb-4">Lo que he hecho ha sido simplificar el negocio. Nos hemos quedado solo Pili y yo, tú sabes… el equipo es un coste bien alto.</p>
 
               <br /><br /><br />
 
@@ -99,7 +99,7 @@ export default function TrabajaConNosotrosOld() {
 
               <br /><br /><br />
 
-              <p className="mb-4">Jajaja, si si, ahora ves en todas las tiendas textos que están escritos por chatgpt y se nota a kilómetro.</p>
+              <p className="mb-4">Jajaja, sí, sí, ahora ves en todas las tiendas textos que están escritos por chatgpt y se nota a kilómetro.</p>
 
               <br /><br /><br /><br />
 
@@ -110,7 +110,7 @@ export default function TrabajaConNosotrosOld() {
               <br /><br />
               <br />
 
-              <p className="mb-4">Si, te cuento. Lo que hacemos es tratar de traernos lo&nbsp; mejor de los dos mundos, es decir, que no tengas que pagar el sobrecoste del personal de la agencia, pero tampoco te damos estrategias genéricas como las consultoras.</p>
+              <p className="mb-4">Sí, te cuento. Lo que hacemos es tratar de traernos lo&nbsp; mejor de los dos mundos, es decir, que no tengas que pagar el sobrecoste del personal de la agencia, pero tampoco te damos estrategias genéricas como las consultoras.</p>
               <br />
               <p className="mb-4">Lo que te damos es toda la estrategia ya hecha. Y cuando te digo hecha es hecha… solo tienes que copiar y pegar.</p>
 
@@ -128,7 +128,7 @@ export default function TrabajaConNosotrosOld() {
 
               <br /><br /><br />
 
-              <p className="mb-4">Jajaja si si, estamos algo locos, pero creo que ahora con todo el ruido que hay, lo que destaca es ser natural y diferente al resto. Si quieres un más de lo mismo te vas a cualquier consultoría que te garantice 30k en 3 meses jajajaja.</p>
+              <p className="mb-4">Jajaja sí, sí, estamos algo locos, pero creo que ahora con todo el ruido que hay, lo que destaca es ser natural y diferente al resto. Si quieres un más de lo mismo te vas a cualquier consultoría que te garantice 30k en 3 meses jajajaja.</p>
 
               <br /><br /><br />
 
@@ -145,7 +145,7 @@ export default function TrabajaConNosotrosOld() {
 
               <br /><br /><br />
 
-              <p className="mb-4"><strong className="text-[#0067FD]">Si, mira, te resumo,</strong> es como si fuesen 3 fases, la primera es la investigación. No podemos hacer cosas distintas si no entendemos bien tu tienda, tu cliente, tu competencia y tu mercado. La segunda es la chica, más de 100 páginas de dossieres, ahí te damos</p>
+              <p className="mb-4"><strong className="text-[#0067FD]">Sí, mira, te resumo,</strong> es como si fuesen 3 fases, la primera es la investigación. No podemos hacer cosas distintas si no entendemos bien tu tienda, tu cliente, tu competencia y tu mercado. La segunda es la chica, más de 100 páginas de dossieres, ahí te damos</p>
               <br />
               <p className="mb-4">- Un <strong>análisis de lo que ya tienes</strong> en la web, los emails y los anuncios versus lo que hace la competencia <strong>y cómo mejorarlo para diferenciarte</strong> de ellos y vender más. </p>
               <br />
@@ -155,13 +155,13 @@ export default function TrabajaConNosotrosOld() {
               <br />
               <p className="mb-4">- Y los anuncios. <strong>Te damos todos los cambios que tienes que hacer de estructura en la cuenta, que campañas montar, que configuración ponerle, que anuncios meter en cada una, con ejemplos</strong> para que no te cueste nada hacerlos, reglas de cuando parar, cuando escalar… aunque esto como luego vamos a estar encima, te iremos avisando.</p>
               <br />
-              <p className="mb-4">- Y por supuesto, un plan trimestral. <strong>Te preparamos por avanzado los próximos tres meses, con las distintas promos, que días te conviene gastar más en anuncios</strong>, ejemplos de promociones que funcionan, y sin hacer descuentos, que así ganas mas.</p>
+              <p className="mb-4">- Y por supuesto, un plan trimestral. <strong>Te preparamos por avanzado los próximos tres meses, con las distintas promos, que días te conviene gastar más en anuncios</strong>, ejemplos de promociones que funcionan, y sin hacer descuentos, que así ganas más.</p>
               <br />
               <p className="mb-4">- Claro, claro, <strong>los plazos también</strong>. No tiene sentido que te diga y te de todo lo que tienes que hacer si no te digo para cuando lo tienes que tener, <strong>que si no luego te pilla el toro</strong>. Y ya te digo, vamos a estar muy encima para que cumplas jajaja.</p>
 
               <br /><br /><br />
 
-              <p className="mb-4">Si si, esto solo es la segunda fase. La tercera sería revisarlo todo. Esto te diría que es lo más importante… Estar en el día a día. Cada semana te pasaremos el informe analizando los resultados y por supuesto si algo falla, lo corregimos, faltaría más. De hecho en los dossieres ya te metemos plan A y plan B por si algo no funciona, pero igualmente estamos en el día a día controlando.</p>
+              <p className="mb-4">Sí, sí, esto solo es la segunda fase. La tercera sería revisarlo todo. Esto te diría que es lo más importante… Estar en el día a día. Cada semana te pasaremos el informe analizando los resultados y por supuesto si algo falla, lo corregimos, faltaría más. De hecho en los dossieres ya te metemos plan A y plan B por si algo no funciona, pero igualmente estamos en el día a día controlando.</p>
 
               <br /><br /><br />
 
@@ -239,13 +239,13 @@ export default function TrabajaConNosotrosOld() {
 
               <h4 className="font-bold text-lg mt-4 mb-2">¿Cómo es el proceso de trabajo?</h4>
               <p className="mb-4">Se puede separar en 3 "fases". La primera es investigar a fondo, TODO, para que no seas un "más de lo mismo" (2 semanas). La segunda es implementar. </p>
-              <p className="mb-4">Te damos los dossieres para que copies y pegues y te controlamos para que lo hagas. Y la tercera es el análisis de resultados. Semanalmente te analizamos todos los resultados y te compartimos un informes con los próximos pasos a seguir. </p>
+              <p className="mb-4">Te damos los dossieres para que copies y pegues y te controlamos para que lo hagas. Y la tercera es el análisis de resultados. Semanalmente te analizamos todos los resultados y te compartimos un informe con los próximos pasos a seguir. </p>
               <p className="mb-4">Esto es así durante 3 meses. Luego, puedes renovar.</p>
               <p className="mb-4">Ahora, que nos hagas caso o no, depende de ti… pero cobrar, cobramos igual.</p>
               <br />
 
               <h4 className="font-bold text-lg mt-4 mb-2">¿Si ya tengo equipo u otra agencia, me sirve?</h4>
-              <p className="mb-4">Si, si tienes alguien que ejecute por ti, de puta madre, eso que te ahorras.</p>
+              <p className="mb-4">Sí, si tienes alguien que ejecute por ti, de puta madre, eso que te ahorras.</p>
               <br />
 
               <h4 className="font-bold text-lg mt-4 mb-2">¿El servicio es para mi?</h4>
@@ -254,7 +254,7 @@ export default function TrabajaConNosotrosOld() {
               <br />
 
               <h4 className="font-bold text-lg mt-4 mb-2">¿Cuándo empezaremos?</h4>
-              <p className="mb-4">Cuando pidas presupuesto aquí abajo, le echaré un ojo a tu tienda y valoraré si me interesa. Si no me interesa el proyecto, te lo comunicaré por mail, y si me interesa, te llamará para hablar y pedirte más detalles. Y con eso te mandaré un presupuesto.</p>
+              <p className="mb-4">Cuando pidas presupuesto aquí abajo, le echaré un ojo a tu tienda y valoraré si me interesa. Si no me interesa el proyecto, te lo comunicaré por mail, y si me interesa, te llamaré para hablar y pedirte más detalles. Y con eso te mandaré un presupuesto.</p>
               <p className="mb-4">Si no rellenas todos los datos que te pido, no te contactaré y si alguno es inventado, tampoco.</p>
               <p className="mb-4">Una vez aceptes el presupuesto, hayamos firmado el contrato y tengamos el justificante de pago, empezaremos a trabajar y cuadraremos la primera reunión.</p>
               <br />
