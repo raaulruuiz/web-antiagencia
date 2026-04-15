@@ -272,7 +272,7 @@
   },
   {
     "id": "telegram-movimientos",
-    "nombre": "Bot Telegram · Movimientos",
+    "nombre": "Bot Telegram",
     "descripcion": "Bot de Telegram que interpreta mensajes con IA para crear facturas, contratos, presupuestos y movimientos financieros en Notion y Google Drive. También convierte libros epub a azw3 con Calibre y los envía al Kindle.",
     "tipo": "bot",
     "schedule": "Tiempo real",
@@ -300,7 +300,7 @@
   },
   {
     "id": "discord-facturas",
-    "nombre": "Bot Discord · Gestión",
+    "nombre": "Bot Discord",
     "descripcion": "Bot de Discord con comandos para generar facturas, contratos y presupuestos, gestionar altas y bajas de clientes y hacer seguimiento del equipo.",
     "tipo": "bot",
     "schedule": "Tiempo real",
