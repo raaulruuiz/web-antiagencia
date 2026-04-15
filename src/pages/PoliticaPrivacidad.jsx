@@ -88,8 +88,8 @@ export default function PoliticaPrivacidad() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">8. Aplicación de TikTok — Antiagencia</h2>
-            <p>Antiagencia utiliza la API de TikTok para publicar contenido en nombre de sus clientes en la plataforma TikTok. A continuación se detalla el uso que hacemos de los datos obtenidos a través de dicha integración:</p>
+            <h2 className="text-lg font-semibold text-white mb-3">8. Aplicación de TikTok — Automatizaciones (Antiagencia)</h2>
+            <p>Antiagencia opera la aplicación <strong className="text-white">Automatizaciones</strong>, registrada en TikTok for Developers, que utiliza la API de TikTok para publicar contenido en nombre de sus clientes en la plataforma TikTok. A continuación se detalla el uso que hacemos de los datos obtenidos a través de dicha integración:</p>
             <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
               <li><strong className="text-white">Datos a los que accedemos:</strong> Información básica de la cuenta de TikTok del cliente (nombre de usuario, ID de cuenta) y contenido de vídeo proporcionado por el propio cliente para su publicación.</li>
               <li><strong className="text-white">Finalidad:</strong> Publicación y programación de contenido de vídeo en TikTok exclusivamente en nombre y con autorización expresa del cliente titular de la cuenta.</li>

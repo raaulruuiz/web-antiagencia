@@ -84,8 +84,8 @@ export default function AvisoLegal() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">10. Uso de la API de TikTok</h2>
-            <p>Antiagencia utiliza la API de TikTok para prestar servicios de gestión y publicación de contenido en dicha plataforma en nombre de sus clientes. El uso de esta integración está sujeto a las siguientes condiciones:</p>
+            <h2 className="text-lg font-semibold text-white mb-3">10. Aplicación Automatizaciones — Uso de la API de TikTok</h2>
+            <p>Antiagencia opera la aplicación <strong className="text-white">Automatizaciones</strong>, registrada en TikTok for Developers, que utiliza la API de TikTok para prestar servicios de gestión y publicación de contenido en dicha plataforma en nombre de sus clientes. El uso de esta integración está sujeto a las siguientes condiciones:</p>
             <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
               <li><strong className="text-white">Autorización expresa:</strong> La integración con TikTok se realiza únicamente bajo autorización expresa del cliente, quien debe conceder acceso a su cuenta de forma voluntaria.</li>
               <li><strong className="text-white">Uso permitido:</strong> El acceso a la API de TikTok se utiliza exclusivamente para publicar y programar contenido de vídeo proporcionado por el cliente. No se utilizará para ningún otro fin no autorizado.</li>
