@@ -12,10 +12,20 @@ export default function Automatizaciones() {
   const [items, setItems] = useState([]);
   const [expanded, setExpanded] = useState(null);
 
+  const TIPO_ORDER = { cron: 0, webhook: 1, bot: 2, workflow: 3 };
+
   useEffect(() => {
     fetch(`${BACKEND}/admin/automatizaciones`, { headers: { 'x-api-key': API_KEY } })
       .then(r => r.json())
-      .then(setItems)
+      .then(data => {
+        const sorted = [...data].sort((a, b) => {
+          const tipoA = TIPO_ORDER[a.tipo?.toLowerCase()] ?? 99;
+          const tipoB = TIPO_ORDER[b.tipo?.toLowerCase()] ?? 99;
+          if (tipoA !== tipoB) return tipoA - tipoB;
+          return a.nombre.localeCompare(b.nombre, 'es');
+        });
+        setItems(sorted);
+      })
       .catch(console.error);
   }, []);
 
