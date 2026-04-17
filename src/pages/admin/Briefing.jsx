@@ -167,70 +167,80 @@ function AgendaSection({ eventos }) {
 
 // ─── Sección Emails ───────────────────────────────────────────────────────────
 
-function EmailsSection({ emails, onOpen, onMarkRead }) {
-  const [visible, setVisible] = useState(10);
-  if (!emails?.length) {
-    return <div className="text-zinc-500 text-sm py-6 text-center">Sin emails sin leer 🎉</div>;
-  }
-  const mostrados = emails.slice(0, visible);
-  const hayMas = visible < emails.length;
+function EmailCard({ email, onOpen, onMarkRead }) {
   return (
-    <div>
-    <div className="space-y-2">
-      {mostrados.map((email) => (
-        <div
-          key={email.id}
-          className={`rounded-lg border transition-colors ${
-            email.leido
-              ? 'bg-zinc-900 border-zinc-800'
-              : 'bg-zinc-800/80 border-zinc-700'
-          }`}
-        >
-          <div
-            className="px-4 py-3 cursor-pointer hover:bg-zinc-800/50 transition-colors rounded-lg"
-            onClick={() => onOpen(email)}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  {!email.leido && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0 mt-0.5" />
-                  )}
-                  <p className="text-xs text-zinc-400 truncate">{email.de?.split('<')[0].trim()}</p>
-                </div>
-                <p className={`text-sm leading-snug truncate ${email.leido ? 'text-zinc-400' : 'text-white font-medium'}`}>
-                  {email.asunto}
-                </p>
-                <p className="text-xs text-zinc-500 mt-0.5 truncate">{email.snippet}</p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-zinc-600">{fmtFechaCorta(email.fecha)}</span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onMarkRead(email.id, email.cuenta); }}
-                  className={`text-xs px-2 py-0.5 rounded transition-colors ${
-                    email.leido
-                      ? 'text-zinc-600 bg-zinc-800 cursor-default'
-                      : 'text-zinc-400 hover:text-white bg-zinc-700 hover:bg-zinc-600'
-                  }`}
-                  disabled={email.leido}
-                >
-                  {email.leido ? '✓' : 'Leído'}
-                </button>
-              </div>
+    <div className="bg-zinc-800/80 border border-zinc-700 rounded-lg">
+      <div className="px-4 py-3 cursor-pointer hover:bg-zinc-800/50 transition-colors rounded-lg" onClick={() => onOpen(email)}>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-zinc-400 truncate">{email.de?.split('<')[0].trim()}</p>
             </div>
+            <p className="text-sm text-white font-medium leading-snug truncate">{email.asunto}</p>
+            <p className="text-xs text-zinc-500 mt-0.5 truncate">{email.snippet}</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-xs text-zinc-600">{fmtFechaCorta(email.fecha)}</span>
+            <button
+              onClick={(e) => { e.stopPropagation(); onMarkRead(email.id, email.cuenta); }}
+              className="text-xs px-2 py-0.5 rounded bg-zinc-700 hover:bg-zinc-600 text-zinc-400 hover:text-white transition-colors"
+            >
+              Leído
+            </button>
           </div>
         </div>
-      ))}
+      </div>
     </div>
-    </div>
-    {hayMas && (
-      <button
-        onClick={() => setVisible(v => v + 10)}
-        className="mt-3 w-full py-2.5 text-sm text-zinc-400 hover:text-white bg-zinc-800/60 hover:bg-zinc-800 rounded-lg transition-colors"
-      >
-        Ver más ({emails.length - visible} restantes)
-      </button>
-    )}
+  );
+}
+
+function EmailsSection({ emailsByAccount, onOpen, onMarkRead }) {
+  const [cuentaIdx, setCuentaIdx] = useState(0);
+  const [visible, setVisible] = useState(10);
+
+  const cuentas = (emailsByAccount || []).filter(a => a.emails.length > 0);
+
+  useEffect(() => { setVisible(10); }, [cuentaIdx]);
+
+  if (!cuentas.length) {
+    return <div className="text-zinc-500 text-sm py-6 text-center">Sin emails sin leer 🎉</div>;
+  }
+
+  const cuenta = cuentas[cuentaIdx % cuentas.length];
+  const total = cuentas.reduce((s, a) => s + a.emails.length, 0);
+  const mostrados = cuenta.emails.slice(0, visible);
+  const hayMas = visible < cuenta.emails.length;
+
+  const prev = () => setCuentaIdx(i => (i - 1 + cuentas.length) % cuentas.length);
+  const next = () => setCuentaIdx(i => (i + 1) % cuentas.length);
+
+  return (
+    <div>
+      {/* Selector de cuenta */}
+      {cuentas.length > 1 && (
+        <div className="flex items-center justify-between mb-3 px-1">
+          <button onClick={prev} className="text-zinc-500 hover:text-white px-2 py-1 transition-colors">‹</button>
+          <div className="text-center">
+            <p className="text-xs text-zinc-400 truncate max-w-[180px]">{cuenta.cuenta}</p>
+            <p className="text-xs text-zinc-600">{cuentaIdx + 1} / {cuentas.length}</p>
+          </div>
+          <button onClick={next} className="text-zinc-500 hover:text-white px-2 py-1 transition-colors">›</button>
+        </div>
+      )}
+      {cuentas.length === 1 && (
+        <p className="text-xs text-zinc-500 mb-3 truncate">{cuenta.cuenta}</p>
+      )}
+      <div className="space-y-2">
+        {mostrados.map(email => (
+          <EmailCard key={email.id} email={email} onOpen={onOpen} onMarkRead={onMarkRead} />
+        ))}
+      </div>
+      {hayMas && (
+        <button onClick={() => setVisible(v => v + 10)} className="mt-3 w-full py-2.5 text-sm text-zinc-400 hover:text-white bg-zinc-800/60 hover:bg-zinc-800 rounded-lg transition-colors">
+          Ver más ({cuenta.emails.length - visible} restantes)
+        </button>
+      )}
     </div>
   );
 }
@@ -297,11 +307,11 @@ function NoticiasSection({ noticias }) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function Briefing() {
-  const [data, setData]           = useState(null);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState(null);
-  const [emailModal, setEmailModal] = useState(null);
-  const [emails, setEmails]       = useState([]);
+  const [data, setData]               = useState(null);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState(null);
+  const [emailModal, setEmailModal]   = useState(null);
+  const [emailsByAccount, setEmailsByAccount] = useState([]);
 
   const fetchBriefing = useCallback(async () => {
     setLoading(true);
@@ -313,7 +323,7 @@ export default function Briefing() {
       if (!res.ok) throw new Error(`Error ${res.status}`);
       const json = await res.json();
       setData(json);
-      setEmails(json.emails || []);
+      setEmailsByAccount(json.emailsByAccount || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -338,14 +348,16 @@ export default function Briefing() {
         });
         if (!res.ok) return;
         const json = await res.json();
-        setEmails(json.emails || []);
+        setEmailsByAccount(json.emailsByAccount || []);
       } catch {}
     }, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
   async function markRead(id, cuenta) {
-    setEmails(prev => prev.filter(e => e.id !== id));
+    setEmailsByAccount(prev =>
+      prev.map(a => ({ ...a, emails: a.emails.filter(e => e.id !== id) }))
+    );
     await fetch(`${BACKEND}/admin/briefing/email/read`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
@@ -363,13 +375,13 @@ export default function Briefing() {
         to: emailModal.de,
         subject: emailModal.asunto,
         body: replyBody,
+        cuenta: emailModal.cuenta,
       }),
     });
-    markRead(emailModal.id);
+    markRead(emailModal.id, emailModal.cuenta);
   }
 
-  const unreadEmails = emails.filter(e => !e.leido);
-  const unreadCount = unreadEmails.length;
+  const unreadCount = emailsByAccount.reduce((s, a) => s + a.emails.length, 0);
   const { eventos = [], markets = {}, noticias = [], fecha = '' } = data || {};
   const CALENDARIOS_REUNION = ['REUNIONES', 'REUNIONES VENTA'];
   const reunionesHoy = eventos.filter(e =>
@@ -500,7 +512,7 @@ export default function Briefing() {
               )}
             </div>
             <EmailsSection
-              emails={unreadEmails}
+              emailsByAccount={emailsByAccount}
               onOpen={setEmailModal}
               onMarkRead={markRead}
             />
