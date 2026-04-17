@@ -168,12 +168,16 @@ function AgendaSection({ eventos }) {
 // ─── Sección Emails ───────────────────────────────────────────────────────────
 
 function EmailsSection({ emails, onOpen, onMarkRead }) {
+  const [visible, setVisible] = useState(10);
   if (!emails?.length) {
-    return <div className="text-zinc-500 text-sm py-6 text-center">Sin emails</div>;
+    return <div className="text-zinc-500 text-sm py-6 text-center">Sin emails sin leer 🎉</div>;
   }
+  const mostrados = emails.slice(0, visible);
+  const hayMas = visible < emails.length;
   return (
+    <div>
     <div className="space-y-2">
-      {emails.map((email) => (
+      {mostrados.map((email) => (
         <div
           key={email.id}
           className={`rounded-lg border transition-colors ${
@@ -217,6 +221,16 @@ function EmailsSection({ emails, onOpen, onMarkRead }) {
           </div>
         </div>
       ))}
+    </div>
+    </div>
+    {hayMas && (
+      <button
+        onClick={() => setVisible(v => v + 10)}
+        className="mt-3 w-full py-2.5 text-sm text-zinc-400 hover:text-white bg-zinc-800/60 hover:bg-zinc-800 rounded-lg transition-colors"
+      >
+        Ver más ({emails.length - visible} restantes)
+      </button>
+    )}
     </div>
   );
 }
@@ -331,7 +345,7 @@ export default function Briefing() {
   }, []);
 
   async function markRead(id, cuenta) {
-    setEmails(prev => prev.map(e => e.id === id ? { ...e, leido: true } : e));
+    setEmails(prev => prev.filter(e => e.id !== id));
     await fetch(`${BACKEND}/admin/briefing/email/read`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
@@ -354,7 +368,8 @@ export default function Briefing() {
     markRead(emailModal.id);
   }
 
-  const unreadCount = emails.filter(e => !e.leido).length;
+  const unreadEmails = emails.filter(e => !e.leido);
+  const unreadCount = unreadEmails.length;
   const { eventos = [], markets = {}, noticias = [], fecha = '' } = data || {};
   const CALENDARIOS_REUNION = ['REUNIONES', 'REUNIONES VENTA', 'Reuniones', 'Reuniones Venta'];
   const reunionesHoy = eventos.filter(e => CALENDARIOS_REUNION.some(c => e.calendario?.toUpperCase().includes(c.toUpperCase())));
@@ -482,7 +497,7 @@ export default function Briefing() {
               )}
             </div>
             <EmailsSection
-              emails={emails}
+              emails={unreadEmails}
               onOpen={setEmailModal}
               onMarkRead={markRead}
             />
