@@ -125,28 +125,37 @@ function EmailModal({ email, onClose, onSend, onMarkRead }) {
 // ─── Sección Agenda ───────────────────────────────────────────────────────────
 
 function AgendaSection({ eventos }) {
-  if (!eventos?.length) {
+  const ahora = new Date();
+  const activos = eventos?.filter(e => !e.fin || new Date(e.fin) > ahora) || [];
+
+  if (!activos.length) {
     return (
-      <div className="text-zinc-500 text-sm py-6 text-center">Sin eventos hoy</div>
+      <div className="text-zinc-500 text-sm py-6 text-center">Sin más eventos hoy</div>
     );
   }
   return (
     <div className="space-y-3">
-      {eventos.map((e, i) => (
-        <div key={i} className="flex gap-3 items-start">
-          <div className="w-16 shrink-0 text-right">
-            <span className="text-xs text-zinc-400">{e.todoElDia ? 'Todo el día' : fmtHora(e.inicio)}</span>
+      {activos.map((e, i) => {
+        const empezado = e.inicio && new Date(e.inicio) <= ahora;
+        return (
+          <div key={i} className="flex gap-3 items-start">
+            <div className="w-16 shrink-0 text-right pt-1">
+              <span className="text-xs text-zinc-400">{e.todoElDia ? 'Todo el día' : fmtHora(e.inicio)}</span>
+              {empezado && !e.todoElDia && (
+                <span className="block text-xs text-green-500 mt-0.5">En curso</span>
+              )}
+            </div>
+            <div className={`flex-1 rounded-lg px-3 py-2.5 ${empezado && !e.todoElDia ? 'bg-blue-950/50 border border-blue-800/40' : 'bg-zinc-800/60'}`}>
+              <p className="text-sm text-white font-medium leading-snug">{e.titulo}</p>
+              {e.asistentes?.length > 0 && (
+                <p className="text-xs text-zinc-500 mt-1 truncate">
+                  {e.asistentes.slice(0, 3).join(' · ')}{e.asistentes.length > 3 ? ` +${e.asistentes.length - 3}` : ''}
+                </p>
+              )}
+            </div>
           </div>
-          <div className="flex-1 bg-zinc-800/60 rounded-lg px-3 py-2.5">
-            <p className="text-sm text-white font-medium leading-snug">{e.titulo}</p>
-            {e.asistentes?.length > 0 && (
-              <p className="text-xs text-zinc-500 mt-1 truncate">
-                {e.asistentes.slice(0, 3).join(' · ')}{e.asistentes.length > 3 ? ` +${e.asistentes.length - 3}` : ''}
-              </p>
-            )}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -207,42 +216,58 @@ function EmailsSection({ emails, onOpen, onMarkRead }) {
 // ─── Sección Noticias ─────────────────────────────────────────────────────────
 
 function NoticiasSection({ noticias }) {
+  const [visible, setVisible] = useState(10);
+
   if (!noticias?.length) {
     return <div className="text-zinc-500 text-sm py-6 text-center">Sin noticias</div>;
   }
+
+  const mostradas = noticias.slice(0, visible);
+  const hayMas = visible < noticias.length;
+
   return (
-    <div className="space-y-4">
-      {noticias.slice(0, 10).map((n, i) => (
-        <div key={i} className="border-b border-zinc-800 pb-4 last:border-0 last:pb-0">
-          <div className="flex items-start gap-3">
-            <span className="text-xs font-bold text-blue-500 mt-0.5 w-5 shrink-0">
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <div className="flex-1">
-              <p className="text-xs text-zinc-500 mb-1">{n.fuente}</p>
-              <a
-                href={n.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-white hover:text-blue-400 font-medium leading-snug transition-colors"
-              >
-                {n.titulo}
-              </a>
-              {n.resumen && (
-                <p className="text-xs text-zinc-400 mt-1 leading-relaxed line-clamp-2">{n.resumen}</p>
-              )}
-              <a
-                href={n.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-2 text-xs text-blue-500 hover:text-blue-400"
-              >
-                Ver noticia →
-              </a>
+    <div>
+      <div className="space-y-4">
+        {mostradas.map((n, i) => (
+          <div key={i} className="border-b border-zinc-800 pb-4 last:border-0 last:pb-0">
+            <div className="flex items-start gap-3">
+              <span className="text-xs font-bold text-blue-500 mt-0.5 w-5 shrink-0">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <div className="flex-1">
+                <p className="text-xs text-zinc-500 mb-1">{n.fuente}</p>
+                <a
+                  href={n.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-white hover:text-blue-400 font-medium leading-snug transition-colors"
+                >
+                  {n.titulo}
+                </a>
+                {n.resumen && (
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed line-clamp-2">{n.resumen}</p>
+                )}
+                <a
+                  href={n.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-2 text-xs text-blue-500 hover:text-blue-400"
+                >
+                  Ver noticia →
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      {hayMas && (
+        <button
+          onClick={() => setVisible(v => v + 10)}
+          className="mt-4 w-full py-2.5 text-sm text-zinc-400 hover:text-white bg-zinc-800/60 hover:bg-zinc-800 rounded-lg transition-colors"
+        >
+          Ver más ({noticias.length - visible} restantes)
+        </button>
+      )}
     </div>
   );
 }
@@ -275,6 +300,12 @@ export default function Briefing() {
   }, []);
 
   useEffect(() => { fetchBriefing(); }, [fetchBriefing]);
+
+  // Auto-refresh cada hora para quitar reuniones pasadas
+  useEffect(() => {
+    const interval = setInterval(fetchBriefing, 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchBriefing]);
 
   async function markRead(id) {
     setEmails(prev => prev.map(e => e.id === id ? { ...e, leido: true } : e));
