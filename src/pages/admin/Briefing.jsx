@@ -52,8 +52,8 @@ function EmailModal({ email, onClose, onSend, onMarkRead }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4">
+      <div className="bg-zinc-900 border border-zinc-700 rounded-t-2xl sm:rounded-xl w-full sm:max-w-2xl max-h-[92vh] flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between p-5 border-b border-zinc-800">
           <div className="flex-1 min-w-0 mr-4">
@@ -96,23 +96,23 @@ function EmailModal({ email, onClose, onSend, onMarkRead }) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 p-5 border-t border-zinc-800">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 p-4 sm:p-5 border-t border-zinc-800">
           <button
             onClick={handleSend}
             disabled={sending}
-            className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+            className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-3 rounded-lg transition-colors"
           >
             {sending ? 'Enviando…' : 'Aceptar y enviar'}
           </button>
           <button
             onClick={handleDelete}
-            className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+            className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium py-3 rounded-lg transition-colors"
           >
             Marcar leído
           </button>
           <button
             onClick={onClose}
-            className="px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-sm py-2.5 rounded-lg transition-colors"
+            className="sm:px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-sm py-3 rounded-lg transition-colors"
           >
             Cancelar
           </button>
@@ -337,24 +337,34 @@ export default function Briefing() {
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-start justify-between mb-10 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-white capitalize">{fecha}</h1>
-            <p className="text-zinc-500 text-sm mt-1">Briefing diario</p>
-          </div>
-          <div className="flex items-center gap-6 flex-wrap justify-end">
-            <div className="text-right">
-              <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">Reuniones</p>
-              <p className="text-2xl font-bold text-white">{eventos.length}</p>
+        <div className="mb-8">
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-3xl font-bold text-white capitalize leading-tight">{fecha}</h1>
+              <p className="text-zinc-500 text-xs sm:text-sm mt-1">Briefing diario</p>
             </div>
-            <div className="text-right">
+            <button
+              onClick={fetchBriefing}
+              className="text-zinc-500 hover:text-white text-base transition-colors shrink-0 mt-1"
+              title="Actualizar"
+            >
+              ↺
+            </button>
+          </div>
+          {/* Stats row - scrollable on mobile */}
+          <div className="flex items-center gap-4 overflow-x-auto pb-1 scrollbar-none">
+            <div className="shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-center min-w-[72px]">
+              <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">Reuniones</p>
+              <p className="text-xl font-bold text-white">{eventos.length}</p>
+            </div>
+            <div className="shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-center min-w-[72px]">
               <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">Emails</p>
-              <p className="text-2xl font-bold text-white">{unreadCount}</p>
+              <p className="text-xl font-bold text-white">{unreadCount}</p>
             </div>
             {markets.btc && (
-              <div className="text-right">
+              <div className="shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
                 <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">BTC</p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-sm font-bold text-white">
                   ${Number(markets.btc.precio).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </p>
                 {markets.btc.cambio24h && (
@@ -365,9 +375,9 @@ export default function Briefing() {
               </div>
             )}
             {markets.sp500 && (
-              <div className="text-right">
+              <div className="shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
                 <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">S&P 500</p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-sm font-bold text-white">
                   {Number(markets.sp500.precio).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </p>
                 {markets.sp500.cambio24h && (
@@ -378,20 +388,13 @@ export default function Briefing() {
               </div>
             )}
             {markets.gold && (
-              <div className="text-right">
+              <div className="shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
                 <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">Oro</p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-sm font-bold text-white">
                   ${Number(markets.gold.precio).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </p>
               </div>
             )}
-            <button
-              onClick={fetchBriefing}
-              className="text-zinc-500 hover:text-white text-xs transition-colors"
-              title="Actualizar"
-            >
-              ↺
-            </button>
           </div>
         </div>
 
