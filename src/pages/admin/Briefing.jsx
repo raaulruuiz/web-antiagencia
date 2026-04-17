@@ -146,7 +146,12 @@ function AgendaSection({ eventos }) {
               )}
             </div>
             <div className={`flex-1 rounded-lg px-3 py-2.5 ${empezado && !e.todoElDia ? 'bg-blue-950/50 border border-blue-800/40' : 'bg-zinc-800/60'}`}>
-              <p className="text-sm text-white font-medium leading-snug">{e.titulo}</p>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm text-white font-medium leading-snug">{e.titulo}</p>
+                {e.calendario && (
+                  <span className="text-xs text-zinc-500 shrink-0 mt-0.5">{e.calendario}</span>
+                )}
+              </div>
               {e.asistentes?.length > 0 && (
                 <p className="text-xs text-zinc-500 mt-1 truncate">
                   {e.asistentes.slice(0, 3).join(' · ')}{e.asistentes.length > 3 ? ` +${e.asistentes.length - 3}` : ''}
@@ -196,14 +201,17 @@ function EmailsSection({ emails, onOpen, onMarkRead }) {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-xs text-zinc-600">{fmtFechaCorta(email.fecha)}</span>
-                {!email.leido && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onMarkRead(email.id); }}
-                    className="text-xs text-zinc-500 hover:text-zinc-300 px-2 py-0.5 rounded bg-zinc-700 hover:bg-zinc-600 transition-colors"
-                  >
-                    Leído
-                  </button>
-                )}
+                <button
+                  onClick={(e) => { e.stopPropagation(); onMarkRead(email.id, email.cuenta); }}
+                  className={`text-xs px-2 py-0.5 rounded transition-colors ${
+                    email.leido
+                      ? 'text-zinc-600 bg-zinc-800 cursor-default'
+                      : 'text-zinc-400 hover:text-white bg-zinc-700 hover:bg-zinc-600'
+                  }`}
+                  disabled={email.leido}
+                >
+                  {email.leido ? '✓' : 'Leído'}
+                </button>
               </div>
             </div>
           </div>
@@ -322,12 +330,12 @@ export default function Briefing() {
     return () => clearInterval(interval);
   }, []);
 
-  async function markRead(id) {
+  async function markRead(id, cuenta) {
     setEmails(prev => prev.map(e => e.id === id ? { ...e, leido: true } : e));
     await fetch(`${BACKEND}/admin/briefing/email/read`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id, cuenta }),
     }).catch(() => {});
   }
 
@@ -348,6 +356,8 @@ export default function Briefing() {
 
   const unreadCount = emails.filter(e => !e.leido).length;
   const { eventos = [], markets = {}, noticias = [], fecha = '' } = data || {};
+  const CALENDARIOS_REUNION = ['REUNIONES', 'REUNIONES VENTA', 'Reuniones', 'Reuniones Venta'];
+  const reunionesHoy = eventos.filter(e => CALENDARIOS_REUNION.some(c => e.calendario?.toUpperCase().includes(c.toUpperCase())));
 
   if (loading) {
     return (
@@ -392,7 +402,7 @@ export default function Briefing() {
           <div className="flex items-center gap-3 sm:gap-5 overflow-x-auto shrink-0 max-w-[60%] sm:max-w-none pb-1">
             <div className="shrink-0 text-right">
               <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">Reuniones</p>
-              <p className="text-xl sm:text-2xl font-bold text-white">{eventos.length}</p>
+              <p className="text-xl sm:text-2xl font-bold text-white">{reunionesHoy.length}</p>
             </div>
             <div className="shrink-0 text-right">
               <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">Emails</p>
