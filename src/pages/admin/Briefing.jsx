@@ -301,11 +301,26 @@ export default function Briefing() {
 
   useEffect(() => { fetchBriefing(); }, [fetchBriefing]);
 
-  // Auto-refresh cada hora para quitar reuniones pasadas
+  // Auto-refresh cada hora (agenda + todo)
   useEffect(() => {
     const interval = setInterval(fetchBriefing, 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, [fetchBriefing]);
+
+  // Auto-refresh emails cada 5 minutos
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`${BACKEND}/admin/briefing`, {
+          headers: { 'x-api-key': API_KEY },
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        setEmails(json.emails || []);
+      } catch {}
+    }, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   async function markRead(id) {
     setEmails(prev => prev.map(e => e.id === id ? { ...e, leido: true } : e));
@@ -368,34 +383,25 @@ export default function Briefing() {
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between gap-3 mb-4">
-            <div className="min-w-0">
-              <h1 className="text-xl sm:text-3xl font-bold text-white capitalize leading-tight">{fecha}</h1>
-              <p className="text-zinc-500 text-xs sm:text-sm mt-1">Briefing diario</p>
-            </div>
-            <button
-              onClick={fetchBriefing}
-              className="text-zinc-500 hover:text-white text-base transition-colors shrink-0 mt-1"
-              title="Actualizar"
-            >
-              ↺
-            </button>
+        <div className="flex items-start justify-between gap-4 mb-10">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white capitalize leading-tight">{fecha}</h1>
+            <p className="text-zinc-500 text-xs sm:text-sm mt-1">Briefing diario</p>
           </div>
-          {/* Stats row - scrollable on mobile */}
-          <div className="flex items-center gap-4 overflow-x-auto pb-1 scrollbar-none">
-            <div className="shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-center min-w-[72px]">
+          {/* Stats — scrollable en móvil, inline en desktop */}
+          <div className="flex items-center gap-3 sm:gap-5 overflow-x-auto shrink-0 max-w-[60%] sm:max-w-none pb-1">
+            <div className="shrink-0 text-right">
               <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">Reuniones</p>
-              <p className="text-xl font-bold text-white">{eventos.length}</p>
+              <p className="text-xl sm:text-2xl font-bold text-white">{eventos.length}</p>
             </div>
-            <div className="shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-center min-w-[72px]">
+            <div className="shrink-0 text-right">
               <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">Emails</p>
-              <p className="text-xl font-bold text-white">{unreadCount}</p>
+              <p className="text-xl sm:text-2xl font-bold text-white">{unreadCount}</p>
             </div>
             {markets.btc && (
-              <div className="shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+              <div className="shrink-0 text-right">
                 <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">BTC</p>
-                <p className="text-sm font-bold text-white">
+                <p className="text-sm sm:text-lg font-bold text-white">
                   ${Number(markets.btc.precio).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </p>
                 {markets.btc.cambio24h && (
@@ -406,9 +412,9 @@ export default function Briefing() {
               </div>
             )}
             {markets.sp500 && (
-              <div className="shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+              <div className="shrink-0 text-right">
                 <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">S&P 500</p>
-                <p className="text-sm font-bold text-white">
+                <p className="text-sm sm:text-lg font-bold text-white">
                   {Number(markets.sp500.precio).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </p>
                 {markets.sp500.cambio24h && (
@@ -419,13 +425,25 @@ export default function Briefing() {
               </div>
             )}
             {markets.gold && (
-              <div className="shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+              <div className="shrink-0 text-right">
                 <p className="text-xs text-zinc-500 uppercase tracking-wide mb-0.5">Oro</p>
-                <p className="text-sm font-bold text-white">
+                <p className="text-sm sm:text-lg font-bold text-white">
                   ${Number(markets.gold.precio).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </p>
+                {markets.gold.cambio24h && (
+                  <p className={`text-xs ${cambioColor(markets.gold.cambio24h)}`}>
+                    {parseFloat(markets.gold.cambio24h) >= 0 ? '+' : ''}{markets.gold.cambio24h}%
+                  </p>
+                )}
               </div>
             )}
+            <button
+              onClick={fetchBriefing}
+              className="shrink-0 text-zinc-500 hover:text-white text-lg transition-colors"
+              title="Actualizar"
+            >
+              ↺
+            </button>
           </div>
         </div>
 
