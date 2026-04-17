@@ -371,8 +371,11 @@ export default function Briefing() {
   const unreadEmails = emails.filter(e => !e.leido);
   const unreadCount = unreadEmails.length;
   const { eventos = [], markets = {}, noticias = [], fecha = '' } = data || {};
-  const CALENDARIOS_REUNION = ['REUNIONES', 'REUNIONES VENTA', 'Reuniones', 'Reuniones Venta'];
-  const reunionesHoy = eventos.filter(e => CALENDARIOS_REUNION.some(c => e.calendario?.toUpperCase().includes(c.toUpperCase())));
+  const CALENDARIOS_REUNION = ['REUNIONES', 'REUNIONES VENTA'];
+  const reunionesHoy = eventos.filter(e =>
+    CALENDARIOS_REUNION.some(c => e.calendario?.toUpperCase().includes(c.toUpperCase())) ||
+    (e.asistentes?.length >= 2)
+  );
 
   if (loading) {
     return (
