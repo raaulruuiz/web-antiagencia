@@ -47,7 +47,7 @@ function EmailModal({ email, onClose, onSend, onMarkRead }) {
   }
 
   async function handleDelete() {
-    await onMarkRead(email.id);
+    await onMarkRead(email.id, email.cuenta);
     onClose();
   }
 
