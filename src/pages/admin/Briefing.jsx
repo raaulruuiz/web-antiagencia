@@ -272,7 +272,7 @@ function NoticiasSection({ noticias }) {
                   href={n.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-white hover:text-blue-400 font-medium leading-snug transition-colors"
+                  className="block text-sm text-white hover:text-blue-400 font-medium leading-snug transition-colors"
                 >
                   {n.titulo}
                 </a>
@@ -283,7 +283,7 @@ function NoticiasSection({ noticias }) {
                   href={n.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block mt-2 text-xs text-blue-500 hover:text-blue-400"
+                  className="block mt-2 text-xs text-blue-500 hover:text-blue-400"
                 >
                   Ver noticia →
                 </a>
