@@ -228,16 +228,6 @@
     ]
   },
   {
-    "id": "swap-trabaja-con-nosotros",
-    "nombre": "Swap TrabajaConNosotros",
-    "descripcion": "Intercambia los componentes de /TrabajaConNosotros y /trabajaconnosotros-old modificando App.jsx vía GitHub API. Se ejecuta el domingo 20 de abril de 2026 a las 23:59.",
-    "tipo": "cron",
-    "schedule": "Único · 20 abr 23:59",
-    "apps": [
-      "GitHub"
-    ]
-  },
-  {
     "id": "sync-automatizaciones-meta",
     "nombre": "Sync panel automatizaciones",
     "descripcion": "GitHub Actions workflow que se dispara en cada push a la rama main del repo automatizaciones y actualiza automáticamente el panel de admin en web-antiagencia con los cambios.",
