@@ -128,12 +128,13 @@
   {
     "id": "tracking-prospeccion-semanal",
     "nombre": "Tracking prospección semanal",
-    "descripcion": "Registra los contactos y seguimientos de prospección de la semana desde Instantly en Notion. Se ejecuta los domingos a las 20:00.",
+    "descripcion": "Registra los seguimientos de prospección de la semana desde MailerLite (campañas enviadas) en Notion. Los contactos fríos se completan manualmente vía bot de Discord. Se ejecuta los domingos a las 20:00.",
     "tipo": "cron",
     "schedule": "Domingos · 20:00",
     "apps": [
-      "Instantly",
-      "Notion"
+      "MailerLite",
+      "Notion",
+      "Discord"
     ]
   },
   {
@@ -256,18 +257,6 @@
       "Calendly",
       "Notion",
       "MailerLite"
-    ]
-  },
-  {
-    "id": "instantly-webhook",
-    "nombre": "Instantly → seguimiento",
-    "descripcion": "Cuando una campaña de Instantly finaliza, envía notificación por email y crea una tarea de seguimiento en Notion.",
-    "tipo": "webhook",
-    "schedule": "Webhook · POST /webhooks/instantly",
-    "apps": [
-      "Instantly",
-      "Gmail",
-      "Notion"
     ]
   },
   {
