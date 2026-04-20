@@ -885,13 +885,17 @@ function EntrenarView({ userId, userEmail, activeSession, setActiveSession, pend
 }
 
 function ActiveSession({ session, userId, onFinish }) {
-  const [sets,        setSets]        = useState([]);
-  const [timerOn,     setTimerOn]     = useState(false);
-  const [timerSec,    setTimerSec]    = useState(0);
-  const [timerTarget, setTimerTarget] = useState(null);
-  const [elapsed,     setElapsed]     = useState(0);
-  const [guidance,    setGuidance]    = useState({});
-  const timerRef   = useRef(null);
+  const plannedExercises = session.exercises ?? [];
+
+  const [sets,         setSets]         = useState([]);
+  const [elapsed,      setElapsed]      = useState(0);
+  const [guidance,     setGuidance]     = useState({});
+  const [activeCards,  setActiveCards]  = useState(() => plannedExercises.map((_, i) => i));
+  const [currentIdx,   setCurrentIdx]   = useState(0);
+  const [exitingIdx,   setExitingIdx]   = useState(null);
+  const [showTerminar, setShowTerminar] = useState(false);
+  const [dragStart,    setDragStart]    = useState(null);
+  const [dragOffset,   setDragOffset]   = useState(0);
   const elapsedRef = useRef(null);
 
   useEffect(() => {
@@ -927,15 +931,6 @@ function ActiveSession({ session, userId, onFinish }) {
   }, [session.exercises, session.id, userId]);
 
   useEffect(() => {
-    if (timerOn) {
-      timerRef.current = setInterval(() => setTimerSec(s => s + 1), 1000);
-    } else {
-      clearInterval(timerRef.current);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [timerOn]);
-
-  useEffect(() => {
     elapsedRef.current = setInterval(() => setElapsed(Math.floor((Date.now() - new Date(session.empezada_at)) / 1000)), 1000);
     return () => clearInterval(elapsedRef.current);
   }, [session.empezada_at]);
@@ -955,11 +950,6 @@ function ActiveSession({ session, userId, onFinish }) {
     };
     const { data: newSet } = await supabase.from('session_sets').insert(payload).select().single();
     if (newSet) setSets(prev => [...prev, newSet]);
-    // Start timer with suggested rest if available
-    const planEx = (session.exercises ?? []).find(e => e.id === routineExerciseId || e.nombre === exerciseNombre);
-    setTimerTarget(planEx?.descanso_segundos ?? null);
-    setTimerSec(0);
-    setTimerOn(true);
   };
 
   const delSet = async (id) => {
@@ -967,409 +957,382 @@ function ActiveSession({ session, userId, onFinish }) {
     setSets(prev => prev.filter(s => s.id !== id));
   };
 
+  const removeCard = (exerciseIdx) => {
+    setExitingIdx(exerciseIdx);
+    setTimeout(() => {
+      const next = activeCards.filter(i => i !== exerciseIdx);
+      setActiveCards(next);
+      setCurrentIdx(ci => Math.min(ci, Math.max(0, next.length - 1)));
+      setExitingIdx(null);
+      if (next.length === 0) setTimeout(onFinish, 500);
+    }, 260);
+  };
+
   const h = Math.floor(elapsed / 3600), m = Math.floor((elapsed % 3600) / 60), sec = elapsed % 60;
   const elapsedStr = elapsed >= 3600 ? `${h}h ${m}m` : `${m}:${sec.toString().padStart(2, '0')}`;
+  const completedCount = plannedExercises.length - activeCards.length;
 
-  const plannedExercises = session.exercises ?? [];
-  const freeExercises = [...new Set(
-    sets
-      .filter(s => !plannedExercises.find(e => e.nombre === s.exercise_nombre || e.nombre === s.variante_de))
-      .map(s => s.variante_de ?? s.exercise_nombre)
-  )];
+  const handlePointerDown = (e) => {
+    if (e.target.closest('input, button, select, textarea')) return;
+    setDragStart(e.clientX);
+    setDragOffset(0);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const handlePointerMove = (e) => {
+    if (dragStart === null) return;
+    setDragOffset(e.clientX - dragStart);
+  };
+  const handlePointerUp = () => {
+    if (dragStart !== null) {
+      if (dragOffset < -70 && currentIdx < activeCards.length - 1) setCurrentIdx(ci => ci + 1);
+      if (dragOffset >  70 && currentIdx > 0)                      setCurrentIdx(ci => ci - 1);
+    }
+    setDragStart(null);
+    setDragOffset(0);
+  };
 
-  const timerDone  = timerTarget && timerSec >= timerTarget;
-  const timerColor = timerDone ? '#22c55e' : '#0067FD';
+  if (activeCards.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '64px 0' }}>
+        <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
+        <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 6 }}>Sesión completada</div>
+        <div style={{ color: '#71717a', fontSize: 14 }}>{elapsedStr} · {sets.length} series registradas</div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      {/* Header */}
-      <div style={{ ...S.card, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>{session.nombre}</div>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <style>{`@keyframes cardOut { from { opacity:1; transform:translateY(0) scale(1); } to { opacity:0; transform:translateY(-20px) scale(0.97); } }`}</style>
+
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 14 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {session.nombre}
+          </div>
           <div style={{ fontSize: 12, color: '#71717a', marginTop: 2 }}>
-            {elapsedStr} · {sets.length} serie{sets.length !== 1 ? 's' : ''}
+            {completedCount} de {plannedExercises.length} · {elapsedStr}
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {timerOn ? (
-            <>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontFamily: 'monospace', fontSize: 20, fontWeight: 700, color: timerColor, minWidth: 52 }}>
-                  {Math.floor(timerSec / 60).toString().padStart(2, '0')}:{(timerSec % 60).toString().padStart(2, '0')}
-                </div>
-                {timerTarget && (
-                  <div style={{ fontSize: 10, color: timerDone ? '#22c55e' : '#52525b', marginTop: 1 }}>
-                    {timerDone ? '✓ listo' : `/ ${fmtDescanso(timerTarget)}`}
-                  </div>
-                )}
-              </div>
-              <button style={{ ...S.ghost, padding: '4px 10px', fontSize: 12 }}
-                onClick={() => { setTimerOn(false); setTimerSec(0); setTimerTarget(null); }}>Stop</button>
-            </>
-          ) : (
-            <button style={{ ...S.ghost, padding: '6px 12px', fontSize: 12 }}
-              onClick={() => { setTimerSec(0); setTimerOn(true); }}>⏱ Descanso</button>
-          )}
-        </div>
-      </div>
-
-      {/* Exercise cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 12 }}>
-        {plannedExercises.map(ex => (
-          <ExerciseCard
-            key={ex.id}
-            exercise={ex}
-            sets={sets.filter(s => s.exercise_nombre === ex.nombre || s.variante_de === ex.nombre)}
-            guidance={guidance[ex.nombre]}
-            onAddSet={addSet}
-            onDelSet={delSet}
-          />
-        ))}
-        {freeExercises.map(nombre => (
-          <ExerciseCard
-            key={nombre}
-            exercise={{ nombre, tipo_metrica: 'libre' }}
-            sets={sets.filter(s => s.exercise_nombre === nombre)}
-            guidance={guidance[nombre]}
-            onAddSet={addSet}
-            onDelSet={delSet}
-          />
-        ))}
-      </div>
-
-      <FreeExerciseAdd onAdd={addSet} />
-
-      <div style={{ marginTop: 24, paddingBottom: 32 }}>
-        <button style={{ ...S.green, width: '100%', padding: '14px', fontSize: 16 }}
-          onClick={() => {
-            if (confirm(`¿Terminar sesión? Has registrado ${sets.length} series en ${elapsedStr}.`)) {
-              onFinish();
-            }
-          }}>
-          ✓ Terminar sesión
+        <button style={{ ...S.danger, padding: '6px 14px', fontSize: 13, flexShrink: 0 }}
+          onClick={() => setShowTerminar(true)}>
+          Terminar
         </button>
       </div>
+
+      {/* ── Carrusel ── */}
+      <div
+        style={{ overflow: 'hidden', position: 'relative', touchAction: 'pan-y' }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      >
+        <div style={{
+          display: 'flex',
+          transform: `translateX(calc(-${currentIdx * 100}% + ${dragOffset}px))`,
+          transition: dragStart !== null ? 'none' : 'transform 0.28s cubic-bezier(.4,0,.2,1)',
+          willChange: 'transform',
+        }}>
+          {activeCards.map((exIdx) => {
+            const ex     = plannedExercises[exIdx];
+            const exSets = sets.filter(s => s.exercise_nombre === ex.nombre || s.variante_de === ex.nombre);
+            return (
+              <div key={ex.id ?? exIdx} style={{
+                minWidth: '100%',
+                animation: exitingIdx === exIdx ? 'cardOut 0.26s ease forwards' : 'none',
+              }}>
+                <ExerciseCardCarousel
+                  exercise={ex}
+                  orderNum={exIdx + 1}
+                  sets={exSets}
+                  guidance={guidance[ex.nombre]}
+                  onAddSet={addSet}
+                  onDelSet={delSet}
+                  onListo={() => removeCard(exIdx)}
+                  onOmitir={() => removeCard(exIdx)}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Flechas navegación (desktop) */}
+        {currentIdx > 0 && (
+          <button
+            style={{ position: 'absolute', left: -10, top: '38%', transform: 'translateY(-50%)', background: '#27272a', border: '1px solid #3f3f46', color: 'white', borderRadius: 8, width: 30, height: 44, cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => setCurrentIdx(ci => ci - 1)}>‹</button>
+        )}
+        {currentIdx < activeCards.length - 1 && (
+          <button
+            style={{ position: 'absolute', right: -10, top: '38%', transform: 'translateY(-50%)', background: '#27272a', border: '1px solid #3f3f46', color: 'white', borderRadius: 8, width: 30, height: 44, cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => setCurrentIdx(ci => ci + 1)}>›</button>
+        )}
+      </div>
+
+      {/* Dots */}
+      {activeCards.length > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 14 }}>
+          {activeCards.map((_, i) => (
+            <div key={i} onClick={() => setCurrentIdx(i)}
+              style={{ width: i === currentIdx ? 20 : 7, height: 7, borderRadius: 4, background: i === currentIdx ? '#0067FD' : '#3f3f46', transition: 'all 0.2s', cursor: 'pointer' }} />
+          ))}
+        </div>
+      )}
+
+      {/* Modal terminar */}
+      {showTerminar && (
+        <Modal onClose={() => setShowTerminar(false)}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 32, marginBottom: 10 }}>🏁</div>
+            <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>¿Terminar sesión?</div>
+            <div style={{ color: '#71717a', fontSize: 13, marginBottom: 24 }}>
+              {completedCount} de {plannedExercises.length} ejercicios · {elapsedStr}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button style={{ ...S.green, width: '100%', padding: 13, fontSize: 15 }}
+                onClick={() => { setShowTerminar(false); onFinish(); }}>
+                Terminar y guardar
+              </button>
+              <button style={{ ...S.ghost, width: '100%', padding: 13 }}
+                onClick={() => setShowTerminar(false)}>
+                Seguir entrenando
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
 
-function ExerciseCard({ exercise, sets, guidance, onAddSet, onDelSet }) {
-  const [showAdd,     setShowAdd]     = useState(false);
-  const [isVariant,   setIsVariant]   = useState(false);
-  const [variantName, setVariantName] = useState('');
+function ExerciseCardCarousel({ exercise, orderNum, sets, guidance, onAddSet, onDelSet, onListo, onOmitir }) {
   const [peso,        setPeso]        = useState('');
   const [reps,        setReps]        = useState('');
   const [rir,         setRir]         = useState('');
   const [distancia,   setDistancia]   = useState('');
   const [tiempo,      setTiempo]      = useState('');
   const [nota,        setNota]        = useState('');
+  const [showVariant, setShowVariant] = useState(false);
+  const [variantName, setVariantName] = useState('');
 
+  const metrica       = exercise.tipo_metrica ?? 'fuerza';
   const lastFuerzaSet = [...sets].reverse().find(s => s.peso_kg != null);
-  const lastSet       = [...sets].reverse()[0];
   const nextSetIdx    = sets.length;
   const rirObjective  = getRirForSet(exercise.rir_series_array, nextSetIdx);
   const guidancePr    = guidance?.pr;
   const guidanceLast  = guidance?.lastTime;
+  const prE1rm        = guidancePr?.peso && guidancePr?.reps
+    ? calcE1rm(guidancePr.peso, guidancePr.reps, guidancePr.rir ?? 0)
+    : null;
 
-  const openAddForm = () => {
-    if (!showAdd) {
-      // Auto-fill from last set
-      if (lastFuerzaSet) {
-        setPeso(String(lastFuerzaSet.peso_kg ?? ''));
-        setReps(String(lastFuerzaSet.reps ?? ''));
-      }
-      // Suggest RIR from objective sequence
-      if (rirObjective != null) setRir(String(rirObjective));
-      else if (lastFuerzaSet?.rir != null) setRir(String(lastFuerzaSet.rir));
-    } else {
-      setIsVariant(false);
+  useEffect(() => {
+    if (metrica !== 'fuerza') return;
+    if (lastFuerzaSet) {
+      setPeso(String(lastFuerzaSet.peso_kg ?? ''));
+      setReps(String(lastFuerzaSet.reps ?? ''));
     }
-    setShowAdd(s => !s);
-  };
+    if (rirObjective != null) setRir(String(rirObjective));
+    else if (lastFuerzaSet?.rir != null) setRir(String(lastFuerzaSet.rir));
+  }, [sets.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const submit = async () => {
-    const exNombre   = isVariant && variantName.trim() ? variantName.trim() : exercise.nombre;
-    const varianteDe = isVariant && variantName.trim() ? exercise.nombre : null;
-    const metrica    = exercise.tipo_metrica;
+    const exNombre   = showVariant && variantName.trim() ? variantName.trim() : exercise.nombre;
+    const varianteDe = showVariant && variantName.trim() ? exercise.nombre : null;
     let data = {};
     if (metrica === 'fuerza') {
+      if (!peso && !reps) return;
       data = { peso_kg: peso ? parseFloat(peso) : null, reps: reps ? parseInt(reps) : null, rir: rir !== '' ? parseInt(rir) : null };
     } else if (metrica === 'cardio') {
       data = { distancia_km: distancia ? parseFloat(distancia) : null, tiempo_seg: tiempo ? parseInt(tiempo) * 60 : null };
     } else if (metrica === 'tiempo') {
       data = { tiempo_seg: tiempo ? parseInt(tiempo) : null };
+    } else {
+      if (!nota.trim()) return;
+      data = { notas: nota || null };
     }
-    data.notas = nota || null;
     await onAddSet(exNombre, exercise.id ?? null, data, varianteDe);
     setPeso(''); setReps(''); setRir(''); setDistancia(''); setTiempo(''); setNota('');
-    setVariantName('');
-    setShowAdd(false); setIsVariant(false);
+    setShowVariant(false); setVariantName('');
   };
-
-  const duplicateLastSet = async () => {
-    if (!lastSet) return;
-    const data = {
-      peso_kg:      lastSet.peso_kg,
-      reps:         lastSet.reps,
-      rir:          lastSet.rir,
-      distancia_km: lastSet.distancia_km,
-      tiempo_seg:   lastSet.tiempo_seg,
-      notas:        lastSet.notas,
-    };
-    await onAddSet(exercise.nombre, exercise.id ?? null, data, null);
-  };
-
-  const prE1rm = guidancePr?.peso && guidancePr?.reps
-    ? calcE1rm(guidancePr.peso, guidancePr.reps, guidancePr.rir ?? 0)
-    : null;
 
   return (
-    <div style={S.card}>
-      {/* Header */}
-      <div style={{ marginBottom: sets.length > 0 ? 10 : 8 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 4 }}>
-          <div style={{ flex: 1 }}>
-            <span style={{ fontWeight: 700 }}>{exercise.nombre}</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-            {exercise.series_objetivo && (
-              <span style={{ fontSize: 12, color: '#71717a' }}>
-                {exercise.series_objetivo} × {fmtRepsEx(exercise)}
-              </span>
-            )}
-            {exercise.rir_series_array?.length > 0 && (
-              <span style={{ fontSize: 11, color: '#a78bfa', fontWeight: 600 }}>
-                RIR {displayRir(exercise.rir_series_array)}
-              </span>
-            )}
-          </div>
+    <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+      {/* ── Bloque 1: Identidad ── */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 11, color: '#52525b', fontWeight: 700, marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          #{orderNum}
         </div>
-        {/* Guidance */}
-        {(guidancePr || guidanceLast) && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 12px', fontSize: 11, marginTop: 2 }}>
-            {guidancePr && (
-              <span style={{ color: '#f59e0b' }}>
-                🏆 {guidancePr.peso}kg×{guidancePr.reps}
-                {prE1rm && <span style={{ color: '#78350f' }}> (e1RM ~{prE1rm}kg)</span>}
-              </span>
-            )}
-            {guidanceLast && (guidanceLast.peso !== guidancePr?.peso || guidanceLast.reps !== guidancePr?.reps) && (
-              <span style={{ color: '#52525b' }}>
-                Última: {guidanceLast.peso}kg×{guidanceLast.reps}
-                {guidanceLast.rir != null && ` @RIR${guidanceLast.rir}`}
-              </span>
-            )}
-          </div>
-        )}
-        {exercise.descanso_segundos && (
-          <div style={{ fontSize: 11, color: '#3f3f46', marginTop: 3 }}>
-            ⏱ descanso sugerido: {fmtDescanso(exercise.descanso_segundos)}
-          </div>
+        <div style={{ fontSize: 21, fontWeight: 800, lineHeight: 1.2, marginBottom: showVariant && variantName ? 4 : 0 }}>
+          {exercise.nombre}
+        </div>
+        {showVariant && variantName && (
+          <div style={{ fontSize: 13, color: '#f59e0b', marginTop: 3 }}>Variante: {variantName}</div>
         )}
         {exercise.notas && (
-          <div style={{ fontSize: 11, color: '#52525b', marginTop: 3, fontStyle: 'italic' }}>{exercise.notas}</div>
+          <div style={{ fontSize: 12, color: '#52525b', fontStyle: 'italic', marginTop: 4 }}>{exercise.notas}</div>
         )}
       </div>
 
-      {/* Logged sets */}
-      {sets.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginBottom: 10 }}>
-          {sets.map((s, i) => {
-            const rirObj = getRirForSet(exercise.rir_series_array, i);
-            return (
-              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '5px 8px', background: '#0d0d0d', borderRadius: 6 }}>
-                <span style={{ color: '#52525b', minWidth: 22, fontSize: 12 }}>#{i + 1}</span>
-                {s.variante_de && (
-                  <span style={{ color: '#f59e0b', fontSize: 11, fontWeight: 600 }}>↩ {s.exercise_nombre}</span>
-                )}
-                {exercise.tipo_metrica === 'fuerza' && (
-                  <span style={{ flex: 1 }}>
-                    {s.peso_kg ?? '—'}kg × {s.reps ?? '—'}
-                    {s.rir != null
-                      ? <span style={{ color: '#a78bfa', marginLeft: 4 }}>@RIR{s.rir}</span>
-                      : rirObj != null && <span style={{ color: '#3f3f46', marginLeft: 4 }}>obj:{rirObj}</span>
-                    }
-                  </span>
-                )}
-                {exercise.tipo_metrica === 'cardio' && (
-                  <span style={{ flex: 1 }}>{s.distancia_km ?? '—'}km · {s.tiempo_seg ? Math.floor(s.tiempo_seg / 60) + 'min' : '—'}</span>
-                )}
-                {exercise.tipo_metrica === 'tiempo' && (
-                  <span style={{ flex: 1 }}>{s.tiempo_seg ? `${Math.floor(s.tiempo_seg / 60)}m ${s.tiempo_seg % 60}s` : '—'}</span>
-                )}
-                {exercise.tipo_metrica === 'libre' && (
-                  <span style={{ flex: 1, color: '#a1a1aa' }}>{s.notas ?? '—'}</span>
-                )}
-                {s.notas && exercise.tipo_metrica !== 'libre' && (
-                  <span style={{ color: '#52525b', fontSize: 11 }}>{s.notas}</span>
-                )}
-                <button style={{ color: '#52525b', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, padding: '0 4px' }}
-                  onClick={() => onDelSet(s.id)}>✕</button>
+      {/* ── Bloque 2: Objetivo ── */}
+      {(exercise.series_objetivo || exercise.rir_series_array?.length > 0) && (
+        <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+          {exercise.series_objetivo && (
+            <div style={{ flex: 1, background: '#0067FD14', border: '1px solid #0067FD30', borderRadius: 10, padding: '10px 14px' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: '#0067FD' }}>
+                {exercise.series_objetivo} × {fmtRepsEx(exercise)}
               </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Add set form */}
-      {showAdd && (
-        <div style={{ background: '#0d0d0d', borderRadius: 8, padding: 12, marginBottom: 10 }}>
-          {isVariant && (
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 11, color: '#f59e0b', marginBottom: 6, fontWeight: 600 }}>Ejercicio alternativo</div>
-              {exercise.variantes?.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
-                  {exercise.variantes.map(v => (
-                    <button key={v}
-                      style={{ ...S.ghost, padding: '4px 10px', fontSize: 12, color: variantName === v ? '#0067FD' : undefined, borderColor: variantName === v ? '#0067FD' : undefined }}
-                      onClick={() => setVariantName(v)}>{v}</button>
-                  ))}
-                </div>
-              )}
-              <input style={S.input} placeholder="O escribe el nombre del ejercicio alternativo..."
-                value={variantName} onChange={e => setVariantName(e.target.value)} />
+              <div style={{ fontSize: 11, color: '#52525b', marginTop: 2 }}>objetivo</div>
             </div>
           )}
-
-          {rirObjective != null && (
-            <div style={{ fontSize: 11, color: '#a78bfa', marginBottom: 8, fontWeight: 600 }}>
-              Serie {nextSetIdx + 1} — objetivo RIR {rirObjective}
+          {exercise.rir_series_array?.length > 0 && (
+            <div style={{ flex: 1, background: '#7c3aed14', border: '1px solid #7c3aed30', borderRadius: 10, padding: '10px 14px' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: '#a78bfa' }}>
+                RIR {displayRir(exercise.rir_series_array)}
+              </div>
+              <div style={{ fontSize: 11, color: '#52525b', marginTop: 2 }}>por serie</div>
             </div>
-          )}
-
-          <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
-            {exercise.tipo_metrica === 'fuerza' && (
-              <>
-                <Field label="Peso (kg)" style={{ flex: 1.5 }}>
-                  <input style={S.input} type="number" step="0.5"
-                    placeholder={lastFuerzaSet?.peso_kg ?? '0'} value={peso} onChange={e => setPeso(e.target.value)} />
-                </Field>
-                <Field label="Reps" style={{ flex: 1 }}>
-                  <input style={S.input} type="number"
-                    placeholder={lastFuerzaSet?.reps ?? exercise.reps_min ?? '0'} value={reps} onChange={e => setReps(e.target.value)} />
-                </Field>
-                <Field label="RIR" style={{ flex: 0.7 }}>
-                  <input style={S.input} type="number" min="0" max="5"
-                    placeholder={rirObjective != null ? String(rirObjective) : '—'} value={rir} onChange={e => setRir(e.target.value)} />
-                </Field>
-              </>
-            )}
-            {exercise.tipo_metrica === 'cardio' && (
-              <>
-                <Field label="Distancia (km)" style={{ flex: 1 }}>
-                  <input style={S.input} type="number" step="0.1" value={distancia} onChange={e => setDistancia(e.target.value)} />
-                </Field>
-                <Field label="Tiempo (min)" style={{ flex: 1 }}>
-                  <input style={S.input} type="number" value={tiempo} onChange={e => setTiempo(e.target.value)} />
-                </Field>
-              </>
-            )}
-            {exercise.tipo_metrica === 'tiempo' && (
-              <Field label="Tiempo (seg)" style={{ flex: 1 }}>
-                <input style={S.input} type="number" value={tiempo} onChange={e => setTiempo(e.target.value)} />
-              </Field>
-            )}
-            {exercise.tipo_metrica === 'libre' && (
-              <Field label="Nota" style={{ flex: 1 }}>
-                <input style={S.input} placeholder="Describe el set..." value={nota} onChange={e => setNota(e.target.value)} />
-              </Field>
-            )}
-            <button style={{ ...S.primary, padding: '8px 16px', flexShrink: 0, alignSelf: 'flex-end' }}
-              onClick={submit}>✓</button>
-          </div>
-
-          {/* Optional note for fuerza/cardio/tiempo */}
-          {exercise.tipo_metrica !== 'libre' && (
-            <input style={{ ...S.input, marginTop: 6, fontSize: 13, padding: '5px 10px' }}
-              placeholder="Nota rápida (opcional)" value={nota} onChange={e => setNota(e.target.value)} />
           )}
         </div>
       )}
 
-      {/* Action buttons */}
-      <div style={{ display: 'flex', gap: 6 }}>
-        <button style={{ ...S.ghost, flex: 1, padding: '7px 12px', fontSize: 13 }} onClick={openAddForm}>
-          {showAdd ? 'Cancelar' : '+ Serie'}
-        </button>
-        {!showAdd && lastSet && (
-          <button
-            style={{ ...S.ghost, padding: '7px 12px', fontSize: 12, color: '#22c55e', borderColor: '#14532d' }}
-            title="Duplicar última serie exacta"
-            onClick={duplicateLastSet}>
-            ⎘ Repetir
-          </button>
-        )}
-        <button
-          style={{ ...S.ghost, padding: '7px 12px', fontSize: 12, color: '#f59e0b', borderColor: '#78350f' }}
-          onClick={() => { setShowAdd(true); setIsVariant(true); }}>
-          ↩ Variante
-        </button>
-      </div>
-    </div>
-  );
-}
+      {/* ── Bloque 3: Referencia ── */}
+      {(guidancePr || guidanceLast) && (
+        <div style={{ display: 'flex', gap: 20, background: '#0d0d0d', borderRadius: 8, padding: '9px 12px', marginBottom: 14 }}>
+          {guidancePr && (
+            <div>
+              <div style={{ fontSize: 10, color: '#f59e0b', fontWeight: 700, marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>PR</div>
+              <div style={{ fontSize: 13 }}>
+                {guidancePr.peso}kg × {guidancePr.reps}
+                {prE1rm && <span style={{ color: '#52525b', fontSize: 11 }}> (~{prE1rm}kg)</span>}
+              </div>
+            </div>
+          )}
+          {guidanceLast && (guidanceLast.peso !== guidancePr?.peso || guidanceLast.reps !== guidancePr?.reps) && (
+            <div>
+              <div style={{ fontSize: 10, color: '#52525b', fontWeight: 700, marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Última vez</div>
+              <div style={{ fontSize: 13, color: '#a1a1aa' }}>
+                {guidanceLast.peso}kg · {guidanceLast.reps}{guidanceLast.rir != null ? ` @RIR${guidanceLast.rir}` : ''}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
-function FreeExerciseAdd({ onAdd }) {
-  const [show,  setShow]  = useState(false);
-  const [nombre,setNombre]= useState('');
-  const [tipo,  setTipo]  = useState('fuerza');
-  const [peso,  setPeso]  = useState('');
-  const [reps,  setReps]  = useState('');
-  const [rir,   setRir]   = useState('');
-  const [dist,  setDist]  = useState('');
-  const [tiempo,setTiempo]= useState('');
-  const [nota,  setNota]  = useState('');
+      {/* ── Bloque 4: Series ── */}
+      <div style={{ marginBottom: 14 }}>
+        {/* Cabecera tabla */}
+        <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 52px 28px', gap: 4, fontSize: 10, color: '#52525b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '0 4px 6px', borderBottom: '1px solid #27272a', marginBottom: 4 }}>
+          <span>S</span>
+          <span>{metrica === 'fuerza' ? 'Peso' : metrica === 'cardio' ? 'Km' : 'Seg'}</span>
+          <span>{metrica === 'fuerza' ? 'Reps' : metrica === 'cardio' ? 'Min' : ''}</span>
+          <span style={{ textAlign: 'center' }}>{metrica === 'fuerza' ? 'RIR' : ''}</span>
+          <span></span>
+        </div>
 
-  const submit = async () => {
-    if (!nombre.trim()) return;
-    let data = {};
-    if (tipo === 'fuerza')  data = { peso_kg: peso ? parseFloat(peso) : null, reps: reps ? parseInt(reps) : null, rir: rir !== '' ? parseInt(rir) : null };
-    if (tipo === 'cardio')  data = { distancia_km: dist ? parseFloat(dist) : null, tiempo_seg: tiempo ? parseInt(tiempo) * 60 : null };
-    if (tipo === 'tiempo')  data = { tiempo_seg: tiempo ? parseInt(tiempo) : null };
-    if (tipo === 'libre')   data = { notas: nota || null };
-    await onAdd(nombre.trim(), null, data, null);
-    setNombre(''); setPeso(''); setReps(''); setRir(''); setDist(''); setTiempo(''); setNota(''); setShow(false);
-  };
-
-  if (!show) return (
-    <button style={{ ...S.ghost, width: '100%', padding: 10, fontSize: 13, color: '#52525b', borderStyle: 'dashed' }}
-      onClick={() => setShow(true)}>
-      + Añadir ejercicio no planificado
-    </button>
-  );
-
-  return (
-    <div style={{ ...S.card, borderStyle: 'dashed' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <input style={S.input} placeholder="Nombre del ejercicio" value={nombre}
-          onChange={e => setNombre(e.target.value)} autoFocus />
-        <select style={S.input} value={tipo} onChange={e => setTipo(e.target.value)}>
-          {METRICAS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-        </select>
-        {tipo === 'fuerza' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 0.7fr', gap: 8 }}>
-            <input style={S.input} type="number" placeholder="Peso (kg)" value={peso} onChange={e => setPeso(e.target.value)} />
-            <input style={S.input} type="number" placeholder="Reps" value={reps} onChange={e => setReps(e.target.value)} />
-            <input style={S.input} type="number" placeholder="RIR" min="0" max="5" value={rir} onChange={e => setRir(e.target.value)} />
+        {/* Series registradas */}
+        {sets.map((s, i) => (
+          <div key={s.id} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 52px 28px', gap: 4, fontSize: 14, padding: '7px 4px', borderRadius: 6, alignItems: 'center', background: i % 2 === 0 ? '#0d0d0d' : 'transparent' }}>
+            <span style={{ color: '#52525b', fontSize: 12, fontWeight: 600 }}>{i + 1}</span>
+            {metrica === 'fuerza' && <>
+              <span>{s.peso_kg ?? '—'}kg</span>
+              <span>{s.reps ?? '—'}</span>
+              <span style={{ color: '#a78bfa', fontSize: 13, textAlign: 'center' }}>{s.rir != null ? s.rir : '—'}</span>
+            </>}
+            {metrica === 'cardio' && <>
+              <span>{s.distancia_km ?? '—'}km</span>
+              <span>{s.tiempo_seg ? Math.floor(s.tiempo_seg / 60) + 'min' : '—'}</span>
+              <span></span>
+            </>}
+            {metrica === 'tiempo' && <>
+              <span style={{ gridColumn: 'span 2', color: '#a1a1aa' }}>{s.tiempo_seg ? `${Math.floor(s.tiempo_seg / 60)}m ${s.tiempo_seg % 60}s` : '—'}</span>
+              <span></span>
+            </>}
+            {metrica === 'libre' && <>
+              <span style={{ gridColumn: 'span 2', color: '#a1a1aa', fontSize: 12 }}>{s.notas ?? '—'}</span>
+              <span></span>
+            </>}
+            <button style={{ color: '#3f3f46', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, padding: 0, textAlign: 'center' }}
+              onClick={() => onDelSet(s.id)}>✕</button>
           </div>
-        )}
-        {tipo === 'cardio' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <input style={S.input} type="number" step="0.1" placeholder="Distancia (km)" value={dist} onChange={e => setDist(e.target.value)} />
-            <input style={S.input} type="number" placeholder="Tiempo (min)" value={tiempo} onChange={e => setTiempo(e.target.value)} />
-          </div>
-        )}
-        {tipo === 'tiempo' && (
-          <input style={S.input} type="number" placeholder="Tiempo (seg)" value={tiempo} onChange={e => setTiempo(e.target.value)} />
-        )}
-        {tipo === 'libre' && (
-          <input style={S.input} placeholder="Nota" value={nota} onChange={e => setNota(e.target.value)} />
-        )}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button style={{ ...S.ghost, flex: 1 }} onClick={() => setShow(false)}>Cancelar</button>
-          <button style={{ ...S.primary, flex: 1 }} onClick={submit}>Añadir</button>
+        ))}
+
+        {/* Fila de entrada */}
+        <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 52px 28px', gap: 4, marginTop: 6, alignItems: 'center' }}>
+          <span style={{ color: '#52525b', fontSize: 12, fontWeight: 600, textAlign: 'center' }}>{sets.length + 1}</span>
+          {metrica === 'fuerza' && <>
+            <input style={{ ...S.input, padding: '7px 8px', fontSize: 14 }}
+              type="number" step="0.5" inputMode="decimal"
+              placeholder={lastFuerzaSet?.peso_kg != null ? String(lastFuerzaSet.peso_kg) : 'kg'}
+              value={peso} onChange={e => setPeso(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()} />
+            <input style={{ ...S.input, padding: '7px 8px', fontSize: 14 }}
+              type="number" inputMode="numeric"
+              placeholder={lastFuerzaSet?.reps != null ? String(lastFuerzaSet.reps) : 'r'}
+              value={reps} onChange={e => setReps(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()} />
+            <input style={{ ...S.input, padding: '7px 6px', fontSize: 14, textAlign: 'center' }}
+              type="number" min="0" max="5" inputMode="numeric"
+              placeholder={rirObjective != null ? String(rirObjective) : 'RIR'}
+              value={rir} onChange={e => setRir(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()} />
+          </>}
+          {metrica === 'cardio' && <>
+            <input style={{ ...S.input, padding: '7px 8px', fontSize: 14 }} type="number" step="0.1" inputMode="decimal" placeholder="km" value={distancia} onChange={e => setDistancia(e.target.value)} />
+            <input style={{ ...S.input, padding: '7px 8px', fontSize: 14 }} type="number" inputMode="numeric" placeholder="min" value={tiempo} onChange={e => setTiempo(e.target.value)} />
+            <span></span>
+          </>}
+          {metrica === 'tiempo' && <>
+            <input style={{ ...S.input, padding: '7px 8px', fontSize: 14, gridColumn: 'span 2' }} type="number" inputMode="numeric" placeholder="seg" value={tiempo} onChange={e => setTiempo(e.target.value)} />
+            <span></span>
+          </>}
+          {metrica === 'libre' && <>
+            <input style={{ ...S.input, padding: '7px 8px', fontSize: 14, gridColumn: 'span 2' }} placeholder="nota" value={nota} onChange={e => setNota(e.target.value)} />
+            <span></span>
+          </>}
+          <button style={{ ...S.primary, padding: '7px 0', fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={submit}>+</button>
         </div>
       </div>
+
+      {/* ── Selector variante ── */}
+      {showVariant && (
+        <div style={{ background: '#0d0d0d', borderRadius: 8, padding: 10, marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: '#f59e0b', marginBottom: 6, fontWeight: 600 }}>Ejercicio alternativo</div>
+          {exercise.variantes?.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
+              {exercise.variantes.map(v => (
+                <button key={v}
+                  style={{ ...S.ghost, padding: '4px 10px', fontSize: 12, color: variantName === v ? '#0067FD' : undefined, borderColor: variantName === v ? '#0067FD' : undefined }}
+                  onClick={() => setVariantName(v)}>{v}</button>
+              ))}
+            </div>
+          )}
+          <input style={S.input} placeholder="O escribe el nombre..."
+            value={variantName} onChange={e => setVariantName(e.target.value)} />
+        </div>
+      )}
+
+      {/* ── Acciones secundarias ── */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+        <button style={{ ...S.ghost, fontSize: 12, padding: '7px 12px' }}
+          onClick={() => setShowVariant(v => !v)}>
+          {showVariant ? 'Cancelar variante' : '↩ Cambiar variante'}
+        </button>
+        <button style={{ ...S.ghost, fontSize: 12, padding: '7px 12px' }}
+          onClick={submit}>+ Serie</button>
+        <button style={{ ...S.ghost, fontSize: 12, padding: '7px 12px', color: '#f87171', borderColor: '#7f1d1d', marginLeft: 'auto' }}
+          onClick={onOmitir}>Omitir</button>
+      </div>
+
+      {/* ── CTA principal ── */}
+      <button
+        style={{ ...S.green, width: '100%', padding: '15px', fontSize: 17, fontWeight: 700, borderRadius: 10 }}
+        onClick={onListo}>
+        Listo ✓
+      </button>
     </div>
   );
 }
