@@ -95,8 +95,8 @@ const AuthenticatedApp = () => {
       <Route path="/audiosecreto" element={<AudioSecreto />} />
       <Route path="/UltimoPaso" element={<LayoutWrapper currentPageName="UltimoPaso"><UltimoPaso /></LayoutWrapper>} />
       <Route path="/YaPorFin" element={<LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper>} />
-      <Route path="/TrabajaConNosotros" element={<LayoutWrapper currentPageName="TrabajaConNosotros"><TrabajaConNosotros /></LayoutWrapper>} />
-      <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
+      <Route path="/TrabajaConNosotros" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
+      <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotros"><TrabajaConNosotros /></LayoutWrapper>} />
       <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
       <Route path="*" element={<PageNotFound />} />
