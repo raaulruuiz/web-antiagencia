@@ -40,10 +40,9 @@ export default function Copywriting() {
         </button>
         <button
           onClick={() => {
-            const w = 380, h = 620;
+            const w = 380, h = window.screen.height;
             const left = window.screen.width - w - 20;
-            const top = window.screen.height - h - 60;
-            window.open('/admin/copywriting-popup', 'copywriting', `width=${w},height=${h},left=${left},top=${top},resizable=yes`);
+            window.open('/admin/copywriting-popup', 'copywriting', `width=${w},height=${h},left=${left},top=0,resizable=yes`);
           }}
           className="bg-white hover:bg-zinc-200 text-zinc-900 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
         >

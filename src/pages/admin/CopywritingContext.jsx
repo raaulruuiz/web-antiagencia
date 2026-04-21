@@ -18,10 +18,9 @@ export function CopywritingProvider({ children }) {
     function onKeyDown(e) {
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'c') {
         e.preventDefault();
-        const w = 380, h = 620;
+        const w = 380, h = window.screen.height;
         const left = window.screen.width - w - 20;
-        const top = window.screen.height - h - 60;
-        window.open('/admin/copywriting-popup', 'copywriting', `width=${w},height=${h},left=${left},top=${top},resizable=yes`);
+        window.open('/admin/copywriting-popup', 'copywriting', `width=${w},height=${h},left=${left},top=0,resizable=yes`);
       }
     }
     window.addEventListener('keydown', onKeyDown);
