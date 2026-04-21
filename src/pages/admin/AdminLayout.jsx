@@ -6,11 +6,12 @@ const AdminCtx = createContext({ role: 'lector', pages: [] });
 export const useAdmin = () => useContext(AdminCtx);
 
 const ALL_NAV = [
-  { to: '/admin/briefing',         label: 'Briefing',         icon: '📋', page: 'briefing' },
-  { to: '/admin/dashboard',        label: 'Dashboard',        icon: '📊', page: 'dashboard' },
-  { to: '/admin/loom',             label: 'Loom',             icon: '🎥', page: 'loom' },
   { to: '/admin/automatizaciones', label: 'Automatizaciones', icon: '⚡', page: 'automatizaciones' },
+  { to: '/admin/briefing',         label: 'Briefing',         icon: '📋', page: 'briefing' },
+  { to: '/admin/copywriting',      label: 'Copywriting',      icon: '✍️', page: 'copywriting' },
+  { to: '/admin/dashboard',        label: 'Dashboard',        icon: '📊', page: 'dashboard' },
   { to: '/admin/gym',              label: 'Entrenos',         icon: '🏋️', page: 'gym' },
+  { to: '/admin/loom',             label: 'Loom',             icon: '🎥', page: 'loom' },
   { to: '/admin/users',            label: 'Usuarios',         icon: '👥', page: 'users' },
 ];
 

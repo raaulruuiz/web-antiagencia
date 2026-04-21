@@ -4,10 +4,12 @@ import { useAdmin } from './AdminLayout';
 import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
 
 const PAGE_OPTIONS = [
-  { value: 'dashboard',        label: 'Dashboard' },
-  { value: 'loom',             label: 'Loom' },
   { value: 'automatizaciones', label: 'Automatizaciones' },
+  { value: 'briefing',         label: 'Briefing' },
+  { value: 'copywriting',      label: 'Copywriting' },
+  { value: 'dashboard',        label: 'Dashboard' },
   { value: 'gym',              label: 'Entrenos' },
+  { value: 'loom',             label: 'Loom' },
 ];
 
 function timeAgo(dateStr) {

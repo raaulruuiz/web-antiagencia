@@ -28,6 +28,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 import Automatizaciones from './pages/admin/Automatizaciones';
 import Gym from './pages/admin/Gym';
 import Briefing from './pages/admin/Briefing';
+import Copywriting from './pages/admin/Copywriting';
 
 // Guard para rutas de lector: redirige a /admin/users si no tiene permiso
 function RequirePage({ page, children }) {
@@ -125,6 +126,7 @@ function App() {
               <Route path="automatizaciones" element={<RequirePage page="automatizaciones"><Automatizaciones /></RequirePage>} />
               <Route path="gym"              element={<RequirePage page="gym"><Gym /></RequirePage>} />
               <Route path="briefing"         element={<RequirePage page="briefing"><Briefing /></RequirePage>} />
+              <Route path="copywriting"      element={<RequirePage page="copywriting"><Copywriting /></RequirePage>} />
             </Route>
             <Route path="/loom" element={<Loom />} />
             <Route path="*" element={<AuthenticatedApp />} />
