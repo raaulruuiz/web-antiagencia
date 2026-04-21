@@ -26,10 +26,10 @@ export default function CopywritingPopup() {
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
         <span className="text-white text-sm font-semibold">Copywriting</span>
         <button
-          onClick={() => setValues(EMPTY)}
+          onClick={() => window.close()}
           className="text-zinc-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-zinc-800 transition-colors"
         >
-          Limpiar
+          Ocultar
         </button>
       </div>
       <div className="flex-1 overflow-y-auto px-4 py-3">
@@ -49,6 +49,14 @@ export default function CopywritingPopup() {
             </div>
           ))}
         </div>
+      </div>
+      <div className="px-4 py-3 border-t border-zinc-800">
+        <button
+          onClick={() => setValues(EMPTY)}
+          className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium px-3 py-2 rounded-lg transition-colors"
+        >
+          Limpiar
+        </button>
       </div>
     </div>
   );
