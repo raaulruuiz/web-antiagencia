@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { FIELDS } from './CopywritingContext';
 
 const LS_KEY = 'copywriting_values';
@@ -10,6 +10,7 @@ function loadFromStorage() {
 
 export default function Copywriting() {
   const [values, setValues] = useState(loadFromStorage);
+  const refs = useRef({});
 
   const handleChange = useCallback((key, val) => {
     setValues(prev => {
@@ -17,6 +18,16 @@ export default function Copywriting() {
       localStorage.setItem(LS_KEY, JSON.stringify(next));
       return next;
     });
+  }, []);
+
+  const handleKeyDown = useCallback((e, key) => {
+    if (key === 'notas') return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const keys = FIELDS.map(f => f.key);
+      const nextKey = keys[keys.indexOf(key) + 1];
+      if (nextKey && refs.current[nextKey]) refs.current[nextKey].focus();
+    }
   }, []);
 
   const handleClear = useCallback(() => {
@@ -49,10 +60,12 @@ export default function Copywriting() {
               {f.label}
             </label>
             <textarea
+              ref={el => refs.current[f.key] = el}
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm resize-none focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
               rows={3}
               value={values[f.key]}
               onChange={e => handleChange(f.key, e.target.value)}
+              onKeyDown={e => handleKeyDown(e, f.key)}
               placeholder={`${f.label}...`}
             />
           </div>
