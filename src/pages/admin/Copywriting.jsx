@@ -1,13 +1,38 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FIELDS } from './CopywritingContext';
 
+const LS_KEY = 'copywriting_values';
 const EMPTY = Object.fromEntries(FIELDS.map(f => [f.key, '']));
 
+function loadFromStorage() {
+  try { return { ...EMPTY, ...JSON.parse(localStorage.getItem(LS_KEY)) }; } catch { return EMPTY; }
+}
+
 export default function Copywriting() {
-  const [values, setValues] = useState(EMPTY);
+  const [values, setValues] = useState(loadFromStorage);
 
   const handleChange = useCallback((key, val) => {
-    setValues(prev => ({ ...prev, [key]: val }));
+    setValues(prev => {
+      const next = { ...prev, [key]: val };
+      localStorage.setItem(LS_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const handleClear = useCallback(() => {
+    localStorage.setItem(LS_KEY, JSON.stringify(EMPTY));
+    setValues(EMPTY);
+  }, []);
+
+  // Sync changes made in the popup window
+  useEffect(() => {
+    function onStorage(e) {
+      if (e.key === LS_KEY && e.newValue) {
+        try { setValues({ ...EMPTY, ...JSON.parse(e.newValue) }); } catch {}
+      }
+    }
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   return (
@@ -36,7 +61,7 @@ export default function Copywriting() {
 
       <div className="flex gap-3 mt-6">
         <button
-          onClick={() => setValues(EMPTY)}
+          onClick={handleClear}
           className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
         >
           Limpiar

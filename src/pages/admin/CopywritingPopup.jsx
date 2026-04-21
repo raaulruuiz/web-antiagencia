@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 const FIELDS = [
   { key: 'historia',    label: 'Historia' },
@@ -9,14 +9,39 @@ const FIELDS = [
   { key: 'notas',       label: 'Notas' },
 ];
 
+const LS_KEY = 'copywriting_values';
 const EMPTY = Object.fromEntries(FIELDS.map(f => [f.key, '']));
 
+function loadFromStorage() {
+  try { return { ...EMPTY, ...JSON.parse(localStorage.getItem(LS_KEY)) }; } catch { return EMPTY; }
+}
+
 export default function CopywritingPopup() {
-  const [values, setValues] = useState(EMPTY);
+  const [values, setValues] = useState(loadFromStorage);
   const refs = useRef({});
 
   const handleChange = useCallback((key, val) => {
-    setValues(prev => ({ ...prev, [key]: val }));
+    setValues(prev => {
+      const next = { ...prev, [key]: val };
+      localStorage.setItem(LS_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const handleClear = useCallback(() => {
+    localStorage.setItem(LS_KEY, JSON.stringify(EMPTY));
+    setValues(EMPTY);
+  }, []);
+
+  // Sync changes made in the main page
+  useEffect(() => {
+    function onStorage(e) {
+      if (e.key === LS_KEY && e.newValue) {
+        try { setValues({ ...EMPTY, ...JSON.parse(e.newValue) }); } catch {}
+      }
+    }
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   const handleKeyDown = useCallback((e, key) => {
@@ -65,7 +90,7 @@ export default function CopywritingPopup() {
       </div>
       <div className="px-3 py-2 border-t border-zinc-800">
         <button
-          onClick={() => setValues(EMPTY)}
+          onClick={handleClear}
           className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium px-3 py-2 rounded-lg transition-colors"
         >
           Limpiar
