@@ -40,7 +40,7 @@ export default function Copywriting() {
         </button>
         <button
           onClick={() => {
-            const w = 180, h = window.screen.height;
+            const w = 140, h = window.screen.height;
             const left = window.screen.width - w;
             window.open('/admin/copywriting-popup', 'copywriting', `width=${w},height=${h},left=${left},top=0,resizable=yes`);
           }}
