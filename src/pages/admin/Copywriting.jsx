@@ -12,7 +12,10 @@ export default function Copywriting() {
 
   return (
     <div className="p-4 md:p-8 max-w-2xl">
-      <h1 className="text-white text-2xl font-semibold mb-6">Copywriting</h1>
+      <h1 className="text-white text-2xl font-semibold mb-1">Copywriting</h1>
+      <p className="text-zinc-500 text-xs mb-6">
+        Abre el panel flotante con <kbd className="bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded text-xs font-mono">⌘ Shift C</kbd> o <kbd className="bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded text-xs font-mono">Ctrl Shift C</kbd>
+      </p>
 
       <div className="flex flex-col gap-4">
         {FIELDS.map(f => (
