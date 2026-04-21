@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
-import { CopywritingProvider, useCopywriting, FIELDS } from './CopywritingContext';
+import { CopywritingProvider } from './CopywritingContext';
 
 const AdminCtx = createContext({ role: 'lector', pages: [] });
 export const useAdmin = () => useContext(AdminCtx);
@@ -21,49 +21,6 @@ function navForRole(role, pages) {
   return ALL_NAV.filter(n => n.page === 'users' || pages.includes(n.page));
 }
 
-function FloatingPanel() {
-  const { values, handleChange, handleClear, setFloating } = useCopywriting();
-  return (
-    <div className="fixed bottom-4 right-4 z-50 w-80 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700">
-        <span className="text-white text-sm font-semibold">Copywriting</span>
-        <button
-          onClick={() => setFloating(false)}
-          className="text-zinc-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-zinc-800 transition-colors"
-        >
-          Ocultar
-        </button>
-      </div>
-      <div className="px-4 py-3 overflow-y-auto max-h-[70vh]">
-        <div className="flex flex-col gap-3">
-          {FIELDS.map(f => (
-            <div key={f.key}>
-              <label className="block text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-1">
-                {f.label}
-              </label>
-              <textarea
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5 text-white text-xs resize-none focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
-                rows={2}
-                value={values[f.key]}
-                onChange={e => handleChange(f.key, e.target.value)}
-                placeholder={`${f.label}...`}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="px-4 py-3 border-t border-zinc-700">
-        <button
-          onClick={handleClear}
-          className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium px-3 py-2 rounded-lg transition-colors"
-        >
-          Limpiar
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function AdminLayoutInner() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,7 +28,6 @@ function AdminLayoutInner() {
   const [role, setRole]   = useState('lector');
   const [pages, setPages] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { floating } = useCopywriting();
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -183,9 +139,6 @@ function AdminLayoutInner() {
             <Outlet />
           </main>
         </div>
-
-        {/* Panel flotante de Copywriting — persiste en todas las páginas */}
-        {floating && <FloatingPanel />}
       </div>
     </AdminCtx.Provider>
   );
