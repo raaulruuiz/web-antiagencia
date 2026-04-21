@@ -50,9 +50,12 @@ export function useABTest(testId, url) {
 export function trackConversion(testId, url) {
   const variant = localStorage.getItem(`_ab_${testId}`);
   if (!variant) return;
+  const body = JSON.stringify({ test_id: testId, variant, session_id: getSessionId(), url });
+  // keepalive: true para que el request sobreviva la navegación inmediata a /ultimopaso
   fetch(`${BACKEND_URL}/track-conversion`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ test_id: testId, variant, session_id: getSessionId(), url }),
+    body,
+    keepalive: true,
   }).catch(() => {});
 }
