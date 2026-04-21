@@ -41,7 +41,7 @@ export default function Copywriting() {
         <button
           onClick={() => {
             const w = 380, h = window.screen.height;
-            const left = window.screen.width - w - 20;
+            const left = window.screen.width - w;
             window.open('/admin/copywriting-popup', 'copywriting', `width=${w},height=${h},left=${left},top=0,resizable=yes`);
           }}
           className="bg-white hover:bg-zinc-200 text-zinc-900 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
