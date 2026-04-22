@@ -16,6 +16,12 @@ function loadFromStorage() {
   try { return { ...EMPTY, ...JSON.parse(localStorage.getItem(LS_KEY)) }; } catch { return EMPTY; }
 }
 
+function autoResize(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
 export default function CopywritingPopup() {
   const [values, setValues] = useState(loadFromStorage);
   const refs = useRef({});
@@ -31,7 +37,13 @@ export default function CopywritingPopup() {
   const handleClear = useCallback(() => {
     localStorage.setItem(LS_KEY, JSON.stringify(EMPTY));
     setValues(EMPTY);
+    setTimeout(() => Object.values(refs.current).forEach(autoResize), 0);
   }, []);
+
+  // Auto-resize on mount and on external sync
+  useEffect(() => {
+    Object.values(refs.current).forEach(autoResize);
+  }, [values]);
 
   // Sync changes made in the main page
   useEffect(() => {
@@ -77,10 +89,10 @@ export default function CopywritingPopup() {
               </label>
               <textarea
                 ref={el => refs.current[f.key] = el}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5 text-white text-xs resize-none focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5 text-white text-xs resize-y focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
                 rows={2}
                 value={values[f.key]}
-                onChange={e => handleChange(f.key, e.target.value)}
+                onChange={e => { handleChange(f.key, e.target.value); autoResize(e.target); }}
                 onKeyDown={e => handleKeyDown(e, f.key)}
                 placeholder={`${f.label}...`}
               />
