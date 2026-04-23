@@ -45,6 +45,7 @@ export default function FooterMinimal() {
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-white/40">
           <Link to={createPageUrl("PoliticaPrivacidad")} className="hover:text-white transition-colors">Privacidad</Link>
           <Link to={createPageUrl("AvisoLegal")} className="hover:text-white transition-colors">Aviso Legal</Link>
+          <Link to={createPageUrl("AvisoLegal")} className="hover:text-white transition-colors">Términos de Servicio</Link>
           <Link to={createPageUrl("PoliticaCookies")} className="hover:text-white transition-colors">Política de Cookies</Link>
         </div>
 
