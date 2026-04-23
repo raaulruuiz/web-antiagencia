@@ -209,22 +209,39 @@
   {
     "id": "verificar-publicaciones",
     "nombre": "Verificar publicaciones programadas",
-    "descripcion": "Comprueba en Publer si los posts programados ya se han publicado o han dado error, y actualiza el estado en Notion (Programado → Publicado o Error). Se ejecuta cada día a las 02:00.",
+    "descripcion": "Comprueba en Instagram, Facebook, YouTube, LinkedIn y TikTok si los posts programados ya se han publicado o han dado error, y actualiza el estado en Notion (Programado → Publicado o Error). Se ejecuta cada 30 minutos.",
     "tipo": "cron",
-    "schedule": "Diario · 02:00",
+    "schedule": "Cada 30 minutos",
     "apps": [
-      "Publer",
+      "Instagram",
+      "Facebook",
+      "YouTube",
+      "LinkedIn",
+      "TikTok",
       "Notion"
     ]
   },
   {
-    "id": "alerta-tiktok-aprobacion",
-    "nombre": "Alerta aprobación TikTok",
-    "descripcion": "Revisa raulruiztrafficker@gmail.com buscando emails de TikTok sobre la aprobación de la app. Si encuentra alguno, envía un aviso a raul@antiagencia.es. Se ejecuta a las 07:00, 14:00 y 21:00.",
+    "id": "refresh-tiktok-token",
+    "nombre": "Renovar token TikTok",
+    "descripcion": "Renueva automáticamente el access token de TikTok (expira cada 24h) usando el refresh token guardado en Supabase. Guarda el nuevo token en Supabase y notifica por Discord. Se ejecuta cada 23 horas.",
     "tipo": "cron",
-    "schedule": "Diario · 07:00, 14:00, 21:00",
+    "schedule": "Cada 23 horas",
     "apps": [
-      "Gmail"
+      "TikTok",
+      "Supabase",
+      "Discord"
+    ]
+  },
+  {
+    "id": "refresh-linkedin-token",
+    "nombre": "Renovar token LinkedIn",
+    "descripcion": "Renueva automáticamente el access token de LinkedIn (expira cada 60 días) usando el refresh token. Actualiza las variables en Railway y notifica por Discord. Se ejecuta cada lunes a las 10:00.",
+    "tipo": "cron",
+    "schedule": "Lunes · 10:00",
+    "apps": [
+      "LinkedIn",
+      "Discord"
     ]
   },
   {
