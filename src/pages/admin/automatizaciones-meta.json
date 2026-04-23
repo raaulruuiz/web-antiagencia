@@ -234,17 +234,6 @@
     ]
   },
   {
-    "id": "refresh-linkedin-token",
-    "nombre": "Renovar token LinkedIn",
-    "descripcion": "Renueva automáticamente el access token de LinkedIn (expira cada 60 días) usando el refresh token. Actualiza las variables en Railway y notifica por Discord. Se ejecuta cada lunes a las 10:00.",
-    "tipo": "cron",
-    "schedule": "Lunes · 10:00",
-    "apps": [
-      "LinkedIn",
-      "Discord"
-    ]
-  },
-  {
     "id": "sync-automatizaciones-meta",
     "nombre": "Sync panel automatizaciones",
     "descripcion": "GitHub Actions workflow que se dispara en cada push a la rama main del repo automatizaciones y actualiza automáticamente el panel de admin en web-antiagencia con los cambios.",
