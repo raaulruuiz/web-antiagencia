@@ -145,7 +145,7 @@ function AgendaSection({ eventos }) {
                 <span className="block text-xs text-green-500 mt-0.5">En curso</span>
               )}
             </div>
-            <div className={`flex-1 rounded-lg px-3 py-2.5 ${empezado && !e.todoElDia ? 'bg-blue-950/50 border border-blue-800/40' : 'bg-zinc-800/60'}`}>
+            <div className={`flex-1 min-w-0 rounded-lg px-3 py-2.5 ${empezado && !e.todoElDia ? 'bg-blue-950/50 border border-blue-800/40' : 'bg-zinc-800/60'}`}>
               <div className="flex items-start justify-between gap-2">
                 <p className="text-sm text-white font-medium leading-snug">{e.titulo}</p>
                 {e.calendario && (
@@ -153,7 +153,7 @@ function AgendaSection({ eventos }) {
                 )}
               </div>
               {e.asistentes?.length > 0 && (
-                <p className="text-xs text-zinc-500 mt-1 truncate">
+                <p className="text-xs text-zinc-500 mt-1 truncate min-w-0">
                   {e.asistentes.slice(0, 3).join(' · ')}{e.asistentes.length > 3 ? ` +${e.asistentes.length - 3}` : ''}
                 </p>
               )}
