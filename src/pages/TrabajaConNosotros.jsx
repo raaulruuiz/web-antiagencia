@@ -197,6 +197,8 @@ export default function TrabajaConNosotros() {
     <>Vamos a <strong>evitar un error muy común que cometen los dueños de tiendas online</strong> (incluso si llevan años con la tienda) y <strong>que está matando muchas ventas.</strong> Tiene que ver con el "cliente ideal".</>,
     <>¿Tu producto es muy similar al de tu competencia? ¿Incluso en precio? Hay <strong>una forma muy simple de diferenciarlo</strong> e incluso venderlo más caro.</>,
     <>Si alguna vez has escuchado sobre el LTV o la recurrencia, <strong>no te vas a tener que preocupar más por eso</strong>. Estarán prácticamente aseguradas (sin hacer nada más)</>,
+    <>Usaremos las <strong>3 fórmulas más económicas, rentables y efectivas</strong> (no tienen que ver con el pop up) para <strong>aumentar tu lista con personas de calidad</strong> que querrán comprar lo que tienes sin regatear.</>,
+    <>La pescadera de mi pueblo, una señora mayor y sin estudios, sabe bastante más de WhatsApp y SMS marketing que cualquiera que se dedique a esto. Por eso vamos a aplicar lo que aprendí de ella <strong>para que "vendas todo el pescao".</strong></>,
     <>Aplicaremos <strong>la estrategia mas simple y poco explorada de aumentar la venta cruzada</strong> y hacer que tus clientes te compren varios productos prácticamente en cada venta.</>,
   ];
 
