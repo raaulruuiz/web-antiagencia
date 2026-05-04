@@ -77,6 +77,12 @@ function MailerLiteForm() {
                   </div>
                 </div>
                 <div className="ml-form-fieldRow">
+                  <div className="ml-field-group ml-field-base_de_datos ml-validate-required">
+                    <label>¿Cuánta gente tienes en la base de datos?</label>
+                    <input aria-label="base_de_datos" aria-required="true" type="text" className="form-control" name="fields[base_de_datos]" placeholder="" />
+                  </div>
+                </div>
+                <div className="ml-form-fieldRow">
                   <div className="ml-field-group ml-field-facturacion_anual ml-validate-required">
                     <label>Facturación anual (año anterior a este)</label>
                     <input aria-label="facturacion_anual" aria-required="true" type="text" className="form-control" name="fields[facturacion_anual]" placeholder="" />
