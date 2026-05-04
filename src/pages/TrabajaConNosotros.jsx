@@ -26,9 +26,9 @@ const mailerLiteCSS = `
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-fieldRow input{background-color:#ffffff!important;color:#333333!important;border-color:#cccccc;border-radius:4px!important;border-style:solid!important;border-width:1px!important;font-family:'Open Sans',Arial,Helvetica,sans-serif;font-size:14px!important;height:auto;line-height:21px!important;margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;padding:10px 10px!important;width:100%!important;box-sizing:border-box!important;max-width:100%!important}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-fieldRow .custom-select{background-color:#ffffff!important;color:#333333!important;border-color:#cccccc;border-radius:4px!important;border-style:solid!important;border-width:1px!important;font-family:'Open Sans',Arial,Helvetica,sans-serif;font-size:14px!important;line-height:20px!important;margin-bottom:0;margin-top:0;padding:10px 28px 10px 12px!important;width:100%!important;box-sizing:border-box!important;max-width:100%!important;height:auto;display:inline-block;vertical-align:middle;background:url('https://assets.mlcdn.com/ml/images/default/dropdown.svg') no-repeat right .75rem center/8px 10px;-webkit-appearance:none;-moz-appearance:none;appearance:none}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit{margin:0 0 20px 0;float:left;width:100%}
-#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button{background-color:#0000ff!important;border:none!important;border-radius:4px!important;box-shadow:none!important;color:#ffffff!important;cursor:pointer;font-family:'Open Sans',Arial,Helvetica,sans-serif!important;font-size:14px!important;font-weight:700!important;line-height:21px!important;height:auto;padding:10px!important;width:100%!important;box-sizing:border-box!important}
+#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button{background-color:#7000FF!important;border:none!important;border-radius:4px!important;box-shadow:none!important;color:#ffffff!important;cursor:pointer;font-family:'Open Sans',Arial,Helvetica,sans-serif!important;font-size:14px!important;font-weight:700!important;line-height:21px!important;height:auto;padding:10px!important;width:100%!important;box-sizing:border-box!important}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button.loading{display:none}
-#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button:hover{background-color:#333333!important}
+#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button:hover{background-color:#0067FD!important}
 .ml-error input,.ml-error textarea,.ml-error select{border-color:red!important}
 .ml-error .label-description,.ml-error .label-description p,.ml-error .label-description p a,.ml-error label:first-child{color:#ff0000!important}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow.ml-error .label-description p,.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow.ml-error .label-description p:first-letter{color:#ff0000!important}
@@ -204,7 +204,7 @@ export default function TrabajaConNosotros() {
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">La manera más sencilla y eficaz de ganar (mucho) dinero con una tienda online…</h1>
               <br />
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-4">que ignoran casi todos los departamentos de marketing, de casi todas las tiendas del mundo.</h1>
-              <br /><br />
+              <br /><br /><br />
 
               <h2 className="text-xl font-bold text-center text-gray-900 mb-2">Por favor, lo primero que quiero que sepas es que no tengo una empresa, ni 40 empleados. Soy autónomo y en mi equipo estamos mi novia y yo.</h2>
               <br />
@@ -359,7 +359,8 @@ export default function TrabajaConNosotros() {
                 ))}
               </ul>
 
-              <p className="mb-4 mt-6">Por cierto, todo esto, por supuesto que lo aplicamos por ti, no te va a llevar tiempo extra que podrás emplear en otras cosas.</p>
+              <h3 className="text-xl font-bold text-center text-gray-900 mt-6 mb-4">Por cierto, todo esto, por supuesto que lo aplicamos por ti, no te va a llevar tiempo extra que podrás emplear en otras cosas.</h3>
+              <img src="/images/prueba-social-raul.jpg" alt="Prueba social" className="w-full my-4 rounded" />
 
               <ul className="mt-4 mb-6 space-y-6 list-none pl-0">
                 {bulletsSecond.map((item, i) => (
