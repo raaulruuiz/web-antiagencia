@@ -204,7 +204,7 @@ export default function TrabajaConNosotros() {
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">La manera más sencilla y eficaz de ganar (mucho) dinero con una tienda online…</h1>
               <br />
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-4">que ignoran casi todos los departamentos de marketing, de casi todas las tiendas del mundo.</h1>
-              <br /><br /><br />
+              <br /><br /><br /><br /><br />
 
               <h2 className="text-xl font-bold text-center text-gray-900 mb-2">Por favor, lo primero que quiero que sepas es que no tengo una empresa, ni 40 empleados. Soy autónomo y en mi equipo estamos mi novia y yo.</h2>
               <br />
@@ -360,7 +360,7 @@ export default function TrabajaConNosotros() {
               </ul>
 
               <h3 className="text-xl font-bold text-center text-gray-900 mt-6 mb-4">Por cierto, todo esto, por supuesto que lo aplicamos por ti, no te va a llevar tiempo extra que podrás emplear en otras cosas.</h3>
-              <img src="/images/prueba-social-raul.jpg" alt="Prueba social" className="w-full my-4 rounded" />
+              <img src="/images/prueba-social-raul.jpg" alt="Prueba social" className="w-full md:w-2/3 md:mx-auto block my-4 rounded" />
 
               <ul className="mt-4 mb-6 space-y-6 list-none pl-0">
                 {bulletsSecond.map((item, i) => (
