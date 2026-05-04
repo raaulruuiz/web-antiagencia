@@ -400,7 +400,7 @@ export default function TrabajaConNosotros() {
 
               <h2 className="text-xl font-bold text-gray-900 mb-4">¿Qué perfil de personas le sacarán mejor partido? </h2>
               <br />
-              <p className="mb-4">Las personas que más partido le sacan al servicio son personas con una lista de cierto tamaño (más 5.000 personas) y que se encuentran en alguna de estas situaciones: a final de mes tus gastos fijos "se comen" tu beneficio o dependes de dar descuentos para vender o nunca has mandado mails a esa lista o piensas que tu lista "es especial" y que tiene que ser tratada como si no hubiese humanos detrás de la pantalla donde leen. En cualquiera de estos casos, si estás dispuesto a ponerle solución por supuesto, le sacarás mucho partido al servicio.</p>
+              <p className="mb-4">Las personas que más partido le sacan al servicio son personas con una lista de cierto tamaño (más 5.000 personas) y que se encuentran en alguna de estas situaciones: a final de mes tus gastos fijos "se comen" tu beneficio o dependes de dar descuentos para vender o nunca has mandado mails a esa lista o los escribes con ChatGPT o piensas que "es que mis clientes no leen" o piensas que tu cliente o tu producto "es especial" y que tiene que ser tratada como si no hubiese humanos detrás de la pantalla donde leen y sobre todo, si tu facturación depende principalmente de la publicidad o de tu comunidad en redes sociales. En cualquiera de estos casos, si estás dispuesto a ponerle solución por supuesto, le sacarás mucho partido al servicio.</p>
               <br /><br />
 
               <h2 className="text-xl font-bold text-gray-900 mb-4">¿Cómo es la comunicación?</h2>
