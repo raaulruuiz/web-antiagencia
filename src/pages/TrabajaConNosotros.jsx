@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
 const mailerLiteCSS = `
-@import url("https://assets.mlcdn.com/fonts.css?version=1775464");
+@import url("https://assets.mlcdn.com/fonts.css?version=1777551");
 .ml-form-embedSubmitLoad{display:inline-block;width:20px;height:20px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 .ml-form-embedSubmitLoad:after{content:" ";display:block;width:11px;height:11px;margin:1px;border-radius:50%;border:4px solid #fff;border-color:#ffffff #ffffff #ffffff transparent;animation:ml-form-embedSubmitLoad 1.2s linear infinite}
@@ -26,9 +26,9 @@ const mailerLiteCSS = `
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-fieldRow input{background-color:#ffffff!important;color:#333333!important;border-color:#cccccc;border-radius:4px!important;border-style:solid!important;border-width:1px!important;font-family:'Open Sans',Arial,Helvetica,sans-serif;font-size:14px!important;height:auto;line-height:21px!important;margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;padding:10px 10px!important;width:100%!important;box-sizing:border-box!important;max-width:100%!important}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-fieldRow .custom-select{background-color:#ffffff!important;color:#333333!important;border-color:#cccccc;border-radius:4px!important;border-style:solid!important;border-width:1px!important;font-family:'Open Sans',Arial,Helvetica,sans-serif;font-size:14px!important;line-height:20px!important;margin-bottom:0;margin-top:0;padding:10px 28px 10px 12px!important;width:100%!important;box-sizing:border-box!important;max-width:100%!important;height:auto;display:inline-block;vertical-align:middle;background:url('https://assets.mlcdn.com/ml/images/default/dropdown.svg') no-repeat right .75rem center/8px 10px;-webkit-appearance:none;-moz-appearance:none;appearance:none}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit{margin:0 0 20px 0;float:left;width:100%}
-#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button{background-color:#7000FF!important;border:none!important;border-radius:4px!important;box-shadow:none!important;color:#ffffff!important;cursor:pointer;font-family:'Open Sans',Arial,Helvetica,sans-serif!important;font-size:14px!important;font-weight:700!important;line-height:21px!important;height:auto;padding:10px!important;width:100%!important;box-sizing:border-box!important}
+#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button{background-color:#0000ff!important;border:none!important;border-radius:4px!important;box-shadow:none!important;color:#ffffff!important;cursor:pointer;font-family:'Open Sans',Arial,Helvetica,sans-serif!important;font-size:14px!important;font-weight:700!important;line-height:21px!important;height:auto;padding:10px!important;width:100%!important;box-sizing:border-box!important}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button.loading{display:none}
-#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button:hover{background-color:#0067FD!important}
+#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button:hover{background-color:#333333!important}
 .ml-error input,.ml-error textarea,.ml-error select{border-color:red!important}
 .ml-error .label-description,.ml-error .label-description p,.ml-error .label-description p a,.ml-error label:first-child{color:#ff0000!important}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow.ml-error .label-description p,.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow.ml-error .label-description p:first-letter{color:#ff0000!important}
@@ -94,7 +94,6 @@ function MailerLiteForm() {
                     <select className="custom-select" name="fields[donacion]" aria-label="donacion" aria-required="true">
                       <option value="">-</option>
                       <option>AECC (Asociación Española Contra el Cáncer)</option>
-                      <option>Mariano Barbacid (Investigación contra el cáncer de páncreas)</option>
                       <option>Zooasis (protectora de animales)</option>
                       <option>Lo dejo a vuestra elección</option>
                     </select>
@@ -109,7 +108,7 @@ function MailerLiteForm() {
               </div>
               <input type="hidden" name="ml-submit" value="1" />
               <div className="ml-form-embedSubmit">
-                <button type="submit" className="primary">Solicitar presupuesto</button>
+                <button type="submit" className="primary">Solicitar el mejor presupuesto que me harán</button>
                 <button disabled type="button" className="loading" style={{ display: "none" }}>
                   <div className="ml-form-embedSubmitLoad"></div>
                   <span className="sr-only">Loading...</span>
@@ -120,9 +119,10 @@ function MailerLiteForm() {
           </div>
           <div className="ml-form-successBody row-success" style={{ display: "none" }}>
             <div className="ml-form-successContent">
-              <h4>¡Ya has solicitado el presupuesto!</h4>
+              <h4>Ya has solicitado el presupuesto!</h4>
               <p>Ahora revisaré tu tienda y lo que me has mandado y decidiré si me interesa que trabajemos juntos.</p>
-              <p>Independientemente de lo que decida te mandaré un correo para avisarte. Hablamos pronto.</p>
+              <p>Independientemente de lo que decida te mandaré un correo para avisarte de mi decisión. Y si es que si me interesa, te llamaré para pedirte más información para el presupuesto.</p>
+              <p>Hablamos pronto!</p>
             </div>
           </div>
         </div>
@@ -150,7 +150,7 @@ export default function TrabajaConNosotros() {
     fetch("https://assets.mailerlite.com/jsonp/686354/forms/182583896449222335/takel");
 
     const script = document.createElement("script");
-    script.src = "https://groot.mailerlite.com/js/w/webforms.min.js?v95037e5bac78f29ed026832ca21a7c7b";
+    script.src = "https://groot.mailerlite.com/js/w/webforms.min.js?vb397d78ebaa8a0f631d35384c46d781b";
     script.type = "text/javascript";
     script.id = "mailerlite-script-trabajaconnosotros";
     document.body.appendChild(script);
@@ -163,7 +163,7 @@ export default function TrabajaConNosotros() {
     };
   }, []);
 
-  const bullets = [
+  const bulletsFirst = [
     <><strong>Vamos a escribir tus mails siguiendo 3 pasos muy concretos para que la gente lea y compre.</strong> (Con un sistema que se ideó basándose en un tipo que conquistó a su mujer después de mandarle 1.460 mails).</>,
     <>Usaremos <strong>la manera más sencilla y honesta de subir los precios</strong> de tus productos sin complicarte la vida ni perder ventas.</>,
     <>Una estrategia tan sencilla que muy pocas marcas aplican y que <strong>permite subir el beneficio casi instantáneamente</strong>.</>,
@@ -181,6 +181,9 @@ export default function TrabajaConNosotros() {
     <>Como <strong>evitar perder ventas con los flujos automáticos</strong> por usarlos de forma incorrecta, como la mayoría de tiendas.</>,
     <>¿Que te pide cualquier plataforma para hacer publicidad o publicar en ella? El mail. Pues <strong>haremos que a tu cliente le sea irresistible no dejarte su correo</strong>.</>,
     <>Si no planificas con antelación, perderás ventas y aumentarás estrés. Por eso <strong>haremos un plan de 3 meses.</strong></>,
+  ];
+
+  const bulletsSecond = [
     <>Te mostraremos por qué <strong>personalizar tus mails suele ser una estrategia de principiantes</strong> (incluso en listas de miles de personas) y por qué puede matar buena parte de tus ventas.</>,
     <>Mejoraremos los resultados de todo lo que hagamos gracias a <strong>una funcionalidad de las plataformas que se usa muy poco</strong> y que es extremadamente útil.</>,
     <><strong>Si tienes un producto caro o complejo, no mandes a la gente a la página de producto. Te mostraremos una mejor forma de venderlos.</strong></>,
@@ -203,16 +206,16 @@ export default function TrabajaConNosotros() {
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-4">que ignoran casi todos los departamentos de marketing, de casi todas las tiendas del mundo.</h1>
               <br /><br />
 
-              <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">Por favor, lo primero que quiero que sepas es que no tengo una empresa, ni 40 empleados. Soy autónomo y en mi equipo estamos mi novia y yo.</h2>
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-2">Por favor, lo primero que quiero que sepas es que no tengo una empresa, ni 40 empleados. Soy autónomo y en mi equipo estamos mi novia y yo.</h2>
               <br />
-              <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">Tampoco tengo ninguna carrera universitaria ni máster de ningún tipo.</h2>
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-2">Tampoco tengo ninguna carrera universitaria ni máster de ningún tipo.</h2>
               <br />
-              <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">Si esto puede suponer un problema para ti, lo mejor es que dejes de leer aquí.</h2>
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-2">Si esto puede suponer un problema para ti, lo mejor es que dejes de leer aquí.</h2>
               <br /><br />
 
-              <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Pero antes de nada, ¿sabías que lo más importante que tienes en tu marca, quizá lo único verdaderamente importante, no es ni la publicidad, ni tus seguidores, ni tu página, ni el precio, ni siquiera el propio producto?</h2>
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">Pero antes de nada, ¿sabías que lo más importante que tienes en tu marca, quizá lo único verdaderamente importante, no es ni la publicidad, ni tus seguidores, ni tu página, ni el precio, ni siquiera el propio producto?</h2>
               <br />
-              <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Cuando…</h2>
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">Cuando…</h2>
               <br />
 
               <p className="mb-4">… la publicidad de mi tienda online empezó a funcionar peor de lo normal no le di mucha importancia.</p>
@@ -228,7 +231,9 @@ export default function TrabajaConNosotros() {
               <br />
               <p className="mb-4">Las noches se hacían eternas, sin dormir, pensando en que podía hacer para sobrevivir esta situación, el estrés de trabajar para apagar un fuego que no sabía cómo se había producido en primer lugar me comía por dentro…</p>
               <br />
+              <br />
               <p className="mb-4 text-center">Un día fue un punto de inflexión y por primera vez me vi bien jodido.</p>
+              <br />
               <br />
               <p className="mb-4">Hubo una actualización de meta ads (en ese momento todavía era Facebook ads) y según los nuevos cambios, mis anuncios no cumplían con las políticas.</p>
               <br />
@@ -257,8 +262,10 @@ export default function TrabajaConNosotros() {
               <br />
               <p className="mb-4">Al final, entre el estrés, los nervios y la angustia, no fui capaz de remontar la situación…</p>
               <br />
+              <br />
 
-              <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Tuve que cerrar la tienda y asumir el fracaso.</h2>
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">Tuve que cerrar la tienda y asumir el fracaso.</h2>
+              <br />
               <br />
 
               <p className="mb-4">Los siguientes meses fueron unos meses muertos para mí.</p>
@@ -299,8 +306,10 @@ export default function TrabajaConNosotros() {
               <br />
               <p className="mb-4">De Russell aprendí que hay que sacar al menos 1€ al mes por cada miembro de la lista.</p>
               <br />
+              <br />
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Ahora me parece poco.</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4" style={{ color: "#0067FD" }}>Ahora me parece poco.</h2>
+              <br />
               <br />
 
               <p className="mb-4">Después de esta experiencia me obsesioné con la lista.</p>
@@ -341,8 +350,8 @@ export default function TrabajaConNosotros() {
               <p className="mb-4">Lo positivo es que cualquiera de los dos casos tiene remedio, es por eso que con mis clientes aplico lo siguiente…</p>
               <br /><br />
 
-              <ul className="mt-4 mb-6 space-y-4 list-none pl-0">
-                {bullets.map((item, i) => (
+              <ul className="mt-4 mb-2 space-y-6 list-none pl-0">
+                {bulletsFirst.map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
                     <span>{item}</span>
@@ -350,10 +359,20 @@ export default function TrabajaConNosotros() {
                 ))}
               </ul>
 
-              <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Por cierto, todo esto, por supuesto que lo aplicamos por ti, no te va a llevar tiempo extra que podrás emplear en otras cosas.</h2>
+              <p className="mb-4 mt-6">Por cierto, todo esto, por supuesto que lo aplicamos por ti, no te va a llevar tiempo extra que podrás emplear en otras cosas.</p>
+
+              <ul className="mt-4 mb-6 space-y-6 list-none pl-0">
+                {bulletsSecond.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+
               <br />
 
-              <p className="mb-4"><strong>¿Podré dejar de tener que dar descuentos para que las personas de mi lista me compren?</strong></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Podré dejar de tener que dar descuentos para que las personas de mi lista me compren?</h3>
               <br />
               <p className="mb-4">Si, por supuesto. El objetivo principal de este servicio es tener una lista sana y fiel, que te compre independientemente de la situación y sin necesidad de descuentos. No es algo inmediato, pero si es la acción más rentable que puedes hacer para tu tienda.</p>
               <br /><br />
@@ -361,57 +380,49 @@ export default function TrabajaConNosotros() {
               <p className="mb-4">Pide tu presupuesto aquí: </p>
               <br />
               <MailerLiteForm />
-              <br />
-
-              <img
-                src="/images/45e269286_PRUEBASOCIAL.png"
-                alt="Prueba social"
-                className="w-full my-6"
-                style={{ filter: "invert(1)" }}
-              />
               <br /><br /><br />
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">¿Qué incluye el servicio?</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Qué incluye el servicio?</h2>
               <br />
               <p className="mb-4">Lo principal sobre lo que vamos a trabajar es el email marketing. Redactaremos y programaremos todos los mails (newsletters  periódicas y flujos) y los formularios de captación. Y también trabajaremos el copy de las fichas de producto de los productos que estemos vendiendo. <strong>Además</strong>, redactaremos un plan de acción trimestral para tener claridad en las acciones.</p>
               <br /><br />
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">¿Cuánto dura el servicio?</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Cuánto dura el servicio?</h2>
               <br />
               <p className="mb-4">El servicio dura 3 meses. Es la mejor forma de arrancar para poder hacer una buena investigación y que obtengas los mejores resultados posibles. Después de estos 3 meses, seguiremos mes a mes y sin ningún tipo de permanencia.</p>
               <br /><br />
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">¿Es muy caro? ¿Es barato?</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Es muy caro? ¿Es barato?</h2>
               <br />
               <p className="mb-4">Es cierto, no es barato. No te voy a negar esa realidad. Nosotros primamos otras cosas muy por encima del precio. E invertimos en ello para dar una experiencia de cliente más especial. Mucha gente no valora eso y solo busca precio, lo respetamos, pero no es al público al que va dirigido este servicio.</p>
               <br /><br />
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">¿Qué perfil de personas le sacarán mejor partido? </h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Qué perfil de personas le sacarán mejor partido? </h2>
               <br />
               <p className="mb-4">Las personas que más partido le sacan al servicio son personas con una lista de cierto tamaño (más 5.000 personas) y que se encuentran en alguna de estas situaciones: dependes de dar descuentos para vender o nunca has mandado mails a esa lista o piensas que tu lista "es especial" y que tiene que ser tratada como si no hubiese humanos detrás de la pantalla donde leen. En cualquiera de estos casos, si estás dispuesto a ponerle solución por supuesto, le sacarás mucho partido al servicio.</p>
               <br /><br />
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">¿Cómo es la comunicación?</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Cómo es la comunicación?</h2>
               <br />
               <p className="mb-4">Nos comunicaremos por WhatsApp, en un grupo donde estaremos nosotros y quien tu quieras de tu equipo. Si lo prefieres podemos usar otro canal de comunicación, pero preferimos WhatsApp por la inmediatez y la facilidad de uso.</p>
               <br /><br />
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">¿Hay algún tipo de garantía?</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún tipo de garantía?</h2>
               <br />
               <p className="mb-4">No, en ningún caso garantizamos resultados ni ninguna promesa de resultados concretos, ya que influyen demasiadas variables que no podemos controlar y que pueden afectar al trabajo.</p>
               <br /><br />
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">¿Hay algún bonus?</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún bonus?</h2>
               <br />
               <p className="mb-4">Si, el servicio es principalmente la redacción, montaje y gestión de la plataforma de email marketing, pero como bonus, ya que es muy importante, incluimos el copywritting de las fichas de producto que estemos trabajando y el plan estratégico trimestral. Ambas cosas son fundamentales para cualquier tienda online, por eso las incluimos.</p>
               <br /><br />
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">¿Cómo funciona eso de la donación?</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Cómo funciona eso de la donación?</h2>
               <br />
               <p className="mb-4">Por si no lo sabías, te cuento. Donamos un 10% de todo lo que nos pagas a una causa benéfica en la que creemos. La causa la eliges en el formulario al pedir el presupuesto y cada vez que recibamos un pago de tu parte, haremos la donación y te enviaremos el justificante.</p>
               <br /><br />
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">¿Es una buena inversión?</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Es una buena inversión?</h2>
               <br />
               <p className="mb-4">Si quieres tener una lista fiel, que te compre independientemente de si das descuento o no, sea la época del año que sea y con eso aumentar los beneficios netos de tu tienda, este servicio hará justo eso. Explotaremos al máximo el activo más importante y rentable que tienes, tu lista. A partir de ahí la decisión es tuya.</p>
               <br /><br />
@@ -419,14 +430,6 @@ export default function TrabajaConNosotros() {
               <p className="mb-4">Pide tu presupuesto aquí: </p>
               <br />
               <MailerLiteForm />
-              <br />
-
-              <img
-                src="/images/45e269286_PRUEBASOCIAL.png"
-                alt="Prueba social"
-                className="w-full my-6"
-                style={{ filter: "invert(1)" }}
-              />
               <br /><br /><br />
 
               <p className="mb-4">Espero que hayas disfrutado leyendo esta carta.</p>
