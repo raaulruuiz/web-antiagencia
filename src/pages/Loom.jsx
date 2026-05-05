@@ -136,6 +136,7 @@ export default function Loom() {
   const [errorMsg, setErrorMsg] = useState('');
   const [previewUrl, setPreviewUrl] = useState(null);
   const [pipContainer, setPipContainer] = useState(null); // portal mount point
+  const [recordingMode, setRecordingMode] = useState('video'); // 'video' | 'audio'
 
   const [bubblePos, setBubblePos] = useState({
     x: window.innerWidth - BUBBLE_SIZE - 40,
@@ -505,6 +506,50 @@ export default function Loom() {
     }
   };
 
+  // ── Start audio-only recording ──────────────────────────────────────────────
+  const startAudioRecording = async () => {
+    setErrorMsg('');
+    setDriveLink('');
+    setUploadStatus('');
+    setElapsed(0);
+    chunksRef.current = [];
+    setRecordingMode('audio');
+
+    let micStream;
+    try {
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      setErrorMsg('No se pudo acceder al micrófono: ' + err.message);
+      setRecordingMode('video');
+      return;
+    }
+
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : 'audio/webm';
+
+    const recorder = new MediaRecorder(micStream, { mimeType });
+    recorder.ondataavailable = e => { if (e.data?.size > 0) chunksRef.current.push(e.data); };
+    recorder.onstop = () => {
+      micStream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+      blobRef.current = blob;
+      setPreviewUrl(URL.createObjectURL(blob));
+      setStatusSync('preview');
+    };
+    recorderRef.current = recorder;
+
+    setCountdownSync(3);
+    setStatusSync('countdown');
+    await new Promise(r => setTimeout(r, 1000));
+    setCountdownSync(2); await new Promise(r => setTimeout(r, 1000));
+    setCountdownSync(1); await new Promise(r => setTimeout(r, 1000));
+    setCountdownSync(0);
+
+    recorder.start(1000);
+    setStatusSync('recording');
+  };
+
   const pauseRecording = () => {
     if (recorderRef.current?.state === 'recording') {
       recorderRef.current.pause();
@@ -544,6 +589,7 @@ export default function Loom() {
     setErrorMsg('');
     setElapsed(0);
     chunksRef.current = [];
+    setRecordingMode('video');
   };
 
   // ── Drive upload ────────────────────────────────────────────────────────────
@@ -555,7 +601,9 @@ export default function Loom() {
     setUploadStatus('uploading');
 
     try {
-      const fileName = `grabacion-${new Date().toISOString().replace(/[:.]/g, '-')}.webm`;
+      const ext = recordingMode === 'audio' ? 'webm' : 'webm';
+      const prefix = recordingMode === 'audio' ? 'audio' : 'grabacion';
+      const fileName = `${prefix}-${new Date().toISOString().replace(/[:.]/g, '-')}.${ext}`;
       const form = new FormData();
       form.append('file', blob, fileName);
       form.append('fileName', fileName);
@@ -654,6 +702,12 @@ export default function Loom() {
             >
               Iniciar grabacion
             </button>
+            <button
+              onClick={startAudioRecording}
+              className="border border-zinc-600 text-zinc-400 rounded-full px-8 py-3 text-sm hover:border-zinc-400 hover:text-white transition-colors"
+            >
+              🎙 Grabar solo sonido
+            </button>
           </div>
         )}
 
@@ -701,8 +755,13 @@ export default function Loom() {
         {/* Preview */}
         {status === 'preview' && previewUrl && (
           <div className="flex flex-col items-center gap-6 w-full max-w-2xl">
-            <h2 className="text-white text-xl font-semibold tracking-tight">Revisa la grabacion</h2>
-            <video src={previewUrl} controls className="w-full rounded-xl border border-zinc-800 bg-black" />
+            <h2 className="text-white text-xl font-semibold tracking-tight">
+              {recordingMode === 'audio' ? 'Revisa el audio' : 'Revisa la grabacion'}
+            </h2>
+            {recordingMode === 'audio'
+              ? <audio src={previewUrl} controls className="w-full rounded-xl" style={{ filter: 'invert(1) hue-rotate(180deg)' }} />
+              : <video src={previewUrl} controls className="w-full rounded-xl border border-zinc-800 bg-black" />
+            }
             <div className="flex gap-3">
               <button onClick={uploadToDrive} className="bg-white text-black rounded-full px-6 py-2.5 text-sm font-medium hover:bg-zinc-100 transition-colors">Subir a Drive</button>
               <button onClick={resetState} className="border border-zinc-600 text-zinc-300 rounded-full px-6 py-2.5 text-sm hover:border-zinc-400 transition-colors">Descartar</button>

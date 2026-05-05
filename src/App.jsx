@@ -30,6 +30,7 @@ import Gym from './pages/admin/Gym';
 import Briefing from './pages/admin/Briefing';
 import Copywriting from './pages/admin/Copywriting';
 import CopywritingPopup from './pages/admin/CopywritingPopup';
+import AdminHome from './pages/admin/AdminHome';
 
 // Guard para rutas de lector: redirige a /admin/users si no tiene permiso
 function RequirePage({ page, children }) {
@@ -121,6 +122,7 @@ function App() {
             <Route path="/admin/login" element={<LoomLogin redirectTo="/admin/dashboard" />} />
             <Route path="/loom-login"  element={<LoomLogin redirectTo="/admin/dashboard" />} />
             <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminHome />} />
               <Route path="dashboard"        element={<RequirePage page="dashboard"><Dashboard /></RequirePage>} />
               <Route path="loom"             element={<RequirePage page="loom"><Loom /></RequirePage>} />
               <Route path="users"            element={<AdminUsers />} />
