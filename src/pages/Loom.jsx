@@ -759,8 +759,22 @@ export default function Loom() {
               {recordingMode === 'audio' ? 'Revisa el audio' : 'Revisa la grabacion'}
             </h2>
             {recordingMode === 'audio'
-              ? <audio src={previewUrl} controls className="w-full rounded-xl" style={{ filter: 'invert(1) hue-rotate(180deg)' }} />
-              : <video src={previewUrl} controls className="w-full rounded-xl border border-zinc-800 bg-black" />
+              ? <audio src={previewUrl} controls className="w-full rounded-xl" style={{ filter: 'invert(1) hue-rotate(180deg)' }}
+                  onLoadedMetadata={e => {
+                    if (e.target.duration === Infinity) {
+                      e.target.currentTime = 1e101;
+                      e.target.ontimeupdate = () => { e.target.ontimeupdate = null; e.target.currentTime = 0; };
+                    }
+                  }}
+                />
+              : <video src={previewUrl} controls className="w-full rounded-xl border border-zinc-800 bg-black"
+                  onLoadedMetadata={e => {
+                    if (e.target.duration === Infinity) {
+                      e.target.currentTime = 1e101;
+                      e.target.ontimeupdate = () => { e.target.ontimeupdate = null; e.target.currentTime = 0; };
+                    }
+                  }}
+                />
             }
             <div className="flex gap-3">
               <button onClick={uploadToDrive} className="bg-white text-black rounded-full px-6 py-2.5 text-sm font-medium hover:bg-zinc-100 transition-colors">Subir a Drive</button>
