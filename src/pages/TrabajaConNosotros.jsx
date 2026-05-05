@@ -383,7 +383,7 @@ export default function TrabajaConNosotros() {
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Podré dejar de tener que dar descuentos para que las personas de mi lista me compren?</h3>
               <br />
-              <p className="mb-4">Si, por supuesto. El objetivo principal de este servicio es tener una lista sana y fiel, que te compre independientemente de la situación y sin necesidad de descuentos. No es algo inmediato, pero si es la acción más rentable que puedes hacer para tu tienda.</p>
+              <p className="mb-4">Si, por supuesto. El objetivo principal de este servicio es tener una lista sana y fiel, que te compre independientemente de la situación y sin necesidad de descuentos. Que te quieran comprar incluso si cambias de negocio y empiezas a vender otra cosa que no tenga nada que ver. No es algo inmediato, pero si es la acción más rentable que puedes hacer para tu tienda.</p>
               <br /><br />
 
               <p className="mb-4">Pide tu presupuesto aquí: </p>
@@ -418,7 +418,7 @@ export default function TrabajaConNosotros() {
 
               <h2 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún tipo de garantía?</h2>
               <br />
-              <p className="mb-4">No, en ningún caso garantizamos resultados ni ninguna promesa de resultados concretos, ya que influyen demasiadas variables que no podemos controlar y que pueden afectar al trabajo.</p>
+              <p className="mb-4">No.</p>
               <br /><br />
 
               <h2 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún bonus?</h2>
@@ -433,7 +433,7 @@ export default function TrabajaConNosotros() {
 
               <h2 className="text-xl font-bold text-gray-900 mb-4">¿Es una buena inversión?</h2>
               <br />
-              <p className="mb-4">Si quieres tener una lista fiel, que te compre independientemente de si das descuento o no, sea la época del año que sea y con eso aumentar los beneficios netos de tu tienda, este servicio hará justo eso. Explotaremos al máximo el activo más importante y rentable que tienes, tu lista. A partir de ahí la decisión es tuya.</p>
+              <p className="mb-4">Si quieres tener una lista fiel, que te compre independientemente de si das descuento o no, sea la época del año que sea o incluso si cambias de negocio, y con eso aumentar los beneficios netos de tu tienda, este servicio hará justo eso. Explotaremos al máximo el activo más importante y rentable que tienes, tu lista. A partir de ahí la decisión es tuya.</p>
               <br /><br />
 
               <p className="mb-4">Pide tu presupuesto aquí: </p>
