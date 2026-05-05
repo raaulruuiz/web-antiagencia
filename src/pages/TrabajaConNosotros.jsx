@@ -194,7 +194,7 @@ export default function TrabajaConNosotros() {
     <>Mejoraremos los resultados de todo lo que hagamos gracias a <strong>una funcionalidad de las plataformas que se usa muy poco</strong> y que es extremadamente útil.</>,
     <><strong>Si tienes un producto caro o complejo, no mandes a la gente a la página de producto. Te mostraremos una mejor forma de venderlos.</strong></>,
     <><strong>Cómo aprovechar la IA (sin usarla) para adelantar a toda tu competencia que si la usa.</strong></>,
-    <>Vamos a <strong>evitar un error muy común que cometen los dueños de tiendas online</strong> (incluso si llevan años con la tienda) y <strong>que está matando muchas ventas.</strong> Tiene que ver con el "cliente ideal".</>,
+    <>Vamos a <strong>evitar un error muy común que cometen los dueños de tiendas online</strong> (incluso si llevan años con la tienda) y <strong>que está matando muchas ventas.</strong> Tiene que ver con esa tontería del "cliente ideal".</>,
     <>¿Tu producto es muy similar al de tu competencia? ¿Incluso en precio? Hay <strong>una forma muy simple de diferenciarlo</strong> e incluso venderlo más caro.</>,
     <>Si alguna vez has escuchado sobre el LTV o la recurrencia, <strong>no te vas a tener que preocupar más por eso</strong>. Estarán prácticamente aseguradas (sin hacer nada más)</>,
     <>Usaremos las <strong>3 fórmulas más económicas, rentables y efectivas</strong> (no tienen que ver con el pop up) para <strong>aumentar tu lista con personas de calidad</strong> que querrán comprar lo que tienes sin regatear.</>,
