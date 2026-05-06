@@ -3,37 +3,36 @@ import FooterMinimal from "@/components/landing/FooterMinimal";
 
 export default function UltimoPaso() {
   return (
-    <div className="min-h-screen bg-[#121212] text-white flex flex-col">
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <div className="flex-1 flex flex-col items-center px-6 pt-16 pb-16">
 
         {/* Logo */}
         <img
-          src="/images/6130113b7_AALogo.png"
+          src="https://media.base44.com/images/public/697678eac9cf34e2aefb7d57/82b3b8d5c_freepik__background__33914.png"
           alt="AntiAgencia"
           className="h-14 w-auto mb-10"
         />
 
         {/* Título */}
-        <h1 className="font-headline font-bold text-white text-3xl md:text-5xl text-center tracking-widest mb-8">
+        <h1 className="font-headline font-bold text-gray-900 text-3xl md:text-5xl text-center tracking-widest mb-8">
           AÚN NO ESTÁS EN LA LISTA
         </h1>
 
         {/* Texto principal */}
-        <p className="font-body text-white/70 text-base md:text-lg text-center max-w-xl leading-relaxed mb-10">
-          Te acaba de llegar a tu mail un correo donde podrás confirmar tu correo para recibir el audio de 18 minutos y 3 segundos que te dará la misma o más información que formaciones y consultorías de miles de euros.
+        <p className="font-body text-gray-600 text-base md:text-lg text-center max-w-xl leading-relaxed mb-10">
+          Te acaba de llegar a tu mail un correo donde podrás confirmar tu correo para recibir el ebook de 16 páginas donde te cuento como mi sobrino de 3 años te enseña a vender más con tu tienda online.
           <br /><br />
           Puede que esté en spam o en la bandeja de notificaciones, en ese caso añade la dirección raul@antiagencia.es a tu lista de contactos.
         </p>
 
         {/* Subtítulo */}
-        <h2 className="font-headline font-bold text-white text-xl md:text-2xl text-center tracking-widest mb-6">
+        <h2 className="font-headline font-bold text-gray-900 text-xl md:text-2xl text-center tracking-widest mb-6">
           MUY IMPORTANTE
         </h2>
 
         {/* Texto regalo secreto */}
-        <p className="font-body text-white/70 text-base md:text-lg text-center max-w-xl leading-relaxed mb-10">
-          Una vez confirmes tu suscripción se abrirá una nueva página (no la cierres) donde tendrás acceso a unos{" "}
-          <strong className="text-white">REGALOS SECRETOS</strong>
+        <p className="font-body text-gray-600 text-base md:text-lg text-center max-w-xl leading-relaxed mb-10">
+          Una vez confirmes tu suscripción se abrirá una nueva página (no la cierres) donde tendrás acceso al ebook
         </p>
 
         {/* Botones de confirmación */}
@@ -57,7 +56,7 @@ export default function UltimoPaso() {
         </div>
 
         {/* Texto bajo los botones */}
-        <p className="font-body text-white/40 text-sm text-center max-w-md leading-relaxed">
+        <p className="font-body text-gray-400 text-sm text-center max-w-md leading-relaxed">
           Si el mail que has puesto no es ninguno de estos dos, no pasa nada. El proceso es el mismo.
         </p>
 
