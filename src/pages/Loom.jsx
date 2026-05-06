@@ -137,6 +137,7 @@ export default function Loom() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [pipContainer, setPipContainer] = useState(null); // portal mount point
   const [recordingMode, setRecordingMode] = useState('video'); // 'video' | 'audio'
+  const [customFileName, setCustomFileName] = useState('');
 
   const [bubblePos, setBubblePos] = useState({
     x: window.innerWidth - BUBBLE_SIZE - 40,
@@ -535,6 +536,8 @@ export default function Loom() {
       const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
       blobRef.current = blob;
       setPreviewUrl(URL.createObjectURL(blob));
+      const now = new Date();
+      setCustomFileName(`Audio ${now.toLocaleDateString('es-ES')} ${now.getHours()}-${String(now.getMinutes()).padStart(2, '0')}`);
       setStatusSync('preview');
     };
     recorderRef.current = recorder;
@@ -576,6 +579,8 @@ export default function Loom() {
     const blob = new Blob(chunksRef.current, { type: 'video/webm' });
     blobRef.current = blob;
     setPreviewUrl(URL.createObjectURL(blob));
+    const now = new Date();
+    setCustomFileName(`Grabacion ${now.toLocaleDateString('es-ES')} ${now.getHours()}-${String(now.getMinutes()).padStart(2, '0')}`);
     setStatusSync('preview');
   };
 
@@ -601,9 +606,8 @@ export default function Loom() {
     setUploadStatus('uploading');
 
     try {
-      const ext = recordingMode === 'audio' ? 'webm' : 'webm';
-      const prefix = recordingMode === 'audio' ? 'audio' : 'grabacion';
-      const fileName = `${prefix}-${new Date().toISOString().replace(/[:.]/g, '-')}.${ext}`;
+      const fallback = recordingMode === 'audio' ? 'audio' : 'grabacion';
+      const fileName = `${customFileName.trim() || fallback}.webm`;
       const form = new FormData();
       form.append('file', blob, fileName);
       form.append('fileName', fileName);
@@ -776,6 +780,16 @@ export default function Loom() {
                   }}
                 />
             }
+            <div className="flex items-center gap-2 w-full">
+              <input
+                type="text"
+                value={customFileName}
+                onChange={e => setCustomFileName(e.target.value)}
+                className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-zinc-500"
+                placeholder="Nombre del archivo"
+              />
+              <span className="text-zinc-500 text-sm">.webm</span>
+            </div>
             <div className="flex gap-3">
               <button onClick={uploadToDrive} className="bg-white text-black rounded-full px-6 py-2.5 text-sm font-medium hover:bg-zinc-100 transition-colors">Subir a Drive</button>
               <button onClick={resetState} className="border border-zinc-600 text-zinc-300 rounded-full px-6 py-2.5 text-sm hover:border-zinc-400 transition-colors">Descartar</button>
