@@ -96,7 +96,9 @@ export default function Home() {
             <div className="text-gray-800 text-base leading-relaxed">
 
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">¿Qué tiene que ver una tienda que tiene beneficios...</h1>
+              <br />
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">con una que no llega a final de mes...</h1>
+              <br />
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-8">con un niño de 3 años?</h1>
 
               <br />
@@ -164,12 +166,12 @@ export default function Home() {
 
               <br />
               <p className="mb-2">Si te interesa, deja tu correo por aquí:</p>
-              <br />
+              <p className="mb-4 text-sm text-gray-500">* Suscribirse es gratis. Darse de baja, también.</p>
 
               <MailerLiteForm />
 
               <br />
-              <p className="mb-4 text-sm text-gray-500">* Suscribirse es gratis. Darse de baja, también. Al dejar tu correo aceptas recibir emails de Raúl Ruiz Romero (raul@antiagencia.es) con contenido sobre marketing y ventas. Puedes darte de baja en cualquier momento desde el propio email. Tus datos no se cederán a terceros.</p>
+              <p className="mb-4 text-xs text-gray-400">Para cumplir con el RGPD (Reglamento General de Protección de Datos) y entender que tus datos están seguros, debes leer y aceptar la política de privacidad. Tus datos serán guardados en MailerLite, proveedor de email marketing. MailerLite también cumple con el RGPD, así que todo está protegido y amparado por la ley.</p>
               <br /><br />
 
               <p className="mb-4">Espero que disfrutes el ebook.</p>
