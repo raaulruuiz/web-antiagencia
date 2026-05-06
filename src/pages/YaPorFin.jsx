@@ -21,7 +21,7 @@ export default function YaPorFin() {
         {/* Texto principal */}
         <div className="font-body text-gray-600 text-base md:text-lg text-center max-w-xl leading-relaxed mb-10">
           <p className="mb-6">Ya por fin estás dentro de esta increíble lista. Ahora te llegará otro mail con el ebook para que lo tengas también por ahí.</p>
-          <p className="mb-6">Aquí tienes también el ebook</p>
+          <p className="mb-6">Mientras tanto, puedes leerlo aquí:</p>
         </div>
 
         {/* PDF embed */}
