@@ -12,7 +12,6 @@ import Newsletter from './pages/Newsletter';
 import UltimoPaso from './pages/UltimoPaso';
 import YaPorFin from './pages/YaPorFin';
 import Home from './pages/Home';
-import HomeABTest from './pages/HomeABTest';
 import AudioSecreto from './pages/AudioSecreto';
 import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotros from './pages/TrabajaConNosotros'
@@ -81,7 +80,7 @@ const AuthenticatedApp = () => {
   return (
     <>
     <Routes>
-      <Route path="/" element={<PixelLayout><HomeABTest /></PixelLayout>} />
+      <Route path="/" element={<PixelLayout><Home /></PixelLayout>} />
       <Route path="/webtipica" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
