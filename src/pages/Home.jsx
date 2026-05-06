@@ -132,6 +132,7 @@ export default function Home() {
               <p className="mb-4">Si ganas poco, ganarás más.</p>
               <p className="mb-4">Y si ya ganas mucho, ganarás más.</p>
               <br />
+              <br />
 
               <p className="mb-4">Después de eso te mandaré un email al día.</p>
               <p className="mb-4">Ofreciéndote mis servicios.</p>
