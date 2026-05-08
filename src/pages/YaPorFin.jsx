@@ -40,14 +40,16 @@ export default function YaPorFin() {
             href="/ebook-sobrino.pdf"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full text-center bg-black text-white font-bold py-4 px-8 rounded-full text-lg tracking-wide"
+            className="w-full text-center font-bold py-4 px-8 rounded-full text-lg tracking-wide text-white"
+            style={{ backgroundColor: '#0067FD' }}
           >
             Leer el ebook
           </a>
           <a
             href="/ebook-sobrino.pdf"
             download
-            className="w-full text-center border-2 border-black text-black font-bold py-4 px-8 rounded-full text-lg tracking-wide"
+            className="w-full text-center font-bold py-4 px-8 rounded-full text-lg tracking-wide text-white"
+            style={{ backgroundColor: '#7000FF' }}
           >
             Descargar PDF
           </a>
