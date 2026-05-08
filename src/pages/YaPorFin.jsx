@@ -24,14 +24,33 @@ export default function YaPorFin() {
           <p className="mb-6">Mientras tanto, puedes leerlo aquí:</p>
         </div>
 
-        {/* PDF embed */}
-        <div className="w-full max-w-3xl mb-10">
+        {/* PDF embed — desktop */}
+        <div className="hidden md:block w-full max-w-3xl mb-10">
           <iframe
             src="/ebook-sobrino.pdf"
             className="w-full rounded-lg shadow-lg"
             style={{ height: "80vh", minHeight: "600px" }}
             title="Ebook sobrino 3 años"
           />
+        </div>
+
+        {/* PDF — móvil: botón de apertura directa */}
+        <div className="md:hidden w-full max-w-sm mb-10 flex flex-col items-center gap-4">
+          <a
+            href="/ebook-sobrino.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full text-center bg-black text-white font-bold py-4 px-8 rounded-full text-lg tracking-wide"
+          >
+            Leer el ebook
+          </a>
+          <a
+            href="/ebook-sobrino.pdf"
+            download
+            className="w-full text-center border-2 border-black text-black font-bold py-4 px-8 rounded-full text-lg tracking-wide"
+          >
+            Descargar PDF
+          </a>
         </div>
 
       </div>
