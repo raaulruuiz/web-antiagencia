@@ -40,16 +40,20 @@ export default function YaPorFin() {
             href="/ebook-sobrino.pdf"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full text-center font-bold py-4 px-8 rounded-full text-lg tracking-wide text-white"
-            style={{ backgroundColor: '#0067FD' }}
+            className="w-full text-center font-bold py-4 px-8 rounded-full text-lg tracking-wide text-white transition-colors duration-200"
+            style={{ backgroundColor: '#7000FF' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#0067FD'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#7000FF'}
           >
             Leer el ebook
           </a>
           <a
             href="/ebook-sobrino.pdf"
             download
-            className="w-full text-center font-bold py-4 px-8 rounded-full text-lg tracking-wide text-white"
-            style={{ backgroundColor: '#7000FF' }}
+            className="w-full text-center font-bold py-4 px-8 rounded-full text-lg tracking-wide transition-colors duration-200"
+            style={{ border: '2px solid #7000FF', color: '#7000FF' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#0067FD'; e.currentTarget.style.color = '#0067FD'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#7000FF'; e.currentTarget.style.color = '#7000FF'; }}
           >
             Descargar PDF
           </a>
