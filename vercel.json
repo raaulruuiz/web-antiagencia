@@ -1,4 +1,7 @@
 {
+  "redirects": [
+    { "source": "/newsletter", "destination": "/", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
