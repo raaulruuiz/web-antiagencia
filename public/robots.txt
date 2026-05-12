@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /admin/
+Disallow: /loom-login
+Disallow: /audiosecreto
+Disallow: /tiktok-connect
+Disallow: /UltimoPaso
+Disallow: /YaPorFin
+Disallow: /Gracias
+Disallow: /newsletter-vieja
+Disallow: /trabajaconnosotros-old
+Disallow: /webtipica
+
+Sitemap: https://antiagencia.es/sitemap.xml
