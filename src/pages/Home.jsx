@@ -106,6 +106,9 @@ export default function Home() {
               <MailerLiteForm />
 
               <br />
+              <p className="mb-4 text-xs text-gray-400">Para cumplir con el RGPD (Reglamento General de Protección de Datos) y entender que tus datos están seguros, debes leer y aceptar la política de privacidad. Tus datos serán guardados en MailerLite, proveedor de email marketing. MailerLite también cumple con el RGPD, así que todo está protegido y amparado por la ley.</p>
+
+              <br />
 
               <p className="mb-4">Cuando te suscribes, recibes un ebook de 16 páginas que incluye:</p>
 
@@ -125,6 +128,10 @@ export default function Home() {
                 <li className="flex items-start gap-3">
                   <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
                   <span><strong>Un bonus secreto para aumentar todavía más las ventas.</strong></span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
+                  <span><strong>Suscribirse es gratis</strong>, darse de baja, también.</span>
                 </li>
               </ul>
 
