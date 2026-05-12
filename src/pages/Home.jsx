@@ -111,9 +111,8 @@ export default function Home() {
               <br />
 
               <p className="mb-4"><strong>¿Qué un niño de 3 años puede ayudarte a vender más?</strong></p>
-              <br />
               <p className="mb-4">Por supuesto no te pido que me creas, pero...</p>
-
+              <br />
               <p className="mb-4">Cuando te suscribes, recibes un ebook de 16 páginas que incluye:</p>
 
               <ul className="mt-2 mb-6 space-y-4 list-none pl-0">
