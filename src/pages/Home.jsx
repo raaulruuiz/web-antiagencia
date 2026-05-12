@@ -107,7 +107,7 @@ export default function Home() {
 
               <br />
 
-              <p className="mb-4">Cuando te suscribes a la lista recibes un ebook que incluye:</p>
+              <p className="mb-4">Cuando te suscribes, recibes un ebook de 16 páginas que incluye:</p>
 
               <ul className="mt-2 mb-6 space-y-4 list-none pl-0">
                 <li className="flex items-start gap-3">
