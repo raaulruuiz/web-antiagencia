@@ -110,7 +110,7 @@ export default function Home() {
 
               <br />
 
-              <p className="mb-4"><strong>¿Qué un niño de 3 años puede ayudarte a vender más?</strong></p>
+              <h3 className="text-lg md:text-xl font-bold mb-4">¿Qué un niño de 3 años puede ayudarte a vender más?</h3>
               <p className="mb-4">Por supuesto no te pido que me creas, pero...</p>
               <br />
               <p className="mb-4">Cuando te suscribes, recibes un ebook de 16 páginas que incluye:</p>
