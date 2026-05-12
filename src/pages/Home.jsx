@@ -95,7 +95,7 @@ export default function Home() {
           <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
             <div className="text-gray-800 text-base leading-relaxed">
 
-              <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-loose mb-8">Cómo <span className="underline">aumentar las ventas de tu tienda</span>… con un ejercicio que aprendí de un niño de 3 años y que puedes implementar <span className="underline">en menos de 5 minutos.</span></h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-[50px] md:leading-[80px] mb-8">Cómo <span className="underline">aumentar las ventas de tu tienda</span>… con un ejercicio que aprendí de un niño de 3 años y que puedes implementar <span className="underline">en menos de 5 minutos.</span></h1>
 
               <br />
 
