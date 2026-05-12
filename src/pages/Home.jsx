@@ -95,57 +95,16 @@ export default function Home() {
           <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
             <div className="text-gray-800 text-base leading-relaxed">
 
-              <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">¿Qué tiene que ver una tienda que tiene beneficios...</h1>
-              <br />
-              <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">con una que no llega a final de mes...</h1>
-              <br />
-              <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-8">con un niño de 3 años?</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-8">Cómo aumentar las ventas de tu tienda… con un ejercicio que aprendí de un niño de 3 años y que puedes implementar en menos de 5 minutos.</h1>
 
               <br />
-              <p className="mb-4">Verás,</p>
-              <p className="mb-4">Hay una verdad universal.</p>
-              <p className="mb-4">Creo que es universal.</p>
-              <p className="mb-4">Y es que <strong>montamos&nbsp;nuestras tiendas para ganar dinero.</strong></p>
-              <p className="mb-4">Quizá hay algún despistado que lo monta para otra cosa.</p>
-              <p className="mb-4">Pero en general es así.</p>
-              <p className="mb-4">(si eres de esos despistados, puede ser bueno que dejes de leer aquí)</p>
-              <br /><br />
 
-              <p className="mb-4">Puede ser que te vaya bien.</p>
-              <p className="mb-4">O puede ser que te vaya mal.</p>
+              <p className="mb-4">En este ebook de <span className="underline">16 páginas</span>, te voy a contar algo que mi sobrino de 3 años no para de decir y que, casi seguro, te va a ayudar a <span className="underline">aumentar las ventas de tu tienda online</span>.</p>
+
               <br />
 
-              <p className="text-center mb-4"><span className="underline">No hay término medio.</span></p>
-              <br />
+              <MailerLiteForm />
 
-              <p className="mb-4">Quiero decir, si no creces, decreces.</p>
-              <p className="mb-4">Eso es otra verdad universal.</p>
-              <br /><br />
-
-              <p className="mb-4"><span className="underline"><strong>¿Y el niño de 3 años?</strong></span></p>
-              <p className="mb-4">Bien.</p>
-              <p className="mb-4">Antes del niño, deberías saber que mi trabajo es escribir para que la gente compre.</p>
-              <p className="mb-4">Mails y fichas de producto.</p>
-              <br />
-
-              <p className="mb-4">Dicho esto, debajo te puedes descargar un ebook donde te hablo de <strong>mi sobrino, que tiene 3 años</strong>, y como los niños son los mejores vendedores del mundo (eso es otra verdad universal), <strong>te enseña como puedes aumentar el número de gente que te compra en tu tienda en menos de 5 minutos.</strong></p>
-              <p className="mb-4">Si ganas poco, ganarás más.</p>
-              <p className="mb-4">Y si ya ganas mucho, ganarás más.</p>
-              <br />
-              <br />
-
-              <p className="mb-4">Después de eso te mandaré un email al día.</p>
-              <p className="mb-4">Ofreciéndote mis servicios.</p>
-              <p className="mb-4">Es mi trabajo y si vendo eso, que menos que lo haga yo para mi...</p>
-              <p className="mb-4">Que ya sabes que hay mucho vendehumos que nunca se ha dedicado a lo que vende.</p>
-              <p className="mb-4">No te preocupes, que <span className="underline">darse de baja es gratis</span>.</p>
-              <p className="mb-4">Pero si te quedas lo mismo hasta aprendes algo.</p>
-              <br /><br />
-
-              <p className="mb-4">El caso.</p>
-              <br /><br />
-
-              <p className="mb-4"><span className="underline"><strong>¿Quieres ver lo que te puede enseñar mi sobrino de 3 años?</strong></span></p>
               <br />
 
               <p className="mb-4">Cuando te suscribes a la lista recibes un ebook que incluye:</p>
@@ -163,11 +122,13 @@ export default function Home() {
                   <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
                   <span>También vas a ver ejemplos de distintos sectores. <strong>Ejemplos de tiendas reales</strong> que he visitado y a las que he aplicado este ejercicio. (quien sabe, quizá es la tuya)</span>
                 </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
+                  <span><strong>Un bonus secreto para aumentar todavía más las ventas.</strong></span>
+                </li>
               </ul>
 
               <br />
-              <p className="mb-2">Si te interesa, deja tu correo por aquí:</p>
-              <p className="mb-4 text-sm text-gray-500">* Suscribirse es gratis. Darse de baja, también.</p>
 
               <MailerLiteForm />
 
