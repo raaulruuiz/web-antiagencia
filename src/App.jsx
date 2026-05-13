@@ -4,7 +4,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -31,6 +31,8 @@ import Copywriting from './pages/admin/Copywriting';
 import CopywritingPopup from './pages/admin/CopywritingPopup';
 import AdminHome from './pages/admin/AdminHome';
 import EmailBuilder from './pages/admin/EmailBuilder';
+import Paginas from './pages/admin/Paginas';
+import { supabase } from '@/lib/supabaseClient';
 
 // Guard para rutas de lector: redirige a /admin/users si no tiene permiso
 function RequirePage({ page, children }) {
@@ -46,6 +48,58 @@ function PageViewTracker() {
   return null;
 }
 
+// ── SmartPage: sirve contenido de Supabase si existe, si no el componente React ──
+function SmartPage({ path, children }) {
+  const [dbData, setDbData] = useState(undefined); // undefined = loading
+  useEffect(() => {
+    supabase.from('paginas').select('contenido,meta_titulo,meta_descripcion,indexada')
+      .eq('path', path).maybeSingle()
+      .then(({ data }) => setDbData(data || null));
+  }, [path]);
+
+  useEffect(() => {
+    if (!dbData) return;
+    if (dbData.meta_titulo) document.title = dbData.meta_titulo;
+    let desc = document.querySelector('meta[name="description"]');
+    if (dbData.meta_descripcion) {
+      if (!desc) { desc = document.createElement('meta'); desc.name = 'description'; document.head.appendChild(desc); }
+      desc.content = dbData.meta_descripcion;
+    }
+    let robots = document.querySelector('meta[name="robots"]');
+    if (dbData.indexada === false) {
+      if (!robots) { robots = document.createElement('meta'); robots.name = 'robots'; document.head.appendChild(robots); }
+      robots.content = 'noindex';
+    } else if (robots) {
+      robots.remove();
+    }
+  }, [dbData]);
+
+  if (dbData === undefined) return null; // loading
+  if (dbData?.contenido) return <div dangerouslySetInnerHTML={{ __html: dbData.contenido }} />;
+  return children;
+}
+
+// ── Páginas dinámicas (creadas desde el admin, no hardcodeadas) ──
+function DynamicPage() {
+  const location = useLocation();
+  const [page, setPage] = useState(undefined);
+
+  useEffect(() => {
+    supabase.from('paginas').select('*')
+      .eq('path', location.pathname).eq('publicada', true).maybeSingle()
+      .then(({ data }) => setPage(data || null));
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!page) return;
+    if (page.meta_titulo) document.title = page.meta_titulo;
+  }, [page]);
+
+  if (page === undefined) return null;
+  if (!page) return <PageNotFound />;
+  return <div dangerouslySetInnerHTML={{ __html: page.contenido }} />;
+}
+
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -57,7 +111,6 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -66,43 +119,38 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
   return (
     <>
     <Routes>
-      <Route path="/" element={<PixelLayout><Home /></PixelLayout>} />
+      <Route path="/" element={<SmartPage path="/"><PixelLayout><Home /></PixelLayout></SmartPage>} />
       <Route path="/webtipica" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
+        <Route key={path} path={`/${path}`}
           element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
+            <SmartPage path={`/${path}`}>
+              <LayoutWrapper currentPageName={path}><Page /></LayoutWrapper>
+            </SmartPage>
           }
         />
       ))}
-      <Route path="/newsletter-vieja" element={<LayoutWrapper currentPageName="Newsletter"><Newsletter /></LayoutWrapper>} />
+      <Route path="/newsletter-vieja" element={<SmartPage path="/newsletter-vieja"><LayoutWrapper currentPageName="Newsletter"><Newsletter /></LayoutWrapper></SmartPage>} />
       <Route path="/audiosecreto" element={<AudioSecreto />} />
-      <Route path="/UltimoPaso" element={<LayoutWrapper currentPageName="UltimoPaso"><UltimoPaso /></LayoutWrapper>} />
-      <Route path="/YaPorFin" element={<LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper>} />
-      <Route path="/TrabajaConNosotros" element={<LayoutWrapper currentPageName="TrabajaConNosotros"><TrabajaConNosotros /></LayoutWrapper>} />
+      <Route path="/UltimoPaso" element={<SmartPage path="/UltimoPaso"><LayoutWrapper currentPageName="UltimoPaso"><UltimoPaso /></LayoutWrapper></SmartPage>} />
+      <Route path="/YaPorFin" element={<SmartPage path="/YaPorFin"><LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper></SmartPage>} />
+      <Route path="/TrabajaConNosotros" element={<SmartPage path="/TrabajaConNosotros"><LayoutWrapper currentPageName="TrabajaConNosotros"><TrabajaConNosotros /></LayoutWrapper></SmartPage>} />
       <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
-      <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+      <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
-      <Route path="*" element={<PageNotFound />} />
+      <Route path="*" element={<DynamicPage />} />
     </Routes>
     <CookieBanner />
     </>
@@ -130,7 +178,8 @@ function App() {
               <Route path="gym"              element={<RequirePage page="gym"><Gym /></RequirePage>} />
               <Route path="briefing"         element={<RequirePage page="briefing"><Briefing /></RequirePage>} />
               <Route path="copywriting"      element={<RequirePage page="copywriting"><Copywriting /></RequirePage>} />
-              <Route path="email-builder"   element={<RequirePage page="email-builder"><EmailBuilder /></RequirePage>} />
+              <Route path="email-builder"    element={<RequirePage page="email-builder"><EmailBuilder /></RequirePage>} />
+              <Route path="paginas"          element={<RequirePage page="paginas"><Paginas /></RequirePage>} />
             </Route>
             <Route path="/admin/copywriting-popup" element={<CopywritingPopup />} />
             <Route path="/loom" element={<Loom />} />

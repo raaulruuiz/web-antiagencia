@@ -11,6 +11,7 @@ const ALL_NAV = [
   { to: '/admin/briefing',         label: 'Briefing',         icon: '📋', page: 'briefing' },
   { to: '/admin/copywriting',      label: 'Copywriting',      icon: '✍️', page: 'copywriting' },
   { to: '/admin/email-builder',   label: 'Email Builder',    icon: '📧', page: 'email-builder' },
+  { to: '/admin/paginas',         label: 'Páginas',          icon: '🌐', page: 'paginas' },
   { to: '/admin/dashboard',        label: 'Dashboard',        icon: '📊', page: 'dashboard' },
   { to: '/admin/gym',              label: 'Entrenos',         icon: '🏋️', page: 'gym' },
   { to: '/admin/loom',             label: 'Loom',             icon: '🎥', page: 'loom' },
