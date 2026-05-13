@@ -71,26 +71,14 @@ function MailerLiteForm() {
                   </div>
                 </div>
                 <div className="ml-form-fieldRow">
-                  <div className="ml-field-group ml-field-redes_sociales ml-validate-required">
-                    <label>La red social con más seguidores que tengas (el nombre de usuario)</label>
-                    <input aria-label="redes_sociales" aria-required="true" type="text" className="form-control" name="fields[redes_sociales]" placeholder="" />
-                  </div>
-                </div>
-                <div className="ml-form-fieldRow">
                   <div className="ml-field-group ml-field-base_de_datos ml-validate-required">
                     <label>¿Cuánta gente tienes en la base de datos?</label>
                     <input aria-label="base_de_datos" aria-required="true" type="text" className="form-control" name="fields[base_de_datos]" placeholder="" />
                   </div>
                 </div>
                 <div className="ml-form-fieldRow">
-                  <div className="ml-field-group ml-field-facturacion_anual ml-validate-required">
-                    <label>Facturación anual (año anterior a este)</label>
-                    <input aria-label="facturacion_anual" aria-required="true" type="text" className="form-control" name="fields[facturacion_anual]" placeholder="" />
-                  </div>
-                </div>
-                <div className="ml-form-fieldRow">
                   <div className="ml-field-group ml-field-facturacion_mensual ml-validate-required">
-                    <label>Facturación mensual (mes anterior a este)</label>
+                    <label>Facturación mensual de la tienda</label>
                     <input aria-label="facturacion_mensual" aria-required="true" type="text" className="form-control" name="fields[facturacion_mensual]" placeholder="" />
                   </div>
                 </div>
