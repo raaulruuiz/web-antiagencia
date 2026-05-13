@@ -178,7 +178,10 @@ export default function TrabajaConNosotrosV3() {
 
               {/* Titular */}
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">
-                Esta es (probablemente) la forma más rentable, rápida, económica y desaprovechada de tener altos beneficios con tu tienda online
+                Esta es (probablemente) la forma más rentable...<br />
+                rápida...<br />
+                económica...<br />
+                y desaprovechada de tener altos beneficios con una tienda online
               </h1>
               <br />
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-4">
@@ -240,7 +243,7 @@ export default function TrabajaConNosotrosV3() {
               <p className="mb-4">En cualquiera de estos casos, si estás dispuesto a ponerle solución, por supuesto, le sacarás mucho partido al servicio.</p>
               <br /><br />
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Eres más de perros o de gatos?</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Eres más de ciervos o de gatos?</h2>
               <br />
               <p className="mb-4">De ciervos. Los gatos te juzgan con la mirada y te miran por encima del hombro. Piensan que eres su esclavo y yo solo soy esclavo de mi trabajo y de Pili.</p>
               <br /><br />
