@@ -178,7 +178,7 @@ export default function TrabajaConNosotrosV3() {
 
               {/* Titular */}
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">
-                Esta es (probablemente) la forma más rentable, rápida y económica de tener altos beneficios con tu tienda online
+                Esta es (probablemente) la forma más rentable, rápida, económica y desaprovechada de tener altos beneficios con tu tienda online
               </h1>
               <br />
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-4">
