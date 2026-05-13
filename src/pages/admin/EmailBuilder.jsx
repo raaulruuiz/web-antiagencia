@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react';
 import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import gjsMjml from 'grapesjs-mjml';
@@ -74,8 +74,10 @@ function ImageDropZone({ label, hint, images, onAdd, onRemove }) {
 
 export default function EmailBuilder() {
   const [tab, setTab] = useState('editor');
+  const editorWrapperRef = useRef(null);
   const editorContainerRef = useRef(null);
   const gjsRef = useRef(null);
+  const [editorHeight, setEditorHeight] = useState(0);
 
   // IA state
   const [imagenes, setImagenes] = useState([]);           // imágenes para incluir en el email
@@ -89,18 +91,29 @@ export default function EmailBuilder() {
   const [htmlGenerado, setHtmlGenerado] = useState('');
   const [error, setError] = useState('');
 
+  useLayoutEffect(() => {
+    const update = () => {
+      if (editorWrapperRef.current) {
+        setEditorHeight(editorWrapperRef.current.offsetHeight);
+      }
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
   useEffect(() => {
-    if (!editorContainerRef.current) return;
+    if (!editorContainerRef.current || editorHeight === 0) return;
     const editor = grapesjs.init({
       container: editorContainerRef.current,
       plugins: [gjsMjml],
       storageManager: false,
-      height: '100%',
+      height: `${editorHeight}px`,
       width: 'auto',
     });
     gjsRef.current = editor;
     return () => editor.destroy();
-  }, []);
+  }, [editorHeight]);
 
   const tieneDatos = imagenes.length > 0 || referencias.length > 0 || urlMarca.trim() || textoExacto.trim() || descripcion.trim();
 
@@ -164,8 +177,12 @@ export default function EmailBuilder() {
       </div>
 
       {/* Editor MJML — siempre montado */}
-      <div className={`flex-1 ${tab !== 'editor' ? 'hidden' : ''}`} style={{ minHeight: 0 }}>
-        <div ref={editorContainerRef} style={{ height: '100%' }} />
+      <div
+        ref={editorWrapperRef}
+        className={`flex-1 ${tab !== 'editor' ? 'hidden' : ''}`}
+        style={{ minHeight: 0 }}
+      >
+        <div ref={editorContainerRef} />
       </div>
 
       {/* Pestaña IA */}
