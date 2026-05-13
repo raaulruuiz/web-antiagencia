@@ -16,6 +16,7 @@ import AudioSecreto from './pages/AudioSecreto';
 import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotros from './pages/TrabajaConNosotros'
 import TrabajaConNosotrosOld from './pages/TrabajaConNosotrosOld'
+import TrabajaConNosotrosV3 from './pages/TrabajaConNosotrosV3'
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import TikTokConnect from './pages/TikTokConnect';
 import PixelLayout from './Layout';
@@ -147,6 +148,7 @@ const AuthenticatedApp = () => {
       <Route path="/UltimoPaso" element={<SmartPage path="/UltimoPaso"><LayoutWrapper currentPageName="UltimoPaso"><UltimoPaso /></LayoutWrapper></SmartPage>} />
       <Route path="/YaPorFin" element={<SmartPage path="/YaPorFin"><LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper></SmartPage>} />
       <Route path="/TrabajaConNosotros" element={<SmartPage path="/TrabajaConNosotros"><LayoutWrapper currentPageName="TrabajaConNosotros"><TrabajaConNosotros /></LayoutWrapper></SmartPage>} />
+      <Route path="/trabajaconnosotros" element={<TrabajaConNosotrosV3 />} />
       <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
