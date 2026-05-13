@@ -124,7 +124,7 @@ export default function EmailBuilder() {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* Header */}
       <div className="flex-shrink-0 flex items-center gap-3 px-6 py-4 border-b border-zinc-800">
@@ -146,11 +146,12 @@ export default function EmailBuilder() {
       </div>
 
       {/* Editor Unlayer — siempre montado */}
-      <div className={tab !== 'editor' ? 'hidden' : ''} style={{ height: 'calc(100vh - 61px)' }}>
+      <div className={tab !== 'editor' ? 'hidden' : ''} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         <EmailEditor
           ref={emailEditorRef}
           onReady={() => setEditorReady(true)}
-          style={{ height: '100%' }}
+          minHeight={window.innerHeight - 61}
+          style={{ flex: 1 }}
           options={{
             displayMode: 'email',
             features: { preview: true },
