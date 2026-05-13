@@ -195,7 +195,7 @@ export default function TrabajaConNosotrosV3() {
               <br /><br />
 
               {/* Subtítulo sin negrita */}
-              <h2 className="text-xl text-center text-gray-900 mb-2">Bien.</h2>
+              <h2 className="text-xl text-center text-gray-900 mb-2">Okay.</h2>
               <br />
               <h2 className="text-xl text-center text-gray-900 mb-4">Este servicio va de email marketing, por lo que toda la venta la voy a hacer ahí. Aquí lo único que haré será ponerte las preguntas frecuentes debajo del formulario de pedir presupuesto:</h2>
               <br /><br />
