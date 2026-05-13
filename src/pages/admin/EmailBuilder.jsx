@@ -67,6 +67,9 @@ export default function EmailBuilder() {
   const emailEditorRef = useRef(null);
   const [editorReady, setEditorReady] = useState(false);
 
+  // HTML tab state
+  const [htmlCode, setHtmlCode] = useState('');
+
   // IA state
   const [imagenes, setImagenes] = useState([]);
   const [referencias, setReferencias] = useState([]);
@@ -80,6 +83,25 @@ export default function EmailBuilder() {
   const [error, setError] = useState('');
 
   const tieneDatos = imagenes.length > 0 || referencias.length > 0 || urlMarca.trim() || textoExacto.trim() || descripcion.trim();
+
+  // Cambiar de tab: si salimos del editor exportamos el HTML actual
+  function switchTab(next) {
+    if (tab === 'editor' && next !== 'editor' && emailEditorRef.current?.editor) {
+      emailEditorRef.current.editor.exportHtml(({ html }) => {
+        setHtmlCode(html);
+        setTab(next);
+      });
+    } else {
+      setTab(next);
+    }
+  }
+
+  // Al volver al editor desde el tab HTML, cargamos el HTML editado
+  function aplicarHtmlAlEditor() {
+    if (!emailEditorRef.current?.editor || !htmlCode) return;
+    emailEditorRef.current.editor.loadDesign({ html: htmlCode, classic: true });
+    setTab('editor');
+  }
 
   async function generarEmail() {
     setLoading(true);
@@ -135,11 +157,15 @@ export default function EmailBuilder() {
             ⬇ Exportar HTML
           </button>
         )}
-        <button onClick={() => setTab('editor')}
+        <button onClick={() => switchTab('editor')}
           className={`px-4 py-1.5 rounded-lg text-sm transition-colors ${tab === 'editor' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>
           ✍️ Editor visual
         </button>
-        <button onClick={() => setTab('ia')}
+        <button onClick={() => switchTab('html')} disabled={!editorReady}
+          className={`px-4 py-1.5 rounded-lg text-sm transition-colors ${tab === 'html' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'} disabled:opacity-40`}>
+          {'</>'} HTML
+        </button>
+        <button onClick={() => switchTab('ia')}
           className={`px-4 py-1.5 rounded-lg text-sm transition-colors ${tab === 'ia' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>
           🤖 Generar con IA
         </button>
@@ -158,6 +184,37 @@ export default function EmailBuilder() {
           }}
         />
       </div>
+
+      {/* Pestaña HTML */}
+      {tab === 'html' && (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 flex-shrink-0">
+            <span className="text-zinc-400 text-xs">Edita el HTML directamente. Los cambios se aplicarán al volver al editor visual.</span>
+            <button onClick={aplicarHtmlAlEditor}
+              className="px-4 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-zinc-200 transition-colors">
+              Aplicar al editor →
+            </button>
+          </div>
+          <textarea
+            value={htmlCode}
+            onChange={e => setHtmlCode(e.target.value)}
+            spellCheck={false}
+            style={{
+              flex: 1,
+              resize: 'none',
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+              fontSize: '13px',
+              lineHeight: '1.6',
+              padding: '16px',
+              background: '#0d0d0d',
+              color: '#e4e4e7',
+              border: 'none',
+              outline: 'none',
+              width: '100%',
+            }}
+          />
+        </div>
+      )}
 
       {/* Pestaña IA */}
       {tab === 'ia' && (
