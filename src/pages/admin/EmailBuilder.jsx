@@ -80,7 +80,8 @@ export default function EmailBuilder() {
   // IA state
   const [imagenes, setImagenes] = useState([]);           // imágenes para incluir en el email
   const [referencias, setReferencias] = useState([]);     // emails de referencia
-  const [extraerDe, setExtraerDe] = useState('ambos');    // 'estructura' | 'estilo' | 'ambos'
+  const [extraerEstructura, setExtraerEstructura] = useState(true);
+  const [extraerEstilo, setExtraerEstilo] = useState(false);
   const [urlMarca, setUrlMarca] = useState('');
   const [textoExacto, setTextoExacto] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -117,7 +118,8 @@ export default function EmailBuilder() {
           urlMarca,
           imagenes: imagenes.map(i => i.dataUrl),
           referencias: referencias.map(i => i.dataUrl),
-          extraerDe,
+          extraerEstructura,
+          extraerEstilo,
         }),
       });
       const data = await res.json();
@@ -184,28 +186,36 @@ export default function EmailBuilder() {
             <div>
               <ImageDropZone
                 label="📧 Emails de referencia"
-                hint="Sube capturas de emails que te gusten para que la IA copie su estructura o estilo"
+                hint="Sube capturas de emails que te gusten para que la IA extraiga su estructura o estilo"
                 images={referencias}
                 onAdd={img => setReferencias(prev => [...prev, img])}
                 onRemove={i => setReferencias(prev => prev.filter((_, j) => j !== i))}
               />
-              {referencias.length > 0 && (
-                <div className="flex gap-4 mt-3">
-                  {['estructura', 'estilo', 'ambos'].map(op => (
-                    <label key={op} className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="extraerDe"
-                        value={op}
-                        checked={extraerDe === op}
-                        onChange={() => setExtraerDe(op)}
-                        className="accent-white"
-                      />
-                      <span className="text-zinc-300 text-sm capitalize">{op}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
+              <div className="flex gap-5 mt-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={extraerEstructura}
+                    onChange={e => setExtraerEstructura(e.target.checked)}
+                    className="accent-white w-4 h-4"
+                  />
+                  <span className="text-zinc-300 text-sm">Estructura</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={extraerEstilo}
+                    onChange={e => setExtraerEstilo(e.target.checked)}
+                    className="accent-white w-4 h-4"
+                  />
+                  <span className="text-zinc-300 text-sm">
+                    Estilo
+                    {extraerEstilo && urlMarca && (
+                      <span className="text-zinc-500 text-xs ml-1">(colores y tipografía los marca la URL)</span>
+                    )}
+                  </span>
+                </label>
+              </div>
             </div>
 
             {/* URL de la web */}
