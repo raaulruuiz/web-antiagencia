@@ -162,7 +162,7 @@ export default function EmailBuilder() {
       </div>
 
       {/* Editor MJML — siempre montado */}
-      <div className={`flex-1 overflow-hidden ${tab !== 'editor' ? 'hidden' : ''}`}>
+      <div className={`flex-1 ${tab !== 'editor' ? 'hidden' : ''}`} style={{ minHeight: 0 }}>
         <div ref={editorContainerRef} style={{ height: '100%' }} />
       </div>
 
