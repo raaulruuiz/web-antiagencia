@@ -69,6 +69,7 @@ export default function EmailBuilder() {
 
   // HTML tab state
   const [htmlCode, setHtmlCode] = useState('');
+  const [htmlPreview, setHtmlPreview] = useState(false);
 
   // IA state
   const [imagenes, setImagenes] = useState([]);
@@ -84,21 +85,12 @@ export default function EmailBuilder() {
 
   const tieneDatos = imagenes.length > 0 || referencias.length > 0 || urlMarca.trim() || textoExacto.trim() || descripcion.trim();
 
-  // Cambiar de tab: si salimos del editor exportamos el HTML actual
   function switchTab(next) {
-    if (tab === 'editor' && next !== 'editor' && emailEditorRef.current?.editor) {
-      emailEditorRef.current.editor.exportHtml(({ html }) => {
-        setHtmlCode(html);
-        setTab(next);
-      });
-    } else {
-      setTab(next);
-    }
+    setTab(next);
   }
 
-  // Al volver al editor desde el tab HTML, cargamos el HTML editado
   function aplicarHtmlAlEditor() {
-    if (!emailEditorRef.current?.editor || !htmlCode) return;
+    if (!emailEditorRef.current?.editor || !htmlCode.trim()) return;
     emailEditorRef.current.editor.loadDesign({ html: htmlCode, classic: true });
     setTab('editor');
   }
@@ -189,30 +181,41 @@ export default function EmailBuilder() {
       {tab === 'html' && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 flex-shrink-0">
-            <span className="text-zinc-400 text-xs">Edita el HTML directamente. Los cambios se aplicarán al volver al editor visual.</span>
-            <button onClick={aplicarHtmlAlEditor}
-              className="px-4 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-zinc-200 transition-colors">
-              Aplicar al editor →
+            <div className="flex items-center gap-3">
+              <span className="text-zinc-400 text-xs">Pega aquí un HTML para cargarlo en el editor visual.</span>
+              <button onClick={() => setHtmlPreview(p => !p)}
+                className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+                {htmlPreview ? 'Ver código' : 'Vista previa'}
+              </button>
+            </div>
+            <button onClick={aplicarHtmlAlEditor} disabled={!htmlCode.trim()}
+              className="px-4 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+              Cargar en editor visual →
             </button>
           </div>
-          <textarea
-            value={htmlCode}
-            onChange={e => setHtmlCode(e.target.value)}
-            spellCheck={false}
-            style={{
-              flex: 1,
-              resize: 'none',
-              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-              fontSize: '13px',
-              lineHeight: '1.6',
-              padding: '16px',
-              background: '#0d0d0d',
-              color: '#e4e4e7',
-              border: 'none',
-              outline: 'none',
-              width: '100%',
-            }}
-          />
+          {htmlPreview ? (
+            <iframe srcDoc={htmlCode} style={{ flex: 1, border: 'none', background: 'white' }} title="HTML preview" />
+          ) : (
+            <textarea
+              value={htmlCode}
+              onChange={e => setHtmlCode(e.target.value)}
+              spellCheck={false}
+              placeholder="Pega aquí el HTML del email..."
+              style={{
+                flex: 1,
+                resize: 'none',
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                fontSize: '13px',
+                lineHeight: '1.6',
+                padding: '16px',
+                background: '#0d0d0d',
+                color: '#e4e4e7',
+                border: 'none',
+                outline: 'none',
+                width: '100%',
+              }}
+            />
+          )}
         </div>
       )}
 
