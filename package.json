@@ -53,6 +53,7 @@
     "embla-carousel-react": "^8.5.2",
     "framer-motion": "^11.16.4",
     "grapesjs": "^0.22.16",
+    "grapesjs-mjml": "^1.0.8",
     "grapesjs-preset-newsletter": "^1.0.2",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.4.2",

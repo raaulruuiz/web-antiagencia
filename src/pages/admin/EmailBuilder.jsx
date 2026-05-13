@@ -1,8 +1,76 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
-import gjsNewsletter from 'grapesjs-preset-newsletter';
+import gjsMjml from 'grapesjs-mjml';
 import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
+
+// ─── Zona de imágenes drag & drop ────────────────────────────────────────────
+
+function ImageDropZone({ label, hint, images, onAdd, onRemove }) {
+  const inputRef = useRef();
+  const [dragging, setDragging] = useState(false);
+
+  async function processFiles(files) {
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+      const dataUrl = await new Promise(resolve => {
+        const r = new FileReader();
+        r.onload = e => resolve(e.target.result);
+        r.readAsDataURL(file);
+      });
+      onAdd({ name: file.name, dataUrl });
+    }
+  }
+
+  const onDrop = useCallback(e => {
+    e.preventDefault();
+    setDragging(false);
+    processFiles(Array.from(e.dataTransfer.files));
+  }, []);
+
+  return (
+    <div>
+      <label className="text-zinc-300 text-sm font-medium mb-2 block">{label}</label>
+      {hint && <p className="text-zinc-500 text-xs mb-2">{hint}</p>}
+
+      <div
+        onDragOver={e => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+        onClick={() => inputRef.current.click()}
+        className={`border-2 border-dashed rounded-lg px-4 py-5 text-center cursor-pointer transition-colors ${
+          dragging ? 'border-zinc-400 bg-zinc-800' : 'border-zinc-700 hover:border-zinc-500 hover:bg-zinc-900'
+        }`}
+      >
+        <p className="text-zinc-400 text-sm">Arrastra imágenes aquí o <span className="text-white underline">selecciona archivos</span></p>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={e => processFiles(Array.from(e.target.files))}
+        />
+      </div>
+
+      {images.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {images.map((img, i) => (
+            <div key={i} className="relative group">
+              <img src={img.dataUrl} alt={img.name} className="w-20 h-20 object-cover rounded-lg border border-zinc-700" />
+              <button
+                onClick={() => onRemove(i)}
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-zinc-900 border border-zinc-600 rounded-full text-zinc-400 hover:text-white text-xs flex items-center justify-center"
+              >×</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function EmailBuilder() {
   const [tab, setTab] = useState('editor');
@@ -10,8 +78,12 @@ export default function EmailBuilder() {
   const gjsRef = useRef(null);
 
   // IA state
-  const [texto, setTexto] = useState('');
-  const [imagenes, setImagenes] = useState(['']);
+  const [imagenes, setImagenes] = useState([]);           // imágenes para incluir en el email
+  const [referencias, setReferencias] = useState([]);     // emails de referencia
+  const [extraerDe, setExtraerDe] = useState('ambos');    // 'estructura' | 'estilo' | 'ambos'
+  const [urlMarca, setUrlMarca] = useState('');
+  const [textoExacto, setTextoExacto] = useState('');
+  const [descripcion, setDescripcion] = useState('');
   const [loading, setLoading] = useState(false);
   const [htmlGenerado, setHtmlGenerado] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +92,7 @@ export default function EmailBuilder() {
     if (!editorContainerRef.current) return;
     const editor = grapesjs.init({
       container: editorContainerRef.current,
-      plugins: [gjsNewsletter],
+      plugins: [gjsMjml],
       storageManager: false,
       height: '100%',
       width: 'auto',
@@ -28,6 +100,8 @@ export default function EmailBuilder() {
     gjsRef.current = editor;
     return () => editor.destroy();
   }, []);
+
+  const tieneDatos = imagenes.length > 0 || referencias.length > 0 || urlMarca.trim() || textoExacto.trim() || descripcion.trim();
 
   async function generarEmail() {
     setLoading(true);
@@ -37,7 +111,14 @@ export default function EmailBuilder() {
       const res = await fetch(`${BACKEND}/admin/email-builder/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-        body: JSON.stringify({ texto, imagenes: imagenes.filter(Boolean) }),
+        body: JSON.stringify({
+          descripcion,
+          textoExacto,
+          urlMarca,
+          imagenes: imagenes.map(i => i.dataUrl),
+          referencias: referencias.map(i => i.dataUrl),
+          extraerDe,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error generando email');
@@ -54,18 +135,6 @@ export default function EmailBuilder() {
       gjsRef.current.setComponents(htmlGenerado);
       setTab('editor');
     }
-  }
-
-  function addImagen() {
-    setImagenes(prev => [...prev, '']);
-  }
-
-  function removeImagen(i) {
-    setImagenes(prev => prev.filter((_, j) => j !== i));
-  }
-
-  function updateImagen(i, val) {
-    setImagenes(prev => { const next = [...prev]; next[i] = val; return next; });
   }
 
   return (
@@ -92,7 +161,7 @@ export default function EmailBuilder() {
         </button>
       </div>
 
-      {/* GrapesJS — siempre montado, oculto cuando no está en editor */}
+      {/* Editor MJML — siempre montado */}
       <div className={`flex-1 overflow-hidden ${tab !== 'editor' ? 'hidden' : ''}`}>
         <div ref={editorContainerRef} style={{ height: '100%' }} />
       </div>
@@ -100,87 +169,102 @@ export default function EmailBuilder() {
       {/* Pestaña IA */}
       {tab === 'ia' && (
         <div className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-2xl flex flex-col gap-5">
+          <div className="max-w-2xl flex flex-col gap-6">
 
-            <p className="text-zinc-400 text-sm">
-              Describe el email que necesitas y añade las URLs de las imágenes. La IA generará el HTML listo para editar en el editor visual.
-            </p>
+            {/* Imágenes del email */}
+            <ImageDropZone
+              label="🖼️ Imágenes para el email"
+              hint="La IA las verá y las incluirá en el diseño"
+              images={imagenes}
+              onAdd={img => setImagenes(prev => [...prev, img])}
+              onRemove={i => setImagenes(prev => prev.filter((_, j) => j !== i))}
+            />
 
-            {/* Descripción */}
+            {/* Referencias */}
             <div>
-              <label className="text-zinc-300 text-sm mb-2 block font-medium">Descripción del email</label>
-              <textarea
-                value={texto}
-                onChange={e => setTexto(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm resize-none focus:outline-none focus:border-zinc-500 transition-colors"
-                rows={6}
-                placeholder="Ej: Email de bienvenida para nuevos suscriptores. Tono cercano y directo. Fondo blanco, acento azul. Arriba el logo, luego un texto de bienvenida, después una imagen y un botón de CTA que lleve a antiagencia.es."
+              <ImageDropZone
+                label="📧 Emails de referencia"
+                hint="Sube capturas de emails que te gusten para que la IA copie su estructura o estilo"
+                images={referencias}
+                onAdd={img => setReferencias(prev => [...prev, img])}
+                onRemove={i => setReferencias(prev => prev.filter((_, j) => j !== i))}
+              />
+              {referencias.length > 0 && (
+                <div className="flex gap-4 mt-3">
+                  {['estructura', 'estilo', 'ambos'].map(op => (
+                    <label key={op} className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="extraerDe"
+                        value={op}
+                        checked={extraerDe === op}
+                        onChange={() => setExtraerDe(op)}
+                        className="accent-white"
+                      />
+                      <span className="text-zinc-300 text-sm capitalize">{op}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* URL de la web */}
+            <div>
+              <label className="text-zinc-300 text-sm font-medium mb-2 block">🌐 URL de la web (para extraer estilo de marca)</label>
+              <input
+                value={urlMarca}
+                onChange={e => setUrlMarca(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-zinc-500 transition-colors"
+                placeholder="https://antiagencia.es"
               />
             </div>
 
-            {/* Imágenes */}
+            {/* Texto exacto */}
             <div>
-              <label className="text-zinc-300 text-sm mb-2 block font-medium">Imágenes (URLs)</label>
-              <div className="flex flex-col gap-2">
-                {imagenes.map((img, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <input
-                      value={img}
-                      onChange={e => updateImagen(i, e.target.value)}
-                      className="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-zinc-500 transition-colors"
-                      placeholder="https://..."
-                    />
-                    {imagenes.length > 1 && (
-                      <button
-                        onClick={() => removeImagen(i)}
-                        className="text-zinc-600 hover:text-red-400 transition-colors text-lg leading-none"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={addImagen}
-                className="mt-2 text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
-              >
-                + Añadir imagen
-              </button>
+              <label className="text-zinc-300 text-sm font-medium mb-2 block">📝 Texto exacto del email <span className="text-zinc-500 font-normal">(opcional)</span></label>
+              <textarea
+                value={textoExacto}
+                onChange={e => setTextoExacto(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm resize-none focus:outline-none focus:border-zinc-500 transition-colors"
+                rows={5}
+                placeholder="Pega aquí el asunto, el cuerpo del email, el texto del botón... exactamente como quieres que aparezca."
+              />
             </div>
 
-            {/* Botón generar */}
+            {/* Descripción */}
+            <div>
+              <label className="text-zinc-300 text-sm font-medium mb-2 block">💬 Descripción / instrucciones <span className="text-zinc-500 font-normal">(opcional)</span></label>
+              <textarea
+                value={descripcion}
+                onChange={e => setDescripcion(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm resize-none focus:outline-none focus:border-zinc-500 transition-colors"
+                rows={4}
+                placeholder="Ej: Email de bienvenida, tono cercano, fondo oscuro, botón verde, logo arriba..."
+              />
+            </div>
+
+            {/* Botón */}
             <button
               onClick={generarEmail}
-              disabled={!texto.trim() || loading}
+              disabled={!tieneDatos || loading}
               className="bg-white text-black font-medium py-2.5 px-6 rounded-lg text-sm hover:bg-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors self-start"
             >
               {loading ? 'Generando...' : 'Generar email'}
             </button>
 
-            {error && (
-              <p className="text-red-400 text-sm">{error}</p>
-            )}
+            {error && <p className="text-red-400 text-sm">{error}</p>}
 
             {/* Vista previa */}
             {htmlGenerado && (
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-zinc-300 text-sm font-medium">Vista previa</span>
-                  <button
-                    onClick={cargarEnEditor}
-                    className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-                  >
+                  <button onClick={cargarEnEditor} className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
                     Editar en editor visual →
                   </button>
                 </div>
                 <div className="border border-zinc-700 rounded-lg overflow-hidden bg-white">
-                  <iframe
-                    srcDoc={htmlGenerado}
-                    className="w-full"
-                    style={{ height: '500px' }}
-                    title="Preview email"
-                  />
+                  <iframe srcDoc={htmlGenerado} className="w-full" style={{ height: '500px' }} title="Preview email" />
                 </div>
               </div>
             )}
