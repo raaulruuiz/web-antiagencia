@@ -5,6 +5,7 @@ const ALL_NAV = [
   { to: '/admin/automatizaciones', label: 'Automatizaciones', icon: '⚡', page: 'automatizaciones', desc: 'Revisa el estado de las automatizaciones activas' },
   { to: '/admin/briefing',         label: 'Briefing',         icon: '📋', page: 'briefing',         desc: 'Reuniones, tareas y prioridades del día' },
   { to: '/admin/copywriting',      label: 'Copywriting',      icon: '✍️', page: 'copywriting',      desc: 'Crea y edita textos con asistencia de IA' },
+  { to: '/admin/email-builder',   label: 'Email Builder',    icon: '📧', page: 'email-builder',   desc: 'Diseña emails HTML con editor visual o con IA' },
   { to: '/admin/dashboard',        label: 'Dashboard',        icon: '📊', page: 'dashboard',        desc: 'Analytics, conversiones y tests A/B' },
   { to: '/admin/gym',              label: 'Entrenos',         icon: '🏋️', page: 'gym',              desc: 'Registro y seguimiento de entrenamientos' },
   { to: '/admin/loom',             label: 'Loom',             icon: '🎥', page: 'loom',             desc: 'Graba tu pantalla o audio y súbelo a Drive' },
