@@ -146,7 +146,7 @@ export default function EmailBuilder() {
       </div>
 
       {/* Editor Unlayer — siempre montado */}
-      <div className={`flex-1 ${tab !== 'editor' ? 'hidden' : ''}`} style={{ minHeight: 0 }}>
+      <div className={tab !== 'editor' ? 'hidden' : ''} style={{ height: 'calc(100vh - 61px)' }}>
         <EmailEditor
           ref={emailEditorRef}
           onReady={() => setEditorReady(true)}
