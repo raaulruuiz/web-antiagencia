@@ -10,6 +10,7 @@ const ALL_NAV = [
   { to: '/admin/automatizaciones', label: 'Automatizaciones', icon: '⚡', page: 'automatizaciones' },
   { to: '/admin/briefing',         label: 'Briefing',         icon: '📋', page: 'briefing' },
   { to: '/admin/copywriting',      label: 'Copywriting',      icon: '✍️', page: 'copywriting' },
+  { to: '/admin/email-builder',   label: 'Email Builder',    icon: '📧', page: 'email-builder' },
   { to: '/admin/dashboard',        label: 'Dashboard',        icon: '📊', page: 'dashboard' },
   { to: '/admin/gym',              label: 'Entrenos',         icon: '🏋️', page: 'gym' },
   { to: '/admin/loom',             label: 'Loom',             icon: '🎥', page: 'loom' },
