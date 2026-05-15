@@ -1,9 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { STRUCTURES, LS_DEFAULT } from './CopywritingContext';
-
-function getDefaultId() {
-  return parseInt(localStorage.getItem(LS_DEFAULT) || '1', 10);
-}
+import { STRUCTURES } from './CopywritingContext';
 
 function emptyFor(s) {
   return Object.fromEntries(s.fields.map(f => [f.key, '']));
@@ -21,8 +17,7 @@ function autoResize(el) {
 }
 
 export default function Copywriting() {
-  const [activeId, setActiveId] = useState(getDefaultId);
-  const [defaultId, setDefaultId] = useState(getDefaultId);
+  const [activeId, setActiveId] = useState(1);
   const [valuesMap, setValuesMap] = useState(() =>
     Object.fromEntries(STRUCTURES.map(s => [s.id, loadValues(s)]))
   );
@@ -56,11 +51,6 @@ export default function Copywriting() {
     setValuesMap(prev => ({ ...prev, [activeId]: empty }));
     setTimeout(() => Object.values(refs.current).forEach(autoResize), 0);
   }, [activeId, active]);
-
-  const handleSetDefault = useCallback((id) => {
-    localStorage.setItem(LS_DEFAULT, String(id));
-    setDefaultId(id);
-  }, []);
 
   useEffect(() => {
     Object.values(refs.current).forEach(autoResize);
@@ -124,18 +114,7 @@ export default function Copywriting() {
         ))}
       </div>
 
-      {/* Default checkbox */}
-      <label className="flex items-center gap-2 mt-5 cursor-pointer w-fit">
-        <input
-          type="checkbox"
-          checked={defaultId === activeId}
-          onChange={() => handleSetDefault(activeId)}
-          className="accent-white w-3.5 h-3.5"
-        />
-        <span className="text-zinc-400 text-xs">Marcar como predeterminada</span>
-      </label>
-
-      <div className="flex gap-3 mt-5">
+      <div className="flex gap-3 mt-6">
         <button
           onClick={handleClear}
           className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"

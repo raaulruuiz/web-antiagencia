@@ -1,9 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { STRUCTURES, LS_DEFAULT } from './CopywritingContext';
-
-function getDefaultId() {
-  return parseInt(localStorage.getItem(LS_DEFAULT) || '1', 10);
-}
+import { STRUCTURES } from './CopywritingContext';
 
 function emptyFor(s) {
   return Object.fromEntries(s.fields.map(f => [f.key, '']));
@@ -21,7 +17,7 @@ function autoResize(el) {
 }
 
 export default function CopywritingPopup() {
-  const [activeId, setActiveId] = useState(getDefaultId);
+  const [activeId, setActiveId] = useState(1);
   const [valuesMap, setValuesMap] = useState(() =>
     Object.fromEntries(STRUCTURES.map(s => [s.id, loadValues(s)]))
   );
