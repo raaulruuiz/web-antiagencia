@@ -26,7 +26,19 @@ export const STRUCTURES = [
   },
 ];
 
-export const LS_DEFAULT = 'copywriting_default';
+export const LS_ORDER = 'copywriting_order';
+
+export function loadOrder() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(LS_ORDER));
+    if (Array.isArray(stored) && stored.length === STRUCTURES.length) return stored;
+  } catch {}
+  return STRUCTURES.map(s => s.id);
+}
+
+export function saveOrder(order) {
+  localStorage.setItem(LS_ORDER, JSON.stringify(order));
+}
 
 // Kept for backward compat
 export const FIELDS = STRUCTURES[0].fields;

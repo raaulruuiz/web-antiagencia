@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { STRUCTURES } from './CopywritingContext';
+import { STRUCTURES, LS_ORDER, loadOrder } from './CopywritingContext';
 
 function emptyFor(s) {
   return Object.fromEntries(s.fields.map(f => [f.key, '']));
@@ -17,7 +17,8 @@ function autoResize(el) {
 }
 
 export default function CopywritingPopup() {
-  const [activeId, setActiveId] = useState(1);
+  const [order, setOrder] = useState(loadOrder);
+  const [activeId, setActiveId] = useState(() => loadOrder()[0]);
   const [valuesMap, setValuesMap] = useState(() =>
     Object.fromEntries(STRUCTURES.map(s => [s.id, loadValues(s)]))
   );
@@ -55,6 +56,9 @@ export default function CopywritingPopup() {
           } catch {}
         }
       });
+      if (e.key === LS_ORDER && e.newValue) {
+        try { setOrder(JSON.parse(e.newValue)); } catch {}
+      }
     }
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
@@ -88,17 +92,17 @@ export default function CopywritingPopup() {
 
       {/* Structure tabs */}
       <div className="flex gap-1 px-3 pt-2 pb-1">
-        {STRUCTURES.map(s => (
+        {order.map((id, idx) => (
           <button
-            key={s.id}
-            onClick={() => setActiveId(s.id)}
+            key={id}
+            onClick={() => setActiveId(id)}
             className={`flex-1 py-1 rounded text-xs font-medium transition-colors ${
-              s.id === activeId
+              id === activeId
                 ? 'bg-white text-zinc-900'
                 : 'bg-zinc-800 text-zinc-400 hover:text-white'
             }`}
           >
-            {s.id}
+            {idx + 1}
           </button>
         ))}
       </div>
