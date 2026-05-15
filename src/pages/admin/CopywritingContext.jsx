@@ -1,19 +1,40 @@
 import { createContext, useContext, useEffect } from 'react';
 
-export const FIELDS = [
-  { key: 'historia',    label: 'Historia' },
-  { key: 'promocion',   label: 'Promoción' },
-  { key: 'informacion', label: 'Información' },
-  { key: 'problema',    label: 'Problema' },
-  { key: 'sentimiento', label: 'Sentimiento' },
-  { key: 'notas',       label: 'Notas' },
+export const STRUCTURES = [
+  {
+    id: 1,
+    label: 'Estructura 1',
+    lsKey: 'copywriting_values',
+    fields: [
+      { key: 'historia',    label: 'Historia' },
+      { key: 'promocion',   label: 'Promoción' },
+      { key: 'informacion', label: 'Información' },
+      { key: 'problema',    label: 'Problema' },
+      { key: 'sentimiento', label: 'Sentimiento' },
+      { key: 'notas',       label: 'Notas' },
+    ],
+  },
+  {
+    id: 2,
+    label: 'Estructura 2',
+    lsKey: 'copywriting_values_2',
+    fields: [
+      { key: 'objetivo',    label: 'Objetivo' },
+      { key: 'tres_cosas',  label: '3 Cosas Importantes' },
+      { key: 'yo_lo_haria', label: '¿Yo lo haría?' },
+    ],
+  },
 ];
+
+export const LS_DEFAULT = 'copywriting_default';
+
+// Kept for backward compat
+export const FIELDS = STRUCTURES[0].fields;
 
 const CopyCtx = createContext(null);
 export const useCopywriting = () => useContext(CopyCtx);
 
 export function CopywritingProvider({ children }) {
-  // Cmd+Shift+C / Ctrl+Shift+C abre la ventana popup
   useEffect(() => {
     function onKeyDown(e) {
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'c') {

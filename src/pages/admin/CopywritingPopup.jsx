@@ -1,19 +1,17 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { STRUCTURES, LS_DEFAULT } from './CopywritingContext';
 
-const FIELDS = [
-  { key: 'historia',    label: 'Historia' },
-  { key: 'promocion',   label: 'Promoción' },
-  { key: 'informacion', label: 'Información' },
-  { key: 'problema',    label: 'Problema' },
-  { key: 'sentimiento', label: 'Sentimiento' },
-  { key: 'notas',       label: 'Notas' },
-];
+function getDefaultId() {
+  return parseInt(localStorage.getItem(LS_DEFAULT) || '1', 10);
+}
 
-const LS_KEY = 'copywriting_values';
-const EMPTY = Object.fromEntries(FIELDS.map(f => [f.key, '']));
+function emptyFor(s) {
+  return Object.fromEntries(s.fields.map(f => [f.key, '']));
+}
 
-function loadFromStorage() {
-  try { return { ...EMPTY, ...JSON.parse(localStorage.getItem(LS_KEY)) }; } catch { return EMPTY; }
+function loadValues(s) {
+  const empty = emptyFor(s);
+  try { return { ...empty, ...JSON.parse(localStorage.getItem(s.lsKey)) }; } catch { return empty; }
 }
 
 function autoResize(el) {
@@ -23,55 +21,66 @@ function autoResize(el) {
 }
 
 export default function CopywritingPopup() {
-  const [values, setValues] = useState(loadFromStorage);
+  const [activeId, setActiveId] = useState(getDefaultId);
+  const [valuesMap, setValuesMap] = useState(() =>
+    Object.fromEntries(STRUCTURES.map(s => [s.id, loadValues(s)]))
+  );
   const refs = useRef({});
 
+  const active = STRUCTURES.find(s => s.id === activeId);
+  const values = valuesMap[activeId];
+
   const handleChange = useCallback((key, val) => {
-    setValues(prev => {
-      const next = { ...prev, [key]: val };
-      localStorage.setItem(LS_KEY, JSON.stringify(next));
+    setValuesMap(prev => {
+      const next = { ...prev, [activeId]: { ...prev[activeId], [key]: val } };
+      localStorage.setItem(active.lsKey, JSON.stringify(next[activeId]));
       return next;
     });
-  }, []);
+  }, [activeId, active]);
 
   const handleClear = useCallback(() => {
-    localStorage.setItem(LS_KEY, JSON.stringify(EMPTY));
-    setValues(EMPTY);
+    const empty = emptyFor(active);
+    localStorage.setItem(active.lsKey, JSON.stringify(empty));
+    setValuesMap(prev => ({ ...prev, [activeId]: empty }));
     setTimeout(() => Object.values(refs.current).forEach(autoResize), 0);
-  }, []);
+  }, [activeId, active]);
 
-  // Auto-resize on mount and on external sync
   useEffect(() => {
     Object.values(refs.current).forEach(autoResize);
-  }, [values]);
+  }, [values, activeId]);
 
-  // Sync changes made in the main page
+  // Sync from page
   useEffect(() => {
     function onStorage(e) {
-      if (e.key === LS_KEY && e.newValue) {
-        try { setValues({ ...EMPTY, ...JSON.parse(e.newValue) }); } catch {}
-      }
+      STRUCTURES.forEach(s => {
+        if (e.key === s.lsKey && e.newValue) {
+          try {
+            setValuesMap(prev => ({ ...prev, [s.id]: { ...emptyFor(s), ...JSON.parse(e.newValue) } }));
+          } catch {}
+        }
+      });
     }
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   const handleKeyDown = useCallback((e, key) => {
-    if (key === 'notas') return;
+    const lastKey = active.fields[active.fields.length - 1].key;
+    if (key === lastKey) return;
     if (e.key === 'Enter') {
       e.preventDefault();
-      const keys = FIELDS.map(f => f.key);
+      const keys = active.fields.map(f => f.key);
       const nextKey = keys[keys.indexOf(key) + 1];
       if (nextKey && refs.current[nextKey]) refs.current[nextKey].focus();
     }
-  }, []);
+  }, [activeId, active]);
 
   return (
     <div
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: '#0d0d0d', color: 'white', fontFamily: 'system-ui, sans-serif' }}
     >
-      <div className="flex flex-wrap items-center justify-between px-3 py-2 border-b border-zinc-800 gap-1">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800">
         <span className="text-white text-sm font-semibold">Copywriting</span>
         <button
           onClick={() => window.close()}
@@ -80,9 +89,27 @@ export default function CopywritingPopup() {
           Ocultar
         </button>
       </div>
+
+      {/* Structure tabs */}
+      <div className="flex gap-1 px-3 pt-2 pb-1">
+        {STRUCTURES.map(s => (
+          <button
+            key={s.id}
+            onClick={() => setActiveId(s.id)}
+            className={`flex-1 py-1 rounded text-xs font-medium transition-colors ${
+              s.id === activeId
+                ? 'bg-white text-zinc-900'
+                : 'bg-zinc-800 text-zinc-400 hover:text-white'
+            }`}
+          >
+            {s.id}
+          </button>
+        ))}
+      </div>
+
       <div className="flex-1 overflow-y-auto px-3 py-2">
         <div className="flex flex-col gap-2">
-          {FIELDS.map(f => (
+          {active.fields.map(f => (
             <div key={f.key}>
               <label className="block text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-1">
                 {f.label}
@@ -91,7 +118,7 @@ export default function CopywritingPopup() {
                 ref={el => refs.current[f.key] = el}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5 text-white text-xs resize-y focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
                 rows={2}
-                value={values[f.key]}
+                value={values[f.key] || ''}
                 onChange={e => { handleChange(f.key, e.target.value); autoResize(e.target); }}
                 onKeyDown={e => handleKeyDown(e, f.key)}
                 placeholder={`${f.label}...`}
@@ -100,6 +127,7 @@ export default function CopywritingPopup() {
           ))}
         </div>
       </div>
+
       <div className="px-3 py-2 border-t border-zinc-800">
         <button
           onClick={handleClear}

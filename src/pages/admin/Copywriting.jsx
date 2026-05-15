@@ -1,11 +1,17 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { FIELDS } from './CopywritingContext';
+import { STRUCTURES, LS_DEFAULT } from './CopywritingContext';
 
-const LS_KEY = 'copywriting_values';
-const EMPTY = Object.fromEntries(FIELDS.map(f => [f.key, '']));
+function getDefaultId() {
+  return parseInt(localStorage.getItem(LS_DEFAULT) || '1', 10);
+}
 
-function loadFromStorage() {
-  try { return { ...EMPTY, ...JSON.parse(localStorage.getItem(LS_KEY)) }; } catch { return EMPTY; }
+function emptyFor(s) {
+  return Object.fromEntries(s.fields.map(f => [f.key, '']));
+}
+
+function loadValues(s) {
+  const empty = emptyFor(s);
+  try { return { ...empty, ...JSON.parse(localStorage.getItem(s.lsKey)) }; } catch { return empty; }
 }
 
 function autoResize(el) {
@@ -15,44 +21,61 @@ function autoResize(el) {
 }
 
 export default function Copywriting() {
-  const [values, setValues] = useState(loadFromStorage);
+  const [activeId, setActiveId] = useState(getDefaultId);
+  const [defaultId, setDefaultId] = useState(getDefaultId);
+  const [valuesMap, setValuesMap] = useState(() =>
+    Object.fromEntries(STRUCTURES.map(s => [s.id, loadValues(s)]))
+  );
   const refs = useRef({});
 
+  const active = STRUCTURES.find(s => s.id === activeId);
+  const values = valuesMap[activeId];
+
   const handleChange = useCallback((key, val) => {
-    setValues(prev => {
-      const next = { ...prev, [key]: val };
-      localStorage.setItem(LS_KEY, JSON.stringify(next));
+    setValuesMap(prev => {
+      const next = { ...prev, [activeId]: { ...prev[activeId], [key]: val } };
+      localStorage.setItem(active.lsKey, JSON.stringify(next[activeId]));
       return next;
     });
-  }, []);
+  }, [activeId, active]);
 
   const handleKeyDown = useCallback((e, key) => {
-    if (key === 'notas') return;
+    const lastKey = active.fields[active.fields.length - 1].key;
+    if (key === lastKey) return;
     if (e.key === 'Enter') {
       e.preventDefault();
-      const keys = FIELDS.map(f => f.key);
+      const keys = active.fields.map(f => f.key);
       const nextKey = keys[keys.indexOf(key) + 1];
       if (nextKey && refs.current[nextKey]) refs.current[nextKey].focus();
     }
-  }, []);
+  }, [activeId, active]);
 
   const handleClear = useCallback(() => {
-    localStorage.setItem(LS_KEY, JSON.stringify(EMPTY));
-    setValues(EMPTY);
+    const empty = emptyFor(active);
+    localStorage.setItem(active.lsKey, JSON.stringify(empty));
+    setValuesMap(prev => ({ ...prev, [activeId]: empty }));
     setTimeout(() => Object.values(refs.current).forEach(autoResize), 0);
+  }, [activeId, active]);
+
+  const handleSetDefault = useCallback((id) => {
+    localStorage.setItem(LS_DEFAULT, String(id));
+    setDefaultId(id);
   }, []);
 
-  // Auto-resize on mount and on external sync
   useEffect(() => {
     Object.values(refs.current).forEach(autoResize);
-  }, [values]);
+  }, [values, activeId]);
 
-  // Sync changes made in the popup window
+  // Sync from popup
   useEffect(() => {
     function onStorage(e) {
-      if (e.key === LS_KEY && e.newValue) {
-        try { setValues({ ...EMPTY, ...JSON.parse(e.newValue) }); } catch {}
-      }
+      STRUCTURES.forEach(s => {
+        if (e.key === s.lsKey && e.newValue) {
+          try {
+            setValuesMap(prev => ({ ...prev, [s.id]: { ...emptyFor(s), ...JSON.parse(e.newValue) } }));
+          } catch {}
+        }
+      });
     }
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
@@ -65,8 +88,25 @@ export default function Copywriting() {
         Abre el panel flotante con <kbd className="bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded text-xs font-mono">⌘ Shift C</kbd> o <kbd className="bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded text-xs font-mono">Ctrl Shift C</kbd>
       </p>
 
+      {/* Structure tabs */}
+      <div className="flex items-center gap-2 mb-6">
+        {STRUCTURES.map(s => (
+          <button
+            key={s.id}
+            onClick={() => setActiveId(s.id)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              s.id === activeId
+                ? 'bg-white text-zinc-900'
+                : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-col gap-4">
-        {FIELDS.map(f => (
+        {active.fields.map(f => (
           <div key={f.key}>
             <label className="block text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-1">
               {f.label}
@@ -75,7 +115,7 @@ export default function Copywriting() {
               ref={el => refs.current[f.key] = el}
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm resize-y focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
               rows={3}
-              value={values[f.key]}
+              value={values[f.key] || ''}
               onChange={e => { handleChange(f.key, e.target.value); autoResize(e.target); }}
               onKeyDown={e => handleKeyDown(e, f.key)}
               placeholder={`${f.label}...`}
@@ -84,7 +124,18 @@ export default function Copywriting() {
         ))}
       </div>
 
-      <div className="flex gap-3 mt-6">
+      {/* Default checkbox */}
+      <label className="flex items-center gap-2 mt-5 cursor-pointer w-fit">
+        <input
+          type="checkbox"
+          checked={defaultId === activeId}
+          onChange={() => handleSetDefault(activeId)}
+          className="accent-white w-3.5 h-3.5"
+        />
+        <span className="text-zinc-400 text-xs">Marcar como predeterminada</span>
+      </label>
+
+      <div className="flex gap-3 mt-5">
         <button
           onClick={handleClear}
           className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
