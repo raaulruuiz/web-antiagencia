@@ -21,7 +21,7 @@ export default function YaPorFin() {
         {/* Texto principal */}
         <div className="font-body text-gray-600 text-base md:text-lg text-center max-w-xl leading-relaxed mb-10">
           <p className="mb-6">Ya por fin estás dentro de esta increíble lista. Ahora te llegará otro mail con el ebook para que lo tengas también por ahí.</p>
-          <p className="mb-6">Tenle paciencia al sistema, puede tardar un poco en mandarte el mail. Si ves que no te llega, revisa spam o notificaciones y si sigue sin llegarte, escríbeme a raul arroba antiagencia.es y le echo un ojo.</p>
+          <p className="mb-6">Tenle paciencia al sistema, puede tardar un poco en mandarte el mail. Si ves que no te llega, revisa spam o notificaciones y si sigue sin llegarte, escríbeme a raul@antiagencia.es y le echo un ojo.</p>
           <p className="mb-6">Mientras tanto, puedes leerlo aquí:</p>
         </div>
 
