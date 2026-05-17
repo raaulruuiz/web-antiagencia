@@ -237,7 +237,7 @@ export default function Copywriting() {
         </div>
 
         {reto && (
-          <div className="bg-zinc-900 border border-zinc-700 rounded-lg px-6 py-6 text-3xl text-white leading-relaxed text-center">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-lg px-6 py-6 text-2xl text-white leading-relaxed text-center">
             Escribe un email con asunto{' '}
             <span style={{ color: '#4d9fff' }}>"{reto.asunto || '—'}"</span>
             , con la temática{' '}
