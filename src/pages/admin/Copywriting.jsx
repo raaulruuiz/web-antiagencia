@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { STRUCTURES, LS_ORDER, loadOrder, saveOrder } from './CopywritingContext';
 
 function emptyFor(s) {
@@ -17,7 +17,9 @@ function autoResize(el) {
 }
 
 // ── Práctica ──
-const LS_PRACTICA = 'copywriting_practica';
+const LS_PRACTICA      = 'copywriting_practica';
+const LS_PRACTICA_USED = 'copywriting_practica_used';
+
 const PRACTICA_COLS = [
   { key: 'asunto',       label: 'Asunto' },
   { key: 'tematica',     label: 'Temática' },
@@ -29,6 +31,10 @@ const PRACTICA_EMPTY = Object.fromEntries(PRACTICA_COLS.map(c => [c.key, '']));
 
 function loadPractica() {
   try { return { ...PRACTICA_EMPTY, ...JSON.parse(localStorage.getItem(LS_PRACTICA)) }; } catch { return PRACTICA_EMPTY; }
+}
+
+function loadUsed() {
+  try { return JSON.parse(localStorage.getItem(LS_PRACTICA_USED)) || []; } catch { return []; }
 }
 
 function parseItems(text) {
@@ -50,11 +56,35 @@ export default function Copywriting() {
 
   // Práctica state
   const [practica, setPractica] = useState(loadPractica);
+  const [usedCombos, setUsedCombos] = useState(loadUsed);
   const [reto, setReto] = useState(null);
 
   const active = STRUCTURES.find(s => s.id === activeId);
   const values = valuesMap[activeId];
 
+  // ── Derived práctica stats ──
+  const currentItems = useMemo(() =>
+    Object.fromEntries(PRACTICA_COLS.map(col => [col.key, new Set(parseItems(practica[col.key]))])),
+    [practica]
+  );
+
+  const totalCombinations = useMemo(() => {
+    const counts = PRACTICA_COLS.map(col => currentItems[col.key].size);
+    if (counts.some(c => c === 0)) return 0;
+    return counts.reduce((acc, c) => acc * c, 1);
+  }, [currentItems]);
+
+  // Valid used = combos where all values still exist in their column
+  const validUsedCount = useMemo(() =>
+    usedCombos.filter(combo =>
+      PRACTICA_COLS.every(col => currentItems[col.key].has(combo[col.key]))
+    ).length,
+    [usedCombos, currentItems]
+  );
+
+  const remaining = totalCombinations - validUsedCount;
+
+  // ── Handlers ──
   const handleChange = useCallback((key, val) => {
     setValuesMap(prev => {
       const next = { ...prev, [activeId]: { ...prev[activeId], [key]: val } };
@@ -96,12 +126,29 @@ export default function Copywriting() {
   }, []);
 
   const handleGenerarReto = useCallback(() => {
-    const result = {};
-    for (const col of PRACTICA_COLS) {
-      result[col.key] = pickRandom(parseItems(practica[col.key]));
-    }
-    setReto(result);
-  }, [practica]);
+    if (remaining <= 0) return;
+
+    const items = Object.fromEntries(PRACTICA_COLS.map(col => [col.key, parseItems(practica[col.key])]));
+    const usedSet = new Set(usedCombos.map(c => JSON.stringify(c)));
+
+    let combo;
+    let attempts = 0;
+    do {
+      combo = Object.fromEntries(PRACTICA_COLS.map(col => [col.key, pickRandom(items[col.key])]));
+      attempts++;
+      if (attempts > 10000) return;
+    } while (usedSet.has(JSON.stringify(combo)));
+
+    const newUsed = [...usedCombos, combo];
+    localStorage.setItem(LS_PRACTICA_USED, JSON.stringify(newUsed));
+    setUsedCombos(newUsed);
+    setReto(combo);
+  }, [practica, usedCombos, remaining]);
+
+  const handleResetUsed = useCallback(() => {
+    localStorage.removeItem(LS_PRACTICA_USED);
+    setUsedCombos([]);
+  }, []);
 
   useEffect(() => {
     Object.values(refs.current).forEach(autoResize);
@@ -126,6 +173,7 @@ export default function Copywriting() {
   }, []);
 
   const isDefault = order[0] === activeId;
+  const exhausted = totalCombinations > 0 && remaining <= 0;
 
   return (
     <div className="p-4 md:p-8">
@@ -224,17 +272,36 @@ export default function Copywriting() {
           ))}
         </div>
 
-        <div className="flex items-center gap-4 mb-5">
+        <div className="flex items-center gap-4 mb-5 flex-wrap">
           <button
             onClick={handleGenerarReto}
-            className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            disabled={exhausted}
+            className={`text-sm font-medium px-5 py-2.5 rounded-lg transition-colors ${
+              exhausted
+                ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
+                : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300'
+            }`}
           >
             Generar reto
           </button>
-          <span className="text-zinc-500 text-xs">
-            {PRACTICA_COLS.reduce((acc, col) => acc * (parseItems(practica[col.key]).length || 1), 1).toLocaleString()} combinaciones posibles
-          </span>
+          <button
+            onClick={handleResetUsed}
+            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            Reiniciar usadas
+          </button>
+          <div className="flex gap-3 text-xs text-zinc-500">
+            <span>{totalCombinations.toLocaleString()} combinaciones posibles</span>
+            <span>·</span>
+            <span className={remaining <= 0 && totalCombinations > 0 ? 'text-red-400' : ''}>
+              {remaining.toLocaleString()} restantes
+            </span>
+          </div>
         </div>
+
+        {exhausted && (
+          <p className="text-red-400 text-sm mb-4">Has completado todas las combinaciones posibles. Pulsa "Reiniciar usadas" para empezar de nuevo.</p>
+        )}
 
         {reto && (
           <div className="bg-zinc-900 border border-zinc-700 rounded-lg px-6 py-6 text-2xl text-white leading-relaxed text-center">
