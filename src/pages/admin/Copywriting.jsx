@@ -255,25 +255,6 @@ export default function Copywriting() {
         <h2 className="text-white text-lg font-semibold mb-1">Práctica</h2>
         <p className="text-zinc-500 text-xs mb-5">Separa los items con saltos de línea o comas. El generador elige uno al azar de cada columna.</p>
 
-        <div className="overflow-x-auto mb-5">
-        <div className="grid grid-cols-5 gap-3 min-w-[640px]">
-          {PRACTICA_COLS.map(col => (
-            <div key={col.key}>
-              <label className="block text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-1">
-                {col.label}
-              </label>
-              <textarea
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm resize-y focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
-                rows={8}
-                value={practica[col.key]}
-                onChange={e => handlePracticaChange(col.key, e.target.value)}
-                placeholder={`${col.label}...`}
-              />
-            </div>
-          ))}
-        </div>
-        </div>
-
         <div className="flex items-center gap-4 mb-5 flex-wrap">
           <button
             onClick={handleGenerarReto}
@@ -299,6 +280,23 @@ export default function Copywriting() {
               {remaining.toLocaleString()} restantes
             </span>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-5">
+          {PRACTICA_COLS.map(col => (
+            <div key={col.key}>
+              <label className="block text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-1">
+                {col.label}
+              </label>
+              <textarea
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm resize-y focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
+                rows={8}
+                value={practica[col.key]}
+                onChange={e => handlePracticaChange(col.key, e.target.value)}
+                placeholder={`${col.label}...`}
+              />
+            </div>
+          ))}
         </div>
 
         {exhausted && (
