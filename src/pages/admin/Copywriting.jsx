@@ -224,15 +224,20 @@ export default function Copywriting() {
           ))}
         </div>
 
-        <button
-          onClick={handleGenerarReto}
-          className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors mb-5"
-        >
-          Generar reto
-        </button>
+        <div className="flex items-center gap-4 mb-5">
+          <button
+            onClick={handleGenerarReto}
+            className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+          >
+            Generar reto
+          </button>
+          <span className="text-zinc-500 text-xs">
+            {PRACTICA_COLS.reduce((acc, col) => acc * (parseItems(practica[col.key]).length || 1), 1).toLocaleString()} combinaciones posibles
+          </span>
+        </div>
 
         {reto && (
-          <div className="bg-zinc-900 border border-zinc-700 rounded-lg px-5 py-4 text-sm text-white leading-relaxed">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-lg px-6 py-6 text-base text-white leading-relaxed text-center">
             Escribe un email con asunto{' '}
             <span style={{ color: '#4d9fff' }}>"{reto.asunto || '—'}"</span>
             , con la temática{' '}
