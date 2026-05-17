@@ -255,7 +255,8 @@ export default function Copywriting() {
         <h2 className="text-white text-lg font-semibold mb-1">Práctica</h2>
         <p className="text-zinc-500 text-xs mb-5">Separa los items con saltos de línea o comas. El generador elige uno al azar de cada columna.</p>
 
-        <div className="grid grid-cols-5 gap-3 mb-5">
+        <div className="overflow-x-auto mb-5">
+        <div className="grid grid-cols-5 gap-3 min-w-[640px]">
           {PRACTICA_COLS.map(col => (
             <div key={col.key}>
               <label className="block text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-1">
@@ -270,6 +271,7 @@ export default function Copywriting() {
               />
             </div>
           ))}
+        </div>
         </div>
 
         <div className="flex items-center gap-4 mb-5 flex-wrap">
