@@ -44,6 +44,51 @@ function calcE1rm(peso, reps, rir = 0) {
   return Math.round(peso * (1 + (reps + (rir || 0)) / 30));
 }
 
+/* ─── exercise bank ───────────────────────────────────────────── */
+function normalizeExName(name) {
+  return String(name).toLowerCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ');
+}
+function findBankMatch(nombre, bank) {
+  if (!bank?.length) return null;
+  const nn = normalizeExName(nombre);
+  let best = null, bestScore = 0;
+  for (const b of bank) {
+    const nb = normalizeExName(b.nombre);
+    let score = 0;
+    if (nn === nb) score = 1;
+    else if (nn.includes(nb) || nb.includes(nn)) score = 0.85;
+    else {
+      const wa = nn.split(' ').filter(w => w.length > 2);
+      const wb = new Set(nb.split(' ').filter(w => w.length > 2));
+      const inter = wa.filter(w => wb.has(w)).length;
+      const union = new Set([...wa, ...wb]).size;
+      score = union > 0 ? inter / union : 0;
+    }
+    if (score > bestScore) { bestScore = score; best = b; }
+  }
+  return bestScore >= 0.65 ? { ...best, score: bestScore } : null;
+}
+async function saveToExerciseBank(ejercicios, userId) {
+  if (!ejercicios?.length || !userId) return;
+  const rows = ejercicios
+    .filter(ex => ex.nombre?.trim())
+    .map(ex => ({
+      user_id: userId,
+      nombre: ex.nombre.trim(),
+      nombre_normalizado: normalizeExName(ex.nombre),
+      tipo_metrica: ex.tipo_metrica || 'fuerza',
+      variantes: ex.variantes || null,
+    }));
+  if (!rows.length) return;
+  await supabase.from('exercise_bank').upsert(rows, {
+    onConflict: 'user_id,nombre_normalizado',
+    ignoreDuplicates: true,
+  });
+}
+
 /* ─── utils ───────────────────────────────────────────────────── */
 function tipoBadge(tipo) {
   const t = TIPOS.find(x => x.value === tipo) ?? TIPOS[0];
@@ -410,6 +455,8 @@ function ExerciseFormModal({ exercise, routineId, order, onClose, onSave }) {
     } else {
       await supabase.from('routine_exercises').insert({ ...payload, routine_id: routineId, orden: order });
     }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) await saveToExerciseBank([payload], user.id);
     onSave();
   };
 
@@ -545,11 +592,14 @@ function ExercisePreviewCard({ ex, index, onRemove }) {
 }
 
 function FileImportModal({ userId, onClose, onSave }) {
-  const [step,     setStep]     = useState('upload');
-  const [rutinas,  setRutinas]  = useState([]);
-  const [selected, setSelected] = useState([]);
-  const [editing,  setEditing]  = useState(null);
-  const [error,    setError]    = useState(null);
+  const [step,         setStep]         = useState('upload');
+  const [rutinas,      setRutinas]      = useState([]);
+  const [selected,     setSelected]     = useState([]);
+  const [editing,      setEditing]      = useState(null);
+  const [error,        setError]        = useState(null);
+  const [bankExs,      setBankExs]      = useState([]);
+  const [bankMatches,  setBankMatches]  = useState([]);
+  const [finalRutinas, setFinalRutinas] = useState(null);
   const fileRef = useRef();
 
   const handleFile = async (file) => {
@@ -566,6 +616,12 @@ function FileImportModal({ userId, onClose, onSave }) {
       if (!res.ok) throw new Error(`Error del servidor (${res.status})`);
       const data = await res.json();
       if (!data.rutinas?.length) throw new Error('No se detectaron rutinas en el archivo');
+      // Si hay rir_series_array, series_objetivo = número de elementos
+      data.rutinas.forEach(r => {
+        (r.ejercicios || []).forEach(ex => {
+          if (ex.rir_series_array?.length) ex.series_objetivo = ex.rir_series_array.length;
+        });
+      });
       setRutinas(data.rutinas);
       setSelected(data.rutinas.map((_, i) => i));
       setStep(data.rutinas.length > 1 ? 'select' : 'preview');
@@ -578,18 +634,37 @@ function FileImportModal({ userId, onClose, onSave }) {
     }
   };
 
+  const goToMatching = async (fr) => {
+    setFinalRutinas(fr);
+    setStep('loading-bank');
+    const { data: bank } = await supabase
+      .from('exercise_bank').select('nombre, tipo_metrica').eq('user_id', userId);
+    const bk = bank || [];
+    setBankExs(bk);
+    const allEx = selected.flatMap(idx =>
+      (fr[idx]?.ejercicios || []).map(ex => ({
+        nombre: ex.nombre,
+        rutina: fr[idx]?.nombre,
+      }))
+    );
+    setBankMatches(allEx.map(bm => ({ ...bm, match: findBankMatch(bm.nombre, bk) })));
+    setStep('matching');
+  };
+
   const saveAll = async () => {
     setStep('saving');
+    const ruts = finalRutinas ?? rutinas;
     for (const idx of selected) {
-      const r = idx === editing?.idx
-        ? { nombre: editing.nombre, ejercicios: editing.ejercicios }
-        : rutinas[idx];
+      const r = finalRutinas
+        ? ruts[idx]
+        : (idx === editing?.idx ? { nombre: editing.nombre, ejercicios: editing.ejercicios } : rutinas[idx]);
       const { data: routine } = await supabase
         .from('routines').insert({ nombre: r.nombre.trim(), user_id: userId }).select().single();
       if (routine && r.ejercicios?.length) {
         await supabase.from('routine_exercises').insert(
           r.ejercicios.map((ex, i) => ({ ...ex, routine_id: routine.id, orden: i }))
         );
+        await saveToExerciseBank(r.ejercicios, userId);
       }
     }
     onSave();
@@ -691,16 +766,61 @@ function FileImportModal({ userId, onClose, onSave }) {
                 );
               }
               return (
-                <button style={S.primary} disabled={!editing.nombre.trim()} onClick={() => {
+                <button style={S.primary} disabled={!editing.nombre.trim()} onClick={async () => {
                   const updated = [...rutinas];
                   updated[editing.idx] = { nombre: editing.nombre, ejercicios: editing.ejercicios };
                   setRutinas(updated);
-                  saveAll();
+                  await goToMatching(updated);
                 }}>
-                  {selected.length > 1 ? `Crear ${selected.length} rutinas` : 'Crear rutina'}
+                  {selected.length > 1 ? `Revisar banco →` : 'Revisar banco →'}
                 </button>
               );
             })()}
+          </div>
+        </>
+      )}
+      {step === 'loading-bank' && <Loader text="Comprobando banco de ejercicios..." />}
+      {step === 'matching' && (
+        <>
+          <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700 }}>Banco de ejercicios</h3>
+          <p style={{ color: '#71717a', fontSize: 13, margin: '0 0 14px' }}>
+            Revisa qué ejercicios son nuevos y cuáles ya tienes guardados.
+          </p>
+          <div style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+            {bankMatches.map((bm, i) => {
+              const isExact = bm.match?.score >= 0.95;
+              const isSimilar = bm.match && !isExact;
+              return (
+                <div key={i} style={{ ...S.card, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 14, minWidth: 18 }}>
+                    {isExact ? '✓' : isSimilar ? '~' : '+'}
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>{bm.nombre}</div>
+                    {bm.match ? (
+                      <div style={{ fontSize: 11, color: isExact ? '#4ade80' : '#fbbf24', marginTop: 1 }}>
+                        {isExact ? 'Ya en banco' : `Similar: "${bm.match.nombre}"`}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 11, color: '#71717a', marginTop: 1 }}>Nuevo — se añadirá al banco</div>
+                    )}
+                  </div>
+                  {bm.rutina && selected.length > 1 && (
+                    <span style={{ fontSize: 10, color: '#52525b' }}>{bm.rutina}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button style={S.ghost} onClick={() => {
+              const lastIdx = selected[selected.length - 1];
+              setEditing({ idx: lastIdx, nombre: (finalRutinas ?? rutinas)[lastIdx].nombre, ejercicios: (finalRutinas ?? rutinas)[lastIdx].ejercicios });
+              setStep('preview');
+            }}>← Volver</button>
+            <button style={S.primary} onClick={saveAll}>
+              {selected.length > 1 ? `Crear ${selected.length} rutinas` : 'Crear rutina'}
+            </button>
           </div>
         </>
       )}
