@@ -373,7 +373,7 @@ function RoutineDetail({ routine, onBack, onStart }) {
                   <div style={{ fontSize: 12, color: '#71717a', display: 'flex', flexWrap: 'wrap', gap: '3px 10px' }}>
                     {ex.tipo_metrica === 'fuerza' && (
                       <>
-                        <span>{ex.series_objetivo ?? '?'} × {fmtRepsEx(ex)}</span>
+                        <span>{ex.series_objetivo ?? ex.rir_series_array?.length ?? '?'} × {fmtRepsEx(ex)}</span>
                         {ex.rir_series_array?.length > 0 && (
                           <span style={{ color: '#a78bfa' }}>RIR {displayRir(ex.rir_series_array)}</span>
                         )}
