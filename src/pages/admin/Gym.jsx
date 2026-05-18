@@ -1886,11 +1886,133 @@ function Loader({ text = 'Cargando...' }) {
 /* ═══════════════════════════════════════════════════════════════
    ROOT
 ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   BANCO DE EJERCICIOS
+═══════════════════════════════════════════════════════════════ */
+function BancoView({ userId }) {
+  const [bank,    setBank]    = useState([]);
+  const [prMap,   setPrMap]   = useState({});
+  const [loading, setLoading] = useState(true);
+  const [search,  setSearch]  = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const [{ data: bankData }, { data: sessions }] = await Promise.all([
+      supabase.from('exercise_bank').select('*').eq('user_id', userId).order('nombre'),
+      supabase.from('workout_sessions').select('id').eq('user_id', userId),
+    ]);
+
+    const sessionIds = (sessions || []).map(s => s.id);
+    const setsMap = {};
+
+    if (sessionIds.length > 0) {
+      const { data: sets } = await supabase
+        .from('session_sets')
+        .select('peso_usado, reps_realizadas, rir_reportado, created_at, routine_exercise_id')
+        .in('session_id', sessionIds)
+        .not('peso_usado', 'is', null)
+        .gt('peso_usado', 0);
+
+      const reIds = [...new Set((sets || []).map(s => s.routine_exercise_id).filter(Boolean))];
+      let reMap = {};
+      if (reIds.length > 0) {
+        const { data: res } = await supabase
+          .from('routine_exercises').select('id, nombre').in('id', reIds);
+        reMap = Object.fromEntries((res || []).map(r => [r.id, r.nombre]));
+      }
+
+      for (const set of (sets || [])) {
+        const nombre = reMap[set.routine_exercise_id];
+        if (!nombre) continue;
+        const nn = normalizeExName(nombre);
+        const e1rm = calcE1rm(set.peso_usado, set.reps_realizadas, set.rir_reportado ?? 0);
+        const prev = setsMap[nn];
+        if (!prev || (e1rm ?? 0) > (prev.e1rm ?? 0)) {
+          setsMap[nn] = { ...set, nombre, e1rm };
+        }
+      }
+    }
+
+    setBank(bankData || []);
+    setPrMap(setsMap);
+    setLoading(false);
+  }, [userId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    const channel = supabase.channel('banco-pr-updates')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'session_sets' }, load)
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [load]);
+
+  const filtered = search
+    ? bank.filter(ex => ex.nombre.toLowerCase().includes(search.toLowerCase()))
+    : bank;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+        <input
+          style={{ ...S.input, flex: 1 }}
+          placeholder="Buscar ejercicio..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <span style={{ color: '#71717a', fontSize: 13, whiteSpace: 'nowrap' }}>{bank.length} ejercicios</span>
+      </div>
+
+      {loading ? <Loader /> : filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', color: '#71717a', paddingTop: 40, fontSize: 14 }}>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>🗂️</div>
+          {search ? 'Sin resultados' : 'El banco está vacío. Importa una rutina para empezar.'}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filtered.map(ex => {
+            const pr = prMap[normalizeExName(ex.nombre)];
+            return (
+              <div key={ex.id} style={{ ...S.card, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {ex.nombre}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#52525b', marginTop: 2 }}>
+                    {METRICA_LABELS_SHORT[ex.tipo_metrica] ?? ex.tipo_metrica}
+                    {ex.variantes?.length > 0 && ` · var: ${ex.variantes.join(', ')}`}
+                  </div>
+                </div>
+                {pr ? (
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: '#fbbf24' }}>
+                      {pr.peso_usado}kg × {pr.reps_realizadas} reps
+                    </div>
+                    {pr.e1rm && (
+                      <div style={{ fontSize: 11, color: '#a78bfa' }}>e1RM ~{pr.e1rm}kg</div>
+                    )}
+                    <div style={{ fontSize: 10, color: '#52525b', marginTop: 1 }}>
+                      {new Date(pr.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: '2-digit' })}
+                    </div>
+                  </div>
+                ) : (
+                  <span style={{ color: '#3f3f46', fontSize: 12, flexShrink: 0 }}>Sin PR</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const TABS = [
   { id: 'rutinas',   label: 'Rutinas',   icon: '📋' },
   { id: 'entrenar',  label: 'Entrenar',  icon: '💪' },
   { id: 'historial', label: 'Historial', icon: '📅' },
   { id: 'progreso',  label: 'Progreso',  icon: '📈' },
+  { id: 'banco',     label: 'Banco',     icon: '🗂️' },
   { id: 'social',    label: 'Social',    icon: '🏆' },
 ];
 
@@ -1955,6 +2077,7 @@ export default function Gym() {
       )}
       {tab === 'historial' && <HistorialView userId={userId} />}
       {tab === 'progreso'  && <ProgresoView  userId={userId} />}
+      {tab === 'banco'     && <BancoView     userId={userId} />}
       {tab === 'social'    && <SocialView />}
     </div>
   );
