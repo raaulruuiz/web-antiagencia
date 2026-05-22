@@ -165,7 +165,7 @@ export default function TrabajaConNosotrosV3() {
             <div className="text-gray-800 text-base leading-relaxed">
 
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">
-                SERVICIO DE COPYWRITTING PARA EMAIL MARKETING
+                SERVICIO DE COPYWRITTING PARA TIENDAS ONLINE
               </h1>
               <p style={{textAlign: 'center'}}>&nbsp;</p>
               <p><span style={{fontWeight: 400}}>Un día cualquiera, de una semana cualquiera, dos emprendedores decidieron montar sus negocios online. Ambos tenían la misma edad, mismo nivel de estudios, e incluso su formación era en la misma área. Y durante su vida profesional habían ejercido cargos similares, que les daban una buena visión del reto que tenían por delante.</span></p>
@@ -290,7 +290,7 @@ export default function TrabajaConNosotrosV3() {
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún bonus?</h3>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Si, el servicio es principalmente la redacción, montaje y gestión de la plataforma de email marketing, pero como bonus, ya que es muy importante, incluimos el copywritting de las fichas de producto que estemos trabajando y el plan estratégico trimestral. Ambas cosas son fundamentales para cualquier tienda online, por eso las incluimos.</span></p>
+              <p><span style={{fontWeight: 400}}>Si, el servicio es principalmente la redacción, montaje y gestión de la plataforma de email marketing, pero como bonus, ya que es muy importante, incluimos el copywritting de las fichas de producto que estemos trabajando, páginas de venta en caso de que las vayas a usar y el plan estratégico trimestral. Ambas cosas son fundamentales para cualquier tienda online, por eso las incluimos.</span></p>
               <p><br /><br /><br /></p>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Cómo funciona eso de la donación?</h3>
