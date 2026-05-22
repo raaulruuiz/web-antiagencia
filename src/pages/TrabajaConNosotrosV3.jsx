@@ -209,7 +209,7 @@ export default function TrabajaConNosotrosV3() {
 
               <h2 className="text-xl font-bold text-center text-gray-900 mb-4">Una herramienta que ahorra dinero</h2>
               <p style={{textAlign: 'center'}}>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>El email no va a sustituir nunca a la publicidad. Es más, va a hacer que funcione mejor. <strong>Lo que va a hacer el mail es permitirte no depender de la publicidad</strong>. O de los algoritmos de las redes.</span></p>
+              <p><span style={{fontWeight: 400}}>El email no va a sustituir nunca a la publicidad. Es más, va a hacer que funcione mejor. <strong>Lo que va a hacer el mail es permitirte no depender de ella</strong>. O de los algoritmos de las redes.</span></p>
               <p><br /><br /></p>
               <p><span style={{fontWeight: 400}}>Te va a permitir vender cada día, cambie el algoritmo o no, tengas tiempo de producir nuevos anuncios o no, inviertas más o menos en publicidad. Al email no le importa nada de esto. No necesitas pagar publicidad, no necesitas pagar por producir anuncios. Incluso no tienes ni que usar imágenes si no quieres.</span></p>
               <p><br /><br /></p>
