@@ -215,7 +215,7 @@ export default function TrabajaConNosotrosV3() {
               <p><br /><br /></p>
               <p><span style={{fontWeight: 400}}>Tampoco te tienes que complicar la vida con complejas automatizaciones (tampoco tienes que quitarlas si las tienes), hiper-segmentar a la audiencias y cosas por el estilo. Detrás de la pantalla hay una persona como tú y como yo. Una persona que, si se va de vacaciones y está dos semanas sin leer tus emails no significa que ya no les interesen. Una persona, que si su hijo se pone enfermo, lo cuidará y no estará pendiente al email.</span></p>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>No tenemos que complicarlo. Hay que mandar mails a personas, nada más.</span></p>
+              <p><span style={{fontWeight: 400}}>No tenemos que complicarlo. Hay que mandar mails a personas, nada más. Contarles historias. Es lo que hacemos las personsa. ¿de qué hablas cuando quedas con tus amigos? Hay que hacerlo más humano y menos artificial.</span></p>
               <p><br /><br /></p>
               <p><span style={{fontWeight: 400}}>Hay muchos más beneficios si trabajas el email marketing de forma profesional y correcta que si te los pongo aquí es posible que esto quede demasiado largo. En todo caso, te puedes hacer una idea.</span></p>
               <p><br /><br /></p>
@@ -239,6 +239,8 @@ export default function TrabajaConNosotrosV3() {
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Qué incluye el servicio?</h3>
               <p>&nbsp;</p>
               <p><span style={{fontWeight: 400}}>Lo principal sobre lo que vamos a trabajar es el email marketing. Redactaremos y programaremos todos los mails (newsletters periódicas y automatizaciones) y los formularios de captación. Además, redactaremos un plan de acción trimestral para que tengas claridad en lo que vamos a hacer.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>Por supuesto, todos los emails los escribimos con Inteligencia Humana y no Inteligencia Artificial, y aprovechamos el recurso de venta más poderoso que tenemos, el contar historias, algo que llevamos haciendo desde el principio de los tiempos.</span></p>
               <p><br /><br /><br /></p>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Cuánto dura el servicio?</h3>
