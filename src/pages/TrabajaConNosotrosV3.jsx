@@ -191,7 +191,7 @@ export default function TrabajaConNosotrosV3() {
               <p><br /><br /></p>
               <p><span style={{fontWeight: 400}}>No es la inteligencia ni los recursos ni la disciplina. Tampoco era invertir o no en publicidad, ambos lo hacían.</span></p>
               <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>No es que uno quisiera tener éxito y el otro no, o que uno tuvo "buena suerte" y el otro "mala suerte", por suerte no es nada de eso.</span></p>
+              <p><span style={{fontWeight: 400}}>No es que uno quisiera tener éxito y el otro no, o que uno tuvo "buena suerte" y el otro "mala suerte", afortunadamente no es nada de eso.</span></p>
               <p><br /><br /></p>
               <p><span style={{fontWeight: 400}}>La verdadera diferencia radica en los profesionales que cada uno elige para que le guíen por un camino que no ha recorrido. De donde pone el foco, apoyado de profesionales que realmente aportan en las áreas más importantes del negocio. Que arrojan resultados.</span></p>
               <p><br /><br /></p>
