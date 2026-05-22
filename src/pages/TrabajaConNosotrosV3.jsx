@@ -182,7 +182,7 @@ export default function TrabajaConNosotrosV3() {
               <p><br /><br /></p>
               <p><span style={{fontWeight: 400}}>A uno de ellos, su tienda le daba un buen sueldo mensual. Facturaba cientos de miles de euros al año y vivía bien. Tenía un equipo que cada vez necesitaba ser más grande. Cada año, su beneficio aumentaba, y estaba planeando expandirse al extranjero. Además, cada año se permitía varias semanas de vacaciones con su pareja.</span></p>
               <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>El otro, sin embargo, facturaba más que él, pero sus beneficios eran cada vez menores. Tenía un equipo que cada vez necesitaba ser más pequeño. Tuvo que despedir a varios empleados y bajarse el sueldo para que no le comieran los costes fijos. Pensaba incluso en cerrar la tienda. Su horario de trabajo era desde que se levantaba hasta que se acostaba, apagando fuegos, y las vacaciones para él no eran más que un motivo de discusión con su pareja porque no podía parar.</span></p>
+              <p><span style={{fontWeight: 400}}>El otro, sin embargo, facturaba más que él, pero dependía de dar descuentos cada vez mayores y por tanto sus beneficios eran cada vez menores. Tenía un equipo que cada vez necesitaba ser más pequeño. Tuvo que despedir a varios empleados y bajarse el sueldo para que no le comieran los costes fijos. Pensaba incluso en cerrar la tienda. Su horario de trabajo era desde que se levantaba hasta que se acostaba, apagando fuegos, y las vacaciones para él no eran más que un motivo de discusión con su pareja porque no podía parar.</span></p>
               <p><br /><br /></p>
 
               <h2 className="text-xl font-bold text-center text-gray-900 mb-4">La diferencia</h2>
