@@ -164,128 +164,144 @@ export default function TrabajaConNosotrosV3() {
           <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
             <div className="text-gray-800 text-base leading-relaxed">
 
-              {/* Titular */}
               <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">
-                Esta es (probablemente) la forma más rentable, rápida, económica y desaprovechada de tener altos beneficios con tu tienda online
+                SERVICIO DE COPYWRITTING PARA EMAIL MARKETING
               </h1>
-              <br />
-              <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-4">
-                Y está a disposición de todos
-              </h1>
-              <br /><br /><br /><br /><br />
+              <p style={{textAlign: 'center'}}>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Un día cualquiera, de una semana cualquiera, dos emprendedores decidieron montar sus negocios online. Ambos tenían la misma edad, mismo nivel de estudios, e incluso su formación era en la misma área. Y durante su vida profesional habían ejercido cargos similares, que les daban una buena visión del reto que tenían por delante.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>Ambos eran muy trabajadores y dedicados.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>Antes de lanzarse a la aventura, ambos se habían preparado e informado sobre como tener éxito con su emprendimiento y con ello, alcanzar la vida de sus sueños. Además, tenían un presupuesto muy similar. Para nada alto, en sus planes no lo necesitaban.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>Sabían que podían crecer rápidamente en el entorno digital. Habían visto muchos casos de otras marcas que crecieron mucho partiendo de una inversión baja. Reinvirtiendo el beneficio.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>Hace poco, estos dos emprendedores se habían encontrado en un evento presencia, un par de años después de montar sus tiendas.</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Sus vidas seguían siendo muy parecidas, incluso en lo personal. Ambos estaban prometidos e incluso pensando en formar una familia. Y ambos seguían al frente de sus negocios, pero había una diferencia.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>A uno de ellos, su tienda le daba un buen sueldo mensual. Facturaba cientos de miles de euros al año y vivía bien. Tenía un equipo que cada vez necesitaba ser más grande. Cada año, su beneficio aumentaba, y estaba planeando expandirse al extranjero. Además, cada año se permitía varias semanas de vacaciones con su pareja.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>El otro, sin embargo, facturaba más que él, pero sus beneficios eran cada vez menores. Tenía un equipo que cada vez necesitaba ser más pequeño. Tuvo que despedir a varios empleados y bajarse el sueldo para que no le comieran los costes fijos. Pensaba incluso en cerrar la tienda. Su horario de trabajo era desde que se levantaba hasta que se acostaba, apagando fuegos, y las vacaciones para él no eran más que un motivo de discusión con su pareja porque no podía parar.</span></p>
+              <p><br /><br /></p>
 
-              {/* Subtítulo con negrita */}
-              <h2 className="text-xl font-bold text-center text-gray-900 mb-2">Por favor, lo primero que quiero que sepas es que no tengo una empresa, ni 40 empleados. Soy autónomo y en mi equipo estamos mi novia y yo.</h2>
-              <br />
-              <h2 className="text-xl font-bold text-center text-gray-900 mb-2">Tampoco tengo ninguna carrera universitaria ni máster de ningún tipo.</h2>
-              <br />
-              <h2 className="text-xl font-bold text-center text-gray-900 mb-2">Si esto puede suponer un problema para ti, lo mejor es que dejes de leer aquí.</h2>
-              <br /><br />
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">La diferencia</h2>
+              <p style={{textAlign: 'center'}}>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>¿Te preguntarás cuál era la diferencia en la vida de estas dos personas?</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>No es la inteligencia ni los recursos ni la disciplina. Tampoco era invertir o no en publicidad, ambos lo hacían.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>No es que uno quisiera tener éxito y el otro no, o que uno tuvo "buena suerte" y el otro "mala suerte", por suerte no es nada de eso.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>La verdadera diferencia radica en los profesionales que cada uno elige para que le guíen por un camino que no ha recorrido. De donde pone el foco, apoyado de profesionales que realmente aportan en las áreas más importantes del negocio. Que arrojan resultados.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>Y es por eso que te escribo sobre Email Marketing. <strong>Porque esa es la idea del Email.</strong></span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Trabajar el área más importante, la base de los beneficios de una marca, la que no depende de poner dinero en juego, pujando por la atención de la gente.</span></p>
+              <p><br /><br /></p>
 
-              {/* Subtítulo sin negrita */}
-              <h2 className="text-xl text-center text-gray-900 mb-2">Okay.</h2>
-              <br />
-              <h2 className="text-xl text-center text-gray-900 mb-4">Este servicio va de email marketing, por lo que toda la venta la voy a hacer ahí. Aquí lo único que haré será ponerte las preguntas frecuentes debajo del formulario de pedir presupuesto:</h2>
-              <br /><br />
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">Una herramienta más simple</h2>
+              <p style={{textAlign: 'center'}}>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Verás, el email marketing es muy simple, no fácil, ojo. No es complejo técnicamente, no tienes que invertir tu dinero para pujar por clientes, por ello, no tienes coste por compra, lo que lleva a que todo lo que generas por email va directamente al beneficio. Y tampoco dependes de que cambien los algoritmos, te bloqueen cuentas o ahora tus publicaciones lleguen a la mitad de personas que hace un mes.</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Además, es la herramienta que <strong>te permite conectar genuinamente con tus compradores, fidelizarlos y hacer que te quieran comprar constantemente, aumentando aún más los beneficios</strong>.</span></p>
+              <p><br /><br /></p>
 
-              {/* Formulario */}
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">Una herramienta que ahorra dinero</h2>
+              <p style={{textAlign: 'center'}}>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>El email no va a sustituir nunca a la publicidad. Es más, va a hacer que funcione mejor. <strong>Lo que va a hacer el mail es permitirte no depender de la publicidad</strong>. O de los algoritmos de las redes.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>Te va a permitir vender cada día, cambie el algoritmo o no, tengas tiempo de producir nuevos anuncios o no, inviertas más o menos en publicidad. Al email no le importa nada de esto. No necesitas pagar publicidad, no necesitas pagar por producir anuncios. Incluso no tienes ni que usar imágenes si no quieres.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>Tampoco te tienes que complicar la vida con complejas automatizaciones (tampoco tienes que quitarlas si las tienes), hiper-segmentar a la audiencias y cosas por el estilo. Detrás de la pantalla hay una persona como tú y como yo. Una persona que, si se va de vacaciones y está dos semanas sin leer tus emails no significa que ya no les interesen. Una persona, que si su hijo se pone enfermo, lo cuidará y no estará pendiente al email.</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>No tenemos que complicarlo. Hay que mandar mails a personas, nada más.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>Hay muchos más beneficios si trabajas el email marketing de forma profesional y correcta que si te los pongo aquí es posible que esto quede demasiado largo. En todo caso, te puedes hacer una idea.</span></p>
+              <p><br /><br /></p>
+              <p><span style={{fontWeight: 400}}>Lo que el email puede hacer por ti, <strong>el beneficio extra que vas a obtener al dejar de depender de descuentos, lo que ahorras al poder apagar la publicidad sin que se te caiga el negocio, no depender de algoritmos…</strong> te ahorra una cantidad de tiempo y dinero que no te puedo cuantificar. En todo caso, podrás comprobarlo si trabajamos juntos:</span></p>
+              <p><br /><br /></p>
+
               <MailerLiteForm />
-              <br /><br /><br />
+              <p><br /><br /></p>
 
-              {/* FAQs */}
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Podré dejar de dar descuentos y de depender de las plataformas de publicidad y del contenido orgánico?</h2>
-              <br />
-              <p className="mb-4">Si, por supuesto. El objetivo principal de este servicio es tener una lista sana y fiel, que te compre independientemente de la situación y sin necesidad de descuentos. Que te quieran comprar incluso si cambias de negocio y empiezas a vender otra cosa que no tenga nada que ver. No es algo inmediato, pero si es la acción más rentable que puedes hacer para tu tienda. Y por supuesto, que puedas parar la publicidad o dejar de publicar y que sigas vendiendo.</p>
-              <br /><br />
+              <p><span style={{fontWeight: 400}}><strong>P.D.</strong> No puedo garantizarte ningún resultado concreto, tampoco es mi estilo. Pero puedo garantizarte que siempre encontrarás este servicio útil, beneficioso y con muchas estrategias diferentes, que sin duda, te traerán resultados distintos a los que ya tienes.</span></p>
+              <p><br /><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Qué incluye el servicio?</h2>
-              <br />
-              <p className="mb-4">Lo principal sobre lo que vamos a trabajar es el email marketing. Redactaremos y programaremos todos los mails (newsletters periódicas y flujos) y los formularios de captación. Además, redactaremos un plan de acción trimestral para que tengas claridad en lo que vamos a hacer.</p>
-              <br /><br />
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">PREGUNTAS FRECUENTES</h2>
+              <p style={{textAlign: 'center'}}><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Cuánto dura el servicio?</h2>
-              <br />
-              <p className="mb-4">El servicio dura 3 meses. Es la mejor forma de arrancar para poder hacer una buena investigación y que obtengas los mejores resultados posibles. Después de estos 3 meses, seguiremos mes a mes y sin ningún tipo de permanencia.</p>
-              <br /><br />
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Podré dejar de dar descuentos y de depender de las plataformas de publicidad y del contenido orgánico?</h3>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Si, por supuesto. El objetivo principal de este servicio es tener una lista sana y fiel, que te compre independientemente de la situación y sin necesidad de descuentos. Que te quieran comprar incluso si cambias de negocio y empiezas a vender otra cosa que no tenga nada que ver. No es algo inmediato, pero si es la acción más rentable que puedes hacer para tu tienda. Y por supuesto, que puedas parar la publicidad o dejar de publicar y que sigas vendiendo.</span></p>
+              <p><br /><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Es muy caro? ¿Es barato?</h2>
-              <br />
-              <p className="mb-4">Es cierto, no es barato. No te voy a negar esa realidad. Nosotros primamos otras cosas muy por encima del precio. E invertimos en ello para dar una experiencia de cliente más especial. Mucha gente no valora eso y solo busca precio, lo respetamos, pero no es al público al que va dirigido este servicio.</p>
-              <br /><br />
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Qué incluye el servicio?</h3>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Lo principal sobre lo que vamos a trabajar es el email marketing. Redactaremos y programaremos todos los mails (newsletters periódicas y automatizaciones) y los formularios de captación. Además, redactaremos un plan de acción trimestral para que tengas claridad en lo que vamos a hacer.</span></p>
+              <p><br /><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Qué perfil de personas le sacarán mejor partido?</h2>
-              <br />
-              <p className="mb-4">Las personas que más partido le sacan al servicio son personas con una lista de cierto tamaño (más 5.000 personas) y que se encuentran en alguna de estas situaciones:</p>
-              <p className="mb-2">a final de mes tus gastos fijos "se comen" tu beneficio</p>
-              <p className="mb-2">o dependes de dar descuentos para vender</p>
-              <p className="mb-2">o nunca has mandado mails a esa lista</p>
-              <p className="mb-2">o los escribes con ChatGPT</p>
-              <p className="mb-2">o si haces emails de 2 párrafos y muchas imágenes</p>
-              <p className="mb-2">o peor, los haces de 2 párrafos y encima escritos por ChatGPT</p>
-              <p className="mb-2">o piensas que "es que mis clientes no leen"</p>
-              <p className="mb-2">o piensas que tu cliente o tu producto "es especial" y que tiene que ser tratada como si no hubiese humanos detrás de la pantalla donde leen</p>
-              <p className="mb-4">y sobre todo, si tu facturación depende principalmente de la publicidad o de tu comunidad en redes sociales.</p>
-              <p className="mb-4">En cualquiera de estos casos, si estás dispuesto a ponerle solución, por supuesto, le sacarás mucho partido al servicio.</p>
-              <br /><br />
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Cuánto dura el servicio?</h3>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>El servicio dura 3 meses. Es la mejor forma de arrancar para poder hacer una buena investigación y que obtengas los mejores resultados posibles. Después de estos 3 meses, seguiremos mes a mes y sin ningún tipo de permanencia.</span></p>
+              <p><br /><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Eres más de ciervos o de gatos?</h2>
-              <br />
-              <p className="mb-4">De ciervos. Los gatos te juzgan con la mirada y te miran por encima del hombro. Piensan que eres su esclavo y yo solo soy esclavo de mi trabajo y de Pili.</p>
-              <br /><br />
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Es muy caro? ¿Es barato?</h3>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Es cierto, no es barato. No te voy a negar esa realidad. Nosotros primamos otras cosas muy por encima del precio. E invertimos en ello para dar unos resultados y una experiencia de cliente más especial. Mucha gente no valora eso y solo busca precio, lo respetamos, pero no es al público al que va dirigido este servicio.</span></p>
+              <p><br /><br /><br /></p>
 
-              <img src="/images/prueba-social-raul.jpg" alt="Prueba social" className="w-full md:w-2/3 md:mx-auto block my-4 rounded" />
-              <br /><br />
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Qué perfil de personas le sacarán mejor partido?</h3>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Las personas que más partido le sacan al servicio son personas con una lista de cierto tamaño (más 5.000 personas) y que se encuentran en alguna de estas situaciones:</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>- a final de mes tus gastos fijos "se comen" tu beneficio</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>- o dependes de dar descuentos para vender</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>- o nunca has mandado mails a esa lista</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>- o los escribes con ChatGPT</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>- o si haces emails de 2 párrafos y muchas imágenes</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>- o peor, los haces de 2 párrafos y encima escritos por ChatGPT</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>- o piensas que "es que mis clientes no leen"</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>- o piensas que tu cliente o tu producto "es especial" y que tiene que ser tratada como si no hubiese humanos detrás de la pantalla donde leen</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>- y sobre todo, si tu facturación depende principalmente de la publicidad o de tu comunidad en redes sociales.</span></p>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>En cualquiera de estos casos, le sacarás mucho partido al servicio.</span></p>
+              <p><br /><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Cómo es la comunicación?</h2>
-              <br />
-              <p className="mb-4">Nos comunicaremos por WhatsApp, en un grupo donde estaremos nosotros y quien tu quieras de tu equipo. Si lo prefieres podemos usar otro canal de comunicación, pero preferimos WhatsApp por la inmediatez y la facilidad de uso.</p>
-              <br /><br />
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Cómo es la comunicación?</h3>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Nos comunicaremos por WhatsApp, en un grupo donde estaremos nosotros y quien quieras de tu equipo. Si lo prefieres podemos usar otro canal de comunicación, pero preferimos WhatsApp por la inmediatez y la facilidad de uso.</span></p>
+              <p><br /><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún tipo de garantía?</h2>
-              <br />
-              <p className="mb-4">No.</p>
-              <br /><br />
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún tipo de garantía?</h3>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>No.</span></p>
+              <p><br /><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún bonus?</h2>
-              <br />
-              <p className="mb-4">Si, el servicio es principalmente la redacción, montaje y gestión de la plataforma de email marketing, pero como bonus, ya que es muy importante, incluimos el copywritting de las fichas de producto que estemos trabajando y el plan estratégico trimestral. Ambas cosas son fundamentales para cualquier tienda online, por eso las incluimos.</p>
-              <br /><br />
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún bonus?</h3>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Si, el servicio es principalmente la redacción, montaje y gestión de la plataforma de email marketing, pero como bonus, ya que es muy importante, incluimos el copywritting de las fichas de producto que estemos trabajando y el plan estratégico trimestral. Ambas cosas son fundamentales para cualquier tienda online, por eso las incluimos.</span></p>
+              <p><br /><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Cómo funciona eso de la donación?</h2>
-              <br />
-              <p className="mb-4">Por si no lo sabías, te cuento. Donamos un 10% de todo lo que nos pagas a una causa benéfica en la que creemos. La causa la eliges en el formulario al pedir el presupuesto y cada vez que recibamos un pago de tu parte, haremos la donación y te enviaremos el justificante.</p>
-              <br /><br />
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Cómo funciona eso de la donación?</h3>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Por si no lo sabías, te cuento. Donamos un 10% de todo lo que nos pagas a una causa benéfica en la que creemos. La causa la eliges en el formulario al pedir el presupuesto y cada vez que recibamos un pago de tu parte, haremos la donación y te enviaremos el justificante.</span></p>
+              <p><br /><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-4">¿Es una buena inversión?</h2>
-              <br />
-              <p className="mb-4">Si quieres tener una lista fiel, que te compre independientemente de si das descuento o no, sea la época del año que sea o incluso si cambias de negocio, y con eso aumentar los beneficios netos de tu tienda, este servicio hará justo eso. Explotaremos al máximo el activo más importante y rentable que tienes, tu lista. A partir de ahí la decisión es tuya.</p>
-              <br /><br />
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Es una buena inversión?</h3>
+              <p>&nbsp;</p>
+              <p><span style={{fontWeight: 400}}>Si quieres tener una lista fiel, que te compre independientemente de si das descuento o no, sea la época del año que sea o incluso si cambias de negocio, y con eso aumentar los beneficios netos de tu tienda, este servicio hará justo eso. Explotaremos al máximo el activo más importante y rentable que tienes, tu lista. A partir de ahí la decisión es tuya.</span></p>
+              <p><br /><br /><br /></p>
 
-              {/* Segundo formulario */}
               <MailerLiteForm />
-              <br /><br /><br />
-
-              {/* Cierre */}
-              <p className="mb-4">Espero que hayas disfrutado leyendo esta carta.</p>
-              <br />
-              <p className="mb-4">Pasa un buen día.</p>
-              <br />
-              <p className="mb-4">Raúl.</p>
-              <br /><br />
-
-              <p className="mb-4"><strong>P.D.</strong> ¿Y si es verdad que el email marketing es lo que marca la diferencia entre tener grandes beneficios y no tenerlo? ¿Y si es verdad que no hay nada más rentable para una tienda online? ¿Dejarás pasar seis meses? ¿Un año? ¿Vas a dejar que tus competidores sigan creciendo y viviendo de puta madre mientras tú esperas otra gran oportunidad, otra promesa de éxito rápido? Esta es la manera más sencilla y eficaz de ganar dinero con una tienda online.</p>
-              <br />
-              <p className="mb-4">Este servicio tiene TODO lo que necesitas para dejar de depender de descuentos, poder generar altos picos de beneficio… En definitiva, ¿y si saber hacer (BIEN) el email marketing, cambia tu tienda?</p>
-
-              <br /><br />
-              <div className="flex items-center justify-center gap-4 mt-4">
-                <img
-                  src="https://media.base44.com/images/public/697678eac9cf34e2aefb7d57/82d53b854_logonegro.png"
-                  alt="AntiAgencia"
-                  className="h-10 w-auto"
-                />
-                <span className="font-bold text-gray-900 text-xl tracking-wide" style={{ fontFamily: "'Rubik', monospace" }}>Antiagencia</span>
-              </div>
 
             </div>
           </div>
