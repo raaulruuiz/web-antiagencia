@@ -19,6 +19,8 @@ import TrabajaConNosotrosOld from './pages/TrabajaConNosotrosOld'
 import TrabajaConNosotrosV3 from './pages/TrabajaConNosotrosV3'
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import TikTokConnect from './pages/TikTokConnect';
+import JorgeCoronado from './pages/JorgeCoronado';
+import GraciasJorgeCoronado from './pages/GraciasJorgeCoronado';
 import PixelLayout from './Layout';
 import LoomLogin from './pages/LoomLogin';
 import Loom from './pages/Loom';
@@ -151,6 +153,8 @@ const AuthenticatedApp = () => {
       <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
+      <Route path="/jorge-coronado" element={<JorgeCoronado />} />
+      <Route path="/gracias-jorge-coronado" element={<GraciasJorgeCoronado />} />
       <Route path="*" element={<DynamicPage />} />
     </Routes>
     <CookieBanner />
