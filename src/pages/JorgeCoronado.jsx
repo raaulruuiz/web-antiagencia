@@ -39,22 +39,24 @@ export default function JorgeCoronado() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white flex flex-col">
-      <div className="flex-1 flex flex-col items-center px-6 pt-6 md:pt-16 pb-16">
-        <div className="max-w-2xl w-full">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
+        <div className="w-full max-w-2xl">
+          <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
+            <div className="text-gray-800 text-base leading-relaxed">
 
           {/* Titular */}
-          <h1 className="font-headline font-bold text-white text-2xl md:text-4xl text-center leading-tight mb-6">
+          <h1 className="text-2xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-6">
             Si vienes del directo o del podcast de Jorge Coronado, esto es para ti...
           </h1>
 
           {/* Subtítulo */}
-          <p className="font-body text-[#0067FD] font-semibold text-base md:text-xl text-center leading-relaxed mb-6">
+          <p className="text-[#0067FD] font-semibold text-base md:text-xl text-center leading-relaxed mb-6">
             Descarga el ebook COLECTIVO MINORITARIO: Cómo dejar de ser un "más de lo mismo" para diferenciarte y vender más por email
           </p>
 
           {/* Cuerpo */}
-          <p className="font-body text-white/80 text-base md:text-lg leading-relaxed mb-10 text-center">
+          <p className="text-gray-700 text-base md:text-lg leading-relaxed mb-10 text-center">
             En este ebook de 42 páginas descubrirás estrategias para diferenciar, crecer y potenciar tu marca para vender (probablemente) bastante más que ahora
           </p>
 
@@ -122,10 +124,12 @@ export default function JorgeCoronado() {
           </div>
 
           {/* Texto legal */}
-          <p className="font-body text-white/30 text-xs text-center mt-2 leading-relaxed max-w-lg mx-auto">
+          <p className="text-gray-400 text-xs text-center mt-2 leading-relaxed max-w-lg mx-auto">
             Para cumplir con el RGPD (Reglamento General de Protección de Datos) y entender que tus datos están seguros, debes leer y aceptar la política de privacidad. Tus datos serán guardados en MailerLite, proveedor de email marketing. MailerLite también cumple con el RGPD, así que todo está protegido y amparado por la ley.
           </p>
 
+            </div>
+          </div>
         </div>
       </div>
       <FooterMinimal />
