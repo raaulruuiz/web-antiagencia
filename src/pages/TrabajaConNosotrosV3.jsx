@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
 const mailerLiteCSS = `
-@import url("https://assets.mlcdn.com/fonts.css?version=1777551");
+@import url("https://assets.mlcdn.com/fonts.css?version=1780922");
 .ml-form-embedSubmitLoad{display:inline-block;width:20px;height:20px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 .ml-form-embedSubmitLoad:after{content:" ";display:block;width:11px;height:11px;margin:1px;border-radius:50%;border:4px solid #fff;border-color:#ffffff #ffffff #ffffff transparent;animation:ml-form-embedSubmitLoad 1.2s linear infinite}
@@ -26,9 +26,9 @@ const mailerLiteCSS = `
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-fieldRow input{background-color:#ffffff!important;color:#333333!important;border-color:#cccccc;border-radius:4px!important;border-style:solid!important;border-width:1px!important;font-family:'Open Sans',Arial,Helvetica,sans-serif;font-size:14px!important;height:auto;line-height:21px!important;margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;padding:10px 10px!important;width:100%!important;box-sizing:border-box!important;max-width:100%!important}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-fieldRow .custom-select{background-color:#ffffff!important;color:#333333!important;border-color:#cccccc;border-radius:4px!important;border-style:solid!important;border-width:1px!important;font-family:'Open Sans',Arial,Helvetica,sans-serif;font-size:14px!important;line-height:20px!important;margin-bottom:0;margin-top:0;padding:10px 28px 10px 12px!important;width:100%!important;box-sizing:border-box!important;max-width:100%!important;height:auto;display:inline-block;vertical-align:middle;background:url('https://assets.mlcdn.com/ml/images/default/dropdown.svg') no-repeat right .75rem center/8px 10px;-webkit-appearance:none;-moz-appearance:none;appearance:none}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit{margin:0 0 20px 0;float:left;width:100%}
-#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button{background-color:#7000FF!important;border:none!important;border-radius:4px!important;box-shadow:none!important;color:#ffffff!important;cursor:pointer;font-family:'Open Sans',Arial,Helvetica,sans-serif!important;font-size:14px!important;font-weight:700!important;line-height:21px!important;height:auto;padding:10px!important;width:100%!important;box-sizing:border-box!important}
+#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button{background-color:#0000ff!important;border:none!important;border-radius:4px!important;box-shadow:none!important;color:#ffffff!important;cursor:pointer;font-family:'Open Sans',Arial,Helvetica,sans-serif!important;font-size:14px!important;font-weight:700!important;line-height:21px!important;height:auto;padding:10px!important;width:100%!important;box-sizing:border-box!important}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button.loading{display:none}
-#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button:hover{background-color:#0067FD!important}
+#mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button:hover{background-color:#333333!important}
 .ml-error input,.ml-error textarea,.ml-error select{border-color:red!important}
 .ml-error .label-description,.ml-error .label-description p,.ml-error .label-description p a,.ml-error label:first-child{color:#ff0000!important}
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow.ml-error .label-description p,.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow.ml-error .label-description p:first-letter{color:#ff0000!important}
@@ -82,17 +82,6 @@ function MailerLiteForm() {
                     <input aria-label="facturacion_mensual" aria-required="true" type="text" className="form-control" name="fields[facturacion_mensual]" placeholder="" />
                   </div>
                 </div>
-                <div className="ml-form-fieldRow">
-                  <div className="ml-field-group ml-field-donacion ml-validate-required">
-                    <label>¿A qué causa quieres donar tu 10%?</label>
-                    <select className="custom-select" name="fields[donacion]" aria-label="donacion" aria-required="true">
-                      <option value="">-</option>
-                      <option>AECC (Asociación Española Contra el Cáncer)</option>
-                      <option>Zooasis (protectora de animales)</option>
-                      <option>Lo dejo a vuestra elección</option>
-                    </select>
-                  </div>
-                </div>
                 <div className="ml-form-fieldRow ml-last-item">
                   <div className="ml-field-group ml-field-notas">
                     <label>¿Algún comentario?</label>
@@ -144,7 +133,7 @@ export default function TrabajaConNosotrosV3() {
     fetch("https://assets.mailerlite.com/jsonp/686354/forms/182583896449222335/takel");
 
     const script = document.createElement("script");
-    script.src = "https://groot.mailerlite.com/js/w/webforms.min.js?vb397d78ebaa8a0f631d35384c46d781b";
+    script.src = "https://groot.mailerlite.com/js/w/webforms.min.js?v83147fa8ce2d95cb73ece7f28b469519";
     script.type = "text/javascript";
     script.id = "mailerlite-script-tcnv3";
     document.body.appendChild(script);
@@ -291,11 +280,6 @@ export default function TrabajaConNosotrosV3() {
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún bonus?</h3>
               <p>&nbsp;</p>
               <p><span style={{fontWeight: 400}}>Si, el servicio es principalmente la redacción, montaje y gestión de la plataforma de email marketing, pero como bonus, ya que es muy importante, y porque somos copywritters, incluimos el copywritting de las fichas de producto que estemos trabajando, páginas de venta en caso de que las vayas a usar y el plan estratégico trimestral. Ambas cosas son fundamentales para cualquier tienda online, por eso las incluimos.</span></p>
-              <p><br /><br /><br /></p>
-
-              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Cómo funciona eso de la donación?</h3>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Por si no lo sabías, te cuento. Donamos un 10% de todo lo que nos pagas a una causa benéfica en la que creemos. La causa la eliges en el formulario al pedir el presupuesto y cada vez que recibamos un pago de tu parte, haremos la donación y te enviaremos el justificante.</span></p>
               <p><br /><br /><br /></p>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Es una buena inversión?</h3>
