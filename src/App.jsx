@@ -153,8 +153,8 @@ const AuthenticatedApp = () => {
       <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
-      <Route path="/jorge-coronado" element={<JorgeCoronado />} />
-      <Route path="/gracias-podcast" element={<GraciasJorgeCoronado />} />
+      <Route path="/jorge-coronado" element={<PixelLayout><JorgeCoronado /></PixelLayout>} />
+      <Route path="/gracias-podcast" element={<PixelLayout><GraciasJorgeCoronado /></PixelLayout>} />
       <Route path="*" element={<DynamicPage />} />
     </Routes>
     <CookieBanner />
