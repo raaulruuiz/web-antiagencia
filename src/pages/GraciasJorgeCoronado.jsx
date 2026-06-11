@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
 export default function GraciasJorgeCoronado() {
+  useEffect(() => {
+    if (window.fbq) window.fbq('track', 'Lead');
+  }, []);
   const pdfUrl = "/colectivo-minoritario.pdf";
 
   return (
