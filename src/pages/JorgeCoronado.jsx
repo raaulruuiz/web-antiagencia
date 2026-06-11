@@ -13,6 +13,8 @@ export default function JorgeCoronado() {
     style.id = "mailerlite-css-jorge";
     document.head.appendChild(style);
 
+    if (window.fbq) window.fbq('track', 'Lead');
+
     window.ml_webform_success_42311315 = function () {
       window.umami?.track('registro-jorge-coronado');
       try {
