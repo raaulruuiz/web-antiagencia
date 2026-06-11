@@ -16,9 +16,9 @@ export default function JorgeCoronado() {
     window.ml_webform_success_42311315 = function () {
       window.umami?.track('registro-jorge-coronado');
       try {
-        window.top.location.href = "https://antiagencia.es/gracias-jorge-coronado";
+        window.top.location.href = "https://antiagencia.es/gracias-podcast";
       } catch (e) {
-        window.location.href = "https://antiagencia.es/gracias-jorge-coronado";
+        window.location.href = "https://antiagencia.es/gracias-podcast";
       }
     };
 

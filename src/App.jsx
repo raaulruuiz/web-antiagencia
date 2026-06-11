@@ -154,7 +154,7 @@ const AuthenticatedApp = () => {
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
       <Route path="/jorge-coronado" element={<JorgeCoronado />} />
-      <Route path="/gracias-jorge-coronado" element={<GraciasJorgeCoronado />} />
+      <Route path="/gracias-podcast" element={<GraciasJorgeCoronado />} />
       <Route path="*" element={<DynamicPage />} />
     </Routes>
     <CookieBanner />
