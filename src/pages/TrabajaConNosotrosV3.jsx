@@ -163,13 +163,13 @@ export default function TrabajaConNosotrosV3() {
   const SectionEnd = ({ sectionId }) => {
     if (activeSection === sectionId) {
       return (
-        <div className="mt-4 mb-10">
+        <div className="mt-4 mb-16">
           <MailerLiteForm />
         </div>
       );
     }
     return (
-      <div className="text-center mt-4 mb-10">
+      <div className="mt-4 mb-16">
         <button
           onClick={() => setActiveSection(sectionId)}
           style={{
@@ -195,7 +195,7 @@ export default function TrabajaConNosotrosV3() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
-        <div className="w-full max-w-3xl">
+        <div className="w-full max-w-5xl">
           <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
             <div className="text-gray-800 text-base leading-relaxed">
 
@@ -488,7 +488,7 @@ export default function TrabajaConNosotrosV3() {
               <p>Si quieres tener una lista fiel, una lista que, si quieres, facturar más, con más beneficio, en piloto automático, teniendo un activo muy valioso, y barrer con tu competencia… es la mejor inversión que puedes hacer. Pero claro, te lo digo yo, que soy parte interesada.</p>
               <p>&nbsp;</p>
               <p>Lo que haremos será explotar al máximo el activo más importante y rentable que tienes, tu lista. A partir de ahí la decisión es tuya.</p>
-              <p><br /><br /></p>
+              <SectionEnd sectionId={6} />
 
             </div>
           </div>
