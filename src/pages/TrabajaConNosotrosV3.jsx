@@ -338,7 +338,7 @@ export default function TrabajaConNosotrosV3() {
               <p><br /><br /></p>
 
               {/* Sección 1 */}
-              <h2 className="text-xl font-bold text-gray-900 mb-4">GANARÁS MÁS DINERO</h2>
+              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">GANARÁS MÁS DINERO</h2>
               <p>&nbsp;</p>
               <p>Ojo, hablo de ganar, de beneficio.</p>
               <p>&nbsp;</p>
@@ -358,7 +358,7 @@ export default function TrabajaConNosotrosV3() {
               <SectionEnd sectionId={1} />
 
               {/* Sección 2 */}
-              <h2 className="text-xl font-bold text-gray-900 mb-4">NO TIENES QUE HACER NADA</h2>
+              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">NO TIENES QUE HACER NADA</h2>
               <p>&nbsp;</p>
               <p>No te va a llevar mucho tiempo extra, más allá de un par de reuniones.</p>
               <p>&nbsp;</p>
@@ -380,7 +380,7 @@ export default function TrabajaConNosotrosV3() {
               <SectionEnd sectionId={2} />
 
               {/* Sección 3 */}
-              <h2 className="text-xl font-bold text-gray-900 mb-4">TENDRÁS UN ACTIVO VALIOSO</h2>
+              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">TENDRÁS UN ACTIVO VALIOSO</h2>
               <p>&nbsp;</p>
               <p>Obviamente, yo no vengo a construir tu marca.</p>
               <p>&nbsp;</p>
@@ -405,7 +405,7 @@ export default function TrabajaConNosotrosV3() {
               <SectionEnd sectionId={3} />
 
               {/* Sección 4 */}
-              <h2 className="text-xl font-bold text-gray-900 mb-4">DESTACARÁS SOBRE TU COMPETENCIA</h2>
+              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">DESTACARÁS SOBRE TU COMPETENCIA</h2>
               <p>&nbsp;</p>
               <p>Quizá lo más importante.</p>
               <p>&nbsp;</p>
@@ -431,7 +431,7 @@ export default function TrabajaConNosotrosV3() {
               <SectionEnd sectionId={4} />
 
               {/* Sección 5 */}
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Y… ALGO QUE NO ESPERABAS</h2>
+              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">Y… ALGO QUE NO ESPERABAS</h2>
               <p>&nbsp;</p>
               <p>Además de trabajar sobre tus campañas de email, tus formularios de captación y tus automatizaciones…</p>
               <p>&nbsp;</p>
