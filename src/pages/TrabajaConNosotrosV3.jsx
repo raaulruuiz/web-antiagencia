@@ -283,7 +283,7 @@ export default function TrabajaConNosotrosV3() {
               <p>Y son conceptos que cualquier marca puede aplicar.</p>
               <p><br /><br /></p>
 
-              <p><span style={{ color: '#0067FD' }}><strong>Dicho esto</strong></span>, toda marca que sepa comunicarse (BIEN) con sus clientes, se convertirá en una marca mucho más atractiva y rentable.</p>
+              <p><span style={{ color: '#0067FD', fontSize: '20px' }}><strong>Dicho esto</strong></span>, toda marca que sepa comunicarse (BIEN) con sus clientes, se convertirá en una marca mucho más atractiva y rentable.</p>
               <p>&nbsp;</p>
               <p>Y esto se consigue por email.</p>
               <p>&nbsp;</p>
@@ -313,7 +313,7 @@ export default function TrabajaConNosotrosV3() {
               <p>Es que, posiblemente, sea la forma más inteligente, beneficiosa y fácil de crecer, con las ventajas de la estabilidad que pueda dar a todo negocio.</p>
               <p><br /><br /></p>
 
-              <p>Y te aseguro que <span style={{ color: '#0067FD' }}><strong>sé de lo que estoy hablando</strong></span>.</p>
+              <p>Y te aseguro que <span style={{ color: '#0067FD', fontSize: '20px' }}><strong>sé de lo que estoy hablando</strong></span>.</p>
               <p>&nbsp;</p>
               <p>Desde que monté mi primera tienda online, en 2018, he facturado más de 5 millones de euros extra para mis clientes.</p>
               <p>&nbsp;</p>
@@ -334,7 +334,7 @@ export default function TrabajaConNosotrosV3() {
 
               <p>Te cuento para que lo mires con calma.</p>
               <p><br /><br /></p>
-              <p><span style={{ color: '#0067FD' }}><strong>Vamos</strong></span>.</p>
+              <p><span style={{ color: '#0067FD', fontSize: '20px' }}><strong>Vamos</strong></span>.</p>
               <p><br /><br /></p>
 
               {/* Sección 1 */}
