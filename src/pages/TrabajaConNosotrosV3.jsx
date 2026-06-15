@@ -212,7 +212,7 @@ export default function TrabajaConNosotrosV3() {
               {/* Historia */}
               <p>Lo que te voy a contar ahora sobre cierto pintor alemán que todos conocemos y cuyo nombre empieza por H y termina por hitler, te va a dejar dándole vueltas a la cabeza y, probablemente, transforme tu marca y la vuelva mucho más atractiva y rentable.</p>
               <p>&nbsp;</p>
-              <p>Es una historia muy breve y fabulosa que te dará varios aprendizajes. Vamos a ello.</p>
+              <p>Es una historia muy breve y fabulosa que, solo la  hisotira, ya te dará un aprendizaje clave que podrás implementar hoy mismo. Vamos a ello.</p>
               <p><br /><br /><br /></p>
 
               <p><span style={{ textDecoration: 'underline' }}>Curso 1999-2000</span></p>
