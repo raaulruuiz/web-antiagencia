@@ -289,7 +289,7 @@ export default function TrabajaConNosotrosV3() {
               <p>Y en estos años dónde no se habla de otra cosa que de IA, mucho más.</p>
               <p><br /><br /></p>
 
-              <p><strong>Es la gran herramienta de nuestros tiempos, sobre todo en la era de la IA, y está al alcance de una marca multimillonaria y en una marca llevada por una persona en su habitación.</strong></p>
+              <p className="text-center"><strong>Es la gran herramienta de nuestros tiempos, sobre todo en la era de la IA, y está al alcance de una marca multimillonaria y en una marca llevada por una persona en su habitación.</strong></p>
               <p><br /><br /></p>
 
               <p>Y es que seguro que lo has visto…</p>
