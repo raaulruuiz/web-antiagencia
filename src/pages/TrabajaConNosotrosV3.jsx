@@ -456,32 +456,32 @@ export default function TrabajaConNosotrosV3() {
               <h3 className="text-lg font-bold text-gray-900 mb-4">¿Cuánto dura el servicio?</h3>
               <p>&nbsp;</p>
               <p>El servicio dura 3 meses. Después de estos 3 meses, seguiremos mes a mes y sin ningún tipo de permanencia.</p>
-              <p><br /><br /></p>
+              <p><br /><br /><br /></p>
 
               <h3 className="text-lg font-bold text-gray-900 mb-4">¿Es muy caro? ¿Es barato?</h3>
               <p>&nbsp;</p>
               <p>Es cierto, no es barato. No te voy a negar esa realidad. Nosotros primamos otras cosas muy por encima del precio. E invertimos en ello para dar unos resultados y una experiencia de cliente más especial. Mucha gente no valora eso y sólo busca precio, lo respetamos, pero no es al público al que va dirigido este servicio.</p>
-              <p><br /><br /></p>
+              <p><br /><br /><br /></p>
 
               <h3 className="text-lg font-bold text-gray-900 mb-4">¿Qué perfil de personas le sacará mejor partido?</h3>
               <p>&nbsp;</p>
               <p>Las personas que más partido le sacan al servicio son personas con una lista de cierto tamaño, más 5.000 personas.</p>
-              <p><br /><br /></p>
+              <p><br /><br /><br /></p>
 
               <h3 className="text-lg font-bold text-gray-900 mb-4">¿Cómo es la comunicación?</h3>
               <p>&nbsp;</p>
               <p>Nos comunicaremos por WhatsApp, en un grupo donde estaremos nosotros y quien quieras de tu equipo.</p>
-              <p><br /><br /></p>
+              <p><br /><br /><br /></p>
 
               <h3 className="text-lg font-bold text-gray-900 mb-4">¿Hay algún tipo de garantía?</h3>
               <p>&nbsp;</p>
               <p>No.</p>
-              <p><br /><br /></p>
+              <p><br /><br /><br /></p>
 
               <h3 className="text-lg font-bold text-gray-900 mb-4">¿Hay algún bonus?</h3>
               <p>&nbsp;</p>
               <p>Si, el servicio es principalmente la redacción, montaje y gestión de la plataforma de email marketing, pero como bonus, ya que es muy importante, incluimos el copywritting de las fichas de producto que estemos trabajando y páginas de venta en caso de que las vayas a usar.</p>
-              <p><br /><br /></p>
+              <p><br /><br /><br /></p>
 
               <h3 className="text-lg font-bold text-gray-900 mb-4">¿Es una buena inversión?</h3>
               <p>&nbsp;</p>
