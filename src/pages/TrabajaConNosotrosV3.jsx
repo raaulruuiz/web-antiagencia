@@ -443,47 +443,47 @@ export default function TrabajaConNosotrosV3() {
               <SectionEnd sectionId={5} />
 
               {/* FAQ */}
-              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">RESPUESTAS FRECUENTES</h2>
+              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">RESPUESTAS FRECUENTES</h2>
               <p><br /><br /></p>
 
-              <h3 className="text-base font-bold text-gray-900 mb-4">¿Qué incluye el servicio?</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">¿Qué incluye el servicio?</h3>
               <p>&nbsp;</p>
               <p>Lo principal sobre lo que vamos a trabajar es el email marketing. Redactaremos y programaremos todos los mails (newsletters periódicas y automatizaciones) y los formularios de captación. Además, redactaremos también el copy de las fichas de producto.</p>
-              <p><br /><br /><br /><br /></p>
+              <p><br /><br /></p>
               <p>Por supuesto, todos los emails los escribimos con Inteligencia Humana y no Inteligencia Artificial, y aprovechamos el recurso de venta más poderoso que tenemos, el contar historias, algo que llevamos haciendo desde el principio de los tiempos.</p>
               <p><br /><br /><br /></p>
 
-              <h3 className="text-base font-bold text-gray-900 mb-4">¿Cuánto dura el servicio?</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">¿Cuánto dura el servicio?</h3>
               <p>&nbsp;</p>
               <p>El servicio dura 3 meses. Después de estos 3 meses, seguiremos mes a mes y sin ningún tipo de permanencia.</p>
               <p><br /><br /></p>
 
-              <h3 className="text-base font-bold text-gray-900 mb-4">¿Es muy caro? ¿Es barato?</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">¿Es muy caro? ¿Es barato?</h3>
               <p>&nbsp;</p>
               <p>Es cierto, no es barato. No te voy a negar esa realidad. Nosotros primamos otras cosas muy por encima del precio. E invertimos en ello para dar unos resultados y una experiencia de cliente más especial. Mucha gente no valora eso y sólo busca precio, lo respetamos, pero no es al público al que va dirigido este servicio.</p>
               <p><br /><br /></p>
 
-              <h3 className="text-base font-bold text-gray-900 mb-4">¿Qué perfil de personas le sacará mejor partido?</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">¿Qué perfil de personas le sacará mejor partido?</h3>
               <p>&nbsp;</p>
               <p>Las personas que más partido le sacan al servicio son personas con una lista de cierto tamaño, más 5.000 personas.</p>
               <p><br /><br /></p>
 
-              <h3 className="text-base font-bold text-gray-900 mb-4">¿Cómo es la comunicación?</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">¿Cómo es la comunicación?</h3>
               <p>&nbsp;</p>
               <p>Nos comunicaremos por WhatsApp, en un grupo donde estaremos nosotros y quien quieras de tu equipo.</p>
               <p><br /><br /></p>
 
-              <h3 className="text-base font-bold text-gray-900 mb-4">¿Hay algún tipo de garantía?</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">¿Hay algún tipo de garantía?</h3>
               <p>&nbsp;</p>
               <p>No.</p>
               <p><br /><br /></p>
 
-              <h3 className="text-base font-bold text-gray-900 mb-4">¿Hay algún bonus?</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">¿Hay algún bonus?</h3>
               <p>&nbsp;</p>
               <p>Si, el servicio es principalmente la redacción, montaje y gestión de la plataforma de email marketing, pero como bonus, ya que es muy importante, incluimos el copywritting de las fichas de producto que estemos trabajando y páginas de venta en caso de que las vayas a usar.</p>
               <p><br /><br /></p>
 
-              <h3 className="text-base font-bold text-gray-900 mb-4">¿Es una buena inversión?</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">¿Es una buena inversión?</h3>
               <p>&nbsp;</p>
               <p>Si quieres tener una lista fiel, una lista que, si quieres, facturar más, con más beneficio, en piloto automático, teniendo un activo muy valioso, y barrer con tu competencia… es la mejor inversión que puedes hacer. Pero claro, te lo digo yo, que soy parte interesada.</p>
               <p>&nbsp;</p>
