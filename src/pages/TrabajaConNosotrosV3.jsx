@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
 const mailerLiteCSS = `
@@ -115,6 +115,16 @@ function MailerLiteForm() {
 }
 
 export default function TrabajaConNosotrosV3() {
+  const [formVisible, setFormVisible] = useState(false);
+  const formRef = useRef(null);
+
+  const showForm = () => {
+    setFormVisible(true);
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = mailerLiteCSS;
@@ -146,6 +156,29 @@ export default function TrabajaConNosotrosV3() {
     };
   }, []);
 
+  const PresupuestoBtn = () => (
+    <div className="text-center my-8">
+      <button
+        onClick={showForm}
+        style={{
+          backgroundColor: '#7000FF',
+          color: '#ffffff',
+          fontFamily: "'Open Sans', Arial, sans-serif",
+          fontSize: '15px',
+          fontWeight: '700',
+          padding: '12px 32px',
+          borderRadius: '4px',
+          border: 'none',
+          cursor: 'pointer',
+        }}
+        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#0067FD'}
+        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#7000FF'}
+      >
+        Pide tu presupuesto aquí
+      </button>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
@@ -153,141 +186,312 @@ export default function TrabajaConNosotrosV3() {
           <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
             <div className="text-gray-800 text-base leading-relaxed">
 
-              <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-2">
-                SERVICIO DE EMAIL MARKETING PARA TIENDAS ONLINE
+              {/* Títulos */}
+              <h1 className="text-2xl md:text-4xl text-center text-gray-900 leading-tight mb-4" style={{ fontWeight: 400 }}>
+                Solo necesitas una herramienta en tu marca para barrer con toda tu competencia y vender más.
               </h1>
-              <p style={{textAlign: 'center'}}>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Un día cualquiera, de una semana cualquiera, dos emprendedores decidieron montar sus negocios online. Ambos tenían la misma edad, mismo nivel de estudios, e incluso su formación era en la misma área. Y durante su vida profesional habían ejercido cargos similares, que les daban una buena visión del reto que tenían por delante.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>Ambos eran muy trabajadores y dedicados.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>Antes de lanzarse a la aventura, ambos se habían preparado e informado sobre como tener éxito con su emprendimiento y con ello, alcanzar la vida de sus sueños. Además, tenían un presupuesto muy similar. Para nada alto, en sus planes no lo necesitaban.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>Sabían que podían crecer rápidamente en el entorno digital. Habían visto muchos casos de otras marcas que crecieron mucho partiendo de una inversión baja. Reinvirtiendo el beneficio.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>Hace poco, estos dos emprendedores se habían encontrado en un evento presencia, un par de años después de montar sus tiendas.</span></p>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Sus vidas seguían siendo muy parecidas, incluso en lo personal. Ambos estaban prometidos e incluso pensando en formar una familia. Y ambos seguían al frente de sus negocios, pero había una diferencia.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>A uno de ellos, su tienda le daba un buen sueldo mensual. Facturaba cientos de miles de euros al año y vivía bien. Tenía un equipo que cada vez necesitaba ser más grande. Cada año, su beneficio aumentaba, y estaba planeando expandirse al extranjero. Además, cada año se permitía varias semanas de vacaciones con su pareja.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>El otro, sin embargo, facturaba más que él, pero dependía de dar descuentos cada vez mayores y por tanto sus beneficios eran cada vez menores. Tenía un equipo que cada vez necesitaba ser más pequeño. Tuvo que despedir a varios empleados y bajarse el sueldo para que no le comieran los costes fijos. Pensaba incluso en cerrar la tienda. Su horario de trabajo era desde que se levantaba hasta que se acostaba, apagando fuegos, y las vacaciones para él no eran más que un motivo de discusión con su pareja porque no podía parar.</span></p>
+              <h1 className="text-2xl md:text-4xl text-center text-gray-900 leading-tight" style={{ fontWeight: 400 }}>
+                Y lo tienes a tu alcance.
+              </h1>
               <p><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">La diferencia</h2>
-              <p style={{textAlign: 'center'}}>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>¿Te preguntarás cuál era la diferencia en la vida de estas dos personas?</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>No es la inteligencia ni los recursos ni la disciplina. Tampoco era invertir o no en publicidad, ambos lo hacían.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>No es que uno quisiera tener éxito y el otro no, o que uno tuvo "buena suerte" y el otro "mala suerte", afortunadamente no es nada de eso.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>La verdadera diferencia radica en los profesionales que cada uno elige para que le guíen por un camino que no ha recorrido. De donde pone el foco, apoyado de profesionales que realmente aportan en las áreas más importantes del negocio. Que arrojan resultados.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>Y es por eso que te escribo sobre Email Marketing. <strong>Porque esa es la idea del Email.</strong></span></p>
+              {/* Historia */}
+              <p>Lo que te voy a contar ahora sobre cierto pintor alemán que todos conocemos y cuyo nombre empieza por H y termina por hitler, te va a dejar dándole vueltas a la cabeza y, probablemente, transforme tu marca y la vuelva mucho más atractiva y rentable.</p>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Trabajar el área más importante, la base de los beneficios de una marca, la que no depende de poner dinero en juego, pujando por la atención de la gente.</span></p>
-              <p><br /><br /></p>
-
-              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">Una herramienta más simple</h2>
-              <p style={{textAlign: 'center'}}>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Verás, el email marketing es muy simple, no fácil, ojo. No es complejo técnicamente, no tienes que invertir tu dinero para pujar por clientes, por ello, no tienes coste por compra, lo que lleva a que todo lo que generas por email va directamente al beneficio. Y tampoco dependes de que cambien los algoritmos, te bloqueen cuentas o ahora tus publicaciones lleguen a la mitad de personas que hace un mes.</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Además, es la herramienta que <strong>te permite conectar genuinamente con tus compradores, fidelizarlos y hacer que te quieran comprar constantemente, aumentando aún más los beneficios</strong>.</span></p>
-              <p><br /><br /></p>
-
-              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">Una herramienta que ahorra dinero</h2>
-              <p style={{textAlign: 'center'}}>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>El email no va a sustituir nunca a la publicidad. Es más, va a hacer que funcione mejor. <strong>Lo que va a hacer el mail es permitirte no depender de ella</strong>. O de los algoritmos de las redes.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>Te va a permitir vender cada día, cambie el algoritmo o no, tengas tiempo de producir nuevos anuncios o no, inviertas más o menos en publicidad. Al email no le importa nada de esto. No necesitas pagar publicidad, no necesitas pagar por producir anuncios. Incluso no tienes ni que usar imágenes si no quieres.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>Tampoco te tienes que complicar la vida con complejas automatizaciones (tampoco tienes que quitarlas si las tienes), hiper-segmentar a la audiencias y cosas por el estilo. Detrás de la pantalla hay una persona como tú y como yo. Una persona que, si se va de vacaciones y está dos semanas sin leer tus emails no significa que ya no les interesen. Una persona, que si su hijo se pone enfermo, lo cuidará y no estará pendiente al email.</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>No tenemos que complicarlo. Hay que mandar mails a personas, nada más. Contarles historias. Es lo que hacemos las personsa. ¿de qué hablas cuando quedas con tus amigos? Hay que hacerlo más humano y menos artificial.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>Hay muchos más beneficios si trabajas el email marketing de forma profesional y correcta que si te los pongo aquí es posible que esto quede demasiado largo. En todo caso, te puedes hacer una idea.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>Lo que el email puede hacer por ti, <strong>el beneficio extra que vas a obtener al dejar de depender de descuentos, lo que ahorras al poder apagar la publicidad sin que se te caiga el negocio, no depender de algoritmos…</strong> te ahorra una cantidad de tiempo y dinero que no te puedo cuantificar. En todo caso, podrás comprobarlo si trabajamos juntos:</span></p>
-              <p><br /><br /></p>
-
-              <MailerLiteForm />
-              <p><br /><br /></p>
-
-              <p><span style={{fontWeight: 400}}><strong>P.D.</strong> No puedo garantizarte ningún resultado concreto, tampoco es mi estilo. Pero puedo garantizarte que siempre encontrarás este servicio útil, beneficioso y con muchas estrategias diferentes, que sin duda, te traerán resultados distintos a los que ya tienes.</span></p>
+              <p>Es una historia muy breve y fabulosa que te dará varios aprendizajes. Vamos a ello.</p>
               <p><br /><br /><br /></p>
 
-              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">PREGUNTAS FRECUENTES</h2>
-              <p style={{textAlign: 'center'}}><br /><br /></p>
-
-              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Podré dejar de dar descuentos y de depender de las plataformas de publicidad y del contenido orgánico?</h3>
+              <p><span style={{ textDecoration: 'underline' }}>Curso 1999-2000</span></p>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Si, por supuesto. El objetivo principal de este servicio es tener una lista sana y fiel, que te compre independientemente de la situación y sin necesidad de descuentos. Que te quieran comprar incluso si cambias de negocio y empiezas a vender otra cosa que no tenga nada que ver. No es algo inmediato, pero si es la acción más rentable que puedes hacer para tu tienda. Y por supuesto, que puedas parar la publicidad o dejar de publicar y que sigas vendiendo.</span></p>
+              <p>Era la primera clase que iban a tener los alumnos con Martin Stoller.</p>
+              <p>&nbsp;</p>
+              <p>Eran los alumnos de comunicación de un MBA en una prestigiosa universidad americana.</p>
+              <p>&nbsp;</p>
+              <p>Martin era un experto en comunicación, especializado en gestión de crisis.</p>
+              <p><br /><br /></p>
+              <p>Era el tío al que llamaban para hablar cuando había un atentado terrorista con víctimas, o cuando había un desastre natural que se llevaba la vida de personas.</p>
+              <p>&nbsp;</p>
+              <p>Vaya, el que hablaba cuando la cosa estaba jodida.</p>
+              <p>&nbsp;</p>
+              <p>Para calmar las aguas.</p>
               <p><br /><br /><br /></p>
+
+              <p>Bien.</p>
+              <p>&nbsp;</p>
+              <p>Pues llega el primer día a clase.</p>
+              <p>&nbsp;</p>
+              <p>Entra, cierra la puerta detrás de él.</p>
+              <p>&nbsp;</p>
+              <p>Pide a los alumnos que guarden silencio y se sienten en sus sitios.</p>
+              <p>&nbsp;</p>
+              <p>- Oye, tú, apaga la luz.</p>
+              <p>&nbsp;</p>
+              <p>- Voy.</p>
+              <p>&nbsp;</p>
+              <p>- Y tú, trae el proyector.</p>
+              <p>&nbsp;</p>
+              <p>- Voy.</p>
+              <p><br /><br /></p>
+
+              <p>Con la luz apagada y el proyector preparado, comienza a proyectar una película en blanco y negro.</p>
+              <p>&nbsp;</p>
+              <p>En la escena aparece Hitler dando uno de los discursos que daba frente a la población.</p>
+              <p>&nbsp;</p>
+              <p>Todo en alemán. Nadie se enteraba de nada.</p>
+              <p>&nbsp;</p>
+              <p>Pero nadie decía nada tampoco.</p>
+              <p><br /><br /></p>
+
+              <p>Solo puso un fragmento de 2 minutos. Con eso bastó.</p>
+              <p><br /><br /></p>
+              <p>Al terminar el vídeo, y con la luz aún apagada, Martin se movió a la luz del proyector y dijo:</p>
+              <p><br /><br /><br /></p>
+
+              <p className="text-center">
+                <em>"Mi nombre es Martin Stoller, soy judío. Mi abuela murió en un campo de concentración. Pero eso no me impide ver que este señor consiguió que el pueblo más civilizado y avanzado de la historia hiciera lo que él quisiera simplemente con el uso de las palabras.</em>
+              </p>
+              <p className="text-center"><br /><br /></p>
+              <p className="text-center">
+                <em>Eso es capacidad de persuasión. Eso es lo que vais a aprender en esta clase. El que se ofenda fácilmente puede salir ya por la puerta."</em>
+              </p>
+              <p><br /><br /><br /></p>
+
+              <p>Guau…</p>
+              <p>&nbsp;</p>
+              <p>Esto es un ejemplo de autoridad, marca y comunicación de un nivel altísimo.</p>
+              <p>&nbsp;</p>
+              <p>Para presentar tu marca, para una automatización de bienvenida, es muy potente.</p>
+              <p><br /><br /></p>
+              <p>Los conceptos que Martin enseñaba a sus alumnos, son los conceptos que utilizan los grandes comunicadores y grandes marcas de nuestros tiempo.</p>
+              <p>&nbsp;</p>
+              <p>Son conceptos aplicados a nivel mundial. Son conceptos que este mismo pintor alemán usó para conseguir lo que quiso.</p>
+              <p>&nbsp;</p>
+              <p>Y son conceptos que cualquier marca puede aplicar.</p>
+              <p><br /><br /></p>
+
+              <p><span style={{ color: '#0067FD' }}><strong>Dicho esto</strong></span>, toda marca que sepa comunicarse (BIEN) con sus clientes, se convertirá en una marca mucho más atractiva y rentable.</p>
+              <p>&nbsp;</p>
+              <p>Y esto se consigue por email.</p>
+              <p>&nbsp;</p>
+              <p>Y toda marca puede aplicarlo.</p>
+              <p>&nbsp;</p>
+              <p>Y en estos años dónde no se habla de otra cosa que de IA, mucho más.</p>
+              <p><br /><br /></p>
+
+              <p><strong>Es la gran herramienta de nuestros tiempos, sobre todo en la era de la IA, y está al alcance de una marca multimillonaria y en una marca llevada por una persona en su habitación.</strong></p>
+              <p><br /><br /></p>
+
+              <p>Y es que seguro que lo has visto…</p>
+              <p>&nbsp;</p>
+              <p>Marcas que dicen todas lo mismo, en las fichas de producto, en los emails, en los anuncios… Ninguna destaca realmente, y las que lo hacen, se pueden contar con los dedos de las manos.</p>
+              <p>&nbsp;</p>
+              <p>Se calcula que adquirir un <strong>nuevo cliente, cuesta 5 veces más</strong> que uno que ya te haya comprado algo y ojo, <strong>8 veces más que uno recurrente</strong>.</p>
+              <p><br /><br /></p>
+
+              <p>Repito, la comunicación por email, ser más atractivos de cara a nuestros clientes, es la gran herramienta de nuestras marcas, por encima de la IA, las plataformas y todo.</p>
+              <p>&nbsp;</p>
+              <p>Ya no es que tu marca sea más rentable, que lo es.</p>
+              <p>&nbsp;</p>
+              <p>No es que tengas más recurrencia, que la tendrás.</p>
+              <p>&nbsp;</p>
+              <p>O que te vayas a destacar por encima de tus competidores, que lo harás.</p>
+              <p>&nbsp;</p>
+              <p>Es que, posiblemente, sea la forma más inteligente, beneficiosa y fácil de crecer, con las ventajas de la estabilidad que pueda dar a todo negocio.</p>
+              <p><br /><br /></p>
+
+              <p>Y te aseguro que <span style={{ color: '#0067FD' }}><strong>sé de lo que estoy hablando</strong></span>.</p>
+              <p>&nbsp;</p>
+              <p>Desde que monté mi primera tienda online, en 2018, he facturado más de 5 millones de euros extra para mis clientes.</p>
+              <p>&nbsp;</p>
+              <p>Y mi propio negocio, lo he hecho crecer mediante el email. Contactando con empresas que no me conocen. Si tener una marca personal enorme, solo email.</p>
+              <p>&nbsp;</p>
+              <p>Quiero decir, sé muy bien cómo hacer marcas atractivas para los clientes, que consiguen vender más, generar más recurrencia y diferenciarse de sus competidores de forma única y diferente a todo lo que hay ahí fuera.</p>
+              <p>&nbsp;</p>
+              <p><strong>Sé cómo hacer que una marca sea muy rentable y me las he visto de todos los colores.</strong></p>
+              <p>&nbsp;</p>
+              <p>Nunca toco de oídas y por ello es que todo lo que aplico para mis clientes está basado en experiencia.</p>
+              <p>&nbsp;</p>
+              <p>Mi servicio de email marketing es del más alto nivel.</p>
+              <p>&nbsp;</p>
+              <p>Un servicio para todo tipo de marcas.</p>
+              <p>&nbsp;</p>
+              <p><strong>Todo escrito a mano, sin IA</strong>, transmitiendo personalidad, diferenciándonos del resto.</p>
+              <p><br /><br /></p>
+
+              <p>Te cuento para que lo mires con calma.</p>
+              <p><br /><br /></p>
+              <p><span style={{ color: '#0067FD' }}><strong>Vamos</strong></span>.</p>
+              <p><br /><br /></p>
+
+              {/* Sección 1 */}
+              <h2 className="text-xl font-bold text-gray-900 mb-4">GANARÁS MÁS DINERO</h2>
+              <p>&nbsp;</p>
+              <p>Ojo, hablo de ganar, de beneficio.</p>
+              <p>&nbsp;</p>
+              <p>¿Que facturarás más?</p>
+              <p>&nbsp;</p>
+              <p>Si, claro.</p>
+              <p>&nbsp;</p>
+              <p>Cuando trabajas adecuadamente la lista, <strong>te van a comprar más personas y te van a comprar más a menudo</strong>.</p>
+              <p>&nbsp;</p>
+              <p>Mayor tasa de conversión, mayor recurrencia, mayor beneficio.</p>
+              <p>&nbsp;</p>
+              <p>Por tanto, no es que solo vayas a vender más, sino que tendrás más beneficio ya que, además de aumentar la recurrencia, como sabes, para vender por email, no tienes que pagar. El coste es prácticamente 0.</p>
+              <p>&nbsp;</p>
+              <p><strong>Y todo lo demás que ya estás haciendo, funcionará mejor</strong>. La publicidad funcionará mejor, el contenido orgánico convertirá mejor, en definitiva, toda tu marca funcionará mejor.</p>
+              <p>&nbsp;</p>
+              <p>Así que, si quieres, no solo facturar más, sino tener más beneficio…</p>
+              <p><br /><br /></p>
+              <PresupuestoBtn />
+
+              {/* Sección 2 */}
+              <h2 className="text-xl font-bold text-gray-900 mb-4">NO TIENES QUE HACER NADA</h2>
+              <p>&nbsp;</p>
+              <p>No te va a llevar mucho tiempo extra, más allá de un par de reuniones.</p>
+              <p>&nbsp;</p>
+              <p>Tampoco vamos a cambiar radicalmente lo que estás haciendo, por lo que no vas a tener que reestructurar tu empresa para trabajar con nosotros.</p>
+              <p>&nbsp;</p>
+              <p>Ni vamos a estar constantemente molestando y pidiendo más material audiovisual ni cosas por tu parte.</p>
+              <p>&nbsp;</p>
+              <p>Si tienes equipo, u otra agencia, perfecto. Nos coordinamos con ellos.</p>
+              <p>&nbsp;</p>
+              <p><strong>Para ti, no va a suponer tiempo extra. Solo beneficio extra.</strong></p>
+              <p>&nbsp;</p>
+              <p>Notarás que, con el trabajo que haremos en tus campañas de emails, tus beneficios se van a incrementar y las automatizaciones pasarán a un segundo plano.</p>
+              <p>&nbsp;</p>
+              <p>Pero.</p>
+              <p>&nbsp;</p>
+              <p>Además, vamos a trabajar automatizaciones de la más alta calidad, que generen ventas sin tener que intervenir.</p>
+              <p><br /><br /></p>
+              <p>Así que, si quieres, no solo facturar más, con más beneficio, sino que hacerlo de una forma que no te lleve tiempo extra y que funcione en piloto automático…</p>
+              <p><br /><br /></p>
+              <PresupuestoBtn />
+
+              {/* Sección 3 */}
+              <h2 className="text-xl font-bold text-gray-900 mb-4">TENDRÁS UN ACTIVO VALIOSO</h2>
+              <p>&nbsp;</p>
+              <p>Obviamente, yo no vengo a construir tu marca.</p>
+              <p>&nbsp;</p>
+              <p>Tu marca ya existe, tú eres quien ha hecho el trabajo duro.</p>
+              <p>&nbsp;</p>
+              <p>Yo vengo a potenciarlo, a comunicarlo al mundo. De forma correcta a tus clientes, para que piensen en tu marca tal y cómo tú quieres que lo haga.</p>
+              <p>&nbsp;</p>
+              <p>Y que te compren más, por supuesto.</p>
+              <p>&nbsp;</p>
+              <p>Que vean la marca atractiva.<br />
+              Que conecten con ellos.<br />
+              Que te recuerden.<br />
+              Que te compren.<br />
+              Que te recomienden.<br />
+              Y que te vuelvan a comprar.</p>
+              <p>&nbsp;</p>
+              <p>Eso es lo que yo haré. Que tus clientes vean tu marca como tu la pensaste, y que ésta te de a ti el estilo de vida que pensabas cuando la creaste.</p>
+              <p>&nbsp;</p>
+              <p>Comunicando adecuadamente, tu marca se convertirá en un activo muy valioso que podrás vender en un futuro a un muy buen precio o, por qué no, algo que heredes a tus hijos.</p>
+              <p><br /><br /></p>
+              <p>Así que, si quieres, no solo facturar más, con más beneficio, en piloto automático, sino que tu marca se convierta en un activo valioso…</p>
+              <p><br /><br /></p>
+              <PresupuestoBtn />
+
+              {/* Sección 4 */}
+              <h2 className="text-xl font-bold text-gray-900 mb-4">DESTACARÁS SOBRE TU COMPETENCIA</h2>
+              <p>&nbsp;</p>
+              <p>Quizá lo más importante.</p>
+              <p>&nbsp;</p>
+              <p>Comunicando correctamente, por email, tu cliente recordará tu marca por encima de los competidores.</p>
+              <p>&nbsp;</p>
+              <p>Has visto las marcas de la competencia, ¿no?</p>
+              <p>&nbsp;</p>
+              <p>Todas dicen lo mismo.</p>
+              <p>&nbsp;</p>
+              <p>No se diferencian más que en el logo y en el diseño del producto.</p>
+              <p>&nbsp;</p>
+              <p>Pero comunican igual. Al menos la mayoría.</p>
+              <p>&nbsp;</p>
+              <p>Por tanto, <strong>destacar es muy fácil.</strong></p>
+              <p>&nbsp;</p>
+              <p>Y más en esta época de IA, donde todo el mundo la usa para escribir sus textos, haciendo por tanto, que todos suenen igual.</p>
+              <p>&nbsp;</p>
+              <p>Tu marca tiene una personalidad única, que comunicada de forma correcta, te va permitir barrer con la competencia, destacar, y grabarte en la cabeza de tus clientes.</p>
+              <p>&nbsp;</p>
+              <p>Te recordarán, y pensarán en ti cuando quieran lo que vendes.</p>
+              <p><br /><br /></p>
+              <p>Así que, si quieres, no solo facturar más, con más beneficio, en piloto automático, teniendo un activo muy valioso, sino que quieres barrer con tu competencia…</p>
+              <p><br /><br /></p>
+              <PresupuestoBtn />
+
+              {/* Sección 5 */}
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Y… ALGO QUE NO ESPERABAS</h2>
+              <p>&nbsp;</p>
+              <p>Además de trabajar sobre tus campañas de email, tus formularios de captación y tus automatizaciones…</p>
+              <p>&nbsp;</p>
+              <p>Además de todo eso, que ya de por si te va a hacer vender más, generar más recurrencia y destacar tu marca de la de tu competencia.</p>
+              <p>&nbsp;</p>
+              <p>Además de eso…</p>
+              <p>&nbsp;</p>
+              <p><strong>Vamos a trabajar el copy de tus fichas de producto. Para que aumente la conversión de tu web también y se reduzcan tus costes publicitarios.</strong></p>
+              <p><br /><br /></p>
+              <PresupuestoBtn />
+
+              {/* Formulario */}
+              <div ref={formRef} className="scroll-mt-8">
+                {formVisible && (
+                  <>
+                    <p><br /></p>
+                    <MailerLiteForm />
+                    <p><br /><br /></p>
+                  </>
+                )}
+              </div>
+
+              {/* FAQ */}
+              <h2 className="text-xl font-bold text-center text-gray-900 mb-4">RESPUESTAS FRECUENTES</h2>
+              <p><br /><br /></p>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Qué incluye el servicio?</h3>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Lo principal sobre lo que vamos a trabajar es el email marketing. Redactaremos y programaremos todos los mails (newsletters periódicas y automatizaciones) y los formularios de captación. Además, redactaremos un plan de acción trimestral para que tengas claridad en lo que vamos a hacer.</span></p>
-              <p><br /><br /></p>
-              <p><span style={{fontWeight: 400}}>Por supuesto, todos los emails los escribimos con Inteligencia Humana y no Inteligencia Artificial, y aprovechamos el recurso de venta más poderoso que tenemos, el contar historias, algo que llevamos haciendo desde el principio de los tiempos.</span></p>
+              <p>Lo principal sobre lo que vamos a trabajar es el email marketing. Redactaremos y programaremos todos los mails (newsletters periódicas y automatizaciones) y los formularios de captación. Además, redactaremos también el copy de las fichas de producto.</p>
+              <p><br /><br /><br /><br /></p>
+              <p>Por supuesto, todos los emails los escribimos con Inteligencia Humana y no Inteligencia Artificial, y aprovechamos el recurso de venta más poderoso que tenemos, el contar historias, algo que llevamos haciendo desde el principio de los tiempos.</p>
               <p><br /><br /><br /></p>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Cuánto dura el servicio?</h3>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>El servicio dura 3 meses. Es la mejor forma de arrancar para poder hacer una buena investigación y que obtengas los mejores resultados posibles. Después de estos 3 meses, seguiremos mes a mes y sin ningún tipo de permanencia.</span></p>
-              <p><br /><br /><br /></p>
+              <p>El servicio dura 3 meses. Después de estos 3 meses, seguiremos mes a mes y sin ningún tipo de permanencia.</p>
+              <p><br /><br /></p>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Es muy caro? ¿Es barato?</h3>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Es cierto, no es barato. No te voy a negar esa realidad. Nosotros primamos otras cosas muy por encima del precio. E invertimos en ello para dar unos resultados y una experiencia de cliente más especial. Mucha gente no valora eso y solo busca precio, lo respetamos, pero no es al público al que va dirigido este servicio.</span></p>
-              <p><br /><br /><br /></p>
+              <p>Es cierto, no es barato. No te voy a negar esa realidad. Nosotros primamos otras cosas muy por encima del precio. E invertimos en ello para dar unos resultados y una experiencia de cliente más especial. Mucha gente no valora eso y sólo busca precio, lo respetamos, pero no es al público al que va dirigido este servicio.</p>
+              <p><br /><br /></p>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Qué perfil de personas le sacarán mejor partido?</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">¿Qué perfil de personas le sacará mejor partido?</h3>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Las personas que más partido le sacan al servicio son personas con una lista de cierto tamaño (más 5.000 personas) y que se encuentran en alguna de estas situaciones:</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>- a final de mes tus gastos fijos "se comen" tu beneficio</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>- o dependes de dar descuentos para vender</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>- o nunca has mandado mails a esa lista</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>- o los escribes con ChatGPT</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>- o si haces emails de 2 párrafos y muchas imágenes</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>- o peor, los haces de 2 párrafos y encima escritos por ChatGPT</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>- o piensas que "es que mis clientes no leen"</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>- o piensas que tu cliente o tu producto "es especial" y que tiene que ser tratada como si no hubiese humanos detrás de la pantalla donde leen</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>- y sobre todo, si tu facturación depende principalmente de la publicidad o de tu comunidad en redes sociales.</span></p>
-              <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>En cualquiera de estos casos, le sacarás mucho partido al servicio.</span></p>
-              <p><br /><br /><br /></p>
+              <p>Las personas que más partido le sacan al servicio son personas con una lista de cierto tamaño, más 5.000 personas.</p>
+              <p><br /><br /></p>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Cómo es la comunicación?</h3>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Nos comunicaremos por WhatsApp, en un grupo donde estaremos nosotros y quien quieras de tu equipo. Si lo prefieres podemos usar otro canal de comunicación, pero preferimos WhatsApp por la inmediatez y la facilidad de uso.</span></p>
-              <p><br /><br /><br /></p>
+              <p>Nos comunicaremos por WhatsApp, en un grupo donde estaremos nosotros y quien quieras de tu equipo.</p>
+              <p><br /><br /></p>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún tipo de garantía?</h3>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>No.</span></p>
-              <p><br /><br /><br /></p>
+              <p>No.</p>
+              <p><br /><br /></p>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Hay algún bonus?</h3>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Si, el servicio es principalmente la redacción, montaje y gestión de la plataforma de email marketing, pero como bonus, ya que es muy importante, y porque somos copywritters, incluimos el copywritting de las fichas de producto que estemos trabajando, páginas de venta en caso de que las vayas a usar y el plan estratégico trimestral. Ambas cosas son fundamentales para cualquier tienda online, por eso las incluimos.</span></p>
-              <p><br /><br /><br /></p>
+              <p>Si, el servicio es principalmente la redacción, montaje y gestión de la plataforma de email marketing, pero como bonus, ya que es muy importante, incluimos el copywritting de las fichas de producto que estemos trabajando y páginas de venta en caso de que las vayas a usar.</p>
+              <p><br /><br /></p>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">¿Es una buena inversión?</h3>
               <p>&nbsp;</p>
-              <p><span style={{fontWeight: 400}}>Si quieres tener una lista fiel, que te compre independientemente de si das descuento o no, sea la época del año que sea o incluso si cambias de negocio, y con eso aumentar los beneficios netos de tu tienda, este servicio hará justo eso. Explotaremos al máximo el activo más importante y rentable que tienes, tu lista. A partir de ahí la decisión es tuya.</span></p>
-              <p><br /><br /><br /></p>
-
-              <MailerLiteForm />
+              <p>Si quieres tener una lista fiel, una lista que, si quieres, facturar más, con más beneficio, en piloto automático, teniendo un activo muy valioso, y barrer con tu competencia… es la mejor inversión que puedes hacer. Pero claro, te lo digo yo, que soy parte interesada.</p>
+              <p>&nbsp;</p>
+              <p>Lo que haremos será explotar al máximo el activo más importante y rentable que tienes, tu lista. A partir de ahí la decisión es tuya.</p>
+              <p><br /><br /></p>
 
             </div>
           </div>
