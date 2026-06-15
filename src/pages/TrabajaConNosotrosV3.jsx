@@ -225,7 +225,7 @@ export default function TrabajaConNosotrosV3() {
               <p><br /><br /></p>
               <p>Era el tío al que llamaban para hablar cuando había un atentado terrorista con víctimas, o cuando había un desastre natural que se llevaba la vida de personas.</p>
               <p>&nbsp;</p>
-              <p>Vaya, el que hablaba cuando la cosa estaba jodida.</p>
+              <p>Vaya, <strong>el que hablaba cuando la cosa estaba jodida.</strong></p>
               <p>&nbsp;</p>
               <p>Para calmar las aguas.</p>
               <p><br /><br /><br /></p>
@@ -238,13 +238,10 @@ export default function TrabajaConNosotrosV3() {
               <p>&nbsp;</p>
               <p>Pide a los alumnos que guarden silencio y se sienten en sus sitios.</p>
               <p>&nbsp;</p>
-              <p>- Oye, tú, apaga la luz.</p>
-              <p>&nbsp;</p>
-              <p>- Voy.</p>
-              <p>&nbsp;</p>
-              <p>- Y tú, trae el proyector.</p>
-              <p>&nbsp;</p>
-              <p>- Voy.</p>
+              <p>— Oye, tú, apaga la luz.</p>
+              <p>— Voy.</p>
+              <p>— Y tú, trae el proyector.</p>
+              <p>— Voy.</p>
               <p><br /><br /></p>
 
               <p>Con la luz apagada y el proyector preparado, comienza a proyectar una película en blanco y negro.</p>
@@ -256,23 +253,23 @@ export default function TrabajaConNosotrosV3() {
               <p>Pero nadie decía nada tampoco.</p>
               <p><br /><br /></p>
 
-              <p>Solo puso un fragmento de 2 minutos. Con eso bastó.</p>
+              <p>Solo puso un fragmento de 2 minutos. <strong>Con eso bastó.</strong></p>
               <p><br /><br /></p>
               <p>Al terminar el vídeo, y con la luz aún apagada, Martin se movió a la luz del proyector y dijo:</p>
               <p><br /><br /><br /></p>
 
               <p className="text-center">
-                <em>"Mi nombre es Martin Stoller, soy judío. Mi abuela murió en un campo de concentración. Pero eso no me impide ver que este señor consiguió que el pueblo más civilizado y avanzado de la historia hiciera lo que él quisiera simplemente con el uso de las palabras.</em>
+                <em>"Mi nombre es Martin Stoller, soy judío.<br />Mi abuela murió en un campo de concentración.<br />Pero eso no me impide ver que este señor consiguió que el pueblo más civilizado y avanzado de la historia hiciera lo que él quisiera simplemente con el uso de las palabras.</em>
               </p>
-              <p className="text-center"><br /><br /></p>
+              <p className="text-center"><br /></p>
               <p className="text-center">
-                <em>Eso es capacidad de persuasión. Eso es lo que vais a aprender en esta clase. El que se ofenda fácilmente puede salir ya por la puerta."</em>
+                <em>Eso es capacidad de persuasión.<br />Eso es lo que vais a aprender en esta clase.<br />El que se ofenda fácilmente puede salir ya por la puerta."</em>
               </p>
               <p><br /><br /><br /></p>
 
               <p>Guau…</p>
               <p>&nbsp;</p>
-              <p>Esto es un ejemplo de autoridad, marca y comunicación de un nivel altísimo.</p>
+              <p><strong>Esto es un ejemplo de autoridad, marca y comunicación de un nivel altísimo.</strong></p>
               <p>&nbsp;</p>
               <p>Para presentar tu marca, para una automatización de bienvenida, es muy potente.</p>
               <p><br /><br /></p>
@@ -280,7 +277,7 @@ export default function TrabajaConNosotrosV3() {
               <p>&nbsp;</p>
               <p>Son conceptos aplicados a nivel mundial. Son conceptos que este mismo pintor alemán usó para conseguir lo que quiso.</p>
               <p>&nbsp;</p>
-              <p>Y son conceptos que cualquier marca puede aplicar.</p>
+              <p><strong>Y son conceptos que cualquier marca puede aplicar.</strong></p>
               <p><br /><br /></p>
 
               <p><span style={{ color: '#0067FD', fontSize: '20px' }}><strong>Dicho esto</strong></span>, toda marca que sepa comunicarse (BIEN) con sus clientes, se convertirá en una marca mucho más atractiva y rentable.</p>
