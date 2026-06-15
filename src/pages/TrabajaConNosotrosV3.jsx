@@ -277,7 +277,7 @@ export default function TrabajaConNosotrosV3() {
               <p>&nbsp;</p>
               <p>Son conceptos aplicados a nivel mundial. Son conceptos que este mismo pintor alemán usó para conseguir lo que quiso.</p>
               <p>&nbsp;</p>
-              <p><strong>Y son conceptos que cualquier marca puede aplicar.</strong></p>
+              <p><strong><em>Y son conceptos que cualquier marca puede aplicar.</em></strong></p>
               <p><br /><br /><br /></p>
 
               <p><span style={{ color: '#0067FD', fontSize: '20px' }}><strong>Dicho esto</strong></span>, toda marca que sepa comunicarse (BIEN) con sus clientes, se convertirá en una marca mucho más atractiva y rentable.</p>
