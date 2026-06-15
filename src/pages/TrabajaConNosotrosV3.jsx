@@ -197,7 +197,7 @@ export default function TrabajaConNosotrosV3() {
       <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
         <div className="w-full max-w-5xl">
           <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
-            <div className="text-gray-800 text-base leading-relaxed">
+            <div className="text-gray-800 text-base leading-relaxed" style={{ lineHeight: '2' }}>
 
               {/* Títulos */}
               <h1 className="text-2xl md:text-4xl font-bold text-center text-gray-900 leading-tight mb-4">
