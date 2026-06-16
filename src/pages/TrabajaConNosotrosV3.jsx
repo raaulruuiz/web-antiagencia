@@ -163,13 +163,13 @@ export default function TrabajaConNosotrosV3() {
   const SectionEnd = ({ sectionId }) => {
     if (activeSection === sectionId) {
       return (
-        <div className="mt-8 mb-16">
+        <div className="mt-8 mb-16"><p><br /></p>
           <MailerLiteForm />
         </div>
       );
     }
     return (
-      <div className="mt-8 mb-16">
+      <div className="mt-8 mb-16"><p><br /></p>
         <button
           onClick={() => setActiveSection(sectionId)}
           style={{
