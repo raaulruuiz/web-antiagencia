@@ -27,11 +27,22 @@ const bloques = [
   },
 ];
 
+const gradientText = {
+  background: 'linear-gradient(135deg, #000000 0%, #0067FD 100%)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  backgroundClip: 'text',
+};
+
+const gradientBadge = {
+  background: 'linear-gradient(135deg, #000000 0%, #0067FD 100%)',
+};
+
 export default function PlanningQ3() {
   return (
     <div className="min-h-screen bg-white font-sans">
       {/* Hero */}
-      <div className="text-white text-center px-6 py-24 md:py-32" style={{ background: 'linear-gradient(135deg, #000000 0%, #7000ff 100%)' }}>
+      <div className="text-white text-center px-6 py-24 md:py-32" style={{ background: 'linear-gradient(135deg, #000000 0%, #0067FD 100%)' }}>
         <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-4">
           Planning Q3
         </h1>
@@ -52,19 +63,19 @@ export default function PlanningQ3() {
               className="group flex flex-col justify-between border border-zinc-200 rounded-2xl p-7 hover:border-black hover:shadow-lg transition-all duration-200 cursor-pointer"
             >
               <div>
-                <div className="w-10 h-10 bg-black rounded-xl mb-5 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl mb-5 flex items-center justify-center" style={gradientBadge}>
                   <span className="text-white text-sm font-bold">
                     {bloque.titulo.split(" ")[1]}
                   </span>
                 </div>
-                <h2 className="text-lg font-bold text-zinc-900 mb-2 leading-snug">
+                <h2 className="text-lg font-bold mb-2 leading-snug" style={gradientText}>
                   {bloque.titulo}
                 </h2>
                 <p className="text-zinc-500 text-sm leading-relaxed">
                   {bloque.descripcion}
                 </p>
               </div>
-              <div className="mt-6 flex items-center gap-1 text-sm font-semibold text-black group-hover:gap-2 transition-all duration-150">
+              <div className="mt-6 flex items-center gap-1 text-sm font-semibold group-hover:gap-2 transition-all duration-150" style={gradientText}>
                 Accede al documento de {bloque.paginas} páginas
                 <span className="text-base">→</span>
               </div>
