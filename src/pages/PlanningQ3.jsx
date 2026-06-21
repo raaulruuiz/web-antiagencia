@@ -35,7 +35,7 @@ const gradientBadge = {
 
 export default function PlanningQ3() {
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-white" style={{ fontFamily: "'Georgia', serif" }}>
       {/* Hero */}
       <div className="text-white text-center px-6 py-24 md:py-32" style={{ background: 'linear-gradient(135deg, #000000 0%, #7000ff 100%)' }}>
         <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-4">
