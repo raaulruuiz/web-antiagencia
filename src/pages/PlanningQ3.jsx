@@ -35,10 +35,10 @@ const gradientBadge = {
 
 export default function PlanningQ3() {
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "'Georgia', serif" }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "'Georgia', 'Times New Roman', Times, serif" }}>
       {/* Hero */}
       <div className="text-white text-center px-6 py-24 md:py-32" style={{ background: 'linear-gradient(135deg, #000000 0%, #7000ff 100%)' }}>
-        <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-4">
+        <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-4" style={{ fontFamily: "'Georgia', serif" }}>
           Planning Q3
         </h1>
         <p className="text-lg md:text-xl text-zinc-400 max-w-xl mx-auto">
@@ -63,7 +63,7 @@ export default function PlanningQ3() {
                     {bloque.titulo.split(" ")[1]}
                   </span>
                 </div>
-                <h2 className="text-lg font-bold mb-2 leading-snug" style={blueText}>
+                <h2 className="text-lg font-bold mb-2 leading-snug" style={{ ...blueText, fontFamily: "'Georgia', serif" }}>
                   {bloque.titulo}
                 </h2>
                 <p className="text-zinc-500 text-sm leading-relaxed">
