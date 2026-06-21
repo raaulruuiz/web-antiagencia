@@ -27,12 +27,7 @@ const bloques = [
   },
 ];
 
-const gradientText = {
-  background: 'linear-gradient(135deg, #000000 0%, #0067FD 100%)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  backgroundClip: 'text',
-};
+const blueText = { color: '#0067FD' };
 
 const gradientBadge = {
   background: 'linear-gradient(135deg, #000000 0%, #0067FD 100%)',
@@ -42,7 +37,7 @@ export default function PlanningQ3() {
   return (
     <div className="min-h-screen bg-white font-sans">
       {/* Hero */}
-      <div className="text-white text-center px-6 py-24 md:py-32" style={{ background: 'linear-gradient(135deg, #000000 0%, #0067FD 100%)' }}>
+      <div className="text-white text-center px-6 py-24 md:py-32" style={{ background: 'linear-gradient(135deg, #000000 0%, #7000ff 100%)' }}>
         <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-4">
           Planning Q3
         </h1>
@@ -68,14 +63,14 @@ export default function PlanningQ3() {
                     {bloque.titulo.split(" ")[1]}
                   </span>
                 </div>
-                <h2 className="text-lg font-bold mb-2 leading-snug" style={gradientText}>
+                <h2 className="text-lg font-bold mb-2 leading-snug" style={blueText}>
                   {bloque.titulo}
                 </h2>
                 <p className="text-zinc-500 text-sm leading-relaxed">
                   {bloque.descripcion}
                 </p>
               </div>
-              <div className="mt-6 flex items-center gap-1 text-sm font-semibold group-hover:gap-2 transition-all duration-150" style={gradientText}>
+              <div className="mt-6 flex items-center gap-1 text-sm font-semibold group-hover:gap-2 transition-all duration-150" style={blueText}>
                 Accede al documento de {bloque.paginas} páginas
                 <span className="text-base">→</span>
               </div>
