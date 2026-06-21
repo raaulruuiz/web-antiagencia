@@ -41,7 +41,7 @@ export default function PlanningQ3() {
         <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-4" style={{ fontFamily: "'Georgia', serif" }}>
           Planning Q3
         </h1>
-        <p className="text-lg md:text-xl text-zinc-400 max-w-xl mx-auto">
+        <p className="text-lg md:text-xl text-zinc-400 max-w-xl mx-auto" style={{ fontFamily: "'Georgia', serif" }}>
           Prepárate para los próximos 3 meses
         </p>
       </div>
@@ -66,11 +66,11 @@ export default function PlanningQ3() {
                 <h2 className="text-lg font-bold mb-2 leading-snug" style={{ ...blueText, fontFamily: "'Georgia', serif" }}>
                   {bloque.titulo}
                 </h2>
-                <p className="text-zinc-500 text-sm leading-relaxed">
+                <p className="text-zinc-500 text-sm leading-relaxed" style={{ fontFamily: "'Georgia', serif" }}>
                   {bloque.descripcion}
                 </p>
               </div>
-              <div className="mt-6 flex items-center gap-1 text-sm font-semibold group-hover:gap-2 transition-all duration-150" style={blueText}>
+              <div className="mt-6 flex items-center gap-1 text-sm font-semibold group-hover:gap-2 transition-all duration-150" style={{ ...blueText, fontFamily: "'Georgia', serif" }}>
                 Accede al documento de {bloque.paginas} páginas
                 <span className="text-base">→</span>
               </div>
