@@ -35,6 +35,7 @@ import CopywritingPopup from './pages/admin/CopywritingPopup';
 import AdminHome from './pages/admin/AdminHome';
 import EmailBuilder from './pages/admin/EmailBuilder';
 import Paginas from './pages/admin/Paginas';
+import PlanningQ3 from './pages/PlanningQ3';
 import { supabase } from '@/lib/supabaseClient';
 
 // Guard para rutas de lector: redirige a /admin/users si no tiene permiso
@@ -152,6 +153,7 @@ const AuthenticatedApp = () => {
       <Route path="/trabajaconnosotros" element={<TrabajaConNosotrosV3 />} />
       <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
+      <Route path="/q3" element={<PlanningQ3 />} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
       <Route path="/jorge-coronado" element={<PixelLayout><JorgeCoronado /></PixelLayout>} />
       <Route path="/gracias-podcast" element={<PixelLayout><GraciasJorgeCoronado /></PixelLayout>} />
