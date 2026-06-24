@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+const RAILWAY_URL = "https://automatizaciones-production-a376.up.railway.app";
+const SESSION_KEY = "q3_acceso_email";
 
 const bloques = [
   {
@@ -28,14 +31,105 @@ const bloques = [
 ];
 
 const blueText = { color: '#0067FD' };
+const gradientBadge = { background: 'linear-gradient(135deg, #000000 0%, #0067FD 100%)' };
 
-const gradientBadge = {
-  background: 'linear-gradient(135deg, #000000 0%, #0067FD 100%)',
-};
+function Gate({ onAcceso }) {
+  const [email, setEmail] = useState('');
+  const [estado, setEstado] = useState('idle'); // idle | cargando | error
+
+  async function verificar(e) {
+    e.preventDefault();
+    if (!email) return;
+    setEstado('cargando');
+    try {
+      const res = await fetch(`${RAILWAY_URL}/api/verificar-acceso-q3`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (data.acceso) {
+        sessionStorage.setItem(SESSION_KEY, email);
+        onAcceso();
+      } else {
+        setEstado('error');
+      }
+    } catch {
+      setEstado('error');
+    }
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      background: 'rgba(0,0,0,0.7)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '16px',
+    }}>
+      <div style={{
+        background: '#fff',
+        borderRadius: '8px',
+        padding: '40px 32px',
+        maxWidth: '420px',
+        width: '100%',
+        fontFamily: "'Georgia', serif",
+        textAlign: 'center',
+      }}>
+        <h2 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '8px', color: '#111' }}>
+          Accede al Planning Q3
+        </h2>
+        <p style={{ fontSize: '14px', color: '#555', marginBottom: '28px', lineHeight: '1.6' }}>
+          Accede con el email con el que te registraste.
+        </p>
+        <form onSubmit={verificar}>
+          <input
+            type="email"
+            placeholder="tu@email.com"
+            value={email}
+            onChange={e => { setEmail(e.target.value); setEstado('idle'); }}
+            required
+            style={{
+              width: '100%', padding: '12px 14px', fontSize: '15px',
+              border: '1px solid #ccc', borderRadius: '4px',
+              marginBottom: '12px', boxSizing: 'border-box',
+              fontFamily: "'Georgia', serif",
+            }}
+          />
+          {estado === 'error' && (
+            <p style={{ color: '#cc0000', fontSize: '13px', marginBottom: '12px' }}>
+              Este email no tiene acceso. Si crees que es un error, escríbenos.
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={estado === 'cargando'}
+            style={{
+              width: '100%', padding: '13px',
+              backgroundColor: estado === 'cargando' ? '#999' : '#0067FD',
+              color: '#fff', border: 'none', borderRadius: '4px',
+              fontSize: '15px', fontWeight: '700', cursor: estado === 'cargando' ? 'default' : 'pointer',
+              fontFamily: "'Georgia', serif",
+            }}
+          >
+            {estado === 'cargando' ? 'Verificando...' : 'Acceder'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function PlanningQ3() {
+  const [acceso, setAcceso] = useState(false);
+
+  useEffect(() => {
+    if (sessionStorage.getItem(SESSION_KEY)) setAcceso(true);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Georgia', 'Times New Roman', Times, serif" }}>
+      {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
+
       {/* Hero */}
       <div className="text-white text-center px-6 py-24 md:py-32" style={{ background: 'linear-gradient(135deg, #000000 0%, #7000ff 100%)' }}>
         <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-4" style={{ fontFamily: "'Georgia', serif" }}>
