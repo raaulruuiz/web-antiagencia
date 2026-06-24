@@ -1,7 +1,7 @@
 import React from "react";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
-const STRIPE_URL = "https://buy.stripe.com/6oU4gz1GtgXH5Lv2aWgfu0i";
+const STRIPE_URL = "https://buy.stripe.com/test_9B63cv84R8rbc9T2aWgfu00";
 
 function BuyButton() {
   return (
