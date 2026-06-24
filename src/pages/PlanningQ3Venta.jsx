@@ -42,11 +42,11 @@ export default function PlanningQ3Venta() {
           <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
             <div className="text-gray-800 text-base leading-relaxed" style={{ lineHeight: '2' }}>
 
-              <h1 className="text-2xl md:text-4xl text-gray-900 leading-tight mb-4 font-bold">Hay algo que debes hacer siempre…&nbsp;</h1>
-              <h1 className="text-2xl md:text-4xl text-gray-900 leading-tight mb-4 font-bold">Y que no te puedes saltar…&nbsp;</h1>
-              <h1 className="text-2xl md:text-4xl text-gray-900 leading-tight mb-4 font-bold">Si quieres que te vaya bien en tu tienda…</h1>
+              <h1 className="text-3xl md:text-5xl text-gray-900 leading-tight mb-4 font-bold">Hay algo que debes hacer siempre…&nbsp;</h1>
+              <h1 className="text-3xl md:text-5xl text-gray-900 leading-tight mb-4 font-bold">Y que no te puedes saltar…&nbsp;</h1>
+              <h1 className="text-3xl md:text-5xl text-gray-900 leading-tight mb-4 font-bold">Si quieres que te vaya bien en tu tienda…</h1>
               <p>&nbsp;</p>
-              <h2 className="text-xl md:text-2xl text-gray-900 leading-tight mb-4" style={{ fontWeight: 400 }}>Y eso es planificar con tiempo.</h2>
+              <h2 className="text-2xl md:text-3xl text-gray-900 leading-tight mb-4" style={{ fontWeight: 400 }}>Y eso es planificar con tiempo.</h2>
               <p><br /><br /></p>
 
               <p>Si eres de los que piensa que ya lo haces y que no lo necesitas, bien. Puedes marcharte.</p>
