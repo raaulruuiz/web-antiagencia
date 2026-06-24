@@ -17,6 +17,8 @@ import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotros from './pages/TrabajaConNosotros'
 import TrabajaConNosotrosOld from './pages/TrabajaConNosotrosOld'
 import TrabajaConNosotrosV3 from './pages/TrabajaConNosotrosV3'
+import PlanningQ3 from './pages/PlanningQ3'
+import PlanningQ3Venta from './pages/PlanningQ3Venta'
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import TikTokConnect from './pages/TikTokConnect';
 import JorgeCoronado from './pages/JorgeCoronado';
@@ -152,6 +154,8 @@ const AuthenticatedApp = () => {
       <Route path="/YaPorFin" element={<SmartPage path="/YaPorFin"><LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper></SmartPage>} />
       <Route path="/trabajaconnosotros" element={<TrabajaConNosotrosV3 />} />
       <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
+      <Route path="/planningq3" element={<PlanningQ3Venta />} />
+      <Route path="/q3" element={<PlanningQ3 />} />
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/q3" element={<PlanningQ3 />} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
