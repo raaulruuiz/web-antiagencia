@@ -92,7 +92,7 @@ function Gate({ onAcceso }) {
               width: '100%', padding: '12px 14px', fontSize: '15px',
               border: '1px solid #ccc', borderRadius: '4px',
               marginBottom: '12px', boxSizing: 'border-box',
-              fontFamily: "'Georgia', serif",
+              fontFamily: "'Georgia', serif", color: '#333',
             }}
           />
           {estado === 'error' && (
