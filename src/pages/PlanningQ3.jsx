@@ -114,6 +114,16 @@ function Gate({ onAcceso }) {
             {estado === 'cargando' ? 'Verificando...' : 'Acceder'}
           </button>
         </form>
+        <a
+          href="/planningq3"
+          style={{
+            display: 'block', marginTop: '16px', fontSize: '13px',
+            color: '#0067FD', fontFamily: "'Georgia', serif", textDecoration: 'underline',
+            cursor: 'pointer',
+          }}
+        >
+          ¿No estás en la lista?
+        </a>
       </div>
     </div>
   );
