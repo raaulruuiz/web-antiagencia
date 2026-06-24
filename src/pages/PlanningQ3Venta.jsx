@@ -87,7 +87,7 @@ export default function PlanningQ3Venta() {
               <p>&nbsp;</p>
               <BuyButton />
 
-              <h3 className="text-xl md:text-2xl text-gray-900 mb-4" style={{ fontWeight: 400 }}>TÓMATE UNA CERVEZA</h3>
+              <h3 className="text-2xl md:text-4xl text-gray-900 mb-4 font-bold">TÓMATE UNA CERVEZA</h3>
               <p>&nbsp;</p>
               <p>Quiero decir, planificar lleva tiempo. Horas. Días incluso si quieres hacerlo bien.</p>
               <p>&nbsp;</p>
@@ -103,7 +103,7 @@ export default function PlanningQ3Venta() {
               <p>&nbsp;</p>
               <BuyButton />
 
-              <h3 className="text-xl md:text-2xl text-gray-900 mb-4" style={{ fontWeight: 400 }}>LOS MÁS RICOS LO DICEN</h3>
+              <h3 className="text-2xl md:text-4xl text-gray-900 mb-4 font-bold">LOS MÁS RICOS LO DICEN</h3>
               <p>&nbsp;</p>
               <p>El señor Warren Buffett, uno de los hombres más ricos del mundo, y uno de los mejores inversores…</p>
               <p>&nbsp;</p>
@@ -128,7 +128,7 @@ export default function PlanningQ3Venta() {
               <p><br /><br /></p>
               <BuyButton />
 
-              <h3 className="text-xl md:text-2xl text-gray-900 mb-4" style={{ fontWeight: 400 }}>SERÁS EL PUTO AMO</h3>
+              <h3 className="text-2xl md:text-4xl text-gray-900 mb-4 font-bold">SERÁS EL PUTO AMO</h3>
               <p>&nbsp;</p>
               <p>O la puta ama.</p>
               <p>&nbsp;</p>
@@ -146,7 +146,7 @@ export default function PlanningQ3Venta() {
               <p><br /><br /></p>
               <BuyButton />
 
-              <h3 className="text-xl md:text-2xl text-gray-900 mb-4" style={{ fontWeight: 400 }}>¿TONTOS O GENIOS?</h3>
+              <h3 className="text-2xl md:text-4xl text-gray-900 mb-4 font-bold">¿TONTOS O GENIOS?</h3>
               <p>&nbsp;</p>
               <p>De nuevo, el gran Warren Buffett nos da la clave.</p>
               <p><br /><br /></p>
