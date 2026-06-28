@@ -14,6 +14,17 @@ function formatCountdown(endsAt) {
   return `${m}:${s}`;
 }
 
+function Toggle({ value, onChange }) {
+  return (
+    <button
+      onClick={() => onChange(!value)}
+      className={`relative flex-shrink-0 w-9 h-5 rounded-full transition-colors ${value ? 'bg-white' : 'bg-zinc-700'}`}
+    >
+      <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${value ? 'left-4 bg-black' : 'left-0.5 bg-zinc-400'}`} />
+    </button>
+  );
+}
+
 function InstallModal({ onClose }) {
   return (
     <div
@@ -100,9 +111,7 @@ export default function Pomodoro() {
     }
   }
 
-  useEffect(() => {
-    fetchState();
-  }, []);
+  useEffect(() => { fetchState(); }, []);
 
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -111,10 +120,7 @@ export default function Pomodoro() {
       intervalRef.current = setInterval(() => {
         const val = formatCountdown(state.ends_at);
         setCountdown(val);
-        if (val === '00:00') {
-          clearInterval(intervalRef.current);
-          fetchState();
-        }
+        if (val === '00:00') { clearInterval(intervalRef.current); fetchState(); }
       }, 1000);
     } else {
       setCountdown('--:--');
@@ -130,37 +136,27 @@ export default function Pomodoro() {
     setActionLoading(true);
     try {
       const res = await fetch(`${BACKEND_URL}/admin/pomodoro/start`, {
-        method: 'POST',
-        headers: API_HEADERS,
+        method: 'POST', headers: API_HEADERS,
         body: JSON.stringify({ work_minutes: 25, break_minutes: 5 }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al iniciar');
       await fetchState();
       notifyExtension();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setActionLoading(false);
-    }
+    } catch (err) { setError(err.message); }
+    finally { setActionLoading(false); }
   }
 
   async function handleStop() {
     setActionLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/admin/pomodoro/stop`, {
-        method: 'POST',
-        headers: API_HEADERS,
-      });
+      const res = await fetch(`${BACKEND_URL}/admin/pomodoro/stop`, { method: 'POST', headers: API_HEADERS });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al parar');
       await fetchState();
       notifyExtension();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setActionLoading(false);
-    }
+    } catch (err) { setError(err.message); }
+    finally { setActionLoading(false); }
   }
 
   async function handleAddUrl() {
@@ -169,55 +165,53 @@ export default function Pomodoro() {
     setActionLoading(true);
     try {
       const res = await fetch(`${BACKEND_URL}/admin/pomodoro/urls`, {
-        method: 'POST',
-        headers: API_HEADERS,
-        body: JSON.stringify({ domain }),
+        method: 'POST', headers: API_HEADERS,
+        body: JSON.stringify({ domain, wildcard: true }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al añadir URL');
       setNewDomain('');
       await fetchState();
       notifyExtension();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setActionLoading(false);
-    }
+    } catch (err) { setError(err.message); }
+    finally { setActionLoading(false); }
   }
 
   async function handleDeleteUrl(domain) {
     setActionLoading(true);
     try {
       const res = await fetch(`${BACKEND_URL}/admin/pomodoro/urls/${encodeURIComponent(domain)}`, {
-        method: 'DELETE',
-        headers: API_HEADERS,
+        method: 'DELETE', headers: API_HEADERS,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al eliminar URL');
       await fetchState();
       notifyExtension();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setActionLoading(false);
-    }
+    } catch (err) { setError(err.message); }
+    finally { setActionLoading(false); }
   }
 
-  async function handleToggleWildcard() {
-    const newValue = !(state?.wildcard_mode ?? true);
-    setState(prev => ({ ...prev, wildcard_mode: newValue }));
+  async function handleToggleUrlWildcard(domain, newWildcard) {
+    // Optimistic update
+    setState(prev => ({
+      ...prev,
+      blocked_urls: prev.blocked_urls.map(e => e.url === domain ? { ...e, wildcard: newWildcard } : e),
+    }));
     try {
-      const res = await fetch(`${BACKEND_URL}/admin/pomodoro/settings`, {
-        method: 'PATCH',
-        headers: API_HEADERS,
-        body: JSON.stringify({ wildcard_mode: newValue }),
+      const res = await fetch(`${BACKEND_URL}/admin/pomodoro/urls/${encodeURIComponent(domain)}`, {
+        method: 'PATCH', headers: API_HEADERS,
+        body: JSON.stringify({ wildcard: newWildcard }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error al actualizar modo');
+      if (!res.ok) throw new Error(data.error || 'Error al actualizar');
       notifyExtension();
     } catch (err) {
       setError(err.message);
-      setState(prev => ({ ...prev, wildcard_mode: !newValue }));
+      // Revert
+      setState(prev => ({
+        ...prev,
+        blocked_urls: prev.blocked_urls.map(e => e.url === domain ? { ...e, wildcard: !newWildcard } : e),
+      }));
     }
   }
 
@@ -228,8 +222,6 @@ export default function Pomodoro() {
       </div>
     );
   }
-
-  const wildcardMode = state?.wildcard_mode ?? true;
 
   return (
     <div className="p-6 max-w-2xl mx-auto" style={{ backgroundColor: '#0d0d0d', color: 'white', minHeight: '100vh' }}>
@@ -295,20 +287,7 @@ export default function Pomodoro() {
 
       {/* URLs bloqueadas */}
       <div className="border border-zinc-800 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold">URLs bloqueadas</h2>
-          <button
-            onClick={handleToggleWildcard}
-            className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-          >
-            <div className={`relative w-9 h-5 rounded-full transition-colors ${wildcardMode ? 'bg-white' : 'bg-zinc-700'}`}>
-              <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${wildcardMode ? 'left-4 bg-black' : 'left-0.5 bg-zinc-400'}`} />
-            </div>
-            <span className="text-xs whitespace-nowrap">
-              {wildcardMode ? 'Bloqueando todos los subdominios y subpaginas' : 'Bloqueando URL exacta'}
-            </span>
-          </button>
-        </div>
+        <h2 className="text-base font-semibold mb-4">URLs bloqueadas</h2>
 
         <div className="flex gap-2 mb-4">
           <input
@@ -335,24 +314,37 @@ export default function Pomodoro() {
             <thead>
               <tr className="border-b border-zinc-800">
                 <th className="text-left py-2 text-zinc-400 font-normal">Dominio</th>
+                <th className="text-left py-2 text-zinc-400 font-normal">Modo</th>
                 <th className="w-20" />
               </tr>
             </thead>
             <tbody>
-              {state.blocked_urls.map(domain => (
-                <tr key={domain} className="border-b border-zinc-900">
-                  <td className="py-2 text-zinc-200">{domain}</td>
-                  <td className="py-2 text-right">
-                    <button
-                      onClick={() => handleDeleteUrl(domain)}
-                      disabled={actionLoading}
-                      className="px-3 py-1 rounded text-xs border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors disabled:opacity-50"
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {state.blocked_urls.map(entry => {
+                const domain = entry.url;
+                const wildcard = entry.wildcard ?? true;
+                return (
+                  <tr key={domain} className="border-b border-zinc-900">
+                    <td className="py-3 text-zinc-200">{domain}</td>
+                    <td className="py-3">
+                      <div className="flex items-center gap-2">
+                        <Toggle value={wildcard} onChange={v => handleToggleUrlWildcard(domain, v)} />
+                        <span className="text-xs text-zinc-500">
+                          {wildcard ? 'Todo el dominio' : 'URL exacta'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 text-right">
+                      <button
+                        onClick={() => handleDeleteUrl(domain)}
+                        disabled={actionLoading}
+                        className="px-3 py-1 rounded text-xs border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors disabled:opacity-50"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
