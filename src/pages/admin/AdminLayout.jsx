@@ -15,6 +15,7 @@ const ALL_NAV = [
   { to: '/admin/dashboard',        label: 'Dashboard',        icon: '📊', page: 'dashboard' },
   { to: '/admin/gym',              label: 'Entrenos',         icon: '🏋️', page: 'gym' },
   { to: '/admin/loom',             label: 'Loom',             icon: '🎥', page: 'loom' },
+  { to: '/admin/pomodoro',         label: 'Pomodoro',         icon: '🍅', page: 'pomodoro' },
   { to: '/admin/users',            label: 'Usuarios',         icon: '👥', page: 'users' },
 ];
 
