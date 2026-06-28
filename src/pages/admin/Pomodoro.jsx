@@ -59,6 +59,10 @@ export default function Pomodoro() {
     return () => clearInterval(intervalRef.current);
   }, [state?.active, state?.ends_at]);
 
+  function notifyExtension() {
+    window.dispatchEvent(new CustomEvent('pomodoroRefresh'));
+  }
+
   async function handleStart() {
     setActionLoading(true);
     try {
@@ -70,6 +74,7 @@ export default function Pomodoro() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al iniciar');
       await fetchState();
+      notifyExtension();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -87,6 +92,7 @@ export default function Pomodoro() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al parar');
       await fetchState();
+      notifyExtension();
     } catch (err) {
       setError(err.message);
     } finally {
