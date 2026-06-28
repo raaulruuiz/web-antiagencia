@@ -14,6 +14,68 @@ function formatCountdown(endsAt) {
   return `${m}:${s}`;
 }
 
+function InstallModal({ onClose }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="relative w-full max-w-md mx-4 border border-zinc-800 rounded-xl p-6" style={{ backgroundColor: '#111' }}>
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-zinc-500 hover:text-white text-lg leading-none"
+        >
+          ✕
+        </button>
+        <h2 className="text-base font-semibold mb-1">Instalar Pomodoro Blocker</h2>
+        <p className="text-sm text-zinc-400 mb-5">La extensión bloquea las URLs distractoras en Chrome durante las sesiones activas.</p>
+
+        <ol className="space-y-4 text-sm text-zinc-300 mb-6">
+          <li className="flex gap-3">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full border border-zinc-600 flex items-center justify-center text-xs text-zinc-400">1</span>
+            <span>
+              <a
+                href="/pomodoro-extension.zip"
+                download
+                className="underline text-white hover:text-zinc-300"
+              >
+                Descarga la extensión
+              </a>
+              {' '}y descomprime el archivo ZIP.
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full border border-zinc-600 flex items-center justify-center text-xs text-zinc-400">2</span>
+            <span>
+              Abre Chrome y ve a{' '}
+              <code className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 text-xs">chrome://extensions</code>
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full border border-zinc-600 flex items-center justify-center text-xs text-zinc-400">3</span>
+            <span>Activa el <strong>Modo desarrollador</strong> (interruptor arriba a la derecha).</span>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full border border-zinc-600 flex items-center justify-center text-xs text-zinc-400">4</span>
+            <span>Haz clic en <strong>Cargar descomprimida</strong> y selecciona la carpeta <code className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 text-xs">pomodoro-extension</code>.</span>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full border border-zinc-600 flex items-center justify-center text-xs text-zinc-400">5</span>
+            <span>La extensión ya está activa. Inicia una sesión desde esta página para empezar a bloquear.</span>
+          </li>
+        </ol>
+
+        <button
+          onClick={onClose}
+          className="w-full px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 transition-colors"
+        >
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Pomodoro() {
   const [state, setState] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,6 +83,7 @@ export default function Pomodoro() {
   const [newDomain, setNewDomain] = useState('');
   const [countdown, setCountdown] = useState('--:--');
   const [error, setError] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
   const intervalRef = useRef(null);
 
   async function fetchState() {
@@ -114,6 +177,7 @@ export default function Pomodoro() {
       if (!res.ok) throw new Error(data.error || 'Error al añadir URL');
       setNewDomain('');
       await fetchState();
+      notifyExtension();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -131,10 +195,29 @@ export default function Pomodoro() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al eliminar URL');
       await fetchState();
+      notifyExtension();
     } catch (err) {
       setError(err.message);
     } finally {
       setActionLoading(false);
+    }
+  }
+
+  async function handleToggleWildcard() {
+    const newValue = !(state?.wildcard_mode ?? true);
+    setState(prev => ({ ...prev, wildcard_mode: newValue }));
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/pomodoro/settings`, {
+        method: 'PATCH',
+        headers: API_HEADERS,
+        body: JSON.stringify({ wildcard_mode: newValue }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al actualizar modo');
+      notifyExtension();
+    } catch (err) {
+      setError(err.message);
+      setState(prev => ({ ...prev, wildcard_mode: !newValue }));
     }
   }
 
@@ -146,9 +229,21 @@ export default function Pomodoro() {
     );
   }
 
+  const wildcardMode = state?.wildcard_mode ?? true;
+
   return (
     <div className="p-6 max-w-2xl mx-auto" style={{ backgroundColor: '#0d0d0d', color: 'white', minHeight: '100vh' }}>
-      <h1 className="text-2xl font-bold mb-6">Pomodoro</h1>
+      {showInstall && <InstallModal onClose={() => setShowInstall(false)} />}
+
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Pomodoro</h1>
+        <button
+          onClick={() => setShowInstall(true)}
+          className="text-sm text-zinc-500 hover:text-zinc-300 underline underline-offset-2 transition-colors mt-1"
+        >
+          Instalar extension
+        </button>
+      </div>
 
       {error && (
         <div className="mb-4 px-4 py-3 rounded-lg border border-red-800 bg-red-950 text-red-300 text-sm">
@@ -200,7 +295,20 @@ export default function Pomodoro() {
 
       {/* URLs bloqueadas */}
       <div className="border border-zinc-800 rounded-xl p-6">
-        <h2 className="text-base font-semibold mb-4">URLs bloqueadas</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold">URLs bloqueadas</h2>
+          <button
+            onClick={handleToggleWildcard}
+            className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+          >
+            <div className={`relative w-9 h-5 rounded-full transition-colors ${wildcardMode ? 'bg-white' : 'bg-zinc-700'}`}>
+              <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${wildcardMode ? 'left-4 bg-black' : 'left-0.5 bg-zinc-400'}`} />
+            </div>
+            <span className="text-xs whitespace-nowrap">
+              {wildcardMode ? 'Bloqueando todos los subdominios y subpaginas' : 'Bloqueando URL exacta'}
+            </span>
+          </button>
+        </div>
 
         <div className="flex gap-2 mb-4">
           <input
@@ -220,7 +328,7 @@ export default function Pomodoro() {
           </button>
         </div>
 
-        {state?.blocked_urls?.length === 0 || !state?.blocked_urls ? (
+        {!state?.blocked_urls?.length ? (
           <p className="text-sm text-zinc-500">No hay URLs bloqueadas.</p>
         ) : (
           <table className="w-full text-sm">
