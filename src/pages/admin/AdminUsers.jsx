@@ -70,6 +70,30 @@ function PageCheckboxes({ selected, onChange }) {
   );
 }
 
+function ConfirmModal({ message, onConfirm, onCancel }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="bg-zinc-900 border border-zinc-700 rounded-xl px-6 py-5 w-80 flex flex-col gap-4">
+        <p className="text-white text-sm">{message}</p>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            className="text-zinc-400 hover:text-white text-sm transition-colors px-3 py-1.5"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onConfirm}
+            className="bg-red-600 hover:bg-red-500 text-white text-sm rounded-lg px-4 py-1.5 transition-colors"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminUsers() {
   const { role: myRole } = useAdmin();
   const isAdmin = myRole === 'admin';
@@ -77,6 +101,7 @@ export default function AdminUsers() {
   const [users, setUsers]     = useState([]);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg]         = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(null); // { id, email }
 
   // Invite form state
   const [email, setEmail]         = useState('');
@@ -143,7 +168,12 @@ export default function AdminUsers() {
   }
 
   async function handleDelete(id, userEmail) {
-    if (!confirm(`¿Eliminar a ${userEmail}?`)) return;
+    setConfirmDelete({ id, email: userEmail });
+  }
+
+  async function confirmDeleteUser() {
+    const { id } = confirmDelete;
+    setConfirmDelete(null);
     await fetch(`${BACKEND}/admin/users/${id}`, {
       method: 'DELETE',
       headers: { 'x-api-key': API_KEY },
@@ -153,6 +183,13 @@ export default function AdminUsers() {
 
   return (
     <div className="p-4 md:p-8 max-w-3xl">
+      {confirmDelete && (
+        <ConfirmModal
+          message={`¿Eliminar a ${confirmDelete.email}?`}
+          onConfirm={confirmDeleteUser}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
       <h1 className="text-white text-2xl font-semibold mb-6">Usuarios</h1>
 
       {/* Invitar — solo admin */}
