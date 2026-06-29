@@ -24,7 +24,6 @@ function todayISO() { return new Date().toISOString().slice(0, 10); }
 
 function isActiveNow(pomodoro) {
   if (pomodoro.enabled === false) return false;
-  if (pomodoro.is_paused) return false;
   const now = new Date();
   const dayName = JS_DAY_TO_KEY[now.getDay()];
   const dateStr = now.toISOString().slice(0, 10);
@@ -47,7 +46,7 @@ function formatSchedule(schedule) {
 }
 
 function emptyForm(isAdmin) {
-  return { name: '', days: [], time_ranges: [{ start: '09:00', end: '17:00' }], blocked_urls: [], is_universal: isAdmin, pause_method: { type: 'none' } };
+  return { name: '', days: [], time_ranges: [{ start: '09:00', end: '17:00' }], blocked_urls: [], is_universal: isAdmin };
 }
 
 // ─── Math operations ──────────────────────────────────────────────────────────
@@ -107,9 +106,6 @@ function isMoreLenient(orig, edited) {
     const ou = (orig.blocked_urls || []).find(u => u.url === eu.url);
     if (ou && (ou.wildcard ?? true) && !(eu.wildcard ?? true)) return true;
   }
-  const oLevel = METHOD_LEVEL[orig.pause_method?.type ?? 'none'];
-  const eLevel = METHOD_LEVEL[edited.pause_method?.type ?? 'none'];
-  if (eLevel < oLevel) return true;
   return false;
 }
 
@@ -302,173 +298,6 @@ function PauseMethodSection({ value, onChange }) {
           </label>
         </div>
       )}
-    </div>
-  );
-}
-
-// ─── Pause Modal ──────────────────────────────────────────────────────────────
-
-function PauseModal({ pomodoro, onClose, onSuccess, buildHeaders }) {
-  const method = pomodoro.pause_method?.type || 'none';
-  const [step, setStep] = useState('initial');
-  const [ops] = useState(() =>
-    method === 'operations'
-      ? generateOperations(pomodoro.pause_method?.count ?? 5, pomodoro.pause_method?.ascending ?? true)
-      : []
-  );
-  const [opIdx, setOpIdx] = useState(0);
-  const [answer, setAnswer] = useState('');
-  const [code, setCode] = useState('');
-  const [sentEmail, setSentEmail] = useState('');
-  const [err, setErr] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  async function doPause(body = {}) {
-    setLoading(true);
-    setErr(null);
-    try {
-      const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${pomodoro.id}/pause`, {
-        method: 'POST', headers: buildHeaders(), body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error');
-      onSuccess();
-    } catch (e) {
-      setErr(e.message);
-      setLoading(false);
-    }
-  }
-
-  async function requestCode() {
-    setLoading(true);
-    setErr(null);
-    try {
-      const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${pomodoro.id}/pause-request`, {
-        method: 'POST', headers: buildHeaders(),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error');
-      setSentEmail(data.email || '');
-      setStep('code');
-    } catch (e) {
-      setErr(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function checkAnswer() {
-    const op = ops[opIdx];
-    const userAns = parseInt(answer.trim(), 10);
-    if (isNaN(userAns) || userAns !== op.a) {
-      if (pomodoro.pause_method?.restart_on_fail) {
-        setOpIdx(0); setAnswer('');
-        setErr('Incorrecto. Empezando desde el principio.');
-      } else {
-        setAnswer('');
-        setErr('Respuesta incorrecta, inténtalo de nuevo.');
-      }
-      return;
-    }
-    setErr(null);
-    setAnswer('');
-    if (opIdx + 1 >= ops.length) {
-      doPause();
-    } else {
-      setOpIdx(i => i + 1);
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="relative w-full max-w-sm mx-4 border border-zinc-800 rounded-xl p-6" style={{ backgroundColor: '#111' }}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white leading-none">✕</button>
-        <h2 className="text-base font-semibold mb-1">Pausar Pomodoro</h2>
-        <p className="text-sm text-zinc-500 mb-5">{pomodoro.name}</p>
-
-        {err && <p className="mb-4 text-sm text-red-400 bg-red-950 border border-red-800 rounded-lg px-3 py-2">{err}</p>}
-
-        {/* None */}
-        {method === 'none' && (
-          <div>
-            <p className="text-sm text-zinc-300 mb-5">¿Confirmas que quieres pausar este Pomodoro?</p>
-            <div className="flex gap-2">
-              <button onClick={onClose}
-                className="flex-1 px-4 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
-                Cancelar
-              </button>
-              <button onClick={() => doPause()} disabled={loading}
-                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
-                {loading ? 'Pausando…' : 'Pausar'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Email — step initial */}
-        {method === 'email' && step === 'initial' && (
-          <div>
-            <p className="text-sm text-zinc-300 mb-5">Se enviará un código de verificación a tu correo de Antiagencia.</p>
-            <div className="flex gap-2">
-              <button onClick={onClose}
-                className="flex-1 px-4 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
-                Cancelar
-              </button>
-              <button onClick={requestCode} disabled={loading}
-                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
-                {loading ? 'Enviando…' : 'Enviar código'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Email — step code */}
-        {method === 'email' && step === 'code' && (
-          <div>
-            <p className="text-sm text-zinc-400 mb-4">
-              Código enviado a <span className="text-white">{sentEmail}</span>.
-            </p>
-            <input type="text" value={code}
-              onChange={e => setCode(e.target.value.toUpperCase())}
-              onKeyDown={e => e.key === 'Enter' && doPause({ code })}
-              maxLength={6} placeholder="XXXXXX"
-              className="w-full px-3 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 text-center tracking-widest font-mono mb-4"
-              autoFocus
-            />
-            <button onClick={() => doPause({ code })} disabled={loading || code.length < 6}
-              className="w-full px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
-              {loading ? 'Verificando…' : 'Verificar y pausar'}
-            </button>
-          </div>
-        )}
-
-        {/* Operations */}
-        {method === 'operations' && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs text-zinc-500">Operación {opIdx + 1} de {ops.length}</span>
-              <div className="flex gap-1">
-                {ops.map((_, i) => (
-                  <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < opIdx ? 'bg-green-400' : i === opIdx ? 'bg-white' : 'bg-zinc-700'}`} />
-                ))}
-              </div>
-            </div>
-            <p className="text-2xl font-bold font-mono text-center mb-6">{ops[opIdx]?.q} = ?</p>
-            <input type="number" value={answer}
-              onChange={e => setAnswer(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && checkAnswer()}
-              placeholder="Tu respuesta"
-              className="w-full px-3 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 text-center mb-4"
-              autoFocus
-            />
-            <button onClick={checkAnswer} disabled={loading || !answer.trim()}
-              className="w-full px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
-              {loading ? 'Pausando…' : opIdx + 1 < ops.length ? 'Siguiente →' : 'Pausar'}
-            </button>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -751,12 +580,6 @@ function PomodoroForm({ initial, isAdmin, onSave, onBack, saving }) {
           <UrlList urls={form.blocked_urls} onChange={urls => setForm(f => ({ ...f, blocked_urls: urls }))} />
         </div>
 
-        {/* Pause method */}
-        <PauseMethodSection
-          value={form.pause_method}
-          onChange={pm => setForm(f => ({ ...f, pause_method: pm }))}
-        />
-
         <button onClick={handleSave} disabled={saving}
           className="w-full px-4 py-2.5 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
           {saving ? 'Guardando…' : 'Guardar Pomodoro'}
@@ -781,7 +604,6 @@ export default function Pomodoro() {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [pauseModal, setPauseModal] = useState(null);
   const [strictMode, setStrictMode] = useState({ enabled: false, method: { type: 'none' } });
   const [strictConfigModal, setStrictConfigModal] = useState(false);
   const [strictVerifyModal, setStrictVerifyModal] = useState(null); // { title, onPass }
@@ -886,7 +708,6 @@ export default function Pomodoro() {
         schedule: { days: form.days, time_ranges: form.time_ranges },
         blocked_urls: form.blocked_urls,
         is_universal: isAdmin ? form.is_universal : false,
-        pause_method: form.pause_method || { type: 'none' },
       };
       const url = editing ? `${BACKEND_URL}/admin/pomodoros/${editing.id}` : `${BACKEND_URL}/admin/pomodoros`;
       const method = editing ? 'PUT' : 'POST';
@@ -925,20 +746,6 @@ export default function Pomodoro() {
     } catch (err) { setError(err.message); }
   }
 
-  async function handleResumePom(id) {
-    try {
-      const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${id}/resume`, {
-        method: 'POST', headers: buildHeaders(),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error al reanudar');
-      setPomodoros(p => p.map(x => x.id === id ? { ...x, is_paused: false } : x));
-      notifyExtension();
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
   async function handleDelete(id) {
     if (strictMode.enabled) {
       setStrictVerifyModal({
@@ -962,29 +769,6 @@ export default function Pomodoro() {
     } catch (err) { setError(err.message); }
   }
 
-  function openPauseModal(p) {
-    if (strictMode.enabled) {
-      setStrictVerifyModal({
-        title: `Pausar "${p.name}"`,
-        onPass: () => disableStrictAndDo(() => doPomPause(p.id)),
-      });
-      return;
-    }
-    setPauseModal(p);
-  }
-
-  async function doPomPause(id) {
-    try {
-      const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${id}/pause`, {
-        method: 'POST', headers: buildHeaders(), body: JSON.stringify({}),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error');
-      setPomodoros(p => p.map(x => x.id === id ? { ...x, is_paused: true } : x));
-      notifyExtension();
-    } catch (err) { setError(err.message); }
-  }
-
   function canEdit(p) {
     if (isAdmin) return true;
     return !p.is_universal && p.created_by === userId;
@@ -1004,24 +788,11 @@ export default function Pomodoro() {
     time_ranges: editing.schedule?.time_ranges || [{ start: '09:00', end: '17:00' }],
     blocked_urls: editing.blocked_urls || [],
     is_universal: editing.is_universal ?? true,
-    pause_method: editing.pause_method || { type: 'none' },
   } : emptyForm(isAdmin);
 
   return (
     <div className="p-6 max-w-2xl mx-auto" style={{ backgroundColor: '#0d0d0d', color: 'white', minHeight: '100vh' }}>
       {showInstall && <InstallModal onClose={() => setShowInstall(false)} />}
-      {pauseModal && (
-        <PauseModal
-          pomodoro={pauseModal}
-          onClose={() => setPauseModal(null)}
-          onSuccess={() => {
-            setPomodoros(p => p.map(x => x.id === pauseModal.id ? { ...x, is_paused: true } : x));
-            setPauseModal(null);
-            notifyExtension();
-          }}
-          buildHeaders={buildHeaders}
-        />
-      )}
       {strictConfigModal && (
         <StrictModeConfigModal
           existingMethod={strictMode.method}
@@ -1103,20 +874,14 @@ export default function Pomodoro() {
                           <Toggle value={p.enabled !== false} onChange={() => handleToggle(p.id, p.enabled !== false)} />
                         )}
                         <span className="font-medium text-base truncate">{p.name}</span>
-                        {/* Active/Paused/Inactive badge */}
-                        {p.is_paused ? (
-                          <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-900 text-amber-300 border border-amber-700">
-                            Pausado
-                          </span>
-                        ) : (
-                          <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${
-                            isActiveNow(p)
-                              ? 'bg-green-900 text-green-300 border border-green-700'
-                              : 'bg-zinc-900 text-zinc-500 border border-zinc-700'
-                          }`}>
-                            {isActiveNow(p) ? 'Activo ahora' : 'Inactivo'}
-                          </span>
-                        )}
+                        {/* Active/Inactive badge */}
+                        <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          isActiveNow(p)
+                            ? 'bg-green-900 text-green-300 border border-green-700'
+                            : 'bg-zinc-900 text-zinc-500 border border-zinc-700'
+                        }`}>
+                          {isActiveNow(p) ? 'Activo ahora' : 'Inactivo'}
+                        </span>
                         {/* Universal/Privado badge */}
                         <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs ${
                           p.is_universal
@@ -1136,25 +901,12 @@ export default function Pomodoro() {
 
                     {canEdit(p) && (
                       <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
-                        {/* Pause / Resume */}
-                        {p.is_paused ? (
-                          <button onClick={() => handleResumePom(p.id)}
-                            className="px-3 py-1.5 rounded-lg text-xs border border-green-700 bg-green-950 text-green-300 hover:bg-green-900 transition-colors">
-                            Reanudar
-                          </button>
-                        ) : isActiveNow(p) && (
-                          <button onClick={() => openPauseModal(p)}
-                            className="px-3 py-1.5 rounded-lg text-xs border border-amber-700 bg-amber-950 text-amber-300 hover:bg-amber-900 transition-colors">
-                            Pausar
-                          </button>
-                        )}
                         <button onClick={() => {
                           setEditing(p);
                           setEditingOriginal({
                             days: p.schedule?.days || [],
                             time_ranges: p.schedule?.time_ranges || [],
                             blocked_urls: p.blocked_urls || [],
-                            pause_method: p.pause_method || { type: 'none' },
                           });
                           setView('edit');
                         }}
