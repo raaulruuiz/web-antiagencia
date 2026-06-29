@@ -23,6 +23,7 @@ const JS_DAY_TO_KEY = ['sunday','monday','tuesday','wednesday','thursday','frida
 function todayISO() { return new Date().toISOString().slice(0, 10); }
 
 function isActiveNow(pomodoro) {
+  if (pomodoro.is_paused) return false;
   const now = new Date();
   const dayName = JS_DAY_TO_KEY[now.getDay()];
   const dateStr = now.toISOString().slice(0, 10);
@@ -45,7 +46,42 @@ function formatSchedule(schedule) {
 }
 
 function emptyForm(isAdmin) {
-  return { name: '', days: [], time_ranges: [{ start: '09:00', end: '17:00' }], blocked_urls: [], is_universal: isAdmin };
+  return { name: '', days: [], time_ranges: [{ start: '09:00', end: '17:00' }], blocked_urls: [], is_universal: isAdmin, pause_method: { type: 'none' } };
+}
+
+// ─── Math operations ──────────────────────────────────────────────────────────
+
+function generateOp(difficulty) {
+  const rng = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  if (difficulty <= 2) {
+    const a = rng(1, difficulty * 10), b = rng(1, difficulty * 10);
+    return { q: `${a} + ${b}`, a: a + b };
+  }
+  if (difficulty <= 4) {
+    const a = rng(2, 9), b = rng(2, 9);
+    if (Math.random() > 0.5) return { q: `${a} × ${b}`, a: a * b };
+    const s = rng(15, 50), sub = rng(1, s - 1);
+    return { q: `${s} − ${sub}`, a: s - sub };
+  }
+  if (difficulty <= 6) {
+    const a = rng(3, 9), b = rng(3, 9), c = rng(1, 15);
+    return Math.random() > 0.5
+      ? { q: `${a} × ${b} + ${c}`, a: a * b + c }
+      : { q: `${a} × ${b} − ${c}`, a: a * b - c };
+  }
+  if (difficulty <= 8) {
+    const a = rng(3, 9), b = rng(3, 9), c = rng(2, 9), d = rng(1, 10);
+    return { q: `(${a} + ${b}) × ${c} − ${d}`, a: (a + b) * c - d };
+  }
+  const a = rng(4, 12), b = rng(4, 12), c = rng(2, 9), d = rng(2, 9);
+  return { q: `${a} × ${b} − ${c} × ${d}`, a: a * b - c * d };
+}
+
+function generateOperations(count, ascending) {
+  return Array.from({ length: count }, (_, i) => {
+    const difficulty = ascending ? Math.round(1 + (9 * i) / Math.max(count - 1, 1)) : 5;
+    return generateOp(difficulty);
+  });
 }
 
 // ─── Toggle ───────────────────────────────────────────────────────────────────
@@ -152,6 +188,229 @@ function UrlList({ urls, onChange }) {
           </tbody>
         </table>
       )}
+    </div>
+  );
+}
+
+// ─── Pause Method Section ─────────────────────────────────────────────────────
+
+const PAUSE_METHODS = [
+  { key: 'none',       label: 'Ninguna',      desc: 'Pausar sin restricciones.' },
+  { key: 'email',      label: 'Email',         desc: 'Se enviará un código de 6 caracteres a tu correo.' },
+  { key: 'operations', label: 'Operaciones',   desc: 'Resuelve operaciones matemáticas antes de pausar.' },
+];
+
+function PauseMethodSection({ value, onChange }) {
+  const type = value?.type || 'none';
+  return (
+    <div className="border border-zinc-800 rounded-xl p-5">
+      <p className="text-sm font-medium text-zinc-300 mb-4">Método de Pausa</p>
+      <div className="space-y-2 mb-4">
+        {PAUSE_METHODS.map(m => (
+          <button key={m.key} onClick={() => onChange({ ...value, type: m.key })}
+            className={`w-full text-left px-4 py-3 rounded-lg border transition-colors ${
+              type === m.key
+                ? 'border-white bg-zinc-800 text-white'
+                : 'border-zinc-700 bg-zinc-900 text-zinc-400 hover:text-zinc-200'
+            }`}>
+            <span className="font-medium text-sm">{m.label}</span>
+            <p className="text-xs text-zinc-500 mt-0.5">{m.desc}</p>
+          </button>
+        ))}
+      </div>
+      {type === 'operations' && (
+        <div className="space-y-3 pt-3 border-t border-zinc-800">
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1.5">Número de operaciones</label>
+            <input type="number" min="1" max="50"
+              value={value?.count ?? 5}
+              onChange={e => onChange({ ...value, count: Math.max(1, Math.min(50, parseInt(e.target.value) || 5)) })}
+              className="w-24 px-3 py-1.5 rounded-lg text-sm border border-zinc-700 bg-zinc-900 text-white focus:outline-none focus:border-zinc-500"
+            />
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" checked={value?.ascending ?? true}
+              onChange={e => onChange({ ...value, ascending: e.target.checked })}
+              className="w-4 h-4 rounded border-zinc-600 bg-zinc-900 accent-white"
+            />
+            <span className="text-sm text-zinc-300">Dificultad ascendente</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" checked={value?.restart_on_fail ?? false}
+              onChange={e => onChange({ ...value, restart_on_fail: e.target.checked })}
+              className="w-4 h-4 rounded border-zinc-600 bg-zinc-900 accent-white"
+            />
+            <span className="text-sm text-zinc-300">Reiniciar al fallo</span>
+          </label>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Pause Modal ──────────────────────────────────────────────────────────────
+
+function PauseModal({ pomodoro, onClose, onSuccess, buildHeaders }) {
+  const method = pomodoro.pause_method?.type || 'none';
+  const [step, setStep] = useState('initial');
+  const [ops] = useState(() =>
+    method === 'operations'
+      ? generateOperations(pomodoro.pause_method?.count ?? 5, pomodoro.pause_method?.ascending ?? true)
+      : []
+  );
+  const [opIdx, setOpIdx] = useState(0);
+  const [answer, setAnswer] = useState('');
+  const [code, setCode] = useState('');
+  const [sentEmail, setSentEmail] = useState('');
+  const [err, setErr] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  async function doPause(body = {}) {
+    setLoading(true);
+    setErr(null);
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${pomodoro.id}/pause`, {
+        method: 'POST', headers: buildHeaders(), body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+      onSuccess();
+    } catch (e) {
+      setErr(e.message);
+      setLoading(false);
+    }
+  }
+
+  async function requestCode() {
+    setLoading(true);
+    setErr(null);
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${pomodoro.id}/pause-request`, {
+        method: 'POST', headers: buildHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+      setSentEmail(data.email || '');
+      setStep('code');
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function checkAnswer() {
+    const op = ops[opIdx];
+    const userAns = parseInt(answer.trim(), 10);
+    if (isNaN(userAns) || userAns !== op.a) {
+      if (pomodoro.pause_method?.restart_on_fail) {
+        setOpIdx(0); setAnswer('');
+        setErr('Incorrecto. Empezando desde el principio.');
+      } else {
+        setAnswer('');
+        setErr('Respuesta incorrecta, inténtalo de nuevo.');
+      }
+      return;
+    }
+    setErr(null);
+    setAnswer('');
+    if (opIdx + 1 >= ops.length) {
+      doPause();
+    } else {
+      setOpIdx(i => i + 1);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="relative w-full max-w-sm mx-4 border border-zinc-800 rounded-xl p-6" style={{ backgroundColor: '#111' }}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white leading-none">✕</button>
+        <h2 className="text-base font-semibold mb-1">Pausar Pomodoro</h2>
+        <p className="text-sm text-zinc-500 mb-5">{pomodoro.name}</p>
+
+        {err && <p className="mb-4 text-sm text-red-400 bg-red-950 border border-red-800 rounded-lg px-3 py-2">{err}</p>}
+
+        {/* None */}
+        {method === 'none' && (
+          <div>
+            <p className="text-sm text-zinc-300 mb-5">¿Confirmas que quieres pausar este Pomodoro?</p>
+            <div className="flex gap-2">
+              <button onClick={onClose}
+                className="flex-1 px-4 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
+                Cancelar
+              </button>
+              <button onClick={() => doPause()} disabled={loading}
+                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
+                {loading ? 'Pausando…' : 'Pausar'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Email — step initial */}
+        {method === 'email' && step === 'initial' && (
+          <div>
+            <p className="text-sm text-zinc-300 mb-5">Se enviará un código de verificación a tu correo de Antiagencia.</p>
+            <div className="flex gap-2">
+              <button onClick={onClose}
+                className="flex-1 px-4 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
+                Cancelar
+              </button>
+              <button onClick={requestCode} disabled={loading}
+                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
+                {loading ? 'Enviando…' : 'Enviar código'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Email — step code */}
+        {method === 'email' && step === 'code' && (
+          <div>
+            <p className="text-sm text-zinc-400 mb-4">
+              Código enviado a <span className="text-white">{sentEmail}</span>.
+            </p>
+            <input type="text" value={code}
+              onChange={e => setCode(e.target.value.toUpperCase())}
+              onKeyDown={e => e.key === 'Enter' && doPause({ code })}
+              maxLength={6} placeholder="XXXXXX"
+              className="w-full px-3 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 text-center tracking-widest font-mono mb-4"
+              autoFocus
+            />
+            <button onClick={() => doPause({ code })} disabled={loading || code.length < 6}
+              className="w-full px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
+              {loading ? 'Verificando…' : 'Verificar y pausar'}
+            </button>
+          </div>
+        )}
+
+        {/* Operations */}
+        {method === 'operations' && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs text-zinc-500">Operación {opIdx + 1} de {ops.length}</span>
+              <div className="flex gap-1">
+                {ops.map((_, i) => (
+                  <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < opIdx ? 'bg-green-400' : i === opIdx ? 'bg-white' : 'bg-zinc-700'}`} />
+                ))}
+              </div>
+            </div>
+            <p className="text-2xl font-bold font-mono text-center mb-6">{ops[opIdx]?.q} = ?</p>
+            <input type="number" value={answer}
+              onChange={e => setAnswer(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && checkAnswer()}
+              placeholder="Tu respuesta"
+              className="w-full px-3 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 text-center mb-4"
+              autoFocus
+            />
+            <button onClick={checkAnswer} disabled={loading || !answer.trim()}
+              className="w-full px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
+              {loading ? 'Pausando…' : opIdx + 1 < ops.length ? 'Siguiente →' : 'Pausar'}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -286,6 +545,12 @@ function PomodoroForm({ initial, isAdmin, onSave, onBack, saving }) {
           <UrlList urls={form.blocked_urls} onChange={urls => setForm(f => ({ ...f, blocked_urls: urls }))} />
         </div>
 
+        {/* Pause method */}
+        <PauseMethodSection
+          value={form.pause_method}
+          onChange={pm => setForm(f => ({ ...f, pause_method: pm }))}
+        />
+
         <button onClick={handleSave} disabled={saving}
           className="w-full px-4 py-2.5 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
           {saving ? 'Guardando…' : 'Guardar Pomodoro'}
@@ -310,6 +575,7 @@ export default function Pomodoro() {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [pauseModal, setPauseModal] = useState(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -358,6 +624,7 @@ export default function Pomodoro() {
         schedule: { days: form.days, time_ranges: form.time_ranges },
         blocked_urls: form.blocked_urls,
         is_universal: isAdmin ? form.is_universal : false,
+        pause_method: form.pause_method || { type: 'none' },
       };
       const url = editing ? `${BACKEND_URL}/admin/pomodoros/${editing.id}` : `${BACKEND_URL}/admin/pomodoros`;
       const method = editing ? 'PUT' : 'POST';
@@ -374,6 +641,20 @@ export default function Pomodoro() {
       setError(err.message);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleResumePom(id) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${id}/resume`, {
+        method: 'POST', headers: buildHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al reanudar');
+      setPomodoros(p => p.map(x => x.id === id ? { ...x, is_paused: false } : x));
+      notifyExtension();
+    } catch (err) {
+      setError(err.message);
     }
   }
 
@@ -409,11 +690,24 @@ export default function Pomodoro() {
     time_ranges: editing.schedule?.time_ranges || [{ start: '09:00', end: '17:00' }],
     blocked_urls: editing.blocked_urls || [],
     is_universal: editing.is_universal ?? true,
+    pause_method: editing.pause_method || { type: 'none' },
   } : emptyForm(isAdmin);
 
   return (
     <div className="p-6 max-w-2xl mx-auto" style={{ backgroundColor: '#0d0d0d', color: 'white', minHeight: '100vh' }}>
       {showInstall && <InstallModal onClose={() => setShowInstall(false)} />}
+      {pauseModal && (
+        <PauseModal
+          pomodoro={pauseModal}
+          onClose={() => setPauseModal(null)}
+          onSuccess={() => {
+            setPomodoros(p => p.map(x => x.id === pauseModal.id ? { ...x, is_paused: true } : x));
+            setPauseModal(null);
+            notifyExtension();
+          }}
+          buildHeaders={buildHeaders}
+        />
+      )}
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Pomodoro</h1>
@@ -462,14 +756,20 @@ export default function Pomodoro() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="font-medium text-base truncate">{p.name}</span>
-                        {/* Active badge */}
-                        <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${
-                          isActiveNow(p)
-                            ? 'bg-green-900 text-green-300 border border-green-700'
-                            : 'bg-zinc-900 text-zinc-500 border border-zinc-700'
-                        }`}>
-                          {isActiveNow(p) ? 'Activo ahora' : 'Inactivo'}
-                        </span>
+                        {/* Active/Paused/Inactive badge */}
+                        {p.is_paused ? (
+                          <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-900 text-amber-300 border border-amber-700">
+                            Pausado
+                          </span>
+                        ) : (
+                          <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${
+                            isActiveNow(p)
+                              ? 'bg-green-900 text-green-300 border border-green-700'
+                              : 'bg-zinc-900 text-zinc-500 border border-zinc-700'
+                          }`}>
+                            {isActiveNow(p) ? 'Activo ahora' : 'Inactivo'}
+                          </span>
+                        )}
                         {/* Universal/Privado badge */}
                         <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs ${
                           p.is_universal
@@ -488,7 +788,19 @@ export default function Pomodoro() {
                     </div>
 
                     {canEdit(p) && (
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+                        {/* Pause / Resume */}
+                        {p.is_paused ? (
+                          <button onClick={() => handleResumePom(p.id)}
+                            className="px-3 py-1.5 rounded-lg text-xs border border-green-700 bg-green-950 text-green-300 hover:bg-green-900 transition-colors">
+                            Reanudar
+                          </button>
+                        ) : isActiveNow(p) && (
+                          <button onClick={() => setPauseModal(p)}
+                            className="px-3 py-1.5 rounded-lg text-xs border border-amber-700 bg-amber-950 text-amber-300 hover:bg-amber-900 transition-colors">
+                            Pausar
+                          </button>
+                        )}
                         <button onClick={() => { setEditing(p); setView('edit'); }}
                           className="px-3 py-1.5 rounded-lg text-xs border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
                           Editar
