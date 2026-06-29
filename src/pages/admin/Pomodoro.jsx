@@ -85,6 +85,34 @@ function generateOperations(count, ascending) {
   });
 }
 
+// ─── Strict mode helpers ──────────────────────────────────────────────────────
+
+const METHOD_LEVEL = { none: 0, email: 1, operations: 2 };
+
+function totalMinutes(ranges) {
+  return (ranges || []).reduce((sum, r) => {
+    const [sh, sm] = (r.start || '00:00').split(':').map(Number);
+    const [eh, em] = (r.end || '00:00').split(':').map(Number);
+    return sum + Math.max(0, (eh * 60 + em) - (sh * 60 + sm));
+  }, 0);
+}
+
+function isMoreLenient(orig, edited) {
+  if (totalMinutes(edited.time_ranges) < totalMinutes(orig.time_ranges)) return true;
+  if ((edited.days || []).length < (orig.days || []).length) return true;
+  const origUrls = new Set((orig.blocked_urls || []).map(u => u.url));
+  const editUrls = new Set((edited.blocked_urls || []).map(u => u.url));
+  for (const url of origUrls) { if (!editUrls.has(url)) return true; }
+  for (const eu of (edited.blocked_urls || [])) {
+    const ou = (orig.blocked_urls || []).find(u => u.url === eu.url);
+    if (ou && (ou.wildcard ?? true) && !(eu.wildcard ?? true)) return true;
+  }
+  const oLevel = METHOD_LEVEL[orig.pause_method?.type ?? 'none'];
+  const eLevel = METHOD_LEVEL[edited.pause_method?.type ?? 'none'];
+  if (eLevel < oLevel) return true;
+  return false;
+}
+
 // ─── Toggle ───────────────────────────────────────────────────────────────────
 
 function Toggle({ value, onChange, disabled }) {
@@ -429,6 +457,154 @@ function PauseModal({ pomodoro, onClose, onSuccess, buildHeaders }) {
   );
 }
 
+// ─── Strict Mode Config Modal ─────────────────────────────────────────────────
+
+function StrictModeConfigModal({ existingMethod, onConfirm, onClose }) {
+  const [method, setMethod] = useState(existingMethod || { type: 'none' });
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="relative w-full max-w-md mx-4 border border-zinc-800 rounded-xl p-6" style={{ backgroundColor: '#111' }}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white leading-none">✕</button>
+        <h2 className="text-base font-semibold mb-1">Activar Modo Estricto</h2>
+        <p className="text-sm text-zinc-500 mb-5">Configura la restricción necesaria para realizar acciones permisivas.</p>
+        <PauseMethodSection value={method} onChange={setMethod} />
+        <div className="flex gap-2 mt-5">
+          <button onClick={onClose}
+            className="flex-1 px-4 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
+            Cancelar
+          </button>
+          <button onClick={() => onConfirm(method)}
+            className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors">
+            Activar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Strict Verify Modal ──────────────────────────────────────────────────────
+
+function StrictVerifyModal({ strictMode, title, onPass, onClose, buildHeaders }) {
+  const method = strictMode.method?.type || 'none';
+  const [step, setStep] = useState('initial');
+  const [ops] = useState(() =>
+    method === 'operations'
+      ? generateOperations(strictMode.method?.count ?? 5, strictMode.method?.ascending ?? true)
+      : []
+  );
+  const [opIdx, setOpIdx] = useState(0);
+  const [answer, setAnswer] = useState('');
+  const [code, setCode] = useState('');
+  const [sentEmail, setSentEmail] = useState('');
+  const [err, setErr] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  async function requestCode() {
+    setLoading(true); setErr(null);
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/strict-mode/request-code`, {
+        method: 'POST', headers: buildHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+      setSentEmail(data.email || '');
+      setStep('code');
+    } catch (e) { setErr(e.message); }
+    finally { setLoading(false); }
+  }
+
+  async function verifyCode() {
+    setLoading(true); setErr(null);
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/strict-mode/verify-code`, {
+        method: 'POST', headers: buildHeaders(), body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+      onPass();
+    } catch (e) { setErr(e.message); setLoading(false); }
+  }
+
+  function checkAnswer() {
+    const op = ops[opIdx];
+    const val = parseInt(answer.trim(), 10);
+    if (isNaN(val) || val !== op.a) {
+      if (strictMode.method?.restart_on_fail) { setOpIdx(0); setAnswer(''); setErr('Incorrecto. Empezando desde el principio.'); }
+      else { setAnswer(''); setErr('Respuesta incorrecta.'); }
+      return;
+    }
+    setErr(null); setAnswer('');
+    if (opIdx + 1 >= ops.length) { onPass(); }
+    else { setOpIdx(i => i + 1); }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="relative w-full max-w-sm mx-4 border border-zinc-800 rounded-xl p-6" style={{ backgroundColor: '#111' }}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white leading-none">✕</button>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-xs px-2 py-0.5 rounded-full border border-red-700 bg-red-950 text-red-300">Modo estricto</span>
+        </div>
+        <h2 className="text-base font-semibold mb-1">{title}</h2>
+        <p className="text-sm text-zinc-500 mb-5">Necesitas pasar la verificación configurada.</p>
+
+        {err && <p className="mb-4 text-sm text-red-400 bg-red-950 border border-red-800 rounded-lg px-3 py-2">{err}</p>}
+
+        {method === 'none' && (
+          <div className="flex gap-2">
+            <button onClick={onClose} className="flex-1 px-4 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">Cancelar</button>
+            <button onClick={onPass} className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors">Confirmar</button>
+          </div>
+        )}
+
+        {method === 'email' && step === 'initial' && (
+          <div className="flex gap-2">
+            <button onClick={onClose} className="flex-1 px-4 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">Cancelar</button>
+            <button onClick={requestCode} disabled={loading} className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
+              {loading ? 'Enviando…' : 'Enviar código'}
+            </button>
+          </div>
+        )}
+
+        {method === 'email' && step === 'code' && (
+          <div>
+            <p className="text-sm text-zinc-400 mb-4">Código enviado a <span className="text-white">{sentEmail}</span>.</p>
+            <input type="text" value={code} onChange={e => setCode(e.target.value.toUpperCase())}
+              onKeyDown={e => e.key === 'Enter' && verifyCode()} maxLength={6} placeholder="XXXXXX"
+              className="w-full px-3 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 text-center tracking-widest font-mono mb-4" autoFocus />
+            <button onClick={verifyCode} disabled={loading || code.length < 6}
+              className="w-full px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
+              {loading ? 'Verificando…' : 'Verificar'}
+            </button>
+          </div>
+        )}
+
+        {method === 'operations' && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs text-zinc-500">Operación {opIdx + 1} de {ops.length}</span>
+              <div className="flex gap-1">
+                {ops.map((_, i) => <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < opIdx ? 'bg-green-400' : i === opIdx ? 'bg-white' : 'bg-zinc-700'}`} />)}
+              </div>
+            </div>
+            <p className="text-2xl font-bold font-mono text-center mb-6">{ops[opIdx]?.q} = ?</p>
+            <input type="number" value={answer} onChange={e => setAnswer(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && checkAnswer()} placeholder="Tu respuesta"
+              className="w-full px-3 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 text-center mb-4" autoFocus />
+            <button onClick={checkAnswer} disabled={!answer.trim()}
+              className="w-full px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors disabled:opacity-50">
+              {opIdx + 1 < ops.length ? 'Siguiente →' : 'Confirmar'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Form ─────────────────────────────────────────────────────────────────────
 
 function PomodoroForm({ initial, isAdmin, onSave, onBack, saving }) {
@@ -590,6 +766,10 @@ export default function Pomodoro() {
   const [saving, setSaving] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [pauseModal, setPauseModal] = useState(null);
+  const [strictMode, setStrictMode] = useState({ enabled: false, method: { type: 'none' } });
+  const [strictConfigModal, setStrictConfigModal] = useState(false);
+  const [strictVerifyModal, setStrictVerifyModal] = useState(null); // { title, onPass }
+  const [editingOriginal, setEditingOriginal] = useState(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -621,6 +801,17 @@ export default function Pomodoro() {
 
   useEffect(() => { fetchPomodoros(); }, [fetchPomodoros]);
 
+  const loadStrictMode = useCallback(async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/strict-mode`, { headers: buildHeaders() });
+      if (!res.ok) return;
+      setStrictMode(await res.json());
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, role]);
+
+  useEffect(() => { loadStrictMode(); }, [loadStrictMode]);
+
   useEffect(() => {
     const t = setInterval(() => setPomodoros(p => p.map(x => ({ ...x, is_active: isActiveNow(x) }))), 60000);
     return () => clearInterval(t);
@@ -630,7 +821,42 @@ export default function Pomodoro() {
     window.dispatchEvent(new CustomEvent('pomodoroRefresh'));
   }
 
+  async function saveStrictMode(settings) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/strict-mode`, {
+        method: 'POST', headers: buildHeaders(), body: JSON.stringify(settings),
+      });
+      if (!res.ok) throw new Error();
+      setStrictMode(settings);
+    } catch { setError('Error al guardar modo estricto'); }
+  }
+
+  function handleStrictModeToggle() {
+    if (strictMode.enabled) {
+      setStrictVerifyModal({
+        title: 'Desactivar modo estricto',
+        onPass: async () => {
+          await saveStrictMode({ ...strictMode, enabled: false });
+          setStrictVerifyModal(null);
+        },
+      });
+    } else {
+      setStrictConfigModal(true);
+    }
+  }
+
   async function handleSave(form) {
+    if (strictMode.enabled && editing && editingOriginal && isMoreLenient(editingOriginal, form)) {
+      setStrictVerifyModal({
+        title: 'Guardar cambios (más permisivos)',
+        onPass: () => { setStrictVerifyModal(null); doSave(form); },
+      });
+      return;
+    }
+    await doSave(form);
+  }
+
+  async function doSave(form) {
     setSaving(true);
     try {
       const payload = {
@@ -642,23 +868,30 @@ export default function Pomodoro() {
       };
       const url = editing ? `${BACKEND_URL}/admin/pomodoros/${editing.id}` : `${BACKEND_URL}/admin/pomodoros`;
       const method = editing ? 'PUT' : 'POST';
-
       const res = await fetch(url, { method, headers: buildHeaders(), body: JSON.stringify(payload) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al guardar');
-
       await fetchPomodoros();
       notifyExtension();
       setView('list');
       setEditing(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSaving(false);
-    }
+      setEditingOriginal(null);
+    } catch (err) { setError(err.message); }
+    finally { setSaving(false); }
   }
 
-  async function handleToggle(id) {
+  async function handleToggle(id, currentlyEnabled) {
+    if (strictMode.enabled && currentlyEnabled) {
+      setStrictVerifyModal({
+        title: 'Desactivar Pomodoro',
+        onPass: () => { setStrictVerifyModal(null); doToggle(id); },
+      });
+      return;
+    }
+    await doToggle(id);
+  }
+
+  async function doToggle(id) {
     try {
       const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${id}/toggle`, {
         method: 'POST', headers: buildHeaders(),
@@ -667,9 +900,7 @@ export default function Pomodoro() {
       if (!res.ok) throw new Error(data.error || 'Error');
       setPomodoros(p => p.map(x => x.id === id ? { ...x, enabled: data.enabled } : x));
       notifyExtension();
-    } catch (err) {
-      setError(err.message);
-    }
+    } catch (err) { setError(err.message); }
   }
 
   async function handleResumePom(id) {
@@ -687,6 +918,18 @@ export default function Pomodoro() {
   }
 
   async function handleDelete(id) {
+    if (strictMode.enabled) {
+      setStrictVerifyModal({
+        title: 'Eliminar Pomodoro',
+        onPass: () => { setStrictVerifyModal(null); doDelete(id); },
+      });
+      setConfirmDeleteId(null);
+      return;
+    }
+    await doDelete(id);
+  }
+
+  async function doDelete(id) {
     try {
       const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${id}`, { method: 'DELETE', headers: buildHeaders() });
       const data = await res.json();
@@ -694,9 +937,30 @@ export default function Pomodoro() {
       setPomodoros(p => p.filter(x => x.id !== id));
       setConfirmDeleteId(null);
       notifyExtension();
-    } catch (err) {
-      setError(err.message);
+    } catch (err) { setError(err.message); }
+  }
+
+  function openPauseModal(p) {
+    if (strictMode.enabled) {
+      setStrictVerifyModal({
+        title: `Pausar "${p.name}"`,
+        onPass: () => { setStrictVerifyModal(null); doPomPause(p.id); },
+      });
+      return;
     }
+    setPauseModal(p);
+  }
+
+  async function doPomPause(id) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${id}/pause`, {
+        method: 'POST', headers: buildHeaders(), body: JSON.stringify({ strict_mode_bypass: true }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+      setPomodoros(p => p.map(x => x.id === id ? { ...x, is_paused: true } : x));
+      notifyExtension();
+    } catch (err) { setError(err.message); }
   }
 
   function canEdit(p) {
@@ -736,6 +1000,25 @@ export default function Pomodoro() {
           buildHeaders={buildHeaders}
         />
       )}
+      {strictConfigModal && (
+        <StrictModeConfigModal
+          existingMethod={strictMode.method}
+          onConfirm={async (method) => {
+            await saveStrictMode({ enabled: true, method });
+            setStrictConfigModal(false);
+          }}
+          onClose={() => setStrictConfigModal(false)}
+        />
+      )}
+      {strictVerifyModal && (
+        <StrictVerifyModal
+          strictMode={strictMode}
+          title={strictVerifyModal.title}
+          onPass={strictVerifyModal.onPass}
+          onClose={() => setStrictVerifyModal(null)}
+          buildHeaders={buildHeaders}
+        />
+      )}
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Pomodoro</h1>
@@ -766,10 +1049,21 @@ export default function Pomodoro() {
             <p className="text-sm text-zinc-400">
               {pomodoros.length === 0 ? 'No hay Pomodoros.' : `${pomodoros.length} Pomodoro${pomodoros.length !== 1 ? 's' : ''}`}
             </p>
-            <button onClick={() => { setEditing(null); setView('create'); }}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors">
-              + Crear Pomodoro
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={handleStrictModeToggle}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                  strictMode.enabled
+                    ? 'border-red-700 bg-red-950 text-red-300 hover:bg-red-900'
+                    : 'border-zinc-700 bg-zinc-900 text-zinc-400 hover:text-zinc-200'
+                }`}>
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${strictMode.enabled ? 'bg-red-400' : 'bg-zinc-600'}`} />
+                {strictMode.enabled ? 'Modo estricto activado' : 'Modo estricto desactivado'}
+              </button>
+              <button onClick={() => { setEditing(null); setView('create'); }}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors">
+                + Crear Pomodoro
+              </button>
+            </div>
           </div>
 
           {pomodoros.length === 0 ? (
@@ -784,7 +1078,7 @@ export default function Pomodoro() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         {canEdit(p) && (
-                          <Toggle value={p.enabled !== false} onChange={() => handleToggle(p.id)} />
+                          <Toggle value={p.enabled !== false} onChange={() => handleToggle(p.id, p.enabled !== false)} />
                         )}
                         <span className="font-medium text-base truncate">{p.name}</span>
                         {/* Active/Paused/Inactive badge */}
@@ -827,12 +1121,21 @@ export default function Pomodoro() {
                             Reanudar
                           </button>
                         ) : isActiveNow(p) && (
-                          <button onClick={() => setPauseModal(p)}
+                          <button onClick={() => openPauseModal(p)}
                             className="px-3 py-1.5 rounded-lg text-xs border border-amber-700 bg-amber-950 text-amber-300 hover:bg-amber-900 transition-colors">
                             Pausar
                           </button>
                         )}
-                        <button onClick={() => { setEditing(p); setView('edit'); }}
+                        <button onClick={() => {
+                          setEditing(p);
+                          setEditingOriginal({
+                            days: p.schedule?.days || [],
+                            time_ranges: p.schedule?.time_ranges || [],
+                            blocked_urls: p.blocked_urls || [],
+                            pause_method: p.pause_method || { type: 'none' },
+                          });
+                          setView('edit');
+                        }}
                           className="px-3 py-1.5 rounded-lg text-xs border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
                           Editar
                         </button>
