@@ -196,7 +196,7 @@ function UrlList({ urls, onChange }) {
 
 const PAUSE_METHODS = [
   { key: 'none',       label: 'Ninguna',      desc: 'Pausar sin restricciones.' },
-  { key: 'email',      label: 'Email',         desc: 'Se enviará un código de 6 caracteres a tu correo.' },
+  { key: 'email',      label: 'Email',         desc: 'Se enviará un código de 6 caracteres al correo configurado.' },
   { key: 'operations', label: 'Operaciones',   desc: 'Resuelve operaciones matemáticas antes de pausar.' },
 ];
 
@@ -218,6 +218,19 @@ function PauseMethodSection({ value, onChange }) {
           </button>
         ))}
       </div>
+      {type === 'email' && (
+        <div className="pt-3 border-t border-zinc-800">
+          <label className="block text-xs text-zinc-500 mb-1.5">Correo que recibirá el código</label>
+          <input
+            type="email"
+            value={value?.email ?? ''}
+            onChange={e => onChange({ ...value, email: e.target.value })}
+            placeholder="otra.persona@ejemplo.com"
+            className="w-full px-3 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500"
+          />
+          <p className="mt-1.5 text-xs text-zinc-600">Esta persona tendrá que darte el código para que puedas pausar.</p>
+        </div>
+      )}
       {type === 'operations' && (
         <div className="space-y-3 pt-3 border-t border-zinc-800">
           <div>
