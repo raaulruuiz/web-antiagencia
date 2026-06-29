@@ -549,7 +549,7 @@ function StrictVerifyModal({ strictMode, title, onPass, onClose, buildHeaders })
           <span className="text-xs px-2 py-0.5 rounded-full border border-red-700 bg-red-950 text-red-300">Modo estricto</span>
         </div>
         <h2 className="text-base font-semibold mb-1">{title}</h2>
-        <p className="text-sm text-zinc-500 mb-5">Necesitas pasar la verificación configurada.</p>
+        <p className="text-sm text-zinc-500 mb-5">Necesitas desactivar el modo estricto para realizar esta acción.</p>
 
         {err && <p className="mb-4 text-sm text-red-400 bg-red-950 border border-red-800 rounded-lg px-3 py-2">{err}</p>}
 
@@ -831,6 +831,12 @@ export default function Pomodoro() {
     } catch { setError('Error al guardar modo estricto'); }
   }
 
+  async function disableStrictAndDo(fn) {
+    await saveStrictMode({ ...strictMode, enabled: false });
+    setStrictVerifyModal(null);
+    await fn();
+  }
+
   function handleStrictModeToggle() {
     if (strictMode.enabled) {
       setStrictVerifyModal({
@@ -849,7 +855,7 @@ export default function Pomodoro() {
     if (strictMode.enabled && editing && editingOriginal && isMoreLenient(editingOriginal, form)) {
       setStrictVerifyModal({
         title: 'Guardar cambios (más permisivos)',
-        onPass: () => { setStrictVerifyModal(null); doSave(form); },
+        onPass: () => disableStrictAndDo(() => doSave(form)),
       });
       return;
     }
@@ -884,7 +890,7 @@ export default function Pomodoro() {
     if (strictMode.enabled && currentlyEnabled) {
       setStrictVerifyModal({
         title: 'Desactivar Pomodoro',
-        onPass: () => { setStrictVerifyModal(null); doToggle(id); },
+        onPass: () => disableStrictAndDo(() => doToggle(id)),
       });
       return;
     }
@@ -921,7 +927,7 @@ export default function Pomodoro() {
     if (strictMode.enabled) {
       setStrictVerifyModal({
         title: 'Eliminar Pomodoro',
-        onPass: () => { setStrictVerifyModal(null); doDelete(id); },
+        onPass: () => disableStrictAndDo(() => doDelete(id)),
       });
       setConfirmDeleteId(null);
       return;
@@ -944,7 +950,7 @@ export default function Pomodoro() {
     if (strictMode.enabled) {
       setStrictVerifyModal({
         title: `Pausar "${p.name}"`,
-        onPass: () => { setStrictVerifyModal(null); doPomPause(p.id); },
+        onPass: () => disableStrictAndDo(() => doPomPause(p.id)),
       });
       return;
     }
@@ -954,7 +960,7 @@ export default function Pomodoro() {
   async function doPomPause(id) {
     try {
       const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${id}/pause`, {
-        method: 'POST', headers: buildHeaders(), body: JSON.stringify({ strict_mode_bypass: true }),
+        method: 'POST', headers: buildHeaders(), body: JSON.stringify({}),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
