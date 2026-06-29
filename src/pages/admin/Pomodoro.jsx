@@ -160,13 +160,28 @@ function InstallModal({ onClose }) {
 
 // ─── URL list ─────────────────────────────────────────────────────────────────
 
+function isValidDomain(value) {
+  // Extraer el hostname si pegan una URL completa
+  let host = value.trim().toLowerCase();
+  try { host = new URL(host.includes('://') ? host : 'https://' + host).hostname; } catch { return false; }
+  host = host.replace(/^www\./, '');
+  // Debe tener al menos un punto y un TLD de al menos 2 chars, sin espacios ni caracteres inválidos
+  return /^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?)+$/.test(host);
+}
+
 function UrlList({ urls, onChange }) {
   const [input, setInput] = useState('');
+  const [err, setErr] = useState('');
 
   function add() {
-    const domain = input.trim();
-    if (!domain || urls.some(u => u.url === domain)) return;
-    onChange([...urls, { url: domain, wildcard: true }]);
+    const raw = input.trim();
+    if (!raw) return;
+    if (!isValidDomain(raw)) { setErr('Introduce un dominio válido (ej: instagram.com)'); return; }
+    let host = raw.toLowerCase();
+    try { host = new URL(host.includes('://') ? host : 'https://' + host).hostname.replace(/^www\./, ''); } catch {}
+    if (urls.some(u => u.url === host)) { setErr('Ya está en la lista'); return; }
+    setErr('');
+    onChange([...urls, { url: host, wildcard: true }]);
     setInput('');
   }
 
@@ -175,16 +190,17 @@ function UrlList({ urls, onChange }) {
       <div className="flex gap-2 mb-3">
         <input
           type="text" value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={e => { setInput(e.target.value); setErr(''); }}
           onKeyDown={e => e.key === 'Enter' && add()}
           placeholder="ejemplo.com"
-          className="flex-1 px-3 py-2 rounded-lg text-sm border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500"
+          className={`flex-1 px-3 py-2 rounded-lg text-sm border bg-zinc-900 text-white placeholder-zinc-500 focus:outline-none ${err ? 'border-red-600 focus:border-red-500' : 'border-zinc-700 focus:border-zinc-500'}`}
         />
         <button onClick={add} disabled={!input.trim()}
           className="px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 transition-colors disabled:opacity-40">
           Añadir
         </button>
       </div>
+      {err && <p className="text-xs text-red-400 mt-1">{err}</p>}
       {urls.length === 0 ? (
         <p className="text-sm text-zinc-600">Añade las URLs que quieras bloquear.</p>
       ) : (
