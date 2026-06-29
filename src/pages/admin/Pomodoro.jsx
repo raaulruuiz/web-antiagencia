@@ -23,6 +23,7 @@ const JS_DAY_TO_KEY = ['sunday','monday','tuesday','wednesday','thursday','frida
 function todayISO() { return new Date().toISOString().slice(0, 10); }
 
 function isActiveNow(pomodoro) {
+  if (pomodoro.enabled === false) return false;
   if (pomodoro.is_paused) return false;
   const now = new Date();
   const dayName = JS_DAY_TO_KEY[now.getDay()];
@@ -657,6 +658,20 @@ export default function Pomodoro() {
     }
   }
 
+  async function handleToggle(id) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${id}/toggle`, {
+        method: 'POST', headers: buildHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+      setPomodoros(p => p.map(x => x.id === id ? { ...x, enabled: data.enabled } : x));
+      notifyExtension();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   async function handleResumePom(id) {
     try {
       const res = await fetch(`${BACKEND_URL}/admin/pomodoros/${id}/resume`, {
@@ -764,10 +779,13 @@ export default function Pomodoro() {
           ) : (
             <div className="space-y-3">
               {pomodoros.map(p => (
-                <div key={p.id} className="border border-zinc-800 rounded-xl p-5">
+                <div key={p.id} className={`border border-zinc-800 rounded-xl p-5 transition-opacity ${p.enabled === false ? 'opacity-50' : ''}`}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {canEdit(p) && (
+                          <Toggle value={p.enabled !== false} onChange={() => handleToggle(p.id)} />
+                        )}
                         <span className="font-medium text-base truncate">{p.name}</span>
                         {/* Active/Paused/Inactive badge */}
                         {p.is_paused ? (
