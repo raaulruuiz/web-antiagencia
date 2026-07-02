@@ -121,6 +121,142 @@ const pipBtn = {
   cursor: 'pointer',
 };
 
+// ── CropOverlay ───────────────────────────────────────────────────────────────
+function CropOverlay({ imageUrl, onCrop, onCancel }) {
+  const [drag, setDrag] = useState(null);
+  const [rect, setRect] = useState(null);
+  const imgRef = useRef(null);
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    const bounds = imgRef.current.getBoundingClientRect();
+    setDrag({ startX: e.clientX - bounds.left, startY: e.clientY - bounds.top });
+    setRect(null);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!drag) return;
+    const bounds = imgRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - bounds.left, bounds.width));
+    const y = Math.max(0, Math.min(e.clientY - bounds.top, bounds.height));
+    setRect({
+      x: Math.min(drag.startX, x),
+      y: Math.min(drag.startY, y),
+      width: Math.abs(x - drag.startX),
+      height: Math.abs(y - drag.startY),
+    });
+  };
+
+  const handleMouseUp = () => {
+    if (!drag || !rect || rect.width < 10 || rect.height < 10) { setDrag(null); return; }
+    const bounds = imgRef.current.getBoundingClientRect();
+    const scaleX = imgRef.current.naturalWidth / bounds.width;
+    const scaleY = imgRef.current.naturalHeight / bounds.height;
+    onCrop({
+      x: Math.round(rect.x * scaleX),
+      y: Math.round(rect.y * scaleY),
+      width: Math.round(rect.width * scaleX),
+      height: Math.round(rect.height * scaleY),
+    });
+    setDrag(null);
+  };
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.92)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+    >
+      <p style={{ color: '#a1a1aa', fontSize: 13, userSelect: 'none' }}>Arrastra para seleccionar el área a capturar</p>
+      <div style={{ position: 'relative', display: 'inline-block', cursor: 'crosshair' }}>
+        <img
+          ref={imgRef}
+          src={imageUrl}
+          alt="captura"
+          style={{ maxWidth: '90vw', maxHeight: '75vh', display: 'block', userSelect: 'none', pointerEvents: 'auto' }}
+          onMouseDown={handleMouseDown}
+          draggable={false}
+        />
+        {rect && rect.width > 0 && rect.height > 0 && (
+          <div style={{
+            position: 'absolute',
+            border: '2px solid white',
+            boxShadow: '0 0 0 9999px rgba(0,0,0,0.45)',
+            pointerEvents: 'none',
+            left: rect.x, top: rect.y, width: rect.width, height: rect.height,
+          }} />
+        )}
+      </div>
+      <button
+        onClick={onCancel}
+        style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '6px 18px', fontSize: 13, cursor: 'pointer' }}
+      >
+        Cancelar
+      </button>
+    </div>
+  );
+}
+
+// ── CaptureConfirmModal ───────────────────────────────────────────────────────
+function CaptureConfirmModal({ imageUrl, fileName, onFileNameChange, onConfirm, onCancel, uploading, doneLink }) {
+  const [copyLabel, setCopyLabel] = useState('Copiar link');
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(doneLink).then(() => {
+      setCopyLabel('Copiado');
+      setTimeout(() => setCopyLabel('Copiar link'), 2000);
+    });
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 16, padding: 24, maxWidth: 560, width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <img src={imageUrl} alt="previsualización" style={{ width: '100%', borderRadius: 8, border: '1px solid #27272a', objectFit: 'contain', maxHeight: 300 }} />
+
+        {!doneLink ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input
+                type="text"
+                value={fileName}
+                onChange={e => onFileNameChange(e.target.value)}
+                style={{ flex: 1, background: '#09090b', border: '1px solid #3f3f46', borderRadius: 10, padding: '8px 12px', color: 'white', fontSize: 13, outline: 'none' }}
+                placeholder="Nombre del archivo"
+              />
+              <span style={{ color: '#52525b', fontSize: 13 }}>.png</span>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={onCancel} style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '7px 18px', fontSize: 13, cursor: 'pointer' }}>
+                Descartar
+              </button>
+              <button onClick={onConfirm} disabled={uploading} style={{ background: uploading ? '#3f3f46' : 'white', color: uploading ? '#a1a1aa' : 'black', border: 'none', borderRadius: 999, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                {uploading && <div style={{ width: 12, height: 12, border: '2px solid #71717a', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />}
+                {uploading ? 'Subiendo…' : 'Subir a Drive'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ background: '#09090b', border: '1px solid #3f3f46', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: '#a1a1aa', wordBreak: 'break-all' }}>{doneLink}</div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={onCancel} style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '7px 18px', fontSize: 13, cursor: 'pointer' }}>
+                Cerrar
+              </button>
+              <button onClick={handleCopy} style={{ background: 'white', color: 'black', border: 'none', borderRadius: 999, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                {copyLabel}
+              </button>
+              <a href={doneLink} target="_blank" rel="noopener noreferrer" style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '7px 18px', fontSize: 13, cursor: 'pointer', textDecoration: 'none' }}>
+                Abrir
+              </a>
+            </div>
+          </>
+        )}
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Loom() {
@@ -164,6 +300,12 @@ export default function Loom() {
   const blobRef = useRef(null);
   const timerRef = useRef(null);
   const docPiPRef = useRef(null);
+
+  // Capture state
+  const [captureState, setCaptureState] = useState(null);
+  // null | { phase: 'cropping'|'confirm', imageUrl, blob, fileName, originalCanvas? }
+  const [captureUploading, setCaptureUploading] = useState(false);
+  const [captureLink, setCaptureLink] = useState('');
 
   const setStatusSync = (s) => { statusRef.current = s; setStatus(s); };
   const setCountdownSync = (n) => { countdownRef.current = n; setCountdown(n); };
@@ -629,6 +771,85 @@ export default function Loom() {
     }
   };
 
+  // ── Capture ─────────────────────────────────────────────────────────────────
+  const doCapture = async (mode) => {
+    setErrorMsg('');
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+    } catch (err) {
+      if (err.name !== 'NotAllowedError') setErrorMsg('No se pudo capturar: ' + err.message);
+      return;
+    }
+
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.muted = true;
+    await video.play();
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    stream.getTracks().forEach(t => t.stop());
+
+    const now = new Date();
+    const fileName = `Captura ${now.toLocaleDateString('es-ES')} ${now.getHours()}-${String(now.getMinutes()).padStart(2, '0')}`;
+
+    canvas.toBlob(blob => {
+      const imageUrl = URL.createObjectURL(blob);
+      if (mode === 'area') {
+        setCaptureState({ phase: 'cropping', imageUrl, blob, fileName, originalCanvas: canvas });
+      } else {
+        setCaptureLink('');
+        setCaptureState({ phase: 'confirm', imageUrl, blob, fileName });
+      }
+    }, 'image/png');
+  };
+
+  const finalizeCrop = (cropRect) => {
+    const { originalCanvas, fileName, imageUrl: oldUrl } = captureState;
+    const cropped = document.createElement('canvas');
+    cropped.width = cropRect.width;
+    cropped.height = cropRect.height;
+    cropped.getContext('2d').drawImage(originalCanvas, cropRect.x, cropRect.y, cropRect.width, cropRect.height, 0, 0, cropRect.width, cropRect.height);
+    URL.revokeObjectURL(oldUrl);
+    cropped.toBlob(blob => {
+      setCaptureLink('');
+      setCaptureState({ phase: 'confirm', imageUrl: URL.createObjectURL(blob), blob, fileName });
+    }, 'image/png');
+  };
+
+  const uploadCaptureToDrive = async () => {
+    const { blob, fileName } = captureState;
+    setCaptureUploading(true);
+    try {
+      const name = `${fileName.trim() || 'captura'}.png`;
+      const form = new FormData();
+      form.append('file', blob, name);
+      form.append('fileName', name);
+      const res = await fetch(`${BACKEND_URL}/loom/upload`, {
+        method: 'POST',
+        headers: { 'x-api-key': LOOM_API_KEY },
+        body: form,
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const { link } = await res.json();
+      setCaptureLink(link);
+    } catch (err) {
+      setErrorMsg('Error al subir: ' + err.message);
+    } finally {
+      setCaptureUploading(false);
+    }
+  };
+
+  const dismissCapture = () => {
+    if (captureState?.imageUrl) URL.revokeObjectURL(captureState.imageUrl);
+    setCaptureState(null);
+    setCaptureLink('');
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/loom-login');
@@ -687,31 +908,59 @@ export default function Loom() {
 
         {/* Idle */}
         {status === 'idle' && (
-          <div className="flex flex-col items-center gap-6">
-            <h2 className="text-white text-2xl font-semibold tracking-tight">Listo para grabar</h2>
-            <button
-              onClick={() => setCameraOn(v => !v)}
-              className={`border rounded-full px-5 py-2 text-sm transition-colors ${cameraOn ? 'border-white text-white' : 'border-zinc-600 text-zinc-400 hover:border-zinc-400'}`}
-            >
-              {cameraOn ? 'Camara activada' : 'Activar camara'}
-            </button>
-            {cameraOn && (
-              <p className="text-zinc-500 text-xs text-center max-w-xs">
-                Arrastra la burbuja para fijar su posicion en la grabacion.
-              </p>
-            )}
-            <button
-              onClick={startRecording}
-              className="bg-white text-black rounded-full px-8 py-3 text-sm font-medium hover:bg-zinc-100 transition-colors"
-            >
-              Iniciar grabacion
-            </button>
-            <button
-              onClick={startAudioRecording}
-              className="border border-zinc-600 text-zinc-400 rounded-full px-8 py-3 text-sm hover:border-zinc-400 hover:text-white transition-colors"
-            >
-              🎙 Grabar solo sonido
-            </button>
+          <div className="flex gap-12 items-start justify-center flex-wrap">
+
+            {/* Grabar */}
+            <div className="flex flex-col items-center gap-6">
+              <h2 className="text-white text-2xl font-semibold tracking-tight">Grabar</h2>
+              <button
+                onClick={() => setCameraOn(v => !v)}
+                className={`border rounded-full px-5 py-2 text-sm transition-colors ${cameraOn ? 'border-white text-white' : 'border-zinc-600 text-zinc-400 hover:border-zinc-400'}`}
+              >
+                {cameraOn ? 'Camara activada' : 'Activar camara'}
+              </button>
+              {cameraOn && (
+                <p className="text-zinc-500 text-xs text-center max-w-xs">
+                  Arrastra la burbuja para fijar su posicion en la grabacion.
+                </p>
+              )}
+              <button
+                onClick={startRecording}
+                className="bg-white text-black rounded-full px-8 py-3 text-sm font-medium hover:bg-zinc-100 transition-colors"
+              >
+                Iniciar grabacion
+              </button>
+              <button
+                onClick={startAudioRecording}
+                className="border border-zinc-600 text-zinc-400 rounded-full px-8 py-3 text-sm hover:border-zinc-400 hover:text-white transition-colors"
+              >
+                🎙 Grabar solo sonido
+              </button>
+            </div>
+
+            {/* Divider */}
+            <div className="hidden md:block w-px bg-zinc-800 self-stretch" />
+
+            {/* Capturar */}
+            <div className="flex flex-col items-center gap-6">
+              <h2 className="text-white text-2xl font-semibold tracking-tight">Capturar</h2>
+              <div className="flex flex-col gap-3 w-full">
+                {[
+                  { mode: 'visible', label: 'Parte visible' },
+                  { mode: 'full',    label: 'Página completa' },
+                  { mode: 'area',    label: 'Área seleccionada' },
+                ].map(({ mode, label }) => (
+                  <button
+                    key={mode}
+                    onClick={() => doCapture(mode)}
+                    className="border border-zinc-600 text-zinc-400 hover:border-zinc-400 hover:text-white rounded-full px-8 py-3 text-sm transition-colors"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
           </div>
         )}
 
@@ -844,6 +1093,26 @@ export default function Loom() {
             <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>Arrastra para posicionar</span>
           </div>
         </div>
+      )}
+
+      {/* Capture overlays */}
+      {captureState?.phase === 'cropping' && (
+        <CropOverlay
+          imageUrl={captureState.imageUrl}
+          onCrop={finalizeCrop}
+          onCancel={dismissCapture}
+        />
+      )}
+      {captureState?.phase === 'confirm' && (
+        <CaptureConfirmModal
+          imageUrl={captureState.imageUrl}
+          fileName={captureState.fileName}
+          onFileNameChange={name => setCaptureState(prev => ({ ...prev, fileName: name }))}
+          onConfirm={uploadCaptureToDrive}
+          onCancel={dismissCapture}
+          uploading={captureUploading}
+          doneLink={captureLink}
+        />
       )}
 
       {/* Document PiP portal — renders into the floating window */}
