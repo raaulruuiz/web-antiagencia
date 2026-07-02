@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { BACKEND_URL, LOOM_API_KEY } from '@/lib/config';
 import { supabase } from '@/lib/supabaseClient';
 import { useAdmin } from '@/pages/admin/AdminLayout';
@@ -608,6 +608,7 @@ export default function Pomodoro() {
   const [strictConfigModal, setStrictConfigModal] = useState(false);
   const [strictVerifyModal, setStrictVerifyModal] = useState(null); // { title, onPass }
   const [editingOriginal, setEditingOriginal] = useState(null);
+  const editParamHandled = useRef(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -649,6 +650,23 @@ export default function Pomodoro() {
   }, [userId, role]);
 
   useEffect(() => { loadStrictMode(); }, [loadStrictMode]);
+
+  useEffect(() => {
+    if (loading || editParamHandled.current) return;
+    const id = new URLSearchParams(window.location.search).get('edit');
+    if (!id) return;
+    const p = pomodoros.find(x => x.id === id);
+    if (!p) return;
+    editParamHandled.current = true;
+    setEditing(p);
+    setEditingOriginal({
+      days: p.schedule?.days || [],
+      time_ranges: p.schedule?.time_ranges || [],
+      blocked_urls: p.blocked_urls || [],
+    });
+    setView('edit');
+    window.history.replaceState({}, '', window.location.pathname);
+  }, [loading, pomodoros]);
 
   useEffect(() => {
     const t = setInterval(() => setPomodoros(p => p.map(x => ({ ...x, is_active: isActiveNow(x) }))), 60000);
