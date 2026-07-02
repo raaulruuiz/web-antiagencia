@@ -39,6 +39,7 @@ import EmailBuilder from './pages/admin/EmailBuilder';
 import Paginas from './pages/admin/Paginas';
 import Pomodoro from './pages/admin/Pomodoro';
 import Biblioteca from './pages/admin/Biblioteca';
+import BibliotecaPublica from './pages/BibliotecaPublica';
 import { supabase } from '@/lib/supabaseClient';
 
 // Guard para rutas de lector: redirige a /admin/users si no tiene permiso
@@ -194,6 +195,7 @@ function App() {
               <Route path="biblioteca"       element={<RequirePage page="biblioteca"><Biblioteca /></RequirePage>} />
               <Route path="pomodoro"        element={<RequirePage page="pomodoro"><Pomodoro /></RequirePage>} />
             </Route>
+            <Route path="/anti-biblioteca" element={<BibliotecaPublica />} />
             <Route path="/admin/copywriting-popup" element={<CopywritingPopup />} />
             <Route path="/loom" element={<Loom />} />
             <Route path="*" element={<AuthenticatedApp />} />
