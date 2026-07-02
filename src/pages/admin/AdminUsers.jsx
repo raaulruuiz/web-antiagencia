@@ -12,6 +12,10 @@ const PAGE_OPTIONS = [
   { value: 'loom',             label: 'Loom' },
 ];
 
+const EXT_OPTIONS = [
+  { value: 'biblioteca', label: 'Biblioteca' },
+];
+
 function timeAgo(dateStr) {
   if (!dateStr) return 'Nunca';
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -49,13 +53,13 @@ function StatusBadge({ confirmed, invitedAt }) {
   );
 }
 
-function PageCheckboxes({ selected, onChange }) {
+function PageCheckboxes({ selected, onChange, options = PAGE_OPTIONS }) {
   const toggle = (val) => {
     onChange(selected.includes(val) ? selected.filter(p => p !== val) : [...selected, val]);
   };
   return (
     <div className="flex flex-wrap gap-3 mt-2">
-      {PAGE_OPTIONS.map(({ value, label }) => (
+      {options.map(({ value, label }) => (
         <label key={value} className="flex items-center gap-1.5 text-sm text-zinc-300 cursor-pointer">
           <input
             type="checkbox"
@@ -104,9 +108,10 @@ export default function AdminUsers() {
   const [confirmDelete, setConfirmDelete] = useState(null); // { id, email }
 
   // Invite form state
-  const [email, setEmail]         = useState('');
+  const [email, setEmail]           = useState('');
   const [inviteRole, setInviteRole] = useState('lector');
   const [invitePages, setInvitePages] = useState([]);
+  const [inviteExtPages, setInviteExtPages] = useState([]);
   const [inviting, setInviting]   = useState(false);
 
   // Editing state: { [userId]: { role, pages } }
@@ -131,7 +136,7 @@ export default function AdminUsers() {
     const res = await fetch(`${BACKEND}/admin/invite-user`, {
       method: 'POST',
       headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, role: inviteRole, pages: inviteRole === 'admin' ? [] : invitePages }),
+      body: JSON.stringify({ email, role: inviteRole, pages: inviteRole === 'admin' ? [] : invitePages, ext_pages: inviteRole === 'admin' ? [] : inviteExtPages }),
     });
     const data = await res.json();
     if (res.ok) {
@@ -139,6 +144,7 @@ export default function AdminUsers() {
       setEmail('');
       setInviteRole('lector');
       setInvitePages([]);
+      setInviteExtPages([]);
       fetchUsers();
     } else {
       setMsg(`Error: ${data.error}`);
@@ -147,7 +153,7 @@ export default function AdminUsers() {
   }
 
   function startEdit(u) {
-    setEditing(prev => ({ ...prev, [u.id]: { role: u.role, pages: u.pages ?? [] } }));
+    setEditing(prev => ({ ...prev, [u.id]: { role: u.role, pages: u.pages ?? [], ext_pages: u.ext_pages ?? [] } }));
   }
 
   function cancelEdit(id) {
@@ -155,12 +161,12 @@ export default function AdminUsers() {
   }
 
   async function saveEdit(u) {
-    const { role, pages } = editing[u.id];
+    const { role, pages, ext_pages } = editing[u.id];
     setSaving(prev => ({ ...prev, [u.id]: true }));
     await fetch(`${BACKEND}/admin/users/${u.id}`, {
       method: 'PATCH',
       headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role, pages }),
+      body: JSON.stringify({ role, pages, ext_pages }),
     });
     setSaving(prev => { const n = { ...prev }; delete n[u.id]; return n; });
     cancelEdit(u.id);
@@ -225,9 +231,15 @@ export default function AdminUsers() {
               </div>
             </div>
             {inviteRole === 'lector' && (
-              <div>
-                <p className="text-zinc-500 text-xs mb-1">Páginas accesibles (además de Usuarios):</p>
-                <PageCheckboxes selected={invitePages} onChange={setInvitePages} />
+              <div className="flex flex-col gap-3">
+                <div>
+                  <p className="text-zinc-500 text-xs mb-1">Páginas accesibles (además de Usuarios):</p>
+                  <PageCheckboxes selected={invitePages} onChange={setInvitePages} />
+                </div>
+                <div>
+                  <p className="text-zinc-500 text-xs mb-1">Extensión:</p>
+                  <PageCheckboxes selected={inviteExtPages} onChange={setInviteExtPages} options={EXT_OPTIONS} />
+                </div>
               </div>
             )}
           </form>
@@ -259,7 +271,7 @@ export default function AdminUsers() {
         {loading && <p className="text-zinc-500 text-sm px-1">Cargando...</p>}
         {!loading && users.map(u => {
           const isEditing = !!editing[u.id];
-          const editState = editing[u.id] ?? { role: u.role, pages: u.pages ?? [] };
+          const editState = editing[u.id] ?? { role: u.role, pages: u.pages ?? [], ext_pages: u.ext_pages ?? [] };
 
           return (
             <div key={u.id} className="rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-4">
@@ -295,7 +307,7 @@ export default function AdminUsers() {
                     <span className="text-zinc-400 text-xs">Rol:</span>
                     <select
                       value={editState.role}
-                      onChange={e => setEditing(prev => ({ ...prev, [u.id]: { ...prev[u.id], role: e.target.value, pages: [] } }))}
+                      onChange={e => setEditing(prev => ({ ...prev, [u.id]: { ...prev[u.id], role: e.target.value, pages: [], ext_pages: [] } }))}
                       className="bg-zinc-800 border border-zinc-700 text-white text-xs rounded-lg px-2 py-1 outline-none"
                     >
                       <option value="lector">Lector</option>
@@ -303,12 +315,22 @@ export default function AdminUsers() {
                     </select>
                   </div>
                   {editState.role === 'lector' && (
-                    <div className="mb-4">
-                      <p className="text-zinc-500 text-xs mb-1">Páginas accesibles (además de Usuarios):</p>
-                      <PageCheckboxes
-                        selected={editState.pages}
-                        onChange={pages => setEditing(prev => ({ ...prev, [u.id]: { ...prev[u.id], pages } }))}
-                      />
+                    <div className="mb-4 flex flex-col gap-3">
+                      <div>
+                        <p className="text-zinc-500 text-xs mb-1">Páginas accesibles (además de Usuarios):</p>
+                        <PageCheckboxes
+                          selected={editState.pages}
+                          onChange={pages => setEditing(prev => ({ ...prev, [u.id]: { ...prev[u.id], pages } }))}
+                        />
+                      </div>
+                      <div>
+                        <p className="text-zinc-500 text-xs mb-1">Extensión:</p>
+                        <PageCheckboxes
+                          selected={editState.ext_pages}
+                          onChange={ext_pages => setEditing(prev => ({ ...prev, [u.id]: { ...prev[u.id], ext_pages } }))}
+                          options={EXT_OPTIONS}
+                        />
+                      </div>
                     </div>
                   )}
                   <div className="flex gap-2 flex-wrap">
