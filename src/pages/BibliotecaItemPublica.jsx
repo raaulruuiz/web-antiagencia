@@ -26,6 +26,7 @@ function Tag({ colors, label }) {
     <span style={{
       fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', display: 'inline-block',
       background: colors.bg, border: `1px solid ${colors.border}`, color: colors.color,
+      alignSelf: 'flex-start',
     }}>
       {label}
     </span>

@@ -447,10 +447,8 @@ export default function BibliotecaItem() {
   const [loading, setLoading] = useState(true);
   const [error, setError]   = useState(null);
 
-  // Nombre (always editable)
-  const [nombre, setNombre] = useState('');
-  const [saving, setSaving] = useState(false);
-  const saveTimeout = useRef(null);
+  const [saving, setSaving]     = useState(false);
+  const [detecting, setDetecting] = useState(false);
 
   // ── Onboarding state ─────────────────────────────────────────────────────
   // mode: 'onboarding' | 'display'
@@ -490,7 +488,6 @@ export default function BibliotecaItem() {
         if (!res.ok) throw new Error(res.status === 404 ? 'Captura no encontrada' : 'Error al cargar');
         const data = await res.json();
         setItem(data);
-        setNombre(data.nombre || '');
         setCategoria(data.categoria || null);
         setSubcat(data.subcategoria || null);
         setMarca(data.marca  !== null && data.marca  !== undefined ? data.marca  : null);
@@ -519,10 +516,22 @@ export default function BibliotecaItem() {
     } finally { setSaving(false); }
   }, [id]);
 
-  const debounceNombre = (value) => {
-    setNombre(value);
-    clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(() => patch({ nombre: value }), 800);
+  const handleDetectarIA = async () => {
+    setDetecting(true);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_BASE}/biblioteca/${id}/detectar`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Error al detectar');
+      const data = await res.json();
+      if (data.marca)      setObMarca(data.marca);
+      if (data.asunto)     setObAsunto(data.asunto);
+      if (data.adelanto)   setObAdelanto(data.adelanto);
+      if (data.enviado_el) setObEnviadoEl(data.enviado_el);
+    } catch (e) { alert(e.message); }
+    finally { setDetecting(false); }
   };
 
   // Onboarding handlers
@@ -627,7 +636,7 @@ export default function BibliotecaItem() {
       {/* Overlays */}
       {showCrop && item && <CropOverlay imageUrl={item.url} onCrop={handleCrop} onCancel={() => setShowCrop(false)} />}
       {cropConfirm && <CropConfirmModal previewUrl={cropConfirm.url} onConfirm={confirmCrop} onCancel={cancelCrop} saving={replacing} />}
-      {showModal && item && <ImageModal imageUrl={item.url} alt={nombre || item.filename} onClose={() => setShowModal(false)} />}
+      {showModal && item && <ImageModal imageUrl={item.url} alt={item.filename} onClose={() => setShowModal(false)} />}
       {discardConfirm && <DiscardModal onConfirm={confirmDiscard} onCancel={() => setDiscardConfirm(false)} />}
 
       {/* Top bar */}
@@ -639,10 +648,6 @@ export default function BibliotecaItem() {
         {saving && <span className="text-xs text-zinc-600">Guardando…</span>}
       </div>
 
-      {/* Nombre */}
-      <input type="text" value={nombre} onChange={e => debounceNombre(e.target.value)} placeholder="Nombre…"
-        className="w-full bg-transparent border border-zinc-800 focus:border-zinc-500 rounded-xl px-4 py-3 text-base text-white outline-none transition-colors mb-5" />
-
       {/* Two columns */}
       <div className="grid grid-cols-2 gap-8 items-start">
 
@@ -651,7 +656,7 @@ export default function BibliotecaItem() {
           onMouseEnter={() => setImageHover(true)}
           onMouseLeave={() => setImageHover(false)}>
           <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden' }}>
-            <img src={item.url} alt={nombre || item.filename} style={{ width: '100%', display: 'block' }} />
+            <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />
           </div>
           {imageHover && (
             <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
@@ -712,6 +717,20 @@ export default function BibliotecaItem() {
               {/* Step: campos */}
               {obStep === 'campos' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {/* Detectar con IA */}
+                  <button onClick={handleDetectarIA} disabled={detecting}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: detecting ? '#1a1a2e' : 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.4)', color: detecting ? '#818cf8' : '#a5b4fc', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 500, cursor: detecting ? 'not-allowed' : 'pointer', transition: 'all 0.15s' }}
+                    onMouseEnter={e => { if (!detecting) { e.currentTarget.style.background='rgba(99,102,241,0.18)'; e.currentTarget.style.borderColor='rgba(99,102,241,0.6)'; }}}
+                    onMouseLeave={e => { if (!detecting) { e.currentTarget.style.background='rgba(99,102,241,0.1)'; e.currentTarget.style.borderColor='rgba(99,102,241,0.4)'; }}}>
+                    {detecting ? (
+                      <div style={{ width: 12, height: 12, border: '2px solid #4f46e5', borderTopColor: '#a5b4fc', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                    ) : (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 8v4l3 3"/><path d="M18 2v4h4"/>
+                      </svg>
+                    )}
+                    {detecting ? 'Detectando…' : 'Detectar con IA'}
+                  </button>
                   {/* Marca — required */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -754,31 +773,33 @@ export default function BibliotecaItem() {
                       style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                   </div>
 
-                  {/* Enviado el Día */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</label>
-                    <input type="date" value={obEnviadoEl} onChange={e => setObEnviadoEl(e.target.value)}
-                      style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
-                  </div>
+                  {/* Enviado el Día — only for Campaña */}
+                  {obSubcat !== 'automatizacion' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</label>
+                      <input type="date" value={obEnviadoEl} onChange={e => setObEnviadoEl(e.target.value)}
+                        style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Bottom buttons */}
-            <div style={{ display: 'flex', gap: 8, paddingTop: 8 }}>
-              <button onClick={() => setDiscardConfirm(true)}
-                style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#dc2626'; e.currentTarget.style.color = '#f87171'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; }}>
-                Descartar
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 8 }}>
               {obStep === 'campos' && (
                 <button onClick={handleGuardar} disabled={saving}
-                  style={{ background: saving ? '#3f3f46' : 'white', color: saving ? '#a1a1aa' : 'black', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  style={{ width: '100%', background: saving ? '#3f3f46' : 'white', color: saving ? '#a1a1aa' : 'black', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                   {saving && <div style={{ width: 12, height: 12, border: '2px solid #71717a', borderTopColor: 'black', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />}
                   {saving ? 'Guardando…' : 'Guardar'}
                 </button>
               )}
+              <button onClick={() => setDiscardConfirm(true)}
+                style={{ width: '100%', background: 'transparent', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 8, padding: '10px 16px', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#dc2626'; e.currentTarget.style.color = '#f87171'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; }}>
+                Descartar
+              </button>
             </div>
           </div>
         ) : (
@@ -806,7 +827,9 @@ export default function BibliotecaItem() {
               allowEmpty={false} suggestions={allMarcas} />
             <FieldRow label="Asunto"   savedValue={asunto}   onSave={v => { setAsunto(v);   patch({ asunto: v });   }} placeholder="Asunto del email…" />
             <FieldRow label="Adelanto" savedValue={adelanto} onSave={v => { setAdelanto(v); patch({ adelanto: v }); }} placeholder="Texto de adelanto…" />
-            <FieldRow label="Enviado el Día" savedValue={enviadoEl} onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }} allowEmpty={false} type="date" />
+            {subcategoria !== 'automatizacion' && (
+              <FieldRow label="Enviado el Día" savedValue={enviadoEl} onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }} allowEmpty={false} type="date" />
+            )}
           </div>
         )}
       </div>
