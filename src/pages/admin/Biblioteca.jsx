@@ -71,7 +71,6 @@ function DateRangePicker({ from, to, onChange }) {
     } else {
       if (ymd >= from) { onChange({ from, to: ymd }); }
       else             { onChange({ from: ymd, to: from }); }
-      setOpen(false);
     }
   };
 
@@ -128,7 +127,7 @@ function DateRangePicker({ from, to, onChange }) {
           </div>
           {hasFilter && (
             <button onClick={() => { onChange({ from: '', to: '' }); setOpen(false); }}
-              style={{ marginTop: 10, width: '100%', background: 'none', border: '1px solid #27272a', color: '#52525b', borderRadius: 8, padding: '5px', fontSize: 11, cursor: 'pointer' }}>
+              style={{ marginTop: 10, width: '100%', background: 'none', border: '1px solid #3f3f46', color: 'white', borderRadius: 8, padding: '5px', fontSize: 11, cursor: 'pointer' }}>
               Limpiar
             </button>
           )}

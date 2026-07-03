@@ -32,7 +32,7 @@ export default function BibliotecaCardMeta({ item, allTags = [] }) {
               border: `1px solid ${item.subcategoria === 'automatizacion' ? '#22c55e' : '#f97316'}`,
               color: item.subcategoria === 'automatizacion' ? '#86efac' : '#fdba74',
             }}>
-              {item.subcategoria === 'automatizacion' ? 'Auto.' : 'Campaña'}
+              {item.subcategoria === 'automatizacion' ? 'Automatización' : 'Campaña'}
             </span>
           )}
           {resolvedTags.map(tag => (

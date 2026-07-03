@@ -255,7 +255,11 @@ function TagColorEditor({ tag, onUpdate, onClose }) {
       </div>
       <div style={{ display: 'flex', gap: 6 }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: '1px solid #3f3f46', borderRadius: 7, padding: '5px 8px' }}>
-          <span style={{ width: 14, height: 14, borderRadius: 3, background: /^#[0-9a-f]{3,6}$/i.test(hex) ? hex : '#888', flexShrink: 0 }} />
+          <label style={{ position: 'relative', width: 14, height: 14, flexShrink: 0, cursor: 'pointer' }}>
+            <span style={{ width: 14, height: 14, borderRadius: 3, background: /^#[0-9a-f]{3,6}$/i.test(hex) ? hex : '#888', display: 'block' }} />
+            <input type="color" value={/^#[0-9a-f]{6}$/i.test(hex) ? hex : '#888888'} onChange={e => setHex(e.target.value)}
+              style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer', border: 'none', padding: 0 }} />
+          </label>
           <input value={hex} onChange={e => setHex(e.target.value)} placeholder="#6366f1"
             style={{ flex: 1, background: 'none', border: 'none', color: 'white', fontSize: 12, outline: 'none', fontFamily: 'monospace' }} />
         </div>
@@ -1037,7 +1041,7 @@ export default function BibliotecaItem() {
               {subcategoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
-                  <Tag colors={SUBCAT_COLORS[subcategoria]} label={subcatLabel(subcategoria)} onRemove={() => { setSubcat(null); patch({ subcategoria: null }); setMode('onboarding'); setObCategoria(categoria); setObSubcat(null); setObStep('subcategoria'); }} />
+                  <Tag colors={SUBCAT_COLORS[subcategoria]} label={subcatLabel(subcategoria)} onRemove={() => { setSubcat(null); patch({ subcategoria: null }); setObMarca(marca || ''); setObAsunto(asunto || ''); setObAdelanto(adelanto || ''); setObEnviadoEl(''); setObTags([]); setMode('onboarding'); setObCategoria(categoria); setObSubcat(null); setObStep('subcategoria'); }} />
                 </div>
               )}
             </div>
