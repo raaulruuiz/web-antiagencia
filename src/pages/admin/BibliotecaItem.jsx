@@ -16,9 +16,9 @@ const SUBCAT_COLORS = {
 
 const presetBtnStyle = (active) => ({
   padding: '4px 10px', fontSize: 11, borderRadius: 6, cursor: 'pointer', transition: 'all 0.1s',
-  border: `1px solid ${active ? '#71717a' : '#27272a'}`,
-  background: active ? '#27272a' : 'transparent',
-  color: active ? 'white' : '#71717a',
+  border: `1px solid ${active ? 'var(--t-text-muted)' : 'var(--t-border)'}`,
+  background: active ? 'var(--t-border)' : 'transparent',
+  color: active ? 'var(--t-text)' : 'var(--t-text-muted)',
 });
 
 // ── Tag palette for user-created tags ────────────────────────────────────────
@@ -183,7 +183,7 @@ function Tag({ colors, label, onRemove }) {
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <span style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', background: colors.bg, border: `1px solid ${colors.border}`, color: colors.text }}>{label}</span>
       {onRemove && (
-        <button onClick={onRemove} style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 2, display: 'flex' }} title="Quitar"><IconX /></button>
+        <button onClick={onRemove} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', padding: 2, display: 'flex' }} title="Quitar"><IconX /></button>
       )}
     </div>
   );
@@ -197,9 +197,9 @@ function CatButtons({ options, colors, onSelect }) {
         <button
           key={opt.value}
           onClick={() => onSelect(opt.value)}
-          style={{ flex: 1, height: 150, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px solid #3f3f46', borderRadius: 16, background: 'transparent', color: '#71717a', cursor: 'pointer', transition: 'all 0.15s', minWidth: 0 }}
+          style={{ flex: 1, height: 150, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px solid var(--t-border-mid)', borderRadius: 16, background: 'transparent', color: 'var(--t-text-muted)', cursor: 'pointer', transition: 'all 0.15s', minWidth: 0 }}
           onMouseEnter={e => { const c = colors[opt.value]; e.currentTarget.style.borderColor = c.border; e.currentTarget.style.color = c.text; e.currentTarget.style.background = c.bg; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; e.currentTarget.style.background = 'transparent'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
         >
           {opt.icon}
           <span style={{ fontSize: 13, textAlign: 'center' }}>{opt.label}</span>
@@ -238,9 +238,9 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
   if (!isSet && !inputMode) {
     return (
       <button onClick={startEdit}
-        style={{ background: 'none', border: '1px dashed #27272a', color: '#3f3f46', borderRadius: 8, padding: '5px 12px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s', alignSelf: 'flex-start' }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = '#52525b'; e.currentTarget.style.color = '#71717a'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#3f3f46'; }}>
+        style={{ background: 'none', border: '1px dashed var(--t-border)', color: 'var(--t-text-faint)', borderRadius: 8, padding: '5px 12px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s', alignSelf: 'flex-start' }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border-muted)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text-faint)'; }}>
         <span style={{ fontSize: 15, lineHeight: 1 }}>+</span> {label}
       </button>
     );
@@ -251,14 +251,14 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
+          <span style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
           <button onClick={startEdit}
-            style={{ background: 'none', border: 'none', color: '#3f3f46', cursor: 'pointer', padding: '2px 4px', display: 'flex', borderRadius: 4, transition: 'color 0.1s' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#71717a'}
-            onMouseLeave={e => e.currentTarget.style.color = '#3f3f46'}
+            style={{ background: 'none', border: 'none', color: 'var(--t-text-faint)', cursor: 'pointer', padding: '2px 4px', display: 'flex', borderRadius: 4, transition: 'color 0.1s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--t-text-muted)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--t-text-faint)'}
             title={`Editar ${label}`}><IconPencil /></button>
         </div>
-        <div style={{ fontSize: 13, color: display ? 'white' : '#71717a', padding: '4px 0', fontStyle: display ? 'normal' : 'italic', borderBottom: '1px solid #27272a' }}>
+        <div style={{ fontSize: 13, color: display ? 'var(--t-text)' : 'var(--t-text-muted)', padding: '4px 0', fontStyle: display ? 'normal' : 'italic', borderBottom: '1px solid var(--t-border)' }}>
           {display || '(Vacío)'}
         </div>
       </div>
@@ -267,7 +267,7 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      {isSet && <span style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>}
+      {isSet && <span style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>}
       <div style={{ position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <input ref={inputRef} type={type} value={inputVal}
@@ -276,16 +276,16 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
             onFocus={() => setShowSugg(true)}
             onBlur={() => setTimeout(() => setShowSugg(false), 150)}
             placeholder={placeholder || label + '…'}
-            style={{ flex: 1, background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 10px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+            style={{ flex: 1, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '7px 10px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
           <button onClick={handleConfirm} style={{ background: 'none', border: 'none', color: '#22c55e', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}><IconCheck /></button>
-          <button onClick={handleCancel} style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}><IconX /></button>
+          <button onClick={handleCancel} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}><IconX /></button>
         </div>
         {showSugg && filteredSugg.length > 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 40, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 20, overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 40, background: 'var(--t-border-s)', border: '1px solid var(--t-border)', borderRadius: 8, marginTop: 4, zIndex: 20, overflow: 'hidden' }}>
             {filteredSugg.slice(0, 6).map(s => (
               <div key={s} onMouseDown={() => { setInputVal(s); setShowSugg(false); }}
-                style={{ padding: '7px 12px', fontSize: 13, color: 'white', cursor: 'pointer' }}
-                onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
+                style={{ padding: '7px 12px', fontSize: 13, color: 'var(--t-text)', cursor: 'pointer' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--t-border)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>{s}</div>
             ))}
           </div>
@@ -303,8 +303,8 @@ function TagColorEditor({ tag, onUpdate, onClose }) {
   const apply = (color) => { onUpdate(tag.id, color); onClose(); };
 
   return (
-    <div style={{ background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 10, padding: '12px', marginTop: 6 }}>
-      <p style={{ fontSize: 11, color: '#71717a', margin: '0 0 8px' }}>Color de <span style={{ color: 'white' }}>"{tag.name}"</span></p>
+    <div style={{ background: 'var(--t-border-s)', border: '1px solid var(--t-border)', borderRadius: 10, padding: '12px', marginTop: 6 }}>
+      <p style={{ fontSize: 11, color: 'var(--t-text-muted)', margin: '0 0 8px' }}>Color de <span style={{ color: 'var(--t-text)' }}>"{tag.name}"</span></p>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
         {TAG_PALETTE.map(c => (
           <button key={c} onClick={() => { setHex(c); apply(c); }}
@@ -314,19 +314,19 @@ function TagColorEditor({ tag, onUpdate, onClose }) {
         ))}
       </div>
       <div style={{ display: 'flex', gap: 6 }}>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: '1px solid #3f3f46', borderRadius: 7, padding: '5px 8px' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: 'var(--t-surface)', border: '1px solid var(--t-border-mid)', borderRadius: 7, padding: '5px 8px' }}>
           <label style={{ position: 'relative', width: 14, height: 14, flexShrink: 0, cursor: 'pointer' }}>
             <span style={{ width: 14, height: 14, borderRadius: 3, background: /^#[0-9a-f]{3,6}$/i.test(hex) ? hex : '#888', display: 'block' }} />
             <input type="color" value={/^#[0-9a-f]{6}$/i.test(hex) ? hex : '#888888'} onChange={e => setHex(e.target.value)}
               style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer', border: 'none', padding: 0 }} />
           </label>
           <input value={hex} onChange={e => setHex(e.target.value)} placeholder="#6366f1"
-            style={{ flex: 1, background: 'none', border: 'none', color: 'white', fontSize: 12, outline: 'none', fontFamily: 'monospace' }} />
+            style={{ flex: 1, background: 'none', border: 'none', color: 'var(--t-text)', fontSize: 12, outline: 'none', fontFamily: 'monospace' }} />
         </div>
         <button onClick={() => apply(hex)}
           style={{ background: 'white', color: 'black', border: 'none', borderRadius: 7, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Aplicar</button>
         <button onClick={onClose}
-          style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 7, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}>✕</button>
+          style={{ background: 'none', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-muted)', borderRadius: 7, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}>✕</button>
       </div>
     </div>
   );
@@ -344,14 +344,14 @@ function TagEditor({ tag, onUpdate, onClose }) {
   };
 
   return (
-    <div style={{ background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 10, padding: '12px', marginTop: 6 }}>
-      <p style={{ fontSize: 11, color: '#71717a', margin: '0 0 8px' }}>Editar etiqueta</p>
+    <div style={{ background: 'var(--t-border-s)', border: '1px solid var(--t-border)', borderRadius: 10, padding: '12px', marginTop: 6 }}>
+      <p style={{ fontSize: 11, color: 'var(--t-text-muted)', margin: '0 0 8px' }}>Editar etiqueta</p>
       {/* Name field */}
       <input
         value={name}
         onChange={e => setName(e.target.value)}
         placeholder="Nombre…"
-        style={{ width: '100%', background: '#111', border: '1px solid #3f3f46', borderRadius: 7, padding: '5px 8px', fontSize: 12, color: 'white', outline: 'none', boxSizing: 'border-box', marginBottom: 10 }}
+        style={{ width: '100%', background: 'var(--t-surface)', border: '1px solid var(--t-border-mid)', borderRadius: 7, padding: '5px 8px', fontSize: 12, color: 'var(--t-text)', outline: 'none', boxSizing: 'border-box', marginBottom: 10 }}
       />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
         {TAG_PALETTE.map(c => (
@@ -362,19 +362,19 @@ function TagEditor({ tag, onUpdate, onClose }) {
         ))}
       </div>
       <div style={{ display: 'flex', gap: 6 }}>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: '1px solid #3f3f46', borderRadius: 7, padding: '5px 8px' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: 'var(--t-surface)', border: '1px solid var(--t-border-mid)', borderRadius: 7, padding: '5px 8px' }}>
           <label style={{ position: 'relative', width: 14, height: 14, flexShrink: 0, cursor: 'pointer' }}>
             <span style={{ width: 14, height: 14, borderRadius: 3, background: /^#[0-9a-f]{3,6}$/i.test(hex) ? hex : '#888', display: 'block' }} />
             <input type="color" value={/^#[0-9a-f]{6}$/i.test(hex) ? hex : '#888888'} onChange={e => setHex(e.target.value)}
               style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer', border: 'none', padding: 0 }} />
           </label>
           <input value={hex} onChange={e => setHex(e.target.value)} placeholder="#6366f1"
-            style={{ flex: 1, background: 'none', border: 'none', color: 'white', fontSize: 12, outline: 'none', fontFamily: 'monospace' }} />
+            style={{ flex: 1, background: 'none', border: 'none', color: 'var(--t-text)', fontSize: 12, outline: 'none', fontFamily: 'monospace' }} />
         </div>
         <button onClick={() => apply(hex)}
           style={{ background: 'white', color: 'black', border: 'none', borderRadius: 7, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Aplicar</button>
         <button onClick={onClose}
-          style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 7, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}>✕</button>
+          style={{ background: 'none', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-muted)', borderRadius: 7, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}>✕</button>
       </div>
     </div>
   );
@@ -437,7 +437,7 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
         })}
         {!showInput && (
           <button onClick={openInput} title="Añadir etiqueta"
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', border: '1px solid #3f3f46', background: 'none', color: '#71717a', cursor: 'pointer', fontSize: 16, lineHeight: 1, flexShrink: 0 }}>
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', border: '1px solid var(--t-border-mid)', background: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', fontSize: 16, lineHeight: 1, flexShrink: 0 }}>
             +
           </button>
         )}
@@ -456,24 +456,24 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
           onFocus={() => setShowDrop(true)}
           onBlur={() => setTimeout(() => { setShowDrop(false); if (!input.trim()) setShowInput(false); }, 150)}
           placeholder="Añadir etiqueta…"
-          style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 10px', fontSize: 12, color: 'white', outline: 'none', boxSizing: 'border-box', colorScheme: 'dark' }}
+          style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '7px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', boxSizing: 'border-box', colorScheme: 'dark' }}
         />
         {showDrop && (filtered.length > 0 || canCreate) && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 30, overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--t-border-s)', border: '1px solid var(--t-border)', borderRadius: 8, marginTop: 4, zIndex: 30, overflow: 'hidden' }}>
             {filtered.slice(0, 6).map(tag => (
               <div key={tag.id}
                 onMouseDown={() => handleSelect(tag)}
                 onMouseEnter={() => setHoverTagId(tag.id)}
                 onMouseLeave={() => setHoverTagId(null)}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', fontSize: 12, background: hoverTagId === tag.id ? '#27272a' : 'transparent' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', fontSize: 12, background: hoverTagId === tag.id ? 'var(--t-border)' : 'transparent' }}>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: tag.color, flexShrink: 0 }} />
-                <span style={{ color: 'white', flex: 1 }}>{tag.name}</span>
+                <span style={{ color: 'var(--t-text)', flex: 1 }}>{tag.name}</span>
                 {hoverTagId === tag.id && (
                   <span style={{ display: 'flex', gap: 4 }}>
                     {onUpdateTag && (
                       <button
                         onMouseDown={e => { e.stopPropagation(); setEditingTag(tag); setShowDrop(false); }}
-                        style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', padding: 2, display: 'flex' }}
+                        style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', padding: 2, display: 'flex' }}
                         title="Editar">
                         <IconPencil />
                       </button>
@@ -481,7 +481,7 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
                     {onDeleteTag && (
                       <button
                         onMouseDown={e => { e.stopPropagation(); onDeleteTag(tag.id); }}
-                        style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', padding: 2, display: 'flex' }}
+                        style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', padding: 2, display: 'flex' }}
                         title="Eliminar">
                         <IconTrashSm />
                       </button>
@@ -492,12 +492,12 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
             ))}
             {canCreate && (
               <div onMouseDown={handleCreate}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', fontSize: 12, borderTop: filtered.length > 0 ? '1px solid #27272a' : 'none' }}
-                onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', fontSize: 12, borderTop: filtered.length > 0 ? '1px solid var(--t-border)' : 'none' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--t-border)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <span style={{ color: '#71717a' }}>Crear</span>
-                <span style={{ color: 'white', fontWeight: 500 }}>"{input.trim()}"</span>
-                <span style={{ color: '#3f3f46', fontSize: 10, marginLeft: 'auto' }}>color aleatorio</span>
+                <span style={{ color: 'var(--t-text-muted)' }}>Crear</span>
+                <span style={{ color: 'var(--t-text)', fontWeight: 500 }}>"{input.trim()}"</span>
+                <span style={{ color: 'var(--t-text-faint)', fontSize: 10, marginLeft: 'auto' }}>color aleatorio</span>
               </div>
             )}
           </div>
@@ -606,22 +606,22 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
     <div style={{ position:'fixed', inset:0, zIndex:200, background:'rgba(0,0,0,0.92)', display:'flex', flexDirection:'column', alignItems:'center', userSelect:'none' }}
       onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
       <div style={{ padding:'16px 0 10px', display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
-        <div style={{ display:'flex', background:'#1a1a1a', border:'1px solid #27272a', borderRadius:10, padding:3, gap:2 }}>
+        <div style={{ display:'flex', background:'var(--t-border-s)', border:'1px solid var(--t-border)', borderRadius:10, padding:3, gap:2 }}>
           {[{id:'libre',label:'Recorte libre'},{id:'ajustar',label:'Ajustar tamaño'}].map(m => (
             <button key={m.id} onClick={() => setMode(m.id)}
-              style={{ padding:'5px 14px', fontSize:12, borderRadius:7, border:'none', cursor:'pointer', transition:'all 0.15s', background:mode===m.id?'#27272a':'transparent', color:mode===m.id?'white':'#71717a' }}>{m.label}</button>
+              style={{ padding:'5px 14px', fontSize:12, borderRadius:7, border:'none', cursor:'pointer', transition:'all 0.15s', background:mode===m.id?'var(--t-border)':'transparent', color:mode===m.id?'var(--t-text)':'var(--t-text-muted)' }}>{m.label}</button>
           ))}
         </div>
         {mode === 'ajustar' && (
           <div style={{ display:'flex', gap:6, alignItems:'center' }}>
-            <span style={{ fontSize:11, color:'#52525b' }}>Proporción:</span>
+            <span style={{ fontSize:11, color:'var(--t-text-subtle)' }}>Proporción:</span>
             <button onClick={() => setAspectRatio(null)} style={presetBtnStyle(aspectRatio === null)}>Libre</button>
             {ASPECT_PRESETS.map(p => (
               <button key={p.label} onClick={() => applyPreset(p.ratio)} style={presetBtnStyle(Math.abs((aspectRatio||0)-p.ratio)<0.001)}>{p.label}</button>
             ))}
           </div>
         )}
-        {mode === 'libre' && <p style={{ color:'#71717a', fontSize:12, margin:0 }}>Arrastra sobre la imagen para seleccionar el área</p>}
+        {mode === 'libre' && <p style={{ color:'var(--t-text-muted)', fontSize:12, margin:0 }}>Arrastra sobre la imagen para seleccionar el área</p>}
       </div>
       <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', width:'100%', overflow:'hidden', padding:'0 40px' }}>
         <div style={{ position:'relative', display:'inline-block' }}>
@@ -649,7 +649,7 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
         </div>
       </div>
       <div style={{ padding:'12px 0 20px', display:'flex', gap:10, alignItems:'center' }}>
-        <button onClick={onCancel} style={{ background:'transparent', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:999, padding:'7px 18px', fontSize:13, cursor:'pointer' }}>Cancelar</button>
+        <button onClick={onCancel} style={{ background:'transparent', border:'1px solid var(--t-border-mid)', color:'var(--t-text-placeholder)', borderRadius:999, padding:'7px 18px', fontSize:13, cursor:'pointer' }}>Cancelar</button>
         {mode==='ajustar' && cropBox && (
           <button onClick={confirmResize} style={{ background:'white', color:'black', border:'none', borderRadius:999, padding:'7px 20px', fontSize:13, fontWeight:600, cursor:'pointer' }}>Confirmar recorte</button>
         )}
@@ -661,9 +661,9 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
 // ── Image modal ───────────────────────────────────────────────────────────────
 function ImageModal({ imageUrl, alt, onClose }) {
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:200, background:'rgba(0,0,0,0.9)', display:'flex', alignItems:'flex-start', justifyContent:'center', overflowY:'auto', padding:'32px 24px' }} onClick={onClose}>
+    <div style={{ position:'fixed', inset:0, zIndex:200, background:'var(--t-overlay)', display:'flex', alignItems:'flex-start', justifyContent:'center', overflowY:'auto', padding:'32px 24px' }} onClick={onClose}>
       <div style={{ position:'relative', maxWidth:900, width:'100%' }} onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} style={{ position:'absolute', top:-36, right:0, background:'transparent', border:'none', color:'#a1a1aa', cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', gap:6 }}><IconX /> Cerrar</button>
+        <button onClick={onClose} style={{ position:'absolute', top:-36, right:0, background:'transparent', border:'none', color:'var(--t-text-placeholder)', cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', gap:6 }}><IconX /> Cerrar</button>
         <img src={imageUrl} alt={alt} style={{ width:'100%', borderRadius:12, display:'block' }} />
       </div>
     </div>
@@ -673,14 +673,14 @@ function ImageModal({ imageUrl, alt, onClose }) {
 // ── Crop confirm modal ────────────────────────────────────────────────────────
 function CropConfirmModal({ previewUrl, onConfirm, onCancel, saving }) {
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:200, background:'rgba(0,0,0,0.85)', display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}>
-      <div style={{ background:'#1a1a1a', border:'1px solid #27272a', borderRadius:16, padding:24, maxWidth:480, width:'100%', display:'flex', flexDirection:'column', gap:16 }}>
-        <p style={{ color:'white', fontSize:15, fontWeight:500, margin:0 }}>¿Guardar este recorte?</p>
-        <p style={{ color:'#71717a', fontSize:12, margin:0 }}>Esta acción reemplazará la imagen original.</p>
-        <img src={previewUrl} alt="recorte" style={{ width:'100%', borderRadius:8, border:'1px solid #27272a', maxHeight:320, objectFit:'contain' }} />
+    <div style={{ position:'fixed', inset:0, zIndex:200, background:'var(--t-overlay)', display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}>
+      <div style={{ background:'var(--t-border-s)', border:'1px solid var(--t-border)', borderRadius:16, padding:24, maxWidth:480, width:'100%', display:'flex', flexDirection:'column', gap:16 }}>
+        <p style={{ color:'var(--t-text)', fontSize:15, fontWeight:500, margin:0 }}>¿Guardar este recorte?</p>
+        <p style={{ color:'var(--t-text-muted)', fontSize:12, margin:0 }}>Esta acción reemplazará la imagen original.</p>
+        <img src={previewUrl} alt="recorte" style={{ width:'100%', borderRadius:8, border:'1px solid var(--t-border)', maxHeight:320, objectFit:'contain' }} />
         <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
-          <button onClick={onCancel} disabled={saving} style={{ background:'transparent', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:999, padding:'7px 18px', fontSize:13, cursor:'pointer' }}>Cancelar</button>
-          <button onClick={onConfirm} disabled={saving} style={{ background:saving?'#3f3f46':'white', color:saving?'#a1a1aa':'black', border:'none', borderRadius:999, padding:'7px 18px', fontSize:13, fontWeight:600, cursor:saving?'not-allowed':'pointer', display:'flex', alignItems:'center', gap:6 }}>
+          <button onClick={onCancel} disabled={saving} style={{ background:'transparent', border:'1px solid var(--t-border-mid)', color:'var(--t-text-placeholder)', borderRadius:999, padding:'7px 18px', fontSize:13, cursor:'pointer' }}>Cancelar</button>
+          <button onClick={onConfirm} disabled={saving} style={{ background:saving?'var(--t-border-mid)':'white', color:saving?'var(--t-text-placeholder)':'black', border:'none', borderRadius:999, padding:'7px 18px', fontSize:13, fontWeight:600, cursor:saving?'not-allowed':'pointer', display:'flex', alignItems:'center', gap:6 }}>
             {saving && <div style={{ width:12, height:12, border:'2px solid #71717a', borderTopColor:'white', borderRadius:'50%', animation:'spin 0.7s linear infinite' }} />}
             {saving ? 'Guardando…' : 'Sí, guardar'}
           </button>
@@ -694,12 +694,12 @@ function CropConfirmModal({ previewUrl, onConfirm, onCancel, saving }) {
 // ── Discard confirm modal ─────────────────────────────────────────────────────
 function DiscardModal({ onConfirm, onCancel }) {
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.7)', display:'flex', alignItems:'center', justifyContent:'center', padding:24 }} onClick={onCancel}>
-      <div style={{ background:'#1a1a1a', border:'1px solid #3f3f46', borderRadius:16, padding:24, maxWidth:320, width:'100%', display:'flex', flexDirection:'column', gap:12 }} onClick={e => e.stopPropagation()}>
-        <p style={{ color:'white', fontSize:14, fontWeight:500, margin:0 }}>¿Eliminar esta captura?</p>
-        <p style={{ color:'#71717a', fontSize:12, margin:0 }}>Esta acción no se puede deshacer.</p>
+    <div style={{ position:'fixed', inset:0, zIndex:300, background:'var(--t-overlay)', display:'flex', alignItems:'center', justifyContent:'center', padding:24 }} onClick={onCancel}>
+      <div style={{ background:'var(--t-border-s)', border:'1px solid var(--t-border-mid)', borderRadius:16, padding:24, maxWidth:320, width:'100%', display:'flex', flexDirection:'column', gap:12 }} onClick={e => e.stopPropagation()}>
+        <p style={{ color:'var(--t-text)', fontSize:14, fontWeight:500, margin:0 }}>¿Eliminar esta captura?</p>
+        <p style={{ color:'var(--t-text-muted)', fontSize:12, margin:0 }}>Esta acción no se puede deshacer.</p>
         <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
-          <button onClick={onCancel} style={{ background:'transparent', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:8, padding:'7px 16px', fontSize:12, cursor:'pointer' }}>Cancelar</button>
+          <button onClick={onCancel} style={{ background:'transparent', border:'1px solid var(--t-border-mid)', color:'var(--t-text-placeholder)', borderRadius:8, padding:'7px 16px', fontSize:12, cursor:'pointer' }}>Cancelar</button>
           <button onClick={onConfirm} style={{ background:'#dc2626', border:'none', color:'white', borderRadius:8, padding:'7px 16px', fontSize:12, fontWeight:600, cursor:'pointer' }}>Eliminar</button>
         </div>
       </div>
@@ -722,11 +722,11 @@ function BlockDivider({ onAdd }) {
       onMouseLeave={() => setHover(false)}
       style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '2px 0', cursor: 'pointer', opacity: hover ? 1 : 0, transition: 'opacity 0.15s' }}
       onClick={onAdd}>
-      <div style={{ flex: 1, height: 1, background: '#27272a' }} />
-      <span style={{ fontSize: 11, color: '#3f3f46', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+      <div style={{ flex: 1, height: 1, background: 'var(--t-border)' }} />
+      <span style={{ fontSize: 11, color: 'var(--t-text-faint)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
         <span style={{ fontSize: 14, lineHeight: 1 }}>+</span> bloque
       </span>
-      <div style={{ flex: 1, height: 1, background: '#27272a' }} />
+      <div style={{ flex: 1, height: 1, background: 'var(--t-border)' }} />
     </div>
   );
 }
@@ -737,10 +737,10 @@ const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del C
 
 function BlockSelector({ onSelect, hasCorreccion, onClose }) {
   return (
-    <div style={{ background: '#111', border: '1px solid #27272a', borderRadius: 14, padding: '16px 16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 14, padding: '16px 16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 12, color: '#71717a', fontWeight: 500 }}>Añadir bloque</span>
-        {onClose && <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>}
+        <span style={{ fontSize: 12, color: 'var(--t-text-muted)', fontWeight: 500 }}>Añadir bloque</span>
+        {onClose && <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {BLOCK_TYPES.map(bt => {
@@ -748,9 +748,9 @@ function BlockSelector({ onSelect, hasCorreccion, onClose }) {
           const c = BLOCK_COLORS[bt.type];
           return (
             <button key={bt.type} onClick={() => !disabled && onSelect(bt.type)} disabled={disabled}
-              style={{ height: 130, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, border: `1px solid ${disabled ? '#27272a' : '#3f3f46'}`, borderRadius: 12, background: 'transparent', color: disabled ? '#3f3f46' : '#71717a', cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: disabled ? 0.4 : 1 }}
+              style={{ height: 130, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, border: `1px solid ${disabled ? 'var(--t-border)' : 'var(--t-border-mid)'}`, borderRadius: 12, background: 'transparent', color: disabled ? 'var(--t-text-faint)' : 'var(--t-text-muted)', cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: disabled ? 0.4 : 1 }}
               onMouseEnter={e => { if (!disabled) { e.currentTarget.style.borderColor = c; e.currentTarget.style.color = c; e.currentTarget.style.background = c + '11'; }}}
-              onMouseLeave={e => { if (!disabled) { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; e.currentTarget.style.background = 'transparent'; }}}>
+              onMouseLeave={e => { if (!disabled) { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}}>
               <span style={{ color: 'inherit' }}>{bt.icon}</span>
               <span style={{ fontSize: 13, fontWeight: 500, color: 'inherit' }}>{bt.label}</span>
             </button>
@@ -770,28 +770,28 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
-    <div style={{ background: '#111', border: '1px solid #1f1f1f', borderRadius: 10, overflow: 'hidden' }}>
+    <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border-s)', borderRadius: 10, overflow: 'hidden' }}>
       {/* Header bar */}
-      <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #1a1a1a' }}>
+      <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid var(--t-border-s)' }}>
         <span style={{ color: c, display: 'flex', flexShrink: 0 }}>{bt?.icon}</span>
-        <span style={{ flex: 1, fontSize: 12, color: 'white', fontWeight: 500 }}>{bt?.label}</span>
+        <span style={{ flex: 1, fontSize: 12, color: 'var(--t-text)', fontWeight: 500 }}>{bt?.label}</span>
         <div style={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 0 }}>
           {!isCorreccion && (
             <>
               <button onClick={onMoveUp} disabled={index === 0}
-                style={{ background: 'none', border: 'none', color: index === 0 ? '#3f3f46' : 'white', cursor: index === 0 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
+                style={{ background: 'none', border: 'none', color: index === 0 ? 'var(--t-text-faint)' : 'var(--t-text)', cursor: index === 0 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
                 <IconChevronUp />
               </button>
               <button onClick={onMoveDown} disabled={index === total - 1}
-                style={{ background: 'none', border: 'none', color: index === total - 1 ? '#3f3f46' : 'white', cursor: index === total - 1 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
+                style={{ background: 'none', border: 'none', color: index === total - 1 ? 'var(--t-text-faint)' : 'var(--t-text)', cursor: index === total - 1 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
                 <IconChevronDown />
               </button>
             </>
           )}
           <button onClick={onEdit}
-            style={{ background: 'none', border: '1px solid #52525b', color: 'white', cursor: 'pointer', padding: '3px 8px', borderRadius: 6, fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'white'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#52525b'; }}>
+            style={{ background: 'none', border: '1px solid var(--t-border-muted)', color: 'var(--t-text)', cursor: 'pointer', padding: '3px 8px', borderRadius: 6, fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-text)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-muted)'; }}>
             <IconPencil /> Editar
           </button>
           {confirmDelete ? (
@@ -802,15 +802,15 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 Sí
               </button>
               <button onClick={() => setConfirmDelete(false)}
-                style={{ background: 'none', border: '1px solid #3f3f46', color: '#a1a1aa', cursor: 'pointer', padding: '2px 7px', borderRadius: 5, fontSize: 11 }}>
+                style={{ background: 'none', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-placeholder)', cursor: 'pointer', padding: '2px 7px', borderRadius: 5, fontSize: 11 }}>
                 No
               </button>
             </div>
           ) : (
             <button onClick={() => setConfirmDelete(true)}
-              style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', padding: 3, display: 'flex' }}
+              style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', padding: 3, display: 'flex' }}
               onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-              onMouseLeave={e => e.currentTarget.style.color = '#71717a'}>
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--t-text-muted)'}>
               <IconTrashSm />
             </button>
           )}
@@ -821,8 +821,8 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       {block.type === 'enlaces' && (
         <div style={{ padding: '14px 14px 14px' }}>
           <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: 'white', lineHeight: 1.2 }}>{block.titulo || 'Enlace'}</div>
-            {block.subtitulo && <div style={{ fontSize: 13, color: '#71717a', marginTop: 4 }}>{block.subtitulo}</div>}
+            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Enlace'}</div>
+            {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginTop: 4 }}>{block.subtitulo}</div>}
           </div>
           {/* Link previews */}
           {(block.links || (block.url ? [{ images: block.images || [], url: block.url }] : [])).length > 0 ? (
@@ -837,7 +837,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
                   {(link.images || []).map((img, i) => (
                     <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-                      <img src={img.url} alt="" style={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid #27272a', display: 'block' }} />
+                      <img src={img.url} alt="" style={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                     </a>
                   ))}
                   {link.url && (
@@ -855,7 +855,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               ))}
             </div>
           ) : (
-            <span style={{ fontSize: 13, color: '#3f3f46', fontStyle: 'italic' }}>Sin links configurados</span>
+            <span style={{ fontSize: 13, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin links configurados</span>
           )}
         </div>
       )}
@@ -863,22 +863,22 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       {block.type === 'imagen' && imgs.length > 0 && (
         <div style={{ padding: '12px 14px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {imgs.map((img, i) => (
-            <img key={i} src={img.url} alt="" style={{ height: 64, borderRadius: 5, objectFit: 'cover', border: '1px solid #27272a' }} />
+            <img key={i} src={img.url} alt="" style={{ height: 64, borderRadius: 5, objectFit: 'cover', border: '1px solid var(--t-border)' }} />
           ))}
         </div>
       )}
 
       {block.type === 'imagen_texto' && (
         <div style={{ padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-          {imgs.length > 0 && <img src={imgs[0].url} alt="" style={{ height: 60, borderRadius: 5, objectFit: 'cover', border: '1px solid #27272a', flexShrink: 0 }} />}
-          {block.texto && <p style={{ fontSize: 12, color: '#a1a1aa', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{block.texto}</p>}
-          {!imgs.length && !block.texto && <span style={{ fontSize: 12, color: '#3f3f46', fontStyle: 'italic' }}>Sin contenido</span>}
+          {imgs.length > 0 && <img src={imgs[0].url} alt="" style={{ height: 60, borderRadius: 5, objectFit: 'cover', border: '1px solid var(--t-border)', flexShrink: 0 }} />}
+          {block.texto && <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{block.texto}</p>}
+          {!imgs.length && !block.texto && <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span>}
         </div>
       )}
 
       {block.type === 'correccion' && block.nota && (
         <div style={{ padding: '12px 14px' }}>
-          <p style={{ fontSize: 12, color: '#a1a1aa', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.nota}</p>
+          <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.nota}</p>
         </div>
       )}
     </div>
@@ -990,37 +990,37 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const c = BLOCK_COLORS[block.type] || '#71717a';
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--t-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
       onClick={onClose}>
-      <div style={{ background: '#111', border: '1px solid #27272a', borderRadius: 16, width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}
+      <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 16, width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ color: c, display: 'flex' }}>{bt?.icon}</span>
-          <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: 'white' }}>{bt?.label}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>
+          <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: 'var(--t-text)' }}>{bt?.label}</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>
         </div>
 
         {/* Título */}
         <div>
-          <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Título</label>
+          <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Título</label>
           <input value={draft.titulo || ''} onChange={e => update('titulo', e.target.value)}
-            style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+            style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
         </div>
 
         {/* Subtítulo */}
         <div>
-          <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Subtítulo</label>
+          <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Subtítulo</label>
           <input value={draft.subtitulo || ''} onChange={e => update('subtitulo', e.target.value)}
             placeholder="Opcional…"
-            style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+            style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
         </div>
 
         {/* Imágenes (solo para tipos no-enlaces) */}
         {draft.type !== 'enlaces' && (
           <div>
-            <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Imágenes</label>
+            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Imágenes</label>
             {(draft.images || []).length > 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6, marginBottom: 8 }}>
                 {(draft.images || []).map((img, idx) => (
@@ -1034,8 +1034,8 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             )}
             {/* Library picker */}
             {showLibrary === 'global' && libraryImages?.length > 0 && (
-              <div style={{ border: '1px solid #27272a', borderRadius: 8, padding: 8, marginBottom: 8 }}>
-                <div style={{ fontSize: 10, color: '#52525b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
+              <div style={{ border: '1px solid var(--t-border)', borderRadius: 8, padding: 8, marginBottom: 8 }}>
+                <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 5 }}>
                   {libraryImages.map((img, i) => (
                     <img key={i} src={img.url} alt="" onClick={() => { addImage(img.url); setShowLibrary(null); }}
@@ -1048,22 +1048,22 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             )}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
-                style={{ flex: 1, background: 'transparent', border: '1px dashed #3f3f46', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: '#71717a', cursor: uploading ? 'not-allowed' : 'pointer', minWidth: 100 }}
-                onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = '#52525b'; }}
-                onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: 'var(--t-text-muted)', cursor: uploading ? 'not-allowed' : 'pointer', minWidth: 100 }}
+                onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = 'var(--t-border-muted)'; }}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
                 {uploading ? 'Subiendo…' : '+ Subir imagen'}
               </button>
               <button onClick={handleCrop} disabled={uploading}
-                style={{ flex: 1, background: 'transparent', border: '1px dashed #3f3f46', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: '#71717a', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, minWidth: 100 }}
-                onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = '#52525b'; }}
-                onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: 'var(--t-text-muted)', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, minWidth: 100 }}
+                onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = 'var(--t-border-muted)'; }}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
                 <IconScissors /> Recortar del email
               </button>
               {libraryImages?.length > 0 && (
                 <button onClick={() => setShowLibrary(showLibrary === 'global' ? null : 'global')}
-                  style={{ flex: 1, background: showLibrary === 'global' ? '#18181b' : 'transparent', border: '1px dashed #3f3f46', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: '#71717a', cursor: 'pointer', minWidth: 100 }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                  style={{ flex: 1, background: showLibrary === 'global' ? 'var(--t-surface2)' : 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer', minWidth: 100 }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--t-border-muted)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
                   Seleccionar imagen
                 </button>
               )}
@@ -1084,7 +1084,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         {/* Layout selector (solo para enlaces) */}
         {draft.type === 'enlaces' && (
           <div>
-            <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Disposición</label>
+            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Disposición</label>
             <div style={{ display: 'flex', gap: 6 }}>
               {[
                 { value: 'columna', label: 'Columna', icon: '⬜\n⬜\n⬜' },
@@ -1094,7 +1094,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                 const active = (draft.links_layout || 'columna') === opt.value;
                 return (
                   <button key={opt.value} onClick={() => update('links_layout', opt.value)}
-                    style={{ flex: 1, background: active ? '#18181b' : 'transparent', border: `1px solid ${active ? '#6366f1' : '#3f3f46'}`, borderRadius: 8, padding: '7px 10px', fontSize: 12, color: active ? '#a5b4fc' : '#71717a', cursor: 'pointer', textAlign: 'center', fontWeight: active ? 600 : 400 }}>
+                    style={{ flex: 1, background: active ? 'var(--t-surface2)' : 'transparent', border: `1px solid ${active ? '#6366f1' : 'var(--t-border-mid)'}`, borderRadius: 8, padding: '7px 10px', fontSize: 12, color: active ? '#a5b4fc' : 'var(--t-text-muted)', cursor: 'pointer', textAlign: 'center', fontWeight: active ? 600 : 400 }}>
                     {opt.label}
                   </button>
                 );
@@ -1106,17 +1106,17 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         {/* Campos específicos: enlaces (múltiples links) */}
         {draft.type === 'enlaces' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Links</label>
+            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Links</label>
             {(draft.links || []).map((link, linkIdx) => {
               const linkFileRef = (ref) => { if (ref) linkFileInputRefs.current[linkIdx] = ref; };
               const isUploadingThis = uploadingLink === linkIdx;
               return (
-                <div key={linkIdx} style={{ border: '1px solid #27272a', borderRadius: 10, padding: '12px 12px 10px', display: 'flex', flexDirection: 'column', gap: 8, position: 'relative' }}>
+                <div key={linkIdx} style={{ border: '1px solid var(--t-border)', borderRadius: 10, padding: '12px 12px 10px', display: 'flex', flexDirection: 'column', gap: 8, position: 'relative' }}>
                   {draft.links.length > 1 && (
                     <button onClick={() => removeLink(linkIdx)}
-                      style={{ position: 'absolute', top: 8, right: 8, background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', display: 'flex', padding: 2 }}
+                      style={{ position: 'absolute', top: 8, right: 8, background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}
                       onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-                      onMouseLeave={e => e.currentTarget.style.color = '#52525b'}>
+                      onMouseLeave={e => e.currentTarget.style.color = 'var(--t-text-subtle)'}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                   )}
@@ -1125,7 +1125,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                     <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                       {(link.images || []).map((img, imgIdx) => (
                         <div key={imgIdx} style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
-                          <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 5, border: '1px solid #27272a', display: 'block' }} />
+                          <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 5, border: '1px solid var(--t-border)', display: 'block' }} />
                           <button onClick={() => removeLinkImage(linkIdx, imgIdx)}
                             style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 12, lineHeight: 1 }}>×</button>
                         </div>
@@ -1134,8 +1134,8 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                   )}
                   {/* Library picker for this link */}
                   {showLibrary === linkIdx && libraryImages?.length > 0 && (
-                    <div style={{ border: '1px solid #27272a', borderRadius: 7, padding: 8 }}>
-                      <div style={{ fontSize: 10, color: '#52525b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
+                    <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 8 }}>
+                      <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
                         {libraryImages.map((img, i) => (
                           <img key={i} src={img.url} alt="" onClick={() => { addLinkImage(linkIdx, img.url); setShowLibrary(null); }}
@@ -1148,22 +1148,22 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                   )}
                   <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                     <button onClick={() => linkFileInputRefs.current[linkIdx]?.click()} disabled={uploadingLink !== null}
-                      style={{ flex: 1, background: 'transparent', border: '1px dashed #3f3f46', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: '#71717a', cursor: uploadingLink !== null ? 'not-allowed' : 'pointer', minWidth: 80 }}
-                      onMouseEnter={e => { if (uploadingLink === null) e.currentTarget.style.borderColor = '#52525b'; }}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                      style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: uploadingLink !== null ? 'not-allowed' : 'pointer', minWidth: 80 }}
+                      onMouseEnter={e => { if (uploadingLink === null) e.currentTarget.style.borderColor = 'var(--t-border-muted)'; }}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
                       {isUploadingThis ? 'Subiendo…' : '+ Imagen'}
                     </button>
                     <button onClick={() => handleLinkCrop(linkIdx)} disabled={uploadingLink !== null}
-                      style={{ flex: 1, background: 'transparent', border: '1px dashed #3f3f46', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: '#71717a', cursor: uploadingLink !== null ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, minWidth: 80 }}
-                      onMouseEnter={e => { if (uploadingLink === null) e.currentTarget.style.borderColor = '#52525b'; }}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                      style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: uploadingLink !== null ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, minWidth: 80 }}
+                      onMouseEnter={e => { if (uploadingLink === null) e.currentTarget.style.borderColor = 'var(--t-border-muted)'; }}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
                       <IconScissors /> Recortar
                     </button>
                     {libraryImages?.length > 0 && (
                       <button onClick={() => setShowLibrary(showLibrary === linkIdx ? null : linkIdx)}
-                        style={{ flex: 1, background: showLibrary === linkIdx ? '#18181b' : 'transparent', border: '1px dashed #3f3f46', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: '#71717a', cursor: 'pointer', minWidth: 80 }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                        style={{ flex: 1, background: showLibrary === linkIdx ? 'var(--t-surface2)' : 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: 'pointer', minWidth: 80 }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--t-border-muted)'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
                         Seleccionar
                       </button>
                     )}
@@ -1182,16 +1182,16 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                   <div>
                     <input value={link.url || ''} onChange={e => updateLinkUrl(linkIdx, e.target.value)}
                       placeholder="https://…"
-                      style={{ width: '100%', background: '#18181b', border: `1px solid ${urlErrors[linkIdx] ? '#ef4444' : '#3f3f46'}`, borderRadius: 7, padding: '7px 10px', fontSize: 12, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                      style={{ width: '100%', background: 'var(--t-surface2)', border: `1px solid ${urlErrors[linkIdx] ? '#ef4444' : 'var(--t-border-mid)'}`, borderRadius: 7, padding: '7px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                     {urlErrors[linkIdx] && <span style={{ fontSize: 11, color: '#ef4444', display: 'block', marginTop: 3 }}>{urlErrors[linkIdx]}</span>}
                   </div>
                 </div>
               );
             })}
             <button onClick={addLink}
-              style={{ background: 'transparent', border: '1px dashed #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#52525b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#52525b'; }}>
+              style={{ background: 'transparent', border: '1px dashed var(--t-border)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text-subtle)'; }}>
               + Añadir otro link
             </button>
           </div>
@@ -1199,19 +1199,19 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 
         {draft.type === 'imagen_texto' && (
           <div>
-            <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Texto</label>
+            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Texto</label>
             <textarea value={draft.texto || ''} onChange={e => update('texto', e.target.value)}
               rows={4} placeholder="Análisis y comentarios…"
-              style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+              style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
           </div>
         )}
 
         {draft.type === 'correccion' && (
           <div>
-            <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Corrección</label>
+            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Corrección</label>
             <textarea value={draft.nota || ''} onChange={e => update('nota', e.target.value)}
               rows={5} placeholder="Cómo lo reescribirías…"
-              style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+              style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
           </div>
         )}
 
@@ -1222,7 +1222,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             Guardar
           </button>
           <button onClick={onClose}
-            style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 8, padding: '10px 16px', fontSize: 13, cursor: 'pointer' }}>
+            style={{ background: 'transparent', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-muted)', borderRadius: 8, padding: '10px 16px', fontSize: 13, cursor: 'pointer' }}>
             Cancelar
           </button>
         </div>
@@ -1651,12 +1651,12 @@ export default function BibliotecaItem() {
   }, [blocksData, blocksLibrary]);
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0d0d0d' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--t-bg)' }}>
       <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
     </div>
   );
   if (error) return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: '#0d0d0d' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: 'var(--t-bg)' }}>
       <p className="text-red-400 text-sm">{error}</p>
       <button onClick={() => navigate('/admin/biblioteca')} className="text-xs text-zinc-400 border border-zinc-700 px-4 py-2 rounded-lg">← Volver</button>
     </div>
@@ -1664,7 +1664,7 @@ export default function BibliotecaItem() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-4 md:p-8" style={{ backgroundColor: '#0d0d0d', color: 'white', minHeight: '100vh' }}>
+    <div className="p-4 md:p-8" style={{ backgroundColor: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
 
       {/* Overlays */}
       {showCrop && item && <CropOverlay imageUrl={item.url} onCrop={handleCrop} onCancel={() => setShowCrop(false)} />}
@@ -1683,7 +1683,7 @@ export default function BibliotecaItem() {
       ) : null; })()}
       {showCropForModal && item && <CropOverlay imageUrl={item.url} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
       {showBlockSelectorModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--t-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
           onClick={() => setShowBlockSelectorModal(false)}>
           <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 480 }}>
             <BlockSelector
@@ -1740,12 +1740,12 @@ export default function BibliotecaItem() {
               {obCategoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
+                    <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
                     <Tag colors={CAT_COLORS[obCategoria]} label={catLabel(obCategoria)} onRemove={() => { setObCategoria(null); setObSubcat(null); setObStep('categoria'); }} />
                   </div>
                   {obSubcat && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
+                      <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
                       <Tag colors={SUBCAT_COLORS[obSubcat]} label={subcatLabel(obSubcat)} onRemove={() => { setObSubcat(null); setObStep('subcategoria'); }} />
                     </div>
                   )}
@@ -1754,14 +1754,14 @@ export default function BibliotecaItem() {
 
               {obStep === 'categoria' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <span style={{ fontSize: 18, fontWeight: 500, color: 'white' }}>¿Email o Ficha de Producto?</span>
+                  <span style={{ fontSize: 18, fontWeight: 500, color: 'var(--t-text)' }}>¿Email o Ficha de Producto?</span>
                   <CatButtons options={CATEGORIAS} colors={CAT_COLORS} onSelect={handleObCategoria} />
                 </div>
               )}
 
               {obStep === 'subcategoria' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <span style={{ fontSize: 18, fontWeight: 500, color: 'white' }}>¿Automatización o Campaña?</span>
+                  <span style={{ fontSize: 18, fontWeight: 500, color: 'var(--t-text)' }}>¿Automatización o Campaña?</span>
                   <CatButtons options={SUBCATEGORIAS} colors={SUBCAT_COLORS} onSelect={handleObSubcat} />
                 </div>
               )}
@@ -1783,20 +1783,20 @@ export default function BibliotecaItem() {
                   </button>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                       Marca <span style={{ color: '#f87171' }}>*</span>
                     </label>
                     <div style={{ position: 'relative' }}>
                       <input type="text" value={obMarca}
                         onChange={e => { setObMarca(e.target.value); setObMarcaError(''); }}
                         placeholder="Marca…"
-                        style={{ width: '100%', background: '#18181b', border: `1px solid ${obMarcaError ? '#f87171' : '#3f3f46'}`, borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                        style={{ width: '100%', background: 'var(--t-surface2)', border: `1px solid ${obMarcaError ? '#f87171' : 'var(--t-border-mid)'}`, borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                       {obMarca.length > 0 && allMarcas.filter(s => s.toLowerCase().includes(obMarca.toLowerCase()) && s !== obMarca).length > 0 && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 20, overflow: 'hidden' }}>
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--t-border-s)', border: '1px solid var(--t-border)', borderRadius: 8, marginTop: 4, zIndex: 20, overflow: 'hidden' }}>
                           {allMarcas.filter(s => s.toLowerCase().includes(obMarca.toLowerCase()) && s !== obMarca).slice(0, 6).map(s => (
                             <div key={s} onMouseDown={() => setObMarca(s)}
-                              style={{ padding: '7px 12px', fontSize: 13, color: 'white', cursor: 'pointer' }}
-                              onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
+                              style={{ padding: '7px 12px', fontSize: 13, color: 'var(--t-text)', cursor: 'pointer' }}
+                              onMouseEnter={e => e.currentTarget.style.background = 'var(--t-border)'}
                               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>{s}</div>
                           ))}
                         </div>
@@ -1806,27 +1806,27 @@ export default function BibliotecaItem() {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Asunto</label>
+                    <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Asunto</label>
                     <input type="text" value={obAsunto} onChange={e => setObAsunto(e.target.value)} placeholder="Asunto del email…"
-                      style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                      style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Adelanto</label>
+                    <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Adelanto</label>
                     <input type="text" value={obAdelanto} onChange={e => setObAdelanto(e.target.value)} placeholder="Texto de adelanto…"
-                      style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                      style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                   </div>
 
                   {obSubcat !== 'automatizacion' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</label>
+                      <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</label>
                       <input type="date" value={obEnviadoEl} onChange={e => setObEnviadoEl(e.target.value)}
-                        style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                        style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                     </div>
                   )}
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</label>
+                    <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</label>
                     <TagPicker
                       selectedIds={obTags}
                       allTags={allTags}
@@ -1857,15 +1857,15 @@ export default function BibliotecaItem() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 8 }}>
               {obStep === 'campos' && (
                 <button onClick={handleGuardar} disabled={saving}
-                  style={{ width: '100%', background: saving ? '#3f3f46' : 'white', color: saving ? '#a1a1aa' : 'black', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                  {saving && <div style={{ width: 12, height: 12, border: '2px solid #71717a', borderTopColor: 'black', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />}
+                  style={{ width: '100%', background: saving ? 'var(--t-border-mid)' : 'white', color: saving ? 'var(--t-text-placeholder)' : 'black', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  {saving && <div style={{ width: 12, height: 12, border: '2px solid var(--t-text-muted)', borderTopColor: 'black', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />}
                   {saving ? 'Guardando…' : 'Guardar'}
                 </button>
               )}
               <button onClick={() => setDiscardConfirm(true)}
-                style={{ width: '100%', background: 'transparent', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 8, padding: '10px 16px', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s' }}
+                style={{ width: '100%', background: 'transparent', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-muted)', borderRadius: 8, padding: '10px 16px', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#dc2626'; e.currentTarget.style.color = '#f87171'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; }}>
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}>
                 Descartar
               </button>
             </div>
@@ -1876,20 +1876,20 @@ export default function BibliotecaItem() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {categoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
+                  <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
                   <Tag colors={CAT_COLORS[categoria]} label={catLabel(categoria)} onRemove={() => { setCategoria(null); setSubcat(null); patch({ categoria: null, subcategoria: null }); setMode('onboarding'); setObStep('categoria'); setObCategoria(null); setObSubcat(null); }} />
                 </div>
               )}
               {subcategoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
+                  <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
                   <Tag colors={SUBCAT_COLORS[subcategoria]} label={subcatLabel(subcategoria)} onRemove={() => { setSubcat(null); patch({ subcategoria: null }); setObMarca(marca || ''); setObAsunto(asunto || ''); setObAdelanto(adelanto || ''); setObEnviadoEl(''); setObTags([]); setMode('onboarding'); setObCategoria(categoria); setObSubcat(null); setObStep('subcategoria'); }} />
                 </div>
               )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
+              <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
               <TagPicker
                 selectedIds={(item?.tags || [])}
                 allTags={allTags}
@@ -1917,7 +1917,7 @@ export default function BibliotecaItem() {
       {/* ── Blocks section (display mode, categoria=email) ── */}
       {mode === 'display' && categoria === 'email' && (
         <div style={{ marginTop: 40 }}>
-          {blocksSaving && <span style={{ fontSize: 11, color: '#52525b', display: 'block', marginBottom: 8 }}>Guardando…</span>}
+          {blocksSaving && <span style={{ fontSize: 11, color: 'var(--t-text-subtle)', display: 'block', marginBottom: 8 }}>Guardando…</span>}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {blocksData.map((block, idx) => (
               <div key={block.id}>
@@ -1936,9 +1936,9 @@ export default function BibliotecaItem() {
             <BlockDivider onAdd={() => setShowBlockSelectorModal(true)} />
             <button
               onClick={() => setShowBlockSelectorModal(true)}
-              style={{ width: '100%', background: 'transparent', border: '1px dashed #27272a', color: '#52525b', borderRadius: 10, padding: '12px 16px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s', marginTop: 4 }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#52525b'; }}>
+              style={{ width: '100%', background: 'transparent', border: '1px dashed var(--t-border)', color: 'var(--t-text-subtle)', borderRadius: 10, padding: '12px 16px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s', marginTop: 4 }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text-subtle)'; }}>
               <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> Añadir bloque
             </button>
           </div>

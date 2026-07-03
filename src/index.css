@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Admin theme CSS variables ─────────────────────────────────────────────── */
+html, html[data-theme="dark"] {
+  --t-bg:           #0d0d0d;
+  --t-surface:      #111111;
+  --t-surface2:     #18181b;
+  --t-surface3:     #0a0a0a;
+  --t-border-s:     #1a1a1a;
+  --t-border:       #27272a;
+  --t-border-mid:   #3f3f46;
+  --t-border-muted: #52525b;
+  --t-text:         #ffffff;
+  --t-text-muted:   #71717a;
+  --t-text-subtle:  #52525b;
+  --t-text-faint:   #3f3f46;
+  --t-text-placeholder: #a1a1aa;
+  --t-overlay:      rgba(0,0,0,0.85);
+  --t-overlay2:     rgba(0,0,0,0.5);
+}
+html[data-theme="light"] {
+  --t-bg:           #f8fafc;
+  --t-surface:      #ffffff;
+  --t-surface2:     #f1f5f9;
+  --t-surface3:     #f8fafc;
+  --t-border-s:     #f1f5f9;
+  --t-border:       #e4e4e7;
+  --t-border-mid:   #d4d4d8;
+  --t-border-muted: #a1a1aa;
+  --t-text:         #09090b;
+  --t-text-muted:   #71717a;
+  --t-text-subtle:  #71717a;
+  --t-text-faint:   #d4d4d8;
+  --t-text-placeholder: #a1a1aa;
+  --t-overlay:      rgba(0,0,0,0.7);
+  --t-overlay2:     rgba(0,0,0,0.3);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

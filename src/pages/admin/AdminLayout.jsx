@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { CopywritingProvider } from './CopywritingContext';
+import { useTheme } from '@/lib/ThemeContext';
 
 const AdminCtx = createContext({ role: 'lector', pages: [] });
 export const useAdmin = () => useContext(AdminCtx);
@@ -25,6 +26,36 @@ function navForRole(role, pages) {
   return ALL_NAV.filter(n => n.page === 'users' || pages.includes(n.page));
 }
 
+function ThemeToggle() {
+  const { theme, toggle } = useTheme();
+  const isDark = theme === 'dark';
+  return (
+    <button
+      onClick={toggle}
+      title={isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: '8px 12px',
+        borderRadius: 8,
+        border: 'none',
+        background: 'transparent',
+        color: 'var(--t-text-muted)',
+        fontSize: 13,
+        cursor: 'pointer',
+        transition: 'color 0.15s, background 0.15s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.color = 'var(--t-text)'; e.currentTarget.style.background = 'var(--t-surface2)'; }}
+      onMouseLeave={e => { e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
+    >
+      <span style={{ fontSize: 16 }}>{isDark ? '☀️' : '🌙'}</span>
+      <span>{isDark ? 'Tema claro' : 'Tema oscuro'}</span>
+    </button>
+  );
+}
+
 function AdminLayoutInner() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,6 +63,8 @@ function AdminLayoutInner() {
   const [role, setRole]   = useState('lector');
   const [pages, setPages] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -52,7 +85,7 @@ function AdminLayoutInner() {
 
   if (!checked) {
     return (
-      <div className="h-screen flex items-center justify-center" style={{ backgroundColor: '#0d0d0d' }}>
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--t-bg)' }}>
         <div className="w-8 h-8 border-4 border-zinc-700 border-t-white rounded-full animate-spin" />
       </div>
     );
@@ -60,15 +93,28 @@ function AdminLayoutInner() {
 
   const visibleNav = navForRole(role, pages);
 
+  const linkStyle = (active) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    padding: '7px 12px',
+    borderRadius: 8,
+    fontSize: 13,
+    textDecoration: 'none',
+    color: active ? 'var(--t-text)' : 'var(--t-text-muted)',
+    background: active ? 'var(--t-surface2)' : 'transparent',
+    transition: 'color 0.15s, background 0.15s',
+  });
+
   const NavLinks = () => visibleNav.map(({ to, label, icon }) => {
     const active = location.pathname === to || location.pathname.startsWith(to + '/');
     return (
       <Link
         key={to}
         to={to}
-        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-          active ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
-        }`}
+        style={linkStyle(active)}
+        onMouseEnter={e => { if (!active) { e.currentTarget.style.color = 'var(--t-text)'; e.currentTarget.style.background = 'var(--t-surface2)'; } }}
+        onMouseLeave={e => { if (!active) { e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; } }}
       >
         <span>{icon}</span>
         <span>{label}</span>
@@ -76,22 +122,40 @@ function AdminLayoutInner() {
     );
   });
 
+  const sidebarStyle = {
+    background: 'var(--t-bg)',
+    borderRight: '1px solid var(--t-border)',
+    display: 'flex',
+    flexDirection: 'column',
+    flexShrink: 0,
+    height: '100%',
+    width: 224,
+  };
+
+  const headerStyle = {
+    padding: '20px 24px',
+    borderBottom: '1px solid var(--t-border)',
+  };
+
   return (
     <AdminCtx.Provider value={{ role, pages }}>
-      <div className="h-screen overflow-hidden flex" style={{ backgroundColor: '#0d0d0d', color: 'white', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ height: '100vh', overflow: 'hidden', display: 'flex', background: 'var(--t-bg)', color: 'var(--t-text)', fontFamily: 'system-ui, sans-serif' }}>
 
         {/* Sidebar — solo desktop */}
-        <aside className="hidden md:flex w-56 border-r border-zinc-800 flex-col flex-shrink-0 h-full">
-          <div className="px-6 py-5 border-b border-zinc-800">
-            <img src="/images/9563e10d2_AALogo.png" alt="Logo" className="h-7 w-auto" />
+        <aside style={{ ...sidebarStyle, display: 'none' }} className="md:flex md:flex-col">
+          <div style={headerStyle}>
+            <img src="/images/9563e10d2_AALogo.png" alt="Logo" style={{ height: 28, width: 'auto', filter: isDark ? 'none' : 'invert(1)' }} />
           </div>
-          <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
+          <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
             <NavLinks />
           </nav>
-          <div className="px-3 py-4 border-t border-zinc-800 flex-shrink-0">
+          <div style={{ padding: '12px', borderTop: '1px solid var(--t-border)', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <ThemeToggle />
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
+              style={{ ...linkStyle(false), width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--t-text)'; e.currentTarget.style.background = 'var(--t-surface2)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
             >
               <span>🚪</span>
               <span>Cerrar sesión</span>
@@ -100,14 +164,14 @@ function AdminLayoutInner() {
         </aside>
 
         {/* Contenido */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           {/* Top bar — solo mobile */}
-          <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-zinc-800 flex-shrink-0">
-            <img src="/images/9563e10d2_AALogo.png" alt="Logo" className="h-6 w-auto" />
+          <header className="md:hidden" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--t-border)', flexShrink: 0 }}>
+            <img src="/images/9563e10d2_AALogo.png" alt="Logo" style={{ height: 24, width: 'auto', filter: isDark ? 'none' : 'invert(1)' }} />
             <button
               onClick={() => setMenuOpen(o => !o)}
-              className="text-zinc-400 hover:text-white transition-colors p-1"
+              style={{ color: 'var(--t-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
               aria-label="Menú"
             >
               {menuOpen ? (
@@ -120,26 +184,27 @@ function AdminLayoutInner() {
 
           {/* Drawer móvil */}
           {menuOpen && (
-            <div className="md:hidden absolute inset-0 z-50 flex" style={{ top: '49px' }}>
-              <div className="w-64 h-full border-r border-zinc-800 flex flex-col" style={{ backgroundColor: '#0d0d0d' }}>
-                <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
+            <div className="md:hidden" style={{ position: 'absolute', inset: 0, zIndex: 50, display: 'flex', top: 49 }}>
+              <div style={{ width: 256, height: '100%', borderRight: '1px solid var(--t-border)', display: 'flex', flexDirection: 'column', background: 'var(--t-bg)' }}>
+                <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
                   <NavLinks />
                 </nav>
-                <div className="px-3 py-4 border-t border-zinc-800">
+                <div style={{ padding: '12px', borderTop: '1px solid var(--t-border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <ThemeToggle />
                   <button
                     onClick={handleSignOut}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
+                    style={{ ...linkStyle(false), width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                   >
                     <span>🚪</span>
                     <span>Cerrar sesión</span>
                   </button>
                 </div>
               </div>
-              <div className="flex-1 bg-black/50" onClick={() => setMenuOpen(false)} />
+              <div style={{ flex: 1, background: 'rgba(0,0,0,0.5)' }} onClick={() => setMenuOpen(false)} />
             </div>
           )}
 
-          <main className="flex-1 overflow-y-auto">
+          <main style={{ flex: 1, overflowY: 'auto', background: 'var(--t-bg)' }}>
             <Outlet />
           </main>
         </div>

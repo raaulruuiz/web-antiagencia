@@ -26,8 +26,8 @@ function Field({ label, value }) {
   if (value === null || value === undefined) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
-      <span style={{ fontSize: 13, color: value ? 'white' : '#71717a', fontStyle: value ? 'normal' : 'italic' }}>{value || '(Vacío)'}</span>
+      <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
+      <span style={{ fontSize: 13, color: value ? 'var(--t-text)' : 'var(--t-text-muted)', fontStyle: value ? 'normal' : 'italic' }}>{value || '(Vacío)'}</span>
     </div>
   );
 }
@@ -42,8 +42,8 @@ function EnlacesBlockView({ block }) {
   if (!links.length) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'white', margin: '0 0 4px' }}>{block.titulo}</h2>}
-      {block.subtitulo && <p style={{ fontSize: 13, color: '#71717a', margin: '0 0 6px', lineHeight: 1.5 }}>{block.subtitulo}</p>}
+      {block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', margin: '0 0 4px' }}>{block.titulo}</h2>}
+      {block.subtitulo && <p style={{ fontSize: 13, color: 'var(--t-text-muted)', margin: '0 0 6px', lineHeight: 1.5 }}>{block.subtitulo}</p>}
       <div style={
         block.links_layout === 'fila'
           ? { display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto' }
@@ -55,7 +55,7 @@ function EnlacesBlockView({ block }) {
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           {(link.images || []).map((img, j) => (
             <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-              <img src={img.url} alt="" style={{ height: 72, borderRadius: 7, objectFit: 'cover', border: '1px solid #27272a', display: 'block' }} />
+              <img src={img.url} alt="" style={{ height: 72, borderRadius: 7, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
             </a>
           ))}
           {link.url && (
@@ -85,14 +85,14 @@ function ImagenBlockView({ block }) {
     return (
       <div>
         <div style={{ position: 'relative' }}>
-          <img src={images[current]} style={{ width: '100%', borderRadius: 10, display: 'block', maxHeight: 400, objectFit: 'contain', background: '#111' }} />
+          <img src={images[current]} style={{ width: '100%', borderRadius: 10, display: 'block', maxHeight: 400, objectFit: 'contain', background: 'var(--t-surface)' }} />
           {images.length > 1 && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 10 }}>
               <button onClick={() => setCurrent(c => (c - 1 + images.length) % images.length)}
-                style={{ background: '#1a1a1a', border: '1px solid #3f3f46', color: 'white', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>‹</button>
-              <span style={{ fontSize: 11, color: '#71717a' }}>{current + 1} / {images.length}</span>
+                style={{ background: '#1a1a1a', border: '1px solid #3f3f46', color: 'var(--t-text)', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>‹</button>
+              <span style={{ fontSize: 11, color: 'var(--t-text-muted)' }}>{current + 1} / {images.length}</span>
               <button onClick={() => setCurrent(c => (c + 1) % images.length)}
-                style={{ background: '#1a1a1a', border: '1px solid #3f3f46', color: 'white', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>›</button>
+                style={{ background: '#1a1a1a', border: '1px solid #3f3f46', color: 'var(--t-text)', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>›</button>
             </div>
           )}
         </div>
@@ -106,7 +106,7 @@ function ImagenBlockView({ block }) {
       <BlockHeader title={block.title} subtitle={block.subtitle} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
         {images.map((url, i) => (
-          <div key={i} style={{ aspectRatio: '16/9', overflow: 'hidden', borderRadius: 8, border: '1px solid #27272a' }}>
+          <div key={i} style={{ aspectRatio: '16/9', overflow: 'hidden', borderRadius: 8, border: '1px solid var(--t-border)' }}>
             <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           </div>
         ))}
@@ -130,7 +130,7 @@ function ImagenTextoBlockView({ block }) {
         )}
         {block.text && (
           <div style={{ direction: 'ltr', background: color + '18', border: `1px solid ${color}44`, borderRadius: 10, padding: '14px 16px' }}>
-            <p style={{ fontSize: 13, color: 'white', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{block.text}</p>
+            <p style={{ fontSize: 13, color: 'var(--t-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{block.text}</p>
           </div>
         )}
       </div>
@@ -150,7 +150,7 @@ function CorreccionBlockView({ block }) {
             {row.cells.map(cell => (
               <div key={cell.id}>
                 {cell.type === 'text' ? (
-                  <p style={{ fontSize: 13, color: 'white', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap', padding: '8px 0' }}>{cell.content}</p>
+                  <p style={{ fontSize: 13, color: 'var(--t-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap', padding: '8px 0' }}>{cell.content}</p>
                 ) : cell.imageUrl ? (
                   <img src={cell.imageUrl} style={{ width: '100%', borderRadius: 8, display: 'block' }} />
                 ) : null}
@@ -164,7 +164,7 @@ function CorreccionBlockView({ block }) {
 }
 
 function BlockView({ block }) {
-  const wrapStyle = { border: '1px solid #1f1f1f', borderRadius: 12, padding: '20px 24px', background: '#0a0a0a' };
+  const wrapStyle = { border: '1px solid var(--t-border-s)', borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
   switch (block.type) {
     case 'enlaces':      return <div style={wrapStyle}><EnlacesBlockView block={block} /></div>;
     case 'imagen':       return <div style={wrapStyle}><ImagenBlockView block={block} /></div>;
@@ -197,16 +197,16 @@ export default function BibliotecaItemPublica() {
   const s = { fontFamily: 'system-ui, sans-serif' };
 
   if (loading) return (
-    <div style={{ ...s, background: '#0d0d0d', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 24, height: 24, border: '2px solid #27272a', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+    <div style={{ ...s, background: 'var(--t-bg)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 24, height: 24, border: '2px solid var(--t-border)', borderTopColor: 'var(--t-text)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   );
 
   if (error) return (
-    <div style={{ ...s, background: '#0d0d0d', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+    <div style={{ ...s, background: 'var(--t-bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
       <p style={{ color: '#f87171', fontSize: 14 }}>{error}</p>
-      <button onClick={() => navigate('/anti-biblioteca')} style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer' }}>
+      <button onClick={() => navigate('/anti-biblioteca')} style={{ background: 'transparent', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-placeholder)', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer' }}>
         ← Anti-Biblioteca
       </button>
     </div>
@@ -218,16 +218,16 @@ export default function BibliotecaItemPublica() {
   const blocksData      = item.blocks_data && item.blocks_data.blocks ? item.blocks_data : { blocks: [] };
 
   return (
-    <div style={{ ...s, background: '#0d0d0d', color: 'white', minHeight: '100vh', padding: '32px 24px' }}>
+    <div style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
         {/* Back button */}
         <div style={{ marginBottom: 24 }}>
           <button onClick={() => navigate('/anti-biblioteca')}
-            style={{ background: 'transparent', border: '1px solid #27272a', color: '#71717a', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#52525b'; e.currentTarget.style.color = 'white'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a'; }}>
+            style={{ background: 'transparent', border: '1px solid var(--t-border)', color: 'var(--t-text-muted)', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border-muted)'; e.currentTarget.style.color = 'var(--t-text)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             Anti-Biblioteca
           </button>
@@ -237,7 +237,7 @@ export default function BibliotecaItemPublica() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'flex-start' }}>
 
           {/* Left: image */}
-          <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid #27272a' }}>
+          <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid var(--t-border)' }}>
             <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />
           </div>
 
@@ -250,14 +250,14 @@ export default function BibliotecaItemPublica() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {item.categoria && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
-                      <Pill colors={CATEGORIA_COLORS[item.categoria] || { bg: '#18181b', border: '#27272a', color: 'white' }} label={CATEGORIAS[item.categoria] || item.categoria} />
+                      <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
+                      <Pill colors={CATEGORIA_COLORS[item.categoria] || { bg: '#18181b', border: '#27272a', color: 'var(--t-text)' }} label={CATEGORIAS[item.categoria] || item.categoria} />
                     </div>
                   )}
                   {item.subcategoria && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
-                      <Pill colors={SUBCAT_COLORS[item.subcategoria] || { bg: '#18181b', border: '#27272a', color: 'white' }} label={SUBCATEGORIAS[item.subcategoria] || item.subcategoria} />
+                      <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
+                      <Pill colors={SUBCAT_COLORS[item.subcategoria] || { bg: '#18181b', border: '#27272a', color: 'var(--t-text)' }} label={SUBCATEGORIAS[item.subcategoria] || item.subcategoria} />
                     </div>
                   )}
                 </div>
@@ -266,7 +266,7 @@ export default function BibliotecaItemPublica() {
               {/* Etiquetas */}
               {resolvedTags.length > 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
+                  <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                     {resolvedTags.map(tag => (
                       <span key={tag.id} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', background: tag.color + '22', border: `1px solid ${tag.color}`, color: tag.color }}>
