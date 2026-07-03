@@ -34,35 +34,34 @@ function Field({ label, value }) {
 
 // ── Block renderers (view-only) ───────────────────────────────────────────────
 
-function BlockHeader({ title, subtitle }) {
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <h3 style={{ fontSize: 17, fontWeight: 700, color: 'white', margin: 0 }}>{title}</h3>
-      {subtitle && <p style={{ fontSize: 12, color: '#71717a', margin: '3px 0 0' }}>{subtitle}</p>}
-    </div>
-  );
-}
-
 function EnlacesBlockView({ block }) {
-  const links = block.links || [];
+  // Support both new structure (links[]) and legacy (url + images)
+  const links = block.links?.length
+    ? block.links
+    : (block.url ? [{ images: block.images || [], url: block.url }] : []);
   if (!links.length) return null;
   return (
-    <div>
-      <BlockHeader title={block.title} subtitle={block.subtitle} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {links.map(link => (
-          <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '8px 12px', textDecoration: 'none', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.08)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; }}>
-            {link.imageUrl && <img src={link.imageUrl} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }} />}
-            <span style={{ color: '#a5b4fc', fontSize: 13, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {link.url}
-            </span>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-          </a>
-        ))}
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {links.map((link, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          {(link.images || []).map((img, j) => (
+            <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
+              <img src={img.url} alt="" style={{ height: 72, borderRadius: 7, objectFit: 'cover', border: '1px solid #27272a', display: 'block' }} />
+            </a>
+          ))}
+          {link.url && (
+            <>
+              <span style={{ fontSize: 22, color: '#6366f1', fontWeight: 300 }}>→</span>
+              <a href={link.url} target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: 13, color: '#a5b4fc', textDecoration: 'none', wordBreak: 'break-all' }}
+                onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                {link.url}
+              </a>
+            </>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
@@ -75,7 +74,6 @@ function ImagenBlockView({ block }) {
   if (block.view === 'carousel') {
     return (
       <div>
-        <BlockHeader title={block.title} subtitle={block.subtitle} />
         <div style={{ position: 'relative' }}>
           <img src={images[current]} style={{ width: '100%', borderRadius: 10, display: 'block', maxHeight: 400, objectFit: 'contain', background: '#111' }} />
           {images.length > 1 && (

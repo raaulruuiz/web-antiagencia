@@ -965,7 +965,10 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   // URL validation
   const isValidUrl = (url) => {
     if (!url) return true;
-    try { new URL(url); return true; } catch { return false; }
+    try {
+      const parsed = new URL(url);
+      return parsed.hostname.includes('.') && parsed.hostname.split('.').every(p => p.length > 0);
+    } catch { return false; }
   };
 
   const handleSave = () => {
@@ -1254,7 +1257,7 @@ export default function BibliotecaItem() {
         setAsunto(data.asunto !== null && data.asunto !== undefined ? data.asunto : null);
         setAdelanto(data.adelanto !== null && data.adelanto !== undefined ? data.adelanto : null);
         setEnviadoEl(data.enviado_el !== null && data.enviado_el !== undefined ? data.enviado_el : null);
-        setBlocksData(data.blocks || []);
+        setBlocksData(data.blocks_data?.blocks || []);
         if (data.categoria) setMode('display');
       } catch (e) { setError(e.message); }
       finally { setLoading(false); }
@@ -1428,7 +1431,7 @@ export default function BibliotecaItem() {
       await fetch(`${API_BASE}/biblioteca/${id}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blocks }),
+        body: JSON.stringify({ blocks_data: { blocks } }),
       });
     } catch (_) {}
     finally { setBlocksSaving(false); }
