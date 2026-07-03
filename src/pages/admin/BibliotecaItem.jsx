@@ -4,9 +4,34 @@ import { supabase } from '@/lib/supabaseClient';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
+const CATEGORIA_COLORS = {
+  email: { bg: 'rgba(59,130,246,0.15)', border: '#3b82f6', text: '#93c5fd' },
+  ficha: { bg: 'rgba(168,85,247,0.15)', border: '#a855f7', text: '#d8b4fe' },
+};
+
 const CATEGORIAS = [
-  { value: 'email', label: 'Email' },
-  { value: 'ficha', label: 'Ficha de Producto' },
+  {
+    value: 'email',
+    label: 'Email',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"/>
+        <polyline points="2,4 12,13 22,4"/>
+      </svg>
+    ),
+  },
+  {
+    value: 'ficha',
+    label: 'Ficha de Producto',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="9" y1="13" x2="15" y2="13"/>
+        <line x1="9" y1="17" x2="15" y2="17"/>
+      </svg>
+    ),
+  },
 ];
 
 async function getToken() {
@@ -20,8 +45,6 @@ export default function BibliotecaItem() {
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Editable fields
   const [nombre, setNombre] = useState('');
   const [categoria, setCategoria] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -58,10 +81,7 @@ export default function BibliotecaItem() {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
       });
-      if (res.ok) {
-        const updated = await res.json();
-        setItem(updated);
-      }
+      if (res.ok) setItem(await res.json());
     } finally {
       setSaving(false);
     }
@@ -78,30 +98,26 @@ export default function BibliotecaItem() {
     patch({ categoria: v });
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0d0d0d' }}>
-        <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0d0d0d' }}>
+      <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+    </div>
+  );
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: '#0d0d0d' }}>
-        <p className="text-red-400 text-sm">{error}</p>
-        <button onClick={() => navigate('/admin/biblioteca')} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 px-4 py-2 rounded-lg transition-colors">
-          ← Volver a Biblioteca
-        </button>
-      </div>
-    );
-  }
+  if (error) return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: '#0d0d0d' }}>
+      <p className="text-red-400 text-sm">{error}</p>
+      <button onClick={() => navigate('/admin/biblioteca')} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 px-4 py-2 rounded-lg transition-colors">
+        ← Volver a Biblioteca
+      </button>
+    </div>
+  );
 
   return (
     <div className="p-4 md:p-8" style={{ backgroundColor: '#0d0d0d', color: 'white', minHeight: '100vh' }}>
 
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      {/* Back + saving */}
+      <div className="flex items-center gap-3 mb-5">
         <button
           onClick={() => navigate('/admin/biblioteca')}
           className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
@@ -114,26 +130,26 @@ export default function BibliotecaItem() {
         {saving && <span className="text-xs text-zinc-600">Guardando…</span>}
       </div>
 
-      {/* Two-column layout */}
-      <div className="flex gap-8 items-start" style={{ maxWidth: 1100 }}>
+      {/* Nombre — full width */}
+      <input
+        type="text"
+        value={nombre}
+        onChange={e => handleNombreChange(e.target.value)}
+        placeholder="Nombre…"
+        className="w-full bg-transparent border border-zinc-800 focus:border-zinc-500 rounded-xl px-4 py-3 text-base text-white outline-none transition-colors mb-5"
+      />
+
+      {/* Two equal columns */}
+      <div className="grid grid-cols-2 gap-8 items-start">
 
         {/* Left: image */}
-        <div className="flex flex-col gap-2 flex-1 min-w-0">
-          {/* Nombre editable */}
-          <input
-            type="text"
-            value={nombre}
-            onChange={e => handleNombreChange(e.target.value)}
-            placeholder="Nombre…"
-            className="bg-transparent border border-zinc-800 focus:border-zinc-500 rounded-lg px-3 py-1.5 text-sm text-white outline-none transition-colors w-full"
-          />
+        <div>
           <img
             src={item.url}
             alt={nombre || item.filename}
-            className="w-full rounded-xl border border-zinc-800"
-            style={{ display: 'block' }}
+            className="w-full rounded-xl border border-zinc-800 block"
           />
-          <p className="text-xs text-zinc-700">
+          <p className="text-xs text-zinc-700 mt-2">
             {new Date(item.created_at).toLocaleDateString('es-ES', {
               day: '2-digit', month: 'short', year: 'numeric',
               hour: '2-digit', minute: '2-digit',
@@ -142,14 +158,20 @@ export default function BibliotecaItem() {
         </div>
 
         {/* Right: metadata */}
-        <div className="flex flex-col gap-6" style={{ width: 220, flexShrink: 0 }}>
+        <div className="flex flex-col gap-6">
 
-          {/* Categoría */}
           {categoria ? (
             <div className="flex flex-col gap-2">
               <span className="text-xs text-zinc-500 uppercase tracking-widest">Categoría</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-white bg-zinc-800 border border-zinc-700 rounded-full px-3 py-1">
+                <span
+                  className="text-xs font-medium rounded-full px-3 py-1"
+                  style={{
+                    background: CATEGORIA_COLORS[categoria]?.bg,
+                    border: `1px solid ${CATEGORIA_COLORS[categoria]?.border}`,
+                    color: CATEGORIA_COLORS[categoria]?.text,
+                  }}
+                >
                   {CATEGORIAS.find(c => c.value === categoria)?.label}
                 </span>
                 <button
@@ -164,16 +186,18 @@ export default function BibliotecaItem() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               <span className="text-sm text-zinc-300">¿Email o Ficha de Producto?</span>
-              <div className="flex flex-col gap-2">
+              <div className="flex gap-3">
                 {CATEGORIAS.map(c => (
                   <button
                     key={c.value}
                     onClick={() => handleCategoria(c.value)}
-                    className="border border-zinc-700 hover:border-zinc-500 text-zinc-400 hover:text-white rounded-lg px-4 py-3 text-sm transition-colors text-left"
+                    className="flex flex-col items-center justify-center gap-2 border border-zinc-700 hover:border-zinc-400 text-zinc-400 hover:text-white rounded-xl transition-colors"
+                    style={{ width: 110, height: 110 }}
                   >
-                    {c.label}
+                    {c.icon}
+                    <span className="text-xs text-center leading-tight px-1">{c.label}</span>
                   </button>
                 ))}
               </div>

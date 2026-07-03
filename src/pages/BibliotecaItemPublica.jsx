@@ -8,6 +8,11 @@ const CATEGORIAS = {
   ficha: 'Ficha de Producto',
 };
 
+const CATEGORIA_COLORS = {
+  email: { bg: 'rgba(59,130,246,0.15)', border: '#3b82f6', color: '#93c5fd' },
+  ficha: { bg: 'rgba(168,85,247,0.15)', border: '#a855f7', color: '#d8b4fe' },
+};
+
 export default function BibliotecaItemPublica() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -88,7 +93,12 @@ export default function BibliotecaItemPublica() {
             <div style={{ width: 200, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16, paddingTop: displayName ? 28 : 0 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Categoría</span>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'white', background: '#18181b', border: '1px solid #27272a', borderRadius: 999, padding: '4px 12px', display: 'inline-block' }}>
+                <span style={{
+                  fontSize: 12, fontWeight: 500, borderRadius: 999, padding: '4px 12px', display: 'inline-block',
+                  background: CATEGORIA_COLORS[item.categoria]?.bg || '#18181b',
+                  border: `1px solid ${CATEGORIA_COLORS[item.categoria]?.border || '#27272a'}`,
+                  color: CATEGORIA_COLORS[item.categoria]?.color || 'white',
+                }}>
                   {CATEGORIAS[item.categoria] || item.categoria}
                 </span>
               </div>
