@@ -28,16 +28,22 @@ const IconFicha = () => (
     <line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/>
   </svg>
 );
-const IconAuto = () => (
+// Automatización → schema/workflow (nodes conectados)
+const IconSchema = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="13 2 13 9 20 9"/>
-    <path d="M20 14.5V7l-7-5H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/>
-    <path d="m16 19 2 2 4-4"/>
+    <rect x="2" y="3" width="6" height="5" rx="1"/>
+    <rect x="16" y="3" width="6" height="5" rx="1"/>
+    <rect x="9" y="16" width="6" height="5" rx="1"/>
+    <line x1="5" y1="8" x2="12" y2="16"/>
+    <line x1="19" y1="8" x2="12" y2="16"/>
+    <line x1="8" y1="5.5" x2="16" y2="5.5"/>
   </svg>
 );
-const IconCampana = () => (
+// Campaña → papel avión / send
+const IconSend = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.7 13.5a19.79 19.79 0 0 1-3-8.59A2 2 0 0 1 3.68 3h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.7a16 16 0 0 0 5.9 5.9l1.06-1.06a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+    <line x1="22" y1="2" x2="11" y2="13"/>
+    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
   </svg>
 );
 const IconScissors = () => (
@@ -59,12 +65,6 @@ const IconX = () => (
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
   </svg>
 );
-const IconPencil = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-  </svg>
-);
 const IconCheck = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12"/>
@@ -76,8 +76,8 @@ const CATEGORIAS = [
   { value: 'ficha', label: 'Ficha de Producto', icon: <IconFicha /> },
 ];
 const SUBCATEGORIAS = [
-  { value: 'automatizacion', label: 'Automatización', icon: <IconAuto /> },
-  { value: 'campana',        label: 'Campaña',         icon: <IconCampana /> },
+  { value: 'automatizacion', label: 'Automatización', icon: <IconSchema /> },
+  { value: 'campana',        label: 'Campaña',         icon: <IconSend /> },
 ];
 
 // ── Tag component ─────────────────────────────────────────────────────────────
@@ -116,84 +116,146 @@ function CatButtons({ options, colors, onSelect }) {
   );
 }
 
-// ── Editable field with pencil toggle ────────────────────────────────────────
-function EditableField({ label, value, onChange, onSave, type = 'text', placeholder }) {
-  const [editing, setEditing] = useState(false);
+// ── Field row with check/X confirm and optional autocomplete ──────────────────
+// savedValue: null = not added | '' = added empty (Vacío) | 'text' = added with value
+function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = true, type = 'text', placeholder, suggestions = [] }) {
+  const [inputMode, setInputMode] = useState(false);
+  const [inputVal, setInputVal]   = useState('');
+  const [error, setError]         = useState('');
+  const [showSugg, setShowSugg]   = useState(false);
   const inputRef = useRef(null);
 
-  useEffect(() => {
-    if (editing && inputRef.current) inputRef.current.focus();
-  }, [editing]);
+  const isSet = savedValue !== null;
 
-  const commit = () => {
-    setEditing(false);
-    onSave();
+  const filteredSugg = suggestions.filter(s =>
+    inputVal.length > 0 && s.toLowerCase().includes(inputVal.toLowerCase()) && s !== inputVal
+  );
+
+  useEffect(() => {
+    if (inputMode && inputRef.current) inputRef.current.focus();
+  }, [inputMode]);
+
+  const startEdit = () => {
+    setInputVal(isSet ? savedValue : '');
+    setError('');
+    setInputMode(true);
+  };
+
+  const handleConfirm = () => {
+    const trimmed = inputVal.trim();
+
+    // Date field: empty → just cancel silently (don't save null)
+    if (type === 'date') {
+      if (!trimmed) { setInputMode(false); return; }
+      onSave(trimmed);
+      setInputMode(false);
+      return;
+    }
+
+    // Required field: empty → error
+    if (required && !trimmed) {
+      setError('Este campo es obligatorio');
+      return;
+    }
+
+    // allowEmpty=false (but not required): empty → cancel silently
+    if (!allowEmpty && !trimmed) {
+      setInputMode(false);
+      return;
+    }
+
+    onSave(trimmed); // '' allowed for non-required fields with allowEmpty=true
+    setInputMode(false);
+    setError('');
+  };
+
+  const handleCancel = () => {
+    setInputMode(false);
+    setError('');
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') commit();
-    if (e.key === 'Escape') setEditing(false);
+    if (e.key === 'Enter') { e.preventDefault(); handleConfirm(); }
+    if (e.key === 'Escape') handleCancel();
   };
 
-  const displayValue = type === 'date' && value
-    ? new Date(value + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
-    : value;
+  // Not set + not in add mode → subtle "+" button
+  if (!isSet && !inputMode) {
+    return (
+      <button
+        onClick={startEdit}
+        style={{ background: 'none', border: '1px dashed #27272a', color: '#3f3f46', borderRadius: 8, padding: '5px 12px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s', alignSelf: 'flex-start' }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = '#52525b'; e.currentTarget.style.color = '#71717a'; }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#3f3f46'; }}
+      >
+        <span style={{ fontSize: 15, lineHeight: 1 }}>+</span> {label}
+      </button>
+    );
+  }
 
+  // Set + not in edit mode → display value, click to re-edit
+  if (isSet && !inputMode) {
+    const displayValue = type === 'date' && savedValue
+      ? new Date(savedValue + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
+      : savedValue;
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <span style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
+        <div
+          onClick={startEdit}
+          title="Haz clic para editar"
+          style={{ fontSize: 13, color: displayValue ? 'white' : '#71717a', cursor: 'text', padding: '4px 0', fontStyle: displayValue ? 'normal' : 'italic', borderBottom: '1px solid #27272a' }}
+        >
+          {displayValue || '(Vacío)'}
+        </div>
+      </div>
+    );
+  }
+
+  // Input mode (adding or editing)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 11, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
-        {!editing && (
-          <button
-            onClick={() => setEditing(true)}
-            style={{ background: 'none', border: 'none', color: '#3f3f46', cursor: 'pointer', padding: '2px 4px', display: 'flex', borderRadius: 4, transition: 'color 0.1s' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#71717a'}
-            onMouseLeave={e => e.currentTarget.style.color = '#3f3f46'}
-            title={`Editar ${label}`}
-          >
-            <IconPencil />
-          </button>
-        )}
-        {editing && (
-          <button
-            onClick={commit}
-            style={{ background: 'none', border: 'none', color: '#22c55e', cursor: 'pointer', padding: '2px 4px', display: 'flex', borderRadius: 4 }}
-            title="Guardar"
-          >
+      {isSet && <span style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>}
+      <div style={{ position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <input
+            ref={inputRef}
+            type={type}
+            value={inputVal}
+            onChange={e => { setInputVal(e.target.value); setShowSugg(true); setError(''); }}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setShowSugg(true)}
+            onBlur={() => setTimeout(() => setShowSugg(false), 150)}
+            placeholder={placeholder || label + '…'}
+            style={{ flex: 1, background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 10px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }}
+          />
+          <button onClick={handleConfirm} title="Confirmar" style={{ background: 'none', border: 'none', color: '#22c55e', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}>
             <IconCheck />
           </button>
+          <button onClick={handleCancel} title="Cancelar" style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}>
+            <IconX />
+          </button>
+        </div>
+
+        {/* Autocomplete dropdown */}
+        {showSugg && filteredSugg.length > 0 && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 40, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 20, overflow: 'hidden' }}>
+            {filteredSugg.slice(0, 6).map(s => (
+              <div
+                key={s}
+                onMouseDown={() => { setInputVal(s); setShowSugg(false); }}
+                style={{ padding: '7px 12px', fontSize: 13, color: 'white', cursor: 'pointer', transition: 'background 0.1s' }}
+                onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                {s}
+              </div>
+            ))}
+          </div>
         )}
       </div>
-      {editing ? (
-        <input
-          ref={inputRef}
-          type={type}
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          onBlur={commit}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder || label + '…'}
-          style={{
-            background: '#18181b',
-            border: '1px solid #3f3f46',
-            borderRadius: 8,
-            padding: '7px 10px',
-            fontSize: 13,
-            color: 'white',
-            outline: 'none',
-            width: '100%',
-            boxSizing: 'border-box',
-            colorScheme: 'dark',
-          }}
-        />
-      ) : (
-        <div
-          onClick={() => setEditing(true)}
-          style={{ fontSize: 13, color: value ? 'white' : '#3f3f46', cursor: 'text', padding: '7px 0', minHeight: 32, borderBottom: '1px solid #27272a' }}
-        >
-          {displayValue || <span style={{ fontStyle: 'italic' }}>{placeholder || label + '…'}</span>}
-        </div>
-      )}
+      {error && <span style={{ fontSize: 11, color: '#f87171' }}>{error}</span>}
     </div>
   );
 }
@@ -293,21 +355,24 @@ export default function BibliotecaItem() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Editable fields
-  const [nombre, setNombre]           = useState('');
-  const [categoria, setCategoria]     = useState(null);
-  const [subcategoria, setSubcat]     = useState(null);
-  const [marca, setMarca]             = useState('');
-  const [asunto, setAsunto]           = useState('');
-  const [adelanto, setAdelanto]       = useState('');
-  const [enviadoEl, setEnviadoEl]     = useState('');
-  const [saving, setSaving]           = useState(false);
+  // Editable fields — null = not added, '' = added empty, 'text' = added with value
+  const [nombre, setNombre]       = useState('');
+  const [categoria, setCategoria] = useState(null);
+  const [subcategoria, setSubcat] = useState(null);
+  const [marca, setMarca]         = useState(null);
+  const [asunto, setAsunto]       = useState(null);
+  const [adelanto, setAdelanto]   = useState(null);
+  const [enviadoEl, setEnviadoEl] = useState(null);
+  const [saving, setSaving]       = useState(false);
   const saveTimeout = useRef(null);
+
+  // Brands autocomplete
+  const [allMarcas, setAllMarcas] = useState([]);
 
   // Image overlay state
   const [imageHover, setImageHover]   = useState(false);
   const [showCrop, setShowCrop]       = useState(false);
-  const [cropConfirm, setCropConfirm] = useState(null); // { blob, url }
+  const [cropConfirm, setCropConfirm] = useState(null);
   const [replacing, setReplacing]     = useState(false);
   const [showModal, setShowModal]     = useState(false);
 
@@ -323,13 +388,20 @@ export default function BibliotecaItem() {
         setNombre(data.nombre || '');
         setCategoria(data.categoria || null);
         setSubcat(data.subcategoria || null);
-        setMarca(data.marca || '');
-        setAsunto(data.asunto || '');
-        setAdelanto(data.adelanto || '');
-        setEnviadoEl(data.enviado_el || '');
+        // null = not added; '' = added empty; 'text' = added with value
+        setMarca(data.marca !== null && data.marca !== undefined ? data.marca : null);
+        setAsunto(data.asunto !== null && data.asunto !== undefined ? data.asunto : null);
+        setAdelanto(data.adelanto !== null && data.adelanto !== undefined ? data.adelanto : null);
+        setEnviadoEl(data.enviado_el !== null && data.enviado_el !== undefined ? data.enviado_el : null);
       } catch (e) { setError(e.message); }
       finally { setLoading(false); }
     })();
+
+    // Fetch existing brands for autocomplete
+    fetch(`${API_BASE}/biblioteca/marcas`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setAllMarcas)
+      .catch(() => {});
   }, [id, navigate]);
 
   const patch = useCallback(async (updates) => {
@@ -345,12 +417,6 @@ export default function BibliotecaItem() {
       if (res.ok) setItem(await res.json());
     } finally { setSaving(false); }
   }, [id]);
-
-  const debounce = (field, value, setter) => {
-    setter(value);
-    clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(() => patch({ [field]: value }), 800);
-  };
 
   const handleCategoria = (v) => { setCategoria(v); setSubcat(null); patch({ categoria: v, subcategoria: null }); };
   const handleSubcat    = (v) => { setSubcat(v); patch({ subcategoria: v }); };
@@ -398,6 +464,13 @@ export default function BibliotecaItem() {
     setCropConfirm(null);
   };
 
+  // Debounce for nombre
+  const debounceNombre = (value) => {
+    setNombre(value);
+    clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => patch({ nombre: value }), 800);
+  };
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0d0d0d' }}>
       <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
@@ -433,7 +506,7 @@ export default function BibliotecaItem() {
       {/* Nombre — full width */}
       <input
         type="text" value={nombre}
-        onChange={e => debounce('nombre', e.target.value, setNombre)}
+        onChange={e => debounceNombre(e.target.value)}
         placeholder="Nombre…"
         className="w-full bg-transparent border border-zinc-800 focus:border-zinc-500 rounded-xl px-4 py-3 text-base text-white outline-none transition-colors mb-5"
       />
@@ -477,18 +550,18 @@ export default function BibliotecaItem() {
         {/* Right: metadata */}
         <div className="flex flex-col gap-5">
 
-          {/* Tags row */}
+          {/* Tags (category + subcategory as stacked rows) */}
           {(categoria || subcategoria) && (
-            <div className="flex flex-col gap-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {categoria && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-600 uppercase tracking-widest w-20">Categoría</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
                   <Tag colors={CAT_COLORS[categoria]} label={CATEGORIAS.find(c => c.value === categoria)?.label} onRemove={() => handleCategoria(null)} />
                 </div>
               )}
               {subcategoria && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-600 uppercase tracking-widest w-20">Subcategoría</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
                   <Tag colors={SUBCAT_COLORS[subcategoria]} label={SUBCATEGORIAS.find(s => s.value === subcategoria)?.label} onRemove={() => { setSubcat(null); patch({ subcategoria: null }); }} />
                 </div>
               )}
@@ -513,35 +586,33 @@ export default function BibliotecaItem() {
 
           {/* Fields (email + subcategory selected) */}
           {showFields && (
-            <div className="flex flex-col gap-5 pt-2">
-              <EditableField
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 4 }}>
+              <FieldRow
                 label="Marca"
-                value={marca}
-                onChange={v => { setMarca(v); clearTimeout(saveTimeout.current); saveTimeout.current = setTimeout(() => patch({ marca: v }), 800); }}
-                onSave={() => patch({ marca })}
-                placeholder="Marca…"
+                savedValue={marca}
+                onSave={v => { setMarca(v); patch({ marca: v }); setAllMarcas(prev => prev.includes(v) ? prev : [...prev, v].sort((a,b) => a.localeCompare(b))); }}
+                required
+                allowEmpty={false}
+                suggestions={allMarcas}
               />
-              <EditableField
+              <FieldRow
                 label="Asunto"
-                value={asunto}
-                onChange={v => { setAsunto(v); clearTimeout(saveTimeout.current); saveTimeout.current = setTimeout(() => patch({ asunto: v }), 800); }}
-                onSave={() => patch({ asunto })}
+                savedValue={asunto}
+                onSave={v => { setAsunto(v); patch({ asunto: v }); }}
                 placeholder="Asunto del email…"
               />
-              <EditableField
+              <FieldRow
                 label="Adelanto"
-                value={adelanto}
-                onChange={v => { setAdelanto(v); clearTimeout(saveTimeout.current); saveTimeout.current = setTimeout(() => patch({ adelanto: v }), 800); }}
-                onSave={() => patch({ adelanto })}
+                savedValue={adelanto}
+                onSave={v => { setAdelanto(v); patch({ adelanto: v }); }}
                 placeholder="Texto de adelanto…"
               />
-              <EditableField
+              <FieldRow
                 label="Enviado el Día"
-                value={enviadoEl}
-                onChange={v => { setEnviadoEl(v); patch({ enviado_el: v || null }); }}
-                onSave={() => patch({ enviado_el: enviadoEl || null })}
+                savedValue={enviadoEl}
+                onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }}
+                allowEmpty={false}
                 type="date"
-                placeholder="Selecciona una fecha"
               />
             </div>
           )}

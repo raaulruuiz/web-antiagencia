@@ -33,11 +33,11 @@ function Tag({ colors, label }) {
 }
 
 function Field({ label, value }) {
-  if (!value) return null;
+  if (value === null || value === undefined) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
-      <span style={{ fontSize: 13, color: 'white' }}>{value}</span>
+      <span style={{ fontSize: 13, color: value ? 'white' : '#71717a', fontStyle: value ? 'normal' : 'italic' }}>{value || '(Vacío)'}</span>
     </div>
   );
 }
@@ -76,7 +76,7 @@ export default function BibliotecaItemPublica() {
   );
 
   const displayName = item.nombre || null;
-  const hasRightContent = item.categoria || item.subcategoria || item.marca || item.asunto || item.adelanto || item.enviado_el;
+  const hasRightContent = item.categoria || item.subcategoria || item.marca !== null || item.asunto !== null || item.adelanto !== null || item.enviado_el;
 
   const enviadoDisplay = item.enviado_el
     ? new Date(item.enviado_el + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
