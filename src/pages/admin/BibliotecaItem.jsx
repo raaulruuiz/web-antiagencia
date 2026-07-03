@@ -78,6 +78,62 @@ const IconPencil = () => (
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
   </svg>
 );
+const IconChain = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+  </svg>
+);
+const IconImageBlock = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+    <polyline points="21 15 16 10 5 21"/>
+  </svg>
+);
+const IconImageText = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="10" height="10" rx="1"/><line x1="15" y1="6" x2="21" y2="6"/>
+    <line x1="15" y1="10" x2="21" y2="10"/><line x1="3" y1="17" x2="21" y2="17"/><line x1="3" y1="21" x2="21" y2="21"/>
+  </svg>
+);
+const IconCorrection = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+  </svg>
+);
+const IconTrashSm = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
+    <path d="M9 6V4h6v2"/>
+  </svg>
+);
+const IconChevronUp = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+);
+const IconChevronDown = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+);
+const IconArrow = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+  </svg>
+);
+const IconGrid = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+    <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+  </svg>
+);
+const IconCarousel = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="6" y="4" width="12" height="16" rx="1"/><line x1="2" y1="9" x2="2" y2="15"/>
+    <line x1="22" y1="9" x2="22" y2="15"/>
+  </svg>
+);
 
 const CATEGORIAS = [
   { value: 'email', label: 'Email',            icon: <IconEmail /> },
@@ -103,6 +159,14 @@ const RESIZE_HANDLES = [
   { id: 's',  style: { bottom: -5, left: '50%', transform: 'translateX(-50%)', cursor: 's-resize' } },
   { id: 'sw', style: { bottom: -5, left: -5, cursor: 'sw-resize' } },
   { id: 'w',  style: { top: '50%', left: -5, transform: 'translateY(-50%)', cursor: 'w-resize' } },
+];
+
+// ── Block types ───────────────────────────────────────────────────────────────
+const BLOCK_TYPES = [
+  { type: 'enlaces',     label: 'Enlace CTA',     icon: <IconChain /> },
+  { type: 'imagen',      label: 'Imagen',          icon: <IconImageBlock /> },
+  { type: 'imagen_texto',label: 'Imagen + Texto',  icon: <IconImageText /> },
+  { type: 'correccion',  label: 'Corrección',      icon: <IconCorrection /> },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -146,7 +210,6 @@ function CatButtons({ options, colors, onSelect }) {
 }
 
 // ── Field with pencil (display mode) ─────────────────────────────────────────
-// savedValue: null = not set (show "+ add"), '' = empty shown as (Vacío), 'text' = value
 function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = true, type = 'text', placeholder, suggestions = [] }) {
   const [inputMode, setInputMode] = useState(false);
   const [inputVal, setInputVal]   = useState('');
@@ -172,7 +235,6 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
   const handleCancel = () => { setInputMode(false); setError(''); };
   const handleKeyDown = (e) => { if (e.key === 'Enter') { e.preventDefault(); handleConfirm(); } if (e.key === 'Escape') handleCancel(); };
 
-  // Not set → small add button
   if (!isSet && !inputMode) {
     return (
       <button onClick={startEdit}
@@ -184,7 +246,6 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
     );
   }
 
-  // Set, not editing → show value with pencil
   if (isSet && !inputMode) {
     const display = type === 'date' && savedValue ? formatDate(savedValue) : savedValue;
     return (
@@ -204,7 +265,6 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
     );
   }
 
-  // Input mode
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {isSet && <span style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>}
@@ -272,18 +332,67 @@ function TagColorEditor({ tag, onUpdate, onClose }) {
   );
 }
 
+// ── TagEditor (extends TagColorEditor — adds name field) ──────────────────────
+function TagEditor({ tag, onUpdate, onClose }) {
+  const [name, setName] = useState(tag.name);
+  const [hex, setHex]   = useState(tag.color);
+
+  const apply = (color) => {
+    const n = name.trim() || tag.name;
+    onUpdate(tag.id, { name: n, color });
+    onClose();
+  };
+
+  return (
+    <div style={{ background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 10, padding: '12px', marginTop: 6 }}>
+      <p style={{ fontSize: 11, color: '#71717a', margin: '0 0 8px' }}>Editar etiqueta</p>
+      {/* Name field */}
+      <input
+        value={name}
+        onChange={e => setName(e.target.value)}
+        placeholder="Nombre…"
+        style={{ width: '100%', background: '#111', border: '1px solid #3f3f46', borderRadius: 7, padding: '5px 8px', fontSize: 12, color: 'white', outline: 'none', boxSizing: 'border-box', marginBottom: 10 }}
+      />
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+        {TAG_PALETTE.map(c => (
+          <button key={c} onClick={() => setHex(c)}
+            style={{ width: 22, height: 22, borderRadius: '50%', background: c, border: `2px solid ${c.toLowerCase() === hex.toLowerCase() ? 'white' : 'transparent'}`, cursor: 'pointer', transition: 'border-color 0.1s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'white'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = c.toLowerCase() === hex.toLowerCase() ? 'white' : 'transparent'} />
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: '1px solid #3f3f46', borderRadius: 7, padding: '5px 8px' }}>
+          <label style={{ position: 'relative', width: 14, height: 14, flexShrink: 0, cursor: 'pointer' }}>
+            <span style={{ width: 14, height: 14, borderRadius: 3, background: /^#[0-9a-f]{3,6}$/i.test(hex) ? hex : '#888', display: 'block' }} />
+            <input type="color" value={/^#[0-9a-f]{6}$/i.test(hex) ? hex : '#888888'} onChange={e => setHex(e.target.value)}
+              style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer', border: 'none', padding: 0 }} />
+          </label>
+          <input value={hex} onChange={e => setHex(e.target.value)} placeholder="#6366f1"
+            style={{ flex: 1, background: 'none', border: 'none', color: 'white', fontSize: 12, outline: 'none', fontFamily: 'monospace' }} />
+        </div>
+        <button onClick={() => apply(hex)}
+          style={{ background: 'white', color: 'black', border: 'none', borderRadius: 7, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Aplicar</button>
+        <button onClick={onClose}
+          style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 7, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}>✕</button>
+      </div>
+    </div>
+  );
+}
+
 // ── TagPicker ─────────────────────────────────────────────────────────────────
-function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCreateTag, onUpdateTagColor }) {
-  const [input, setInput] = useState('');
+function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCreateTag, onUpdateTag, onDeleteTag, onUpdateTagColor }) {
+  const [input, setInput]       = useState('');
   const [showDrop, setShowDrop] = useState(false);
   const [editingTag, setEditingTag] = useState(null);
+  const [hoverTagId, setHoverTagId] = useState(null);
   const inputRef = useRef(null);
 
   const scopedTags = subcategoria ? allTags.filter(t => !t.subcategoria || t.subcategoria === subcategoria) : allTags;
-  const available = scopedTags.filter(t => !selectedIds.includes(t.id));
-  const filtered = input.length > 0 ? available.filter(t => t.name.toLowerCase().includes(input.toLowerCase())) : available;
+  const available  = scopedTags.filter(t => !selectedIds.includes(t.id));
+  const filtered   = input.length > 0 ? available.filter(t => t.name.toLowerCase().includes(input.toLowerCase())) : available;
   const exactMatch = scopedTags.find(t => t.name.toLowerCase() === input.trim().toLowerCase());
-  const canCreate = input.trim().length > 0 && !exactMatch;
+  const canCreate  = input.trim().length > 0 && !exactMatch;
 
   const handleSelect = (tag) => { onAdd(tag.id); setInput(''); setShowDrop(false); };
 
@@ -306,10 +415,10 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
             return (
               <span key={id} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 6px 2px 8px', background: tag.color + '22', border: `1px solid ${tag.color}`, color: tag.color }}>
                 {tag.name}
-                {onUpdateTagColor && (
+                {(onUpdateTag || onUpdateTagColor) && (
                   <button onClick={() => setEditingTag(isEditing ? null : tag)}
                     style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: '0 1px', display: 'flex', opacity: isEditing ? 1 : 0.5, lineHeight: 1 }}
-                    title="Editar color">
+                    title="Editar">
                     <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -322,8 +431,11 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
           })}
         </div>
       )}
-      {/* Color editor for selected tag */}
-      {editingTag && onUpdateTagColor && (
+      {/* Editor for selected tag */}
+      {editingTag && onUpdateTag && (
+        <TagEditor tag={editingTag} onUpdate={onUpdateTag} onClose={() => setEditingTag(null)} />
+      )}
+      {editingTag && !onUpdateTag && onUpdateTagColor && (
         <TagColorEditor tag={editingTag} onUpdate={onUpdateTagColor} onClose={() => setEditingTag(null)} />
       )}
       {/* Input */}
@@ -338,12 +450,33 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
         {showDrop && (filtered.length > 0 || canCreate) && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 30, overflow: 'hidden' }}>
             {filtered.slice(0, 6).map(tag => (
-              <div key={tag.id} onMouseDown={() => handleSelect(tag)}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', fontSize: 12 }}
-                onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+              <div key={tag.id}
+                onMouseDown={() => handleSelect(tag)}
+                onMouseEnter={() => setHoverTagId(tag.id)}
+                onMouseLeave={() => setHoverTagId(null)}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', fontSize: 12, background: hoverTagId === tag.id ? '#27272a' : 'transparent' }}>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: tag.color, flexShrink: 0 }} />
-                <span style={{ color: 'white' }}>{tag.name}</span>
+                <span style={{ color: 'white', flex: 1 }}>{tag.name}</span>
+                {hoverTagId === tag.id && (
+                  <span style={{ display: 'flex', gap: 4 }}>
+                    {onUpdateTag && (
+                      <button
+                        onMouseDown={e => { e.stopPropagation(); setEditingTag(tag); setShowDrop(false); }}
+                        style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', padding: 2, display: 'flex' }}
+                        title="Editar">
+                        <IconPencil />
+                      </button>
+                    )}
+                    {onDeleteTag && (
+                      <button
+                        onMouseDown={e => { e.stopPropagation(); onDeleteTag(tag.id); }}
+                        style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', padding: 2, display: 'flex' }}
+                        title="Eliminar">
+                        <IconTrashSm />
+                      </button>
+                    )}
+                  </span>
+                )}
               </div>
             ))}
             {canCreate && (
@@ -569,6 +702,217 @@ async function getToken() {
   return session?.access_token || null;
 }
 
+// ── Block: image uploader ─────────────────────────────────────────────────────
+function BlockImageUploader({ onFile, uploading }) {
+  const inputRef = useRef(null);
+  return (
+    <div
+      onClick={() => inputRef.current?.click()}
+      style={{ border: '1px dashed #3f3f46', borderRadius: 8, padding: '20px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: uploading ? 'not-allowed' : 'pointer', opacity: uploading ? 0.6 : 1, transition: 'border-color 0.15s' }}
+      onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = '#52525b'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = '#3f3f46'; }}>
+      <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }}
+        onChange={e => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ''; }} />
+      {uploading
+        ? <div style={{ width: 16, height: 16, border: '2px solid #3f3f46', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+        : <IconImageBlock />}
+      <span style={{ fontSize: 11, color: '#52525b' }}>{uploading ? 'Subiendo…' : 'Subir imagen'}</span>
+    </div>
+  );
+}
+
+// ── Block: selector panel ─────────────────────────────────────────────────────
+function BlockSelector({ onSelect, onClose }) {
+  return (
+    <div style={{ background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+        <span style={{ fontSize: 12, color: '#71717a', fontWeight: 500 }}>Añadir bloque</span>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 2, display: 'flex' }}><IconX /></button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        {BLOCK_TYPES.map(bt => (
+          <button key={bt.type} onClick={() => onSelect(bt.type)}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: 'transparent', border: '1px solid #27272a', borderRadius: 8, color: '#a1a1aa', cursor: 'pointer', fontSize: 12, transition: 'all 0.15s', textAlign: 'left' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = 'white'; e.currentTarget.style.background = '#27272a'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#a1a1aa'; e.currentTarget.style.background = 'transparent'; }}>
+            {bt.icon}
+            {bt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Block: divider ────────────────────────────────────────────────────────────
+function BlockDivider({ onAdd }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0', cursor: 'pointer', opacity: hover ? 1 : 0 }}
+      onClick={onAdd}>
+      <div style={{ flex: 1, height: 1, background: '#27272a' }} />
+      <span style={{ fontSize: 11, color: '#3f3f46', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ fontSize: 14, lineHeight: 1 }}>+</span> bloque
+      </span>
+      <div style={{ flex: 1, height: 1, background: '#27272a' }} />
+    </div>
+  );
+}
+
+// ── Block: header bar ─────────────────────────────────────────────────────────
+function BlockHeader({ label, index, total, onMoveUp, onMoveDown, onDelete }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+      <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', flex: 1 }}>{label}</span>
+      <button onClick={onMoveUp} disabled={index === 0}
+        style={{ background: 'none', border: 'none', color: index === 0 ? '#27272a' : '#52525b', cursor: index === 0 ? 'default' : 'pointer', padding: 2, display: 'flex' }}
+        title="Subir"><IconChevronUp /></button>
+      <button onClick={onMoveDown} disabled={index === total - 1}
+        style={{ background: 'none', border: 'none', color: index === total - 1 ? '#27272a' : '#52525b', cursor: index === total - 1 ? 'default' : 'pointer', padding: 2, display: 'flex' }}
+        title="Bajar"><IconChevronDown /></button>
+      <button onClick={onDelete}
+        style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 2, display: 'flex' }}
+        onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+        onMouseLeave={e => e.currentTarget.style.color = '#52525b'}
+        title="Eliminar bloque"><IconTrashSm /></button>
+    </div>
+  );
+}
+
+// ── Block: wrapper ────────────────────────────────────────────────────────────
+function BlockWrapper({ children, index, total, label, onMoveUp, onMoveDown, onDelete }) {
+  return (
+    <div style={{ background: '#111', border: '1px solid #1f1f1f', borderRadius: 10, padding: '12px 14px' }}>
+      <BlockHeader label={label} index={index} total={total} onMoveUp={onMoveUp} onMoveDown={onMoveDown} onDelete={onDelete} />
+      {children}
+    </div>
+  );
+}
+
+// ── Block: EnlacesBlock ───────────────────────────────────────────────────────
+function EnlacesBlock({ block, index, total, onChange, onMoveUp, onMoveDown, onDelete }) {
+  const [url, setUrl]     = useState(block.url || '');
+  const [texto, setTexto] = useState(block.texto || '');
+
+  const flush = () => onChange({ ...block, url: url.trim(), texto: texto.trim() });
+
+  return (
+    <BlockWrapper label="Enlace CTA" index={index} total={total} onMoveUp={onMoveUp} onMoveDown={onMoveDown} onDelete={onDelete}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <IconChain />
+          <input
+            value={url}
+            onChange={e => setUrl(e.target.value)}
+            onBlur={flush}
+            placeholder="https://…"
+            style={{ flex: 1, background: '#18181b', border: '1px solid #27272a', borderRadius: 6, padding: '6px 8px', fontSize: 12, color: 'white', outline: 'none', colorScheme: 'dark' }}
+          />
+        </div>
+        <input
+          value={texto}
+          onChange={e => setTexto(e.target.value)}
+          onBlur={flush}
+          placeholder="Texto del botón…"
+          style={{ width: '100%', background: '#18181b', border: '1px solid #27272a', borderRadius: 6, padding: '6px 8px', fontSize: 12, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }}
+        />
+      </div>
+    </BlockWrapper>
+  );
+}
+
+// ── Block: ImagenBlock ────────────────────────────────────────────────────────
+function ImagenBlock({ block, index, total, onChange, onMoveUp, onMoveDown, onDelete, onCropRequest, uploading, onUpload }) {
+  return (
+    <BlockWrapper label="Imagen" index={index} total={total} onMoveUp={onMoveUp} onMoveDown={onMoveDown} onDelete={onDelete}>
+      {block.url
+        ? (
+          <div style={{ position: 'relative' }}>
+            <img src={block.url} alt="" style={{ width: '100%', borderRadius: 6, display: 'block', maxHeight: 200, objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', top: 6, right: 6, display: 'flex', gap: 4 }}>
+              <button onClick={() => onCropRequest(block.id)}
+                style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', borderRadius: 6, padding: '4px 6px', cursor: 'pointer', display: 'flex', fontSize: 11, gap: 3, alignItems: 'center' }}>
+                <IconScissors /> Recortar
+              </button>
+              <button onClick={() => onUpload(block.id)}
+                style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', borderRadius: 6, padding: '4px 6px', cursor: 'pointer', fontSize: 11 }}>
+                Cambiar
+              </button>
+            </div>
+          </div>
+        )
+        : <BlockImageUploader uploading={uploading} onFile={file => onUpload(block.id, file)} />
+      }
+    </BlockWrapper>
+  );
+}
+
+// ── Block: ImagenTextoBlock ───────────────────────────────────────────────────
+function ImagenTextoBlock({ block, index, total, onChange, onMoveUp, onMoveDown, onDelete, onCropRequest, uploading, onUpload }) {
+  const [texto, setTexto] = useState(block.texto || '');
+
+  const flush = () => onChange({ ...block, texto: texto.trim() });
+
+  return (
+    <BlockWrapper label="Imagen + Texto" index={index} total={total} onMoveUp={onMoveUp} onMoveDown={onMoveDown} onDelete={onDelete}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {block.url
+          ? (
+            <div style={{ position: 'relative' }}>
+              <img src={block.url} alt="" style={{ width: '100%', borderRadius: 6, display: 'block', maxHeight: 160, objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', top: 6, right: 6, display: 'flex', gap: 4 }}>
+                <button onClick={() => onCropRequest(block.id)}
+                  style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', borderRadius: 6, padding: '4px 6px', cursor: 'pointer', display: 'flex', fontSize: 11, gap: 3, alignItems: 'center' }}>
+                  <IconScissors /> Recortar
+                </button>
+                <button onClick={() => onUpload(block.id)}
+                  style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', borderRadius: 6, padding: '4px 6px', cursor: 'pointer', fontSize: 11 }}>
+                  Cambiar
+                </button>
+              </div>
+            </div>
+          )
+          : <BlockImageUploader uploading={uploading} onFile={file => onUpload(block.id, file)} />
+        }
+        <textarea
+          value={texto}
+          onChange={e => setTexto(e.target.value)}
+          onBlur={flush}
+          placeholder="Texto del bloque…"
+          rows={3}
+          style={{ width: '100%', background: '#18181b', border: '1px solid #27272a', borderRadius: 6, padding: '6px 8px', fontSize: 12, color: 'white', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }}
+        />
+      </div>
+    </BlockWrapper>
+  );
+}
+
+// ── Block: CorreccionBlock ────────────────────────────────────────────────────
+function CorreccionBlock({ block, index, total, onChange, onMoveUp, onMoveDown, onDelete }) {
+  const [nota, setNota] = useState(block.nota || '');
+
+  const flush = () => onChange({ ...block, nota: nota.trim() });
+
+  return (
+    <BlockWrapper label="Corrección" index={index} total={total} onMoveUp={onMoveUp} onMoveDown={onMoveDown} onDelete={onDelete}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+        <div style={{ marginTop: 2, color: '#f97316', flexShrink: 0 }}><IconCorrection /></div>
+        <textarea
+          value={nota}
+          onChange={e => setNota(e.target.value)}
+          onBlur={flush}
+          placeholder="Describe la corrección…"
+          rows={3}
+          style={{ flex: 1, background: '#18181b', border: '1px solid #27272a', borderRadius: 6, padding: '6px 8px', fontSize: 12, color: 'white', outline: 'none', colorScheme: 'dark', resize: 'vertical', fontFamily: 'inherit' }}
+        />
+      </div>
+    </BlockWrapper>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 export default function BibliotecaItem() {
   const { id } = useParams();
@@ -586,9 +930,8 @@ export default function BibliotecaItem() {
   const [obTags, setObTags]     = useState([]);
 
   // ── Onboarding state ─────────────────────────────────────────────────────
-  // mode: 'onboarding' | 'display'
   const [mode, setMode]             = useState('onboarding');
-  const [obStep, setObStep]         = useState('categoria'); // 'categoria' | 'subcategoria' | 'campos'
+  const [obStep, setObStep]         = useState('categoria');
   const [obCategoria, setObCategoria] = useState(null);
   const [obSubcat, setObSubcat]     = useState(null);
   const [obMarca, setObMarca]       = useState('');
@@ -604,6 +947,15 @@ export default function BibliotecaItem() {
   const [asunto, setAsunto]       = useState(null);
   const [adelanto, setAdelanto]   = useState(null);
   const [enviadoEl, setEnviadoEl] = useState(null);
+
+  // ── Blocks state ─────────────────────────────────────────────────────────
+  const [blocksData, setBlocksData]         = useState([]);
+  const [showBlockSelector, setShowBlockSelector] = useState(false);
+  const [blockSelectorAfter, setBlockSelectorAfter] = useState(null); // index after which to insert
+  const [cropForBlock, setCropForBlock]     = useState(null); // { blockId, imageUrl }
+  const [blockUploading, setBlockUploading] = useState({}); // { [blockId]: bool }
+  const [blocksSaving, setBlocksSaving]     = useState(false);
+  const blockFileRefs = useRef({});
 
   // Misc
   const [allMarcas, setAllMarcas]       = useState([]);
@@ -629,13 +981,12 @@ export default function BibliotecaItem() {
         setAsunto(data.asunto !== null && data.asunto !== undefined ? data.asunto : null);
         setAdelanto(data.adelanto !== null && data.adelanto !== undefined ? data.adelanto : null);
         setEnviadoEl(data.enviado_el !== null && data.enviado_el !== undefined ? data.enviado_el : null);
-        // If already categorized → display mode
+        setBlocksData(data.blocks || []);
         if (data.categoria) setMode('display');
       } catch (e) { setError(e.message); }
       finally { setLoading(false); }
     })();
     fetch(`${API_BASE}/biblioteca/marcas`).then(r => r.ok ? r.json() : []).then(setAllMarcas).catch(() => {});
-    // Load all tags in parallel
     (async () => {
       const token2 = await getToken();
       if (token2) {
@@ -645,7 +996,6 @@ export default function BibliotecaItem() {
     })();
   }, [id, navigate]);
 
-  // Resolve itemTags whenever item or allTags change
   useEffect(() => {
     if (!item || !allTags.length) return;
     setItemTags((item.tags || []).map(id => allTags.find(t => t.id === id)).filter(Boolean));
@@ -683,7 +1033,6 @@ export default function BibliotecaItem() {
     finally { setDetecting(false); }
   };
 
-  // Onboarding handlers
   const handleObCategoria = (v) => { setObCategoria(v); setObStep(v === 'email' ? 'subcategoria' : 'campos'); };
   const handleObSubcat    = (v) => { setObSubcat(v);    setObStep('campos'); };
 
@@ -770,13 +1119,13 @@ export default function BibliotecaItem() {
     } catch (_) {}
   }, [addTagToItem]);
 
-  const updateTagColor = useCallback(async (tagId, color) => {
+  const updateTag = useCallback(async (tagId, { name, color }) => {
     try {
       const token = await getToken();
       const res = await fetch(`${API_BASE}/biblioteca/tags/${tagId}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ color }),
+        body: JSON.stringify({ name, color }),
       });
       if (res.ok) {
         const updated = await res.json();
@@ -785,7 +1134,107 @@ export default function BibliotecaItem() {
     } catch (_) {}
   }, []);
 
-  // Crop handlers
+  const deleteTag = useCallback(async (tagId) => {
+    try {
+      const token = await getToken();
+      await fetch(`${API_BASE}/biblioteca/tags/${tagId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAllTags(prev => prev.filter(t => t.id !== tagId));
+      setItem(prev => ({ ...prev, tags: (prev.tags || []).filter(id => id !== tagId) }));
+      setItemTags(prev => prev.filter(t => t.id !== tagId));
+    } catch (_) {}
+  }, []);
+
+  // ── Blocks handlers ──────────────────────────────────────────────────────
+  const saveBlocks = useCallback(async (blocks) => {
+    setBlocksSaving(true);
+    try {
+      const token = await getToken();
+      await fetch(`${API_BASE}/biblioteca/${id}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blocks }),
+      });
+    } catch (_) {}
+    finally { setBlocksSaving(false); }
+  }, [id]);
+
+  const addBlock = useCallback((type, afterIndex = null) => {
+    const newBlock = { id: `blk_${Date.now()}`, type, url: null, texto: '', nota: '' };
+    setBlocksData(prev => {
+      let next;
+      if (afterIndex === null) {
+        next = [...prev, newBlock];
+      } else {
+        next = [...prev.slice(0, afterIndex + 1), newBlock, ...prev.slice(afterIndex + 1)];
+      }
+      saveBlocks(next);
+      return next;
+    });
+    setShowBlockSelector(false);
+    setBlockSelectorAfter(null);
+  }, [saveBlocks]);
+
+  const updateBlock = useCallback((updatedBlock) => {
+    setBlocksData(prev => {
+      const next = prev.map(b => b.id === updatedBlock.id ? updatedBlock : b);
+      saveBlocks(next);
+      return next;
+    });
+  }, [saveBlocks]);
+
+  const deleteBlock = useCallback((blockId) => {
+    setBlocksData(prev => {
+      const next = prev.filter(b => b.id !== blockId);
+      saveBlocks(next);
+      return next;
+    });
+  }, [saveBlocks]);
+
+  const moveBlock = useCallback((blockId, direction) => {
+    setBlocksData(prev => {
+      const idx = prev.findIndex(b => b.id === blockId);
+      if (idx === -1) return prev;
+      const newIdx = idx + direction;
+      if (newIdx < 0 || newIdx >= prev.length) return prev;
+      const next = [...prev];
+      [next[idx], next[newIdx]] = [next[newIdx], next[idx]];
+      saveBlocks(next);
+      return next;
+    });
+  }, [saveBlocks]);
+
+  const uploadBlockImage = useCallback(async (blockId, file) => {
+    setBlockUploading(prev => ({ ...prev, [blockId]: true }));
+    try {
+      const token = await getToken();
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch(`${API_BASE}/biblioteca/${id}/block-image`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const { url } = await res.json();
+      setBlocksData(prev => {
+        const next = prev.map(b => b.id === blockId ? { ...b, url } : b);
+        saveBlocks(next);
+        return next;
+      });
+    } catch (e) { alert('Error al subir imagen: ' + e.message); }
+    finally { setBlockUploading(prev => ({ ...prev, [blockId]: false })); }
+  }, [id, saveBlocks]);
+
+  const addToLibrary = useCallback(async () => {
+    // placeholder — saves blocks and navigates back
+    await saveBlocks(blocksData);
+    navigate('/admin/biblioteca');
+  }, [blocksData, saveBlocks, navigate]);
+
+  // Crop handlers (main image)
   const handleCrop = useCallback((cropRect) => {
     setShowCrop(false);
     const img = new Image(); img.crossOrigin = 'anonymous';
@@ -815,6 +1264,24 @@ export default function BibliotecaItem() {
 
   const cancelCrop = () => { if (cropConfirm?.url) URL.revokeObjectURL(cropConfirm.url); setCropConfirm(null); };
 
+  // Crop for block image
+  const handleBlockCrop = useCallback((cropRect) => {
+    if (!cropForBlock) return;
+    const { blockId, imageUrl } = cropForBlock;
+    setCropForBlock(null);
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = cropRect.w; canvas.height = cropRect.h;
+      canvas.getContext('2d').drawImage(img, cropRect.x, cropRect.y, cropRect.w, cropRect.h, 0, 0, cropRect.w, cropRect.h);
+      canvas.toBlob(blob => {
+        if (!blob) return;
+        uploadBlockImage(blockId, blob);
+      }, 'image/png');
+    };
+    img.src = imageUrl;
+  }, [cropForBlock, uploadBlockImage]);
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0d0d0d' }}>
       <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
@@ -836,6 +1303,10 @@ export default function BibliotecaItem() {
       {cropConfirm && <CropConfirmModal previewUrl={cropConfirm.url} onConfirm={confirmCrop} onCancel={cancelCrop} saving={replacing} />}
       {showModal && item && <ImageModal imageUrl={item.url} alt={item.filename} onClose={() => setShowModal(false)} />}
       {discardConfirm && <DiscardModal onConfirm={confirmDiscard} onCancel={() => setDiscardConfirm(false)} />}
+      {/* Crop overlay for block images */}
+      {cropForBlock && (
+        <CropOverlay imageUrl={cropForBlock.imageUrl} onCrop={handleBlockCrop} onCancel={() => setCropForBlock(null)} />
+      )}
 
       {/* Top bar */}
       <div className="flex items-center gap-3 mb-5">
@@ -843,7 +1314,7 @@ export default function BibliotecaItem() {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           Biblioteca
         </button>
-        {saving && <span className="text-xs text-zinc-600">Guardando…</span>}
+        {(saving || blocksSaving) && <span className="text-xs text-zinc-600">Guardando…</span>}
       </div>
 
       {/* Two columns */}
@@ -877,10 +1348,8 @@ export default function BibliotecaItem() {
         {/* Right: onboarding OR display */}
         {mode === 'onboarding' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minHeight: 400 }}>
-            {/* Step content */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-              {/* Show selected tags on step subcategoria/campos */}
               {obCategoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -896,7 +1365,6 @@ export default function BibliotecaItem() {
                 </div>
               )}
 
-              {/* Step: categoria */}
               {obStep === 'categoria' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <span style={{ fontSize: 18, fontWeight: 500, color: 'white' }}>¿Email o Ficha de Producto?</span>
@@ -904,7 +1372,6 @@ export default function BibliotecaItem() {
                 </div>
               )}
 
-              {/* Step: subcategoria */}
               {obStep === 'subcategoria' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <span style={{ fontSize: 18, fontWeight: 500, color: 'white' }}>¿Automatización o Campaña?</span>
@@ -912,10 +1379,8 @@ export default function BibliotecaItem() {
                 </div>
               )}
 
-              {/* Step: campos */}
               {obStep === 'campos' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {/* Detectar con IA */}
                   <button onClick={handleDetectarIA} disabled={detecting}
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: detecting ? '#1a1a2e' : 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.4)', color: detecting ? '#818cf8' : '#a5b4fc', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 500, cursor: detecting ? 'not-allowed' : 'pointer', transition: 'all 0.15s' }}
                     onMouseEnter={e => { if (!detecting) { e.currentTarget.style.background='rgba(99,102,241,0.18)'; e.currentTarget.style.borderColor='rgba(99,102,241,0.6)'; }}}
@@ -929,20 +1394,16 @@ export default function BibliotecaItem() {
                     )}
                     {detecting ? 'Detectando…' : 'Detectar con IA'}
                   </button>
-                  {/* Marca — required */}
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                       Marca <span style={{ color: '#f87171' }}>*</span>
                     </label>
                     <div style={{ position: 'relative' }}>
-                      <input
-                        type="text" value={obMarca}
+                      <input type="text" value={obMarca}
                         onChange={e => { setObMarca(e.target.value); setObMarcaError(''); }}
                         placeholder="Marca…"
-                        onFocus={() => {}}
-                        style={{ width: '100%', background: '#18181b', border: `1px solid ${obMarcaError ? '#f87171' : '#3f3f46'}`, borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }}
-                      />
-                      {/* Autocomplete */}
+                        style={{ width: '100%', background: '#18181b', border: `1px solid ${obMarcaError ? '#f87171' : '#3f3f46'}`, borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                       {obMarca.length > 0 && allMarcas.filter(s => s.toLowerCase().includes(obMarca.toLowerCase()) && s !== obMarca).length > 0 && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 20, overflow: 'hidden' }}>
                           {allMarcas.filter(s => s.toLowerCase().includes(obMarca.toLowerCase()) && s !== obMarca).slice(0, 6).map(s => (
@@ -957,21 +1418,18 @@ export default function BibliotecaItem() {
                     {obMarcaError && <span style={{ fontSize: 11, color: '#f87171' }}>{obMarcaError}</span>}
                   </div>
 
-                  {/* Asunto */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Asunto</label>
                     <input type="text" value={obAsunto} onChange={e => setObAsunto(e.target.value)} placeholder="Asunto del email…"
                       style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                   </div>
 
-                  {/* Adelanto */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Adelanto</label>
                     <input type="text" value={obAdelanto} onChange={e => setObAdelanto(e.target.value)} placeholder="Texto de adelanto…"
                       style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                   </div>
 
-                  {/* Enviado el Día — only for Campaña */}
                   {obSubcat !== 'automatizacion' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</label>
@@ -980,7 +1438,6 @@ export default function BibliotecaItem() {
                     </div>
                   )}
 
-                  {/* Etiquetas */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</label>
                     <TagPicker
@@ -1010,7 +1467,6 @@ export default function BibliotecaItem() {
               )}
             </div>
 
-            {/* Bottom buttons */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 8 }}>
               {obStep === 'campos' && (
                 <button onClick={handleGuardar} disabled={saving}
@@ -1030,7 +1486,6 @@ export default function BibliotecaItem() {
         ) : (
           /* Display mode */
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* Categoria / Subcategoria tags */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {categoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -1046,7 +1501,6 @@ export default function BibliotecaItem() {
               )}
             </div>
 
-            {/* Etiquetas */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
               <TagPicker
@@ -1056,11 +1510,11 @@ export default function BibliotecaItem() {
                 onAdd={addTagToItem}
                 onRemove={removeTagFromItem}
                 onCreateTag={createTagAndAdd}
-                onUpdateTagColor={updateTagColor}
+                onUpdateTag={updateTag}
+                onDeleteTag={deleteTag}
               />
             </div>
 
-            {/* Fields */}
             <FieldRow label="Marca" savedValue={marca} required
               onSave={v => { setMarca(v); patch({ marca: v }); if (v && !allMarcas.includes(v)) setAllMarcas(p => [...p, v].sort((a,b) => a.localeCompare(b))); }}
               allowEmpty={false} suggestions={allMarcas} />
@@ -1072,6 +1526,111 @@ export default function BibliotecaItem() {
           </div>
         )}
       </div>
+
+      {/* ── Blocks section (display mode, categoria=email) ── */}
+      {mode === 'display' && categoria === 'email' && (
+        <div style={{ marginTop: 40 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: 'white', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Análisis de bloques
+            </h3>
+            {blocksSaving && <span style={{ fontSize: 11, color: '#52525b' }}>Guardando…</span>}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {/* Top divider */}
+            <BlockDivider onAdd={() => { setBlockSelectorAfter(-1); setShowBlockSelector(true); }} />
+
+            {blocksData.map((block, idx) => {
+              const commonProps = {
+                block,
+                index: idx,
+                total: blocksData.length,
+                onChange: updateBlock,
+                onMoveUp: () => moveBlock(block.id, -1),
+                onMoveDown: () => moveBlock(block.id, 1),
+                onDelete: () => deleteBlock(block.id),
+              };
+
+              let blockEl = null;
+              if (block.type === 'enlaces') {
+                blockEl = <EnlacesBlock key={block.id} {...commonProps} />;
+              } else if (block.type === 'imagen') {
+                blockEl = (
+                  <ImagenBlock key={block.id} {...commonProps}
+                    uploading={!!blockUploading[block.id]}
+                    onUpload={(blockId, file) => {
+                      if (file) {
+                        uploadBlockImage(blockId, file);
+                      } else {
+                        // trigger file picker via hidden input
+                        const inp = document.createElement('input');
+                        inp.type = 'file'; inp.accept = 'image/*';
+                        inp.onchange = e => { const f = e.target.files?.[0]; if (f) uploadBlockImage(blockId, f); };
+                        inp.click();
+                      }
+                    }}
+                    onCropRequest={(blockId) => {
+                      const b = blocksData.find(x => x.id === blockId);
+                      if (b?.url) setCropForBlock({ blockId, imageUrl: b.url });
+                    }}
+                  />
+                );
+              } else if (block.type === 'imagen_texto') {
+                blockEl = (
+                  <ImagenTextoBlock key={block.id} {...commonProps}
+                    uploading={!!blockUploading[block.id]}
+                    onUpload={(blockId, file) => {
+                      if (file) {
+                        uploadBlockImage(blockId, file);
+                      } else {
+                        const inp = document.createElement('input');
+                        inp.type = 'file'; inp.accept = 'image/*';
+                        inp.onchange = e => { const f = e.target.files?.[0]; if (f) uploadBlockImage(blockId, f); };
+                        inp.click();
+                      }
+                    }}
+                    onCropRequest={(blockId) => {
+                      const b = blocksData.find(x => x.id === blockId);
+                      if (b?.url) setCropForBlock({ blockId, imageUrl: b.url });
+                    }}
+                  />
+                );
+              } else if (block.type === 'correccion') {
+                blockEl = <CorreccionBlock key={block.id} {...commonProps} />;
+              }
+
+              return (
+                <div key={block.id}>
+                  {blockEl}
+                  <BlockDivider onAdd={() => { setBlockSelectorAfter(idx); setShowBlockSelector(true); }} />
+                </div>
+              );
+            })}
+
+            {/* Block selector panel */}
+            {showBlockSelector && (
+              <div style={{ marginTop: 8 }}>
+                <BlockSelector
+                  onSelect={(type) => addBlock(type, blockSelectorAfter === -1 ? null : blockSelectorAfter)}
+                  onClose={() => { setShowBlockSelector(false); setBlockSelectorAfter(null); }}
+                />
+              </div>
+            )}
+
+            {/* Add first block CTA when empty */}
+            {blocksData.length === 0 && !showBlockSelector && (
+              <button
+                onClick={() => { setBlockSelectorAfter(null); setShowBlockSelector(true); }}
+                style={{ width: '100%', background: 'transparent', border: '1px dashed #27272a', color: '#52525b', borderRadius: 10, padding: '20px 16px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#52525b'; }}>
+                <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> Añadir primer bloque
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>

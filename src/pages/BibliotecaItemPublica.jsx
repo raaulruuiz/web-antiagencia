@@ -3,15 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
-const CATEGORIAS = {
-  email: 'Email',
-  ficha: 'Ficha de Producto',
-};
-const SUBCATEGORIAS = {
-  automatizacion: 'Automatización',
-  campana: 'Campaña',
-};
-
+const CATEGORIAS = { email: 'Email', ficha: 'Ficha de Producto' };
+const SUBCATEGORIAS = { automatizacion: 'Automatización', campana: 'Campaña' };
 const CATEGORIA_COLORS = {
   email: { bg: 'rgba(59,130,246,0.15)', border: '#3b82f6', color: '#93c5fd' },
   ficha: { bg: 'rgba(168,85,247,0.15)', border: '#a855f7', color: '#d8b4fe' },
@@ -21,13 +14,9 @@ const SUBCAT_COLORS = {
   campana:        { bg: 'rgba(249,115,22,0.12)',  border: '#f97316', color: '#fdba74' },
 };
 
-function Tag({ colors, label }) {
+function Pill({ colors, label }) {
   return (
-    <span style={{
-      fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', display: 'inline-block',
-      background: colors.bg, border: `1px solid ${colors.border}`, color: colors.color,
-      alignSelf: 'flex-start',
-    }}>
+    <span style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', display: 'inline-block', background: colors.bg, border: `1px solid ${colors.border}`, color: colors.color, alignSelf: 'flex-start' }}>
       {label}
     </span>
   );
@@ -43,17 +32,156 @@ function Field({ label, value }) {
   );
 }
 
+// ── Block renderers (view-only) ───────────────────────────────────────────────
+
+function BlockHeader({ title, subtitle }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <h3 style={{ fontSize: 17, fontWeight: 700, color: 'white', margin: 0 }}>{title}</h3>
+      {subtitle && <p style={{ fontSize: 12, color: '#71717a', margin: '3px 0 0' }}>{subtitle}</p>}
+    </div>
+  );
+}
+
+function EnlacesBlockView({ block }) {
+  const links = block.links || [];
+  if (!links.length) return null;
+  return (
+    <div>
+      <BlockHeader title={block.title} subtitle={block.subtitle} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {links.map(link => (
+          <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"
+            style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '8px 12px', textDecoration: 'none', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.08)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; }}>
+            {link.imageUrl && <img src={link.imageUrl} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }} />}
+            <span style={{ color: '#a5b4fc', fontSize: 13, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {link.url}
+            </span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ImagenBlockView({ block }) {
+  const images = block.images || [];
+  const [current, setCurrent] = useState(0);
+  if (!images.length) return null;
+
+  if (block.view === 'carousel') {
+    return (
+      <div>
+        <BlockHeader title={block.title} subtitle={block.subtitle} />
+        <div style={{ position: 'relative' }}>
+          <img src={images[current]} style={{ width: '100%', borderRadius: 10, display: 'block', maxHeight: 400, objectFit: 'contain', background: '#111' }} />
+          {images.length > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 10 }}>
+              <button onClick={() => setCurrent(c => (c - 1 + images.length) % images.length)}
+                style={{ background: '#1a1a1a', border: '1px solid #3f3f46', color: 'white', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>‹</button>
+              <span style={{ fontSize: 11, color: '#71717a' }}>{current + 1} / {images.length}</span>
+              <button onClick={() => setCurrent(c => (c + 1) % images.length)}
+                style={{ background: '#1a1a1a', border: '1px solid #3f3f46', color: 'white', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>›</button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Grid
+  return (
+    <div>
+      <BlockHeader title={block.title} subtitle={block.subtitle} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
+        {images.map((url, i) => (
+          <div key={i} style={{ aspectRatio: '16/9', overflow: 'hidden', borderRadius: 8, border: '1px solid #27272a' }}>
+            <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ImagenTextoBlockView({ block }) {
+  if (!block.text && !block.imageUrl) return null;
+  const isReversed = block.layout === 'text_image';
+  const color = block.color || '#6366f1';
+  return (
+    <div>
+      <BlockHeader title={block.title} subtitle={block.subtitle} />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start', direction: isReversed ? 'rtl' : 'ltr' }}>
+        {block.imageUrl && (
+          <div style={{ direction: 'ltr' }}>
+            <img src={block.imageUrl} style={{ width: '100%', borderRadius: 10, display: 'block' }} />
+          </div>
+        )}
+        {block.text && (
+          <div style={{ direction: 'ltr', background: color + '18', border: `1px solid ${color}44`, borderRadius: 10, padding: '14px 16px' }}>
+            <p style={{ fontSize: 13, color: 'white', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{block.text}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CorreccionBlockView({ block }) {
+  const rows = block.rows || [];
+  if (!rows.length) return null;
+  return (
+    <div>
+      <BlockHeader title={block.title} subtitle={block.subtitle} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {rows.map(row => (
+          <div key={row.id} style={{ display: 'grid', gridTemplateColumns: `repeat(${row.cols}, 1fr)`, gap: 8 }}>
+            {row.cells.map(cell => (
+              <div key={cell.id}>
+                {cell.type === 'text' ? (
+                  <p style={{ fontSize: 13, color: 'white', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap', padding: '8px 0' }}>{cell.content}</p>
+                ) : cell.imageUrl ? (
+                  <img src={cell.imageUrl} style={{ width: '100%', borderRadius: 8, display: 'block' }} />
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BlockView({ block }) {
+  const wrapStyle = { border: '1px solid #1f1f1f', borderRadius: 12, padding: '20px 24px', background: '#0a0a0a' };
+  switch (block.type) {
+    case 'enlaces':      return <div style={wrapStyle}><EnlacesBlockView block={block} /></div>;
+    case 'imagen':       return <div style={wrapStyle}><ImagenBlockView block={block} /></div>;
+    case 'imagen_texto': return <div style={wrapStyle}><ImagenTextoBlockView block={block} /></div>;
+    case 'correccion':   return <div style={wrapStyle}><CorreccionBlockView block={block} /></div>;
+    default: return null;
+  }
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+
 export default function BibliotecaItemPublica() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [item, setItem] = useState(null);
+  const [item, setItem]       = useState(null);
+  const [allTags, setAllTags] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError]     = useState(null);
 
   useEffect(() => {
-    fetch(`${API_BASE}/biblioteca/${id}`)
-      .then(r => r.ok ? r.json() : Promise.reject(r.status === 404 ? 'No encontrado' : 'Error'))
-      .then(setItem)
+    Promise.all([
+      fetch(`${API_BASE}/biblioteca/${id}`).then(r => r.ok ? r.json() : Promise.reject(r.status === 404 ? 'No encontrado' : 'Error')),
+      fetch(`${API_BASE}/biblioteca/tags/public`).then(r => r.ok ? r.json() : []),
+    ])
+      .then(([itemData, tagsData]) => { setItem(itemData); setAllTags(tagsData); })
       .catch(e => setError(typeof e === 'string' ? e : 'Error al cargar'))
       .finally(() => setLoading(false));
   }, [id]);
@@ -76,28 +204,23 @@ export default function BibliotecaItemPublica() {
     </div>
   );
 
-  const displayName = item.nombre || null;
   const hasRightContent = item.categoria || item.subcategoria || item.marca !== null || item.asunto !== null || item.adelanto !== null || item.enviado_el;
-
-  const enviadoDisplay = item.enviado_el
-    ? new Date(item.enviado_el + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
-    : null;
+  const enviadoDisplay  = item.enviado_el ? new Date(item.enviado_el + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
+  const resolvedTags    = (item.tags || []).map(tid => allTags.find(t => t.id === tid)).filter(Boolean);
+  const blocksData      = item.blocks_data && item.blocks_data.blocks ? item.blocks_data : { blocks: [] };
 
   return (
     <div style={{ ...s, background: '#0d0d0d', color: 'white', minHeight: '100vh', padding: '32px 24px' }}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
-        {/* Header */}
+        {/* Back button */}
         <div style={{ marginBottom: 24 }}>
-          <button
-            onClick={() => navigate('/anti-biblioteca')}
+          <button onClick={() => navigate('/anti-biblioteca')}
             style={{ background: 'transparent', border: '1px solid #27272a', color: '#71717a', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#52525b'; e.currentTarget.style.color = 'white'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a'; }}
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a'; }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             Anti-Biblioteca
           </button>
         </div>
@@ -105,47 +228,65 @@ export default function BibliotecaItemPublica() {
         {/* Two equal columns */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'flex-start' }}>
 
-          {/* Left: image with scroll frame */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid #27272a' }}>
-              <img
-                src={item.url}
-                alt={displayName || item.filename}
-                style={{ width: '100%', display: 'block' }}
-              />
-            </div>
+          {/* Left: image */}
+          <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid #27272a' }}>
+            <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />
           </div>
 
           {/* Right: metadata */}
           {hasRightContent && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-              {/* Tags */}
+              {/* Categoria / Subcategoria */}
               {(item.categoria || item.subcategoria) && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {item.categoria && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
-                      <Tag colors={CATEGORIA_COLORS[item.categoria] || { bg: '#18181b', border: '#27272a', color: 'white' }} label={CATEGORIAS[item.categoria] || item.categoria} />
+                      <Pill colors={CATEGORIA_COLORS[item.categoria] || { bg: '#18181b', border: '#27272a', color: 'white' }} label={CATEGORIAS[item.categoria] || item.categoria} />
                     </div>
                   )}
                   {item.subcategoria && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
-                      <Tag colors={SUBCAT_COLORS[item.subcategoria] || { bg: '#18181b', border: '#27272a', color: 'white' }} label={SUBCATEGORIAS[item.subcategoria] || item.subcategoria} />
+                      <Pill colors={SUBCAT_COLORS[item.subcategoria] || { bg: '#18181b', border: '#27272a', color: 'white' }} label={SUBCATEGORIAS[item.subcategoria] || item.subcategoria} />
                     </div>
                   )}
                 </div>
               )}
 
+              {/* Etiquetas */}
+              {resolvedTags.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                    {resolvedTags.map(tag => (
+                      <span key={tag.id} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', background: tag.color + '22', border: `1px solid ${tag.color}`, color: tag.color }}>
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Fields */}
-              <Field label="Marca" value={item.marca} />
-              <Field label="Asunto" value={item.asunto} />
-              <Field label="Adelanto" value={item.adelanto} />
+              <Field label="Marca"          value={item.marca} />
+              <Field label="Asunto"         value={item.asunto} />
+              <Field label="Adelanto"       value={item.adelanto} />
               <Field label="Enviado el Día" value={enviadoDisplay} />
             </div>
           )}
         </div>
+
+        {/* Blocks — view only, only for email */}
+        {item.categoria === 'email' && blocksData.blocks.length > 0 && (
+          <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {blocksData.blocks.map(block => (
+              <BlockView key={block.id} block={block} />
+            ))}
+          </div>
+        )}
+
       </div>
     </div>
   );
