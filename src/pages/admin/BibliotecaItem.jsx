@@ -142,13 +142,18 @@ export default function BibliotecaItem() {
       {/* Two equal columns */}
       <div className="grid grid-cols-2 gap-8 items-start">
 
-        {/* Left: image */}
+        {/* Left: image with scroll frame */}
         <div>
-          <img
-            src={item.url}
-            alt={nombre || item.filename}
-            className="w-full rounded-xl border border-zinc-800 block"
-          />
+          <div
+            className="rounded-xl border border-zinc-800"
+            style={{ height: 560, overflowY: 'auto', overflowX: 'hidden' }}
+          >
+            <img
+              src={item.url}
+              alt={nombre || item.filename}
+              style={{ width: '100%', display: 'block' }}
+            />
+          </div>
           <p className="text-xs text-zinc-700 mt-2">
             {new Date(item.created_at).toLocaleDateString('es-ES', {
               day: '2-digit', month: 'short', year: 'numeric',
@@ -186,18 +191,32 @@ export default function BibliotecaItem() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
-              <span className="text-sm text-zinc-300">¿Email o Ficha de Producto?</span>
-              <div className="flex gap-3">
+            <div className="flex flex-col items-center gap-6 pt-8">
+              <span className="text-sm text-zinc-300 self-start">¿Email o Ficha de Producto?</span>
+              <div className="flex gap-4 w-full">
                 {CATEGORIAS.map(c => (
                   <button
                     key={c.value}
                     onClick={() => handleCategoria(c.value)}
-                    className="flex flex-col items-center justify-center gap-2 border border-zinc-700 hover:border-zinc-400 text-zinc-400 hover:text-white rounded-xl transition-colors"
-                    style={{ width: 110, height: 110 }}
+                    className="flex flex-col items-center justify-center gap-3 border rounded-2xl transition-all flex-1"
+                    style={{
+                      height: 160,
+                      borderColor: '#3f3f46',
+                      color: '#71717a',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = CATEGORIA_COLORS[c.value].border;
+                      e.currentTarget.style.color = CATEGORIA_COLORS[c.value].text;
+                      e.currentTarget.style.background = CATEGORIA_COLORS[c.value].bg;
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = '#3f3f46';
+                      e.currentTarget.style.color = '#71717a';
+                      e.currentTarget.style.background = 'transparent';
+                    }}
                   >
                     {c.icon}
-                    <span className="text-xs text-center leading-tight px-1">{c.label}</span>
+                    <span className="text-sm text-center leading-tight px-2">{c.label}</span>
                   </button>
                 ))}
               </div>

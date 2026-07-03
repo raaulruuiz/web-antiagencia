@@ -67,19 +67,23 @@ export default function BibliotecaItemPublica() {
           </button>
         </div>
 
-        {/* Two-column layout */}
-        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
+        {/* Nombre */}
+        {displayName && (
+          <p style={{ fontSize: 16, fontWeight: 500, color: 'white', margin: '0 0 20px' }}>{displayName}</p>
+        )}
 
-          {/* Left: image */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {displayName && (
-              <p style={{ fontSize: 15, fontWeight: 500, color: 'white', margin: 0 }}>{displayName}</p>
-            )}
-            <img
-              src={item.url}
-              alt={displayName || item.filename}
-              style={{ width: '100%', borderRadius: 12, border: '1px solid #27272a', display: 'block' }}
-            />
+        {/* Two equal columns */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'flex-start' }}>
+
+          {/* Left: image with scroll frame */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid #27272a' }}>
+              <img
+                src={item.url}
+                alt={displayName || item.filename}
+                style={{ width: '100%', display: 'block' }}
+              />
+            </div>
             <p style={{ fontSize: 11, color: '#3f3f46', margin: 0 }}>
               {new Date(item.created_at).toLocaleDateString('es-ES', {
                 day: '2-digit', month: 'short', year: 'numeric',
@@ -90,18 +94,16 @@ export default function BibliotecaItemPublica() {
 
           {/* Right: metadata (only show if something set) */}
           {item.categoria && (
-            <div style={{ width: 200, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16, paddingTop: displayName ? 28 : 0 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Categoría</span>
-                <span style={{
-                  fontSize: 12, fontWeight: 500, borderRadius: 999, padding: '4px 12px', display: 'inline-block',
-                  background: CATEGORIA_COLORS[item.categoria]?.bg || '#18181b',
-                  border: `1px solid ${CATEGORIA_COLORS[item.categoria]?.border || '#27272a'}`,
-                  color: CATEGORIA_COLORS[item.categoria]?.color || 'white',
-                }}>
-                  {CATEGORIAS[item.categoria] || item.categoria}
-                </span>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Categoría</span>
+              <span style={{
+                fontSize: 12, fontWeight: 500, borderRadius: 999, padding: '4px 12px', display: 'inline-block',
+                background: CATEGORIA_COLORS[item.categoria]?.bg || '#18181b',
+                border: `1px solid ${CATEGORIA_COLORS[item.categoria]?.border || '#27272a'}`,
+                color: CATEGORIA_COLORS[item.categoria]?.color || 'white',
+              }}>
+                {CATEGORIAS[item.categoria] || item.categoria}
+              </span>
             </div>
           )}
         </div>
