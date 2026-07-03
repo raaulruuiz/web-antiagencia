@@ -384,6 +384,7 @@ function TagEditor({ tag, onUpdate, onClose }) {
 function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCreateTag, onUpdateTag, onDeleteTag, onUpdateTagColor }) {
   const [input, setInput]       = useState('');
   const [showDrop, setShowDrop] = useState(false);
+  const [showInput, setShowInput] = useState(false);
   const [editingTag, setEditingTag] = useState(null);
   const [hoverTagId, setHoverTagId] = useState(null);
   const inputRef = useRef(null);
@@ -394,43 +395,53 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
   const exactMatch = scopedTags.find(t => t.name.toLowerCase() === input.trim().toLowerCase());
   const canCreate  = input.trim().length > 0 && !exactMatch;
 
-  const handleSelect = (tag) => { onAdd(tag.id); setInput(''); setShowDrop(false); };
+  const handleSelect = (tag) => { onAdd(tag.id); setInput(''); setShowDrop(false); setShowInput(false); };
 
   const handleCreate = () => {
     const color = TAG_PALETTE[Math.floor(Math.random() * TAG_PALETTE.length)];
     onCreateTag(input.trim(), color, subcategoria);
     setInput('');
     setShowDrop(false);
+    setShowInput(false);
+  };
+
+  const openInput = () => {
+    setShowInput(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      {/* Selected tags */}
-      {selectedIds.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-          {selectedIds.map(id => {
-            const tag = allTags.find(t => t.id === id);
-            if (!tag) return null;
-            const isEditing = editingTag?.id === tag.id;
-            return (
-              <span key={id} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 6px 2px 8px', background: tag.color + '22', border: `1px solid ${tag.color}`, color: tag.color }}>
-                {tag.name}
-                {(onUpdateTag || onUpdateTagColor) && (
-                  <button onClick={() => setEditingTag(isEditing ? null : tag)}
-                    style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: '0 1px', display: 'flex', opacity: isEditing ? 1 : 0.5, lineHeight: 1 }}
-                    title="Editar">
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                  </button>
-                )}
-                <button onClick={() => onRemove(id)} style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: 0, display: 'flex', opacity: 0.7, lineHeight: 1, fontSize: 14 }}>×</button>
-              </span>
-            );
-          })}
-        </div>
-      )}
+      {/* Selected tags + add button */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
+        {selectedIds.map(id => {
+          const tag = allTags.find(t => t.id === id);
+          if (!tag) return null;
+          const isEditing = editingTag?.id === tag.id;
+          return (
+            <span key={id} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 6px 2px 8px', background: tag.color + '22', border: `1px solid ${tag.color}`, color: tag.color }}>
+              {tag.name}
+              {(onUpdateTag || onUpdateTagColor) && (
+                <button onClick={() => setEditingTag(isEditing ? null : tag)}
+                  style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: '0 1px', display: 'flex', opacity: isEditing ? 1 : 0.5, lineHeight: 1 }}
+                  title="Editar">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+              )}
+              <button onClick={() => onRemove(id)} style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: 0, display: 'flex', opacity: 0.7, lineHeight: 1, fontSize: 14 }}>×</button>
+            </span>
+          );
+        })}
+        {!showInput && (
+          <button onClick={openInput} title="Añadir etiqueta"
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', border: '1px solid #3f3f46', background: 'none', color: '#71717a', cursor: 'pointer', fontSize: 16, lineHeight: 1, flexShrink: 0 }}>
+            +
+          </button>
+        )}
+      </div>
       {/* Editor for selected tag */}
       {editingTag && onUpdateTag && (
         <TagEditor tag={editingTag} onUpdate={onUpdateTag} onClose={() => setEditingTag(null)} />
@@ -438,12 +449,12 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
       {editingTag && !onUpdateTag && onUpdateTagColor && (
         <TagColorEditor tag={editingTag} onUpdate={onUpdateTagColor} onClose={() => setEditingTag(null)} />
       )}
-      {/* Input */}
-      <div style={{ position: 'relative' }}>
+      {/* Input (shown only when + clicked) */}
+      {showInput && <div style={{ position: 'relative' }}>
         <input ref={inputRef} value={input}
           onChange={e => { setInput(e.target.value); setShowDrop(true); }}
           onFocus={() => setShowDrop(true)}
-          onBlur={() => setTimeout(() => setShowDrop(false), 150)}
+          onBlur={() => setTimeout(() => { setShowDrop(false); if (!input.trim()) setShowInput(false); }, 150)}
           placeholder="Añadir etiqueta…"
           style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 10px', fontSize: 12, color: 'white', outline: 'none', boxSizing: 'border-box', colorScheme: 'dark' }}
         />
@@ -491,7 +502,7 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
             )}
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }
