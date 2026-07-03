@@ -717,10 +717,13 @@ async function getToken() {
 const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7' };
 const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo' };
 
-function BlockSelector({ onSelect, hasCorreccion }) {
+function BlockSelector({ onSelect, hasCorreccion, onClose }) {
   return (
     <div style={{ background: '#111', border: '1px solid #27272a', borderRadius: 14, padding: '16px 16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <span style={{ fontSize: 12, color: '#71717a', fontWeight: 500 }}>Añadir bloque</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 12, color: '#71717a', fontWeight: 500 }}>Añadir bloque</span>
+        {onClose && <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>}
+      </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {BLOCK_TYPES.map(bt => {
           const disabled = bt.type === 'correccion' && hasCorreccion;
@@ -740,49 +743,100 @@ function BlockSelector({ onSelect, hasCorreccion }) {
   );
 }
 
-// ── Block: card (collapsed) ───────────────────────────────────────────────────
+// ── Block: card ───────────────────────────────────────────────────────────────
 function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown }) {
   const bt = BLOCK_TYPES.find(b => b.type === block.type);
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
+  const imgs = block.images || [];
+
   return (
-    <div style={{ background: '#111', border: '1px solid #1f1f1f', borderRadius: 10, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-      <span style={{ color: c, display: 'flex', flexShrink: 0 }}>{bt?.icon}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, color: 'white', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{block.titulo || bt?.label}</div>
-        {block.subtitulo && <div style={{ fontSize: 11, color: '#71717a', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{block.subtitulo}</div>}
+    <div style={{ background: '#111', border: '1px solid #1f1f1f', borderRadius: 10, overflow: 'hidden' }}>
+      {/* Header bar */}
+      <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #1a1a1a' }}>
+        <span style={{ color: c, display: 'flex', flexShrink: 0 }}>{bt?.icon}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ fontSize: 12, color: 'white', fontWeight: 500 }}>{block.titulo || bt?.label}</span>
+          {block.subtitulo && <span style={{ fontSize: 11, color: '#52525b', marginLeft: 6 }}>{block.subtitulo}</span>}
+        </div>
+        <div style={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 0 }}>
+          {!isCorreccion && (
+            <>
+              <button onClick={onMoveUp} disabled={index === 0}
+                style={{ background: 'none', border: 'none', color: index === 0 ? '#27272a' : '#52525b', cursor: index === 0 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
+                <IconChevronUp />
+              </button>
+              <button onClick={onMoveDown} disabled={index === total - 1}
+                style={{ background: 'none', border: 'none', color: index === total - 1 ? '#27272a' : '#52525b', cursor: index === total - 1 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
+                <IconChevronDown />
+              </button>
+            </>
+          )}
+          <button onClick={onEdit}
+            style={{ background: 'none', border: '1px solid #27272a', color: '#71717a', cursor: 'pointer', padding: '3px 8px', borderRadius: 6, fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#52525b'; e.currentTarget.style.color = 'white'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a'; }}>
+            <IconPencil /> Editar
+          </button>
+          <button onClick={onDelete}
+            style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 3, display: 'flex' }}
+            onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+            onMouseLeave={e => e.currentTarget.style.color = '#52525b'}>
+            <IconTrashSm />
+          </button>
+        </div>
       </div>
-      {(block.images?.length > 0) && (
-        <span style={{ fontSize: 11, color: '#52525b', background: '#18181b', border: '1px solid #27272a', borderRadius: 999, padding: '2px 7px', flexShrink: 0 }}>
-          {block.images.length} img
-        </span>
+
+      {/* Content preview */}
+      {block.type === 'enlaces' && (
+        <div style={{ padding: '12px 14px' }}>
+          {imgs.length > 0 || block.url ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              {imgs.map((img, i) => (
+                <a key={i} href={block.url || '#'} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
+                  <img src={img.url} alt="" style={{ height: 72, borderRadius: 6, objectFit: 'cover', border: '1px solid #27272a', display: 'block' }} />
+                </a>
+              ))}
+              {block.url && (
+                <>
+                  <span style={{ fontSize: 20, color: c, fontWeight: 300 }}>→</span>
+                  <a href={block.url} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 13, color: c, textDecoration: 'none', wordBreak: 'break-all' }}
+                    onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                    onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                    {block.url}
+                  </a>
+                </>
+              )}
+            </div>
+          ) : (
+            <span style={{ fontSize: 12, color: '#3f3f46', fontStyle: 'italic' }}>Sin imagen ni URL configurada</span>
+          )}
+        </div>
       )}
-      <div style={{ display: 'flex', gap: 2, flexShrink: 0, alignItems: 'center' }}>
-        {!isCorreccion && (
-          <>
-            <button onClick={onMoveUp} disabled={index === 0}
-              style={{ background: 'none', border: 'none', color: index === 0 ? '#27272a' : '#52525b', cursor: index === 0 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
-              <IconChevronUp />
-            </button>
-            <button onClick={onMoveDown} disabled={index === total - 1}
-              style={{ background: 'none', border: 'none', color: index === total - 1 ? '#27272a' : '#52525b', cursor: index === total - 1 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
-              <IconChevronDown />
-            </button>
-          </>
-        )}
-        <button onClick={onEdit}
-          style={{ background: 'none', border: '1px solid #27272a', color: '#71717a', cursor: 'pointer', padding: '3px 8px', borderRadius: 6, fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = '#52525b'; e.currentTarget.style.color = 'white'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a'; }}>
-          <IconPencil /> Editar
-        </button>
-        <button onClick={onDelete}
-          style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 3, display: 'flex' }}
-          onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-          onMouseLeave={e => e.currentTarget.style.color = '#52525b'}>
-          <IconTrashSm />
-        </button>
-      </div>
+
+      {block.type === 'imagen' && imgs.length > 0 && (
+        <div style={{ padding: '12px 14px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {imgs.map((img, i) => (
+            <img key={i} src={img.url} alt="" style={{ height: 64, borderRadius: 5, objectFit: 'cover', border: '1px solid #27272a' }} />
+          ))}
+        </div>
+      )}
+
+      {block.type === 'imagen_texto' && (
+        <div style={{ padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+          {imgs.length > 0 && <img src={imgs[0].url} alt="" style={{ height: 60, borderRadius: 5, objectFit: 'cover', border: '1px solid #27272a', flexShrink: 0 }} />}
+          {block.texto && <p style={{ fontSize: 12, color: '#a1a1aa', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{block.texto}</p>}
+          {!imgs.length && !block.texto && <span style={{ fontSize: 12, color: '#3f3f46', fontStyle: 'italic' }}>Sin contenido</span>}
+        </div>
+      )}
+
+      {block.type === 'correccion' && block.nota && (
+        <div style={{ padding: '12px 14px' }}>
+          <p style={{ fontSize: 12, color: '#a1a1aa', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.nota}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -880,20 +934,12 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 
         {/* Campos específicos por tipo */}
         {draft.type === 'enlaces' && (
-          <>
-            <div>
-              <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>URL del enlace</label>
-              <input value={draft.url || ''} onChange={e => update('url', e.target.value)}
-                placeholder="https://…"
-                style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
-            </div>
-            <div>
-              <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Texto del botón</label>
-              <input value={draft.texto_boton || ''} onChange={e => update('texto_boton', e.target.value)}
-                placeholder="Comprar ahora…"
-                style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
-            </div>
-          </>
+          <div>
+            <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>URL del enlace</label>
+            <input value={draft.url || ''} onChange={e => update('url', e.target.value)}
+              placeholder="https://…"
+              style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+          </div>
         )}
 
         {draft.type === 'imagen_texto' && (
@@ -966,10 +1012,11 @@ export default function BibliotecaItem() {
   const [enviadoEl, setEnviadoEl] = useState(null);
 
   // ── Blocks state ─────────────────────────────────────────────────────────
-  const [blocksData, setBlocksData]         = useState([]);
-  const [editingBlockId, setEditingBlockId] = useState(null);
+  const [blocksData, setBlocksData]             = useState([]);
+  const [editingBlockId, setEditingBlockId]     = useState(null);
   const [showCropForModal, setShowCropForModal] = useState(false);
-  const [blocksSaving, setBlocksSaving]     = useState(false);
+  const [showBlockSelectorModal, setShowBlockSelectorModal] = useState(false);
+  const [blocksSaving, setBlocksSaving]         = useState(false);
   const cropForModalResolveRef = useRef(null);
 
   // Misc
@@ -1327,7 +1374,6 @@ export default function BibliotecaItem() {
       {cropConfirm && <CropConfirmModal previewUrl={cropConfirm.url} onConfirm={confirmCrop} onCancel={cancelCrop} saving={replacing} />}
       {showModal && item && <ImageModal imageUrl={item.url} alt={item.filename} onClose={() => setShowModal(false)} />}
       {discardConfirm && <DiscardModal onConfirm={confirmDiscard} onCancel={() => setDiscardConfirm(false)} />}
-      {showCropForModal && item && <CropOverlay imageUrl={item.url} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
       {editingBlockId && (() => { const eb = blocksData.find(b => b.id === editingBlockId); return eb ? (
         <BlockEditorModal
           block={eb}
@@ -1337,6 +1383,19 @@ export default function BibliotecaItem() {
           onCropFromEmail={cropFromEmail}
         />
       ) : null; })()}
+      {showCropForModal && item && <CropOverlay imageUrl={item.url} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
+      {showBlockSelectorModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+          onClick={() => setShowBlockSelectorModal(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 480 }}>
+            <BlockSelector
+              hasCorreccion={blocksData.some(b => b.type === 'correccion')}
+              onSelect={(type) => { addBlock(type); setShowBlockSelectorModal(false); }}
+              onClose={() => setShowBlockSelectorModal(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Top bar */}
       <div className="flex items-center gap-3 mb-5">
@@ -1574,10 +1633,13 @@ export default function BibliotecaItem() {
                 onMoveDown={() => moveBlock(block.id, 1)}
               />
             ))}
-            <BlockSelector
-              hasCorreccion={blocksData.some(b => b.type === 'correccion')}
-              onSelect={addBlock}
-            />
+            <button
+              onClick={() => setShowBlockSelectorModal(true)}
+              style={{ width: '100%', background: 'transparent', border: '1px dashed #27272a', color: '#52525b', borderRadius: 10, padding: '12px 16px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#52525b'; }}>
+              <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> Añadir bloque
+            </button>
           </div>
         </div>
       )}
