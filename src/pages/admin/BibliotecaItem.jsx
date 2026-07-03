@@ -21,6 +21,9 @@ const presetBtnStyle = (active) => ({
   color: active ? 'white' : '#71717a',
 });
 
+// ── Tag palette for user-created tags ────────────────────────────────────────
+const TAG_PALETTE = ['#6366f1','#8b5cf6','#a855f7','#ec4899','#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#14b8a6','#78716c'];
+
 // ── Icons ─────────────────────────────────────────────────────────────────────
 const IconEmail = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -229,6 +232,101 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
         )}
       </div>
       {error && <span style={{ fontSize: 11, color: '#f87171' }}>{error}</span>}
+    </div>
+  );
+}
+
+// ── TagPicker ─────────────────────────────────────────────────────────────────
+function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCreateTag }) {
+  const [input, setInput] = useState('');
+  const [showDrop, setShowDrop] = useState(false);
+  const [pendingColor, setPendingColor] = useState(null);
+  const inputRef = useRef(null);
+
+  const scopedTags = subcategoria ? allTags.filter(t => !t.subcategoria || t.subcategoria === subcategoria) : allTags;
+  const available = scopedTags.filter(t => !selectedIds.includes(t.id));
+  const filtered = input.length > 0 ? available.filter(t => t.name.toLowerCase().includes(input.toLowerCase())) : available;
+  const exactMatch = scopedTags.find(t => t.name.toLowerCase() === input.trim().toLowerCase());
+  const canCreate = input.trim().length > 0 && !exactMatch;
+
+  const handleSelect = (tag) => {
+    onAdd(tag.id);
+    setInput('');
+    setShowDrop(false);
+  };
+
+  const handleCreate = (color) => {
+    onCreateTag(input.trim(), color, subcategoria);
+    setInput('');
+    setPendingColor(null);
+    setShowDrop(false);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {/* Selected tags */}
+      {selectedIds.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+          {selectedIds.map(id => {
+            const tag = allTags.find(t => t.id === id);
+            if (!tag) return null;
+            return (
+              <span key={id} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 8px 2px 8px', background: tag.color + '22', border: `1px solid ${tag.color}`, color: tag.color }}>
+                {tag.name}
+                <button onClick={() => onRemove(id)} style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: 0, display: 'flex', opacity: 0.7, lineHeight: 1 }}>×</button>
+              </span>
+            );
+          })}
+        </div>
+      )}
+      {/* Input */}
+      <div style={{ position: 'relative' }}>
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={e => { setInput(e.target.value); setShowDrop(true); setPendingColor(null); }}
+          onFocus={() => setShowDrop(true)}
+          onBlur={() => setTimeout(() => { setShowDrop(false); setPendingColor(null); }, 200)}
+          placeholder="Añadir etiqueta…"
+          style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 10px', fontSize: 12, color: 'white', outline: 'none', boxSizing: 'border-box', colorScheme: 'dark' }}
+        />
+        {showDrop && (filtered.length > 0 || canCreate) && !pendingColor && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 30, overflow: 'hidden' }}>
+            {filtered.slice(0, 6).map(tag => (
+              <div key={tag.id} onMouseDown={() => handleSelect(tag)}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', fontSize: 12 }}
+                onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: tag.color, flexShrink: 0 }} />
+                <span style={{ color: 'white' }}>{tag.name}</span>
+              </div>
+            ))}
+            {canCreate && (
+              <div onMouseDown={() => setPendingColor(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', fontSize: 12, borderTop: filtered.length > 0 ? '1px solid #27272a' : 'none' }}
+                onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <span style={{ color: '#71717a' }}>Crear</span>
+                <span style={{ color: 'white', fontWeight: 500 }}>"{input.trim()}"</span>
+              </div>
+            )}
+          </div>
+        )}
+        {/* Color picker for new tag */}
+        {pendingColor && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 30, padding: '10px 12px' }}>
+            <p style={{ fontSize: 11, color: '#71717a', margin: '0 0 8px' }}>Elige el color para "{input.trim()}"</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {TAG_PALETTE.map(c => (
+                <button key={c} onMouseDown={() => handleCreate(c)}
+                  style={{ width: 22, height: 22, borderRadius: '50%', background: c, border: '2px solid transparent', cursor: 'pointer', transition: 'border-color 0.1s' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'white'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'transparent'} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -450,6 +548,11 @@ export default function BibliotecaItem() {
   const [saving, setSaving]     = useState(false);
   const [detecting, setDetecting] = useState(false);
 
+  // ── Tags state ───────────────────────────────────────────────────────────
+  const [allTags, setAllTags]   = useState([]);
+  const [itemTags, setItemTags] = useState([]);
+  const [obTags, setObTags]     = useState([]);
+
   // ── Onboarding state ─────────────────────────────────────────────────────
   // mode: 'onboarding' | 'display'
   const [mode, setMode]             = useState('onboarding');
@@ -500,7 +603,21 @@ export default function BibliotecaItem() {
       finally { setLoading(false); }
     })();
     fetch(`${API_BASE}/biblioteca/marcas`).then(r => r.ok ? r.json() : []).then(setAllMarcas).catch(() => {});
+    // Load all tags in parallel
+    (async () => {
+      const token2 = await getToken();
+      if (token2) {
+        fetch(`${API_BASE}/biblioteca/tags`, { headers: { Authorization: `Bearer ${token2}` } })
+          .then(r => r.ok ? r.json() : []).then(setAllTags).catch(() => {});
+      }
+    })();
   }, [id, navigate]);
+
+  // Resolve itemTags whenever item or allTags change
+  useEffect(() => {
+    if (!item || !allTags.length) return;
+    setItemTags((item.tags || []).map(id => allTags.find(t => t.id === id)).filter(Boolean));
+  }, [item, allTags]);
 
   const patch = useCallback(async (updates) => {
     const token = await getToken();
@@ -548,6 +665,7 @@ export default function BibliotecaItem() {
       asunto: obAsunto.trim(),
       adelanto: obAdelanto.trim(),
       enviado_el: obEnviadoEl || null,
+      tags: obTags,
     };
     setSaving(true);
     try {
@@ -586,6 +704,39 @@ export default function BibliotecaItem() {
     } catch (_) {}
     navigate('/admin/biblioteca');
   };
+
+  // ── Tags handlers ────────────────────────────────────────────────────────
+  const addTagToItem = useCallback(async (tagId) => {
+    const newIds = [...(item.tags || []).filter(id => id !== tagId), tagId];
+    setItem(prev => ({ ...prev, tags: newIds }));
+    setItemTags(prev => {
+      const tag = allTags.find(t => t.id === tagId);
+      return tag && !prev.find(t => t.id === tagId) ? [...prev, tag] : prev;
+    });
+    await patch({ tags: newIds });
+  }, [item, allTags, patch]);
+
+  const removeTagFromItem = useCallback(async (tagId) => {
+    const newIds = (item.tags || []).filter(id => id !== tagId);
+    setItem(prev => ({ ...prev, tags: newIds }));
+    setItemTags(prev => prev.filter(t => t.id !== tagId));
+    await patch({ tags: newIds });
+  }, [item, patch]);
+
+  const createTagAndAdd = useCallback(async (name, color, subcategoriaScope) => {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_BASE}/biblioteca/tags`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, color, subcategoria: subcategoriaScope || null }),
+      });
+      if (!res.ok) return;
+      const newTag = await res.json();
+      setAllTags(prev => [...prev, newTag]);
+      await addTagToItem(newTag.id);
+    } catch (_) {}
+  }, [addTagToItem]);
 
   // Crop handlers
   const handleCrop = useCallback((cropRect) => {
@@ -781,6 +932,33 @@ export default function BibliotecaItem() {
                         style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                     </div>
                   )}
+
+                  {/* Etiquetas */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <label style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</label>
+                    <TagPicker
+                      selectedIds={obTags}
+                      allTags={allTags}
+                      subcategoria={obSubcat}
+                      onAdd={id => setObTags(prev => prev.includes(id) ? prev : [...prev, id])}
+                      onRemove={id => setObTags(prev => prev.filter(x => x !== id))}
+                      onCreateTag={async (name, color, sub) => {
+                        try {
+                          const token = await getToken();
+                          const res = await fetch(`${API_BASE}/biblioteca/tags`, {
+                            method: 'POST',
+                            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, color, subcategoria: sub || null }),
+                          });
+                          if (res.ok) {
+                            const newTag = await res.json();
+                            setAllTags(prev => [...prev, newTag]);
+                            setObTags(prev => [...prev, newTag.id]);
+                          }
+                        } catch (_) {}
+                      }}
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -805,7 +983,7 @@ export default function BibliotecaItem() {
         ) : (
           /* Display mode */
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* Tags */}
+            {/* Categoria / Subcategoria tags */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {categoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -819,6 +997,31 @@ export default function BibliotecaItem() {
                   <Tag colors={SUBCAT_COLORS[subcategoria]} label={subcatLabel(subcategoria)} onRemove={() => { setSubcat(null); patch({ subcategoria: null }); setMode('onboarding'); setObCategoria(categoria); setObSubcat(null); setObStep('subcategoria'); }} />
                 </div>
               )}
+            </div>
+
+            {/* Etiquetas */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
+              </div>
+              {itemTags.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                  {itemTags.map(tag => (
+                    <span key={tag.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 8px', background: tag.color + '22', border: `1px solid ${tag.color}`, color: tag.color }}>
+                      {tag.name}
+                      <button onClick={() => removeTagFromItem(tag.id)} style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: 0, display: 'flex', opacity: 0.7, lineHeight: 1, fontSize: 14 }}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <TagPicker
+                selectedIds={(item?.tags || [])}
+                allTags={allTags}
+                subcategoria={subcategoria}
+                onAdd={addTagToItem}
+                onRemove={removeTagFromItem}
+                onCreateTag={createTagAndAdd}
+              />
             </div>
 
             {/* Fields */}
