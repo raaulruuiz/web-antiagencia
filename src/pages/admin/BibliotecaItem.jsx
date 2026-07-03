@@ -864,10 +864,18 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       )}
 
       {block.type === 'imagen' && imgs.length > 0 && (
-        <div style={{ padding: '12px 14px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {imgs.map((img, i) => (
-            <img key={i} src={img.url} alt="" style={{ height: 64, borderRadius: 5, objectFit: 'cover', border: '1px solid var(--t-border)' }} />
-          ))}
+        <div style={{ padding: '12px 14px' }}>
+          <div style={
+            block.images_layout === 'fila'
+              ? { display: 'flex', flexDirection: 'row', gap: 10, overflowX: 'auto' }
+              : block.images_layout === 'grid'
+              ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }
+              : { display: 'flex', flexDirection: 'column', gap: 10 }
+          }>
+            {imgs.map((img, i) => (
+              <img key={i} src={img.url} alt="" style={{ height: 210, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', flexShrink: 0 }} />
+            ))}
+          </div>
         </div>
       )}
 
@@ -1038,10 +1046,13 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             {/* Library picker */}
             {showLibrary === 'global' && libraryImages?.length > 0 && (
               <div style={{ border: '1px solid var(--t-border)', borderRadius: 8, padding: 8, marginBottom: 8 }}>
-                <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
+                  <button onClick={() => setShowLibrary(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 5 }}>
                   {libraryImages.map((img, i) => (
-                    <img key={i} src={img.url} alt="" onClick={() => { addImage(img.url); setShowLibrary(null); }}
+                    <img key={i} src={img.url} alt="" onClick={() => { addImage(img.url); }}
                       style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 5, cursor: 'pointer', border: '2px solid transparent' }}
                       onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
                       onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
@@ -1084,19 +1095,20 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           </div>
         )}
 
-        {/* Layout selector (solo para enlaces) */}
-        {draft.type === 'enlaces' && (
+        {/* Layout selector (enlaces e imagen) */}
+        {(draft.type === 'enlaces' || draft.type === 'imagen') && (
           <div>
             <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Disposición</label>
             <div style={{ display: 'flex', gap: 6 }}>
               {[
-                { value: 'columna', label: 'Columna', icon: '⬜\n⬜\n⬜' },
-                { value: 'fila',    label: 'Fila',    icon: '⬜⬜⬜' },
-                { value: 'grid',    label: 'Grid',    icon: '⬜⬜\n⬜⬜' },
+                { value: 'columna', label: 'Columna' },
+                { value: 'fila',    label: 'Fila' },
+                { value: 'grid',    label: 'Grid' },
               ].map(opt => {
-                const active = (draft.links_layout || 'columna') === opt.value;
+                const layoutField = draft.type === 'imagen' ? 'images_layout' : 'links_layout';
+                const active = (draft[layoutField] || 'columna') === opt.value;
                 return (
-                  <button key={opt.value} onClick={() => update('links_layout', opt.value)}
+                  <button key={opt.value} onClick={() => update(layoutField, opt.value)}
                     style={{ flex: 1, background: active ? 'var(--t-surface2)' : 'transparent', border: `1px solid ${active ? '#6366f1' : 'var(--t-border-mid)'}`, borderRadius: 8, padding: '7px 10px', fontSize: 12, color: active ? '#a5b4fc' : 'var(--t-text-muted)', cursor: 'pointer', textAlign: 'center', fontWeight: active ? 600 : 400 }}>
                     {opt.label}
                   </button>
@@ -1138,10 +1150,13 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                   {/* Library picker for this link */}
                   {showLibrary === linkIdx && libraryImages?.length > 0 && (
                     <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 8 }}>
-                      <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
+                        <button onClick={() => setShowLibrary(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
+                      </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
                         {libraryImages.map((img, i) => (
-                          <img key={i} src={img.url} alt="" onClick={() => { addLinkImage(linkIdx, img.url); setShowLibrary(null); }}
+                          <img key={i} src={img.url} alt="" onClick={() => { addLinkImage(linkIdx, img.url); }}
                             style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: 'pointer', border: '2px solid transparent' }}
                             onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
                             onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
@@ -1499,6 +1514,7 @@ export default function BibliotecaItem() {
       texto_boton: '',
       links: type === 'enlaces' ? [{ images: [], url: '' }] : [],
       links_layout: 'columna',
+      images_layout: 'columna',
       texto: '',
       nota: '',
     };
