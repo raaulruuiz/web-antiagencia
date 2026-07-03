@@ -236,11 +236,43 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
   );
 }
 
+// ── TagColorEditor ────────────────────────────────────────────────────────────
+function TagColorEditor({ tag, onUpdate, onClose }) {
+  const [hex, setHex] = useState(tag.color);
+
+  const apply = (color) => { onUpdate(tag.id, color); onClose(); };
+
+  return (
+    <div style={{ background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 10, padding: '12px', marginTop: 6 }}>
+      <p style={{ fontSize: 11, color: '#71717a', margin: '0 0 8px' }}>Color de <span style={{ color: 'white' }}>"{tag.name}"</span></p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+        {TAG_PALETTE.map(c => (
+          <button key={c} onClick={() => { setHex(c); apply(c); }}
+            style={{ width: 22, height: 22, borderRadius: '50%', background: c, border: `2px solid ${c.toLowerCase() === hex.toLowerCase() ? 'white' : 'transparent'}`, cursor: 'pointer', transition: 'border-color 0.1s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'white'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = c.toLowerCase() === hex.toLowerCase() ? 'white' : 'transparent'} />
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: '1px solid #3f3f46', borderRadius: 7, padding: '5px 8px' }}>
+          <span style={{ width: 14, height: 14, borderRadius: 3, background: /^#[0-9a-f]{3,6}$/i.test(hex) ? hex : '#888', flexShrink: 0 }} />
+          <input value={hex} onChange={e => setHex(e.target.value)} placeholder="#6366f1"
+            style={{ flex: 1, background: 'none', border: 'none', color: 'white', fontSize: 12, outline: 'none', fontFamily: 'monospace' }} />
+        </div>
+        <button onClick={() => apply(hex)}
+          style={{ background: 'white', color: 'black', border: 'none', borderRadius: 7, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Aplicar</button>
+        <button onClick={onClose}
+          style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 7, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}>✕</button>
+      </div>
+    </div>
+  );
+}
+
 // ── TagPicker ─────────────────────────────────────────────────────────────────
-function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCreateTag }) {
+function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCreateTag, onUpdateTagColor }) {
   const [input, setInput] = useState('');
   const [showDrop, setShowDrop] = useState(false);
-  const [pendingColor, setPendingColor] = useState(null);
+  const [editingTag, setEditingTag] = useState(null);
   const inputRef = useRef(null);
 
   const scopedTags = subcategoria ? allTags.filter(t => !t.subcategoria || t.subcategoria === subcategoria) : allTags;
@@ -249,16 +281,12 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
   const exactMatch = scopedTags.find(t => t.name.toLowerCase() === input.trim().toLowerCase());
   const canCreate = input.trim().length > 0 && !exactMatch;
 
-  const handleSelect = (tag) => {
-    onAdd(tag.id);
-    setInput('');
-    setShowDrop(false);
-  };
+  const handleSelect = (tag) => { onAdd(tag.id); setInput(''); setShowDrop(false); };
 
-  const handleCreate = (color) => {
+  const handleCreate = () => {
+    const color = TAG_PALETTE[Math.floor(Math.random() * TAG_PALETTE.length)];
     onCreateTag(input.trim(), color, subcategoria);
     setInput('');
-    setPendingColor(null);
     setShowDrop(false);
   };
 
@@ -270,27 +298,40 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
           {selectedIds.map(id => {
             const tag = allTags.find(t => t.id === id);
             if (!tag) return null;
+            const isEditing = editingTag?.id === tag.id;
             return (
-              <span key={id} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 8px 2px 8px', background: tag.color + '22', border: `1px solid ${tag.color}`, color: tag.color }}>
+              <span key={id} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 6px 2px 8px', background: tag.color + '22', border: `1px solid ${tag.color}`, color: tag.color }}>
                 {tag.name}
-                <button onClick={() => onRemove(id)} style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: 0, display: 'flex', opacity: 0.7, lineHeight: 1 }}>×</button>
+                {onUpdateTagColor && (
+                  <button onClick={() => setEditingTag(isEditing ? null : tag)}
+                    style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: '0 1px', display: 'flex', opacity: isEditing ? 1 : 0.5, lineHeight: 1 }}
+                    title="Editar color">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                )}
+                <button onClick={() => onRemove(id)} style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: 0, display: 'flex', opacity: 0.7, lineHeight: 1, fontSize: 14 }}>×</button>
               </span>
             );
           })}
         </div>
       )}
+      {/* Color editor for selected tag */}
+      {editingTag && onUpdateTagColor && (
+        <TagColorEditor tag={editingTag} onUpdate={onUpdateTagColor} onClose={() => setEditingTag(null)} />
+      )}
       {/* Input */}
       <div style={{ position: 'relative' }}>
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={e => { setInput(e.target.value); setShowDrop(true); setPendingColor(null); }}
+        <input ref={inputRef} value={input}
+          onChange={e => { setInput(e.target.value); setShowDrop(true); }}
           onFocus={() => setShowDrop(true)}
-          onBlur={() => setTimeout(() => { setShowDrop(false); setPendingColor(null); }, 200)}
+          onBlur={() => setTimeout(() => setShowDrop(false), 150)}
           placeholder="Añadir etiqueta…"
           style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 10px', fontSize: 12, color: 'white', outline: 'none', boxSizing: 'border-box', colorScheme: 'dark' }}
         />
-        {showDrop && (filtered.length > 0 || canCreate) && !pendingColor && (
+        {showDrop && (filtered.length > 0 || canCreate) && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 30, overflow: 'hidden' }}>
             {filtered.slice(0, 6).map(tag => (
               <div key={tag.id} onMouseDown={() => handleSelect(tag)}
@@ -302,28 +343,15 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
               </div>
             ))}
             {canCreate && (
-              <div onMouseDown={() => setPendingColor(true)}
+              <div onMouseDown={handleCreate}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', fontSize: 12, borderTop: filtered.length > 0 ? '1px solid #27272a' : 'none' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 <span style={{ color: '#71717a' }}>Crear</span>
                 <span style={{ color: 'white', fontWeight: 500 }}>"{input.trim()}"</span>
+                <span style={{ color: '#3f3f46', fontSize: 10, marginLeft: 'auto' }}>color aleatorio</span>
               </div>
             )}
-          </div>
-        )}
-        {/* Color picker for new tag */}
-        {pendingColor && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 30, padding: '10px 12px' }}>
-            <p style={{ fontSize: 11, color: '#71717a', margin: '0 0 8px' }}>Elige el color para "{input.trim()}"</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {TAG_PALETTE.map(c => (
-                <button key={c} onMouseDown={() => handleCreate(c)}
-                  style={{ width: 22, height: 22, borderRadius: '50%', background: c, border: '2px solid transparent', cursor: 'pointer', transition: 'border-color 0.1s' }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'white'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'transparent'} />
-              ))}
-            </div>
           </div>
         )}
       </div>
@@ -738,6 +766,21 @@ export default function BibliotecaItem() {
     } catch (_) {}
   }, [addTagToItem]);
 
+  const updateTagColor = useCallback(async (tagId, color) => {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_BASE}/biblioteca/tags/${tagId}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ color }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setAllTags(prev => prev.map(t => t.id === tagId ? updated : t));
+      }
+    } catch (_) {}
+  }, []);
+
   // Crop handlers
   const handleCrop = useCallback((cropRect) => {
     setShowCrop(false);
@@ -1000,20 +1043,8 @@ export default function BibliotecaItem() {
             </div>
 
             {/* Etiquetas */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
-              </div>
-              {itemTags.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                  {itemTags.map(tag => (
-                    <span key={tag.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 8px', background: tag.color + '22', border: `1px solid ${tag.color}`, color: tag.color }}>
-                      {tag.name}
-                      <button onClick={() => removeTagFromItem(tag.id)} style={{ background: 'none', border: 'none', color: tag.color, cursor: 'pointer', padding: 0, display: 'flex', opacity: 0.7, lineHeight: 1, fontSize: 14 }}>×</button>
-                    </span>
-                  ))}
-                </div>
-              )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
               <TagPicker
                 selectedIds={(item?.tags || [])}
                 allTags={allTags}
@@ -1021,6 +1052,7 @@ export default function BibliotecaItem() {
                 onAdd={addTagToItem}
                 onRemove={removeTagFromItem}
                 onCreateTag={createTagAndAdd}
+                onUpdateTagColor={updateTagColor}
               />
             </div>
 

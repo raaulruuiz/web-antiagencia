@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import BibliotecaCardMeta from '@/components/BibliotecaCardMeta';
@@ -38,6 +38,105 @@ const XIcon = () => (
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
   </svg>
 );
+
+// ── DateRangePicker ───────────────────────────────────────────────────────────
+function DateRangePicker({ from, to, onChange }) {
+  const [open, setOpen] = useState(false);
+  const today = new Date();
+  const [viewYear, setViewYear]   = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+
+  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const WDAYS  = ['L','M','X','J','V','S','D'];
+  const pad = (n) => String(n).padStart(2, '0');
+  const toYMD = (y, m, d) => `${y}-${pad(m+1)}-${pad(d)}`;
+  const fmtShort = (s) => {
+    if (!s) return '';
+    const [y, m, d] = s.split('-');
+    return `${parseInt(d)} ${['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][parseInt(m)-1]}`;
+  };
+  const daysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
+  const firstDayMon = (y, m) => { const d = new Date(y, m, 1).getDay(); return d === 0 ? 6 : d - 1; };
+
+  const handleDayClick = (ymd) => {
+    if (!from || (from && to)) {
+      onChange({ from: ymd, to: '' });
+    } else {
+      if (ymd >= from) { onChange({ from, to: ymd }); }
+      else             { onChange({ from: ymd, to: from }); }
+      setOpen(false);
+    }
+  };
+
+  const prevMonth = () => viewMonth === 0  ? (setViewYear(y => y-1), setViewMonth(11)) : setViewMonth(m => m-1);
+  const nextMonth = () => viewMonth === 11 ? (setViewYear(y => y+1), setViewMonth(0))  : setViewMonth(m => m+1);
+
+  const hasFilter = from || to;
+  const selectingEnd = from && !to;
+  const label = hasFilter
+    ? (from && to ? `${fmtShort(from)} – ${fmtShort(to)}` : `Desde ${fmtShort(from)}`)
+    : null;
+
+  const numDays = daysInMonth(viewYear, viewMonth);
+  const offset  = firstDayMon(viewYear, viewMonth);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8, fontSize: 12, background: hasFilter ? 'rgba(99,102,241,0.1)' : '#18181b', border: `1px solid ${hasFilter ? '#6366f1' : '#27272a'}`, color: hasFilter ? '#a5b4fc' : '#71717a', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>{label || 'Fecha de envío'}</span>
+        {hasFilter && <span onMouseDown={e => { e.stopPropagation(); onChange({ from: '', to: '' }); }} style={{ opacity: 0.7, lineHeight: 1, fontSize: 15, marginLeft: 2 }}>×</span>}
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, background: '#1a1a1a', border: '1px solid #3f3f46', borderRadius: 12, padding: '14px', zIndex: 100, width: 240, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+          {selectingEnd && <p style={{ fontSize: 10, color: '#6366f1', margin: '0 0 8px', textAlign: 'center' }}>Ahora selecciona la fecha final</p>}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <button onClick={prevMonth} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: 18, padding: '0 8px', lineHeight: 1 }}>‹</button>
+            <span style={{ fontSize: 13, fontWeight: 500, color: 'white' }}>{MONTHS[viewMonth]} {viewYear}</span>
+            <button onClick={nextMonth} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: 18, padding: '0 8px', lineHeight: 1 }}>›</button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 6 }}>
+            {WDAYS.map(d => <span key={d} style={{ textAlign: 'center', fontSize: 10, color: '#52525b', display: 'block', padding: '1px 0' }}>{d}</span>)}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+            {Array.from({ length: offset }).map((_, i) => <div key={`e${i}`} />)}
+            {Array.from({ length: numDays }).map((_, i) => {
+              const d = i + 1;
+              const ymd = toYMD(viewYear, viewMonth, d);
+              const isStart = ymd === from;
+              const isEnd   = ymd === to;
+              const inRange = from && to && ymd > from && ymd < to;
+              return (
+                <button key={d} onClick={() => handleDayClick(ymd)} style={{
+                  width: '100%', aspectRatio: '1', border: 'none',
+                  borderRadius: isStart || isEnd ? '50%' : inRange ? 0 : 4,
+                  background: isStart || isEnd ? '#6366f1' : inRange ? 'rgba(99,102,241,0.2)' : 'transparent',
+                  color: isStart || isEnd ? 'white' : inRange ? '#a5b4fc' : '#d4d4d8',
+                  cursor: 'pointer', fontSize: 12, fontWeight: isStart || isEnd ? 700 : 400,
+                }}>
+                  {d}
+                </button>
+              );
+            })}
+          </div>
+          {hasFilter && (
+            <button onClick={() => { onChange({ from: '', to: '' }); setOpen(false); }}
+              style={{ marginTop: 10, width: '100%', background: 'none', border: '1px solid #27272a', color: '#52525b', borderRadius: 8, padding: '5px', fontSize: 11, cursor: 'pointer' }}>
+              Limpiar
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ConfirmModal({ count, onConfirm, onCancel }) {
   return (
@@ -85,7 +184,7 @@ export default function Biblioteca() {
   const [filterFechaFrom, setFilterFechaFrom] = useState('');
   const [filterFechaTo, setFilterFechaTo]     = useState('');
 
-  const activeFilterCount = [filterCategoria, filterSubcat, filterMarca, filterTagId, filterFechaFrom, filterFechaTo].filter(Boolean).length;
+  const activeFilterCount = [filterCategoria, filterSubcat, filterMarca, filterTagId, (filterFechaFrom || filterFechaTo) ? '1' : ''].filter(Boolean).length;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -263,16 +362,10 @@ export default function Biblioteca() {
             </div>
           )}
 
-          {/* Fecha desde */}
+          {/* Fecha rango */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado desde</span>
-            <input type="date" value={filterFechaFrom} onChange={e => setFilterFechaFrom(e.target.value)} style={selectStyle} />
-          </div>
-
-          {/* Fecha hasta */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Hasta</span>
-            <input type="date" value={filterFechaTo} onChange={e => setFilterFechaTo(e.target.value)} style={selectStyle} />
+            <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</span>
+            <DateRangePicker from={filterFechaFrom} to={filterFechaTo} onChange={({ from, to }) => { setFilterFechaFrom(from); setFilterFechaTo(to); }} />
           </div>
 
           {activeFilterCount > 0 && (
