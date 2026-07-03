@@ -102,11 +102,6 @@ export default function BibliotecaItemPublica() {
           </button>
         </div>
 
-        {/* Nombre */}
-        {displayName && (
-          <p style={{ fontSize: 16, fontWeight: 500, color: 'white', margin: '0 0 20px' }}>{displayName}</p>
-        )}
-
         {/* Two equal columns */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'flex-start' }}>
 

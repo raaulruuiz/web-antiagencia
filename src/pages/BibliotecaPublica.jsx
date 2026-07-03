@@ -48,7 +48,7 @@ function DateRangePicker({ from, to, onChange }) {
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, background: hasFilter ? 'rgba(99,102,241,0.1)' : 'transparent', border: `1px solid ${hasFilter ? '#6366f1' : '#3f3f46'}`, color: hasFilter ? '#a5b4fc' : '#a1a1aa', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, background: hasFilter ? 'rgba(99,102,241,0.1)' : 'transparent', border: `1px solid ${hasFilter ? '#6366f1' : '#3f3f46'}`, color: hasFilter ? '#a5b4fc' : 'white', cursor: 'pointer', whiteSpace: 'nowrap' }}>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>{label || 'Fecha de envío'}</span>
         {hasFilter && <span onMouseDown={e => { e.stopPropagation(); onChange({ from: '', to: '' }); }} style={{ opacity: 0.7, lineHeight: 1, fontSize: 15, marginLeft: 2 }}>×</span>}
@@ -155,7 +155,7 @@ export default function BibliotecaPublica() {
             </button>
             {/* Filter */}
             <button onClick={() => { setShowFilters(s => !s); setShowSearch(false); }}
-              style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: (showFilters || activeFilterCount > 0) ? '#1a1a1a' : 'transparent', borderColor: activeFilterCount > 0 ? '#6366f1' : '#3f3f46', color: activeFilterCount > 0 ? '#a5b4fc' : '#a1a1aa' }}>
+              style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: (showFilters || activeFilterCount > 0) ? '#1a1a1a' : 'transparent', borderColor: activeFilterCount > 0 ? '#6366f1' : '#3f3f46', color: activeFilterCount > 0 ? '#a5b4fc' : 'white' }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
               Filtrar
               {activeFilterCount > 0 && <span style={{ background: '#6366f1', color: 'white', fontSize: 9, fontWeight: 700, borderRadius: 999, padding: '1px 5px' }}>{activeFilterCount}</span>}
