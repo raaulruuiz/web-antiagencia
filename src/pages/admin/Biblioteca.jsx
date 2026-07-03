@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
@@ -61,6 +62,7 @@ function ConfirmModal({ count, onConfirm, onCancel }) {
 }
 
 export default function Biblioteca() {
+  const navigate = useNavigate();
   const [items, setItems]         = useState([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState(null);
@@ -208,7 +210,7 @@ export default function Biblioteca() {
                 className="group relative cursor-pointer"
                 onClick={() => {
                   if (selecting) { toggleSelect(item.id); return; }
-                  window.open(item.url, '_blank', 'noopener,noreferrer');
+                  navigate(`/admin/biblioteca/${item.id}`);
                 }}
               >
                 <div

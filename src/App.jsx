@@ -39,6 +39,7 @@ import EmailBuilder from './pages/admin/EmailBuilder';
 import Paginas from './pages/admin/Paginas';
 import Pomodoro from './pages/admin/Pomodoro';
 import Biblioteca from './pages/admin/Biblioteca';
+import BibliotecaItem from './pages/admin/BibliotecaItem';
 import BibliotecaPublica from './pages/BibliotecaPublica';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -193,6 +194,7 @@ function App() {
               <Route path="email-builder"    element={<RequirePage page="email-builder"><EmailBuilder /></RequirePage>} />
               <Route path="paginas"          element={<RequirePage page="paginas"><Paginas /></RequirePage>} />
               <Route path="biblioteca"       element={<RequirePage page="biblioteca"><Biblioteca /></RequirePage>} />
+              <Route path="biblioteca/:id"  element={<RequirePage page="biblioteca"><BibliotecaItem /></RequirePage>} />
               <Route path="pomodoro"        element={<RequirePage page="pomodoro"><Pomodoro /></RequirePage>} />
             </Route>
             <Route path="/anti-biblioteca" element={<BibliotecaPublica />} />
