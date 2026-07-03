@@ -765,19 +765,20 @@ function BlockSelector({ onSelect, hasCorreccion, onClose }) {
 }
 
 // ── Preview image with lightbox hover ────────────────────────────────────────
-function PreviewImg({ src, imgStyle, wrapperStyle, onPreview }) {
+function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
   const [hov, setHov] = useState(false);
+  const imgEl = <img src={src} alt="" style={{ display: 'block', ...imgStyle }} />;
   return (
     <div style={{ position: 'relative', ...wrapperStyle }}
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
-      <img src={src} alt="" style={{ display: 'block', ...imgStyle }} />
+      {href
+        ? <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>{imgEl}</a>
+        : imgEl}
       {hov && (
-        <div onClick={e => { e.preventDefault(); e.stopPropagation(); onPreview(src); }}
-          style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-in', borderRadius: imgStyle?.borderRadius || 0 }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-          </svg>
-        </div>
+        <button onClick={e => { e.preventDefault(); e.stopPropagation(); onPreview(src); }}
+          style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 6, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 11, fontWeight: 500, backdropFilter: 'blur(4px)' }}>
+          <IconEye /> Ver
+        </button>
       )}
     </div>
   );
@@ -868,6 +869,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                         <PreviewImg key={i} src={img.url}
                           imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
                           wrapperStyle={{ width: '100%' }}
+                          href={link.url || undefined}
                           onPreview={setLightbox} />
                       ))}
                       {link.url && (
@@ -885,6 +887,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                         <PreviewImg key={i} src={img.url}
                           imgStyle={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
                           wrapperStyle={{ flexShrink: 0 }}
+                          href={link.url || undefined}
                           onPreview={setLightbox} />
                       ))}
                       {link.url && (
