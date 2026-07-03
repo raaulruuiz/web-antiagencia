@@ -42,6 +42,8 @@ function EnlacesBlockView({ block }) {
   if (!links.length) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'white', margin: '0 0 4px' }}>{block.titulo}</h2>}
+      {block.subtitulo && <p style={{ fontSize: 13, color: '#71717a', margin: '0 0 6px', lineHeight: 1.5 }}>{block.subtitulo}</p>}
       {links.map((link, i) => (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           {(link.images || []).map((img, j) => (

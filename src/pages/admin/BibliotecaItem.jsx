@@ -774,10 +774,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       {/* Header bar */}
       <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #1a1a1a' }}>
         <span style={{ color: c, display: 'flex', flexShrink: 0 }}>{bt?.icon}</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: 12, color: 'white', fontWeight: 500 }}>{block.titulo || bt?.label}</span>
-          {block.subtitulo && <span style={{ fontSize: 11, color: '#52525b', marginLeft: 6 }}>{block.subtitulo}</span>}
-        </div>
+        <div style={{ flex: 1 }} />
         <div style={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 0 }}>
           {!isCorreccion && (
             <>
@@ -1065,8 +1062,16 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                 </button>
               )}
             </div>
-            <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }}
-              onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }} />
+            <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
+              onChange={async e => {
+                const files = Array.from(e.target.files || []);
+                e.target.value = '';
+                if (!files.length) return;
+                setUploading(true);
+                try { for (const f of files) { const url = await onUploadImage(f); addImage(url); } }
+                catch { alert('Error al subir imagen'); }
+                finally { setUploading(false); }
+              }} />
           </div>
         )}
 
@@ -1134,8 +1139,16 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                         Seleccionar
                       </button>
                     )}
-                    <input ref={linkFileRef} type="file" accept="image/*" style={{ display: 'none' }}
-                      onChange={e => { const f = e.target.files?.[0]; if (f) handleLinkFile(linkIdx, f); e.target.value = ''; }} />
+                    <input ref={linkFileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
+                      onChange={async e => {
+                        const files = Array.from(e.target.files || []);
+                        e.target.value = '';
+                        if (!files.length) return;
+                        setUploadingLink(linkIdx);
+                        try { for (const f of files) { const url = await onUploadImage(f); addLinkImage(linkIdx, url); } }
+                        catch { alert('Error al subir imagen'); }
+                        finally { setUploadingLink(null); }
+                      }} />
                   </div>
                   {/* URL */}
                   <div>
@@ -1227,6 +1240,8 @@ export default function BibliotecaItem() {
 
   // ── Blocks state ─────────────────────────────────────────────────────────
   const [blocksData, setBlocksData]             = useState([]);
+  const [blocksLibrary, setBlocksLibrary]       = useState([]);
+  const blocksLibraryRef                        = useRef([]);
   const [editingBlockId, setEditingBlockId]     = useState(null);
   const [showCropForModal, setShowCropForModal] = useState(false);
   const [showBlockSelectorModal, setShowBlockSelectorModal] = useState(false);
@@ -1258,6 +1273,9 @@ export default function BibliotecaItem() {
         setAdelanto(data.adelanto !== null && data.adelanto !== undefined ? data.adelanto : null);
         setEnviadoEl(data.enviado_el !== null && data.enviado_el !== undefined ? data.enviado_el : null);
         setBlocksData(data.blocks_data?.blocks || []);
+        const lib = data.blocks_data?.library || [];
+        setBlocksLibrary(lib);
+        blocksLibraryRef.current = lib;
         if (data.categoria) setMode('display');
       } catch (e) { setError(e.message); }
       finally { setLoading(false); }
@@ -1431,7 +1449,7 @@ export default function BibliotecaItem() {
       await fetch(`${API_BASE}/biblioteca/${id}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blocks_data: { blocks } }),
+        body: JSON.stringify({ blocks_data: { blocks, library: blocksLibraryRef.current } }),
       });
     } catch (_) {}
     finally { setBlocksSaving(false); }
@@ -1475,6 +1493,24 @@ export default function BibliotecaItem() {
 
   const deleteBlock = useCallback((blockId) => {
     setBlocksData(prev => {
+      const blockToDelete = prev.find(b => b.id === blockId);
+      if (blockToDelete) {
+        const libUrls = new Set(blocksLibraryRef.current.map(img => img.url));
+        const newImgs = [];
+        (blockToDelete.images || []).forEach(img => {
+          if (!libUrls.has(img.url)) { newImgs.push(img); libUrls.add(img.url); }
+        });
+        (blockToDelete.links || []).forEach(link => {
+          (link.images || []).forEach(img => {
+            if (!libUrls.has(img.url)) { newImgs.push(img); libUrls.add(img.url); }
+          });
+        });
+        if (newImgs.length) {
+          const newLib = [...blocksLibraryRef.current, ...newImgs];
+          blocksLibraryRef.current = newLib;
+          setBlocksLibrary(newLib);
+        }
+      }
       const next = prev.filter(b => b.id !== blockId);
       saveBlocks(next);
       return next;
@@ -1570,7 +1606,8 @@ export default function BibliotecaItem() {
 
   const libraryImages = useMemo(() => {
     const seen = new Set();
-    const imgs = [];
+    const imgs = [...blocksLibrary];
+    blocksLibrary.forEach(img => seen.add(img.url));
     blocksData.forEach(b => {
       (b.images || []).forEach(img => {
         if (!seen.has(img.url)) { seen.add(img.url); imgs.push(img); }
@@ -1582,7 +1619,7 @@ export default function BibliotecaItem() {
       });
     });
     return imgs;
-  }, [blocksData]);
+  }, [blocksData, blocksLibrary]);
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0d0d0d' }}>
