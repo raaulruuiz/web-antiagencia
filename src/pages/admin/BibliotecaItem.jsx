@@ -180,9 +180,11 @@ function formatDate(v)  {
 
 // ── Tag ───────────────────────────────────────────────────────────────────────
 function Tag({ colors, label, onRemove }) {
+  const { theme } = useTheme();
+  const textColor = theme === 'dark' ? colors.text : colors.border;
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <span style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', background: colors.bg, border: `1px solid ${colors.border}`, color: colors.text }}>{label}</span>
+      <span style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', background: colors.bg, border: `1px solid ${colors.border}`, color: textColor }}>{label}</span>
       {onRemove && (
         <button onClick={onRemove} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', padding: 2, display: 'flex' }} title="Quitar"><IconX /></button>
       )}

@@ -155,9 +155,9 @@ function ConfirmModal({ count, onConfirm, onCancel }) {
 
 const btnStyle = (active) => ({
   fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, cursor: 'pointer', transition: 'all 0.15s', border: '1px solid',
-  borderColor: active ? 'var(--t-border-muted)' : 'var(--t-border-mid)',
-  background: active ? 'var(--t-border)' : 'transparent',
-  color: active ? 'white' : '#a1a1aa',
+  borderColor: active ? '#52525b' : '#3f3f46',
+  background: active ? '#27272a' : 'transparent',
+  color: active ? 'var(--t-text)' : '#a1a1aa',
 });
 
 export default function Biblioteca() {
