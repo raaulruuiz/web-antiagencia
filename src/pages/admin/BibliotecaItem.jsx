@@ -834,22 +834,22 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 : { display: 'flex', flexDirection: 'column', gap: 12 }
             }>
               {(block.links || (block.url ? [{ images: block.images || [], url: block.url }] : [])).map((link, li) => (
-                <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
                   {(link.images || []).map((img, i) => (
                     <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-                      <img src={img.url} alt="" style={{ height: 100, borderRadius: 7, objectFit: 'cover', border: '1px solid #27272a', display: 'block' }} />
+                      <img src={img.url} alt="" style={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid #27272a', display: 'block' }} />
                     </a>
                   ))}
                   {link.url && (
-                    <>
-                      <span style={{ fontSize: 24, color: '#3b82f6', fontWeight: 300 }}>→</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflowX: 'auto', flexShrink: 0, maxWidth: 320 }}>
+                      <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
                       <a href={link.url} target="_blank" rel="noopener noreferrer"
-                        style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
+                        style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
                         onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
                         onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
                         {link.url}
                       </a>
-                    </>
+                    </div>
                   )}
                 </div>
               ))}
