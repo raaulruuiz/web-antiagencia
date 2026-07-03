@@ -764,6 +764,25 @@ function BlockSelector({ onSelect, hasCorreccion, onClose }) {
   );
 }
 
+// ── Preview image with lightbox hover ────────────────────────────────────────
+function PreviewImg({ src, imgStyle, wrapperStyle, onPreview }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div style={{ position: 'relative', ...wrapperStyle }}
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
+      <img src={src} alt="" style={{ display: 'block', ...imgStyle }} />
+      {hov && (
+        <div onClick={e => { e.preventDefault(); e.stopPropagation(); onPreview(src); }}
+          style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-in', borderRadius: imgStyle?.borderRadius || 0 }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Block: card ───────────────────────────────────────────────────────────────
 function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown }) {
   const bt = BLOCK_TYPES.find(b => b.type === block.type);
@@ -771,6 +790,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
   const isCorreccion = block.type === 'correccion';
   const imgs = block.images || [];
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [lightbox, setLightbox] = useState(null);
 
   return (
     <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border-s)', borderRadius: 10, overflow: 'hidden' }}>
@@ -845,9 +865,10 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                   {block.links_layout === 'grid' ? (
                     <>
                       {(link.images || []).map((img, i) => (
-                        <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
-                          <img src={img.url} alt="" style={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
-                        </a>
+                        <PreviewImg key={i} src={img.url}
+                          imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                          wrapperStyle={{ width: '100%' }}
+                          onPreview={setLightbox} />
                       ))}
                       {link.url && (
                         <a href={link.url} target="_blank" rel="noopener noreferrer"
@@ -861,9 +882,10 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                   ) : (
                     <>
                       {(link.images || []).map((img, i) => (
-                        <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-                          <img src={img.url} alt="" style={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
-                        </a>
+                        <PreviewImg key={i} src={img.url}
+                          imgStyle={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                          wrapperStyle={{ flexShrink: 0 }}
+                          onPreview={setLightbox} />
                       ))}
                       {link.url && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflowX: 'auto', flexShrink: 0, maxWidth: 320 }}>
@@ -898,10 +920,10 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
           }>
             {imgs.map((img, i) => (
               block.images_layout === 'grid'
-                ? <img key={i} src={img.url} alt="" style={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} />
+                ? <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
                 : block.images_layout === 'fila'
-                ? <img key={i} src={img.url} alt="" style={{ height: 180, width: 'auto', flexShrink: 0, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} />
-                : <img key={i} src={img.url} alt="" style={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} />
+                ? <PreviewImg key={i} src={img.url} imgStyle={{ height: 180, width: 'auto', borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} />
+                : <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
             ))}
           </div>
         </div>
@@ -909,7 +931,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {block.type === 'imagen_texto' && (
         <div style={{ padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-          {imgs.length > 0 && <img src={imgs[0].url} alt="" style={{ height: 60, borderRadius: 5, objectFit: 'cover', border: '1px solid var(--t-border)', flexShrink: 0 }} />}
+          {imgs.length > 0 && <PreviewImg src={imgs[0].url} imgStyle={{ height: 60, borderRadius: 5, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} />}
           {block.texto && <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{block.texto}</p>}
           {!imgs.length && !block.texto && <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span>}
         </div>
@@ -918,6 +940,19 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       {block.type === 'correccion' && block.nota && (
         <div style={{ padding: '12px 14px' }}>
           <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.nota}</p>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+          onClick={() => setLightbox(null)}>
+          <img src={lightbox} alt="" style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: 10, boxShadow: '0 0 60px rgba(0,0,0,0.6)' }}
+            onClick={e => e.stopPropagation()} />
+          <button onClick={() => setLightbox(null)}
+            style={{ position: 'absolute', top: 20, right: 24, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', cursor: 'pointer', padding: '6px 14px', borderRadius: 8, fontSize: 18, lineHeight: 1 }}>
+            ✕
+          </button>
         </div>
       )}
     </div>
