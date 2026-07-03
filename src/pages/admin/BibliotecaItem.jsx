@@ -163,7 +163,7 @@ const RESIZE_HANDLES = [
 
 // ── Block types ───────────────────────────────────────────────────────────────
 const BLOCK_TYPES = [
-  { type: 'enlaces',     label: 'Enlace CTA',     icon: <IconChain /> },
+  { type: 'enlaces',     label: 'Enlace',          icon: <IconChain /> },
   { type: 'imagen',      label: 'Imagen',          icon: <IconImageBlock /> },
   { type: 'imagen_texto',label: 'Imagen + Texto',  icon: <IconImageText /> },
   { type: 'correccion',  label: 'Corrección',      icon: <IconCorrection /> },
@@ -817,7 +817,7 @@ function EnlacesBlock({ block, index, total, onChange, onMoveUp, onMoveDown, onD
   const flush = () => onChange({ ...block, url: url.trim(), texto: texto.trim() });
 
   return (
-    <BlockWrapper label="Enlace CTA" index={index} total={total} onMoveUp={onMoveUp} onMoveDown={onMoveDown} onDelete={onDelete}>
+    <BlockWrapper label="Enlace" index={index} total={total} onMoveUp={onMoveUp} onMoveDown={onMoveDown} onDelete={onDelete}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <IconChain />
