@@ -142,7 +142,7 @@ function AdminLayoutInner() {
       <div style={{ height: '100vh', overflow: 'hidden', display: 'flex', background: 'var(--t-bg)', color: 'var(--t-text)', fontFamily: 'system-ui, sans-serif' }}>
 
         {/* Sidebar — solo desktop */}
-        <aside style={{ ...sidebarStyle, display: 'none' }} className="md:flex md:flex-col">
+        <aside className="hidden md:flex md:flex-col" style={{ ...sidebarStyle, display: undefined }}>
           <div style={headerStyle}>
             <img src="/images/9563e10d2_AALogo.png" alt="Logo" style={{ height: 28, width: 'auto', filter: isDark ? 'none' : 'invert(1)' }} />
           </div>
