@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
+import { useTheme } from '@/lib/ThemeContext';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
@@ -1235,6 +1236,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 export default function BibliotecaItem() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { theme, toggle } = useTheme();
   const [item, setItem]     = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]   = useState(null);
@@ -1651,12 +1653,12 @@ export default function BibliotecaItem() {
   }, [blocksData, blocksLibrary]);
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--t-bg)' }}>
+    <div data-theme={theme} className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--t-bg)' }}>
       <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
     </div>
   );
   if (error) return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: 'var(--t-bg)' }}>
+    <div data-theme={theme} className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: 'var(--t-bg)' }}>
       <p className="text-red-400 text-sm">{error}</p>
       <button onClick={() => navigate('/admin/biblioteca')} className="text-xs text-zinc-400 border border-zinc-700 px-4 py-2 rounded-lg">← Volver</button>
     </div>
@@ -1664,7 +1666,7 @@ export default function BibliotecaItem() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-4 md:p-8" style={{ backgroundColor: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
+    <div data-theme={theme} className="p-4 md:p-8" style={{ backgroundColor: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
 
       {/* Overlays */}
       {showCrop && item && <CropOverlay imageUrl={item.url} onCrop={handleCrop} onCancel={() => setShowCrop(false)} />}
@@ -1702,6 +1704,10 @@ export default function BibliotecaItem() {
           Biblioteca
         </button>
         {(saving || blocksSaving) && <span className="text-xs text-zinc-600">Guardando…</span>}
+        <button onClick={toggle} title={theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
+          style={{ marginLeft: 'auto', fontSize: 16, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', lineHeight: 1 }}>
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
       </div>
 
       {/* Two columns */}

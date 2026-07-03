@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ── Admin theme CSS variables ─────────────────────────────────────────────── */
-html, html[data-theme="dark"] {
+:root, [data-theme="dark"] {
   --t-bg:           #0d0d0d;
   --t-surface:      #111111;
   --t-surface2:     #18181b;
@@ -20,7 +20,7 @@ html, html[data-theme="dark"] {
   --t-overlay:      rgba(0,0,0,0.85);
   --t-overlay2:     rgba(0,0,0,0.5);
 }
-html[data-theme="light"] {
+[data-theme="light"] {
   --t-bg:           #f8fafc;
   --t-surface:      #ffffff;
   --t-surface2:     #f1f5f9;

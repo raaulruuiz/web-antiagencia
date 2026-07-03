@@ -1,23 +1,15 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 const ThemeContext = createContext({ theme: 'dark', toggle: () => {} });
 export const useTheme = () => useContext(ThemeContext);
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem('aa-theme') || 'dark');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('aa-theme', theme);
-  }, [theme]);
-
-  const toggle = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
-
+  const [theme, setTheme] = useState(() => localStorage.getItem('aa-biblioteca-theme') || 'dark');
+  const toggle = () => setTheme(t => {
+    const next = t === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('aa-biblioteca-theme', next);
+    return next;
+  });
   return (
     <ThemeContext.Provider value={{ theme, toggle }}>
       {children}

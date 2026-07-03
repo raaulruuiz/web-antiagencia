@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import BibliotecaCardMeta from '@/components/BibliotecaCardMeta';
+import { useTheme } from '@/lib/ThemeContext';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
@@ -88,21 +89,21 @@ function DateRangePicker({ from, to, onChange }) {
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8, fontSize: 12, background: hasFilter ? 'rgba(99,102,241,0.1)' : '#18181b', border: `1px solid ${hasFilter ? '#6366f1' : '#27272a'}`, color: hasFilter ? '#a5b4fc' : 'white', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8, fontSize: 12, background: hasFilter ? 'rgba(99,102,241,0.1)' : 'var(--t-surface2)', border: `1px solid ${hasFilter ? '#6366f1' : 'var(--t-border)'}`, color: hasFilter ? '#a5b4fc' : 'white', cursor: 'pointer', whiteSpace: 'nowrap' }}>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>{label || 'Fecha de envío'}</span>
         {hasFilter && <span onMouseDown={e => { e.stopPropagation(); onChange({ from: '', to: '' }); }} style={{ opacity: 0.7, lineHeight: 1, fontSize: 15, marginLeft: 2 }}>×</span>}
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, background: '#1a1a1a', border: '1px solid #3f3f46', borderRadius: 12, padding: '14px', zIndex: 100, width: 240, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, background: 'var(--t-surface)', border: '1px solid #3f3f46', borderRadius: 12, padding: '14px', zIndex: 100, width: 240, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
           {selectingEnd && <p style={{ fontSize: 10, color: '#6366f1', margin: '0 0 8px', textAlign: 'center' }}>Ahora selecciona la fecha final</p>}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <button onClick={prevMonth} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: 18, padding: '0 8px', lineHeight: 1 }}>‹</button>
-            <span style={{ fontSize: 13, fontWeight: 500, color: 'white' }}>{MONTHS[viewMonth]} {viewYear}</span>
-            <button onClick={nextMonth} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: 18, padding: '0 8px', lineHeight: 1 }}>›</button>
+            <button onClick={prevMonth} style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', fontSize: 18, padding: '0 8px', lineHeight: 1 }}>‹</button>
+            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--t-text)' }}>{MONTHS[viewMonth]} {viewYear}</span>
+            <button onClick={nextMonth} style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', fontSize: 18, padding: '0 8px', lineHeight: 1 }}>›</button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 6 }}>
-            {WDAYS.map(d => <span key={d} style={{ textAlign: 'center', fontSize: 10, color: '#52525b', display: 'block', padding: '1px 0' }}>{d}</span>)}
+            {WDAYS.map(d => <span key={d} style={{ textAlign: 'center', fontSize: 10, color: 'var(--t-border-muted)', display: 'block', padding: '1px 0' }}>{d}</span>)}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
             {Array.from({ length: offset }).map((_, i) => <div key={`e${i}`} />)}
@@ -127,7 +128,7 @@ function DateRangePicker({ from, to, onChange }) {
           </div>
           {hasFilter && (
             <button onClick={() => { onChange({ from: '', to: '' }); setOpen(false); }}
-              style={{ marginTop: 10, width: '100%', background: 'none', border: '1px solid #3f3f46', color: 'white', borderRadius: 8, padding: '5px', fontSize: 11, cursor: 'pointer' }}>
+              style={{ marginTop: 10, width: '100%', background: 'none', border: '1px solid #3f3f46', color: 'var(--t-text)', borderRadius: 8, padding: '5px', fontSize: 11, cursor: 'pointer' }}>
               Limpiar
             </button>
           )}
@@ -140,7 +141,7 @@ function DateRangePicker({ from, to, onChange }) {
 function ConfirmModal({ count, onConfirm, onCancel }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={onCancel}>
-      <div className="rounded-xl border border-zinc-700 p-6 flex flex-col gap-4" style={{ backgroundColor: '#1a1a1a', width: '320px' }} onClick={e => e.stopPropagation()}>
+      <div className="rounded-xl border border-zinc-700 p-6 flex flex-col gap-4" style={{ backgroundColor: 'var(--t-surface)', width: '320px' }} onClick={e => e.stopPropagation()}>
         <p className="text-sm text-white font-medium">{count === 1 ? '¿Eliminar esta captura?' : `¿Eliminar ${count} capturas?`}</p>
         <p className="text-xs text-zinc-400">Esta acción no se puede deshacer.</p>
         <div className="flex gap-2 justify-end">
@@ -154,13 +155,14 @@ function ConfirmModal({ count, onConfirm, onCancel }) {
 
 const btnStyle = (active) => ({
   fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, cursor: 'pointer', transition: 'all 0.15s', border: '1px solid',
-  borderColor: active ? '#52525b' : '#3f3f46',
-  background: active ? '#27272a' : 'transparent',
+  borderColor: active ? 'var(--t-border-muted)' : 'var(--t-border-mid)',
+  background: active ? 'var(--t-border)' : 'transparent',
   color: active ? 'white' : '#a1a1aa',
 });
 
 export default function Biblioteca() {
   const navigate = useNavigate();
+  const { theme, toggle } = useTheme();
   const [items, setItems]         = useState([]);
   const [allTags, setAllTags]     = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -248,11 +250,11 @@ export default function Biblioteca() {
   const toggleSelect = (id) => { setSelected(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; }); };
   const exitSelect = () => { setSelecting(false); setSelected(new Set()); };
 
-  const inputStyle = { background: '#18181b', border: '1px solid #27272a', borderRadius: 8, padding: '5px 10px', fontSize: 12, color: 'white', outline: 'none', colorScheme: 'dark' };
+  const inputStyle = { background: 'var(--t-surface2)', border: '1px solid #27272a', borderRadius: 8, padding: '5px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark' };
   const selectStyle = { ...inputStyle, cursor: 'pointer' };
 
   return (
-    <div className="p-4 md:p-8" style={{ backgroundColor: '#0d0d0d', color: 'white', minHeight: '100vh' }}>
+    <div data-theme={theme} className="p-4 md:p-8" style={{ backgroundColor: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
 
       {confirm && <ConfirmModal count={confirm.ids.length} onConfirm={() => deleteIds(confirm.ids)} onCancel={() => setConfirm(null)} />}
 
@@ -291,12 +293,16 @@ export default function Biblioteca() {
                 style={{ ...btnStyle(showFilters || activeFilterCount > 0), position: 'relative' }}>
                 <FilterIcon /> Filtrar
                 {activeFilterCount > 0 && (
-                  <span style={{ background: '#6366f1', color: 'white', fontSize: 9, fontWeight: 700, borderRadius: 999, padding: '1px 5px', marginLeft: 2 }}>{activeFilterCount}</span>
+                  <span style={{ background: '#6366f1', color: 'var(--t-text)', fontSize: 9, fontWeight: 700, borderRadius: 999, padding: '1px 5px', marginLeft: 2 }}>{activeFilterCount}</span>
                 )}
               </button>
               <button onClick={() => setSelecting(true)} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors">Seleccionar</button>
               <button onClick={load} disabled={loading} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
                 {loading ? 'Cargando…' : 'Actualizar'}
+              </button>
+              <button onClick={toggle} title={theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
+                style={{ fontSize: 16, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', lineHeight: 1 }}>
+                {theme === 'dark' ? '☀️' : '🌙'}
               </button>
             </>
           )}
@@ -307,23 +313,23 @@ export default function Biblioteca() {
       {showSearch && (
         <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ flex: 1, position: 'relative' }}>
-            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#52525b', pointerEvents: 'none', display: 'flex' }}><SearchIcon /></span>
+            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--t-border-muted)', pointerEvents: 'none', display: 'flex' }}><SearchIcon /></span>
             <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar por marca, asunto, adelanto…"
               style={{ ...inputStyle, width: '100%', paddingLeft: 32, boxSizing: 'border-box', fontSize: 13, padding: '8px 10px 8px 32px' }} />
           </div>
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', display: 'flex' }}><XIcon /></button>
+            <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', display: 'flex' }}><XIcon /></button>
           )}
         </div>
       )}
 
       {/* Filter panel */}
       {showFilters && (
-        <div style={{ marginBottom: 16, background: '#111', border: '1px solid #27272a', borderRadius: 12, padding: '14px 16px', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end' }}>
+        <div style={{ marginBottom: 16, background: 'var(--t-surface)', border: '1px solid #27272a', borderRadius: 12, padding: '14px 16px', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end' }}>
           {/* Categoría */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
+            <span style={{ fontSize: 10, color: 'var(--t-border-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
             <select value={filterCategoria} onChange={e => setFilterCategoria(e.target.value)} style={selectStyle}>
               <option value="">Todas</option>
               <option value="email">Email</option>
@@ -333,7 +339,7 @@ export default function Biblioteca() {
 
           {/* Subcategoría */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
+            <span style={{ fontSize: 10, color: 'var(--t-border-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
             <select value={filterSubcat} onChange={e => setFilterSubcat(e.target.value)} style={selectStyle}>
               <option value="">Todas</option>
               <option value="automatizacion">Automatización</option>
@@ -343,7 +349,7 @@ export default function Biblioteca() {
 
           {/* Marca */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Marca</span>
+            <span style={{ fontSize: 10, color: 'var(--t-border-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Marca</span>
             <select value={filterMarca} onChange={e => setFilterMarca(e.target.value)} style={selectStyle}>
               <option value="">Todas</option>
               {allMarcas.map(m => <option key={m} value={m}>{m}</option>)}
@@ -353,7 +359,7 @@ export default function Biblioteca() {
           {/* Etiqueta */}
           {allTags.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiqueta</span>
+              <span style={{ fontSize: 10, color: 'var(--t-border-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiqueta</span>
               <select value={filterTagId} onChange={e => setFilterTagId(e.target.value)} style={selectStyle}>
                 <option value="">Todas</option>
                 {allTags.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -363,15 +369,15 @@ export default function Biblioteca() {
 
           {/* Fecha rango */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</span>
+            <span style={{ fontSize: 10, color: 'var(--t-border-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</span>
             <DateRangePicker from={filterFechaFrom} to={filterFechaTo} onChange={({ from, to }) => { setFilterFechaFrom(from); setFilterFechaTo(to); }} />
           </div>
 
           {activeFilterCount > 0 && (
             <button onClick={clearFilters}
-              style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 8, padding: '5px 10px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
-              onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = '#52525b'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = '#71717a'; e.currentTarget.style.borderColor = '#3f3f46'; }}>
+              style={{ background: 'none', border: '1px solid #3f3f46', color: 'var(--t-text-muted)', borderRadius: 8, padding: '5px 10px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'var(--t-border-muted)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#71717a'; e.currentTarget.style.borderColor = 'var(--t-border-mid)'; }}>
               <XIcon /> Limpiar filtros
             </button>
           )}
@@ -380,7 +386,7 @@ export default function Biblioteca() {
 
       {/* Result count when filtered */}
       {(searchQuery || activeFilterCount > 0) && !loading && (
-        <p style={{ fontSize: 12, color: '#52525b', marginBottom: 12 }}>
+        <p style={{ fontSize: 12, color: 'var(--t-border-muted)', marginBottom: 12 }}>
           {filteredItems.length} {filteredItems.length === 1 ? 'resultado' : 'resultados'}
         </p>
       )}
@@ -402,7 +408,7 @@ export default function Biblioteca() {
             return (
               <div key={item.id} className="group relative cursor-pointer"
                 onClick={() => { if (selecting) { toggleSelect(item.id); return; } navigate(`/admin/biblioteca/${item.id}`); }}>
-                <div className="aspect-video bg-zinc-900 rounded-lg overflow-hidden border transition-colors" style={{ borderColor: isSelected ? '#fff' : '#27272a' }}>
+                <div className="aspect-video bg-zinc-900 rounded-lg overflow-hidden border transition-colors" style={{ borderColor: isSelected ? '#fff' : 'var(--t-border)' }}>
                   <img src={item.url} alt={item.filename} className="w-full h-full object-cover" loading="lazy" />
 
                   {!selecting && (
