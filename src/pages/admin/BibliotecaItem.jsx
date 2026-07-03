@@ -767,6 +767,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
   const imgs = block.images || [];
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
     <div style={{ background: '#111', border: '1px solid #1f1f1f', borderRadius: 10, overflow: 'hidden' }}>
@@ -796,12 +797,26 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a'; }}>
             <IconPencil /> Editar
           </button>
-          <button onClick={onDelete}
-            style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 3, display: 'flex' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-            onMouseLeave={e => e.currentTarget.style.color = '#52525b'}>
-            <IconTrashSm />
-          </button>
+          {confirmDelete ? (
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: '#ef4444' }}>¿Eliminar?</span>
+              <button onClick={onDelete}
+                style={{ background: '#dc2626', border: 'none', color: 'white', cursor: 'pointer', padding: '2px 7px', borderRadius: 5, fontSize: 11, fontWeight: 600 }}>
+                Sí
+              </button>
+              <button onClick={() => setConfirmDelete(false)}
+                style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', cursor: 'pointer', padding: '2px 7px', borderRadius: 5, fontSize: 11 }}>
+                No
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => setConfirmDelete(true)}
+              style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 3, display: 'flex' }}
+              onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+              onMouseLeave={e => e.currentTarget.style.color = '#52525b'}>
+              <IconTrashSm />
+            </button>
+          )}
         </div>
       </div>
 
