@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BibliotecaCardMeta from '@/components/BibliotecaCardMeta';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
@@ -101,41 +102,7 @@ export default function BibliotecaPublica() {
                     loading="lazy"
                   />
                 </div>
-                <div style={{ marginTop: 4 }}>
-                  {item.marca ? (
-                    <p style={{ fontSize: 14, fontWeight: 500, color: 'white', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.marca}
-                    </p>
-                  ) : (
-                    <p style={{ fontSize: 11, color: '#52525b', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {new Date(item.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </p>
-                  )}
-                  {(item.categoria || item.subcategoria) && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 3 }}>
-                      {item.categoria && (
-                        <span style={{
-                          fontSize: 10, borderRadius: 999, padding: '1px 7px', fontWeight: 500,
-                          background: item.categoria === 'email' ? 'rgba(59,130,246,0.15)' : 'rgba(168,85,247,0.15)',
-                          border: `1px solid ${item.categoria === 'email' ? '#3b82f6' : '#a855f7'}`,
-                          color: item.categoria === 'email' ? '#93c5fd' : '#d8b4fe',
-                        }}>
-                          {item.categoria === 'email' ? 'Email' : 'Ficha'}
-                        </span>
-                      )}
-                      {item.subcategoria && (
-                        <span style={{
-                          fontSize: 10, borderRadius: 999, padding: '1px 7px', fontWeight: 500,
-                          background: item.subcategoria === 'automatizacion' ? 'rgba(34,197,94,0.12)' : 'rgba(249,115,22,0.12)',
-                          border: `1px solid ${item.subcategoria === 'automatizacion' ? '#22c55e' : '#f97316'}`,
-                          color: item.subcategoria === 'automatizacion' ? '#86efac' : '#fdba74',
-                        }}>
-                          {item.subcategoria === 'automatizacion' ? 'Auto.' : 'Campaña'}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
+                <BibliotecaCardMeta item={item} />
               </div>
             ))}
           </div>
