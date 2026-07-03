@@ -14,6 +14,13 @@ const SUBCAT_COLORS = {
   campana:        { bg: 'rgba(249,115,22,0.12)',  border: '#f97316', text: '#fdba74' },
 };
 
+const presetBtnStyle = (active) => ({
+  padding: '4px 10px', fontSize: 11, borderRadius: 6, cursor: 'pointer', transition: 'all 0.1s',
+  border: `1px solid ${active ? '#71717a' : '#27272a'}`,
+  background: active ? '#27272a' : 'transparent',
+  color: active ? 'white' : '#71717a',
+});
+
 // ── Icons (SVG) ───────────────────────────────────────────────────────────────
 const IconEmail = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -28,7 +35,6 @@ const IconFicha = () => (
     <line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/>
   </svg>
 );
-// Automatización → schema/workflow (nodes conectados)
 const IconSchema = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <rect x="2" y="3" width="6" height="5" rx="1"/>
@@ -39,7 +45,6 @@ const IconSchema = () => (
     <line x1="8" y1="5.5" x2="16" y2="5.5"/>
   </svg>
 );
-// Campaña → papel avión / send
 const IconSend = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="22" y1="2" x2="11" y2="13"/>
@@ -80,6 +85,24 @@ const SUBCATEGORIAS = [
   { value: 'campana',        label: 'Campaña',         icon: <IconSend /> },
 ];
 
+const ASPECT_PRESETS = [
+  { label: '1:1',  ratio: 1 },
+  { label: '9:16', ratio: 9 / 16 },
+  { label: '16:9', ratio: 16 / 9 },
+  { label: '4:5',  ratio: 4 / 5 },
+];
+
+const RESIZE_HANDLES = [
+  { id: 'nw', style: { top: -5, left: -5, cursor: 'nw-resize' } },
+  { id: 'n',  style: { top: -5, left: '50%', transform: 'translateX(-50%)', cursor: 'n-resize' } },
+  { id: 'ne', style: { top: -5, right: -5, cursor: 'ne-resize' } },
+  { id: 'e',  style: { top: '50%', right: -5, transform: 'translateY(-50%)', cursor: 'e-resize' } },
+  { id: 'se', style: { bottom: -5, right: -5, cursor: 'se-resize' } },
+  { id: 's',  style: { bottom: -5, left: '50%', transform: 'translateX(-50%)', cursor: 's-resize' } },
+  { id: 'sw', style: { bottom: -5, left: -5, cursor: 'sw-resize' } },
+  { id: 'w',  style: { top: '50%', left: -5, transform: 'translateY(-50%)', cursor: 'w-resize' } },
+];
+
 // ── Tag component ─────────────────────────────────────────────────────────────
 function Tag({ colors, label, onRemove }) {
   return (
@@ -117,7 +140,6 @@ function CatButtons({ options, colors, onSelect }) {
 }
 
 // ── Field row with check/X confirm and optional autocomplete ──────────────────
-// savedValue: null = not added | '' = added empty (Vacío) | 'text' = added with value
 function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = true, type = 'text', placeholder, suggestions = [] }) {
   const [inputMode, setInputMode] = useState(false);
   const [inputVal, setInputVal]   = useState('');
@@ -126,7 +148,6 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
   const inputRef = useRef(null);
 
   const isSet = savedValue !== null;
-
   const filteredSugg = suggestions.filter(s =>
     inputVal.length > 0 && s.toLowerCase().includes(inputVal.toLowerCase()) && s !== inputVal
   );
@@ -136,50 +157,33 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
   }, [inputMode]);
 
   const startEdit = () => {
-    setInputVal(isSet ? savedValue : '');
+    setInputVal(isSet ? (savedValue || '') : '');
     setError('');
     setInputMode(true);
   };
 
   const handleConfirm = () => {
     const trimmed = inputVal.trim();
-
-    // Date field: empty → just cancel silently (don't save null)
     if (type === 'date') {
       if (!trimmed) { setInputMode(false); return; }
       onSave(trimmed);
       setInputMode(false);
       return;
     }
-
-    // Required field: empty → error
-    if (required && !trimmed) {
-      setError('Este campo es obligatorio');
-      return;
-    }
-
-    // allowEmpty=false (but not required): empty → cancel silently
-    if (!allowEmpty && !trimmed) {
-      setInputMode(false);
-      return;
-    }
-
-    onSave(trimmed); // '' allowed for non-required fields with allowEmpty=true
+    if (required && !trimmed) { setError('Este campo es obligatorio'); return; }
+    if (!allowEmpty && !trimmed) { setInputMode(false); return; }
+    onSave(trimmed);
     setInputMode(false);
     setError('');
   };
 
-  const handleCancel = () => {
-    setInputMode(false);
-    setError('');
-  };
+  const handleCancel = () => { setInputMode(false); setError(''); };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') { e.preventDefault(); handleConfirm(); }
     if (e.key === 'Escape') handleCancel();
   };
 
-  // Not set + not in add mode → subtle "+" button
   if (!isSet && !inputMode) {
     return (
       <button
@@ -193,27 +197,21 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
     );
   }
 
-  // Set + not in edit mode → display value, click to re-edit
   if (isSet && !inputMode) {
     const displayValue = type === 'date' && savedValue
       ? new Date(savedValue + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
       : savedValue;
-
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <span style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
-        <div
-          onClick={startEdit}
-          title="Haz clic para editar"
-          style={{ fontSize: 13, color: displayValue ? 'white' : '#71717a', cursor: 'text', padding: '4px 0', fontStyle: displayValue ? 'normal' : 'italic', borderBottom: '1px solid #27272a' }}
-        >
+        <div onClick={startEdit} title="Haz clic para editar"
+          style={{ fontSize: 13, color: displayValue ? 'white' : '#71717a', cursor: 'text', padding: '4px 0', fontStyle: displayValue ? 'normal' : 'italic', borderBottom: '1px solid #27272a' }}>
           {displayValue || '(Vacío)'}
         </div>
       </div>
     );
   }
 
-  // Input mode (adding or editing)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {isSet && <span style={{ fontSize: 11, color: 'white', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>}
@@ -230,25 +228,16 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
             placeholder={placeholder || label + '…'}
             style={{ flex: 1, background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 10px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }}
           />
-          <button onClick={handleConfirm} title="Confirmar" style={{ background: 'none', border: 'none', color: '#22c55e', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}>
-            <IconCheck />
-          </button>
-          <button onClick={handleCancel} title="Cancelar" style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}>
-            <IconX />
-          </button>
+          <button onClick={handleConfirm} title="Confirmar" style={{ background: 'none', border: 'none', color: '#22c55e', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}><IconCheck /></button>
+          <button onClick={handleCancel} title="Cancelar" style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}><IconX /></button>
         </div>
-
-        {/* Autocomplete dropdown */}
         {showSugg && filteredSugg.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 40, background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, marginTop: 4, zIndex: 20, overflow: 'hidden' }}>
             {filteredSugg.slice(0, 6).map(s => (
-              <div
-                key={s}
-                onMouseDown={() => { setInputVal(s); setShowSugg(false); }}
-                style={{ padding: '7px 12px', fontSize: 13, color: 'white', cursor: 'pointer', transition: 'background 0.1s' }}
+              <div key={s} onMouseDown={() => { setInputVal(s); setShowSugg(false); }}
+                style={{ padding: '7px 12px', fontSize: 13, color: 'white', cursor: 'pointer' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 {s}
               </div>
             ))}
@@ -260,47 +249,266 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
   );
 }
 
-// ── Crop overlay ──────────────────────────────────────────────────────────────
+// ── Crop overlay (two modes) ──────────────────────────────────────────────────
 function CropOverlay({ imageUrl, onCrop, onCancel }) {
-  const [drag, setDrag] = useState(null);
-  const [rect, setRect] = useState(null);
+  const [mode, setMode]           = useState('libre');
+  // Free crop
+  const [freeDrag, setFreeDrag]   = useState(null);
+  const [freeRect, setFreeRect]   = useState(null);
+  // Resize crop
+  const [cropBox, setCropBox]     = useState(null); // { x, y, w, h } display px relative to image
+  const [dragHandle, setDragHandle] = useState(null);
+  const [aspectRatio, setAspectRatio] = useState(null);
   const imgRef = useRef(null);
 
-  const handleMouseDown = (e) => {
-    e.preventDefault();
+  // Global mouseup to handle dragging outside overlay
+  useEffect(() => {
+    const up = () => { setDragHandle(null); setFreeDrag(null); };
+    document.addEventListener('mouseup', up);
+    return () => document.removeEventListener('mouseup', up);
+  }, []);
+
+  const initCropBox = useCallback(() => {
+    if (!imgRef.current) return;
     const b = imgRef.current.getBoundingClientRect();
-    setDrag({ sx: e.clientX - b.left, sy: e.clientY - b.top });
-    setRect(null);
+    if (b.width === 0) return;
+    const w = b.width * 0.75;
+    const h = b.height * 0.65;
+    setCropBox({ x: (b.width - w) / 2, y: (b.height - h) / 2, w, h });
+  }, []);
+
+  useEffect(() => {
+    if (mode === 'ajustar') {
+      setCropBox(null);
+      setAspectRatio(null);
+      requestAnimationFrame(() => requestAnimationFrame(initCropBox));
+    } else {
+      setFreeRect(null);
+    }
+  }, [mode, initCropBox]);
+
+  const applyPreset = (ratio) => {
+    setAspectRatio(ratio);
+    if (!imgRef.current) return;
+    const b = imgRef.current.getBoundingClientRect();
+    const current = cropBox || { x: b.width * 0.1, y: b.height * 0.1, w: b.width * 0.8, h: b.height * 0.8 };
+    const cx = current.x + current.w / 2;
+    const cy = current.y + current.h / 2;
+    let w = current.w;
+    let h = ratio ? w / ratio : current.h;
+    if (h > b.height * 0.95) { h = b.height * 0.95; w = ratio ? h * ratio : w; }
+    if (w > b.width  * 0.95) { w = b.width  * 0.95; h = ratio ? w / ratio : h; }
+    const x = Math.max(0, Math.min(cx - w / 2, b.width  - w));
+    const y = Math.max(0, Math.min(cy - h / 2, b.height - h));
+    setCropBox({ x, y, w, h });
   };
+
   const handleMouseMove = (e) => {
-    if (!drag) return;
-    const b = imgRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - b.left, b.width));
-    const y = Math.max(0, Math.min(e.clientY - b.top, b.height));
-    setRect({ x: Math.min(drag.sx, x), y: Math.min(drag.sy, y), w: Math.abs(x - drag.sx), h: Math.abs(y - drag.sy) });
+    if (mode === 'libre') {
+      if (!freeDrag || !imgRef.current) return;
+      const b = imgRef.current.getBoundingClientRect();
+      const x = Math.max(0, Math.min(e.clientX - b.left, b.width));
+      const y = Math.max(0, Math.min(e.clientY - b.top,  b.height));
+      setFreeRect({ x: Math.min(freeDrag.sx, x), y: Math.min(freeDrag.sy, y), w: Math.abs(x - freeDrag.sx), h: Math.abs(y - freeDrag.sy) });
+    } else {
+      if (!dragHandle || !imgRef.current) return;
+      const imgRect = imgRef.current.getBoundingClientRect();
+      const dx = (e.clientX - imgRect.left) - dragHandle.startRelX;
+      const dy = (e.clientY - imgRect.top)  - dragHandle.startRelY;
+      const b  = dragHandle.startBox;
+      const imgW = imgRect.width;
+      const imgH = imgRect.height;
+      const ratio = aspectRatio;
+      const MIN = 30;
+      let { x, y, w, h } = b;
+
+      switch (dragHandle.type) {
+        case 'move':
+          x = Math.max(0, Math.min(b.x + dx, imgW - b.w));
+          y = Math.max(0, Math.min(b.y + dy, imgH - b.h));
+          break;
+        case 'se':
+          w = Math.max(MIN, Math.min(b.w + dx, imgW - b.x));
+          h = ratio ? w / ratio : Math.max(MIN, Math.min(b.h + dy, imgH - b.y));
+          if (ratio && b.y + h > imgH) { h = imgH - b.y; w = h * ratio; }
+          break;
+        case 'sw':
+          w = Math.max(MIN, Math.min(b.w - dx, b.x + b.w));
+          x = b.x + b.w - w;
+          h = ratio ? w / ratio : Math.max(MIN, Math.min(b.h + dy, imgH - b.y));
+          if (ratio && b.y + h > imgH) { h = imgH - b.y; w = h * ratio; x = b.x + b.w - w; }
+          break;
+        case 'ne':
+          w = Math.max(MIN, Math.min(b.w + dx, imgW - b.x));
+          h = ratio ? w / ratio : Math.max(MIN, Math.min(b.h - dy, b.y + b.h));
+          y = b.y + b.h - h;
+          if (ratio && y < 0) { h = b.y + b.h; w = h * ratio; y = 0; }
+          break;
+        case 'nw':
+          w = Math.max(MIN, Math.min(b.w - dx, b.x + b.w));
+          x = b.x + b.w - w;
+          h = ratio ? w / ratio : Math.max(MIN, Math.min(b.h - dy, b.y + b.h));
+          y = b.y + b.h - h;
+          if (ratio && y < 0) { h = b.y + b.h; w = h * ratio; x = b.x + b.w - w; y = 0; }
+          break;
+        case 'e':
+          w = Math.max(MIN, Math.min(b.w + dx, imgW - b.x));
+          if (ratio) { h = w / ratio; y = b.y + b.h / 2 - h / 2; }
+          break;
+        case 'w':
+          w = Math.max(MIN, Math.min(b.w - dx, b.x + b.w));
+          x = b.x + b.w - w;
+          if (ratio) { h = w / ratio; y = b.y + b.h / 2 - h / 2; }
+          break;
+        case 'n':
+          h = Math.max(MIN, Math.min(b.h - dy, b.y + b.h));
+          y = b.y + b.h - h;
+          if (ratio) { w = h * ratio; x = b.x + b.w / 2 - w / 2; }
+          break;
+        case 's':
+          h = Math.max(MIN, Math.min(b.h + dy, imgH - b.y));
+          if (ratio) { w = h * ratio; x = b.x + b.w / 2 - w / 2; }
+          break;
+        default: break;
+      }
+      // Clamp to image bounds
+      x = Math.max(0, x); y = Math.max(0, y);
+      w = Math.min(w, imgW - x); h = Math.min(h, imgH - y);
+      setCropBox({ x, y, w, h });
+    }
   };
+
   const handleMouseUp = () => {
-    if (!drag || !rect || rect.w < 10 || rect.h < 10) { setDrag(null); return; }
-    const b = imgRef.current.getBoundingClientRect();
-    const sx = imgRef.current.naturalWidth / b.width;
+    if (mode === 'libre' && freeDrag && freeRect && freeRect.w >= 10 && freeRect.h >= 10) {
+      const b  = imgRef.current.getBoundingClientRect();
+      const sx = imgRef.current.naturalWidth  / b.width;
+      const sy = imgRef.current.naturalHeight / b.height;
+      onCrop({ x: Math.round(freeRect.x * sx), y: Math.round(freeRect.y * sy), w: Math.round(freeRect.w * sx), h: Math.round(freeRect.h * sy) });
+    }
+    setFreeDrag(null);
+    setDragHandle(null);
+  };
+
+  const confirmResize = () => {
+    if (!cropBox || !imgRef.current) return;
+    const b  = imgRef.current.getBoundingClientRect();
+    const sx = imgRef.current.naturalWidth  / b.width;
     const sy = imgRef.current.naturalHeight / b.height;
-    onCrop({ x: Math.round(rect.x * sx), y: Math.round(rect.y * sy), w: Math.round(rect.w * sx), h: Math.round(rect.h * sy) });
-    setDrag(null);
+    onCrop({ x: Math.round(cropBox.x * sx), y: Math.round(cropBox.y * sy), w: Math.round(cropBox.w * sx), h: Math.round(cropBox.h * sy) });
+  };
+
+  const startHandleDrag = (e, handleType) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!imgRef.current) return;
+    const imgRect = imgRef.current.getBoundingClientRect();
+    setDragHandle({
+      type:      handleType,
+      startRelX: e.clientX - imgRect.left,
+      startRelY: e.clientY - imgRect.top,
+      startBox:  { ...cropBox },
+    });
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.92)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14 }}
-      onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
-      <p style={{ color: '#a1a1aa', fontSize: 13, userSelect: 'none' }}>Arrastra para seleccionar el área a recortar</p>
-      <div style={{ position: 'relative', cursor: 'crosshair', maxHeight: '80vh', overflowY: 'auto' }}>
-        <img ref={imgRef} src={imageUrl} crossOrigin="anonymous" alt="recortar"
-          style={{ maxWidth: '80vw', display: 'block', userSelect: 'none' }}
-          onMouseDown={handleMouseDown} draggable={false} />
-        {rect && rect.w > 0 && rect.h > 0 && (
-          <div style={{ position: 'absolute', border: '2px solid white', boxShadow: '0 0 0 9999px rgba(0,0,0,0.5)', pointerEvents: 'none', left: rect.x, top: rect.y, width: rect.w, height: rect.h }} />
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.92)', display: 'flex', flexDirection: 'column', alignItems: 'center', userSelect: 'none' }}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+    >
+      {/* Top controls */}
+      <div style={{ padding: '16px 0 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        {/* Mode tabs */}
+        <div style={{ display: 'flex', background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 10, padding: 3, gap: 2 }}>
+          {[{ id: 'libre', label: 'Recorte libre' }, { id: 'ajustar', label: 'Ajustar tamaño' }].map(m => (
+            <button key={m.id} onClick={() => setMode(m.id)}
+              style={{ padding: '5px 14px', fontSize: 12, borderRadius: 7, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: mode === m.id ? '#27272a' : 'transparent', color: mode === m.id ? 'white' : '#71717a' }}>
+              {m.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Aspect ratio presets (ajustar mode) */}
+        {mode === 'ajustar' && (
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <span style={{ fontSize: 11, color: '#52525b' }}>Proporción:</span>
+            <button onClick={() => { setAspectRatio(null); }} style={presetBtnStyle(aspectRatio === null)}>Libre</button>
+            {ASPECT_PRESETS.map(p => (
+              <button key={p.label} onClick={() => applyPreset(p.ratio)} style={presetBtnStyle(Math.abs((aspectRatio || 0) - p.ratio) < 0.001)}>{p.label}</button>
+            ))}
+          </div>
+        )}
+
+        {mode === 'libre' && (
+          <p style={{ color: '#71717a', fontSize: 12, margin: 0 }}>Arrastra sobre la imagen para seleccionar el área</p>
         )}
       </div>
-      <button onClick={onCancel} style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '6px 18px', fontSize: 13, cursor: 'pointer' }}>Cancelar</button>
+
+      {/* Image area */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden', padding: '0 40px' }}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <img
+            ref={imgRef}
+            src={imageUrl}
+            crossOrigin="anonymous"
+            alt="recortar"
+            onLoad={mode === 'ajustar' ? initCropBox : undefined}
+            style={{ maxWidth: '80vw', maxHeight: '62vh', display: 'block', cursor: mode === 'libre' ? 'crosshair' : 'default' }}
+            onMouseDown={mode === 'libre' ? (e) => {
+              e.preventDefault();
+              const b = imgRef.current.getBoundingClientRect();
+              setFreeDrag({ sx: e.clientX - b.left, sy: e.clientY - b.top });
+              setFreeRect(null);
+            } : undefined}
+            draggable={false}
+          />
+
+          {/* Free crop selection rect */}
+          {mode === 'libre' && freeRect && freeRect.w > 0 && freeRect.h > 0 && (
+            <div style={{ position: 'absolute', border: '2px solid white', boxShadow: '0 0 0 9999px rgba(0,0,0,0.5)', pointerEvents: 'none', left: freeRect.x, top: freeRect.y, width: freeRect.w, height: freeRect.h }} />
+          )}
+
+          {/* Resize crop box */}
+          {mode === 'ajustar' && cropBox && (
+            <div
+              onMouseDown={e => startHandleDrag(e, 'move')}
+              style={{ position: 'absolute', left: cropBox.x, top: cropBox.y, width: cropBox.w, height: cropBox.h, border: '2px solid white', boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)', cursor: 'move', boxSizing: 'border-box' }}
+            >
+              {/* Grid lines (rule of thirds) */}
+              <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                {['33.33%', '66.66%'].map(p => (
+                  <div key={'h' + p} style={{ position: 'absolute', top: p, left: 0, right: 0, borderTop: '1px solid rgba(255,255,255,0.25)' }} />
+                ))}
+                {['33.33%', '66.66%'].map(p => (
+                  <div key={'v' + p} style={{ position: 'absolute', left: p, top: 0, bottom: 0, borderLeft: '1px solid rgba(255,255,255,0.25)' }} />
+                ))}
+              </div>
+
+              {/* Resize handles */}
+              {RESIZE_HANDLES.map(h => (
+                <div
+                  key={h.id}
+                  onMouseDown={e => startHandleDrag(e, h.id)}
+                  style={{ position: 'absolute', width: 10, height: 10, background: 'white', borderRadius: 2, ...h.style }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div style={{ padding: '12px 0 20px', display: 'flex', gap: 10, alignItems: 'center' }}>
+        <button onClick={onCancel}
+          style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '7px 18px', fontSize: 13, cursor: 'pointer' }}>
+          Cancelar
+        </button>
+        {mode === 'ajustar' && cropBox && (
+          <button onClick={confirmResize}
+            style={{ background: 'white', color: 'black', border: 'none', borderRadius: 999, padding: '7px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            Confirmar recorte
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -330,7 +538,8 @@ function CropConfirmModal({ previewUrl, onConfirm, onCancel, saving }) {
         <img src={previewUrl} alt="recorte" style={{ width: '100%', borderRadius: 8, border: '1px solid #27272a', maxHeight: 320, objectFit: 'contain' }} />
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button onClick={onCancel} disabled={saving} style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '7px 18px', fontSize: 13, cursor: 'pointer' }}>Cancelar</button>
-          <button onClick={onConfirm} disabled={saving} style={{ background: saving ? '#3f3f46' : 'white', color: saving ? '#a1a1aa' : 'black', border: 'none', borderRadius: 999, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button onClick={onConfirm} disabled={saving}
+            style={{ background: saving ? '#3f3f46' : 'white', color: saving ? '#a1a1aa' : 'black', border: 'none', borderRadius: 999, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
             {saving && <div style={{ width: 12, height: 12, border: '2px solid #71717a', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />}
             {saving ? 'Guardando…' : 'Sí, guardar'}
           </button>
@@ -355,7 +564,6 @@ export default function BibliotecaItem() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Editable fields — null = not added, '' = added empty, 'text' = added with value
   const [nombre, setNombre]       = useState('');
   const [categoria, setCategoria] = useState(null);
   const [subcategoria, setSubcat] = useState(null);
@@ -366,10 +574,8 @@ export default function BibliotecaItem() {
   const [saving, setSaving]       = useState(false);
   const saveTimeout = useRef(null);
 
-  // Brands autocomplete
   const [allMarcas, setAllMarcas] = useState([]);
 
-  // Image overlay state
   const [imageHover, setImageHover]   = useState(false);
   const [showCrop, setShowCrop]       = useState(false);
   const [cropConfirm, setCropConfirm] = useState(null);
@@ -388,8 +594,7 @@ export default function BibliotecaItem() {
         setNombre(data.nombre || '');
         setCategoria(data.categoria || null);
         setSubcat(data.subcategoria || null);
-        // null = not added; '' = added empty; 'text' = added with value
-        setMarca(data.marca !== null && data.marca !== undefined ? data.marca : null);
+        setMarca(data.marca  !== null && data.marca  !== undefined ? data.marca  : null);
         setAsunto(data.asunto !== null && data.asunto !== undefined ? data.asunto : null);
         setAdelanto(data.adelanto !== null && data.adelanto !== undefined ? data.adelanto : null);
         setEnviadoEl(data.enviado_el !== null && data.enviado_el !== undefined ? data.enviado_el : null);
@@ -397,7 +602,6 @@ export default function BibliotecaItem() {
       finally { setLoading(false); }
     })();
 
-    // Fetch existing brands for autocomplete
     fetch(`${API_BASE}/biblioteca/marcas`)
       .then(r => r.ok ? r.json() : [])
       .then(setAllMarcas)
@@ -421,7 +625,6 @@ export default function BibliotecaItem() {
   const handleCategoria = (v) => { setCategoria(v); setSubcat(null); patch({ categoria: v, subcategoria: null }); };
   const handleSubcat    = (v) => { setSubcat(v); patch({ subcategoria: v }); };
 
-  // ── Crop ────────────────────────────────────────────────────────────────────
   const handleCrop = useCallback((cropRect) => {
     setShowCrop(false);
     const img = new Image();
@@ -430,9 +633,7 @@ export default function BibliotecaItem() {
       const canvas = document.createElement('canvas');
       canvas.width = cropRect.w; canvas.height = cropRect.h;
       canvas.getContext('2d').drawImage(img, cropRect.x, cropRect.y, cropRect.w, cropRect.h, 0, 0, cropRect.w, cropRect.h);
-      canvas.toBlob(blob => {
-        setCropConfirm({ blob, url: URL.createObjectURL(blob) });
-      }, 'image/png');
+      canvas.toBlob(blob => setCropConfirm({ blob, url: URL.createObjectURL(blob) }), 'image/png');
     };
     img.src = item.url;
   }, [item]);
@@ -445,13 +646,10 @@ export default function BibliotecaItem() {
       const form = new FormData();
       form.append('file', cropConfirm.blob, `recorte_${Date.now()}.png`);
       const res = await fetch(`${API_BASE}/biblioteca/${id}/replace-image`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: form,
+        method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: form,
       });
       if (!res.ok) throw new Error(await res.text());
-      const updated = await res.json();
-      setItem(updated);
+      setItem(await res.json());
       URL.revokeObjectURL(cropConfirm.url);
       setCropConfirm(null);
     } catch (e) {
@@ -464,7 +662,6 @@ export default function BibliotecaItem() {
     setCropConfirm(null);
   };
 
-  // Debounce for nombre
   const debounceNombre = (value) => {
     setNombre(value);
     clearTimeout(saveTimeout.current);
@@ -489,12 +686,10 @@ export default function BibliotecaItem() {
   return (
     <div className="p-4 md:p-8" style={{ backgroundColor: '#0d0d0d', color: 'white', minHeight: '100vh' }}>
 
-      {/* Overlays */}
       {showCrop && item && <CropOverlay imageUrl={item.url} onCrop={handleCrop} onCancel={() => setShowCrop(false)} />}
       {cropConfirm && <CropConfirmModal previewUrl={cropConfirm.url} onConfirm={confirmCrop} onCancel={cancelCrop} saving={replacing} />}
       {showModal && item && <ImageModal imageUrl={item.url} alt={nombre || item.filename} onClose={() => setShowModal(false)} />}
 
-      {/* Back */}
       <div className="flex items-center gap-3 mb-5">
         <button onClick={() => navigate('/admin/biblioteca')} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -503,7 +698,6 @@ export default function BibliotecaItem() {
         {saving && <span className="text-xs text-zinc-600">Guardando…</span>}
       </div>
 
-      {/* Nombre — full width */}
       <input
         type="text" value={nombre}
         onChange={e => debounceNombre(e.target.value)}
@@ -511,36 +705,27 @@ export default function BibliotecaItem() {
         className="w-full bg-transparent border border-zinc-800 focus:border-zinc-500 rounded-xl px-4 py-3 text-base text-white outline-none transition-colors mb-5"
       />
 
-      {/* Two equal columns */}
       <div className="grid grid-cols-2 gap-8 items-start">
 
-        {/* Left: image with hover overlay */}
-        <div
-          style={{ position: 'relative' }}
+        {/* Left: image */}
+        <div style={{ position: 'relative' }}
           onMouseEnter={() => setImageHover(true)}
-          onMouseLeave={() => setImageHover(false)}
-        >
+          onMouseLeave={() => setImageHover(false)}>
           <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden' }}>
             <img src={item.url} alt={nombre || item.filename} style={{ width: '100%', display: 'block' }} />
           </div>
           {imageHover && (
             <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
-              <button
-                onClick={() => setShowCrop(true)}
-                title="Recortar"
+              <button onClick={() => setShowCrop(true)} title="Recortar"
                 style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, backdropFilter: 'blur(4px)' }}
                 onMouseEnter={e => e.currentTarget.style.color = 'white'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
-              >
+                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}>
                 <IconScissors /> Recortar
               </button>
-              <button
-                onClick={() => setShowModal(true)}
-                title="Ver completa"
+              <button onClick={() => setShowModal(true)} title="Ver completa"
                 style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, backdropFilter: 'blur(4px)' }}
                 onMouseEnter={e => e.currentTarget.style.color = 'white'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
-              >
+                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}>
                 <IconEye /> Ver
               </button>
             </div>
@@ -550,7 +735,6 @@ export default function BibliotecaItem() {
         {/* Right: metadata */}
         <div className="flex flex-col gap-5">
 
-          {/* Tags (category + subcategory as stacked rows) */}
           {(categoria || subcategoria) && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {categoria && (
@@ -568,7 +752,6 @@ export default function BibliotecaItem() {
             </div>
           )}
 
-          {/* Category question */}
           {!categoria && (
             <div className="flex flex-col items-center gap-8 pt-4">
               <span className="text-xl font-medium text-white text-center">¿Email o Ficha de Producto?</span>
@@ -576,7 +759,6 @@ export default function BibliotecaItem() {
             </div>
           )}
 
-          {/* Subcategory question (email only) */}
           {showSubcatQuestion && (
             <div className="flex flex-col gap-6 pt-2">
               <span className="text-xl font-medium text-white">¿Automatización o Campaña?</span>
@@ -584,36 +766,21 @@ export default function BibliotecaItem() {
             </div>
           )}
 
-          {/* Fields (email + subcategory selected) */}
           {showFields && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 4 }}>
               <FieldRow
                 label="Marca"
                 savedValue={marca}
-                onSave={v => { setMarca(v); patch({ marca: v }); setAllMarcas(prev => prev.includes(v) ? prev : [...prev, v].sort((a,b) => a.localeCompare(b))); }}
-                required
-                allowEmpty={false}
+                onSave={v => {
+                  setMarca(v); patch({ marca: v });
+                  setAllMarcas(prev => prev.includes(v) ? prev : [...prev, v].sort((a, b) => a.localeCompare(b)));
+                }}
+                required allowEmpty={false}
                 suggestions={allMarcas}
               />
-              <FieldRow
-                label="Asunto"
-                savedValue={asunto}
-                onSave={v => { setAsunto(v); patch({ asunto: v }); }}
-                placeholder="Asunto del email…"
-              />
-              <FieldRow
-                label="Adelanto"
-                savedValue={adelanto}
-                onSave={v => { setAdelanto(v); patch({ adelanto: v }); }}
-                placeholder="Texto de adelanto…"
-              />
-              <FieldRow
-                label="Enviado el Día"
-                savedValue={enviadoEl}
-                onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }}
-                allowEmpty={false}
-                type="date"
-              />
+              <FieldRow label="Asunto"   savedValue={asunto}   onSave={v => { setAsunto(v);   patch({ asunto: v });   }} placeholder="Asunto del email…" />
+              <FieldRow label="Adelanto" savedValue={adelanto} onSave={v => { setAdelanto(v); patch({ adelanto: v }); }} placeholder="Texto de adelanto…" />
+              <FieldRow label="Enviado el Día" savedValue={enviadoEl} onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }} allowEmpty={false} type="date" />
             </div>
           )}
 
