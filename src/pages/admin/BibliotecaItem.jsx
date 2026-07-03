@@ -941,12 +941,13 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         return (
           <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {items.map((it, i) => {
+              const tc = it.text_color;
               const imgEl = it.image ? <PreviewImg src={it.image.url} imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} /> : null;
-              const txtEl = it.texto ? <div style={{ flex: 1, padding: '8px 10px', borderRadius: 8, fontSize: 12, color: 'var(--t-text)', lineHeight: 1.55, textAlign: it.text_align || 'left', background: it.text_bg || 'transparent', border: it.text_border ? `1px solid ${it.text_border}` : '1px solid var(--t-border)', minWidth: 0, overflow: 'hidden' }}>{it.texto}</div> : null;
+              const txtEl = it.texto ? <div style={{ flex: 1, maxWidth: isHoriz ? 400 : '100%', padding: '8px 10px', borderRadius: 8, fontSize: 12, lineHeight: 1.6, textAlign: it.text_align || 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: tc ? tc + '22' : 'transparent', border: tc ? `1px solid ${tc}` : '1px solid var(--t-border)', color: tc || 'var(--t-text)' }}>{it.texto}</div> : null;
               const els = imgFirst ? [imgEl, txtEl] : [txtEl, imgEl];
               return (
-                <div key={i} style={{ display: 'flex', flexDirection: isHoriz ? 'row' : 'column', gap: 10, alignItems: isHoriz ? 'flex-start' : 'stretch' }}>
-                  {els.map((el, j) => el && <div key={j} style={{ ...(isHoriz ? {} : { width: '100%' }) }}>{el}</div>)}
+                <div key={i} style={{ display: 'flex', flexDirection: isHoriz ? 'row' : 'column', gap: 10, alignItems: isHoriz ? 'flex-start' : 'center' }}>
+                  {els.map((el, j) => el && <div key={j} style={{ ...(isHoriz ? {} : { width: '100%', display: 'flex', justifyContent: 'center' }) }}>{el}</div>)}
                 </div>
               );
             })}
@@ -976,6 +977,52 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
   );
 }
 
+// ── InlineColorPicker (tag-style) ─────────────────────────────────────────────
+function InlineColorPicker({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [hex, setHex] = useState(value || '');
+  const apply = (color) => { onChange(color); setOpen(false); };
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <button onClick={() => setOpen(o => !o)}
+          style={{ width: 26, height: 26, borderRadius: 6, background: value || 'transparent', border: value ? `2px solid ${value}` : '1px dashed var(--t-border-mid)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {!value && <span style={{ fontSize: 14, color: 'var(--t-text-subtle)' }}>+</span>}
+        </button>
+        {value && (
+          <span style={{ fontSize: 10, borderRadius: 999, padding: '2px 8px', fontWeight: 600, background: value + '22', border: `1px solid ${value}`, color: value }}>Aa</span>
+        )}
+        {value && <button onClick={() => { onChange(''); setHex(''); }} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: 0 }}>✕</button>}
+      </div>
+      {open && (
+        <div style={{ position: 'absolute', top: 32, left: 0, zIndex: 50, background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 10, padding: 12, minWidth: 220, boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+            {TAG_PALETTE.map(c => (
+              <button key={c} onClick={() => { setHex(c); apply(c); }}
+                style={{ width: 22, height: 22, borderRadius: '50%', background: c, border: `2px solid ${c.toLowerCase() === (hex||'').toLowerCase() ? 'white' : 'transparent'}`, cursor: 'pointer' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'white'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = c.toLowerCase() === (hex||'').toLowerCase() ? 'white' : 'transparent'} />
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 7, padding: '5px 8px' }}>
+              <label style={{ position: 'relative', width: 14, height: 14, flexShrink: 0, cursor: 'pointer' }}>
+                <span style={{ width: 14, height: 14, borderRadius: 3, background: /^#[0-9a-f]{3,6}$/i.test(hex) ? hex : '#888', display: 'block' }} />
+                <input type="color" value={/^#[0-9a-f]{6}$/i.test(hex) ? hex : '#888888'} onChange={e => setHex(e.target.value)}
+                  style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer', border: 'none', padding: 0 }} />
+              </label>
+              <input value={hex} onChange={e => setHex(e.target.value)} placeholder="#6366f1"
+                style={{ flex: 1, background: 'none', border: 'none', color: 'var(--t-text)', fontSize: 12, outline: 'none', fontFamily: 'monospace' }} />
+            </div>
+            <button onClick={() => apply(hex)} style={{ background: 'white', color: 'black', border: 'none', borderRadius: 7, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Aplicar</button>
+            <button onClick={() => setOpen(false)} style={{ background: 'none', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-muted)', borderRadius: 7, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}>✕</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Block: editor modal ───────────────────────────────────────────────────────
 function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages }) {
   const [draft, setDraft] = useState(() => {
@@ -986,7 +1033,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     }
     if (d.type === 'enlaces' && !d.links) d.links = [{ images: [], url: '' }];
     if (d.type === 'imagen_texto' && !d.items) {
-      d.items = [{ image: d.images?.[0] || null, texto: d.texto || '', text_bg: '', text_border: '', text_align: 'left' }];
+      d.items = [{ image: d.images?.[0] || null, texto: d.texto || '', text_color: '', text_align: 'left' }];
     }
     return d;
   });
@@ -1028,7 +1075,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const removeLink = (linkIdx) => setDraft(d => ({ ...d, links: (d.links || []).filter((_, i) => i !== linkIdx) }));
 
   // imagen_texto items management
-  const addItem = () => setDraft(d => ({ ...d, items: [...(d.items || []), { image: null, texto: '', text_bg: '', text_border: '', text_align: 'left' }] }));
+  const addItem = () => setDraft(d => ({ ...d, items: [...(d.items || []), { image: null, texto: '', text_color: '', text_align: 'left' }] }));
   const removeItem = (idx) => setDraft(d => ({ ...d, items: (d.items || []).filter((_, i) => i !== idx) }));
   const setItemImage = (idx, url) => setDraft(d => {
     const items = [...(d.items || [])]; items[idx] = { ...items[idx], image: url ? { url } : null }; return { ...d, items };
@@ -1446,25 +1493,17 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 
                     {/* Text styling */}
                     <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Fondo</label>
-                        <input type="color" value={it.text_bg || '#000000'} onChange={e => updateItemField(itemIdx, 'text_bg', e.target.value)}
-                          style={{ width: 28, height: 22, borderRadius: 4, border: '1px solid var(--t-border-mid)', cursor: 'pointer', padding: 1, background: 'transparent' }} />
-                        {it.text_bg && <button onClick={() => updateItemField(itemIdx, 'text_bg', '')} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 10, padding: 0 }}>✕</button>}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Borde</label>
-                        <input type="color" value={it.text_border || '#ffffff'} onChange={e => updateItemField(itemIdx, 'text_border', e.target.value)}
-                          style={{ width: 28, height: 22, borderRadius: 4, border: '1px solid var(--t-border-mid)', cursor: 'pointer', padding: 1, background: 'transparent' }} />
-                        {it.text_border && <button onClick={() => updateItemField(itemIdx, 'text_border', '')} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 10, padding: 0 }}>✕</button>}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Color</label>
+                        <InlineColorPicker value={it.text_color || ''} onChange={c => updateItemField(itemIdx, 'text_color', c)} />
                       </div>
                       <div style={{ display: 'flex', gap: 3 }}>
-                        {[['left','⬅'], ['center','⬛'], ['right','➡'], ['justify','☰']].map(([val, icon]) => {
+                        {[['left','≡L'], ['center','≡C'], ['right','≡R'], ['justify','≡']].map(([val, icon]) => {
                           const active = (it.text_align || 'left') === val;
                           return (
                             <button key={val} onClick={() => updateItemField(itemIdx, 'text_align', val)}
                               title={val}
-                              style={{ background: active ? 'var(--t-border)' : 'transparent', border: `1px solid ${active ? 'var(--t-text-muted)' : 'var(--t-border)'}`, borderRadius: 5, width: 26, height: 26, cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? 'var(--t-text)' : 'var(--t-text-subtle)' }}>
+                              style={{ background: active ? 'var(--t-border)' : 'transparent', border: `1px solid ${active ? 'var(--t-text-muted)' : 'var(--t-border)'}`, borderRadius: 5, width: 28, height: 26, cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? 'var(--t-text)' : 'var(--t-text-subtle)', fontWeight: active ? 700 : 400 }}>
                               {icon}
                             </button>
                           );
@@ -1776,7 +1815,7 @@ export default function BibliotecaItem() {
       links_layout: 'columna',
       images_layout: 'columna',
       it_layout: 'img-text',
-      items: type === 'imagen_texto' ? [{ image: null, texto: '', text_bg: '', text_border: '', text_align: 'left' }] : [],
+      items: type === 'imagen_texto' ? [{ image: null, texto: '', text_color: '', text_align: 'left' }] : [],
       texto: '',
       nota: '',
     };
