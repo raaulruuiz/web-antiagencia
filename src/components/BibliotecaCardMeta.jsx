@@ -1,5 +1,7 @@
-// Shared card metadata (marca + category tags) used in both admin and public biblioteca grids.
-export default function BibliotecaCardMeta({ item }) {
+// Shared card metadata used in both admin and public biblioteca grids.
+export default function BibliotecaCardMeta({ item, allTags = [] }) {
+  const resolvedTags = (item.tags || []).map(id => allTags.find(t => t.id === id)).filter(Boolean);
+
   return (
     <div style={{ marginTop: 4 }}>
       {item.marca ? (
@@ -11,7 +13,7 @@ export default function BibliotecaCardMeta({ item }) {
           {new Date(item.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
         </p>
       )}
-      {(item.categoria || item.subcategoria) && (
+      {(item.categoria || item.subcategoria || resolvedTags.length > 0) && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 3 }}>
           {item.categoria && (
             <span style={{
@@ -33,6 +35,16 @@ export default function BibliotecaCardMeta({ item }) {
               {item.subcategoria === 'automatizacion' ? 'Auto.' : 'Campaña'}
             </span>
           )}
+          {resolvedTags.map(tag => (
+            <span key={tag.id} style={{
+              fontSize: 10, borderRadius: 999, padding: '1px 7px', fontWeight: 500,
+              background: tag.color + '22',
+              border: `1px solid ${tag.color}`,
+              color: tag.color,
+            }}>
+              {tag.name}
+            </span>
+          ))}
         </div>
       )}
     </div>

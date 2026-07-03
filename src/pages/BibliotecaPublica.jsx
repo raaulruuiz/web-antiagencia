@@ -7,6 +7,7 @@ const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 export default function BibliotecaPublica() {
   const navigate = useNavigate();
   const [items, setItems]     = useState([]);
+  const [allTags, setAllTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
 
@@ -22,6 +23,10 @@ export default function BibliotecaPublica() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/biblioteca/tags/public`).then(r => r.ok ? r.json() : []).then(setAllTags).catch(() => {});
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -102,7 +107,7 @@ export default function BibliotecaPublica() {
                     loading="lazy"
                   />
                 </div>
-                <BibliotecaCardMeta item={item} />
+                <BibliotecaCardMeta item={item} allTags={allTags} />
               </div>
             ))}
           </div>
