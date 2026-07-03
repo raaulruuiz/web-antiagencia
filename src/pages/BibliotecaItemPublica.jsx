@@ -7,11 +7,40 @@ const CATEGORIAS = {
   email: 'Email',
   ficha: 'Ficha de Producto',
 };
+const SUBCATEGORIAS = {
+  automatizacion: 'Automatización',
+  campana: 'Campaña',
+};
 
 const CATEGORIA_COLORS = {
   email: { bg: 'rgba(59,130,246,0.15)', border: '#3b82f6', color: '#93c5fd' },
   ficha: { bg: 'rgba(168,85,247,0.15)', border: '#a855f7', color: '#d8b4fe' },
 };
+const SUBCAT_COLORS = {
+  automatizacion: { bg: 'rgba(34,197,94,0.12)', border: '#22c55e', color: '#86efac' },
+  campana:        { bg: 'rgba(249,115,22,0.12)',  border: '#f97316', color: '#fdba74' },
+};
+
+function Tag({ colors, label }) {
+  return (
+    <span style={{
+      fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', display: 'inline-block',
+      background: colors.bg, border: `1px solid ${colors.border}`, color: colors.color,
+    }}>
+      {label}
+    </span>
+  );
+}
+
+function Field({ label, value }) {
+  if (!value) return null;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
+      <span style={{ fontSize: 13, color: 'white' }}>{value}</span>
+    </div>
+  );
+}
 
 export default function BibliotecaItemPublica() {
   const { id } = useParams();
@@ -47,6 +76,11 @@ export default function BibliotecaItemPublica() {
   );
 
   const displayName = item.nombre || null;
+  const hasRightContent = item.categoria || item.subcategoria || item.marca || item.asunto || item.adelanto || item.enviado_el;
+
+  const enviadoDisplay = item.enviado_el
+    ? new Date(item.enviado_el + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
+    : null;
 
   return (
     <div style={{ ...s, background: '#0d0d0d', color: 'white', minHeight: '100vh', padding: '32px 24px' }}>
@@ -86,18 +120,33 @@ export default function BibliotecaItemPublica() {
             </div>
           </div>
 
-          {/* Right: metadata (only show if something set) */}
-          {item.categoria && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Categoría</span>
-              <span style={{
-                fontSize: 12, fontWeight: 500, borderRadius: 999, padding: '4px 12px', display: 'inline-block',
-                background: CATEGORIA_COLORS[item.categoria]?.bg || '#18181b',
-                border: `1px solid ${CATEGORIA_COLORS[item.categoria]?.border || '#27272a'}`,
-                color: CATEGORIA_COLORS[item.categoria]?.color || 'white',
-              }}>
-                {CATEGORIAS[item.categoria] || item.categoria}
-              </span>
+          {/* Right: metadata */}
+          {hasRightContent && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+              {/* Tags */}
+              {(item.categoria || item.subcategoria) && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {item.categoria && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
+                      <Tag colors={CATEGORIA_COLORS[item.categoria] || { bg: '#18181b', border: '#27272a', color: 'white' }} label={CATEGORIAS[item.categoria] || item.categoria} />
+                    </div>
+                  )}
+                  {item.subcategoria && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
+                      <Tag colors={SUBCAT_COLORS[item.subcategoria] || { bg: '#18181b', border: '#27272a', color: 'white' }} label={SUBCATEGORIAS[item.subcategoria] || item.subcategoria} />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Fields */}
+              <Field label="Marca" value={item.marca} />
+              <Field label="Asunto" value={item.asunto} />
+              <Field label="Adelanto" value={item.adelanto} />
+              <Field label="Enviado el Día" value={enviadoDisplay} />
             </div>
           )}
         </div>
