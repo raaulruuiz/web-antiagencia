@@ -722,23 +722,29 @@ function BlockImageUploader({ onFile, uploading }) {
 }
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
-function BlockSelector({ onSelect, onClose }) {
+const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7' };
+
+function BlockSelector({ onSelect, onClose, hasCorreccion }) {
   return (
-    <div style={{ background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+    <div style={{ background: '#111', border: '1px solid #27272a', borderRadius: 14, padding: '16px 16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 12, color: '#71717a', fontWeight: 500 }}>Añadir bloque</span>
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 2, display: 'flex' }}><IconX /></button>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        {BLOCK_TYPES.map(bt => (
-          <button key={bt.type} onClick={() => onSelect(bt.type)}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: 'transparent', border: '1px solid #27272a', borderRadius: 8, color: '#a1a1aa', cursor: 'pointer', fontSize: 12, transition: 'all 0.15s', textAlign: 'left' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = 'white'; e.currentTarget.style.background = '#27272a'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#a1a1aa'; e.currentTarget.style.background = 'transparent'; }}>
-            {bt.icon}
-            {bt.label}
-          </button>
-        ))}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        {BLOCK_TYPES.map(bt => {
+          const disabled = bt.type === 'correccion' && hasCorreccion;
+          const c = BLOCK_COLORS[bt.type];
+          return (
+            <button key={bt.type} onClick={() => !disabled && onSelect(bt.type)} disabled={disabled}
+              style={{ height: 130, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, border: `1px solid ${disabled ? '#27272a' : '#3f3f46'}`, borderRadius: 12, background: 'transparent', color: disabled ? '#3f3f46' : '#71717a', cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: disabled ? 0.4 : 1 }}
+              onMouseEnter={e => { if (!disabled) { e.currentTarget.style.borderColor = c; e.currentTarget.style.color = c; e.currentTarget.style.background = c + '11'; }}}
+              onMouseLeave={e => { if (!disabled) { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; e.currentTarget.style.background = 'transparent'; }}}>
+              <span style={{ color: 'inherit' }}>{bt.icon}</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: 'inherit' }}>{bt.label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -1530,12 +1536,7 @@ export default function BibliotecaItem() {
       {/* ── Blocks section (display mode, categoria=email) ── */}
       {mode === 'display' && categoria === 'email' && (
         <div style={{ marginTop: 40 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: 'white', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Análisis de bloques
-            </h3>
-            {blocksSaving && <span style={{ fontSize: 11, color: '#52525b' }}>Guardando…</span>}
-          </div>
+          {blocksSaving && <span style={{ fontSize: 11, color: '#52525b', display: 'block', marginBottom: 8 }}>Guardando…</span>}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {/* Top divider */}
