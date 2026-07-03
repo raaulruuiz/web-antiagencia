@@ -41,6 +41,7 @@ import Pomodoro from './pages/admin/Pomodoro';
 import Biblioteca from './pages/admin/Biblioteca';
 import BibliotecaItem from './pages/admin/BibliotecaItem';
 import BibliotecaPublica from './pages/BibliotecaPublica';
+import BibliotecaItemPublica from './pages/BibliotecaItemPublica';
 import { supabase } from '@/lib/supabaseClient';
 
 // Guard para rutas de lector: redirige a /admin/users si no tiene permiso
@@ -198,6 +199,7 @@ function App() {
               <Route path="pomodoro"        element={<RequirePage page="pomodoro"><Pomodoro /></RequirePage>} />
             </Route>
             <Route path="/anti-biblioteca" element={<BibliotecaPublica />} />
+            <Route path="/anti-biblioteca/:id" element={<BibliotecaItemPublica />} />
             <Route path="/admin/copywriting-popup" element={<CopywritingPopup />} />
             <Route path="/loom" element={<Loom />} />
             <Route path="*" element={<AuthenticatedApp />} />

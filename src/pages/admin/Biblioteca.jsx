@@ -255,7 +255,7 @@ export default function Biblioteca() {
                 </div>
 
                 <p className="text-xs text-zinc-500 mt-1 truncate">
-                  {new Date(item.created_at).toLocaleDateString('es-ES', {
+                  {item.nombre || new Date(item.created_at).toLocaleDateString('es-ES', {
                     day: '2-digit', month: 'short', year: 'numeric',
                     hour: '2-digit', minute: '2-digit',
                   })}

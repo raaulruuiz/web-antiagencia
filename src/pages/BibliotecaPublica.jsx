@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
 export default function BibliotecaPublica() {
+  const navigate = useNavigate();
   const [items, setItems]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
@@ -76,12 +78,10 @@ export default function BibliotecaPublica() {
             gap: '12px',
           }}>
             {items.map(item => (
-              <a
+              <div
                 key={item.id}
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: 'block', textDecoration: 'none' }}
+                onClick={() => navigate(`/anti-biblioteca/${item.id}`)}
+                style={{ display: 'block', textDecoration: 'none', cursor: 'pointer' }}
               >
                 <div style={{
                   aspectRatio: '16/9',
@@ -96,18 +96,18 @@ export default function BibliotecaPublica() {
                 >
                   <img
                     src={item.url}
-                    alt={item.filename}
+                    alt={item.nombre || item.filename}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     loading="lazy"
                   />
                 </div>
                 <p style={{ fontSize: '0.7rem', color: '#52525b', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {new Date(item.created_at).toLocaleDateString('es-ES', {
+                  {item.nombre || new Date(item.created_at).toLocaleDateString('es-ES', {
                     day: '2-digit', month: 'short', year: 'numeric',
                     hour: '2-digit', minute: '2-digit',
                   })}
                 </p>
-              </a>
+              </div>
             ))}
           </div>
         )}
