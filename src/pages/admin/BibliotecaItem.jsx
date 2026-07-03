@@ -774,24 +774,24 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       {/* Header bar */}
       <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #1a1a1a' }}>
         <span style={{ color: c, display: 'flex', flexShrink: 0 }}>{bt?.icon}</span>
-        <div style={{ flex: 1 }} />
+        <span style={{ flex: 1, fontSize: 12, color: 'white', fontWeight: 500 }}>{bt?.label}</span>
         <div style={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 0 }}>
           {!isCorreccion && (
             <>
               <button onClick={onMoveUp} disabled={index === 0}
-                style={{ background: 'none', border: 'none', color: index === 0 ? '#27272a' : '#52525b', cursor: index === 0 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
+                style={{ background: 'none', border: 'none', color: index === 0 ? '#3f3f46' : 'white', cursor: index === 0 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
                 <IconChevronUp />
               </button>
               <button onClick={onMoveDown} disabled={index === total - 1}
-                style={{ background: 'none', border: 'none', color: index === total - 1 ? '#27272a' : '#52525b', cursor: index === total - 1 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
+                style={{ background: 'none', border: 'none', color: index === total - 1 ? '#3f3f46' : 'white', cursor: index === total - 1 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
                 <IconChevronDown />
               </button>
             </>
           )}
           <button onClick={onEdit}
-            style={{ background: 'none', border: '1px solid #27272a', color: '#71717a', cursor: 'pointer', padding: '3px 8px', borderRadius: 6, fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#52525b'; e.currentTarget.style.color = 'white'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#71717a'; }}>
+            style={{ background: 'none', border: '1px solid #52525b', color: 'white', cursor: 'pointer', padding: '3px 8px', borderRadius: 6, fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'white'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#52525b'; }}>
             <IconPencil /> Editar
           </button>
           {confirmDelete ? (
@@ -802,15 +802,15 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 Sí
               </button>
               <button onClick={() => setConfirmDelete(false)}
-                style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', cursor: 'pointer', padding: '2px 7px', borderRadius: 5, fontSize: 11 }}>
+                style={{ background: 'none', border: '1px solid #3f3f46', color: '#a1a1aa', cursor: 'pointer', padding: '2px 7px', borderRadius: 5, fontSize: 11 }}>
                 No
               </button>
             </div>
           ) : (
             <button onClick={() => setConfirmDelete(true)}
-              style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 3, display: 'flex' }}
+              style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', padding: 3, display: 'flex' }}
               onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-              onMouseLeave={e => e.currentTarget.style.color = '#52525b'}>
+              onMouseLeave={e => e.currentTarget.style.color = '#71717a'}>
               <IconTrashSm />
             </button>
           )}
@@ -826,19 +826,25 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
           </div>
           {/* Link previews */}
           {(block.links || (block.url ? [{ images: block.images || [], url: block.url }] : [])).length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={
+              block.links_layout === 'fila'
+                ? { display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto' }
+                : block.links_layout === 'grid'
+                ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }
+                : { display: 'flex', flexDirection: 'column', gap: 12 }
+            }>
               {(block.links || (block.url ? [{ images: block.images || [], url: block.url }] : [])).map((link, li) => (
-                <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   {(link.images || []).map((img, i) => (
                     <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-                      <img src={img.url} alt="" style={{ height: 64, borderRadius: 5, objectFit: 'cover', border: '1px solid #27272a', display: 'block' }} />
+                      <img src={img.url} alt="" style={{ height: 100, borderRadius: 7, objectFit: 'cover', border: '1px solid #27272a', display: 'block' }} />
                     </a>
                   ))}
                   {link.url && (
                     <>
-                      <span style={{ fontSize: 18, color: '#3b82f6', fontWeight: 300 }}>→</span>
+                      <span style={{ fontSize: 24, color: '#3b82f6', fontWeight: 300 }}>→</span>
                       <a href={link.url} target="_blank" rel="noopener noreferrer"
-                        style={{ fontSize: 12, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
+                        style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
                         onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
                         onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
                         {link.url}
@@ -849,7 +855,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               ))}
             </div>
           ) : (
-            <span style={{ fontSize: 12, color: '#3f3f46', fontStyle: 'italic' }}>Sin links configurados</span>
+            <span style={{ fontSize: 13, color: '#3f3f46', fontStyle: 'italic' }}>Sin links configurados</span>
           )}
         </div>
       )}
@@ -1072,6 +1078,28 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                 catch { alert('Error al subir imagen'); }
                 finally { setUploading(false); }
               }} />
+          </div>
+        )}
+
+        {/* Layout selector (solo para enlaces) */}
+        {draft.type === 'enlaces' && (
+          <div>
+            <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Disposición</label>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {[
+                { value: 'columna', label: 'Columna', icon: '⬜\n⬜\n⬜' },
+                { value: 'fila',    label: 'Fila',    icon: '⬜⬜⬜' },
+                { value: 'grid',    label: 'Grid',    icon: '⬜⬜\n⬜⬜' },
+              ].map(opt => {
+                const active = (draft.links_layout || 'columna') === opt.value;
+                return (
+                  <button key={opt.value} onClick={() => update('links_layout', opt.value)}
+                    style={{ flex: 1, background: active ? '#18181b' : 'transparent', border: `1px solid ${active ? '#6366f1' : '#3f3f46'}`, borderRadius: 8, padding: '7px 10px', fontSize: 12, color: active ? '#a5b4fc' : '#71717a', cursor: 'pointer', textAlign: 'center', fontWeight: active ? 600 : 400 }}>
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -1466,6 +1494,7 @@ export default function BibliotecaItem() {
       url: '',
       texto_boton: '',
       links: type === 'enlaces' ? [{ images: [], url: '' }] : [],
+      links_layout: 'columna',
       texto: '',
       nota: '',
     };

@@ -44,6 +44,13 @@ function EnlacesBlockView({ block }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'white', margin: '0 0 4px' }}>{block.titulo}</h2>}
       {block.subtitulo && <p style={{ fontSize: 13, color: '#71717a', margin: '0 0 6px', lineHeight: 1.5 }}>{block.subtitulo}</p>}
+      <div style={
+        block.links_layout === 'fila'
+          ? { display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto' }
+          : block.links_layout === 'grid'
+          ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }
+          : { display: 'flex', flexDirection: 'column', gap: 10 }
+      }>
       {links.map((link, i) => (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           {(link.images || []).map((img, j) => (
@@ -64,6 +71,7 @@ function EnlacesBlockView({ block }) {
           )}
         </div>
       ))}
+      </div>
     </div>
   );
 }
