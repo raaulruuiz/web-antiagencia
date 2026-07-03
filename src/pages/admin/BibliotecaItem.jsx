@@ -837,22 +837,46 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 : { display: 'flex', flexDirection: 'column', gap: 12 }
             }>
               {(block.links || (block.url ? [{ images: block.images || [], url: block.url }] : [])).map((link, li) => (
-                <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
-                  {(link.images || []).map((img, i) => (
-                    <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-                      <img src={img.url} alt="" style={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
-                    </a>
-                  ))}
-                  {link.url && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflowX: 'auto', flexShrink: 0, maxWidth: 320 }}>
-                      <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
-                      <a href={link.url} target="_blank" rel="noopener noreferrer"
-                        style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                        onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                        onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                        {link.url}
-                      </a>
-                    </div>
+                <div key={li} style={
+                  block.links_layout === 'grid'
+                    ? { display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }
+                    : { display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }
+                }>
+                  {block.links_layout === 'grid' ? (
+                    <>
+                      {(link.images || []).map((img, i) => (
+                        <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
+                          <img src={img.url} alt="" style={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
+                        </a>
+                      ))}
+                      {link.url && (
+                        <a href={link.url} target="_blank" rel="noopener noreferrer"
+                          style={{ fontSize: 11, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                          onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                          {link.url}
+                        </a>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {(link.images || []).map((img, i) => (
+                        <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
+                          <img src={img.url} alt="" style={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
+                        </a>
+                      ))}
+                      {link.url && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflowX: 'auto', flexShrink: 0, maxWidth: 320 }}>
+                          <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
+                          <a href={link.url} target="_blank" rel="noopener noreferrer"
+                            style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                            onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                            onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                            {link.url}
+                          </a>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               ))}
@@ -869,11 +893,15 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             block.images_layout === 'fila'
               ? { display: 'flex', flexDirection: 'row', gap: 10, overflowX: 'auto' }
               : block.images_layout === 'grid'
-              ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }
+              ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }
               : { display: 'flex', flexDirection: 'column', gap: 10 }
           }>
             {imgs.map((img, i) => (
-              <img key={i} src={img.url} alt="" style={{ height: 210, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', flexShrink: 0 }} />
+              block.images_layout === 'grid'
+                ? <img key={i} src={img.url} alt="" style={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} />
+                : block.images_layout === 'fila'
+                ? <img key={i} src={img.url} alt="" style={{ height: 180, width: 'auto', flexShrink: 0, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} />
+                : <img key={i} src={img.url} alt="" style={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} />
             ))}
           </div>
         </div>
@@ -1028,6 +1056,24 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
         </div>
 
+        {/* Layout selector para imagen (antes de las imágenes) */}
+        {draft.type === 'imagen' && (
+          <div>
+            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Disposición</label>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {[{ value: 'columna', label: 'Columna' }, { value: 'fila', label: 'Fila' }, { value: 'grid', label: 'Grid' }].map(opt => {
+                const active = (draft.images_layout || 'columna') === opt.value;
+                return (
+                  <button key={opt.value} onClick={() => update('images_layout', opt.value)}
+                    style={{ flex: 1, background: active ? 'var(--t-surface2)' : 'transparent', border: `1px solid ${active ? '#6366f1' : 'var(--t-border-mid)'}`, borderRadius: 8, padding: '7px 10px', fontSize: 12, color: active ? '#a5b4fc' : 'var(--t-text-muted)', cursor: 'pointer', textAlign: 'center', fontWeight: active ? 600 : 400 }}>
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Imágenes (solo para tipos no-enlaces) */}
         {draft.type !== 'enlaces' && (
           <div>
@@ -1051,12 +1097,18 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                   <button onClick={() => setShowLibrary(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 5 }}>
-                  {libraryImages.map((img, i) => (
-                    <img key={i} src={img.url} alt="" onClick={() => { addImage(img.url); }}
-                      style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 5, cursor: 'pointer', border: '2px solid transparent' }}
-                      onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
-                      onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
-                  ))}
+                  {libraryImages.map((libImg, i) => {
+                    const alreadyAdded = (draft.images || []).some(existing => existing.url === libImg.url);
+                    return (
+                      <div key={i} style={{ position: 'relative' }}>
+                        <img src={libImg.url} alt="" onClick={() => { if (!alreadyAdded) addImage(libImg.url); }}
+                          style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 5, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
+                          onMouseEnter={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
+                          onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid transparent'; }} />
+                        {alreadyAdded && <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconCheck /></div>}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1095,20 +1147,15 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           </div>
         )}
 
-        {/* Layout selector (enlaces e imagen) */}
-        {(draft.type === 'enlaces' || draft.type === 'imagen') && (
+        {/* Layout selector para enlaces (antes de los links) */}
+        {draft.type === 'enlaces' && (
           <div>
             <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Disposición</label>
             <div style={{ display: 'flex', gap: 6 }}>
-              {[
-                { value: 'columna', label: 'Columna' },
-                { value: 'fila',    label: 'Fila' },
-                { value: 'grid',    label: 'Grid' },
-              ].map(opt => {
-                const layoutField = draft.type === 'imagen' ? 'images_layout' : 'links_layout';
-                const active = (draft[layoutField] || 'columna') === opt.value;
+              {[{ value: 'columna', label: 'Columna' }, { value: 'fila', label: 'Fila' }, { value: 'grid', label: 'Grid' }].map(opt => {
+                const active = (draft.links_layout || 'columna') === opt.value;
                 return (
-                  <button key={opt.value} onClick={() => update(layoutField, opt.value)}
+                  <button key={opt.value} onClick={() => update('links_layout', opt.value)}
                     style={{ flex: 1, background: active ? 'var(--t-surface2)' : 'transparent', border: `1px solid ${active ? '#6366f1' : 'var(--t-border-mid)'}`, borderRadius: 8, padding: '7px 10px', fontSize: 12, color: active ? '#a5b4fc' : 'var(--t-text-muted)', cursor: 'pointer', textAlign: 'center', fontWeight: active ? 600 : 400 }}>
                     {opt.label}
                   </button>
@@ -1155,12 +1202,18 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                         <button onClick={() => setShowLibrary(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
-                        {libraryImages.map((img, i) => (
-                          <img key={i} src={img.url} alt="" onClick={() => { addLinkImage(linkIdx, img.url); }}
-                            style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: 'pointer', border: '2px solid transparent' }}
-                            onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
-                            onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
-                        ))}
+                        {libraryImages.map((libImg, i) => {
+                          const alreadyAdded = (draft.links?.[linkIdx]?.images || []).some(existing => existing.url === libImg.url);
+                          return (
+                            <div key={i} style={{ position: 'relative' }}>
+                              <img src={libImg.url} alt="" onClick={() => { if (!alreadyAdded) addLinkImage(linkIdx, libImg.url); }}
+                                style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
+                                onMouseEnter={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
+                                onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid transparent'; }} />
+                              {alreadyAdded && <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconCheck /></div>}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
