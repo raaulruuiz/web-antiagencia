@@ -84,12 +84,6 @@ export default function BibliotecaItemPublica() {
                 style={{ width: '100%', display: 'block' }}
               />
             </div>
-            <p style={{ fontSize: 11, color: '#3f3f46', margin: 0 }}>
-              {new Date(item.created_at).toLocaleDateString('es-ES', {
-                day: '2-digit', month: 'short', year: 'numeric',
-                hour: '2-digit', minute: '2-digit',
-              })}
-            </p>
           </div>
 
           {/* Right: metadata (only show if something set) */}

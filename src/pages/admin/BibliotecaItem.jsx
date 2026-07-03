@@ -143,23 +143,15 @@ export default function BibliotecaItem() {
       <div className="grid grid-cols-2 gap-8 items-start">
 
         {/* Left: image with scroll frame */}
-        <div>
-          <div
-            className="rounded-xl border border-zinc-800"
-            style={{ height: 560, overflowY: 'auto', overflowX: 'hidden' }}
-          >
-            <img
-              src={item.url}
-              alt={nombre || item.filename}
-              style={{ width: '100%', display: 'block' }}
-            />
-          </div>
-          <p className="text-xs text-zinc-700 mt-2">
-            {new Date(item.created_at).toLocaleDateString('es-ES', {
-              day: '2-digit', month: 'short', year: 'numeric',
-              hour: '2-digit', minute: '2-digit',
-            })}
-          </p>
+        <div
+          className="rounded-xl border border-zinc-800"
+          style={{ height: 560, overflowY: 'auto', overflowX: 'hidden' }}
+        >
+          <img
+            src={item.url}
+            alt={nombre || item.filename}
+            style={{ width: '100%', display: 'block' }}
+          />
         </div>
 
         {/* Right: metadata */}
@@ -191,8 +183,8 @@ export default function BibliotecaItem() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-6 pt-8">
-              <span className="text-sm text-zinc-300 self-start">¿Email o Ficha de Producto?</span>
+            <div className="flex flex-col items-center gap-8 h-full justify-center pt-4">
+              <span className="text-xl font-medium text-white text-center">¿Email o Ficha de Producto?</span>
               <div className="flex gap-4 w-full">
                 {CATEGORIAS.map(c => (
                   <button
