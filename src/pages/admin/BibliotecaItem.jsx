@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -713,6 +713,24 @@ async function getToken() {
   return session?.access_token || null;
 }
 
+// ── Block: divider ────────────────────────────────────────────────────────────
+function BlockDivider({ onAdd }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '2px 0', cursor: 'pointer', opacity: hover ? 1 : 0, transition: 'opacity 0.15s' }}
+      onClick={onAdd}>
+      <div style={{ flex: 1, height: 1, background: '#27272a' }} />
+      <span style={{ fontSize: 11, color: '#3f3f46', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ fontSize: 14, lineHeight: 1 }}>+</span> bloque
+      </span>
+      <div style={{ flex: 1, height: 1, background: '#27272a' }} />
+    </div>
+  );
+}
+
 // ── Block: selector panel ─────────────────────────────────────────────────────
 const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7' };
 const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo' };
@@ -789,29 +807,37 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {/* Content preview */}
       {block.type === 'enlaces' && (
-        <div style={{ padding: '12px 14px' }}>
-          {imgs.length > 0 || block.url ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              {imgs.map((img, i) => (
-                <a key={i} href={block.url || '#'} target="_blank" rel="noopener noreferrer"
-                  style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-                  <img src={img.url} alt="" style={{ height: 72, borderRadius: 6, objectFit: 'cover', border: '1px solid #27272a', display: 'block' }} />
-                </a>
+        <div style={{ padding: '14px 14px 14px' }}>
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: 'white', lineHeight: 1.2 }}>{block.titulo || 'Enlace'}</div>
+            {block.subtitulo && <div style={{ fontSize: 13, color: '#71717a', marginTop: 4 }}>{block.subtitulo}</div>}
+          </div>
+          {/* Link previews */}
+          {(block.links || (block.url ? [{ images: block.images || [], url: block.url }] : [])).length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {(block.links || (block.url ? [{ images: block.images || [], url: block.url }] : [])).map((link, li) => (
+                <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {(link.images || []).map((img, i) => (
+                    <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
+                      <img src={img.url} alt="" style={{ height: 64, borderRadius: 5, objectFit: 'cover', border: '1px solid #27272a', display: 'block' }} />
+                    </a>
+                  ))}
+                  {link.url && (
+                    <>
+                      <span style={{ fontSize: 18, color: '#3b82f6', fontWeight: 300 }}>→</span>
+                      <a href={link.url} target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize: 12, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
+                        onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                        onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                        {link.url}
+                      </a>
+                    </>
+                  )}
+                </div>
               ))}
-              {block.url && (
-                <>
-                  <span style={{ fontSize: 20, color: c, fontWeight: 300 }}>→</span>
-                  <a href={block.url} target="_blank" rel="noopener noreferrer"
-                    style={{ fontSize: 13, color: c, textDecoration: 'none', wordBreak: 'break-all' }}
-                    onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                    onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                    {block.url}
-                  </a>
-                </>
-              )}
             </div>
           ) : (
-            <span style={{ fontSize: 12, color: '#3f3f46', fontStyle: 'italic' }}>Sin imagen ni URL configurada</span>
+            <span style={{ fontSize: 12, color: '#3f3f46', fontStyle: 'italic' }}>Sin links configurados</span>
           )}
         </div>
       )}
@@ -842,15 +868,52 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 }
 
 // ── Block: editor modal ───────────────────────────────────────────────────────
-function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail }) {
-  const [draft, setDraft] = useState({ ...block });
+function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages }) {
+  const [draft, setDraft] = useState(() => {
+    const d = { ...block };
+    // Migrate old enlaces structure to new links structure
+    if (d.type === 'enlaces' && !d.links?.length) {
+      d.links = [{ images: d.images || [], url: d.url || '' }];
+    }
+    if (d.type === 'enlaces' && !d.links) d.links = [{ images: [], url: '' }];
+    return d;
+  });
   const [uploading, setUploading] = useState(false);
+  const [uploadingLink, setUploadingLink] = useState(null); // linkIdx
+  const [urlErrors, setUrlErrors] = useState({});
+  const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number)
   const fileInputRef = useRef(null);
+  const linkFileInputRefs = useRef({});
 
   const update = (field, val) => setDraft(d => ({ ...d, [field]: val }));
+
+  // Global images (for non-enlaces types)
   const addImage = (url) => setDraft(d => ({ ...d, images: [...(d.images || []), { url }] }));
   const removeImage = (idx) => setDraft(d => ({ ...d, images: (d.images || []).filter((_, i) => i !== idx) }));
 
+  // Per-link image management (for enlaces)
+  const addLinkImage = (linkIdx, url) => setDraft(d => {
+    const links = [...(d.links || [])];
+    links[linkIdx] = { ...links[linkIdx], images: [...(links[linkIdx].images || []), { url }] };
+    return { ...d, links };
+  });
+  const removeLinkImage = (linkIdx, imgIdx) => setDraft(d => {
+    const links = [...(d.links || [])];
+    links[linkIdx] = { ...links[linkIdx], images: (links[linkIdx].images || []).filter((_, i) => i !== imgIdx) };
+    return { ...d, links };
+  });
+  const updateLinkUrl = (linkIdx, url) => {
+    setDraft(d => {
+      const links = [...(d.links || [])];
+      links[linkIdx] = { ...links[linkIdx], url };
+      return { ...d, links };
+    });
+    setUrlErrors(e => { const n = { ...e }; delete n[linkIdx]; return n; });
+  };
+  const addLink = () => setDraft(d => ({ ...d, links: [...(d.links || []), { images: [], url: '' }] }));
+  const removeLink = (linkIdx) => setDraft(d => ({ ...d, links: (d.links || []).filter((_, i) => i !== linkIdx) }));
+
+  // Upload global image
   const handleFile = async (file) => {
     if (!file || uploading) return;
     setUploading(true);
@@ -865,6 +928,41 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     try { const url = await onCropFromEmail(); if (url) addImage(url); }
     catch (_) {}
     finally { setUploading(false); }
+  };
+
+  // Upload link image
+  const handleLinkFile = async (linkIdx, file) => {
+    if (!file || uploadingLink !== null) return;
+    setUploadingLink(linkIdx);
+    try { const url = await onUploadImage(file); addLinkImage(linkIdx, url); }
+    catch (e) { alert('Error al subir imagen'); }
+    finally { setUploadingLink(null); }
+  };
+
+  const handleLinkCrop = async (linkIdx) => {
+    if (uploadingLink !== null) return;
+    setUploadingLink(linkIdx);
+    try { const url = await onCropFromEmail(); if (url) addLinkImage(linkIdx, url); }
+    catch (_) {}
+    finally { setUploadingLink(null); }
+  };
+
+  // URL validation
+  const isValidUrl = (url) => {
+    if (!url) return true;
+    try { new URL(url); return true; } catch { return false; }
+  };
+
+  const handleSave = () => {
+    if (draft.type === 'enlaces') {
+      const errors = {};
+      (draft.links || []).forEach((link, i) => {
+        if (link.url && !isValidUrl(link.url)) errors[i] = 'URL no válida (debe empezar por https://)';
+      });
+      if (Object.keys(errors).length > 0) { setUrlErrors(errors); return; }
+    }
+    onSave(draft);
+    onClose();
   };
 
   const bt = BLOCK_TYPES.find(b => b.type === block.type);
@@ -898,47 +996,145 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
         </div>
 
-        {/* Imágenes */}
-        <div>
-          <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Imágenes</label>
-          {(draft.images || []).length > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 6, marginBottom: 8 }}>
-              {(draft.images || []).map((img, idx) => (
-                <div key={idx} style={{ position: 'relative', aspectRatio: '1' }}>
-                  <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, display: 'block' }} />
-                  <button onClick={() => removeImage(idx)}
-                    style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 13, lineHeight: 1 }}>
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-          <div style={{ display: 'flex', gap: 6 }}>
-            <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
-              style={{ flex: 1, background: 'transparent', border: '1px dashed #3f3f46', borderRadius: 8, padding: '9px 12px', fontSize: 12, color: '#71717a', cursor: uploading ? 'not-allowed' : 'pointer' }}
-              onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = '#52525b'; }}
-              onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
-              {uploading ? 'Subiendo…' : '+ Subir imagen'}
-            </button>
-            <button onClick={handleCrop} disabled={uploading}
-              style={{ flex: 1, background: 'transparent', border: '1px dashed #3f3f46', borderRadius: 8, padding: '9px 12px', fontSize: 12, color: '#71717a', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
-              onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = '#52525b'; }}
-              onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
-              <IconScissors /> Recortar del email
-            </button>
-          </div>
-          <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }}
-            onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }} />
-        </div>
-
-        {/* Campos específicos por tipo */}
-        {draft.type === 'enlaces' && (
+        {/* Imágenes (solo para tipos no-enlaces) */}
+        {draft.type !== 'enlaces' && (
           <div>
-            <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>URL del enlace</label>
-            <input value={draft.url || ''} onChange={e => update('url', e.target.value)}
-              placeholder="https://…"
-              style={{ width: '100%', background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+            <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Imágenes</label>
+            {(draft.images || []).length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6, marginBottom: 8 }}>
+                {(draft.images || []).map((img, idx) => (
+                  <div key={idx} style={{ position: 'relative', aspectRatio: '1' }}>
+                    <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, display: 'block' }} />
+                    <button onClick={() => removeImage(idx)}
+                      style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 13, lineHeight: 1 }}>×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Library picker */}
+            {showLibrary === 'global' && libraryImages?.length > 0 && (
+              <div style={{ border: '1px solid #27272a', borderRadius: 8, padding: 8, marginBottom: 8 }}>
+                <div style={{ fontSize: 10, color: '#52525b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 5 }}>
+                  {libraryImages.map((img, i) => (
+                    <img key={i} src={img.url} alt="" onClick={() => { addImage(img.url); setShowLibrary(null); }}
+                      style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 5, cursor: 'pointer', border: '2px solid transparent' }}
+                      onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
+                      onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
+                  ))}
+                </div>
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                style={{ flex: 1, background: 'transparent', border: '1px dashed #3f3f46', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: '#71717a', cursor: uploading ? 'not-allowed' : 'pointer', minWidth: 100 }}
+                onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = '#52525b'; }}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                {uploading ? 'Subiendo…' : '+ Subir imagen'}
+              </button>
+              <button onClick={handleCrop} disabled={uploading}
+                style={{ flex: 1, background: 'transparent', border: '1px dashed #3f3f46', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: '#71717a', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, minWidth: 100 }}
+                onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = '#52525b'; }}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                <IconScissors /> Recortar del email
+              </button>
+              {libraryImages?.length > 0 && (
+                <button onClick={() => setShowLibrary(showLibrary === 'global' ? null : 'global')}
+                  style={{ flex: 1, background: showLibrary === 'global' ? '#18181b' : 'transparent', border: '1px dashed #3f3f46', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: '#71717a', cursor: 'pointer', minWidth: 100 }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                  Seleccionar imagen
+                </button>
+              )}
+            </div>
+            <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }}
+              onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }} />
+          </div>
+        )}
+
+        {/* Campos específicos: enlaces (múltiples links) */}
+        {draft.type === 'enlaces' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <label style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Links</label>
+            {(draft.links || []).map((link, linkIdx) => {
+              const linkFileRef = (ref) => { if (ref) linkFileInputRefs.current[linkIdx] = ref; };
+              const isUploadingThis = uploadingLink === linkIdx;
+              return (
+                <div key={linkIdx} style={{ border: '1px solid #27272a', borderRadius: 10, padding: '12px 12px 10px', display: 'flex', flexDirection: 'column', gap: 8, position: 'relative' }}>
+                  {draft.links.length > 1 && (
+                    <button onClick={() => removeLink(linkIdx)}
+                      style={{ position: 'absolute', top: 8, right: 8, background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', display: 'flex', padding: 2 }}
+                      onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                      onMouseLeave={e => e.currentTarget.style.color = '#52525b'}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  )}
+                  {/* Images for this link */}
+                  {(link.images || []).length > 0 && (
+                    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                      {(link.images || []).map((img, imgIdx) => (
+                        <div key={imgIdx} style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
+                          <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 5, border: '1px solid #27272a', display: 'block' }} />
+                          <button onClick={() => removeLinkImage(linkIdx, imgIdx)}
+                            style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 12, lineHeight: 1 }}>×</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* Library picker for this link */}
+                  {showLibrary === linkIdx && libraryImages?.length > 0 && (
+                    <div style={{ border: '1px solid #27272a', borderRadius: 7, padding: 8 }}>
+                      <div style={{ fontSize: 10, color: '#52525b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
+                        {libraryImages.map((img, i) => (
+                          <img key={i} src={img.url} alt="" onClick={() => { addLinkImage(linkIdx, img.url); setShowLibrary(null); }}
+                            style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: 'pointer', border: '2px solid transparent' }}
+                            onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
+                            onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                    <button onClick={() => linkFileInputRefs.current[linkIdx]?.click()} disabled={uploadingLink !== null}
+                      style={{ flex: 1, background: 'transparent', border: '1px dashed #3f3f46', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: '#71717a', cursor: uploadingLink !== null ? 'not-allowed' : 'pointer', minWidth: 80 }}
+                      onMouseEnter={e => { if (uploadingLink === null) e.currentTarget.style.borderColor = '#52525b'; }}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                      {isUploadingThis ? 'Subiendo…' : '+ Imagen'}
+                    </button>
+                    <button onClick={() => handleLinkCrop(linkIdx)} disabled={uploadingLink !== null}
+                      style={{ flex: 1, background: 'transparent', border: '1px dashed #3f3f46', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: '#71717a', cursor: uploadingLink !== null ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, minWidth: 80 }}
+                      onMouseEnter={e => { if (uploadingLink === null) e.currentTarget.style.borderColor = '#52525b'; }}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                      <IconScissors /> Recortar
+                    </button>
+                    {libraryImages?.length > 0 && (
+                      <button onClick={() => setShowLibrary(showLibrary === linkIdx ? null : linkIdx)}
+                        style={{ flex: 1, background: showLibrary === linkIdx ? '#18181b' : 'transparent', border: '1px dashed #3f3f46', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: '#71717a', cursor: 'pointer', minWidth: 80 }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = '#3f3f46'}>
+                        Seleccionar
+                      </button>
+                    )}
+                    <input ref={linkFileRef} type="file" accept="image/*" style={{ display: 'none' }}
+                      onChange={e => { const f = e.target.files?.[0]; if (f) handleLinkFile(linkIdx, f); e.target.value = ''; }} />
+                  </div>
+                  {/* URL */}
+                  <div>
+                    <input value={link.url || ''} onChange={e => updateLinkUrl(linkIdx, e.target.value)}
+                      placeholder="https://…"
+                      style={{ width: '100%', background: '#18181b', border: `1px solid ${urlErrors[linkIdx] ? '#ef4444' : '#3f3f46'}`, borderRadius: 7, padding: '7px 10px', fontSize: 12, color: 'white', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                    {urlErrors[linkIdx] && <span style={{ fontSize: 11, color: '#ef4444', display: 'block', marginTop: 3 }}>{urlErrors[linkIdx]}</span>}
+                  </div>
+                </div>
+              );
+            })}
+            <button onClick={addLink}
+              style={{ background: 'transparent', border: '1px dashed #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#52525b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#52525b'; }}>
+              + Añadir otro link
+            </button>
           </div>
         )}
 
@@ -962,7 +1158,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 
         {/* Guardar / Cancelar */}
         <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-          <button onClick={() => { onSave(draft); onClose(); }}
+          <button onClick={handleSave}
             style={{ flex: 1, background: 'white', color: 'black', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
             Guardar
           </button>
@@ -1233,6 +1429,7 @@ export default function BibliotecaItem() {
       images: [],
       url: '',
       texto_boton: '',
+      links: type === 'enlaces' ? [{ images: [], url: '' }] : [],
       texto: '',
       nota: '',
     };
@@ -1353,6 +1550,22 @@ export default function BibliotecaItem() {
 
   const cancelCrop = () => { if (cropConfirm?.url) URL.revokeObjectURL(cropConfirm.url); setCropConfirm(null); };
 
+  const libraryImages = useMemo(() => {
+    const seen = new Set();
+    const imgs = [];
+    blocksData.forEach(b => {
+      (b.images || []).forEach(img => {
+        if (!seen.has(img.url)) { seen.add(img.url); imgs.push(img); }
+      });
+      (b.links || []).forEach(link => {
+        (link.images || []).forEach(img => {
+          if (!seen.has(img.url)) { seen.add(img.url); imgs.push(img); }
+        });
+      });
+    });
+    return imgs;
+  }, [blocksData]);
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0d0d0d' }}>
       <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
@@ -1381,6 +1594,7 @@ export default function BibliotecaItem() {
           onClose={() => setEditingBlockId(null)}
           onUploadImage={uploadImageForBlock}
           onCropFromEmail={cropFromEmail}
+          libraryImages={libraryImages}
         />
       ) : null; })()}
       {showCropForModal && item && <CropOverlay imageUrl={item.url} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
@@ -1620,22 +1834,25 @@ export default function BibliotecaItem() {
       {mode === 'display' && categoria === 'email' && (
         <div style={{ marginTop: 40 }}>
           {blocksSaving && <span style={{ fontSize: 11, color: '#52525b', display: 'block', marginBottom: 8 }}>Guardando…</span>}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {blocksData.map((block, idx) => (
-              <BlockCard
-                key={block.id}
-                block={block}
-                index={idx}
-                total={blocksData.length}
-                onEdit={() => setEditingBlockId(block.id)}
-                onDelete={() => deleteBlock(block.id)}
-                onMoveUp={() => moveBlock(block.id, -1)}
-                onMoveDown={() => moveBlock(block.id, 1)}
-              />
+              <div key={block.id}>
+                <BlockDivider onAdd={() => setShowBlockSelectorModal(true)} />
+                <BlockCard
+                  block={block}
+                  index={idx}
+                  total={blocksData.length}
+                  onEdit={() => setEditingBlockId(block.id)}
+                  onDelete={() => deleteBlock(block.id)}
+                  onMoveUp={() => moveBlock(block.id, -1)}
+                  onMoveDown={() => moveBlock(block.id, 1)}
+                />
+              </div>
             ))}
+            <BlockDivider onAdd={() => setShowBlockSelectorModal(true)} />
             <button
               onClick={() => setShowBlockSelectorModal(true)}
-              style={{ width: '100%', background: 'transparent', border: '1px dashed #27272a', color: '#52525b', borderRadius: 10, padding: '12px 16px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s' }}
+              style={{ width: '100%', background: 'transparent', border: '1px dashed #27272a', color: '#52525b', borderRadius: 10, padding: '12px 16px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s', marginTop: 4 }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#3f3f46'; e.currentTarget.style.color = '#71717a'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = '#27272a'; e.currentTarget.style.color = '#52525b'; }}>
               <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> Añadir bloque
