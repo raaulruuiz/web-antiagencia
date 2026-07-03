@@ -166,7 +166,7 @@ const RESIZE_HANDLES = [
 const BLOCK_TYPES = [
   { type: 'enlaces',     label: 'Enlace',          icon: <IconChain /> },
   { type: 'imagen',      label: 'Imagen',          icon: <IconImageBlock /> },
-  { type: 'imagen_texto',label: 'Imagen + Texto',  icon: <IconImageText /> },
+  { type: 'imagen_texto',label: 'Imagen y/o Texto',  icon: <IconImageText /> },
   { type: 'correccion',  label: 'Corrección',      icon: <IconCorrection /> },
 ];
 
@@ -932,13 +932,27 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         </div>
       )}
 
-      {block.type === 'imagen_texto' && (
-        <div style={{ padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-          {imgs.length > 0 && <PreviewImg src={imgs[0].url} imgStyle={{ height: 60, borderRadius: 5, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} />}
-          {block.texto && <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{block.texto}</p>}
-          {!imgs.length && !block.texto && <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span>}
-        </div>
-      )}
+      {block.type === 'imagen_texto' && (() => {
+        const items = block.items || (block.images?.length || block.texto ? [{ image: block.images?.[0] || null, texto: block.texto || '' }] : []);
+        const layout = block.it_layout || 'img-text';
+        const isHoriz = layout === 'img-text' || layout === 'text-img';
+        const imgFirst = layout === 'img-text' || layout === 'img-top';
+        if (!items.length) return <div style={{ padding: '12px 14px' }}><span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span></div>;
+        return (
+          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {items.map((it, i) => {
+              const imgEl = it.image ? <PreviewImg src={it.image.url} imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} /> : null;
+              const txtEl = it.texto ? <div style={{ flex: 1, padding: '8px 10px', borderRadius: 8, fontSize: 12, color: 'var(--t-text)', lineHeight: 1.55, textAlign: it.text_align || 'left', background: it.text_bg || 'transparent', border: it.text_border ? `1px solid ${it.text_border}` : '1px solid var(--t-border)', minWidth: 0, overflow: 'hidden' }}>{it.texto}</div> : null;
+              const els = imgFirst ? [imgEl, txtEl] : [txtEl, imgEl];
+              return (
+                <div key={i} style={{ display: 'flex', flexDirection: isHoriz ? 'row' : 'column', gap: 10, alignItems: isHoriz ? 'flex-start' : 'stretch' }}>
+                  {els.map((el, j) => el && <div key={j} style={{ ...(isHoriz ? {} : { width: '100%' }) }}>{el}</div>)}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {block.type === 'correccion' && block.nota && (
         <div style={{ padding: '12px 14px' }}>
@@ -971,14 +985,19 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
       d.links = [{ images: d.images || [], url: d.url || '' }];
     }
     if (d.type === 'enlaces' && !d.links) d.links = [{ images: [], url: '' }];
+    if (d.type === 'imagen_texto' && !d.items) {
+      d.items = [{ image: d.images?.[0] || null, texto: d.texto || '', text_bg: '', text_border: '', text_align: 'left' }];
+    }
     return d;
   });
   const [uploading, setUploading] = useState(false);
   const [uploadingLink, setUploadingLink] = useState(null); // linkIdx
+  const [uploadingItem, setUploadingItem] = useState(null); // itemIdx
   const [urlErrors, setUrlErrors] = useState({});
-  const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number)
+  const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number) | 'it-{idx}'
   const fileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
+  const itemFileInputRefs = useRef({});
 
   const update = (field, val) => setDraft(d => ({ ...d, [field]: val }));
 
@@ -1007,6 +1026,30 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   };
   const addLink = () => setDraft(d => ({ ...d, links: [...(d.links || []), { images: [], url: '' }] }));
   const removeLink = (linkIdx) => setDraft(d => ({ ...d, links: (d.links || []).filter((_, i) => i !== linkIdx) }));
+
+  // imagen_texto items management
+  const addItem = () => setDraft(d => ({ ...d, items: [...(d.items || []), { image: null, texto: '', text_bg: '', text_border: '', text_align: 'left' }] }));
+  const removeItem = (idx) => setDraft(d => ({ ...d, items: (d.items || []).filter((_, i) => i !== idx) }));
+  const setItemImage = (idx, url) => setDraft(d => {
+    const items = [...(d.items || [])]; items[idx] = { ...items[idx], image: url ? { url } : null }; return { ...d, items };
+  });
+  const updateItemField = (idx, field, val) => setDraft(d => {
+    const items = [...(d.items || [])]; items[idx] = { ...items[idx], [field]: val }; return { ...d, items };
+  });
+  const handleItemFile = async (idx, file) => {
+    if (!file || uploadingItem !== null) return;
+    setUploadingItem(idx);
+    try { const url = await onUploadImage(file); setItemImage(idx, url); }
+    catch { alert('Error al subir imagen'); }
+    finally { setUploadingItem(null); }
+  };
+  const handleItemCrop = async (idx) => {
+    if (uploadingItem !== null) return;
+    setUploadingItem(idx);
+    try { const url = await onCropFromEmail(); if (url) setItemImage(idx, url); }
+    catch (_) {}
+    finally { setUploadingItem(null); }
+  };
 
   // Upload global image
   const handleFile = async (file) => {
@@ -1112,8 +1155,8 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           </div>
         )}
 
-        {/* Imágenes (solo para tipos no-enlaces) */}
-        {draft.type !== 'enlaces' && (
+        {/* Imágenes (solo para tipo imagen) */}
+        {draft.type === 'imagen' && (
           <div>
             <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Imágenes</label>
             {(draft.images || []).length > 0 && (
@@ -1307,12 +1350,138 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         )}
 
         {draft.type === 'imagen_texto' && (
-          <div>
-            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Texto</label>
-            <textarea value={draft.texto || ''} onChange={e => update('texto', e.target.value)}
-              rows={4} placeholder="Análisis y comentarios…"
-              style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
-          </div>
+          <>
+            {/* Layout selector */}
+            <div>
+              <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Disposición</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                {[
+                  { value: 'img-text', label: 'Imagen | Texto' },
+                  { value: 'text-img', label: 'Texto | Imagen' },
+                  { value: 'img-top',  label: 'Imagen ↑  Texto ↓' },
+                  { value: 'text-top', label: 'Texto ↑  Imagen ↓' },
+                ].map(opt => {
+                  const active = (draft.it_layout || 'img-text') === opt.value;
+                  return (
+                    <button key={opt.value} onClick={() => update('it_layout', opt.value)}
+                      style={{ background: active ? 'var(--t-surface2)' : 'transparent', border: `1px solid ${active ? '#6366f1' : 'var(--t-border-mid)'}`, borderRadius: 8, padding: '7px 10px', fontSize: 11, color: active ? '#a5b4fc' : 'var(--t-text-muted)', cursor: 'pointer', textAlign: 'center', fontWeight: active ? 600 : 400 }}>
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Items */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Elementos</label>
+              {(draft.items || []).map((it, itemIdx) => {
+                const itFileRef = (ref) => { if (ref) itemFileInputRefs.current[itemIdx] = ref; };
+                const isUploadingThis = uploadingItem === itemIdx;
+                const libKey = `it-${itemIdx}`;
+                return (
+                  <div key={itemIdx} style={{ border: '1px solid var(--t-border)', borderRadius: 10, padding: '12px 12px 10px', display: 'flex', flexDirection: 'column', gap: 8, position: 'relative' }}>
+                    {(draft.items || []).length > 1 && (
+                      <button onClick={() => removeItem(itemIdx)}
+                        style={{ position: 'absolute', top: 8, right: 8, background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}
+                        onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                        onMouseLeave={e => e.currentTarget.style.color = 'var(--t-text-subtle)'}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
+                    )}
+
+                    {/* Image (max 1) */}
+                    {it.image ? (
+                      <div style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
+                        <img src={it.image.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, border: '1px solid var(--t-border)', display: 'block' }} />
+                        <button onClick={() => setItemImage(itemIdx, null)}
+                          style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 12, lineHeight: 1 }}>×</button>
+                      </div>
+                    ) : (
+                      <>
+                        {showLibrary === libKey && libraryImages?.length > 0 && (
+                          <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                              <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
+                              <button onClick={() => setShowLibrary(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
+                              {libraryImages.map((libImg, i) => (
+                                <img key={i} src={libImg.url} alt="" onClick={() => { setItemImage(itemIdx, libImg.url); setShowLibrary(null); }}
+                                  style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: 'pointer', border: '2px solid transparent' }}
+                                  onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
+                                  onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                          <button onClick={() => itemFileInputRefs.current[itemIdx]?.click()} disabled={isUploadingThis}
+                            style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: isUploadingThis ? 'not-allowed' : 'pointer', minWidth: 80 }}>
+                            {isUploadingThis ? 'Subiendo…' : '+ Imagen'}
+                          </button>
+                          <button onClick={() => handleItemCrop(itemIdx)} disabled={isUploadingThis}
+                            style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: isUploadingThis ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, minWidth: 80 }}>
+                            <IconScissors /> Recortar
+                          </button>
+                          {libraryImages?.length > 0 && (
+                            <button onClick={() => setShowLibrary(showLibrary === libKey ? null : libKey)}
+                              style={{ flex: 1, background: showLibrary === libKey ? 'var(--t-surface2)' : 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: 'pointer', minWidth: 80 }}>
+                              Seleccionar
+                            </button>
+                          )}
+                        </div>
+                        <input ref={itFileRef} type="file" accept="image/*" style={{ display: 'none' }}
+                          onChange={async e => {
+                            const file = e.target.files?.[0]; e.target.value = '';
+                            if (file) await handleItemFile(itemIdx, file);
+                          }} />
+                      </>
+                    )}
+
+                    {/* Text */}
+                    <textarea value={it.texto || ''} onChange={e => updateItemField(itemIdx, 'texto', e.target.value)}
+                      rows={3} placeholder="Análisis y comentarios…"
+                      style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+
+                    {/* Text styling */}
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Fondo</label>
+                        <input type="color" value={it.text_bg || '#000000'} onChange={e => updateItemField(itemIdx, 'text_bg', e.target.value)}
+                          style={{ width: 28, height: 22, borderRadius: 4, border: '1px solid var(--t-border-mid)', cursor: 'pointer', padding: 1, background: 'transparent' }} />
+                        {it.text_bg && <button onClick={() => updateItemField(itemIdx, 'text_bg', '')} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 10, padding: 0 }}>✕</button>}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Borde</label>
+                        <input type="color" value={it.text_border || '#ffffff'} onChange={e => updateItemField(itemIdx, 'text_border', e.target.value)}
+                          style={{ width: 28, height: 22, borderRadius: 4, border: '1px solid var(--t-border-mid)', cursor: 'pointer', padding: 1, background: 'transparent' }} />
+                        {it.text_border && <button onClick={() => updateItemField(itemIdx, 'text_border', '')} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 10, padding: 0 }}>✕</button>}
+                      </div>
+                      <div style={{ display: 'flex', gap: 3 }}>
+                        {[['left','⬅'], ['center','⬛'], ['right','➡'], ['justify','☰']].map(([val, icon]) => {
+                          const active = (it.text_align || 'left') === val;
+                          return (
+                            <button key={val} onClick={() => updateItemField(itemIdx, 'text_align', val)}
+                              title={val}
+                              style={{ background: active ? 'var(--t-border)' : 'transparent', border: `1px solid ${active ? 'var(--t-text-muted)' : 'var(--t-border)'}`, borderRadius: 5, width: 26, height: 26, cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? 'var(--t-text)' : 'var(--t-text-subtle)' }}>
+                              {icon}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              <button onClick={addItem}
+                style={{ background: 'transparent', border: '1px dashed var(--t-border)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text-subtle)'; }}>
+                + Añadir otro elemento
+              </button>
+            </div>
+          </>
         )}
 
         {draft.type === 'correccion' && (
@@ -1606,6 +1775,8 @@ export default function BibliotecaItem() {
       links: type === 'enlaces' ? [{ images: [], url: '' }] : [],
       links_layout: 'columna',
       images_layout: 'columna',
+      it_layout: 'img-text',
+      items: type === 'imagen_texto' ? [{ image: null, texto: '', text_bg: '', text_border: '', text_align: 'left' }] : [],
       texto: '',
       nota: '',
     };
@@ -1644,6 +1815,9 @@ export default function BibliotecaItem() {
           (link.images || []).forEach(img => {
             if (!libUrls.has(img.url)) { newImgs.push(img); libUrls.add(img.url); }
           });
+        });
+        (blockToDelete.items || []).forEach(it => {
+          if (it.image && !libUrls.has(it.image.url)) { newImgs.push(it.image); libUrls.add(it.image.url); }
         });
         if (newImgs.length) {
           const newLib = [...blocksLibraryRef.current, ...newImgs];
