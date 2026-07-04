@@ -955,9 +955,44 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         );
       })()}
 
-      {block.type === 'correccion' && block.nota && (
+      {block.type === 'correccion' && (
         <div style={{ padding: '12px 14px' }}>
-          <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.nota}</p>
+          {(block.email_blocks || []).length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 320, overflow: 'hidden' }}>
+              {(block.email_blocks || []).slice(0, 6).map((eb, i) => (
+                <div key={i}>
+                  {eb.type === 'text' && eb.content && (
+                    <p style={{ margin: 0, fontSize: eb.size || 14, fontWeight: eb.bold ? 700 : 400, textAlign: eb.align || 'left', color: 'var(--t-text)', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{eb.content}</p>
+                  )}
+                  {eb.type === 'image' && eb.url && (
+                    <PreviewImg src={eb.url} imgStyle={{ maxWidth: '100%', maxHeight: 140, borderRadius: 7, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{}} onPreview={setLightbox} />
+                  )}
+                  {eb.type === 'button' && eb.text && (
+                    <span style={{ display: 'inline-block', background: eb.bg || '#3b82f6', color: eb.color || '#ffffff', borderRadius: 6, padding: '5px 14px', fontSize: 12, fontWeight: 600 }}>{eb.text}</span>
+                  )}
+                  {eb.type === 'columns' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      {['left','right'].map(side => (
+                        <div key={side} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {(eb[side] || []).slice(0, 2).map((sub, j) => (
+                            <div key={j}>
+                              {sub.type === 'text' && sub.content && <p style={{ margin: 0, fontSize: sub.size || 12, fontWeight: sub.bold ? 700 : 400, textAlign: sub.align || 'left', color: 'var(--t-text)', whiteSpace: 'pre-wrap' }}>{sub.content}</p>}
+                              {sub.type === 'image' && sub.url && <img src={sub.url} alt="" style={{ maxWidth: '100%', maxHeight: 80, borderRadius: 5, objectFit: 'contain', border: '1px solid var(--t-border)' }} />}
+                              {sub.type === 'button' && sub.text && <span style={{ display: 'inline-block', background: sub.bg || '#3b82f6', color: sub.color || '#ffffff', borderRadius: 5, padding: '3px 10px', fontSize: 11, fontWeight: 600 }}>{sub.text}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : block.nota ? (
+            <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.nota}</p>
+          ) : (
+            <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span>
+          )}
         </div>
       )}
 
@@ -1017,6 +1052,210 @@ function InlineColorPicker({ value, onChange }) {
             <button onClick={() => apply(hex)} style={{ background: 'white', color: 'black', border: 'none', borderRadius: 7, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Aplicar</button>
             <button onClick={() => setOpen(false)} style={{ background: 'none', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-muted)', borderRadius: 7, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}>✕</button>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Mini Email Builder (for Corrección block) ─────────────────────────────────
+const EB_TYPES = [
+  { type: 'text',    label: 'Texto',    icon: '¶' },
+  { type: 'image',   label: 'Imagen',   icon: '🖼' },
+  { type: 'button',  label: 'Botón',    icon: '□' },
+  { type: 'columns', label: 'Columnas', icon: '▥' },
+];
+const newEB = (type) => {
+  const id = `eb_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+  if (type === 'text')    return { id, type, content: '', align: 'left', bold: false, size: 14 };
+  if (type === 'image')   return { id, type, url: '' };
+  if (type === 'button')  return { id, type, text: 'Haz clic aquí', url: '', bg: '#3b82f6', color: '#ffffff' };
+  if (type === 'columns') return { id, type, left: [newEB('text')], right: [newEB('text')] };
+  return { id, type };
+};
+
+function EBItem({ block, onChange, onDelete, onUpload, onCrop, libImages, nested = false }) {
+  const [showLib, setShowLib] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
+
+  const upload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    try { const url = await onUpload(file); onChange({ url }); }
+    catch { alert('Error al subir imagen'); }
+    finally { setUploading(false); }
+  };
+
+  const crop = async () => {
+    setUploading(true);
+    try { const url = await onCrop(); if (url) onChange({ url }); }
+    catch (_) {}
+    finally { setUploading(false); }
+  };
+
+  const rowStyle = { display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 };
+  const btnStyle = (active) => ({ background: active ? 'var(--t-border)' : 'transparent', border: `1px solid ${active ? 'var(--t-border-mid)' : 'var(--t-border)'}`, borderRadius: 5, padding: '3px 7px', fontSize: 11, color: active ? 'var(--t-text)' : 'var(--t-text-subtle)', cursor: 'pointer' });
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button onClick={onDelete} style={{ position: 'absolute', top: 0, right: 0, background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '2px 4px', zIndex: 1 }}
+        onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+        onMouseLeave={e => e.currentTarget.style.color = 'var(--t-text-subtle)'}>×</button>
+
+      {block.type === 'text' && (
+        <div>
+          <div style={rowStyle}>
+            {[['left','≡L'],['center','≡C'],['right','≡R'],['justify','≡']].map(([v,l]) => (
+              <button key={v} onClick={() => onChange({ align: v })} style={btnStyle(block.align === v || (!block.align && v==='left'))}>{l}</button>
+            ))}
+            <button onClick={() => onChange({ bold: !block.bold })} style={btnStyle(block.bold)}><b>N</b></button>
+            <select value={block.size || 14} onChange={e => onChange({ size: +e.target.value })}
+              style={{ background: 'var(--t-surface2)', border: '1px solid var(--t-border)', borderRadius: 5, color: 'var(--t-text)', fontSize: 11, padding: '2px 4px' }}>
+              {[11,12,13,14,16,18,20,24,28].map(s => <option key={s} value={s}>{s}px</option>)}
+            </select>
+          </div>
+          <textarea value={block.content || ''} onChange={e => onChange({ content: e.target.value })}
+            rows={3} placeholder="Escribe aquí…"
+            style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 7, padding: '7px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', textAlign: block.align || 'left', fontWeight: block.bold ? 700 : 400 }} />
+        </div>
+      )}
+
+      {block.type === 'image' && (
+        <div>
+          {block.url ? (
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <img src={block.url} alt="" style={{ maxWidth: '100%', maxHeight: 160, borderRadius: 7, border: '1px solid var(--t-border)', display: 'block' }} />
+              <button onClick={() => onChange({ url: '' })}
+                style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.7)', border: 'none', color: 'white', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', fontSize: 13, lineHeight: 1 }}>×</button>
+            </div>
+          ) : (
+            <>
+              {showLib && libImages?.length > 0 && (
+                <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 8, marginBottom: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                    <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase' }}>Biblioteca</span>
+                    <button onClick={() => setShowLib(false)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11 }}>Cerrar</button>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(56px, 1fr))', gap: 4 }}>
+                    {libImages.map((img, i) => (
+                      <img key={i} src={img.url} alt="" onClick={() => { onChange({ url: img.url }); setShowLib(false); }}
+                        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: 'pointer', border: '2px solid transparent' }}
+                        onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
+                        onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                <button onClick={() => fileRef.current?.click()} disabled={uploading}
+                  style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '6px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: uploading ? 'not-allowed' : 'pointer', minWidth: 70 }}>
+                  {uploading ? 'Subiendo…' : '+ Subir'}
+                </button>
+                <button onClick={crop} disabled={uploading}
+                  style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '6px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, minWidth: 70 }}>
+                  <IconScissors /> Recortar
+                </button>
+                {libImages?.length > 0 && (
+                  <button onClick={() => setShowLib(s => !s)}
+                    style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '6px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: 'pointer', minWidth: 70 }}>
+                    Seleccionar
+                  </button>
+                )}
+                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+                  onChange={async e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) await upload(f); }} />
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {block.type === 'button' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input value={block.text || ''} onChange={e => onChange({ text: e.target.value })} placeholder="Texto del botón"
+              style={{ flex: 1, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 7, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input value={block.url || ''} onChange={e => onChange({ url: e.target.value })} placeholder="https://…"
+              style={{ flex: 1, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 7, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Fondo</label>
+            <input type="color" value={block.bg || '#3b82f6'} onChange={e => onChange({ bg: e.target.value })}
+              style={{ width: 26, height: 22, borderRadius: 4, border: '1px solid var(--t-border-mid)', cursor: 'pointer', padding: 1 }} />
+            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Texto</label>
+            <input type="color" value={block.color || '#ffffff'} onChange={e => onChange({ color: e.target.value })}
+              style={{ width: 26, height: 22, borderRadius: 4, border: '1px solid var(--t-border-mid)', cursor: 'pointer', padding: 1 }} />
+            <div style={{ flex: 1 }}>
+              <span style={{ display: 'inline-block', background: block.bg || '#3b82f6', color: block.color || '#ffffff', borderRadius: 6, padding: '4px 14px', fontSize: 12, fontWeight: 600 }}>{block.text || 'Botón'}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {block.type === 'columns' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          {['left','right'].map(side => (
+            <div key={side} style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', marginBottom: 2 }}>{side === 'left' ? 'Columna izq.' : 'Columna der.'}</div>
+              <EBCanvas blocks={block[side] || []} nested
+                onChange={newBlocks => onChange({ [side]: newBlocks })}
+                onUpload={onUpload} onCrop={onCrop} libImages={libImages} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EBCanvas({ blocks, onChange, onUpload, onCrop, libImages, nested = false }) {
+  const [dragging, setDragging] = useState(null);
+  const [dragOver, setDragOver] = useState(null);
+
+  const add = (type) => onChange([...blocks, newEB(type)]);
+  const del = (idx) => onChange(blocks.filter((_, i) => i !== idx));
+  const upd = (idx, changes) => onChange(blocks.map((b, i) => i === idx ? { ...b, ...changes } : b));
+  const move = (from, to) => {
+    const next = [...blocks];
+    const [removed] = next.splice(from, 1);
+    next.splice(to, 0, removed);
+    onChange(next);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {/* Palette */}
+      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+        {(nested ? EB_TYPES.filter(t => t.type !== 'columns') : EB_TYPES).map(bt => (
+          <button key={bt.type} onClick={() => add(bt.type)}
+            style={{ background: 'transparent', border: '1px dashed var(--t-border)', borderRadius: 6, padding: nested ? '3px 6px' : '4px 8px', fontSize: 10, color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3 }}>
+            <span>{bt.icon}</span> {bt.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Blocks */}
+      {blocks.map((block, idx) => (
+        <div key={block.id}
+          draggable
+          onDragStart={() => setDragging(idx)}
+          onDragOver={e => { e.preventDefault(); setDragOver(idx); }}
+          onDrop={e => { e.preventDefault(); if (dragging !== null && dragging !== idx) move(dragging, idx); setDragging(null); setDragOver(null); }}
+          onDragEnd={() => { setDragging(null); setDragOver(null); }}
+          style={{ border: `1px solid ${dragOver === idx && dragging !== idx ? '#6366f1' : 'var(--t-border)'}`, borderRadius: 8, padding: 10, background: 'var(--t-surface)', cursor: 'grab', opacity: dragging === idx ? 0.4 : 1, transition: 'border-color 0.1s' }}>
+          <EBItem block={block}
+            onChange={changes => upd(idx, changes)}
+            onDelete={() => del(idx)}
+            onUpload={onUpload} onCrop={onCrop} libImages={libImages}
+            nested={nested} />
+        </div>
+      ))}
+
+      {blocks.length === 0 && !nested && (
+        <div style={{ border: '2px dashed var(--t-border)', borderRadius: 8, padding: 20, textAlign: 'center', color: 'var(--t-text-faint)', fontSize: 12 }}>
+          Añade bloques arriba
         </div>
       )}
     </div>
@@ -1159,7 +1398,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'var(--t-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
       onClick={onClose}>
-      <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 16, width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}
+      <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 16, width: '100%', maxWidth: block.type === 'correccion' ? 740 : 560, maxHeight: '90vh', overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}
@@ -1525,10 +1764,13 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 
         {draft.type === 'correccion' && (
           <div>
-            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Corrección</label>
-            <textarea value={draft.nota || ''} onChange={e => update('nota', e.target.value)}
-              rows={5} placeholder="Cómo lo reescribirías…"
-              style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Email de corrección</label>
+            <EBCanvas
+              blocks={draft.email_blocks || []}
+              onChange={newBlocks => update('email_blocks', newBlocks)}
+              onUpload={onUploadImage}
+              onCrop={onCropFromEmail}
+              libImages={libraryImages} />
           </div>
         )}
 
@@ -1816,6 +2058,7 @@ export default function BibliotecaItem() {
       images_layout: 'columna',
       it_layout: 'img-text',
       items: type === 'imagen_texto' ? [{ image: null, texto: '', text_color: '', text_align: 'left' }] : [],
+      email_blocks: [],
       texto: '',
       nota: '',
     };
