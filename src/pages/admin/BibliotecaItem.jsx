@@ -941,8 +941,8 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                   <div key={li} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {(link.images || []).map((img, i) => (
                       <PreviewImg key={i} src={img.url}
-                        imgStyle={{ width: '100%', height: 'auto', maxHeight: 400, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
-                        wrapperStyle={{ width: '100%' }}
+                        imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                        wrapperStyle={{ flexShrink: 0 }}
                         href={link.url || undefined}
                         onPreview={setLightbox} />
                     ))}

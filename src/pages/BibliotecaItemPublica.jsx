@@ -84,25 +84,47 @@ function EnlacesBlockView({ block }) {
               )}
             </div>
           ) : (
-            /* columna y fila: imágenes en fila horizontal (height 160), url a la derecha */
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
-              {(link.images || []).map((img, j) => (
-                <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-                  <img src={img.url} alt="" style={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
-                </a>
-              ))}
-              {link.url && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
-                  <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
-                  <a href={link.url} target="_blank" rel="noopener noreferrer"
-                    style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                    onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                    onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                    {link.url}
+            isFila ? (
+              /* Fila: imágenes en horizontal */
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
+                {(link.images || []).map((img, j) => (
+                  <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
+                    <img src={img.url} alt="" style={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                   </a>
-                </div>
-              )}
-            </div>
+                ))}
+                {link.url && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
+                    <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
+                    <a href={link.url} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                      onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                      onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                      {link.url}
+                    </a>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Columna: imágenes apiladas, url debajo */
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {(link.images || []).map((img, j) => (
+                  <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
+                    <img src={img.url} alt="" style={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
+                  </a>
+                ))}
+                {link.url && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
+                    <a href={link.url} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
+                      onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                      onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                      {link.url}
+                    </a>
+                  </div>
+                )}
+              </div>
+            )
           )
         ))}
       </div>
