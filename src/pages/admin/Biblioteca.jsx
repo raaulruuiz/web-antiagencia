@@ -490,7 +490,7 @@ export default function Biblioteca() {
             return (
               <div key={item.id} className="group relative cursor-pointer"
                 onClick={() => { if (selecting) { toggleSelect(item.id); return; } navigate(`/admin/biblioteca/${item.id}`); }}>
-                <div className="aspect-video bg-zinc-900 rounded-lg overflow-hidden border transition-colors" style={{ borderColor: isSelected ? '#fff' : 'var(--t-border)' }}>
+                <div className="aspect-video bg-zinc-900 rounded-lg overflow-hidden border transition-colors relative" style={{ borderColor: isSelected ? '#fff' : 'var(--t-border)' }}>
                   <img src={item.url} alt={item.filename} className="w-full h-full object-cover" loading="lazy" />
 
                   {/* Permanent badge — visible at a glance when item is hidden */}
