@@ -89,37 +89,42 @@ function EnlacesBlockView({ block }) {
 
 function ImagenBlockView({ block }) {
   const images = block.images || [];
-  const [current, setCurrent] = useState(0);
   if (!images.length) return null;
+  const layout = block.images_layout;
 
-  if (block.view === 'carousel') {
+  if (layout === 'fila') {
     return (
       <div>
-        <div style={{ position: 'relative' }}>
-          <img src={images[current]} style={{ width: '100%', borderRadius: 10, display: 'block', maxHeight: 400, objectFit: 'contain', background: 'var(--t-surface)' }} />
-          {images.length > 1 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 10 }}>
-              <button onClick={() => setCurrent(c => (c - 1 + images.length) % images.length)}
-                style={{ background: '#1a1a1a', border: '1px solid #3f3f46', color: 'var(--t-text)', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>‹</button>
-              <span style={{ fontSize: 11, color: 'var(--t-text-muted)' }}>{current + 1} / {images.length}</span>
-              <button onClick={() => setCurrent(c => (c + 1) % images.length)}
-                style={{ background: '#1a1a1a', border: '1px solid #3f3f46', color: 'var(--t-text)', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>›</button>
-            </div>
-          )}
+        <BlockHeader title={block.title} subtitle={block.subtitle} />
+        <div style={{ display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto' }}>
+          {images.map((img, i) => (
+            <img key={i} src={img.url || img} alt="" style={{ height: 180, width: 'auto', borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)', flexShrink: 0, display: 'block' }} />
+          ))}
         </div>
       </div>
     );
   }
 
-  // Grid
+  if (layout === 'grid') {
+    return (
+      <div>
+        <BlockHeader title={block.title} subtitle={block.subtitle} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
+          {images.map((img, i) => (
+            <img key={i} src={img.url || img} alt="" style={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Default: columna
   return (
     <div>
       <BlockHeader title={block.title} subtitle={block.subtitle} />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
-        {images.map((url, i) => (
-          <div key={i} style={{ aspectRatio: '16/9', overflow: 'hidden', borderRadius: 8, border: '1px solid var(--t-border)' }}>
-            <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-          </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {images.map((img, i) => (
+          <img key={i} src={img.url || img} alt="" style={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)', display: 'block' }} />
         ))}
       </div>
     </div>
@@ -127,48 +132,78 @@ function ImagenBlockView({ block }) {
 }
 
 function ImagenTextoBlockView({ block }) {
-  if (!block.text && !block.imageUrl) return null;
+  const items = block.items || [];
+  if (!items.length) return null;
   const isReversed = block.layout === 'text_image';
-  const color = block.color || '#6366f1';
+
   return (
     <div>
       <BlockHeader title={block.title} subtitle={block.subtitle} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start', direction: isReversed ? 'rtl' : 'ltr' }}>
-        {block.imageUrl && (
-          <div style={{ direction: 'ltr' }}>
-            <img src={block.imageUrl} style={{ width: '100%', borderRadius: 10, display: 'block' }} />
-          </div>
-        )}
-        {block.text && (
-          <div style={{ direction: 'ltr', background: color + '18', border: `1px solid ${color}44`, borderRadius: 10, padding: '14px 16px' }}>
-            <p style={{ fontSize: 13, color: 'var(--t-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{block.text}</p>
-          </div>
-        )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {items.map((it, i) => {
+          const color = it.text_color || '#6366f1';
+          const hasImage = it.image?.url;
+          const hasText  = it.texto?.trim();
+          return (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: hasImage && hasText ? '1fr 1fr' : '1fr', gap: 16, alignItems: 'start', direction: isReversed ? 'rtl' : 'ltr' }}>
+              {hasImage && (
+                <div style={{ direction: 'ltr' }}>
+                  <img src={it.image.url} alt="" style={{ width: '100%', borderRadius: 10, display: 'block' }} />
+                </div>
+              )}
+              {hasText && (
+                <div style={{ direction: 'ltr', background: color + '18', border: `1px solid ${color}44`, borderRadius: 10, padding: '14px 16px' }}>
+                  <p style={{ fontSize: 13, color: 'var(--t-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: it.text_align || 'left' }}>{it.texto}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
+function renderEBBlock(eb, i, colMode) {
+  return (
+    <div key={i}>
+      {eb.type === 'text' && eb.content && (() => {
+        const p = <p style={{ margin: 0, fontSize: eb.size || 14, fontWeight: eb.bold ? 700 : 400, textAlign: eb.align || 'left', color: '#1a1a1a', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{eb.content}</p>;
+        return eb.href ? <a href={eb.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>{p}</a> : p;
+      })()}
+      {eb.type === 'image' && eb.url && (() => {
+        const img = <img src={eb.url} alt="" style={{ display: 'block', maxWidth: '100%', maxHeight: colMode ? 120 : 200, objectFit: 'contain', borderRadius: 6, margin: '0 auto' }} />;
+        return <div style={{ textAlign: 'center' }}>{eb.href ? <a href={eb.href} target="_blank" rel="noopener noreferrer">{img}</a> : img}</div>;
+      })()}
+      {eb.type === 'button' && eb.text && (
+        <div style={{ textAlign: 'center' }}>
+          <a href={eb.href || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', background: '#6366f1', color: 'white', borderRadius: 6, padding: '8px 20px', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>{eb.text}</a>
+        </div>
+      )}
+      {eb.type === 'columns' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{(eb.left || []).map((sub, j) => renderEBBlock(sub, j, true))}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{(eb.right || []).map((sub, j) => renderEBBlock(sub, j, true))}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CorreccionBlockView({ block }) {
-  const rows = block.rows || [];
-  if (!rows.length) return null;
+  const { theme } = useTheme();
+  const emailBlocks = block.email_blocks || [];
+  if (!emailBlocks.length) return null;
+  const emailBg  = block.email_bg || '#ffffff';
+  const outerBg  = theme === 'dark' ? '#1e1e1e' : '#e0e0e0';
+
   return (
     <div>
       <BlockHeader title={block.title} subtitle={block.subtitle} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {rows.map(row => (
-          <div key={row.id} style={{ display: 'grid', gridTemplateColumns: `repeat(${row.cols}, 1fr)`, gap: 8 }}>
-            {row.cells.map(cell => (
-              <div key={cell.id}>
-                {cell.type === 'text' ? (
-                  <p style={{ fontSize: 13, color: 'var(--t-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap', padding: '8px 0' }}>{cell.content}</p>
-                ) : cell.imageUrl ? (
-                  <img src={cell.imageUrl} style={{ width: '100%', borderRadius: 8, display: 'block' }} />
-                ) : null}
-              </div>
-            ))}
-          </div>
-        ))}
+      <div style={{ background: outerBg, borderRadius: 12, padding: '20px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ background: emailBg, borderRadius: 8, padding: '20px 24px', width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {emailBlocks.map((eb, i) => renderEBBlock(eb, i, false))}
+        </div>
       </div>
     </div>
   );
