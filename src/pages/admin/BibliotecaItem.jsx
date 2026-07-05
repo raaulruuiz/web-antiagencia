@@ -956,37 +956,41 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       })()}
 
       {block.type === 'correccion' && (
-        <div style={{ padding: '12px 14px' }}>
+        <div style={{ padding: '10px 12px' }}>
           {(block.email_blocks || []).length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 320, overflow: 'hidden' }}>
-              {(block.email_blocks || []).slice(0, 6).map((eb, i) => (
-                <div key={i}>
-                  {eb.type === 'text' && eb.content && (
-                    <p style={{ margin: 0, fontSize: eb.size || 14, fontWeight: eb.bold ? 700 : 400, textAlign: eb.align || 'left', color: 'var(--t-text)', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{eb.content}</p>
-                  )}
-                  {eb.type === 'image' && eb.url && (
-                    <PreviewImg src={eb.url} imgStyle={{ maxWidth: '100%', maxHeight: 140, borderRadius: 7, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{}} onPreview={setLightbox} />
-                  )}
-                  {eb.type === 'button' && eb.text && (
-                    <span style={{ display: 'inline-block', background: eb.bg || '#3b82f6', color: eb.color || '#ffffff', borderRadius: 6, padding: '5px 14px', fontSize: 12, fontWeight: 600 }}>{eb.text}</span>
-                  )}
-                  {eb.type === 'columns' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      {['left','right'].map(side => (
-                        <div key={side} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                          {(eb[side] || []).slice(0, 2).map((sub, j) => (
-                            <div key={j}>
-                              {sub.type === 'text' && sub.content && <p style={{ margin: 0, fontSize: sub.size || 12, fontWeight: sub.bold ? 700 : 400, textAlign: sub.align || 'left', color: 'var(--t-text)', whiteSpace: 'pre-wrap' }}>{sub.content}</p>}
-                              {sub.type === 'image' && sub.url && <img src={sub.url} alt="" style={{ maxWidth: '100%', maxHeight: 80, borderRadius: 5, objectFit: 'contain', border: '1px solid var(--t-border)' }} />}
-                              {sub.type === 'button' && sub.text && <span style={{ display: 'inline-block', background: sub.bg || '#3b82f6', color: sub.color || '#ffffff', borderRadius: 5, padding: '3px 10px', fontSize: 11, fontWeight: 600 }}>{sub.text}</span>}
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div style={{ maxHeight: 340, overflow: 'hidden', background: '#e8e8e8', borderRadius: 8, padding: '10px 8px' }}>
+              <div style={{ background: '#ffffff', maxWidth: 520, margin: '0 auto', borderRadius: 4, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {(block.email_blocks || []).slice(0, 6).map((eb, i) => (
+                  <div key={i}>
+                    {eb.type === 'text' && eb.content && (
+                      <p style={{ margin: 0, fontSize: eb.size || 14, fontWeight: eb.bold ? 700 : 400, textAlign: eb.align || 'left', color: '#1a1a1a', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{eb.content}</p>
+                    )}
+                    {eb.type === 'image' && eb.url && (
+                      <PreviewImg src={eb.url} imgStyle={{ display: 'block', maxWidth: '100%', maxHeight: 160, objectFit: 'contain', borderRadius: 6, margin: '0 auto' }} wrapperStyle={{ textAlign: 'center' }} onPreview={setLightbox} />
+                    )}
+                    {eb.type === 'button' && eb.text && (
+                      <div style={{ textAlign: 'center', padding: '4px 0' }}>
+                        <span style={{ display: 'inline-block', background: eb.bg || '#3b82f6', color: eb.color || '#ffffff', borderRadius: 6, padding: '7px 20px', fontSize: 13, fontWeight: 600 }}>{eb.text}</span>
+                      </div>
+                    )}
+                    {eb.type === 'columns' && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        {['left','right'].map(side => (
+                          <div key={side} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {(eb[side] || []).slice(0, 2).map((sub, j) => (
+                              <div key={j}>
+                                {sub.type === 'text' && sub.content && <p style={{ margin: 0, fontSize: sub.size || 12, fontWeight: sub.bold ? 700 : 400, textAlign: sub.align || 'left', color: '#1a1a1a', whiteSpace: 'pre-wrap' }}>{sub.content}</p>}
+                                {sub.type === 'image' && sub.url && <img src={sub.url} alt="" style={{ display: 'block', maxWidth: '100%', maxHeight: 90, objectFit: 'contain', borderRadius: 4, margin: '0 auto' }} />}
+                                {sub.type === 'button' && sub.text && <div style={{ textAlign: 'center' }}><span style={{ display: 'inline-block', background: sub.bg || '#3b82f6', color: sub.color || '#ffffff', borderRadius: 4, padding: '4px 12px', fontSize: 11, fontWeight: 600 }}>{sub.text}</span></div>}
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           ) : block.nota ? (
             <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.nota}</p>
