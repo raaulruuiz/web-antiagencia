@@ -822,7 +822,7 @@ function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
 }
 
 // ── Block: card ───────────────────────────────────────────────────────────────
-function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown }) {
+function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onToggleVisible }) {
   const bt = BLOCK_TYPES.find(b => b.type === block.type);
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
@@ -850,6 +850,24 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               </button>
             </>
           )}
+          <button onClick={onToggleVisible}
+            style={block.visible === false
+              ? { color: '#f97316', background: 'rgba(234,88,12,0.25)', border: '1px solid rgba(234,88,12,0.5)', cursor: 'pointer', padding: '3px 6px', borderRadius: 6, display: 'flex', alignItems: 'center' }
+              : { color: 'var(--t-text-muted)', background: 'none', border: '1px solid transparent', cursor: 'pointer', padding: '3px 6px', borderRadius: 6, display: 'flex', alignItems: 'center' }}
+            onMouseEnter={e => {
+              if (block.visible === false) { e.currentTarget.style.background = 'rgba(234,88,12,0.45)'; }
+              else { e.currentTarget.style.color = 'var(--t-text)'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }
+            }}
+            onMouseLeave={e => {
+              if (block.visible === false) { e.currentTarget.style.background = 'rgba(234,88,12,0.25)'; }
+              else { e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'none'; }
+            }}
+            title={block.visible === false ? 'Sección oculta en público' : 'Sección visible en público'}>
+            {block.visible === false
+              ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            }
+          </button>
           <button onClick={onEdit}
             style={{ background: 'none', border: '1px solid var(--t-border-muted)', color: 'var(--t-text)', cursor: 'pointer', padding: '3px 8px', borderRadius: 6, fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-text)'; }}
@@ -1966,7 +1984,11 @@ export default function BibliotecaItem() {
         setEnviadoEl(data.enviado_el ?? null);
         setItemUrl(data.ficha_url ?? null);
         setFechaAnalisis(data.fecha_analisis ?? null);
-        setBlocksData(data.blocks_data?.blocks || []);
+        const rawBlocks = data.blocks_data?.blocks || [];
+        setBlocksData(rawBlocks.map(b => ({
+          ...b,
+          visible: b.visible !== undefined ? b.visible : b.type !== 'correccion',
+        })));
         const lib = data.blocks_data?.library || [];
         setBlocksLibrary(lib);
         blocksLibraryRef.current = lib;
@@ -2188,6 +2210,7 @@ export default function BibliotecaItem() {
       email_blocks: [],
       texto: '',
       nota: '',
+      visible: type !== 'correccion',
     };
     setBlocksData(prev => {
       let next;
@@ -2206,6 +2229,14 @@ export default function BibliotecaItem() {
   const updateBlock = useCallback((updatedBlock) => {
     setBlocksData(prev => {
       const next = prev.map(b => b.id === updatedBlock.id ? updatedBlock : b);
+      saveBlocks(next);
+      return next;
+    });
+  }, [saveBlocks]);
+
+  const toggleBlockVisible = useCallback((blockId) => {
+    setBlocksData(prev => {
+      const next = prev.map(b => b.id === blockId ? { ...b, visible: !b.visible } : b);
       saveBlocks(next);
       return next;
     });
@@ -2677,6 +2708,7 @@ export default function BibliotecaItem() {
                   onDelete={() => deleteBlock(block.id)}
                   onMoveUp={() => moveBlock(block.id, -1)}
                   onMoveDown={() => moveBlock(block.id, 1)}
+                  onToggleVisible={() => toggleBlockVisible(block.id)}
                 />
               </div>
             ))}

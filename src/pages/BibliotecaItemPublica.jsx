@@ -174,7 +174,7 @@ function BlockHeader({ title, subtitle }) {
   );
 }
 
-function EnlacesBlockView({ block, onPreview }) {
+function EnlacesBlockView({ block, onPreview, hideTitle }) {
   // Support both new structure (links[]) and legacy (url + images)
   const links = block.links?.length
     ? block.links
@@ -186,8 +186,8 @@ function EnlacesBlockView({ block, onPreview }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', margin: '0 0 4px' }}>{block.titulo}</h2>}
-      {block.subtitulo && <p style={{ fontSize: 13, color: 'var(--t-text-muted)', margin: '0 0 6px', lineHeight: 1.5 }}>{block.subtitulo}</p>}
+      {!hideTitle && block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', margin: '0 0 4px' }}>{block.titulo}</h2>}
+      {!hideTitle && block.subtitulo && <p style={{ fontSize: 13, color: 'var(--t-text-muted)', margin: '0 0 6px', lineHeight: 1.5 }}>{block.subtitulo}</p>}
       <div style={
         isFila
           ? { display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto', alignItems: 'flex-start' }
@@ -261,7 +261,7 @@ function EnlacesBlockView({ block, onPreview }) {
   );
 }
 
-function ImagenBlockView({ block, onPreview }) {
+function ImagenBlockView({ block, onPreview, hideTitle }) {
   const images = block.images || [];
   if (!images.length) return null;
   const layout = block.images_layout;
@@ -269,7 +269,7 @@ function ImagenBlockView({ block, onPreview }) {
   if (layout === 'fila') {
     return (
       <div>
-        <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
+        {!hideTitle && <BlockHeader title={block.titulo} subtitle={block.subtitulo} />}
         <div style={{ display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto' }}>
           {images.map((img, i) => (
             <PreviewImg key={i} src={img.url || img} onPreview={onPreview}
@@ -284,7 +284,7 @@ function ImagenBlockView({ block, onPreview }) {
   if (layout === 'grid') {
     return (
       <div>
-        <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
+        {!hideTitle && <BlockHeader title={block.titulo} subtitle={block.subtitulo} />}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
           {images.map((img, i) => (
             <PreviewImg key={i} src={img.url || img} onPreview={onPreview}
@@ -299,7 +299,7 @@ function ImagenBlockView({ block, onPreview }) {
   // Default: columna
   return (
     <div>
-      <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
+      {!hideTitle && <BlockHeader title={block.titulo} subtitle={block.subtitulo} />}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {images.map((img, i) => (
           <PreviewImg key={i} src={img.url || img} onPreview={onPreview}
@@ -311,7 +311,7 @@ function ImagenBlockView({ block, onPreview }) {
   );
 }
 
-function ImagenTextoBlockView({ block, onPreview }) {
+function ImagenTextoBlockView({ block, onPreview, hideTitle }) {
   const items = block.items || [];
   if (!items.length) return null;
   const layout   = block.it_layout || 'img-text';
@@ -320,7 +320,7 @@ function ImagenTextoBlockView({ block, onPreview }) {
 
   return (
     <div>
-      <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
+      {!hideTitle && <BlockHeader title={block.titulo} subtitle={block.subtitulo} />}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {items.map((it, i) => {
           const color = it.text_color || '#6366f1';
@@ -379,7 +379,7 @@ function renderEBBlock(eb, i, colMode, onPreview) {
   );
 }
 
-function CorreccionBlockView({ block, onPreview }) {
+function CorreccionBlockView({ block, onPreview, hideTitle }) {
   const { theme } = useTheme();
   const emailBlocks = block.email_blocks || [];
   if (!emailBlocks.length) return null;
@@ -388,7 +388,7 @@ function CorreccionBlockView({ block, onPreview }) {
 
   return (
     <div>
-      <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
+      {!hideTitle && <BlockHeader title={block.titulo} subtitle={block.subtitulo} />}
       <div style={{ background: outerBg, borderRadius: 12, padding: '20px', display: 'flex', justifyContent: 'center' }}>
         <div style={{ background: emailBg, borderRadius: 8, padding: '20px 24px', width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 12 }}>
           {emailBlocks.map((eb, i) => renderEBBlock(eb, i, false, onPreview))}
@@ -400,6 +400,39 @@ function CorreccionBlockView({ block, onPreview }) {
 
 function BlockView({ block, onPreview }) {
   const wrapStyle = { border: '1px solid var(--t-border-s)', borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
+
+  // Determine visibility: explicit false = hidden; undefined defaults: correccion=hidden, others=visible
+  const isVisible = block.visible !== undefined
+    ? block.visible !== false
+    : block.type !== 'correccion';
+
+  if (!isVisible) {
+    // Render title + blurred content
+    const title = block.titulo;
+    const subtitle = block.subtitulo;
+    let content;
+    switch (block.type) {
+      case 'enlaces':      content = <EnlacesBlockView block={block} onPreview={() => {}} hideTitle />; break;
+      case 'imagen':       content = <ImagenBlockView block={block} onPreview={() => {}} hideTitle />; break;
+      case 'imagen_texto': content = <ImagenTextoBlockView block={block} onPreview={() => {}} hideTitle />; break;
+      case 'correccion':   content = <CorreccionBlockView block={block} onPreview={() => {}} hideTitle />; break;
+      default: content = null;
+    }
+    return (
+      <div style={wrapStyle}>
+        {(title || subtitle) && (
+          <div style={{ marginBottom: 12 }}>
+            {title && <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', margin: '0 0 4px' }}>{title}</h2>}
+            {subtitle && <p style={{ fontSize: 13, color: 'var(--t-text-muted)', margin: 0, lineHeight: 1.5 }}>{subtitle}</p>}
+          </div>
+        )}
+        <div style={{ filter: 'blur(8px)', userSelect: 'none', pointerEvents: 'none', opacity: 0.7 }}>
+          {content}
+        </div>
+      </div>
+    );
+  }
+
   switch (block.type) {
     case 'enlaces':      return <div style={wrapStyle}><EnlacesBlockView block={block} onPreview={onPreview} /></div>;
     case 'imagen':       return <div style={wrapStyle}><ImagenBlockView block={block} onPreview={onPreview} /></div>;
