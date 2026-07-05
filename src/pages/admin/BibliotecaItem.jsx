@@ -2398,6 +2398,11 @@ export default function BibliotecaItem() {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           Biblioteca
         </button>
+        {item?.publico === false && (
+          <span style={{ fontSize: 11, fontWeight: 600, color: '#f87171', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, padding: '3px 8px', letterSpacing: '0.02em' }}>
+            Oculto
+          </span>
+        )}
         {(saving || blocksSaving) && <span className="text-xs text-zinc-600">Guardando…</span>}
         <button onClick={toggle} title={theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
           style={{ marginLeft: 'auto', fontSize: 16, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', lineHeight: 1 }}>
