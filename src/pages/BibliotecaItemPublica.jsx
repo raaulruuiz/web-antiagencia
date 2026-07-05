@@ -51,37 +51,76 @@ function EnlacesBlockView({ block }) {
     ? block.links
     : (block.url ? [{ images: block.images || [], url: block.url }] : []);
   if (!links.length) return null;
+  const layout = block.links_layout || 'columna';
+  const isGrid = layout === 'grid';
+  const isFila = layout === 'fila';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', margin: '0 0 4px' }}>{block.titulo}</h2>}
       {block.subtitulo && <p style={{ fontSize: 13, color: 'var(--t-text-muted)', margin: '0 0 6px', lineHeight: 1.5 }}>{block.subtitulo}</p>}
       <div style={
-        block.links_layout === 'fila'
-          ? { display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto' }
-          : block.links_layout === 'grid'
+        isFila
+          ? { display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto', alignItems: 'flex-start' }
+          : isGrid
           ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }
-          : { display: 'flex', flexDirection: 'column', gap: 10 }
+          : { display: 'flex', flexDirection: 'column', gap: 12 }
       }>
-      {links.map((link, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, overflow: 'hidden' }}>
-          {(link.images || []).map((img, j) => (
-            <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-              <img src={img.url} alt="" style={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
-            </a>
-          ))}
-          {link.url && (
-            <>
-              <span style={{ fontSize: 22, color: '#6366f1', fontWeight: 300 }}>→</span>
-              <a href={link.url} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: 13, color: '#a5b4fc', textDecoration: 'none', wordBreak: 'break-all' }}
-                onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                {link.url}
-              </a>
-            </>
-          )}
-        </div>
-      ))}
+        {links.map((link, i) => (
+          isGrid ? (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {(link.images || []).map((img, j) => (
+                <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
+                  <img src={img.url} alt="" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
+                </a>
+              ))}
+              {link.url && (
+                <a href={link.url} target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 11, color: '#3b82f6', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                  {link.url}
+                </a>
+              )}
+            </div>
+          ) : isFila ? (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+              {(link.images || []).map((img, j) => (
+                <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
+                  <img src={img.url} alt="" style={{ height: 160, width: 'auto', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
+                </a>
+              ))}
+              {link.url && (
+                <a href={link.url} target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 12, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                  onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                  {link.url}
+                </a>
+              )}
+            </div>
+          ) : (
+            /* columna (default): images full-width stacked, url below */
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {(link.images || []).map((img, j) => (
+                <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
+                  <img src={img.url} alt="" style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
+                </a>
+              ))}
+              {link.url && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
+                  <a href={link.url} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
+                    onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                    onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                    {link.url}
+                  </a>
+                </div>
+              )}
+            </div>
+          )
+        ))}
       </div>
     </div>
   );
