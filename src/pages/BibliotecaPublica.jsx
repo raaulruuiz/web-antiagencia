@@ -217,7 +217,8 @@ export default function BibliotecaPublica() {
     if (filterTagId)     result = result.filter(i => (i.tags || []).includes(filterTagId));
     if (filterFechaFrom) result = result.filter(i => i.enviado_el && i.enviado_el >= filterFechaFrom);
     if (filterFechaTo)   result = result.filter(i => i.enviado_el && i.enviado_el <= filterFechaTo);
-    return result;
+    // Visible items first, blurred last
+    return result.sort((a, b) => (a.publico === false ? 1 : 0) - (b.publico === false ? 1 : 0));
   }, [items, searchQuery, filterCategoria, filterSubcat, filterTagId, filterFechaFrom, filterFechaTo]);
 
   const clearFilters = () => { setFilterCategoria(''); setFilterSubcat(''); setFilterTagId(''); setFilterFechaFrom(''); setFilterFechaTo(''); };
@@ -327,16 +328,32 @@ export default function BibliotecaPublica() {
 
         {filteredItems.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px' }}>
-            {filteredItems.map(item => (
-              <div key={item.id} onClick={() => navigate(`/anti-biblioteca/${item.id}`)} style={{ cursor: 'pointer' }}>
-                <div style={{ aspectRatio: '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', transition: 'border-color 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = '#27272a'}>
-                  <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+            {filteredItems.map(item => {
+              const isBlurred = item.publico === false;
+              return isBlurred ? (
+                <div key={item.id} style={{ cursor: 'default' }}>
+                  <div style={{ aspectRatio: '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', position: 'relative' }}>
+                    <img src={item.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'blur(12px)', transform: 'scale(1.05)' }} loading="lazy" />
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ background: 'rgba(0,0,0,0.55)', borderRadius: 8, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Contenido exclusivo</span>
+                      </div>
+                    </div>
+                  </div>
+                  <BibliotecaCardMeta item={item} allTags={allTags} />
                 </div>
-                <BibliotecaCardMeta item={item} allTags={allTags} />
-              </div>
-            ))}
+              ) : (
+                <div key={item.id} onClick={() => navigate(`/anti-biblioteca/${item.id}`)} style={{ cursor: 'pointer' }}>
+                  <div style={{ aspectRatio: '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', transition: 'border-color 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = '#27272a'}>
+                    <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+                  </div>
+                  <BibliotecaCardMeta item={item} allTags={allTags} />
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -19,6 +19,18 @@ const TrashIcon = () => (
     <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
   </svg>
 );
+const EyeOpenIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+  </svg>
+);
+const EyeOffIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+  </svg>
+);
 const CheckIcon = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12"/>
@@ -250,6 +262,32 @@ export default function Biblioteca() {
   const toggleSelect = (id) => { setSelected(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; }); };
   const exitSelect = () => { setSelecting(false); setSelected(new Set()); };
 
+  const togglePublico = useCallback(async (id, current) => {
+    const next = current === false ? true : false;
+    setItems(prev => prev.map(i => i.id === id ? { ...i, publico: next } : i));
+    try {
+      const token = await getToken();
+      await fetch(`${API_BASE}/biblioteca/${id}`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publico: next }),
+      });
+    } catch { /* optimistic, revert on hard failure is acceptable */ }
+  }, []);
+
+  const bulkSetVisibilidad = useCallback(async (publico) => {
+    const ids = [...selected];
+    setItems(prev => prev.map(i => ids.includes(i.id) ? { ...i, publico } : i));
+    try {
+      const token = await getToken();
+      await fetch(`${API_BASE}/biblioteca/visibilidad`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, publico }),
+      });
+    } catch { /* optimistic */ }
+  }, [selected]);
+
   const inputStyle = { background: 'var(--t-surface2)', border: '1px solid #27272a', borderRadius: 8, padding: '5px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark' };
   const selectStyle = { ...inputStyle, cursor: 'pointer' };
 
@@ -265,10 +303,20 @@ export default function Biblioteca() {
           {selecting ? (
             <>
               {selected.size > 0 && (
-                <button onClick={() => askDelete([...selected])} disabled={deleting}
-                  className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 border border-red-900 hover:border-red-700 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
-                  <TrashIcon /> Eliminar {selected.size}
-                </button>
+                <>
+                  <button onClick={() => askDelete([...selected])} disabled={deleting}
+                    className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 border border-red-900 hover:border-red-700 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
+                    <TrashIcon /> Eliminar {selected.size}
+                  </button>
+                  <button onClick={() => bulkSetVisibilidad(true)}
+                    className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors">
+                    <EyeOpenIcon /> Mostrar
+                  </button>
+                  <button onClick={() => bulkSetVisibilidad(false)}
+                    className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors">
+                    <EyeOffIcon /> Ocultar
+                  </button>
+                </>
               )}
               <button onClick={exitSelect} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors">Cancelar</button>
             </>
@@ -413,10 +461,18 @@ export default function Biblioteca() {
 
                   {!selecting && (
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all rounded-lg flex items-start justify-end p-2 opacity-0 group-hover:opacity-100">
-                      <button onClick={e => { e.stopPropagation(); askDelete([item.id]); }} disabled={deleting}
-                        className="p-1.5 rounded-md text-white/70 hover:text-white hover:bg-red-600/80 transition-colors disabled:opacity-50" title="Eliminar">
-                        <TrashIcon />
-                      </button>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button onClick={e => { e.stopPropagation(); togglePublico(item.id, item.publico); }}
+                          className="p-1.5 rounded-md transition-colors"
+                          style={{ color: item.publico === false ? '#f97316' : 'rgba(255,255,255,0.7)', background: 'transparent' }}
+                          title={item.publico === false ? 'Oculto en público (con blur)' : 'Visible en público'}>
+                          {item.publico === false ? <EyeOffIcon /> : <EyeOpenIcon />}
+                        </button>
+                        <button onClick={e => { e.stopPropagation(); askDelete([item.id]); }} disabled={deleting}
+                          className="p-1.5 rounded-md text-white/70 hover:text-white hover:bg-red-600/80 transition-colors disabled:opacity-50" title="Eliminar">
+                          <TrashIcon />
+                        </button>
+                      </div>
                     </div>
                   )}
 
