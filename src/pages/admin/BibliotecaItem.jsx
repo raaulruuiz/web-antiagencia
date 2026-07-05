@@ -2395,19 +2395,23 @@ export default function BibliotecaItem() {
                     {obMarcaError && <span style={{ fontSize: 11, color: '#f87171' }}>{obMarcaError}</span>}
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Asunto</label>
-                    <input type="text" value={obAsunto} onChange={e => setObAsunto(e.target.value)} placeholder="Asunto del email…"
-                      style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
-                  </div>
+                  {obCategoria === 'email' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Asunto</label>
+                      <input type="text" value={obAsunto} onChange={e => setObAsunto(e.target.value)} placeholder="Asunto del email…"
+                        style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                    </div>
+                  )}
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Adelanto</label>
-                    <input type="text" value={obAdelanto} onChange={e => setObAdelanto(e.target.value)} placeholder="Texto de adelanto…"
-                      style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
-                  </div>
+                  {obCategoria === 'email' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Adelanto</label>
+                      <input type="text" value={obAdelanto} onChange={e => setObAdelanto(e.target.value)} placeholder="Texto de adelanto…"
+                        style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                    </div>
+                  )}
 
-                  {obSubcat !== 'automatizacion' && (
+                  {obCategoria === 'email' && obSubcat !== 'automatizacion' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</label>
                       <input type="date" value={obEnviadoEl} onChange={e => setObEnviadoEl(e.target.value)}
@@ -2473,7 +2477,7 @@ export default function BibliotecaItem() {
               {subcategoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
-                  <Tag colors={SUBCAT_COLORS[subcategoria]} label={subcatLabel(subcategoria)} onRemove={() => { setSubcat(null); patch({ subcategoria: null }); setObMarca(marca || ''); setObAsunto(asunto || ''); setObAdelanto(adelanto || ''); setObEnviadoEl(''); setObTags([]); setMode('onboarding'); setObCategoria(categoria); setObSubcat(null); setObStep('subcategoria'); }} />
+                  <Tag colors={SUBCAT_COLORS[subcategoria]} label={subcatLabel(subcategoria)} onRemove={() => { setSubcat(null); patch({ subcategoria: null }); setObMarca(marca || ''); setObAsunto(asunto || ''); setObAdelanto(adelanto || ''); setObEnviadoEl(enviadoEl || ''); setObTags(item?.tags || []); setMode('onboarding'); setObCategoria(categoria); setObSubcat(null); setObStep('subcategoria'); }} />
                 </div>
               )}
             </div>
@@ -2495,9 +2499,13 @@ export default function BibliotecaItem() {
             <FieldRow label="Marca" savedValue={marca} required
               onSave={v => { setMarca(v); patch({ marca: v }); if (v && !allMarcas.includes(v)) setAllMarcas(p => [...p, v].sort((a,b) => a.localeCompare(b))); }}
               allowEmpty={false} suggestions={allMarcas} />
-            <FieldRow label="Asunto"   savedValue={asunto}   onSave={v => { setAsunto(v);   patch({ asunto: v });   }} placeholder="Asunto del email…" />
-            <FieldRow label="Adelanto" savedValue={adelanto} onSave={v => { setAdelanto(v); patch({ adelanto: v }); }} placeholder="Texto de adelanto…" />
-            {subcategoria !== 'automatizacion' && (
+            {categoria === 'email' && (
+              <FieldRow label="Asunto" savedValue={asunto} onSave={v => { setAsunto(v); patch({ asunto: v }); }} placeholder="Asunto del email…" />
+            )}
+            {categoria === 'email' && (
+              <FieldRow label="Adelanto" savedValue={adelanto} onSave={v => { setAdelanto(v); patch({ adelanto: v }); }} placeholder="Texto de adelanto…" />
+            )}
+            {categoria === 'email' && subcategoria !== 'automatizacion' && (
               <FieldRow label="Enviado el Día" savedValue={enviadoEl} onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }} allowEmpty={false} type="date" />
             )}
           </div>
