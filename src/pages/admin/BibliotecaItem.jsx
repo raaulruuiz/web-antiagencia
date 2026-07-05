@@ -1398,7 +1398,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const handleLinkCrop = async (linkIdx) => {
     if (uploadingLink !== null) return;
     setUploadingLink(linkIdx);
-    try { const urls = await onCropFromEmail(); if (urls?.[0]) addLinkImage(linkIdx, urls[0]); }
+    try { const urls = await onCropFromEmail(); (urls || []).forEach(url => addLinkImage(linkIdx, url)); }
     catch (_) {}
     finally { setUploadingLink(null); }
   };
