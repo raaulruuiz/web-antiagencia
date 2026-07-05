@@ -114,7 +114,7 @@ function EnlacesBlockView({ block, onPreview }) {
           isGrid ? (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
               {(link.images || []).map((img, j) => (
-                <PreviewImg key={j} src={img.url} onPreview={onPreview}
+                <PreviewImg key={j} src={img.url} href={link.url} onPreview={onPreview}
                   wrapperStyle={{ borderRadius: 9 }}
                   imgStyle={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
               ))}
@@ -132,7 +132,7 @@ function EnlacesBlockView({ block, onPreview }) {
               /* Fila: imágenes en horizontal */
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
                 {(link.images || []).map((img, j) => (
-                  <PreviewImg key={j} src={img.url} onPreview={onPreview}
+                  <PreviewImg key={j} src={img.url} href={link.url} onPreview={onPreview}
                     wrapperStyle={{ borderRadius: 9, flexShrink: 0 }}
                     imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                 ))}
@@ -152,7 +152,7 @@ function EnlacesBlockView({ block, onPreview }) {
               /* Columna: imágenes apiladas, url debajo */
               <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {(link.images || []).map((img, j) => (
-                  <PreviewImg key={j} src={img.url} onPreview={onPreview}
+                  <PreviewImg key={j} src={img.url} href={link.url} onPreview={onPreview}
                     wrapperStyle={{ borderRadius: 9, flexShrink: 0 }}
                     imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                 ))}
