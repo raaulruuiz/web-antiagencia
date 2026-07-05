@@ -1948,6 +1948,7 @@ export default function BibliotecaItem() {
       adelanto: obAdelanto.trim(),
       enviado_el: obEnviadoEl || null,
       tags: obTags,
+      blocks_data: { blocks: blocksData, library: blocksLibraryRef.current },
     };
     setSaving(true);
     try {
@@ -1966,6 +1967,12 @@ export default function BibliotecaItem() {
         setAsunto(data.asunto !== null && data.asunto !== undefined ? data.asunto : null);
         setAdelanto(data.adelanto !== null && data.adelanto !== undefined ? data.adelanto : null);
         setEnviadoEl(data.enviado_el !== null && data.enviado_el !== undefined ? data.enviado_el : null);
+        if (data.blocks_data?.blocks) {
+          setBlocksData(data.blocks_data.blocks);
+          const lib = data.blocks_data.library || [];
+          setBlocksLibrary(lib);
+          blocksLibraryRef.current = lib;
+        }
         setMode('display');
         if (marcaTrimmed && !allMarcas.includes(marcaTrimmed)) {
           setAllMarcas(prev => [...prev, marcaTrimmed].sort((a,b) => a.localeCompare(b)));
