@@ -972,20 +972,24 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {block.type === 'imagen_texto' && (() => {
         const items = block.items || (block.images?.length || block.texto ? [{ image: block.images?.[0] || null, texto: block.texto || '' }] : []);
-        const layout = block.it_layout || 'img-text';
-        const isHoriz = layout === 'img-text' || layout === 'text-img';
-        const imgFirst = layout === 'img-text' || layout === 'img-top';
+        const isReversed = block.layout === 'text_image';
         if (!items.length) return <div style={{ padding: '12px 14px' }}><span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span></div>;
         return (
-          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
             {items.map((it, i) => {
               const tc = it.text_color;
-              const imgEl = it.image ? <PreviewImg src={it.image.url} imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} /> : null;
-              const txtEl = it.texto ? <div style={{ flex: 1, maxWidth: isHoriz ? 400 : '100%', padding: '8px 10px', borderRadius: 8, fontSize: 12, lineHeight: 1.6, textAlign: it.text_align || 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: tc ? tc + '22' : 'transparent', border: tc ? `1px solid ${tc}` : '1px solid var(--t-border)', color: tc || 'var(--t-text)' }}>{it.texto}</div> : null;
-              const els = imgFirst ? [imgEl, txtEl] : [txtEl, imgEl];
+              const hasImage = it.image?.url;
+              const hasText  = it.texto?.trim();
               return (
-                <div key={i} style={{ display: 'flex', flexDirection: isHoriz ? 'row' : 'column', gap: 10, alignItems: isHoriz ? 'flex-start' : 'center' }}>
-                  {els.map((el, j) => el && <div key={j} style={{ ...(isHoriz ? {} : { width: '100%', display: 'flex', justifyContent: 'center' }) }}>{el}</div>)}
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: hasImage && hasText ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start', direction: isReversed ? 'rtl' : 'ltr' }}>
+                  {hasImage && (
+                    <div style={{ direction: 'ltr' }}>
+                      <PreviewImg src={it.image.url} imgStyle={{ width: '100%', height: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
+                    </div>
+                  )}
+                  {hasText && (
+                    <div style={{ direction: 'ltr', padding: '10px 12px', borderRadius: 8, fontSize: 12, lineHeight: 1.6, textAlign: it.text_align || 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: tc ? tc + '22' : 'transparent', border: tc ? `1px solid ${tc}` : '1px solid var(--t-border)', color: 'var(--t-text)' }}>{it.texto}</div>
+                  )}
                 </div>
               );
             })}
