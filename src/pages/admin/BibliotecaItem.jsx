@@ -511,10 +511,12 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
 }
 
 // ── Crop overlay (dual mode) ──────────────────────────────────────────────────
+const SAVED_RECT_COLORS = ['#3b82f6','#22c55e','#f97316','#a855f7','#ef4444','#eab308','#06b6d4','#ec4899'];
 function CropOverlay({ imageUrl, onCrop, onCancel }) {
   const [mode, setMode]               = useState('libre');
   const [freeDrag, setFreeDrag]       = useState(null);
   const [freeRect, setFreeRect]       = useState(null);
+  const [savedRects, setSavedRects]   = useState([]); // {display:{x,y,w,h}} — natural coords computed on confirm
   const [cropBox, setCropBox]         = useState(null);
   const [dragHandle, setDragHandle]   = useState(null);
   const [aspectRatio, setAspectRatio] = useState(null);
@@ -584,18 +586,24 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
 
   const handleMouseUp = () => {
     if (mode === 'libre' && freeDrag && freeRect && freeRect.w >= 10 && freeRect.h >= 10) {
-      const b=imgRef.current.getBoundingClientRect();
-      const sx=imgRef.current.naturalWidth/b.width; const sy=imgRef.current.naturalHeight/b.height;
-      onCrop({ x:Math.round(freeRect.x*sx), y:Math.round(freeRect.y*sy), w:Math.round(freeRect.w*sx), h:Math.round(freeRect.h*sy) });
+      setSavedRects(prev => [...prev, { ...freeRect }]);
     }
-    setFreeDrag(null); setDragHandle(null);
+    setFreeDrag(null); setFreeRect(null); setDragHandle(null);
+  };
+
+  const confirmMulti = () => {
+    if (!imgRef.current || savedRects.length === 0) return;
+    const b = imgRef.current.getBoundingClientRect();
+    const sx = imgRef.current.naturalWidth / b.width;
+    const sy = imgRef.current.naturalHeight / b.height;
+    onCrop(savedRects.map(r => ({ x: Math.round(r.x*sx), y: Math.round(r.y*sy), w: Math.round(r.w*sx), h: Math.round(r.h*sy) })));
   };
 
   const confirmResize = () => {
     if (!cropBox || !imgRef.current) return;
     const b=imgRef.current.getBoundingClientRect();
     const sx=imgRef.current.naturalWidth/b.width; const sy=imgRef.current.naturalHeight/b.height;
-    onCrop({ x:Math.round(cropBox.x*sx), y:Math.round(cropBox.y*sy), w:Math.round(cropBox.w*sx), h:Math.round(cropBox.h*sy) });
+    onCrop([{ x:Math.round(cropBox.x*sx), y:Math.round(cropBox.y*sy), w:Math.round(cropBox.w*sx), h:Math.round(cropBox.h*sy) }]);
   };
 
   const startHandleDrag = (e, type) => {
@@ -624,7 +632,7 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
             ))}
           </div>
         )}
-        {mode === 'libre' && <p style={{ color:'var(--t-text-muted)', fontSize:12, margin:0 }}>Arrastra sobre la imagen para seleccionar el área</p>}
+        {mode === 'libre' && <p style={{ color:'var(--t-text-muted)', fontSize:12, margin:0 }}>{savedRects.length === 0 ? 'Arrastra sobre la imagen para seleccionar el área' : `${savedRects.length} recorte${savedRects.length>1?'s':''} seleccionado${savedRects.length>1?'s':''}. Sigue dibujando o confirma.`}</p>}
       </div>
       <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', width:'100%', overflow:'hidden', padding:'0 40px' }}>
         <div style={{ position:'relative', display:'inline-block' }}>
@@ -633,8 +641,15 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
             style={{ maxWidth:'80vw', maxHeight:'62vh', display:'block', cursor:mode==='libre'?'crosshair':'default' }}
             onMouseDown={mode==='libre'?(e)=>{ e.preventDefault(); const b=imgRef.current.getBoundingClientRect(); setFreeDrag({sx:e.clientX-b.left,sy:e.clientY-b.top}); setFreeRect(null); }:undefined}
             draggable={false} />
+          {mode==='libre' && savedRects.map((r, i) => (
+            <div key={i} style={{ position:'absolute', left:r.x, top:r.y, width:r.w, height:r.h, border:`2px solid ${SAVED_RECT_COLORS[i % SAVED_RECT_COLORS.length]}`, boxSizing:'border-box', pointerEvents:'none' }}>
+              <div style={{ position:'absolute', top:-1, left:-1, background:SAVED_RECT_COLORS[i % SAVED_RECT_COLORS.length], color:'white', fontSize:10, fontWeight:700, width:18, height:18, borderRadius:'0 0 6px 0', display:'flex', alignItems:'center', justifyContent:'center' }}>{i+1}</div>
+              <button onClick={e => { e.stopPropagation(); setSavedRects(prev => prev.filter((_,j) => j!==i)); }}
+                style={{ position:'absolute', top:-1, right:-1, background:SAVED_RECT_COLORS[i % SAVED_RECT_COLORS.length], color:'white', border:'none', fontSize:11, width:18, height:18, borderRadius:'0 0 0 6px', cursor:'pointer', lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:'all' }}>×</button>
+            </div>
+          ))}
           {mode==='libre' && freeRect && freeRect.w>0 && freeRect.h>0 && (
-            <div style={{ position:'absolute', border:'2px solid white', boxShadow:'0 0 0 9999px rgba(0,0,0,0.5)', pointerEvents:'none', left:freeRect.x, top:freeRect.y, width:freeRect.w, height:freeRect.h }} />
+            <div style={{ position:'absolute', border:'2px dashed white', boxShadow:'0 0 0 9999px rgba(0,0,0,0.45)', pointerEvents:'none', left:freeRect.x, top:freeRect.y, width:freeRect.w, height:freeRect.h }} />
           )}
           {mode==='ajustar' && cropBox && (
             <div onMouseDown={e => startHandleDrag(e,'move')}
@@ -653,6 +668,11 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
       </div>
       <div style={{ padding:'12px 0 20px', display:'flex', gap:10, alignItems:'center' }}>
         <button onClick={onCancel} style={{ background:'transparent', border:'1px solid var(--t-border-mid)', color:'var(--t-text-placeholder)', borderRadius:999, padding:'7px 18px', fontSize:13, cursor:'pointer' }}>Cancelar</button>
+        {mode==='libre' && savedRects.length > 0 && (
+          <button onClick={confirmMulti} style={{ background:'white', color:'black', border:'none', borderRadius:999, padding:'7px 20px', fontSize:13, fontWeight:600, cursor:'pointer' }}>
+            Confirmar {savedRects.length === 1 ? '1 recorte' : `${savedRects.length} recortes`}
+          </button>
+        )}
         {mode==='ajustar' && cropBox && (
           <button onClick={confirmResize} style={{ background:'white', color:'black', border:'none', borderRadius:999, padding:'7px 20px', fontSize:13, fontWeight:600, cursor:'pointer' }}>Confirmar recorte</button>
         )}
@@ -1095,7 +1115,7 @@ function EBItem({ block, onChange, onDelete, onUpload, onCrop, libImages, nested
 
   const crop = async () => {
     setUploading(true);
-    try { const url = await onCrop(); if (url) onChange({ url }); }
+    try { const urls = await onCrop(); if (urls?.[0]) onChange({ url: urls[0] }); }
     catch (_) {}
     finally { setUploading(false); }
   };
@@ -1344,7 +1364,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const handleItemCrop = async (idx) => {
     if (uploadingItem !== null) return;
     setUploadingItem(idx);
-    try { const url = await onCropFromEmail(); if (url) setItemImage(idx, url); }
+    try { const urls = await onCropFromEmail(); if (urls?.[0]) setItemImage(idx, urls[0]); }
     catch (_) {}
     finally { setUploadingItem(null); }
   };
@@ -1361,7 +1381,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const handleCrop = async () => {
     if (uploading) return;
     setUploading(true);
-    try { const url = await onCropFromEmail(); if (url) addImage(url); }
+    try { const urls = await onCropFromEmail(); (urls || []).forEach(url => addImage(url)); }
     catch (_) {}
     finally { setUploading(false); }
   };
@@ -1378,7 +1398,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const handleLinkCrop = async (linkIdx) => {
     if (uploadingLink !== null) return;
     setUploadingLink(linkIdx);
-    try { const url = await onCropFromEmail(); if (url) addLinkImage(linkIdx, url); }
+    try { const urls = await onCropFromEmail(); if (urls?.[0]) addLinkImage(linkIdx, urls[0]); }
     catch (_) {}
     finally { setUploadingLink(null); }
   };
@@ -2174,30 +2194,33 @@ export default function BibliotecaItem() {
     });
   }, []);
 
-  const handleCropForModal = useCallback((cropRect) => {
+  const handleCropForModal = useCallback((cropRects) => {
     setShowCropForModal(false);
     const img = new Image(); img.crossOrigin = 'anonymous';
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = cropRect.w; canvas.height = cropRect.h;
-      canvas.getContext('2d').drawImage(img, cropRect.x, cropRect.y, cropRect.w, cropRect.h, 0, 0, cropRect.w, cropRect.h);
-      canvas.toBlob(async blob => {
-        if (!blob) { cropForModalResolveRef.current?.reject(new Error('crop failed')); return; }
-        try {
-          const url = await uploadImageForBlock(blob);
-          cropForModalResolveRef.current?.resolve(url);
-        } catch (e) {
-          cropForModalResolveRef.current?.reject(e);
-        } finally {
-          cropForModalResolveRef.current = null;
-        }
-      }, 'image/png');
+      const cropOne = (cropRect) => new Promise(resolve => {
+        const canvas = document.createElement('canvas');
+        canvas.width = cropRect.w; canvas.height = cropRect.h;
+        canvas.getContext('2d').drawImage(img, cropRect.x, cropRect.y, cropRect.w, cropRect.h, 0, 0, cropRect.w, cropRect.h);
+        canvas.toBlob(async blob => {
+          if (!blob) { resolve(null); return; }
+          try { resolve(await uploadImageForBlock(blob)); }
+          catch { resolve(null); }
+        }, 'image/png');
+      });
+      Promise.all(cropRects.map(cropOne)).then(urls => {
+        const valid = urls.filter(Boolean);
+        cropForModalResolveRef.current?.resolve(valid);
+        cropForModalResolveRef.current = null;
+      });
     };
     img.src = item.url;
   }, [item, uploadImageForBlock]);
 
   // Crop handlers (main image)
-  const handleCrop = useCallback((cropRect) => {
+  const handleCrop = useCallback((cropRects) => {
+    const cropRect = Array.isArray(cropRects) ? cropRects[0] : cropRects;
+    if (!cropRect) return;
     setShowCrop(false);
     const img = new Image(); img.crossOrigin = 'anonymous';
     img.onload = () => {
