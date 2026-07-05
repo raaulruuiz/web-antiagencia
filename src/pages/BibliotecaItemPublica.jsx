@@ -212,8 +212,9 @@ export default function BibliotecaItemPublica() {
     </div>
   );
 
-  const hasRightContent = item.categoria || item.subcategoria || item.marca !== null || item.asunto !== null || item.adelanto !== null || item.enviado_el;
+  const hasRightContent = item.categoria || item.subcategoria || item.marca !== null || item.asunto !== null || item.adelanto !== null || item.enviado_el || item.ficha_url || item.fecha_analisis;
   const enviadoDisplay  = item.enviado_el ? new Date(item.enviado_el + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
+  const fechaAnalisisDisplay = item.fecha_analisis ? new Date(item.fecha_analisis + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
   const resolvedTags    = (item.tags || []).map(tid => allTags.find(t => t.id === tid)).filter(Boolean);
   const blocksData      = item.blocks_data && item.blocks_data.blocks ? item.blocks_data : { blocks: [] };
 
@@ -236,7 +237,7 @@ export default function BibliotecaItemPublica() {
         {/* Two equal columns */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'flex-start' }}>
 
-          {/* Left: image */}
+          {/* Left: image (screenshot) */}
           <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid var(--t-border)' }}>
             <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />
           </div>
@@ -277,17 +278,36 @@ export default function BibliotecaItemPublica() {
                 </div>
               )}
 
-              {/* Fields */}
+              {/* Fields — email */}
               <Field label="Marca"          value={item.marca} />
-              <Field label="Asunto"         value={item.asunto} />
-              <Field label="Adelanto"       value={item.adelanto} />
-              <Field label="Enviado el Día" value={enviadoDisplay} />
+              {item.categoria === 'email' && <Field label="Asunto"         value={item.asunto} />}
+              {item.categoria === 'email' && <Field label="Adelanto"       value={item.adelanto} />}
+              {item.categoria === 'email' && <Field label="Enviado el Día" value={enviadoDisplay} />}
+              {/* Fields — ficha */}
+              {item.categoria === 'ficha' && item.ficha_url && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>URL</span>
+                  <a href={item.ficha_url} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 13, color: '#a5b4fc', textDecoration: 'none', wordBreak: 'break-all' }}
+                    onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                    onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                    {item.ficha_url}
+                  </a>
+                </div>
+              )}
+              {item.categoria === 'ficha' && fechaAnalisisDisplay && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Fecha de Análisis</span>
+                  <span style={{ fontSize: 13, color: 'var(--t-text)' }}>{fechaAnalisisDisplay}</span>
+                  <span style={{ fontSize: 11, color: 'var(--t-text-subtle)', fontStyle: 'italic' }}>* La página puede haber sido editada en fechas posteriores</span>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Blocks — view only, only for email */}
-        {item.categoria === 'email' && blocksData.blocks.length > 0 && (
+        {/* Blocks — view only */}
+        {(item.categoria === 'email' || item.categoria === 'ficha') && blocksData.blocks.length > 0 && (
           <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {blocksData.blocks.map(block => (
               <BlockView key={block.id} block={block} />

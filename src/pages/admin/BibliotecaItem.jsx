@@ -1921,7 +1921,7 @@ export default function BibliotecaItem() {
         setAsunto(data.asunto ?? null);
         setAdelanto(data.adelanto ?? null);
         setEnviadoEl(data.enviado_el ?? null);
-        setItemUrl(data.url ?? null);
+        setItemUrl(data.ficha_url ?? null);
         setFechaAnalisis(data.fecha_analisis ?? null);
         setBlocksData(data.blocks_data?.blocks || []);
         const lib = data.blocks_data?.library || [];
@@ -1973,7 +1973,7 @@ export default function BibliotecaItem() {
       const data = await res.json();
       if (obCategoria === 'ficha') {
         if (data.marca)          setObMarca(data.marca);
-        if (data.url)            setObUrl(data.url);
+        if (data.ficha_url)      setObUrl(data.ficha_url);
         if (data.fecha_analisis) setObFechaAnalisis(data.fecha_analisis);
       } else {
         if (data.marca)      setObMarca(data.marca);
@@ -2001,7 +2001,7 @@ export default function BibliotecaItem() {
       asunto: obCategoria === 'email' ? obAsunto.trim() : null,
       adelanto: obCategoria === 'email' ? obAdelanto.trim() : null,
       enviado_el: obCategoria === 'email' ? (obEnviadoEl || null) : null,
-      url: obCategoria === 'ficha' ? (urlTrimmed || null) : null,
+      ficha_url: obCategoria === 'ficha' ? (urlTrimmed || null) : null,
       fecha_analisis: obCategoria === 'ficha' ? (obFechaAnalisis || null) : null,
       tags: obTags,
       blocks_data: { blocks: blocksData, library: blocksLibraryRef.current },
@@ -2023,7 +2023,7 @@ export default function BibliotecaItem() {
         setAsunto(data.asunto ?? null);
         setAdelanto(data.adelanto ?? null);
         setEnviadoEl(data.enviado_el ?? null);
-        setItemUrl(data.url ?? null);
+        setItemUrl(data.ficha_url ?? null);
         setFechaAnalisis(data.fecha_analisis ?? null);
         if (data.blocks_data?.blocks) {
           setBlocksData(data.blocks_data.blocks);
@@ -2561,7 +2561,7 @@ export default function BibliotecaItem() {
               {categoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
-                  <Tag colors={CAT_COLORS[categoria]} label={catLabel(categoria)} onRemove={() => { setCategoria(null); setSubcat(null); patch({ categoria: null, subcategoria: null, url: null, fecha_analisis: null }); setObMarca(''); setObUrl(''); setObFechaAnalisis(''); setObTags([]); setMode('onboarding'); setObStep('categoria'); setObCategoria(null); setObSubcat(null); }} />
+                  <Tag colors={CAT_COLORS[categoria]} label={catLabel(categoria)} onRemove={() => { setCategoria(null); setSubcat(null); patch({ categoria: null, subcategoria: null, ficha_url: null, fecha_analisis: null }); setObMarca(''); setObUrl(''); setObFechaAnalisis(''); setObTags([]); setMode('onboarding'); setObStep('categoria'); setObCategoria(null); setObSubcat(null); }} />
                 </div>
               )}
               {subcategoria && (
@@ -2600,7 +2600,7 @@ export default function BibliotecaItem() {
               <FieldRow label="Enviado el Día" savedValue={enviadoEl} onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }} allowEmpty={false} type="date" />
             )}
             {categoria === 'ficha' && (
-              <FieldRow label="URL" savedValue={itemUrl} required onSave={v => { setItemUrl(v); patch({ url: v }); }} placeholder="https://dominio.com" allowEmpty={false}
+              <FieldRow label="URL" savedValue={itemUrl} required onSave={v => { setItemUrl(v); patch({ ficha_url: v }); }} placeholder="https://dominio.com" allowEmpty={false}
                 validate={v => isValidHttpUrl(v) ? null : 'URL no válida. Ej: https://dominio.com'} />
             )}
             {categoria === 'ficha' && (
