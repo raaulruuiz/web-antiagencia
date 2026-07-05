@@ -33,6 +33,57 @@ function Field({ label, value }) {
   );
 }
 
+// ── Lightbox ──────────────────────────────────────────────────────────────────
+
+function Lightbox({ src, onClose }) {
+  useEffect(() => {
+    const h = e => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [onClose]);
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, cursor: 'zoom-out' }}>
+      <img src={src} alt="" onClick={e => e.stopPropagation()} style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 10, objectFit: 'contain', display: 'block' }} />
+    </div>
+  );
+}
+
+function MainImgContainer({ src, onPreview }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div style={{ position: 'relative', height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid var(--t-border)' }}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}>
+      <img src={src} alt="" style={{ width: '100%', display: 'block' }} />
+      {hov && (
+        <div style={{ position: 'sticky', top: 8, marginLeft: 'auto', width: 'fit-content', display: 'block', zIndex: 10, height: 0, pointerEvents: 'none' }}>
+          <button onClick={onPreview} style={{ pointerEvents: 'all', position: 'relative', top: 0, right: 8, float: 'right', background: 'rgba(0,0,0,0.6)', border: 'none', color: 'white', borderRadius: '50%', width: 36, height: 36, cursor: 'zoom-in', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PublicImg({ src, imgStyle, wrapperStyle, onPreview }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div style={{ position: 'relative', ...wrapperStyle }}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}>
+      <img src={src} alt="" style={imgStyle} />
+      {hov && (
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', borderRadius: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={() => onPreview(src)} style={{ background: 'rgba(0,0,0,0.6)', border: 'none', color: 'white', borderRadius: '50%', width: 36, height: 36, cursor: 'zoom-in', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Block renderers (view-only) ───────────────────────────────────────────────
 
 function BlockHeader({ title, subtitle }) {
@@ -45,7 +96,7 @@ function BlockHeader({ title, subtitle }) {
   );
 }
 
-function EnlacesBlockView({ block }) {
+function EnlacesBlockView({ block, onPreview }) {
   // Support both new structure (links[]) and legacy (url + images)
   const links = block.links?.length
     ? block.links
@@ -70,9 +121,9 @@ function EnlacesBlockView({ block }) {
           isGrid ? (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
               {(link.images || []).map((img, j) => (
-                <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
-                  <img src={img.url} alt="" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
-                </a>
+                <PublicImg key={j} src={img.url} onPreview={onPreview}
+                  wrapperStyle={{ borderRadius: 9 }}
+                  imgStyle={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
               ))}
               {link.url && (
                 <a href={link.url} target="_blank" rel="noopener noreferrer"
@@ -88,9 +139,9 @@ function EnlacesBlockView({ block }) {
               /* Fila: imágenes en horizontal */
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
                 {(link.images || []).map((img, j) => (
-                  <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-                    <img src={img.url} alt="" style={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
-                  </a>
+                  <PublicImg key={j} src={img.url} onPreview={onPreview}
+                    wrapperStyle={{ borderRadius: 9, flexShrink: 0 }}
+                    imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                 ))}
                 {link.url && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
@@ -108,9 +159,9 @@ function EnlacesBlockView({ block }) {
               /* Columna: imágenes apiladas, url debajo */
               <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {(link.images || []).map((img, j) => (
-                  <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-                    <img src={img.url} alt="" style={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
-                  </a>
+                  <PublicImg key={j} src={img.url} onPreview={onPreview}
+                    wrapperStyle={{ borderRadius: 9, flexShrink: 0 }}
+                    imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                 ))}
                 {link.url && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -132,7 +183,7 @@ function EnlacesBlockView({ block }) {
   );
 }
 
-function ImagenBlockView({ block }) {
+function ImagenBlockView({ block, onPreview }) {
   const images = block.images || [];
   if (!images.length) return null;
   const layout = block.images_layout;
@@ -143,7 +194,9 @@ function ImagenBlockView({ block }) {
         <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
         <div style={{ display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto' }}>
           {images.map((img, i) => (
-            <img key={i} src={img.url || img} alt="" style={{ height: 180, width: 'auto', borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)', flexShrink: 0, display: 'block' }} />
+            <PublicImg key={i} src={img.url || img} onPreview={onPreview}
+              wrapperStyle={{ borderRadius: 9, flexShrink: 0 }}
+              imgStyle={{ height: 180, width: 'auto', borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)', display: 'block' }} />
           ))}
         </div>
       </div>
@@ -156,7 +209,9 @@ function ImagenBlockView({ block }) {
         <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
           {images.map((img, i) => (
-            <img key={i} src={img.url || img} alt="" style={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
+            <PublicImg key={i} src={img.url || img} onPreview={onPreview}
+              wrapperStyle={{ borderRadius: 9 }}
+              imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
           ))}
         </div>
       </div>
@@ -169,14 +224,16 @@ function ImagenBlockView({ block }) {
       <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {images.map((img, i) => (
-          <img key={i} src={img.url || img} alt="" style={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)', display: 'block' }} />
+          <PublicImg key={i} src={img.url || img} onPreview={onPreview}
+            wrapperStyle={{ borderRadius: 9 }}
+            imgStyle={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)', display: 'block' }} />
         ))}
       </div>
     </div>
   );
 }
 
-function ImagenTextoBlockView({ block }) {
+function ImagenTextoBlockView({ block, onPreview }) {
   const items = block.items || [];
   if (!items.length) return null;
   const layout   = block.it_layout || 'img-text';
@@ -192,7 +249,9 @@ function ImagenTextoBlockView({ block }) {
           const hasImage = it.image?.url;
           const hasText  = it.texto?.trim();
           const imgEl = hasImage ? (
-            <img src={it.image.url} alt="" style={{ width: '100%', borderRadius: 10, display: 'block' }} />
+            <PublicImg src={it.image.url} onPreview={onPreview}
+              wrapperStyle={{ borderRadius: 10 }}
+              imgStyle={{ width: '100%', borderRadius: 10, display: 'block' }} />
           ) : null;
           const txtEl = hasText ? (
             <div style={{ background: color + '18', border: `1px solid ${color}44`, borderRadius: 10, padding: '14px 16px' }}>
@@ -213,17 +272,20 @@ function ImagenTextoBlockView({ block }) {
   );
 }
 
-function renderEBBlock(eb, i, colMode) {
+function renderEBBlock(eb, i, colMode, onPreview) {
   return (
     <div key={i}>
       {eb.type === 'text' && eb.content && (() => {
         const p = <p style={{ margin: 0, fontSize: eb.size || 14, fontWeight: eb.bold ? 700 : 400, textAlign: eb.align || 'left', color: '#1a1a1a', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{eb.content}</p>;
         return eb.href ? <a href={eb.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>{p}</a> : p;
       })()}
-      {eb.type === 'image' && eb.url && (() => {
-        const img = <img src={eb.url} alt="" style={{ display: 'block', maxWidth: '100%', maxHeight: colMode ? 120 : 200, objectFit: 'contain', borderRadius: 6, margin: '0 auto' }} />;
-        return <div style={{ textAlign: 'center' }}>{eb.href ? <a href={eb.href} target="_blank" rel="noopener noreferrer">{img}</a> : img}</div>;
-      })()}
+      {eb.type === 'image' && eb.url && (
+        <div style={{ textAlign: 'center' }}>
+          <PublicImg src={eb.url} onPreview={onPreview}
+            wrapperStyle={{ display: 'inline-block', borderRadius: 6 }}
+            imgStyle={{ display: 'block', maxWidth: '100%', maxHeight: colMode ? 120 : 200, objectFit: 'contain', borderRadius: 6, margin: '0 auto' }} />
+        </div>
+      )}
       {eb.type === 'button' && eb.text && (
         <div style={{ textAlign: 'center' }}>
           <a href={eb.href || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', background: '#6366f1', color: 'white', borderRadius: 6, padding: '8px 20px', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>{eb.text}</a>
@@ -231,15 +293,15 @@ function renderEBBlock(eb, i, colMode) {
       )}
       {eb.type === 'columns' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{(eb.left || []).map((sub, j) => renderEBBlock(sub, j, true))}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{(eb.right || []).map((sub, j) => renderEBBlock(sub, j, true))}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{(eb.left || []).map((sub, j) => renderEBBlock(sub, j, true, onPreview))}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{(eb.right || []).map((sub, j) => renderEBBlock(sub, j, true, onPreview))}</div>
         </div>
       )}
     </div>
   );
 }
 
-function CorreccionBlockView({ block }) {
+function CorreccionBlockView({ block, onPreview }) {
   const { theme } = useTheme();
   const emailBlocks = block.email_blocks || [];
   if (!emailBlocks.length) return null;
@@ -251,20 +313,20 @@ function CorreccionBlockView({ block }) {
       <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
       <div style={{ background: outerBg, borderRadius: 12, padding: '20px', display: 'flex', justifyContent: 'center' }}>
         <div style={{ background: emailBg, borderRadius: 8, padding: '20px 24px', width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {emailBlocks.map((eb, i) => renderEBBlock(eb, i, false))}
+          {emailBlocks.map((eb, i) => renderEBBlock(eb, i, false, onPreview))}
         </div>
       </div>
     </div>
   );
 }
 
-function BlockView({ block }) {
+function BlockView({ block, onPreview }) {
   const wrapStyle = { border: '1px solid var(--t-border-s)', borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
   switch (block.type) {
-    case 'enlaces':      return <div style={wrapStyle}><EnlacesBlockView block={block} /></div>;
-    case 'imagen':       return <div style={wrapStyle}><ImagenBlockView block={block} /></div>;
-    case 'imagen_texto': return <div style={wrapStyle}><ImagenTextoBlockView block={block} /></div>;
-    case 'correccion':   return <div style={wrapStyle}><CorreccionBlockView block={block} /></div>;
+    case 'enlaces':      return <div style={wrapStyle}><EnlacesBlockView block={block} onPreview={onPreview} /></div>;
+    case 'imagen':       return <div style={wrapStyle}><ImagenBlockView block={block} onPreview={onPreview} /></div>;
+    case 'imagen_texto': return <div style={wrapStyle}><ImagenTextoBlockView block={block} onPreview={onPreview} /></div>;
+    case 'correccion':   return <div style={wrapStyle}><CorreccionBlockView block={block} onPreview={onPreview} /></div>;
     default: return null;
   }
 }
@@ -279,6 +341,7 @@ export default function BibliotecaItemPublica() {
   const [allTags, setAllTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
+  const [lightbox, setLightbox] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -316,6 +379,7 @@ export default function BibliotecaItemPublica() {
 
   return (
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
+      {lightbox && <Lightbox src={lightbox} onClose={() => setLightbox(null)} />}
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
@@ -339,9 +403,7 @@ export default function BibliotecaItemPublica() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'flex-start' }}>
 
           {/* Left: image (screenshot) */}
-          <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid var(--t-border)' }}>
-            <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />
-          </div>
+          <MainImgContainer src={item.url} onPreview={() => setLightbox(item.url)} />
 
           {/* Right: metadata */}
           {hasRightContent && (
@@ -411,7 +473,7 @@ export default function BibliotecaItemPublica() {
         {(item.categoria === 'email' || item.categoria === 'ficha') && blocksData.blocks.length > 0 && (
           <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {blocksData.blocks.map(block => (
-              <BlockView key={block.id} block={block} />
+              <BlockView key={block.id} block={block} onPreview={setLightbox} />
             ))}
           </div>
         )}
