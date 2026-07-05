@@ -792,6 +792,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
   const imgs = block.images || [];
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [lightbox, setLightbox] = useState(null);
+  const { theme } = useTheme();
 
   return (
     <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border-s)', borderRadius: 10, overflow: 'hidden' }}>
@@ -957,42 +958,43 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {block.type === 'correccion' && (
         <div style={{ padding: '10px 12px' }}>
-          {(block.email_blocks || []).length > 0 ? (
-            <div style={{ maxHeight: 340, overflow: 'hidden', background: '#e8e8e8', borderRadius: 8, padding: '10px 8px' }}>
-              <div style={{ background: '#ffffff', maxWidth: 520, margin: '0 auto', borderRadius: 4, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {(block.email_blocks || []).slice(0, 6).map((eb, i) => (
-                  <div key={i}>
-                    {eb.type === 'text' && eb.content && (
-                      <p style={{ margin: 0, fontSize: eb.size || 14, fontWeight: eb.bold ? 700 : 400, textAlign: eb.align || 'left', color: '#1a1a1a', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{eb.content}</p>
-                    )}
-                    {eb.type === 'image' && eb.url && (
-                      <PreviewImg src={eb.url} imgStyle={{ display: 'block', maxWidth: '100%', maxHeight: 160, objectFit: 'contain', borderRadius: 6, margin: '0 auto' }} wrapperStyle={{ textAlign: 'center' }} onPreview={setLightbox} />
-                    )}
-                    {eb.type === 'button' && eb.text && (
-                      <div style={{ textAlign: 'center', padding: '4px 0' }}>
-                        <span style={{ display: 'inline-block', background: eb.bg || '#3b82f6', color: eb.color || '#ffffff', borderRadius: 6, padding: '7px 20px', fontSize: 13, fontWeight: 600 }}>{eb.text}</span>
-                      </div>
-                    )}
-                    {eb.type === 'columns' && (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                        {['left','right'].map(side => (
-                          <div key={side} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            {(eb[side] || []).slice(0, 2).map((sub, j) => (
-                              <div key={j}>
-                                {sub.type === 'text' && sub.content && <p style={{ margin: 0, fontSize: sub.size || 12, fontWeight: sub.bold ? 700 : 400, textAlign: sub.align || 'left', color: '#1a1a1a', whiteSpace: 'pre-wrap' }}>{sub.content}</p>}
-                                {sub.type === 'image' && sub.url && <img src={sub.url} alt="" style={{ display: 'block', maxWidth: '100%', maxHeight: 90, objectFit: 'contain', borderRadius: 4, margin: '0 auto' }} />}
-                                {sub.type === 'button' && sub.text && <div style={{ textAlign: 'center' }}><span style={{ display: 'inline-block', background: sub.bg || '#3b82f6', color: sub.color || '#ffffff', borderRadius: 4, padding: '4px 12px', fontSize: 11, fontWeight: 600 }}>{sub.text}</span></div>}
-                              </div>
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+          {(block.email_blocks || []).length > 0 ? (() => {
+            const outerBg = theme === 'dark' ? '#1e1e1e' : '#e0e0e0';
+            const emailBg = block.email_bg || '#ffffff';
+            const renderEBBlock = (eb, i, colMode) => (
+              <div key={i}>
+                {eb.type === 'text' && eb.content && (() => {
+                  const p = <p style={{ margin: 0, fontSize: eb.size || 14, fontWeight: eb.bold ? 700 : 400, textAlign: eb.align || 'left', color: '#1a1a1a', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{eb.content}</p>;
+                  return eb.href ? <a href={eb.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>{p}</a> : p;
+                })()}
+                {eb.type === 'image' && eb.url && (() => {
+                  const img = <img src={eb.url} alt="" style={{ display: 'block', maxWidth: '100%', maxHeight: colMode ? 120 : 200, objectFit: 'contain', borderRadius: 6, margin: '0 auto' }} />;
+                  return <div style={{ textAlign: 'center' }}>{eb.href ? <a href={eb.href} target="_blank" rel="noopener noreferrer">{img}</a> : img}</div>;
+                })()}
+                {eb.type === 'button' && eb.text && (
+                  <div style={{ textAlign: 'center', padding: '4px 0' }}>
+                    <span style={{ display: 'inline-block', background: eb.bg || '#3b82f6', color: eb.color || '#ffffff', borderRadius: 6, padding: '7px 20px', fontSize: 13, fontWeight: 600 }}>{eb.text}</span>
                   </div>
-                ))}
+                )}
+                {eb.type === 'columns' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    {['left','right'].map(side => (
+                      <div key={side} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {(eb[side] || []).map((sub, j) => renderEBBlock(sub, j, true))}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ) : block.nota ? (
+            );
+            return (
+              <div style={{ background: outerBg, borderRadius: 8, padding: '10px 8px', maxHeight: 420, overflowY: 'auto' }}>
+                <div style={{ background: emailBg, maxWidth: 520, margin: '0 auto', borderRadius: 4, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {(block.email_blocks || []).map((eb, i) => renderEBBlock(eb, i, false))}
+                </div>
+              </div>
+            );
+          })() : block.nota ? (
             <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.nota}</p>
           ) : (
             <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span>
@@ -1122,16 +1124,22 @@ function EBItem({ block, onChange, onDelete, onUpload, onCrop, libImages, nested
           <textarea value={block.content || ''} onChange={e => onChange({ content: e.target.value })}
             rows={3} placeholder="Escribe aquí…"
             style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 7, padding: '7px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', textAlign: block.align || 'left', fontWeight: block.bold ? 700 : 400 }} />
+          <input value={block.href || ''} onChange={e => onChange({ href: e.target.value })} placeholder="🔗 Link (opcional)"
+            style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border)', borderRadius: 6, padding: '5px 9px', fontSize: 11, color: 'var(--t-text-subtle)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box', marginTop: 4 }} />
         </div>
       )}
 
       {block.type === 'image' && (
         <div>
           {block.url ? (
-            <div style={{ position: 'relative', display: 'inline-block' }}>
-              <img src={block.url} alt="" style={{ maxWidth: '100%', maxHeight: 160, borderRadius: 7, border: '1px solid var(--t-border)', display: 'block' }} />
-              <button onClick={() => onChange({ url: '' })}
-                style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.7)', border: 'none', color: 'white', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', fontSize: 13, lineHeight: 1 }}>×</button>
+            <div>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <img src={block.url} alt="" style={{ maxWidth: '100%', maxHeight: 160, borderRadius: 7, border: '1px solid var(--t-border)', display: 'block' }} />
+                <button onClick={() => onChange({ url: '' })}
+                  style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.7)', border: 'none', color: 'white', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', fontSize: 13, lineHeight: 1 }}>×</button>
+              </div>
+              <input value={block.href || ''} onChange={e => onChange({ href: e.target.value })} placeholder="🔗 Link al hacer clic (opcional)"
+                style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border)', borderRadius: 6, padding: '5px 9px', fontSize: 11, color: 'var(--t-text-subtle)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box', marginTop: 6 }} />
             </div>
           ) : (
             <>
@@ -1768,7 +1776,14 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 
         {draft.type === 'correccion' && (
           <div>
-            <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Email de corrección</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Email de corrección</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Fondo email</span>
+                <input type="color" value={draft.email_bg || '#ffffff'} onChange={e => update('email_bg', e.target.value)}
+                  style={{ width: 26, height: 22, borderRadius: 4, border: '1px solid var(--t-border-mid)', cursor: 'pointer', padding: 1 }} />
+              </div>
+            </div>
             <EBCanvas
               blocks={draft.email_blocks || []}
               onChange={newBlocks => update('email_blocks', newBlocks)}
