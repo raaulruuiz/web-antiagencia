@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BibliotecaCardMeta from '@/components/BibliotecaCardMeta';
+import { useTheme } from '@/lib/ThemeContext';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
@@ -86,6 +87,7 @@ function DateRangePicker({ from, to, onChange }) {
 
 export default function BibliotecaPublica() {
   const navigate = useNavigate();
+  const { theme, toggle } = useTheme();
   const [items, setItems]     = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -138,7 +140,7 @@ export default function BibliotecaPublica() {
   const inputStyle = { background: 'transparent', border: '1px solid #3f3f46', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'white', outline: 'none', colorScheme: 'dark', cursor: 'pointer' };
 
   return (
-    <div style={{ ...s, backgroundColor: '#0d0d0d', color: 'white', minHeight: '100vh', padding: '32px 24px' }}>
+    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
         {/* Header */}
@@ -148,6 +150,12 @@ export default function BibliotecaPublica() {
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Anti-Biblioteca</h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Theme toggle */}
+            <button onClick={toggle}
+              title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+              style={{ display: 'flex', alignItems: 'center', padding: '6px 10px', borderRadius: 8, fontSize: 14, background: 'transparent', border: '1px solid #3f3f46', color: 'var(--t-text-muted)', cursor: 'pointer', lineHeight: 1 }}>
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
             {/* Search */}
             <button onClick={() => { setShowSearch(s => !s); setShowFilters(false); }}
               style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: showSearch ? '#1a1a1a' : 'transparent' }}>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTheme } from '@/lib/ThemeContext';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
@@ -33,6 +34,16 @@ function Field({ label, value }) {
 }
 
 // ── Block renderers (view-only) ───────────────────────────────────────────────
+
+function BlockHeader({ title, subtitle }) {
+  if (!title && !subtitle) return null;
+  return (
+    <div style={{ marginBottom: 12 }}>
+      {title && <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', margin: '0 0 4px' }}>{title}</h2>}
+      {subtitle && <p style={{ fontSize: 13, color: 'var(--t-text-muted)', margin: 0, lineHeight: 1.5 }}>{subtitle}</p>}
+    </div>
+  );
+}
 
 function EnlacesBlockView({ block }) {
   // Support both new structure (links[]) and legacy (url + images)
@@ -179,6 +190,7 @@ function BlockView({ block }) {
 export default function BibliotecaItemPublica() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { theme, toggle } = useTheme();
   const [item, setItem]       = useState(null);
   const [allTags, setAllTags] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -197,14 +209,14 @@ export default function BibliotecaItemPublica() {
   const s = { fontFamily: 'system-ui, sans-serif' };
 
   if (loading) return (
-    <div style={{ ...s, background: 'var(--t-bg)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: 24, height: 24, border: '2px solid var(--t-border)', borderTopColor: 'var(--t-text)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   );
 
   if (error) return (
-    <div style={{ ...s, background: 'var(--t-bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
       <p style={{ color: '#f87171', fontSize: 14 }}>{error}</p>
       <button onClick={() => navigate('/anti-biblioteca')} style={{ background: 'transparent', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-placeholder)', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer' }}>
         ← Anti-Biblioteca
@@ -219,18 +231,23 @@ export default function BibliotecaItemPublica() {
   const blocksData      = item.blocks_data && item.blocks_data.blocks ? item.blocks_data : { blocks: [] };
 
   return (
-    <div style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
+    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
-        {/* Back button */}
-        <div style={{ marginBottom: 24 }}>
+        {/* Back button + theme toggle */}
+        <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button onClick={() => navigate('/anti-biblioteca')}
             style={{ background: 'transparent', border: '1px solid var(--t-border)', color: 'var(--t-text-muted)', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border-muted)'; e.currentTarget.style.color = 'var(--t-text)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             Anti-Biblioteca
+          </button>
+          <button onClick={toggle}
+            title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            style={{ background: 'transparent', border: '1px solid var(--t-border)', color: 'var(--t-text-muted)', borderRadius: 8, padding: '6px 10px', fontSize: 14, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>
+            {theme === 'dark' ? '☀️' : '🌙'}
           </button>
         </div>
 
