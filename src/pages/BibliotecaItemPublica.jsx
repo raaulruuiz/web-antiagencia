@@ -68,7 +68,7 @@ function EnlacesBlockView({ block }) {
       }>
         {links.map((link, i) => (
           isGrid ? (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
               {(link.images || []).map((img, j) => (
                 <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
                   <img src={img.url} alt="" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
@@ -83,35 +83,19 @@ function EnlacesBlockView({ block }) {
                 </a>
               )}
             </div>
-          ) : isFila ? (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-              {(link.images || []).map((img, j) => (
-                <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
-                  <img src={img.url} alt="" style={{ height: 160, width: 'auto', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
-                </a>
-              ))}
-              {link.url && (
-                <a href={link.url} target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize: 12, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                  onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                  onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                  {link.url}
-                </a>
-              )}
-            </div>
           ) : (
-            /* columna (default): images full-width stacked, url below */
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            /* columna y fila: imágenes en fila horizontal (height 160), url a la derecha */
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
               {(link.images || []).map((img, j) => (
-                <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
-                  <img src={img.url} alt="" style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
+                <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
+                  <img src={img.url} alt="" style={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                 </a>
               ))}
               {link.url && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
                   <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
                   <a href={link.url} target="_blank" rel="noopener noreferrer"
-                    style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
+                    style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
                     onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
                     onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
                     {link.url}
