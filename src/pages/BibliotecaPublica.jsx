@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BibliotecaCardMeta from '@/components/BibliotecaCardMeta';
 import { useTheme } from '@/lib/ThemeContext';
+import MailerLitePopup from '@/components/MailerLitePopup';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
@@ -141,6 +142,7 @@ export default function BibliotecaPublica() {
 
   return (
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
+      <MailerLitePopup />
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
         {/* Header */}

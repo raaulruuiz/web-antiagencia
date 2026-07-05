@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
+import MailerLitePopup from '@/components/MailerLitePopup';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
@@ -374,6 +375,7 @@ export default function BibliotecaItemPublica() {
 
   return (
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
+      <MailerLitePopup />
       {showModal && item && <ImageModal imageUrl={item.url} alt={item.filename} onClose={() => setShowModal(false)} />}
       {lightbox && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
