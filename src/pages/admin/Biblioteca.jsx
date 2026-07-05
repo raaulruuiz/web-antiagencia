@@ -306,6 +306,8 @@ export default function Biblioteca() {
   const bulkSetVisibilidad = useCallback(async (publico) => {
     const ids = [...selected];
     setConfirmVis(null);
+    setSelecting(false);
+    setSelected(new Set());
     setItems(prev => prev.map(i => ids.includes(i.id) ? { ...i, publico } : i));
     try {
       const token = await getToken();
@@ -492,8 +494,8 @@ export default function Biblioteca() {
                   <img src={item.url} alt={item.filename} className="w-full h-full object-cover" loading="lazy" />
 
                   {/* Permanent badge — visible at a glance when item is hidden */}
-                  {item.publico === false && !selecting && (
-                    <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(234,88,12,0.9)', borderRadius: 6, padding: '3px 5px', display: 'flex', alignItems: 'center', backdropFilter: 'blur(4px)', pointerEvents: 'none' }}>
+                  {item.publico === false && (
+                    <div style={{ position: 'absolute', bottom: 8, left: 8, background: 'rgba(234,88,12,0.9)', borderRadius: 6, padding: '3px 5px', display: 'flex', alignItems: 'center', backdropFilter: 'blur(4px)', pointerEvents: 'none' }}>
                       <EyeOffIcon />
                     </div>
                   )}
