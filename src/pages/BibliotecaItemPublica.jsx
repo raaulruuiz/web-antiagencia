@@ -4,6 +4,90 @@ import { useTheme } from '@/lib/ThemeContext';
 import MailerLitePopup from '@/components/MailerLitePopup';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
+const SESSION_KEY = 'biblioteca_acceso_email';
+
+function Gate({ onAcceso }) {
+  const [email, setEmail] = useState('');
+  const [estado, setEstado] = useState('idle'); // idle | cargando | error
+
+  async function verificar(e) {
+    e.preventDefault();
+    if (!email) return;
+    setEstado('cargando');
+    try {
+      const res = await fetch(`${API_BASE}/api/verificar-acceso-q3`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (data.acceso) {
+        sessionStorage.setItem(SESSION_KEY, email);
+        onAcceso();
+      } else {
+        setEstado('error');
+      }
+    } catch {
+      setEstado('error');
+    }
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      background: 'rgba(0,0,0,0.7)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '16px',
+    }}>
+      <div style={{
+        background: '#fff', borderRadius: '8px', padding: '40px 32px',
+        maxWidth: '420px', width: '100%',
+        fontFamily: "'Georgia', serif", textAlign: 'center',
+      }}>
+        <h2 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '8px', color: '#111' }}>
+          Accede a la Anti-Biblioteca
+        </h2>
+        <p style={{ fontSize: '14px', color: '#555', marginBottom: '28px', lineHeight: '1.6' }}>
+          Accede con el email con el que te registraste.
+        </p>
+        <form onSubmit={verificar}>
+          <input
+            type="email"
+            placeholder="tu@email.com"
+            value={email}
+            onChange={e => { setEmail(e.target.value); setEstado('idle'); }}
+            required
+            style={{
+              width: '100%', padding: '12px 14px', fontSize: '15px',
+              border: '1px solid #ccc', borderRadius: '4px',
+              marginBottom: '12px', boxSizing: 'border-box',
+              fontFamily: "'Georgia', serif", color: '#333',
+            }}
+          />
+          {estado === 'error' && (
+            <p style={{ color: '#cc0000', fontSize: '13px', marginBottom: '12px' }}>
+              Este email no tiene acceso. Si crees que es un error, escríbenos.
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={estado === 'cargando'}
+            style={{
+              width: '100%', padding: '13px',
+              backgroundColor: estado === 'cargando' ? '#999' : '#0067FD',
+              color: '#fff', border: 'none', borderRadius: '4px',
+              fontSize: '15px', fontWeight: '700',
+              cursor: estado === 'cargando' ? 'default' : 'pointer',
+              fontFamily: "'Georgia', serif",
+            }}
+          >
+            {estado === 'cargando' ? 'Verificando...' : 'Acceder'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 const CATEGORIAS = { email: 'Email', ficha: 'Ficha de Producto' };
 const SUBCATEGORIAS = { automatizacion: 'Automatización', campana: 'Campaña' };
@@ -338,6 +422,7 @@ export default function BibliotecaItemPublica() {
   const [lightbox, setLightbox] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [imageHover, setImageHover] = useState(false);
+  const [acceso, setAcceso] = useState(() => !!sessionStorage.getItem(SESSION_KEY));
 
   useEffect(() => {
     Promise.all([
@@ -375,6 +460,7 @@ export default function BibliotecaItemPublica() {
 
   return (
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
+      {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
       <MailerLitePopup />
       {showModal && item && <ImageModal imageUrl={item.url} alt={item.filename} onClose={() => setShowModal(false)} />}
       {lightbox && (
