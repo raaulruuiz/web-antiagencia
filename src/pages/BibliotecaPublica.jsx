@@ -224,7 +224,7 @@ export default function BibliotecaPublica() {
   const clearFilters = () => { setFilterCategoria(''); setFilterSubcat(''); setFilterTagId(''); setFilterFechaFrom(''); setFilterFechaTo(''); };
 
   const s = { fontFamily: 'system-ui, sans-serif' };
-  const inputStyle = { background: 'transparent', border: '1px solid #3f3f46', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'white', outline: 'none', colorScheme: 'dark', cursor: 'pointer' };
+  const inputStyle = { background: 'transparent', border: '1px solid #3f3f46', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', cursor: 'pointer' };
 
   return (
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
@@ -235,14 +235,16 @@ export default function BibliotecaPublica() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/images/9563e10d2_AALogo.png" alt="Logo" style={{ height: '28px', width: 'auto' }} />
+            <div style={theme === 'light' ? { background: '#111', borderRadius: 6, padding: '3px 5px', display: 'flex' } : {}}>
+              <img src="/images/9563e10d2_AALogo.png" alt="Logo" style={{ height: '28px', width: 'auto' }} />
+            </div>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Anti-Biblioteca</h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Theme toggle */}
             <button onClick={toggle}
               title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
-              style={{ display: 'flex', alignItems: 'center', padding: '6px 10px', borderRadius: 8, fontSize: 14, background: 'transparent', border: '1px solid #3f3f46', color: 'var(--t-text-muted)', cursor: 'pointer', lineHeight: 1 }}>
+              style={{ display: 'flex', alignItems: 'center', padding: '6px 10px', borderRadius: 8, fontSize: 14, background: 'transparent', border: `1px solid ${theme === 'light' ? '#71717a' : '#3f3f46'}`, color: 'var(--t-text-muted)', cursor: 'pointer', lineHeight: 1 }}>
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
             {/* Search */}
@@ -252,15 +254,14 @@ export default function BibliotecaPublica() {
             </button>
             {/* Filter */}
             <button onClick={() => { setShowFilters(s => !s); setShowSearch(false); }}
-              style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: (showFilters || activeFilterCount > 0) ? '#1a1a1a' : 'transparent', borderColor: activeFilterCount > 0 ? '#6366f1' : '#3f3f46', color: activeFilterCount > 0 ? '#a5b4fc' : 'white' }}>
+              style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: (showFilters || activeFilterCount > 0) ? '#1a1a1a' : 'transparent', borderColor: activeFilterCount > 0 ? '#6366f1' : '#3f3f46', color: activeFilterCount > 0 ? '#a5b4fc' : 'var(--t-text)' }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
               Filtrar
               {activeFilterCount > 0 && <span style={{ background: '#6366f1', color: 'white', fontSize: 9, fontWeight: 700, borderRadius: 999, padding: '1px 5px' }}>{activeFilterCount}</span>}
             </button>
             <button onClick={load} disabled={loading}
-              style={{ ...inputStyle, opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
-              onMouseEnter={e => { if (!loading) { e.target.style.borderColor = '#71717a'; e.target.style.color = '#fff'; }}}
-              onMouseLeave={e => { e.target.style.borderColor = '#3f3f46'; e.target.style.color = '#a1a1aa'; }}>
+              style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               {loading ? 'Cargando…' : 'Actualizar'}
             </button>
           </div>

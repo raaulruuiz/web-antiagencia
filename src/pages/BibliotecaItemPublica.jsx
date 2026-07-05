@@ -102,7 +102,7 @@ const SUBCAT_COLORS = {
 
 function Pill({ colors, label }) {
   return (
-    <span style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', display: 'inline-block', background: colors.bg, border: `1px solid ${colors.border}`, color: colors.color, alignSelf: 'flex-start' }}>
+    <span style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', display: 'inline-block', background: colors.bg, border: `1px solid ${colors.border}`, color: colors.border, alignSelf: 'flex-start' }}>
       {label}
     </span>
   );
@@ -333,7 +333,7 @@ function ImagenTextoBlockView({ block, onPreview, hideTitle }) {
           ) : null;
           const txtEl = hasText ? (
             <div style={{ background: color + '18', border: `1px solid ${color}44`, borderRadius: 10, padding: '14px 16px' }}>
-              <p style={{ fontSize: 13, color: 'var(--t-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: it.text_align || 'left' }}>{it.texto}</p>
+              <p style={{ fontSize: 13, color: color, margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: it.text_align || 'left' }}>{it.texto}</p>
             </div>
           ) : null;
           const first  = imgFirst ? imgEl : txtEl;
@@ -398,8 +398,8 @@ function CorreccionBlockView({ block, onPreview, hideTitle }) {
   );
 }
 
-function BlockView({ block, onPreview }) {
-  const wrapStyle = { border: '1px solid var(--t-border-s)', borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
+function BlockView({ block, onPreview, theme }) {
+  const wrapStyle = { border: `1px solid ${theme === 'light' ? '#d4d4d8' : '#27272a'}`, borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
 
   // Determine visibility: explicit false = hidden; undefined defaults: correccion=hidden, others=visible
   const isVisible = block.visible !== undefined
@@ -516,15 +516,15 @@ export default function BibliotecaItemPublica() {
         {/* Back button + theme toggle */}
         <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button onClick={() => navigate('/anti-biblioteca')}
-            style={{ background: 'transparent', border: '1px solid var(--t-border)', color: 'var(--t-text-muted)', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border-muted)'; e.currentTarget.style.color = 'var(--t-text)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}>
+            style={{ background: 'transparent', border: `1px solid ${theme === 'light' ? '#71717a' : '#3f3f46'}`, color: 'var(--t-text)', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#71717a'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = theme === 'light' ? '#71717a' : '#3f3f46'; }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             Anti-Biblioteca
           </button>
           <button onClick={toggle}
             title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-            style={{ background: 'transparent', border: '1px solid var(--t-border)', color: 'var(--t-text-muted)', borderRadius: 8, padding: '6px 10px', fontSize: 14, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>
+            style={{ background: 'transparent', border: `1px solid ${theme === 'light' ? '#71717a' : '#3f3f46'}`, color: 'var(--t-text-muted)', borderRadius: 8, padding: '6px 10px', fontSize: 14, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
         </div>
@@ -617,7 +617,7 @@ export default function BibliotecaItemPublica() {
         {(item.categoria === 'email' || item.categoria === 'ficha') && blocksData.blocks.length > 0 && (
           <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {blocksData.blocks.map(block => (
-              <BlockView key={block.id} block={block} onPreview={setLightbox} />
+              <BlockView key={block.id} block={block} onPreview={setLightbox} theme={theme} />
             ))}
           </div>
         )}
