@@ -384,7 +384,7 @@ function TagEditor({ tag, onUpdate, onClose }) {
 }
 
 // ── TagPicker ─────────────────────────────────────────────────────────────────
-function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCreateTag, onUpdateTag, onDeleteTag, onUpdateTagColor }) {
+function TagPicker({ selectedIds, allTags, categoria, subcategoria, onAdd, onRemove, onCreateTag, onUpdateTag, onDeleteTag, onUpdateTagColor }) {
   const [input, setInput]       = useState('');
   const [showDrop, setShowDrop] = useState(false);
   const [showInput, setShowInput] = useState(false);
@@ -392,7 +392,12 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
   const [hoverTagId, setHoverTagId] = useState(null);
   const inputRef = useRef(null);
 
-  const scopedTags = subcategoria ? allTags.filter(t => !t.subcategoria || t.subcategoria === subcategoria) : allTags;
+  // Scope tags: ficha sees only ficha tags; email sees tags scoped to its subcategoria (or global email tags)
+  const scopedTags = categoria === 'ficha'
+    ? allTags.filter(t => t.subcategoria === 'ficha')
+    : subcategoria
+      ? allTags.filter(t => t.subcategoria !== 'ficha' && (!t.subcategoria || t.subcategoria === subcategoria))
+      : allTags.filter(t => t.subcategoria !== 'ficha');
   const available  = scopedTags.filter(t => !selectedIds.includes(t.id));
   const filtered   = input.length > 0 ? available.filter(t => t.name.toLowerCase().includes(input.toLowerCase())) : available;
   const exactMatch = scopedTags.find(t => t.name.toLowerCase() === input.trim().toLowerCase());
@@ -402,7 +407,8 @@ function TagPicker({ selectedIds, allTags, subcategoria, onAdd, onRemove, onCrea
 
   const handleCreate = () => {
     const color = TAG_PALETTE[Math.floor(Math.random() * TAG_PALETTE.length)];
-    onCreateTag(input.trim(), color, subcategoria);
+    const scope = categoria === 'ficha' ? 'ficha' : subcategoria;
+    onCreateTag(input.trim(), color, scope);
     setInput('');
     setShowDrop(false);
     setShowInput(false);
@@ -1855,7 +1861,10 @@ export default function BibliotecaItem() {
   const [obAsunto, setObAsunto]     = useState('');
   const [obAdelanto, setObAdelanto] = useState('');
   const [obEnviadoEl, setObEnviadoEl] = useState('');
+  const [obUrl, setObUrl]           = useState('');
+  const [obFechaAnalisis, setObFechaAnalisis] = useState('');
   const [obMarcaError, setObMarcaError] = useState('');
+  const [obUrlError, setObUrlError] = useState('');
 
   // ── Display state ────────────────────────────────────────────────────────
   const [categoria, setCategoria] = useState(null);
@@ -1864,6 +1873,8 @@ export default function BibliotecaItem() {
   const [asunto, setAsunto]       = useState(null);
   const [adelanto, setAdelanto]   = useState(null);
   const [enviadoEl, setEnviadoEl] = useState(null);
+  const [itemUrl, setItemUrl]     = useState(null);
+  const [fechaAnalisis, setFechaAnalisis] = useState(null);
 
   // ── Blocks state ─────────────────────────────────────────────────────────
   const [blocksData, setBlocksData]             = useState([]);
@@ -1895,10 +1906,12 @@ export default function BibliotecaItem() {
         setItem(data);
         setCategoria(data.categoria || null);
         setSubcat(data.subcategoria || null);
-        setMarca(data.marca  !== null && data.marca  !== undefined ? data.marca  : null);
-        setAsunto(data.asunto !== null && data.asunto !== undefined ? data.asunto : null);
-        setAdelanto(data.adelanto !== null && data.adelanto !== undefined ? data.adelanto : null);
-        setEnviadoEl(data.enviado_el !== null && data.enviado_el !== undefined ? data.enviado_el : null);
+        setMarca(data.marca  ?? null);
+        setAsunto(data.asunto ?? null);
+        setAdelanto(data.adelanto ?? null);
+        setEnviadoEl(data.enviado_el ?? null);
+        setItemUrl(data.url ?? null);
+        setFechaAnalisis(data.fecha_analisis ?? null);
         setBlocksData(data.blocks_data?.blocks || []);
         const lib = data.blocks_data?.library || [];
         setBlocksLibrary(lib);
@@ -1942,14 +1955,21 @@ export default function BibliotecaItem() {
       const token = await getToken();
       const res = await fetch(`${API_BASE}/biblioteca/${id}/detectar`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoria: obCategoria }),
       });
       if (!res.ok) throw new Error('Error al detectar');
       const data = await res.json();
-      if (data.marca)      setObMarca(data.marca);
-      if (data.asunto)     setObAsunto(data.asunto);
-      if (data.adelanto)   setObAdelanto(data.adelanto);
-      if (data.enviado_el) setObEnviadoEl(data.enviado_el);
+      if (obCategoria === 'ficha') {
+        if (data.marca)          setObMarca(data.marca);
+        if (data.url)            setObUrl(data.url);
+        if (data.fecha_analisis) setObFechaAnalisis(data.fecha_analisis);
+      } else {
+        if (data.marca)      setObMarca(data.marca);
+        if (data.asunto)     setObAsunto(data.asunto);
+        if (data.adelanto)   setObAdelanto(data.adelanto);
+        if (data.enviado_el) setObEnviadoEl(data.enviado_el);
+      }
     } catch (e) { alert(e.message); }
     finally { setDetecting(false); }
   };
@@ -1959,14 +1979,18 @@ export default function BibliotecaItem() {
 
   const handleGuardar = async () => {
     const marcaTrimmed = obMarca.trim();
+    const urlTrimmed = obUrl.trim();
     if (!marcaTrimmed) { setObMarcaError('La marca es obligatoria'); return; }
+    if (obCategoria === 'ficha' && !urlTrimmed) { setObUrlError('La URL es obligatoria'); return; }
     const updates = {
       categoria: obCategoria,
       subcategoria: obCategoria === 'email' ? obSubcat : null,
       marca: marcaTrimmed,
-      asunto: obAsunto.trim(),
-      adelanto: obAdelanto.trim(),
-      enviado_el: obEnviadoEl || null,
+      asunto: obCategoria === 'email' ? obAsunto.trim() : null,
+      adelanto: obCategoria === 'email' ? obAdelanto.trim() : null,
+      enviado_el: obCategoria === 'email' ? (obEnviadoEl || null) : null,
+      url: obCategoria === 'ficha' ? (urlTrimmed || null) : null,
+      fecha_analisis: obCategoria === 'ficha' ? (obFechaAnalisis || null) : null,
       tags: obTags,
       blocks_data: { blocks: blocksData, library: blocksLibraryRef.current },
     };
@@ -1983,10 +2007,12 @@ export default function BibliotecaItem() {
         setItem(data);
         setCategoria(data.categoria);
         setSubcat(data.subcategoria);
-        setMarca(data.marca !== null && data.marca !== undefined ? data.marca : null);
-        setAsunto(data.asunto !== null && data.asunto !== undefined ? data.asunto : null);
-        setAdelanto(data.adelanto !== null && data.adelanto !== undefined ? data.adelanto : null);
-        setEnviadoEl(data.enviado_el !== null && data.enviado_el !== undefined ? data.enviado_el : null);
+        setMarca(data.marca ?? null);
+        setAsunto(data.asunto ?? null);
+        setAdelanto(data.adelanto ?? null);
+        setEnviadoEl(data.enviado_el ?? null);
+        setItemUrl(data.url ?? null);
+        setFechaAnalisis(data.fecha_analisis ?? null);
         if (data.blocks_data?.blocks) {
           setBlocksData(data.blocks_data.blocks);
           const lib = data.blocks_data.library || [];
@@ -2449,11 +2475,30 @@ export default function BibliotecaItem() {
                     </div>
                   )}
 
+                  {obCategoria === 'ficha' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>URL <span style={{ color: '#f87171' }}>*</span></label>
+                      <input type="url" value={obUrl} onChange={e => { setObUrl(e.target.value); setObUrlError(''); }} placeholder="https://…"
+                        style={{ width: '100%', background: 'var(--t-surface2)', border: `1px solid ${obUrlError ? '#f87171' : 'var(--t-border-mid)'}`, borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                      {obUrlError && <span style={{ fontSize: 11, color: '#f87171' }}>{obUrlError}</span>}
+                    </div>
+                  )}
+
+                  {obCategoria === 'ficha' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Fecha de Análisis</label>
+                      <input type="date" value={obFechaAnalisis} onChange={e => setObFechaAnalisis(e.target.value)}
+                        style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                      <span style={{ fontSize: 11, color: 'var(--t-text-subtle)', fontStyle: 'italic' }}>* La página puede haber sido editada en fechas posteriores</span>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</label>
                     <TagPicker
                       selectedIds={obTags}
                       allTags={allTags}
+                      categoria={obCategoria}
                       subcategoria={obSubcat}
                       onAdd={id => setObTags(prev => prev.includes(id) ? prev : [...prev, id])}
                       onRemove={id => setObTags(prev => prev.filter(x => x !== id))}
@@ -2501,7 +2546,7 @@ export default function BibliotecaItem() {
               {categoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
-                  <Tag colors={CAT_COLORS[categoria]} label={catLabel(categoria)} onRemove={() => { setCategoria(null); setSubcat(null); patch({ categoria: null, subcategoria: null }); setMode('onboarding'); setObStep('categoria'); setObCategoria(null); setObSubcat(null); }} />
+                  <Tag colors={CAT_COLORS[categoria]} label={catLabel(categoria)} onRemove={() => { setCategoria(null); setSubcat(null); patch({ categoria: null, subcategoria: null, url: null, fecha_analisis: null }); setObMarca(''); setObUrl(''); setObFechaAnalisis(''); setObTags([]); setMode('onboarding'); setObStep('categoria'); setObCategoria(null); setObSubcat(null); }} />
                 </div>
               )}
               {subcategoria && (
@@ -2517,6 +2562,7 @@ export default function BibliotecaItem() {
               <TagPicker
                 selectedIds={(item?.tags || [])}
                 allTags={allTags}
+                categoria={categoria}
                 subcategoria={subcategoria}
                 onAdd={addTagToItem}
                 onRemove={removeTagFromItem}
@@ -2538,12 +2584,21 @@ export default function BibliotecaItem() {
             {categoria === 'email' && subcategoria !== 'automatizacion' && (
               <FieldRow label="Enviado el Día" savedValue={enviadoEl} onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }} allowEmpty={false} type="date" />
             )}
+            {categoria === 'ficha' && (
+              <FieldRow label="URL" savedValue={itemUrl} required onSave={v => { setItemUrl(v); patch({ url: v }); }} placeholder="https://…" allowEmpty={false} />
+            )}
+            {categoria === 'ficha' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <FieldRow label="Fecha de Análisis" savedValue={fechaAnalisis} onSave={v => { setFechaAnalisis(v); patch({ fecha_analisis: v }); }} type="date" />
+                <span style={{ fontSize: 11, color: 'var(--t-text-subtle)', fontStyle: 'italic' }}>* La página puede haber sido editada en fechas posteriores</span>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* ── Blocks section (display mode, categoria=email) ── */}
-      {mode === 'display' && categoria === 'email' && (
+      {/* ── Blocks section (display mode) ── */}
+      {mode === 'display' && (categoria === 'email' || categoria === 'ficha') && (
         <div style={{ marginTop: 40 }}>
           {blocksSaving && <span style={{ fontSize: 11, color: 'var(--t-text-subtle)', display: 'block', marginBottom: 8 }}>Guardando…</span>}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
