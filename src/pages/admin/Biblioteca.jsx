@@ -165,6 +165,33 @@ function ConfirmModal({ count, onConfirm, onCancel }) {
   );
 }
 
+function ConfirmVisibilidadModal({ count, publico, onConfirm, onCancel }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={onCancel}>
+      <div className="rounded-xl border border-zinc-700 p-6 flex flex-col gap-4" style={{ backgroundColor: 'var(--t-surface)', width: '320px' }} onClick={e => e.stopPropagation()}>
+        <p className="text-sm text-white font-medium">
+          {publico
+            ? `¿Mostrar ${count === 1 ? 'esta captura' : `estas ${count} capturas`} en la biblioteca pública?`
+            : `¿Ocultar ${count === 1 ? 'esta captura' : `estas ${count} capturas`} de la biblioteca pública?`}
+        </p>
+        <p className="text-xs text-zinc-400">
+          {publico ? 'Aparecerán en la biblioteca pública normalmente.' : 'Aparecerán con blur para los visitantes.'}
+        </p>
+        <div className="flex gap-2 justify-end">
+          <button onClick={onCancel} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-4 py-2 rounded-lg transition-colors">Cancelar</button>
+          <button onClick={onConfirm}
+            className="text-xs text-white px-4 py-2 rounded-lg transition-colors"
+            style={{ background: publico ? '#16a34a' : '#ea580c' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+            {publico ? 'Mostrar' : 'Ocultar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const btnStyle = (active) => ({
   fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, cursor: 'pointer', transition: 'all 0.15s', border: '1px solid',
   borderColor: active ? '#52525b' : '#3f3f46',
@@ -183,6 +210,7 @@ export default function Biblioteca() {
   const [selected, setSelected]   = useState(new Set());
   const [deleting, setDeleting]   = useState(false);
   const [confirm, setConfirm]     = useState(null);
+  const [confirmVis, setConfirmVis] = useState(null); // { publico: boolean }
 
   // Search
   const [showSearch, setShowSearch] = useState(false);
@@ -277,6 +305,7 @@ export default function Biblioteca() {
 
   const bulkSetVisibilidad = useCallback(async (publico) => {
     const ids = [...selected];
+    setConfirmVis(null);
     setItems(prev => prev.map(i => ids.includes(i.id) ? { ...i, publico } : i));
     try {
       const token = await getToken();
@@ -288,6 +317,8 @@ export default function Biblioteca() {
     } catch { /* optimistic */ }
   }, [selected]);
 
+  const askBulkVisibilidad = (publico) => setConfirmVis({ publico });
+
   const inputStyle = { background: 'var(--t-surface2)', border: '1px solid #27272a', borderRadius: 8, padding: '5px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark' };
   const selectStyle = { ...inputStyle, cursor: 'pointer' };
 
@@ -295,6 +326,7 @@ export default function Biblioteca() {
     <div data-theme={theme} className="p-4 md:p-8" style={{ backgroundColor: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
 
       {confirm && <ConfirmModal count={confirm.ids.length} onConfirm={() => deleteIds(confirm.ids)} onCancel={() => setConfirm(null)} />}
+      {confirmVis && <ConfirmVisibilidadModal count={selected.size} publico={confirmVis.publico} onConfirm={() => bulkSetVisibilidad(confirmVis.publico)} onCancel={() => setConfirmVis(null)} />}
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -308,11 +340,11 @@ export default function Biblioteca() {
                     className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 border border-red-900 hover:border-red-700 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
                     <TrashIcon /> Eliminar {selected.size}
                   </button>
-                  <button onClick={() => bulkSetVisibilidad(true)}
+                  <button onClick={() => askBulkVisibilidad(true)}
                     className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors">
                     <EyeOpenIcon /> Mostrar
                   </button>
-                  <button onClick={() => bulkSetVisibilidad(false)}
+                  <button onClick={() => askBulkVisibilidad(false)}
                     className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors">
                     <EyeOffIcon /> Ocultar
                   </button>
@@ -459,12 +491,37 @@ export default function Biblioteca() {
                 <div className="aspect-video bg-zinc-900 rounded-lg overflow-hidden border transition-colors" style={{ borderColor: isSelected ? '#fff' : 'var(--t-border)' }}>
                   <img src={item.url} alt={item.filename} className="w-full h-full object-cover" loading="lazy" />
 
+                  {/* Permanent badge — visible at a glance when item is hidden */}
+                  {item.publico === false && !selecting && (
+                    <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(234,88,12,0.9)', borderRadius: 6, padding: '3px 5px', display: 'flex', alignItems: 'center', backdropFilter: 'blur(4px)', pointerEvents: 'none' }}>
+                      <EyeOffIcon />
+                    </div>
+                  )}
+
                   {!selecting && (
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all rounded-lg flex items-start justify-end p-2 opacity-0 group-hover:opacity-100">
                       <div style={{ display: 'flex', gap: 4 }}>
                         <button onClick={e => { e.stopPropagation(); togglePublico(item.id, item.publico); }}
                           className="p-1.5 rounded-md transition-colors"
-                          style={{ color: item.publico === false ? '#f97316' : 'rgba(255,255,255,0.7)', background: 'transparent' }}
+                          style={item.publico === false
+                            ? { color: '#f97316', background: 'rgba(234,88,12,0.25)', border: '1px solid rgba(234,88,12,0.5)' }
+                            : { color: 'rgba(255,255,255,0.7)', background: 'transparent', border: '1px solid transparent' }}
+                          onMouseEnter={e => {
+                            if (item.publico === false) {
+                              e.currentTarget.style.background = 'rgba(234,88,12,0.45)';
+                            } else {
+                              e.currentTarget.style.color = 'white';
+                              e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                            }
+                          }}
+                          onMouseLeave={e => {
+                            if (item.publico === false) {
+                              e.currentTarget.style.background = 'rgba(234,88,12,0.25)';
+                            } else {
+                              e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+                              e.currentTarget.style.background = 'transparent';
+                            }
+                          }}
                           title={item.publico === false ? 'Oculto en público (con blur)' : 'Visible en público'}>
                           {item.publico === false ? <EyeOffIcon /> : <EyeOpenIcon />}
                         </button>
