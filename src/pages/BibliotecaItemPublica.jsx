@@ -157,7 +157,9 @@ function ImagenBlockView({ block }) {
 function ImagenTextoBlockView({ block }) {
   const items = block.items || [];
   if (!items.length) return null;
-  const isReversed = block.layout === 'text_image';
+  const layout   = block.it_layout || 'img-text';
+  const isHoriz  = layout === 'img-text' || layout === 'text-img';
+  const imgFirst = layout === 'img-text' || layout === 'img-top';
 
   return (
     <div>
@@ -167,18 +169,20 @@ function ImagenTextoBlockView({ block }) {
           const color = it.text_color || '#6366f1';
           const hasImage = it.image?.url;
           const hasText  = it.texto?.trim();
+          const imgEl = hasImage ? (
+            <img src={it.image.url} alt="" style={{ width: '100%', borderRadius: 10, display: 'block' }} />
+          ) : null;
+          const txtEl = hasText ? (
+            <div style={{ background: color + '18', border: `1px solid ${color}44`, borderRadius: 10, padding: '14px 16px' }}>
+              <p style={{ fontSize: 13, color: 'var(--t-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: it.text_align || 'left' }}>{it.texto}</p>
+            </div>
+          ) : null;
+          const first  = imgFirst ? imgEl : txtEl;
+          const second = imgFirst ? txtEl : imgEl;
           return (
-            <div key={i} style={{ display: 'grid', gridTemplateColumns: hasImage && hasText ? '1fr 1fr' : '1fr', gap: 16, alignItems: 'start', direction: isReversed ? 'rtl' : 'ltr' }}>
-              {hasImage && (
-                <div style={{ direction: 'ltr' }}>
-                  <img src={it.image.url} alt="" style={{ width: '100%', borderRadius: 10, display: 'block' }} />
-                </div>
-              )}
-              {hasText && (
-                <div style={{ direction: 'ltr', background: color + '18', border: `1px solid ${color}44`, borderRadius: 10, padding: '14px 16px' }}>
-                  <p style={{ fontSize: 13, color: 'var(--t-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: it.text_align || 'left' }}>{it.texto}</p>
-                </div>
-              )}
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasImage && hasText ? '1fr 1fr' : '1fr', gap: 16, alignItems: 'start' }}>
+              {first}
+              {second}
             </div>
           );
         })}

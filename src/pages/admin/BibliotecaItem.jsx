@@ -896,52 +896,69 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 : { display: 'flex', flexDirection: 'column', gap: 12 }
             }>
               {(block.links || (block.url ? [{ images: block.images || [], url: block.url }] : [])).map((link, li) => (
-                <div key={li} style={
-                  block.links_layout === 'grid'
-                    ? { display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }
-                    : { display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }
-                }>
-                  {block.links_layout === 'grid' ? (
-                    <>
-                      {(link.images || []).map((img, i) => (
-                        <PreviewImg key={i} src={img.url}
-                          imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
-                          wrapperStyle={{ width: '100%' }}
-                          href={link.url || undefined}
-                          onPreview={setLightbox} />
-                      ))}
-                      {link.url && (
+                block.links_layout === 'grid' ? (
+                  <div key={li} style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
+                    {(link.images || []).map((img, i) => (
+                      <PreviewImg key={i} src={img.url}
+                        imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                        wrapperStyle={{ width: '100%' }}
+                        href={link.url || undefined}
+                        onPreview={setLightbox} />
+                    ))}
+                    {link.url && (
+                      <a href={link.url} target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize: 11, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                        onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                        onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                        {link.url}
+                      </a>
+                    )}
+                  </div>
+                ) : block.links_layout === 'fila' ? (
+                  /* Fila: imágenes en horizontal dentro del link item */
+                  <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
+                    {(link.images || []).map((img, i) => (
+                      <PreviewImg key={i} src={img.url}
+                        imgStyle={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                        wrapperStyle={{ flexShrink: 0 }}
+                        href={link.url || undefined}
+                        onPreview={setLightbox} />
+                    ))}
+                    {link.url && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
+                        <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
                         <a href={link.url} target="_blank" rel="noopener noreferrer"
-                          style={{ fontSize: 11, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
                           onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
                           onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
                           {link.url}
                         </a>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {(link.images || []).map((img, i) => (
-                        <PreviewImg key={i} src={img.url}
-                          imgStyle={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
-                          wrapperStyle={{ flexShrink: 0 }}
-                          href={link.url || undefined}
-                          onPreview={setLightbox} />
-                      ))}
-                      {link.url && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflowX: 'auto', flexShrink: 0, maxWidth: 320 }}>
-                          <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
-                          <a href={link.url} target="_blank" rel="noopener noreferrer"
-                            style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                            onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                            onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                            {link.url}
-                          </a>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Columna: imágenes apiladas verticalmente dentro del link item */
+                  <div key={li} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {(link.images || []).map((img, i) => (
+                      <PreviewImg key={i} src={img.url}
+                        imgStyle={{ width: '100%', height: 'auto', maxHeight: 400, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                        wrapperStyle={{ width: '100%' }}
+                        href={link.url || undefined}
+                        onPreview={setLightbox} />
+                    ))}
+                    {link.url && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
+                        <a href={link.url} target="_blank" rel="noopener noreferrer"
+                          style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
+                          onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                          onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                          {link.url}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )
               ))}
             </div>
           ) : (
@@ -978,7 +995,9 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {block.type === 'imagen_texto' && (() => {
         const items = block.items || (block.images?.length || block.texto ? [{ image: block.images?.[0] || null, texto: block.texto || '' }] : []);
-        const isReversed = block.layout === 'text_image';
+        const layout  = block.it_layout || 'img-text';
+        const isHoriz = layout === 'img-text' || layout === 'text-img';
+        const imgFirst = layout === 'img-text' || layout === 'img-top';
         if (!items.length) return <div style={{ padding: '12px 14px' }}><span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span></div>;
         return (
           <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -992,16 +1011,18 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               const tc = it.text_color;
               const hasImage = it.image?.url;
               const hasText  = it.texto?.trim();
+              const imgEl = hasImage ? (
+                <PreviewImg src={it.image.url} imgStyle={{ width: '100%', height: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
+              ) : null;
+              const txtEl = hasText ? (
+                <div style={{ padding: '10px 12px', borderRadius: 8, fontSize: 12, lineHeight: 1.6, textAlign: it.text_align || 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: tc ? tc + '22' : 'transparent', border: tc ? `1px solid ${tc}` : '1px solid var(--t-border)', color: tc || 'var(--t-text)' }}>{it.texto}</div>
+              ) : null;
+              const first = imgFirst ? imgEl : txtEl;
+              const second = imgFirst ? txtEl : imgEl;
               return (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: hasImage && hasText ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start', direction: isReversed ? 'rtl' : 'ltr' }}>
-                  {hasImage && (
-                    <div style={{ direction: 'ltr' }}>
-                      <PreviewImg src={it.image.url} imgStyle={{ width: '100%', height: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
-                    </div>
-                  )}
-                  {hasText && (
-                    <div style={{ direction: 'ltr', padding: '10px 12px', borderRadius: 8, fontSize: 12, lineHeight: 1.6, textAlign: it.text_align || 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: tc ? tc + '22' : 'transparent', border: tc ? `1px solid ${tc}` : '1px solid var(--t-border)', color: tc || 'var(--t-text)' }}>{it.texto}</div>
-                  )}
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasImage && hasText ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start' }}>
+                  {first}
+                  {second}
                 </div>
               );
             })}
