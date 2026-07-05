@@ -952,6 +952,12 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {block.type === 'imagen' && imgs.length > 0 && (
         <div style={{ padding: '12px 14px' }}>
+          {(block.titulo || block.subtitulo) && (
+            <div style={{ marginBottom: 10 }}>
+              {block.titulo && <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo}</div>}
+              {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
+            </div>
+          )}
           <div style={
             block.images_layout === 'fila'
               ? { display: 'flex', flexDirection: 'row', gap: 10, overflowX: 'auto' }
@@ -976,6 +982,12 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         if (!items.length) return <div style={{ padding: '12px 14px' }}><span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span></div>;
         return (
           <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {(block.titulo || block.subtitulo) && (
+              <div style={{ marginBottom: 2 }}>
+                {block.titulo && <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo}</div>}
+                {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
+              </div>
+            )}
             {items.map((it, i) => {
               const tc = it.text_color;
               const hasImage = it.image?.url;
@@ -999,6 +1011,12 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {block.type === 'correccion' && (
         <div style={{ padding: '10px 12px' }}>
+          {(block.titulo || block.subtitulo) && (
+            <div style={{ marginBottom: 10 }}>
+              {block.titulo && <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo}</div>}
+              {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
+            </div>
+          )}
           {(block.email_blocks || []).length > 0 ? (() => {
             const outerBg = theme === 'dark' ? '#1e1e1e' : '#e0e0e0';
             const emailBg = block.email_bg || '#ffffff';

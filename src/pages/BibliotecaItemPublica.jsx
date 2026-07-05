@@ -63,10 +63,10 @@ function EnlacesBlockView({ block }) {
           : { display: 'flex', flexDirection: 'column', gap: 10 }
       }>
       {links.map((link, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, overflow: 'hidden' }}>
           {(link.images || []).map((img, j) => (
             <a key={j} href={link.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-              <img src={img.url} alt="" style={{ height: 72, borderRadius: 7, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
+              <img src={img.url} alt="" style={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
             </a>
           ))}
           {link.url && (
@@ -95,7 +95,7 @@ function ImagenBlockView({ block }) {
   if (layout === 'fila') {
     return (
       <div>
-        <BlockHeader title={block.title} subtitle={block.subtitle} />
+        <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
         <div style={{ display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto' }}>
           {images.map((img, i) => (
             <img key={i} src={img.url || img} alt="" style={{ height: 180, width: 'auto', borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)', flexShrink: 0, display: 'block' }} />
@@ -108,7 +108,7 @@ function ImagenBlockView({ block }) {
   if (layout === 'grid') {
     return (
       <div>
-        <BlockHeader title={block.title} subtitle={block.subtitle} />
+        <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
           {images.map((img, i) => (
             <img key={i} src={img.url || img} alt="" style={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
@@ -121,7 +121,7 @@ function ImagenBlockView({ block }) {
   // Default: columna
   return (
     <div>
-      <BlockHeader title={block.title} subtitle={block.subtitle} />
+      <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {images.map((img, i) => (
           <img key={i} src={img.url || img} alt="" style={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)', display: 'block' }} />
@@ -138,7 +138,7 @@ function ImagenTextoBlockView({ block }) {
 
   return (
     <div>
-      <BlockHeader title={block.title} subtitle={block.subtitle} />
+      <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {items.map((it, i) => {
           const color = it.text_color || '#6366f1';
@@ -199,7 +199,7 @@ function CorreccionBlockView({ block }) {
 
   return (
     <div>
-      <BlockHeader title={block.title} subtitle={block.subtitle} />
+      <BlockHeader title={block.titulo} subtitle={block.subtitulo} />
       <div style={{ background: outerBg, borderRadius: 12, padding: '20px', display: 'flex', justifyContent: 'center' }}>
         <div style={{ background: emailBg, borderRadius: 8, padding: '20px 24px', width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 12 }}>
           {emailBlocks.map((eb, i) => renderEBBlock(eb, i, false))}
