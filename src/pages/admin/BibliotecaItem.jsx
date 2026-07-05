@@ -25,6 +25,16 @@ const presetBtnStyle = (active) => ({
 // ── Tag palette for user-created tags ────────────────────────────────────────
 const TAG_PALETTE = ['#6366f1','#8b5cf6','#a855f7','#ec4899','#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#14b8a6','#78716c'];
 
+const isValidHttpUrl = (url) => {
+  if (!url) return false;
+  try {
+    const p = new URL(url);
+    if (!['http:', 'https:'].includes(p.protocol)) return false;
+    const parts = p.hostname.split('.');
+    return parts.length >= 2 && parts.every(seg => seg.length > 0) && parts[parts.length - 1].length >= 2;
+  } catch { return false; }
+};
+
 // ── Icons ─────────────────────────────────────────────────────────────────────
 const IconEmail = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -213,7 +223,7 @@ function CatButtons({ options, colors, onSelect }) {
 }
 
 // ── Field with pencil (display mode) ─────────────────────────────────────────
-function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = true, type = 'text', placeholder, suggestions = [] }) {
+function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = true, type = 'text', placeholder, suggestions = [], validate }) {
   const [inputMode, setInputMode] = useState(false);
   const [inputVal, setInputVal]   = useState('');
   const [error, setError]         = useState('');
@@ -232,6 +242,7 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
     if (type === 'date') { if (!t) { setInputMode(false); return; } onSave(t); setInputMode(false); return; }
     if (required && !t) { setError('Obligatorio'); return; }
     if (!allowEmpty && !t) { setInputMode(false); return; }
+    if (validate) { const err = validate(t); if (err) { setError(err); return; } }
     onSave(t); setInputMode(false); setError('');
   };
 
@@ -1982,6 +1993,7 @@ export default function BibliotecaItem() {
     const urlTrimmed = obUrl.trim();
     if (!marcaTrimmed) { setObMarcaError('La marca es obligatoria'); return; }
     if (obCategoria === 'ficha' && !urlTrimmed) { setObUrlError('La URL es obligatoria'); return; }
+    if (obCategoria === 'ficha' && !isValidHttpUrl(urlTrimmed)) { setObUrlError('URL no válida. Ej: https://dominio.com'); return; }
     const updates = {
       categoria: obCategoria,
       subcategoria: obCategoria === 'email' ? obSubcat : null,
@@ -2478,7 +2490,10 @@ export default function BibliotecaItem() {
                   {obCategoria === 'ficha' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>URL <span style={{ color: '#f87171' }}>*</span></label>
-                      <input type="url" value={obUrl} onChange={e => { setObUrl(e.target.value); setObUrlError(''); }} placeholder="https://…"
+                      <input type="text" value={obUrl}
+                        onChange={e => { setObUrl(e.target.value); setObUrlError(''); }}
+                        onBlur={() => { if (obUrl.trim() && !isValidHttpUrl(obUrl.trim())) setObUrlError('URL no válida. Ej: https://dominio.com'); }}
+                        placeholder="https://dominio.com"
                         style={{ width: '100%', background: 'var(--t-surface2)', border: `1px solid ${obUrlError ? '#f87171' : 'var(--t-border-mid)'}`, borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
                       {obUrlError && <span style={{ fontSize: 11, color: '#f87171' }}>{obUrlError}</span>}
                     </div>
@@ -2585,7 +2600,8 @@ export default function BibliotecaItem() {
               <FieldRow label="Enviado el Día" savedValue={enviadoEl} onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }} allowEmpty={false} type="date" />
             )}
             {categoria === 'ficha' && (
-              <FieldRow label="URL" savedValue={itemUrl} required onSave={v => { setItemUrl(v); patch({ url: v }); }} placeholder="https://…" allowEmpty={false} />
+              <FieldRow label="URL" savedValue={itemUrl} required onSave={v => { setItemUrl(v); patch({ url: v }); }} placeholder="https://dominio.com" allowEmpty={false}
+                validate={v => isValidHttpUrl(v) ? null : 'URL no válida. Ej: https://dominio.com'} />
             )}
             {categoria === 'ficha' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
