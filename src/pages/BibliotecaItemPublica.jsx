@@ -311,11 +311,11 @@ function ImagenBlockView({ block, onPreview, hideTitle }) {
   );
 }
 
-function ImagenTextoBlockView({ block, onPreview, hideTitle }) {
+function ImagenTextoBlockView({ block, onPreview, hideTitle, isMobile }) {
   const items = block.items || [];
   if (!items.length) return null;
   const layout   = block.it_layout || 'img-text';
-  const isHoriz  = layout === 'img-text' || layout === 'text-img';
+  const isHoriz  = !isMobile && (layout === 'img-text' || layout === 'text-img');
   const imgFirst = layout === 'img-text' || layout === 'img-top';
 
   return (
@@ -398,7 +398,7 @@ function CorreccionBlockView({ block, onPreview, hideTitle }) {
   );
 }
 
-function BlockView({ block, onPreview, theme }) {
+function BlockView({ block, onPreview, theme, isMobile }) {
   const wrapStyle = { border: `1px solid ${theme === 'light' ? '#d4d4d8' : '#27272a'}`, borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
 
   // Determine visibility: explicit false = hidden; undefined defaults: correccion=hidden, others=visible
@@ -414,7 +414,7 @@ function BlockView({ block, onPreview, theme }) {
     switch (block.type) {
       case 'enlaces':      content = <EnlacesBlockView block={block} onPreview={() => {}} hideTitle />; break;
       case 'imagen':       content = <ImagenBlockView block={block} onPreview={() => {}} hideTitle />; break;
-      case 'imagen_texto': content = <ImagenTextoBlockView block={block} onPreview={() => {}} hideTitle />; break;
+      case 'imagen_texto': content = <ImagenTextoBlockView block={block} onPreview={() => {}} hideTitle isMobile={isMobile} />; break;
       case 'correccion':   content = <CorreccionBlockView block={block} onPreview={() => {}} hideTitle />; break;
       default: content = null;
     }
@@ -439,7 +439,7 @@ function BlockView({ block, onPreview, theme }) {
   switch (block.type) {
     case 'enlaces':      return <div style={wrapStyle}><EnlacesBlockView block={block} onPreview={onPreview} /></div>;
     case 'imagen':       return <div style={wrapStyle}><ImagenBlockView block={block} onPreview={onPreview} /></div>;
-    case 'imagen_texto': return <div style={wrapStyle}><ImagenTextoBlockView block={block} onPreview={onPreview} /></div>;
+    case 'imagen_texto': return <div style={wrapStyle}><ImagenTextoBlockView block={block} onPreview={onPreview} isMobile={isMobile} /></div>;
     case 'correccion':   return <div style={wrapStyle}><CorreccionBlockView block={block} onPreview={onPreview} /></div>;
     default: return null;
   }
@@ -459,6 +459,13 @@ export default function BibliotecaItemPublica() {
   const [showModal, setShowModal] = useState(false);
   const [imageHover, setImageHover] = useState(false);
   const [acceso, setAcceso] = useState(() => !!sessionStorage.getItem(SESSION_KEY));
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -529,8 +536,10 @@ export default function BibliotecaItemPublica() {
           </button>
         </div>
 
-        {/* Two equal columns */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'flex-start' }}>
+        {/* Two equal columns — stacks on mobile */}
+        <div style={isMobile
+          ? { display: 'flex', flexDirection: 'column', gap: 24 }
+          : { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'flex-start' }}>
 
           {/* Left: image (screenshot) */}
           <div style={{ position: 'relative' }}
@@ -539,7 +548,7 @@ export default function BibliotecaItemPublica() {
             <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid var(--t-border)' }}>
               <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />
             </div>
-            {imageHover && (
+            {(imageHover || isMobile) && (
               <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
                 <button onClick={() => setShowModal(true)}
                   style={{ background:'rgba(0,0,0,0.7)', border:'1px solid rgba(255,255,255,0.15)', color:'rgba(255,255,255,0.8)', borderRadius:8, padding:'6px 8px', cursor:'pointer', display:'flex', alignItems:'center', gap:5, fontSize:12, backdropFilter:'blur(4px)' }}>
@@ -617,7 +626,7 @@ export default function BibliotecaItemPublica() {
         {(item.categoria === 'email' || item.categoria === 'ficha') && blocksData.blocks.length > 0 && (
           <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {blocksData.blocks.map(block => (
-              <BlockView key={block.id} block={block} onPreview={setLightbox} theme={theme} />
+              <BlockView key={block.id} block={block} onPreview={setLightbox} theme={theme} isMobile={isMobile} />
             ))}
           </div>
         )}
