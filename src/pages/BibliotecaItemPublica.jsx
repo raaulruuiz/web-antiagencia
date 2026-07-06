@@ -145,6 +145,7 @@ function ImageModal({ imageUrl, alt, onClose }) {
 // ── PreviewImg — imágenes de bloques (same as admin) ──────────────────────────
 function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
   const [hov, setHov] = useState(false);
+  const mobile = window.innerWidth < 640;
   const imgEl = <img src={src} alt="" style={{ display: 'block', ...imgStyle }} />;
   return (
     <div style={{ position: 'relative', ...wrapperStyle }}
@@ -152,7 +153,7 @@ function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
       {href
         ? <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>{imgEl}</a>
         : imgEl}
-      {hov && (
+      {(hov || mobile) && (
         <button onClick={e => { e.preventDefault(); e.stopPropagation(); onPreview(src); }}
           style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 6, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 11, fontWeight: 500, backdropFilter: 'blur(4px)' }}>
           <IconEye /> Ver
