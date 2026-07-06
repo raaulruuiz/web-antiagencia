@@ -1956,6 +1956,7 @@ export default function BibliotecaItem() {
   const [showCropForModal, setShowCropForModal] = useState(false);
   const [showBlockSelectorModal, setShowBlockSelectorModal] = useState(false);
   const [blocksSaving, setBlocksSaving]         = useState(false);
+  const [blocksSaveError, setBlocksSaveError]   = useState(false);
   const cropForModalResolveRef = useRef(null);
 
   // Misc
@@ -2181,14 +2182,16 @@ export default function BibliotecaItem() {
   // ── Blocks handlers ──────────────────────────────────────────────────────
   const saveBlocks = useCallback(async (blocks) => {
     setBlocksSaving(true);
+    setBlocksSaveError(false);
     try {
       const token = await getToken();
-      await fetch(`${API_BASE}/biblioteca/${id}`, {
+      const res = await fetch(`${API_BASE}/biblioteca/${id}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ blocks_data: { blocks, library: blocksLibraryRef.current } }),
       });
-    } catch (_) {}
+      if (!res.ok) setBlocksSaveError(true);
+    } catch (_) { setBlocksSaveError(true); }
     finally { setBlocksSaving(false); }
   }, [id]);
 
@@ -2696,6 +2699,12 @@ export default function BibliotecaItem() {
       {mode === 'display' && (categoria === 'email' || categoria === 'ficha') && (
         <div style={{ marginTop: 40 }}>
           {blocksSaving && <span style={{ fontSize: 11, color: 'var(--t-text-subtle)', display: 'block', marginBottom: 8 }}>Guardando…</span>}
+          {!blocksSaving && blocksSaveError && (
+            <span style={{ fontSize: 11, color: '#f87171', display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Error al guardar. Recarga la página y vuelve a intentarlo.
+            </span>
+          )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {blocksData.map((block, idx) => (
               <div key={block.id}>
