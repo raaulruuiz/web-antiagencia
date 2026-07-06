@@ -1795,20 +1795,24 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                       </div>
                     ) : (
                       <>
-                        {showLibrary === libKey && libraryImages?.length > 0 && (
+                        {showLibrary === libKey && (
                           <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 8 }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                               <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
                               <button onClick={() => setShowLibrary(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
-                              {libraryImages.map((libImg, i) => (
-                                <img key={i} src={libImg.url} alt="" onClick={() => { setItemImage(itemIdx, libImg.url); setShowLibrary(null); }}
-                                  style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: 'pointer', border: '2px solid transparent' }}
-                                  onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
-                                  onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
-                              ))}
-                            </div>
+                            {libraryImages?.length > 0 ? (
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
+                                {libraryImages.map((libImg, i) => (
+                                  <img key={i} src={libImg.url} alt="" onClick={() => { setItemImage(itemIdx, libImg.url); setShowLibrary(null); }}
+                                    style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: 'pointer', border: '2px solid transparent' }}
+                                    onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
+                                    onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
+                                ))}
+                              </div>
+                            ) : (
+                              <div style={{ fontSize: 11, color: 'var(--t-text-subtle)', padding: '4px 0' }}>No hay imágenes en la biblioteca todavía.</div>
+                            )}
                           </div>
                         )}
                         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
@@ -1820,12 +1824,10 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                             style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: isUploadingThis ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, minWidth: 80 }}>
                             <IconScissors /> Recortar
                           </button>
-                          {libraryImages?.length > 0 && (
-                            <button onClick={() => setShowLibrary(showLibrary === libKey ? null : libKey)}
-                              style={{ flex: 1, background: showLibrary === libKey ? 'var(--t-surface2)' : 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: 'pointer', minWidth: 80 }}>
-                              Seleccionar
-                            </button>
-                          )}
+                          <button onClick={() => setShowLibrary(showLibrary === libKey ? null : libKey)}
+                            style={{ flex: 1, background: showLibrary === libKey ? 'var(--t-surface2)' : 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: 'pointer', minWidth: 80 }}>
+                            Seleccionar
+                          </button>
                         </div>
                         <input ref={itFileRef} type="file" accept="image/*" style={{ display: 'none' }}
                           onChange={async e => {
@@ -2376,6 +2378,11 @@ export default function BibliotecaItem() {
         (link.images || []).forEach(img => {
           if (!seen.has(img.url)) { seen.add(img.url); imgs.push(img); }
         });
+      });
+      (b.items || []).forEach(item => {
+        if (item.image?.url && !seen.has(item.image.url)) {
+          seen.add(item.image.url); imgs.push(item.image);
+        }
       });
     });
     return imgs;
