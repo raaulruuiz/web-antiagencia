@@ -235,9 +235,7 @@ export default function BibliotecaPublica() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={theme === 'light' ? { background: '#111', borderRadius: 6, padding: '3px 5px', display: 'flex' } : {}}>
-              <img src="/images/9563e10d2_AALogo.png" alt="Logo" style={{ height: '28px', width: 'auto' }} />
-            </div>
+            <img src={theme === 'light' ? '/images/82b3b8d5c_freepik__background__33914.png' : '/images/9563e10d2_AALogo.png'} alt="Logo" style={{ height: '28px', width: 'auto' }} />
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Anti-Biblioteca</h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
