@@ -470,8 +470,8 @@ export default function BibliotecaItemPublica() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_BASE}/biblioteca/${id}`).then(r => r.ok ? r.json() : Promise.reject(r.status === 404 ? 'No encontrado' : 'Error')),
-      fetch(`${API_BASE}/biblioteca/tags/public`).then(r => r.ok ? r.json() : []),
+      fetch(`${API_BASE}/biblioteca/${id}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(r.status === 404 ? 'No encontrado' : 'Error')),
+      fetch(`${API_BASE}/biblioteca/tags/public`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []),
     ])
       .then(([itemData, tagsData]) => { setItem(itemData); setAllTags(tagsData); })
       .catch(e => setError(typeof e === 'string' ? e : 'Error al cargar'))
