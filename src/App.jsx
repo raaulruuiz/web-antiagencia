@@ -159,7 +159,7 @@ const AuthenticatedApp = () => {
       <Route path="/YaPorFin" element={<SmartPage path="/YaPorFin"><LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper></SmartPage>} />
       <Route path="/trabajaconnosotros" element={<TrabajaConNosotrosV3 />} />
       <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
-      <Route path="/planningq3" element={<PlanningQ3Venta />} />
+      {/* <Route path="/planningq3" element={<PlanningQ3Venta />} /> */}
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/q3" element={<PlanningQ3 />} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
