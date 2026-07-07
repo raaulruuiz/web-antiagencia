@@ -1289,7 +1289,10 @@ function EBItem({ block, onChange, onDelete, onUpload, onCrop, libImages, nested
                   </div>
                 </div>
               )}
-              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}
+                onDragOver={e => { e.preventDefault(); e.currentTarget.style.outline = '2px dashed #3b82f6'; e.currentTarget.style.borderRadius = '6px'; }}
+                onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.style.outline = ''; }}
+                onDrop={async e => { e.preventDefault(); e.currentTarget.style.outline = ''; const f = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/')); if (f && !uploading) await upload(f); }}>
                 <button onClick={() => fileRef.current?.click()} disabled={uploading}
                   style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '6px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: uploading ? 'not-allowed' : 'pointer', minWidth: 70 }}>
                   {uploading ? 'Subiendo…' : '+ Subir'}
@@ -1621,7 +1624,10 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                 </div>
               </div>
             )}
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}
+              onDragOver={e => { e.preventDefault(); e.currentTarget.style.outline = '2px dashed #3b82f6'; e.currentTarget.style.borderRadius = '8px'; }}
+              onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.style.outline = ''; }}
+              onDrop={async e => { e.preventDefault(); e.currentTarget.style.outline = ''; const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')); if (!files.length || uploading) return; setUploading(true); try { for (const f of files) { const url = await onUploadImage(f); addImage(url); } } catch { alert('Error al subir imagen'); } finally { setUploading(false); } }}>
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
                 style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: 'var(--t-text-muted)', cursor: uploading ? 'not-allowed' : 'pointer', minWidth: 100 }}
                 onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = 'var(--t-border-muted)'; }}
@@ -1726,7 +1732,10 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                       </div>
                     </div>
                   )}
-                  <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}
+                    onDragOver={e => { e.preventDefault(); e.currentTarget.style.outline = '2px dashed #3b82f6'; e.currentTarget.style.borderRadius = '6px'; }}
+                    onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.style.outline = ''; }}
+                    onDrop={async e => { e.preventDefault(); e.currentTarget.style.outline = ''; const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')); if (!files.length || uploadingLink !== null) return; setUploadingLink(linkIdx); try { for (const f of files) { const url = await onUploadImage(f); addLinkImage(linkIdx, url); } } catch { alert('Error al subir imagen'); } finally { setUploadingLink(null); } }}>
                     <button onClick={() => linkFileInputRefs.current[linkIdx]?.click()} disabled={uploadingLink !== null}
                       style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: uploadingLink !== null ? 'not-allowed' : 'pointer', minWidth: 80 }}
                       onMouseEnter={e => { if (uploadingLink === null) e.currentTarget.style.borderColor = 'var(--t-border-muted)'; }}
@@ -1847,7 +1856,10 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                             )}
                           </div>
                         )}
-                        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}
+                          onDragOver={e => { e.preventDefault(); e.currentTarget.style.outline = '2px dashed #3b82f6'; e.currentTarget.style.borderRadius = '6px'; }}
+                          onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.style.outline = ''; }}
+                          onDrop={async e => { e.preventDefault(); e.currentTarget.style.outline = ''; const f = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/')); if (f && !isUploadingThis) await handleItemFile(itemIdx, f); }}>
                           <button onClick={() => itemFileInputRefs.current[itemIdx]?.click()} disabled={isUploadingThis}
                             style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: isUploadingThis ? 'not-allowed' : 'pointer', minWidth: 80 }}>
                             {isUploadingThis ? 'Subiendo…' : '+ Imagen'}
