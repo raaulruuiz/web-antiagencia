@@ -6,6 +6,20 @@ import MailerLitePopup from '@/components/MailerLitePopup';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 const SESSION_KEY = 'biblioteca_acceso_email';
+const SESSION_TTL = 30 * 24 * 60 * 60 * 1000; // 30 días
+
+function saveSession(email) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ email, ts: Date.now() }));
+}
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const { email, ts } = JSON.parse(raw);
+    if (Date.now() - ts > SESSION_TTL) { localStorage.removeItem(SESSION_KEY); return null; }
+    return email;
+  } catch { return null; }
+}
 
 function Gate({ onAcceso }) {
   const [email, setEmail] = useState('');
@@ -23,7 +37,7 @@ function Gate({ onAcceso }) {
       });
       const data = await res.json();
       if (data.acceso) {
-        sessionStorage.setItem(SESSION_KEY, email);
+        saveSession(email);
         onAcceso();
       } else {
         setEstado('error');
@@ -84,6 +98,12 @@ function Gate({ onAcceso }) {
           >
             {estado === 'cargando' ? 'Verificando...' : 'Acceder'}
           </button>
+          <p style={{ fontSize: '13px', color: '#777', marginTop: '16px' }}>
+            ¿No estás en la lista?{' '}
+            <a href="https://antiagencia.es" style={{ color: '#0067FD', textDecoration: 'underline' }}>
+              Apúntate aquí
+            </a>
+          </p>
         </form>
       </div>
     </div>
@@ -173,7 +193,7 @@ function DateRangePicker({ from, to, onChange }) {
 export default function BibliotecaPublica() {
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
-  const [acceso, setAcceso] = useState(() => !!sessionStorage.getItem(SESSION_KEY));
+  const [acceso, setAcceso] = useState(() => !!loadSession());
   const [items, setItems]     = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -218,6 +218,9 @@ export default function Biblioteca() {
 
   // Filters
   const [showFilters, setShowFilters]       = useState(false);
+  const [showStats, setShowStats]           = useState(false);
+  const [statsData, setStatsData]           = useState(null);
+  const [statsLoading, setStatsLoading]     = useState(false);
   const [filterCategoria, setFilterCategoria]   = useState('');
   const [filterSubcat, setFilterSubcat]       = useState('');
   const [filterMarca, setFilterMarca]         = useState('');
@@ -365,6 +368,22 @@ export default function Biblioteca() {
                 </svg>
                 Enlace público
               </a>
+              <button onClick={async () => {
+                setShowStats(true);
+                if (!statsData) {
+                  setStatsLoading(true);
+                  try {
+                    const token = await getToken();
+                    const res = await fetch(`${API_BASE}/api/biblioteca-accesos`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const data = await res.json();
+                    setStatsData(data);
+                  } catch { setStatsData([]); }
+                  setStatsLoading(false);
+                }
+              }} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Estadísticas
+              </button>
               {/* Search */}
               <button onClick={() => { setShowSearch(s => !s); setShowFilters(false); }}
                 style={btnStyle(showSearch)}>
@@ -548,6 +567,43 @@ export default function Biblioteca() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {showStats && (
+        <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,0.7)', display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+          onClick={e => { if (e.target === e.currentTarget) setShowStats(false); }}>
+          <div style={{ background:'var(--t-surface)', border:'1px solid var(--t-border)', borderRadius:12, padding:24, width:'100%', maxWidth:540, maxHeight:'80vh', display:'flex', flexDirection:'column', gap:12 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <h3 style={{ fontSize:15, fontWeight:600, color:'var(--t-text)', margin:0 }}>Accesos a la Anti-Biblioteca</h3>
+              <button onClick={() => setShowStats(false)} style={{ background:'none', border:'none', color:'var(--t-text-subtle)', cursor:'pointer', fontSize:18, lineHeight:1 }}>×</button>
+            </div>
+            <div style={{ overflowY:'auto', flex:1 }}>
+              {statsLoading && <p style={{ fontSize:13, color:'var(--t-text-muted)', textAlign:'center', padding:'20px 0' }}>Cargando...</p>}
+              {!statsLoading && statsData && statsData.length === 0 && <p style={{ fontSize:13, color:'var(--t-text-muted)', textAlign:'center', padding:'20px 0' }}>Sin accesos registrados todavía.</p>}
+              {!statsLoading && statsData && statsData.length > 0 && (
+                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
+                  <thead>
+                    <tr style={{ borderBottom:'1px solid var(--t-border)' }}>
+                      <th style={{ textAlign:'left', padding:'6px 8px', color:'var(--t-text-subtle)', fontWeight:600, textTransform:'uppercase', fontSize:10, letterSpacing:'0.06em' }}>Email</th>
+                      <th style={{ textAlign:'left', padding:'6px 8px', color:'var(--t-text-subtle)', fontWeight:600, textTransform:'uppercase', fontSize:10, letterSpacing:'0.06em' }}>Fecha y hora</th>
+                      <th style={{ textAlign:'center', padding:'6px 8px', color:'var(--t-text-subtle)', fontWeight:600, textTransform:'uppercase', fontSize:10, letterSpacing:'0.06em' }}>Válido</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {statsData.map((row, i) => (
+                      <tr key={i} style={{ borderBottom:'1px solid var(--t-border-s)' }}>
+                        <td style={{ padding:'7px 8px', color:'var(--t-text)' }}>{row.email}</td>
+                        <td style={{ padding:'7px 8px', color:'var(--t-text-muted)', whiteSpace:'nowrap' }}>{new Date(row.accessed_at).toLocaleString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
+                        <td style={{ padding:'7px 8px', textAlign:'center' }}>{row.valid ? <span style={{ color:'#22c55e', fontSize:14 }}>✓</span> : <span style={{ color:'#71717a', fontSize:14 }}>—</span>}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            {!statsLoading && statsData && <p style={{ fontSize:11, color:'var(--t-text-subtle)', margin:0 }}>{statsData.length} registro{statsData.length !== 1 ? 's' : ''} · ✓ = email en lista</p>}
+          </div>
         </div>
       )}
     </div>
