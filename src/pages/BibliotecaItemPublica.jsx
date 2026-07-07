@@ -580,7 +580,7 @@ export default function BibliotecaItemPublica() {
   const blocksData      = item.blocks_data && item.blocks_data.blocks ? item.blocks_data : { blocks: [] };
 
   return (
-    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '24px', overflowX: 'hidden', boxSizing: 'border-box' }}>
+    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
       {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
       <MailerLitePopup />
       {showModal && item && <ImageModal imageUrl={item.url} alt={item.filename} onClose={() => setShowModal(false)} />}
@@ -596,10 +596,10 @@ export default function BibliotecaItemPublica() {
         </div>
       )}
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
 
-        {/* Back button + theme toggle */}
-        <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      {/* Sticky header */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'var(--t-bg)', borderBottom: '1px solid var(--t-border)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button onClick={() => navigate('/anti-biblioteca')}
             style={{ background: 'transparent', border: `1px solid ${theme === 'light' ? '#71717a' : '#3f3f46'}`, color: 'var(--t-text)', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#71717a'; }}
@@ -613,6 +613,10 @@ export default function BibliotecaItemPublica() {
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
         </div>
+      </div>
+
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px', overflowX: 'hidden', boxSizing: 'border-box', width: '100%' }}>
+        <div>
 
         {/* Two equal columns — stacks on mobile */}
         <div style={isMobile
@@ -719,6 +723,7 @@ export default function BibliotecaItemPublica() {
           </div>
         )}
 
+        </div>
       </div>
     </div>
   );
