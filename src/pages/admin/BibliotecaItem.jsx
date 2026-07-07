@@ -2876,9 +2876,9 @@ export default function BibliotecaItem() {
                       }
                     }
                   }}
-                  style={{ width: '100%', background: 'transparent', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-subtle)', borderRadius: 8, padding: '10px 16px', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-subtle)'; }}>
+                  style={{ width: '100%', background: 'transparent', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-muted)', borderRadius: 8, padding: '10px 16px', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#dc2626'; e.currentTarget.style.color = '#f87171'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}>
                   ← Volver
                 </button>
               )}
