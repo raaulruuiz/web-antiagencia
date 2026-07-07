@@ -511,7 +511,7 @@ export default function BibliotecaItemPublica() {
   );
 
   const hasRightContent = item.categoria || item.subcategoria || item.marca !== null || item.asunto !== null || item.adelanto !== null || item.enviado_el || item.ficha_url || item.fecha_analisis;
-  const enviadoDisplay  = item.enviado_el ? new Date(item.enviado_el + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
+  const enviadoDisplay  = item.enviado_el ? (() => { const s = new Date(item.enviado_el + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }); return s.charAt(0).toUpperCase() + s.slice(1); })() : null;
   const fechaAnalisisDisplay = item.fecha_analisis ? new Date(item.fecha_analisis + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
   const resolvedTags    = (item.tags || []).map(tid => allTags.find(t => t.id === tid)).filter(Boolean);
   const blocksData      = item.blocks_data && item.blocks_data.blocks ? item.blocks_data : { blocks: [] };

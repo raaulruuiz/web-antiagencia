@@ -185,7 +185,8 @@ function catLabel(v)    { return CATEGORIAS.find(c => c.value === v)?.label || v
 function subcatLabel(v) { return SUBCATEGORIAS.find(s => s.value === v)?.label || v; }
 function formatDate(v)  {
   if (!v) return '';
-  return new Date(v + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+  const s = new Date(v + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // ── Tag ───────────────────────────────────────────────────────────────────────
