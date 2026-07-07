@@ -365,6 +365,64 @@ function ImagenTextoBlockView({ block, onPreview, hideTitle, isMobile }) {
   );
 }
 
+function AsuntoAdelantoBlockView({ block, item, hideTitle, isMobile }) {
+  const items = block.items || [];
+  if (!items.length) return null;
+  const layout   = block.it_layout || 'img-text';
+  const isHoriz  = !isMobile && (layout === 'img-text' || layout === 'text-img');
+  const fieldFirst = layout === 'img-text' || layout === 'img-top';
+
+  return (
+    <div>
+      {!hideTitle && <BlockHeader title={block.titulo} subtitle={block.subtitulo} />}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {items.map((it, i) => {
+          const color = it.text_color || '#6366f1';
+          const hasField = it.show_asunto || it.show_adelanto;
+          const hasText  = it.texto?.trim();
+          const fieldEl = hasField ? (
+            <div style={{
+              background: 'var(--t-surface2)',
+              border: '1px solid var(--t-border)',
+              borderRadius: 8,
+              padding: '12px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}>
+              {it.show_asunto && item?.asunto && (
+                <>
+                  <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--t-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Asunto</span>
+                  <span style={{ fontSize: 13, color: 'var(--t-text)', lineHeight: 1.4 }}>{item.asunto}</span>
+                </>
+              )}
+              {it.show_adelanto && item?.adelanto && (
+                <>
+                  <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--t-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Adelanto</span>
+                  <span style={{ fontSize: 13, color: 'var(--t-text)', lineHeight: 1.4 }}>{item.adelanto}</span>
+                </>
+              )}
+            </div>
+          ) : null;
+          const txtEl = hasText ? (
+            <div style={{ background: color + '18', border: `1px solid ${color}44`, borderRadius: 10, padding: '14px 16px' }}>
+              <p style={{ fontSize: 13, color: color, margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: it.text_align || 'left' }}>{it.texto}</p>
+            </div>
+          ) : null;
+          const first  = fieldFirst ? fieldEl : txtEl;
+          const second = fieldFirst ? txtEl : fieldEl;
+          return (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasField && hasText ? '1fr 1fr' : '1fr', gap: 16, alignItems: 'start' }}>
+              {first}
+              {second}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function renderEBBlock(eb, i, colMode, onPreview) {
   return (
     <div key={i}>
@@ -413,7 +471,7 @@ function CorreccionBlockView({ block, onPreview, hideTitle }) {
   );
 }
 
-function BlockView({ block, onPreview, theme, isMobile }) {
+function BlockView({ block, onPreview, theme, isMobile, item }) {
   const wrapStyle = { border: `1px solid ${theme === 'light' ? '#d4d4d8' : '#27272a'}`, borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
 
   // Determine visibility: explicit false = hidden; undefined defaults: correccion=hidden, others=visible
@@ -427,10 +485,11 @@ function BlockView({ block, onPreview, theme, isMobile }) {
     const subtitle = block.subtitulo;
     let content;
     switch (block.type) {
-      case 'enlaces':      content = <EnlacesBlockView block={block} onPreview={() => {}} hideTitle />; break;
-      case 'imagen':       content = <ImagenBlockView block={block} onPreview={() => {}} hideTitle />; break;
-      case 'imagen_texto': content = <ImagenTextoBlockView block={block} onPreview={() => {}} hideTitle isMobile={isMobile} />; break;
-      case 'correccion':   content = <CorreccionBlockView block={block} onPreview={() => {}} hideTitle />; break;
+      case 'enlaces':          content = <EnlacesBlockView block={block} onPreview={() => {}} hideTitle />; break;
+      case 'imagen':           content = <ImagenBlockView block={block} onPreview={() => {}} hideTitle />; break;
+      case 'imagen_texto':     content = <ImagenTextoBlockView block={block} onPreview={() => {}} hideTitle isMobile={isMobile} />; break;
+      case 'correccion':       content = <CorreccionBlockView block={block} onPreview={() => {}} hideTitle />; break;
+      case 'asunto_adelanto':  content = <AsuntoAdelantoBlockView block={block} item={item} hideTitle isMobile={isMobile} />; break;
       default: content = null;
     }
     return (
@@ -452,10 +511,11 @@ function BlockView({ block, onPreview, theme, isMobile }) {
   }
 
   switch (block.type) {
-    case 'enlaces':      return <div style={wrapStyle}><EnlacesBlockView block={block} onPreview={onPreview} /></div>;
-    case 'imagen':       return <div style={wrapStyle}><ImagenBlockView block={block} onPreview={onPreview} /></div>;
-    case 'imagen_texto': return <div style={wrapStyle}><ImagenTextoBlockView block={block} onPreview={onPreview} isMobile={isMobile} /></div>;
-    case 'correccion':   return <div style={wrapStyle}><CorreccionBlockView block={block} onPreview={onPreview} /></div>;
+    case 'enlaces':         return <div style={wrapStyle}><EnlacesBlockView block={block} onPreview={onPreview} /></div>;
+    case 'imagen':          return <div style={wrapStyle}><ImagenBlockView block={block} onPreview={onPreview} /></div>;
+    case 'imagen_texto':    return <div style={wrapStyle}><ImagenTextoBlockView block={block} onPreview={onPreview} isMobile={isMobile} /></div>;
+    case 'correccion':      return <div style={wrapStyle}><CorreccionBlockView block={block} onPreview={onPreview} /></div>;
+    case 'asunto_adelanto': return <div style={wrapStyle}><AsuntoAdelantoBlockView block={block} item={item} isMobile={isMobile} /></div>;
     default: return null;
   }
 }
@@ -641,7 +701,7 @@ export default function BibliotecaItemPublica() {
         {(item.categoria === 'email' || item.categoria === 'ficha') && blocksData.blocks.length > 0 && (
           <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {blocksData.blocks.map(block => (
-              <BlockView key={block.id} block={block} onPreview={setLightbox} theme={theme} isMobile={isMobile} />
+              <BlockView key={block.id} block={block} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={item} />
             ))}
           </div>
         )}

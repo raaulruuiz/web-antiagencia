@@ -145,6 +145,13 @@ const IconCarousel = () => (
     <line x1="22" y1="9" x2="22" y2="15"/>
   </svg>
 );
+const IconAsuntoAdelanto = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <line x1="3" y1="12" x2="15" y2="12"/>
+    <line x1="3" y1="18" x2="18" y2="18"/>
+  </svg>
+);
 
 const CATEGORIAS = [
   { value: 'email', label: 'Email',            icon: <IconEmail /> },
@@ -174,10 +181,11 @@ const RESIZE_HANDLES = [
 
 // ── Block types ───────────────────────────────────────────────────────────────
 const BLOCK_TYPES = [
-  { type: 'enlaces',     label: 'Enlace',          icon: <IconChain /> },
-  { type: 'imagen',      label: 'Imagen',          icon: <IconImageBlock /> },
-  { type: 'imagen_texto',label: 'Imagen y/o Texto',  icon: <IconImageText /> },
-  { type: 'correccion',  label: 'Corrección',      icon: <IconCorrection /> },
+  { type: 'enlaces',        label: 'Enlace',              icon: <IconChain /> },
+  { type: 'imagen',         label: 'Imagen',              icon: <IconImageBlock /> },
+  { type: 'imagen_texto',   label: 'Imagen y/o Texto',    icon: <IconImageText /> },
+  { type: 'correccion',     label: 'Corrección',          icon: <IconCorrection /> },
+  { type: 'asunto_adelanto',label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -804,10 +812,12 @@ function BlockDivider({ onAdd }) {
 }
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
-const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7' };
-const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo' };
+const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b' };
+const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto' };
 
-function BlockSelector({ onSelect, hasCorreccion, onClose }) {
+function BlockSelector({ onSelect, hasCorreccion, onClose, categoria }) {
+  const mainTypes = BLOCK_TYPES.filter(bt => bt.type !== 'asunto_adelanto');
+  const c_aa = BLOCK_COLORS['asunto_adelanto'];
   return (
     <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 14, padding: '16px 16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -815,7 +825,7 @@ function BlockSelector({ onSelect, hasCorreccion, onClose }) {
         {onClose && <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {BLOCK_TYPES.map(bt => {
+        {mainTypes.map(bt => {
           const disabled = bt.type === 'correccion' && hasCorreccion;
           const c = BLOCK_COLORS[bt.type];
           return (
@@ -829,6 +839,15 @@ function BlockSelector({ onSelect, hasCorreccion, onClose }) {
           );
         })}
       </div>
+      {categoria === 'email' && (
+        <button onClick={() => onSelect('asunto_adelanto')}
+          style={{ width: '100%', height: 50, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px solid var(--t-border-mid)', borderRadius: 12, background: 'transparent', color: 'var(--t-text-muted)', cursor: 'pointer', transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = c_aa; e.currentTarget.style.color = c_aa; e.currentTarget.style.background = c_aa + '11'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}>
+          <span style={{ color: 'inherit' }}><IconAsuntoAdelanto /></span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: 'inherit' }}>Asunto y/o Adelanto</span>
+        </button>
+      )}
     </div>
   );
 }
@@ -1071,6 +1090,46 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               const second = imgFirst ? txtEl : imgEl;
               return (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasImage && hasText ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start' }}>
+                  {first}
+                  {second}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
+
+      {block.type === 'asunto_adelanto' && (() => {
+        const items = block.items || [];
+        const layout   = block.it_layout || 'img-text';
+        const isHoriz  = layout === 'img-text' || layout === 'text-img';
+        const fieldFirst = layout === 'img-text' || layout === 'img-top';
+        if (!items.length) return <div style={{ padding: '12px 14px' }}><span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span></div>;
+        return (
+          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {(block.titulo || block.subtitulo) && (
+              <div style={{ marginBottom: 2 }}>
+                {block.titulo && <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo}</div>}
+                {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
+              </div>
+            )}
+            {items.map((it, i) => {
+              const tc = it.text_color;
+              const hasField = it.show_asunto || it.show_adelanto;
+              const hasText  = it.texto?.trim();
+              const fieldEl = hasField ? (
+                <div style={{ padding: '8px 10px', borderRadius: 7, fontSize: 11, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {it.show_asunto && <span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Asunto</span>}
+                  {it.show_adelanto && <span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Adelanto</span>}
+                </div>
+              ) : null;
+              const txtEl = hasText ? (
+                <div style={{ padding: '10px 12px', borderRadius: 8, fontSize: 12, lineHeight: 1.6, textAlign: it.text_align || 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: tc ? tc + '22' : 'transparent', border: tc ? `1px solid ${tc}` : '1px solid var(--t-border)', color: tc || 'var(--t-text)' }}>{it.texto}</div>
+              ) : null;
+              const first = fieldFirst ? fieldEl : txtEl;
+              const second = fieldFirst ? txtEl : fieldEl;
+              return (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasField && hasText ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start' }}>
                   {first}
                   {second}
                 </div>
@@ -1918,6 +1977,119 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           </>
         )}
 
+        {draft.type === 'asunto_adelanto' && (() => {
+          const asuntoUsed = (draft.items || []).some(it => it.show_asunto);
+          const adelantoUsed = (draft.items || []).some(it => it.show_adelanto);
+          const canAddMore = !asuntoUsed || !adelantoUsed;
+          const updateAsItem = (idx, field, value) => {
+            const newItems = [...(draft.items || [])];
+            newItems[idx] = { ...newItems[idx], [field]: value };
+            update('items', newItems);
+          };
+          const addAsItem = () => {
+            update('items', [...(draft.items || []), { show_asunto: false, show_adelanto: false, texto: '', text_color: '', text_align: 'left' }]);
+          };
+          const removeAsItem = (idx) => {
+            update('items', (draft.items || []).filter((_, i) => i !== idx));
+          };
+          return (
+            <>
+              {/* Layout selector */}
+              <div>
+                <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Disposición</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                  {[
+                    { value: 'img-text',  label: 'Campo | Texto' },
+                    { value: 'text-img',  label: 'Texto | Campo' },
+                    { value: 'img-top',   label: 'Campo ↑  Texto ↓' },
+                    { value: 'text-top',  label: 'Texto ↑  Campo ↓' },
+                  ].map(opt => {
+                    const active = (draft.it_layout || 'img-text') === opt.value;
+                    return (
+                      <button key={opt.value} onClick={() => update('it_layout', opt.value)}
+                        style={{ background: active ? 'var(--t-surface2)' : 'transparent', border: `1px solid ${active ? '#6366f1' : 'var(--t-border-mid)'}`, borderRadius: 8, padding: '7px 10px', fontSize: 11, color: active ? '#a5b4fc' : 'var(--t-text-muted)', cursor: 'pointer', textAlign: 'center', fontWeight: active ? 600 : 400 }}>
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Items */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Elementos</label>
+                {(draft.items || []).map((it, itemIdx) => {
+                  const isAsuntoActive = it.show_asunto;
+                  const asuntoDisabledByOther = !it.show_asunto && asuntoUsed;
+                  const isAdelantoActive = it.show_adelanto;
+                  const adelantoDisabledByOther = !it.show_adelanto && adelantoUsed;
+                  return (
+                    <div key={itemIdx} style={{ border: '1px solid var(--t-border)', borderRadius: 10, padding: '12px 12px 10px', display: 'flex', flexDirection: 'column', gap: 8, position: 'relative' }}>
+                      {(draft.items || []).length > 1 && (
+                        <button onClick={() => removeAsItem(itemIdx)}
+                          style={{ position: 'absolute', top: 8, right: 8, background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}
+                          onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                          onMouseLeave={e => e.currentTarget.style.color = 'var(--t-text-subtle)'}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                      )}
+
+                      {/* Toggle buttons: Asunto / Adelanto */}
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                          disabled={asuntoDisabledByOther}
+                          onClick={() => !asuntoDisabledByOther && updateAsItem(itemIdx, 'show_asunto', !it.show_asunto)}
+                          style={{ flex: 1, background: isAsuntoActive ? 'var(--t-surface2)' : 'transparent', border: `1px dashed ${isAsuntoActive ? '#f59e0b' : 'var(--t-border-mid)'}`, borderRadius: 6, padding: '7px 8px', fontSize: 11, color: isAsuntoActive ? '#fcd34d' : 'var(--t-text-muted)', cursor: asuntoDisabledByOther ? 'not-allowed' : 'pointer', opacity: asuntoDisabledByOther ? 0.4 : 1, fontWeight: isAsuntoActive ? 600 : 400 }}>
+                          Asunto
+                        </button>
+                        <button
+                          disabled={adelantoDisabledByOther}
+                          onClick={() => !adelantoDisabledByOther && updateAsItem(itemIdx, 'show_adelanto', !it.show_adelanto)}
+                          style={{ flex: 1, background: isAdelantoActive ? 'var(--t-surface2)' : 'transparent', border: `1px dashed ${isAdelantoActive ? '#f59e0b' : 'var(--t-border-mid)'}`, borderRadius: 6, padding: '7px 8px', fontSize: 11, color: isAdelantoActive ? '#fcd34d' : 'var(--t-text-muted)', cursor: adelantoDisabledByOther ? 'not-allowed' : 'pointer', opacity: adelantoDisabledByOther ? 0.4 : 1, fontWeight: isAdelantoActive ? 600 : 400 }}>
+                          Adelanto
+                        </button>
+                      </div>
+
+                      {/* Text */}
+                      <textarea value={it.texto || ''} onChange={e => updateAsItem(itemIdx, 'texto', e.target.value)}
+                        rows={3} placeholder="Análisis y comentarios…"
+                        style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+
+                      {/* Text styling */}
+                      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Color</label>
+                          <InlineColorPicker value={it.text_color || ''} onChange={c => updateAsItem(itemIdx, 'text_color', c)} />
+                        </div>
+                        <div style={{ display: 'flex', gap: 3 }}>
+                          {[['left','≡L'], ['center','≡C'], ['right','≡R'], ['justify','≡']].map(([val, icon]) => {
+                            const active = (it.text_align || 'left') === val;
+                            return (
+                              <button key={val} onClick={() => updateAsItem(itemIdx, 'text_align', val)}
+                                title={val}
+                                style={{ background: active ? 'var(--t-border)' : 'transparent', border: `1px solid ${active ? 'var(--t-text-muted)' : 'var(--t-border)'}`, borderRadius: 5, width: 28, height: 26, cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? 'var(--t-text)' : 'var(--t-text-subtle)', fontWeight: active ? 700 : 400 }}>
+                                {icon}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {canAddMore && (
+                  <button onClick={addAsItem}
+                    style={{ background: 'transparent', border: '1px dashed var(--t-border)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text-subtle)'; }}>
+                    + Añadir otro elemento
+                  </button>
+                )}
+              </div>
+            </>
+          );
+        })()}
+
         {draft.type === 'correccion' && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -2256,7 +2428,7 @@ export default function BibliotecaItem() {
       links_layout: 'columna',
       images_layout: 'columna',
       it_layout: 'img-text',
-      items: type === 'imagen_texto' ? [{ image: null, texto: '', text_color: '', text_align: 'left' }] : [],
+      items: type === 'imagen_texto' ? [{ image: null, texto: '', text_color: '', text_align: 'left' }] : type === 'asunto_adelanto' ? [{ show_asunto: false, show_adelanto: false, texto: '', text_color: '', text_align: 'left' }] : [],
       email_blocks: [],
       texto: '',
       nota: '',
@@ -2477,6 +2649,7 @@ export default function BibliotecaItem() {
               hasCorreccion={blocksData.some(b => b.type === 'correccion')}
               onSelect={(type) => { addBlock(type, insertAtIndex); setInsertAtIndex(null); setShowBlockSelectorModal(false); }}
               onClose={() => { setShowBlockSelectorModal(false); setInsertAtIndex(null); }}
+              categoria={categoria}
             />
           </div>
         </div>
