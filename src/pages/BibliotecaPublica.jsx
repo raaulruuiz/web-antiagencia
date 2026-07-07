@@ -364,10 +364,16 @@ export default function BibliotecaPublica() {
                 </div>
               ) : (
                 <div key={item.id} onClick={() => navigate(`/anti-biblioteca/${item.id}`)} style={{ cursor: 'pointer' }}>
-                  <div style={{ aspectRatio: '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', transition: 'border-color 0.15s' }}
+                  {item.categoria === 'email' && item.asunto && (
+                    <p style={{ fontSize: 11, color: '#71717a', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.asunto}>{item.asunto}</p>
+                  )}
+                  {item.categoria === 'ficha' && item.ficha_url && (
+                    <p style={{ fontSize: 11, color: '#71717a', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.ficha_url}>{item.ficha_url}</p>
+                  )}
+                  <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', transition: 'border-color 0.15s' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = '#27272a'}>
-                    <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+                    <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block' }} loading="lazy" />
                   </div>
                   <BibliotecaCardMeta item={item} allTags={allTags} />
                 </div>

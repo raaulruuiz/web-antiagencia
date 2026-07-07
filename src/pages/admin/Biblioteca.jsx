@@ -509,8 +509,14 @@ export default function Biblioteca() {
             return (
               <div key={item.id} className="group relative cursor-pointer"
                 onClick={() => { if (selecting) { toggleSelect(item.id); return; } navigate(`/admin/biblioteca/${item.id}`); }}>
-                <div className="aspect-video bg-zinc-900 rounded-lg overflow-hidden border transition-colors relative" style={{ borderColor: isSelected ? '#fff' : 'var(--t-border)' }}>
-                  <img src={item.url} alt={item.filename} className="w-full h-full object-cover" loading="lazy" />
+                {item.categoria === 'email' && item.asunto && (
+                  <p style={{ fontSize: 11, color: 'var(--t-text-muted)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.asunto}>{item.asunto}</p>
+                )}
+                {item.categoria === 'ficha' && item.ficha_url && (
+                  <p style={{ fontSize: 11, color: 'var(--t-text-muted)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.ficha_url}>{item.ficha_url}</p>
+                )}
+                <div className="bg-zinc-900 rounded-lg overflow-hidden border transition-colors relative" style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', borderColor: isSelected ? '#fff' : 'var(--t-border)' }}>
+                  <img src={item.url} alt={item.filename} className="w-full h-full object-cover" style={{ objectPosition: item.categoria === 'email' ? 'top' : 'center' }} loading="lazy" />
 
                   {/* Permanent badge — visible at a glance when item is hidden */}
                   {item.publico === false && (
