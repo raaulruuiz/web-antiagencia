@@ -1119,8 +1119,8 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               const hasText  = it.texto?.trim();
               const fieldEl = hasField ? (
                 <div style={{ padding: '8px 10px', borderRadius: 7, fontSize: 11, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {it.show_asunto && <><span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Asunto</span>{itemAsunto && <span style={{ fontSize: 11, color: 'var(--t-text-muted)', marginTop: 2 }}>{itemAsunto}</span>}</>}
-                  {it.show_adelanto && <><span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Adelanto</span>{itemAdelanto && <span style={{ fontSize: 11, color: 'var(--t-text-muted)', marginTop: 2 }}>{itemAdelanto}</span>}</>}
+                  {it.show_asunto && <><span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Asunto</span>{itemAsunto && <span style={{ fontSize: 12, color: '#ffffff', marginTop: 2 }}>{itemAsunto}</span>}</>}
+                  {it.show_adelanto && <><span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Adelanto</span>{itemAdelanto && <span style={{ fontSize: 12, color: '#ffffff', marginTop: 2 }}>{itemAdelanto}</span>}</>}
                 </div>
               ) : null;
               const txtEl = hasText ? (
