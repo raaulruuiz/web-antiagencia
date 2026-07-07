@@ -192,6 +192,85 @@ function ConfirmVisibilidadModal({ count, publico, onConfirm, onCancel }) {
   );
 }
 
+function BulkSectorsPanel({ allSectors, selectedItems, onAdd, onRemove, onCreateSector }) {
+  const [newName, setNewName] = useState('');
+
+  return (
+    <div style={{ marginBottom: 12, background: 'var(--t-surface)', border: '1px solid #27272a', borderRadius: 12, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <span style={{ fontSize: 11, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Sectores — {selectedItems.length} {selectedItems.length === 1 ? 'elemento' : 'elementos'}</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {allSectors.map(s => {
+          const allHave = selectedItems.every(i => (i.sector || []).includes(s.id));
+          const noneHave = selectedItems.every(i => !(i.sector || []).includes(s.id));
+          return (
+            <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 4, background: s.color + '18', border: `1px solid ${s.color}`, borderRadius: 999, padding: '2px 4px 2px 8px' }}>
+              <span style={{ fontSize: 11, fontWeight: 500, color: s.color }}>{s.name}</span>
+              {!allHave && (
+                <button onClick={() => onAdd(s.id)} title="Añadir a todos"
+                  style={{ background: s.color + '33', border: 'none', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: s.color, fontSize: 13, lineHeight: 1, fontWeight: 700 }}>+</button>
+              )}
+              {!noneHave && (
+                <button onClick={() => onRemove(s.id)} title="Quitar de todos"
+                  style={{ background: 'rgba(239,68,68,0.15)', border: 'none', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#f87171', fontSize: 13, lineHeight: 1 }}>−</button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Nuevo sector…"
+          style={{ background: 'var(--t-surface2)', border: '1px solid #27272a', borderRadius: 8, padding: '5px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', flex: 1 }}
+          onKeyDown={e => { if (e.key === 'Enter' && newName.trim()) { onCreateSector(newName.trim()); setNewName(''); } }} />
+        <button onClick={() => { if (newName.trim()) { onCreateSector(newName.trim()); setNewName(''); } }}
+          style={{ background: 'var(--t-border)', border: 'none', borderRadius: 8, padding: '5px 12px', fontSize: 12, color: 'var(--t-text)', cursor: 'pointer' }}>Crear</button>
+      </div>
+    </div>
+  );
+}
+
+function BulkTagsPanel({ allTags, selectedItems, onAdd, onRemove }) {
+  const categorias = [...new Set(selectedItems.map(i => i.categoria).filter(Boolean))];
+  const mixedCat = categorias.length > 1;
+  const sharedCat = categorias.length === 1 ? categorias[0] : null;
+
+  const scopedTags = sharedCat === 'ficha'
+    ? allTags.filter(t => t.subcategoria === 'ficha')
+    : sharedCat === 'email'
+      ? allTags.filter(t => t.subcategoria === 'email' || !t.subcategoria)
+      : [];
+
+  return (
+    <div style={{ marginBottom: 12, background: 'var(--t-surface)', border: '1px solid #27272a', borderRadius: 12, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <span style={{ fontSize: 11, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas — {selectedItems.length} {selectedItems.length === 1 ? 'elemento' : 'elementos'}</span>
+      {mixedCat ? (
+        <p style={{ fontSize: 12, color: '#f87171', margin: 0 }}>Los elementos seleccionados tienen distintas categorías (Email y Ficha). Selecciona solo una categoría para editar etiquetas.</p>
+      ) : scopedTags.length === 0 ? (
+        <p style={{ fontSize: 12, color: 'var(--t-text-muted)', margin: 0 }}>No hay etiquetas disponibles para {sharedCat === 'email' ? 'emails' : 'fichas de producto'}.</p>
+      ) : (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {scopedTags.map(t => {
+            const allHave = selectedItems.every(i => (i.tags || []).includes(t.id));
+            const noneHave = selectedItems.every(i => !(i.tags || []).includes(t.id));
+            return (
+              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 4, background: t.color + '18', border: `1px solid ${t.color}`, borderRadius: 999, padding: '2px 4px 2px 8px' }}>
+                <span style={{ fontSize: 11, fontWeight: 500, color: t.color }}>{t.name}</span>
+                {!allHave && (
+                  <button onClick={() => onAdd(t.id)} title="Añadir a todos"
+                    style={{ background: t.color + '33', border: 'none', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.color, fontSize: 13, lineHeight: 1, fontWeight: 700 }}>+</button>
+                )}
+                {!noneHave && (
+                  <button onClick={() => onRemove(t.id)} title="Quitar de todos"
+                    style={{ background: 'rgba(239,68,68,0.15)', border: 'none', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#f87171', fontSize: 13, lineHeight: 1 }}>−</button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const btnStyle = (active) => ({
   fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, cursor: 'pointer', transition: 'all 0.15s', border: '1px solid',
   borderColor: active ? '#52525b' : '#3f3f46',
@@ -234,6 +313,10 @@ export default function Biblioteca() {
   const [filterFechaTo, setFilterFechaTo]     = useState('');
 
   const activeFilterCount = [filterCategoria, filterSubcat, filterMarca, filterTagId, (filterFechaFrom || filterFechaTo) ? '1' : ''].filter(Boolean).length;
+
+  // Bulk sector/tag panel
+  const [showBulkSectors, setShowBulkSectors] = useState(false);
+  const [showBulkTags, setShowBulkTags] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -317,7 +400,7 @@ export default function Biblioteca() {
 
   const askDelete = (ids) => setConfirm({ ids });
   const toggleSelect = (id) => { setSelected(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; }); };
-  const exitSelect = () => { setSelecting(false); setSelected(new Set()); };
+  const exitSelect = () => { setSelecting(false); setSelected(new Set()); setShowBulkSectors(false); setShowBulkTags(false); };
 
   const togglePublico = useCallback(async (id, current) => {
     const next = current === false ? true : false;
@@ -350,6 +433,56 @@ export default function Biblioteca() {
 
   const askBulkVisibilidad = (publico) => setConfirmVis({ publico });
 
+  const bulkAddSector = useCallback(async (sectorId) => {
+    const ids = [...selected];
+    setItems(prev => prev.map(i => ids.includes(i.id) && !(i.sector || []).includes(sectorId)
+      ? { ...i, sector: [...(i.sector || []), sectorId] } : i));
+    const token = await getToken();
+    await Promise.all(ids.map(id => {
+      const item = items.find(i => i.id === id);
+      const cur = item?.sector || [];
+      if (cur.includes(sectorId)) return;
+      const ns = [...cur, sectorId];
+      return fetch(`${API_BASE}/biblioteca/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ sector: ns }) });
+    }));
+  }, [selected, items]);
+
+  const bulkRemoveSector = useCallback(async (sectorId) => {
+    const ids = [...selected];
+    setItems(prev => prev.map(i => ids.includes(i.id) ? { ...i, sector: (i.sector || []).filter(x => x !== sectorId) } : i));
+    const token = await getToken();
+    await Promise.all(ids.map(id => {
+      const item = items.find(i => i.id === id);
+      const ns = (item?.sector || []).filter(x => x !== sectorId);
+      return fetch(`${API_BASE}/biblioteca/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ sector: ns }) });
+    }));
+  }, [selected, items]);
+
+  const bulkAddTag = useCallback(async (tagId) => {
+    const ids = [...selected];
+    setItems(prev => prev.map(i => ids.includes(i.id) && !(i.tags || []).includes(tagId)
+      ? { ...i, tags: [...(i.tags || []), tagId] } : i));
+    const token = await getToken();
+    await Promise.all(ids.map(id => {
+      const item = items.find(i => i.id === id);
+      const cur = item?.tags || [];
+      if (cur.includes(tagId)) return;
+      const nt = [...cur, tagId];
+      return fetch(`${API_BASE}/biblioteca/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ tags: nt }) });
+    }));
+  }, [selected, items]);
+
+  const bulkRemoveTag = useCallback(async (tagId) => {
+    const ids = [...selected];
+    setItems(prev => prev.map(i => ids.includes(i.id) ? { ...i, tags: (i.tags || []).filter(x => x !== tagId) } : i));
+    const token = await getToken();
+    await Promise.all(ids.map(id => {
+      const item = items.find(i => i.id === id);
+      const nt = (item?.tags || []).filter(x => x !== tagId);
+      return fetch(`${API_BASE}/biblioteca/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ tags: nt }) });
+    }));
+  }, [selected, items]);
+
   const inputStyle = { background: 'var(--t-surface2)', border: '1px solid #27272a', borderRadius: 8, padding: '5px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark' };
   const selectStyle = { ...inputStyle, cursor: 'pointer' };
 
@@ -378,6 +511,16 @@ export default function Biblioteca() {
                   <button onClick={() => askBulkVisibilidad(false)}
                     className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors">
                     <EyeOffIcon /> Ocultar
+                  </button>
+                  <button onClick={() => { setShowBulkSectors(v => !v); setShowBulkTags(false); }}
+                    className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors"
+                    style={{ borderColor: showBulkSectors ? 'var(--t-border-muted)' : undefined, color: showBulkSectors ? 'white' : undefined }}>
+                    Sectores
+                  </button>
+                  <button onClick={() => { setShowBulkTags(v => !v); setShowBulkSectors(false); }}
+                    className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors"
+                    style={{ borderColor: showBulkTags ? 'var(--t-border-muted)' : undefined, color: showBulkTags ? 'white' : undefined }}>
+                    Etiquetas
                   </button>
                 </>
               )}
@@ -441,6 +584,33 @@ export default function Biblioteca() {
           )}
         </div>
       </div>
+
+      {/* Bulk Sectors panel */}
+      {selecting && showBulkSectors && (
+        <BulkSectorsPanel
+          allSectors={allSectors}
+          selectedItems={items.filter(i => selected.has(i.id))}
+          onAdd={bulkAddSector}
+          onRemove={bulkRemoveSector}
+          onCreateSector={async (name) => {
+            try {
+              const token = await getToken();
+              const res = await fetch(`${API_BASE}/biblioteca/sectores`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name, color: '#6366f1' }) });
+              if (res.ok) { const ns = await res.json(); setAllSectors(prev => [...prev, ns]); }
+            } catch (_) {}
+          }}
+        />
+      )}
+
+      {/* Bulk Tags panel */}
+      {selecting && showBulkTags && (
+        <BulkTagsPanel
+          allTags={allTags}
+          selectedItems={items.filter(i => selected.has(i.id))}
+          onAdd={bulkAddTag}
+          onRemove={bulkRemoveTag}
+        />
+      )}
 
       {/* Search bar */}
       {showSearch && (
