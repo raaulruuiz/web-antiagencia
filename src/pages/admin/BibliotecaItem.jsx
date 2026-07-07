@@ -2264,7 +2264,7 @@ export default function BibliotecaItem() {
     };
     setBlocksData(prev => {
       let next;
-      if (atIndex !== null) {
+      if (atIndex !== null && type !== 'correccion') {
         next = [...prev.slice(0, atIndex), newBlock, ...prev.slice(atIndex)];
       } else {
         const correccionIdx = prev.findIndex(b => b.type === 'correccion');
