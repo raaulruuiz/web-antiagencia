@@ -124,6 +124,8 @@ export default function HomeV2() {
                 Así que este es el trato, tú me dejas <span className="underline">tu email</span> y yo te mando:
               </p>
 
+              <br />
+
               <ul className="mt-2 mb-6 space-y-4 list-none pl-0">
                 <li className="flex items-start gap-3">
                   <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
