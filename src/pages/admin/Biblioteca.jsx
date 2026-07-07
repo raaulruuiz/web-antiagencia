@@ -204,6 +204,7 @@ export default function Biblioteca() {
   const { theme, toggle } = useTheme();
   const [items, setItems]         = useState([]);
   const [allTags, setAllTags]     = useState([]);
+  const [allSectors, setAllSectors] = useState([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState(null);
   const [selecting, setSelecting] = useState(false);
@@ -240,13 +241,15 @@ export default function Biblioteca() {
     try {
       const token = await getToken();
       if (!token) throw new Error('Sin sesión');
-      const [itemsRes, tagsRes] = await Promise.all([
+      const [itemsRes, tagsRes, sectorsRes] = await Promise.all([
         fetch(`${API_BASE}/biblioteca`, { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch(`${API_BASE}/biblioteca/tags`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_BASE}/biblioteca/sectores`, { headers: { 'Authorization': `Bearer ${token}` } }),
       ]);
       if (!itemsRes.ok) throw new Error('Error al cargar');
       setItems(await itemsRes.json());
       if (tagsRes.ok) setAllTags(await tagsRes.json());
+      if (sectorsRes.ok) setAllSectors(await sectorsRes.json());
     } catch(e) {
       setError(e.message);
     } finally {
@@ -592,7 +595,7 @@ export default function Biblioteca() {
                     </div>
                   )}
                 </div>
-                <BibliotecaCardMeta item={item} allTags={allTags} />
+                <BibliotecaCardMeta item={item} allTags={allTags} allSectors={allSectors} />
               </div>
             );
           })}

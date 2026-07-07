@@ -528,6 +528,7 @@ export default function BibliotecaItemPublica() {
   const { theme, toggle } = useTheme();
   const [item, setItem]       = useState(null);
   const [allTags, setAllTags] = useState([]);
+  const [allSectors, setAllSectors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
   const [lightbox, setLightbox] = useState(null);
@@ -546,8 +547,9 @@ export default function BibliotecaItemPublica() {
     Promise.all([
       fetch(`${API_BASE}/biblioteca/${id}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(r.status === 404 ? 'No encontrado' : 'Error')),
       fetch(`${API_BASE}/biblioteca/tags/public`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []),
+      fetch(`${API_BASE}/biblioteca/sectores/public`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []),
     ])
-      .then(([itemData, tagsData]) => { setItem(itemData); setAllTags(tagsData); })
+      .then(([itemData, tagsData, sectorsData]) => { setItem(itemData); setAllTags(tagsData); setAllSectors(sectorsData); })
       .catch(e => setError(typeof e === 'string' ? e : 'Error al cargar'))
       .finally(() => setLoading(false));
   }, [id]);
@@ -574,6 +576,7 @@ export default function BibliotecaItemPublica() {
   const enviadoDisplay  = item.enviado_el ? (() => { const s = new Date(item.enviado_el + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }); return s.charAt(0).toUpperCase() + s.slice(1); })() : null;
   const fechaAnalisisDisplay = item.fecha_analisis ? new Date(item.fecha_analisis + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
   const resolvedTags    = (item.tags || []).map(tid => allTags.find(t => t.id === tid)).filter(Boolean);
+  const resolvedSectors = (item.sector || []).map(sid => allSectors.find(s => s.id === sid)).filter(Boolean);
   const blocksData      = item.blocks_data && item.blocks_data.blocks ? item.blocks_data : { blocks: [] };
 
   return (
@@ -637,13 +640,23 @@ export default function BibliotecaItemPublica() {
           {hasRightContent && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-              {/* Categoria / Subcategoria */}
-              {(item.categoria || item.subcategoria) && (
+              {/* Categoria / Sector / Subcategoria */}
+              {(item.categoria || resolvedSectors.length > 0 || item.subcategoria) && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {item.categoria && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
                       <Pill colors={CATEGORIA_COLORS[item.categoria] || { bg: '#18181b', border: '#27272a', color: 'var(--t-text)' }} label={CATEGORIAS[item.categoria] || item.categoria} />
+                    </div>
+                  )}
+                  {resolvedSectors.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Sector</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                        {resolvedSectors.map(s => (
+                          <span key={s.id} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', background: s.color + '22', border: `1px solid ${s.color}`, color: s.color }}>{s.name}</span>
+                        ))}
+                      </div>
                     </div>
                   )}
                   {item.subcategoria && (

@@ -10,9 +10,10 @@ const SUBCAT_TEXT = {
   light: { automatizacion: '#15803d', campana: '#c2410c' },
 };
 
-export default function BibliotecaCardMeta({ item, allTags = [], hideSubtext = false }) {
+export default function BibliotecaCardMeta({ item, allTags = [], allSectors = [], hideSubtext = false }) {
   const { theme } = useTheme();
   const resolvedTags = (item.tags || []).map(id => allTags.find(t => t.id === id)).filter(Boolean);
+  const resolvedSectors = (item.sector || []).map(id => allSectors.find(s => s.id === id)).filter(Boolean);
 
   return (
     <div style={{ marginTop: 4 }}>
@@ -30,7 +31,7 @@ export default function BibliotecaCardMeta({ item, allTags = [], hideSubtext = f
           {item.categoria === 'email' ? item.asunto : item.ficha_url}
         </p>
       )}
-      {(item.categoria || item.subcategoria || resolvedTags.length > 0) && (
+      {(item.categoria || resolvedSectors.length > 0 || item.subcategoria || resolvedTags.length > 0) && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 3 }}>
           {item.categoria && (
             <span style={{
@@ -42,6 +43,16 @@ export default function BibliotecaCardMeta({ item, allTags = [], hideSubtext = f
               {item.categoria === 'email' ? 'Email' : 'Ficha'}
             </span>
           )}
+          {resolvedSectors.map(s => (
+            <span key={s.id} style={{
+              fontSize: 10, borderRadius: 999, padding: '1px 7px', fontWeight: 500,
+              background: s.color + '22',
+              border: `1px solid ${s.color}`,
+              color: s.color,
+            }}>
+              {s.name}
+            </span>
+          ))}
           {item.subcategoria && (
             <span style={{
               fontSize: 10, borderRadius: 999, padding: '1px 7px', fontWeight: 500,

@@ -196,6 +196,7 @@ export default function BibliotecaPublica() {
   const [acceso, setAcceso] = useState(() => !!loadSession());
   const [items, setItems]     = useState([]);
   const [allTags, setAllTags] = useState([]);
+  const [allSectors, setAllSectors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
 
@@ -224,6 +225,7 @@ export default function BibliotecaPublica() {
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
     fetch(`${API_BASE}/biblioteca/tags/public`).then(r => r.ok ? r.json() : []).then(setAllTags).catch(() => {});
+    fetch(`${API_BASE}/biblioteca/sectores/public`).then(r => r.ok ? r.json() : []).then(setAllSectors).catch(() => {});
   }, []);
 
   const filteredItems = useMemo(() => {
@@ -360,7 +362,7 @@ export default function BibliotecaPublica() {
                       </div>
                     </div>
                   </div>
-                  <BibliotecaCardMeta item={item} allTags={allTags} hideSubtext />
+                  <BibliotecaCardMeta item={item} allTags={allTags} allSectors={allSectors} hideSubtext />
                 </div>
               ) : (
                 <div key={item.id} onClick={() => navigate(`/anti-biblioteca/${item.id}`)} style={{ cursor: 'pointer' }}>
@@ -369,7 +371,7 @@ export default function BibliotecaPublica() {
                     onMouseLeave={e => e.currentTarget.style.borderColor = '#27272a'}>
                     <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block' }} loading="lazy" />
                   </div>
-                  <BibliotecaCardMeta item={item} allTags={allTags} />
+                  <BibliotecaCardMeta item={item} allTags={allTags} allSectors={allSectors} />
                 </div>
               );
             })}

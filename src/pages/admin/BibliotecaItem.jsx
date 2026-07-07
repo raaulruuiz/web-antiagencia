@@ -403,6 +403,69 @@ function TagEditor({ tag, onUpdate, onClose }) {
   );
 }
 
+// ── DisplaySectorPicker ───────────────────────────────────────────────────────
+function DisplaySectorPicker({ allSectors, selectedIds, onToggle, onCreateSector }) {
+  const [showDrop, setShowDrop] = useState(false);
+  const [input, setInput] = useState('');
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setShowDrop(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+
+  const available = allSectors.filter(s => !selectedIds.includes(s.id));
+  const filtered = input.length > 0 ? allSectors.filter(s => s.name.toLowerCase().includes(input.toLowerCase())) : available;
+  const exactMatch = allSectors.find(s => s.name.toLowerCase() === input.trim().toLowerCase());
+  const canCreate = input.trim().length > 0 && !exactMatch;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Sector</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
+        {selectedIds.map(sid => {
+          const s = allSectors.find(x => x.id === sid);
+          if (!s) return null;
+          return (
+            <span key={sid} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 6px 2px 8px', background: s.color + '22', border: `1px solid ${s.color}`, color: s.color }}>
+              {s.name}
+              <button onClick={() => onToggle(sid)} style={{ background: 'none', border: 'none', color: s.color, cursor: 'pointer', padding: 0, opacity: 0.7, lineHeight: 1, fontSize: 14 }}>×</button>
+            </span>
+          );
+        })}
+        <div ref={ref} style={{ position: 'relative' }}>
+          <button onClick={() => setShowDrop(v => !v)}
+            style={{ width: 24, height: 24, borderRadius: '50%', border: '1px solid var(--t-border-mid)', background: 'transparent', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, lineHeight: 1 }}>+</button>
+          {showDrop && (
+            <div style={{ position: 'absolute', top: '100%', left: 0, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', borderRadius: 8, marginTop: 4, zIndex: 20, minWidth: 160, overflow: 'hidden' }}>
+              <input autoFocus value={input} onChange={e => setInput(e.target.value)} placeholder="Buscar o crear…"
+                style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid var(--t-border)', padding: '7px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }}
+                onKeyDown={e => { if (e.key === 'Enter' && canCreate) { onCreateSector(input.trim()); setInput(''); setShowDrop(false); } }} />
+              {filtered.map(s => (
+                <div key={s.id} onMouseDown={() => { onToggle(s.id); setShowDrop(false); setInput(''); }}
+                  style={{ padding: '6px 10px', fontSize: 12, color: s.color, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--t-border)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: s.color, flexShrink: 0 }} />{s.name}
+                </div>
+              ))}
+              {canCreate && (
+                <div onMouseDown={() => { onCreateSector(input.trim()); setInput(''); setShowDrop(false); }}
+                  style={{ padding: '6px 10px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer', borderTop: filtered.length ? '1px solid var(--t-border)' : 'none' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--t-border)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  + Crear "{input.trim()}"
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── TagPicker ─────────────────────────────────────────────────────────────────
 function TagPicker({ selectedIds, allTags, categoria, subcategoria, onAdd, onRemove, onCreateTag, onUpdateTag, onDeleteTag, onUpdateTagColor }) {
   const [input, setInput]       = useState('');
@@ -412,12 +475,10 @@ function TagPicker({ selectedIds, allTags, categoria, subcategoria, onAdd, onRem
   const [hoverTagId, setHoverTagId] = useState(null);
   const inputRef = useRef(null);
 
-  // Scope tags: ficha sees only ficha tags; email sees tags scoped to its subcategoria (or global email tags)
+  // Scope tags by categoria: ficha sees only ficha tags; email sees email tags (shared across all subcategories)
   const scopedTags = categoria === 'ficha'
     ? allTags.filter(t => t.subcategoria === 'ficha')
-    : subcategoria
-      ? allTags.filter(t => t.subcategoria !== 'ficha' && (!t.subcategoria || t.subcategoria === subcategoria))
-      : allTags.filter(t => t.subcategoria !== 'ficha');
+    : allTags.filter(t => t.subcategoria === 'email' || !t.subcategoria);
   const available  = scopedTags.filter(t => !selectedIds.includes(t.id));
   const filtered   = input.length > 0 ? available.filter(t => t.name.toLowerCase().includes(input.toLowerCase())) : available;
   const exactMatch = scopedTags.find(t => t.name.toLowerCase() === input.trim().toLowerCase());
@@ -427,7 +488,7 @@ function TagPicker({ selectedIds, allTags, categoria, subcategoria, onAdd, onRem
 
   const handleCreate = () => {
     const color = TAG_PALETTE[Math.floor(Math.random() * TAG_PALETTE.length)];
-    const scope = categoria === 'ficha' ? 'ficha' : subcategoria;
+    const scope = categoria === 'ficha' ? 'ficha' : 'email';
     onCreateTag(input.trim(), color, scope);
     setInput('');
     setShowDrop(false);
@@ -2145,6 +2206,12 @@ export default function BibliotecaItem() {
   const [itemTags, setItemTags] = useState([]);
   const [obTags, setObTags]     = useState([]);
 
+  // ── Sectors state ────────────────────────────────────────────────────────
+  const [allSectors, setAllSectors] = useState([]);
+  const [sector, setSector]         = useState([]);   // display mode: uuid[]
+  const [obSector, setObSector]     = useState([]);   // onboarding: uuid[]
+  const [sectorInput, setSectorInput] = useState('');
+
   // ── Onboarding state ─────────────────────────────────────────────────────
   const [mode, setMode]             = useState('onboarding');
   const [obStep, setObStep]         = useState('categoria');
@@ -2201,6 +2268,7 @@ export default function BibliotecaItem() {
         setItem(data);
         setCategoria(data.categoria || null);
         setSubcat(data.subcategoria || null);
+        setSector(data.sector || []);
         setMarca(data.marca  ?? null);
         setAsunto(data.asunto ?? null);
         setAdelanto(data.adelanto ?? null);
@@ -2225,6 +2293,8 @@ export default function BibliotecaItem() {
       if (token2) {
         fetch(`${API_BASE}/biblioteca/tags`, { headers: { Authorization: `Bearer ${token2}` } })
           .then(r => r.ok ? r.json() : []).then(setAllTags).catch(() => {});
+        fetch(`${API_BASE}/biblioteca/sectores`, { headers: { Authorization: `Bearer ${token2}` } })
+          .then(r => r.ok ? r.json() : []).then(setAllSectors).catch(() => {});
       }
     })();
   }, [id, navigate]);
@@ -2273,7 +2343,7 @@ export default function BibliotecaItem() {
     finally { setDetecting(false); }
   };
 
-  const handleObCategoria = (v) => { setObCategoria(v); setObStep(v === 'email' ? 'subcategoria' : 'campos'); };
+  const handleObCategoria = (v) => { setObCategoria(v); setObStep('sector'); };
   const handleObSubcat    = (v) => { setObSubcat(v);    setObStep('campos'); };
 
   const handleGuardar = async () => {
@@ -2285,6 +2355,7 @@ export default function BibliotecaItem() {
     const updates = {
       categoria: obCategoria,
       subcategoria: obCategoria === 'email' ? obSubcat : null,
+      sector: obSector,
       marca: marcaTrimmed,
       asunto: obCategoria === 'email' ? obAsunto.trim() : null,
       adelanto: obCategoria === 'email' ? obAdelanto.trim() : null,
@@ -2307,6 +2378,7 @@ export default function BibliotecaItem() {
         setItem(data);
         setCategoria(data.categoria);
         setSubcat(data.subcategoria);
+        setSector(data.sector || []);
         setMarca(data.marca ?? null);
         setAsunto(data.asunto ?? null);
         setAdelanto(data.adelanto ?? null);
@@ -2713,8 +2785,18 @@ export default function BibliotecaItem() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
-                    <Tag colors={CAT_COLORS[obCategoria]} label={catLabel(obCategoria)} onRemove={() => { setObCategoria(null); setObSubcat(null); setObStep('categoria'); }} />
+                    <Tag colors={CAT_COLORS[obCategoria]} label={catLabel(obCategoria)} onRemove={() => { setObCategoria(null); setObSubcat(null); setObSector([]); setObStep('categoria'); }} />
                   </div>
+                  {obSector.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Sector</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {obSector.map(sid => { const s = allSectors.find(x => x.id === sid); if (!s) return null; return (
+                          <Tag key={sid} colors={{ bg: s.color + '22', border: s.color, text: s.color }} label={s.name} onRemove={() => setObSector(prev => prev.filter(x => x !== sid))} />
+                        ); })}
+                      </div>
+                    </div>
+                  )}
                   {obSubcat && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
@@ -2728,6 +2810,58 @@ export default function BibliotecaItem() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <span style={{ fontSize: 18, fontWeight: 500, color: 'var(--t-text)' }}>¿Email o Ficha de Producto?</span>
                   <CatButtons options={CATEGORIAS} colors={CAT_COLORS} onSelect={handleObCategoria} />
+                </div>
+              )}
+
+              {obStep === 'sector' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <span style={{ fontSize: 18, fontWeight: 500, color: 'var(--t-text)' }}>Elige Sector</span>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      value={sectorInput}
+                      onChange={e => setSectorInput(e.target.value)}
+                      placeholder="Añadir nuevo sector…"
+                      style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }}
+                      onKeyDown={async e => {
+                        if (e.key === 'Enter' && sectorInput.trim()) {
+                          const name = sectorInput.trim();
+                          const exists = allSectors.find(s => s.name.toLowerCase() === name.toLowerCase());
+                          if (exists) {
+                            if (!obSector.includes(exists.id)) setObSector(prev => [...prev, exists.id]);
+                          } else {
+                            try {
+                              const token = await getToken();
+                              const res = await fetch(`${API_BASE}/biblioteca/sectores`, {
+                                method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ name, color: '#6366f1' }),
+                              });
+                              if (res.ok) { const ns = await res.json(); setAllSectors(prev => [...prev, ns]); setObSector(prev => [...prev, ns.id]); }
+                            } catch (_) {}
+                          }
+                          setSectorInput('');
+                        }
+                      }}
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    {allSectors.map(s => {
+                      const selected = obSector.includes(s.id);
+                      return (
+                        <button key={s.id} onClick={() => setObSector(prev => selected ? prev.filter(x => x !== s.id) : [...prev, s.id])}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: 8, border: `1px solid ${selected ? s.color : 'var(--t-border)'}`, background: selected ? s.color + '22' : 'transparent', color: selected ? s.color : 'var(--t-text)', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left' }}>
+                          <span>{s.name}</span>
+                          {selected && <span style={{ fontSize: 14 }}>✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button
+                    onClick={() => setObStep(obCategoria === 'email' ? 'subcategoria' : 'campos')}
+                    disabled={obSector.length === 0}
+                    style={{ width: '100%', background: obSector.length === 0 ? 'var(--t-border-mid)' : 'white', color: obSector.length === 0 ? 'var(--t-text-placeholder)' : 'black', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: obSector.length === 0 ? 'not-allowed' : 'pointer' }}>
+                    Continuar
+                  </button>
                 </div>
               )}
 
@@ -2860,19 +2994,16 @@ export default function BibliotecaItem() {
                   {saving ? 'Guardando…' : 'Guardar'}
                 </button>
               )}
-              {obStep !== 'categoria' && (
+              {obStep !== 'categoria' && obStep !== 'sector' && (
                 <button
                   onClick={() => {
                     if (obStep === 'subcategoria') {
-                      setObCategoria(null);
-                      setObSubcat(null);
-                      setObStep('categoria');
+                      setObStep('sector');
                     } else if (obStep === 'campos') {
                       if (obCategoria === 'email') {
                         setObStep('subcategoria');
                       } else {
-                        setObCategoria(null);
-                        setObStep('categoria');
+                        setObStep('sector');
                       }
                     }
                   }}
@@ -2897,8 +3028,22 @@ export default function BibliotecaItem() {
               {categoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
-                  <Tag colors={CAT_COLORS[categoria]} label={catLabel(categoria)} onRemove={() => { setCategoria(null); setSubcat(null); patch({ categoria: null, subcategoria: null, ficha_url: null, fecha_analisis: null }); setObMarca(''); setObUrl(''); setObFechaAnalisis(''); setObTags([]); setMode('onboarding'); setObStep('categoria'); setObCategoria(null); setObSubcat(null); }} />
+                  <Tag colors={CAT_COLORS[categoria]} label={catLabel(categoria)} onRemove={() => { setCategoria(null); setSubcat(null); setSector([]); patch({ categoria: null, subcategoria: null, sector: [], ficha_url: null, fecha_analisis: null }); setObMarca(''); setObUrl(''); setObFechaAnalisis(''); setObTags([]); setObSector([]); setMode('onboarding'); setObStep('categoria'); setObCategoria(null); setObSubcat(null); }} />
                 </div>
+              )}
+              {categoria && (
+                <DisplaySectorPicker
+                  allSectors={allSectors}
+                  selectedIds={sector}
+                  onToggle={(sid) => { const ns = sector.includes(sid) ? sector.filter(x => x !== sid) : [...sector, sid]; setSector(ns); patch({ sector: ns }); }}
+                  onCreateSector={async (name) => {
+                    try {
+                      const token = await getToken();
+                      const res = await fetch(`${API_BASE}/biblioteca/sectores`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name, color: '#6366f1' }) });
+                      if (res.ok) { const ns2 = await res.json(); setAllSectors(prev => [...prev, ns2]); const newS = [...sector, ns2.id]; setSector(newS); patch({ sector: newS }); }
+                    } catch (_) {}
+                  }}
+                />
               )}
               {subcategoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
