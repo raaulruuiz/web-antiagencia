@@ -1,0 +1,27 @@
+name: Swap home to HomeV2 (lunes 13 julio)
+
+on:
+  schedule:
+    # Medianoche hora España (CEST = UTC+2) → 22:00 UTC del domingo 12
+    - cron: '0 22 12 7 *'
+
+jobs:
+  swap-home:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Swap ruta / a HomeV2
+        run: |
+          sed -i 's|<Route path="/" element={<SmartPage path="/"><PixelLayout><Home /></PixelLayout></SmartPage>} />|<Route path="/" element={<SmartPage path="/"><PixelLayout><HomeV2 /></PixelLayout></SmartPage>} />|' src/App.jsx
+
+      - name: Commit y push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx
+          git commit -m "Lanzamiento HomeV2 como home principal (lunes 13 julio)"
+          git push
