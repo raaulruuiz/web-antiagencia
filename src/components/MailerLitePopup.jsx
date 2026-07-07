@@ -113,8 +113,66 @@ function MailerLiteForm() {
   );
 }
 
+function AnalizaPopup({ onClose }) {
+  useEffect(() => {
+    const h = e => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 950,
+        background: 'rgba(0,0,0,0.6)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '24px 16px', overflowY: 'auto',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: 'white', borderRadius: 12,
+          width: '100%', maxWidth: 560,
+          maxHeight: '90vh', overflowY: 'auto',
+          position: 'relative', boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+          padding: '36px 32px',
+          fontFamily: 'system-ui, sans-serif',
+        }}
+      >
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute', top: 12, right: 12, zIndex: 10,
+            background: 'rgba(0,0,0,0.07)', border: 'none',
+            borderRadius: '50%', width: 30, height: 30,
+            cursor: 'pointer', fontSize: 16, lineHeight: 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#333',
+          }}
+        >✕</button>
+
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 20, lineHeight: 1.4 }}>
+          ¿Cómo hago para que analices mis emails?
+        </h2>
+
+        <p style={{ fontSize: 15, color: '#222', marginBottom: 12, lineHeight: 1.6 }}>Muy fácil.</p>
+        <p style={{ fontSize: 15, color: '#222', marginBottom: 12, lineHeight: 1.6 }}>Responde a cualquiera de mis emails.</p>
+        <p style={{ fontSize: 15, color: '#222', marginBottom: 12, lineHeight: 1.6 }}>Ya está.</p>
+        <p style={{ fontSize: 15, color: '#222', marginBottom: 12, lineHeight: 1.6 }}>Cada semana filtraré por respuestas y elegiré al azar.</p>
+        <p style={{ fontSize: 15, color: '#222', marginBottom: 20, lineHeight: 1.6 }}>A cuantos más emails respondas, más posibilidades.</p>
+        <p style={{ fontSize: 15, color: '#111', fontWeight: 700, lineHeight: 1.6, margin: 0 }}>
+          Importante: Cuando respondas, independientemente de si te elijo o no, me suscribiré a tu lista. Si no has mandando ningún email que pueda analizar.... no lo puedo analizar.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function MailerLitePopup() {
   const [open, setOpen] = useState(false);
+  const [openAnalisis, setOpenAnalisis] = useState(false);
 
   useEffect(() => {
     // CSS
@@ -156,7 +214,27 @@ export default function MailerLitePopup() {
 
   return (
     <>
-      {/* Floating button */}
+      {/* Floating button — Analizo tus emails */}
+      <button
+        onClick={() => setOpenAnalisis(true)}
+        style={{
+          position: 'fixed', bottom: 82, right: 24, zIndex: 900,
+          background: '#18181b', color: 'white',
+          border: 'none', borderRadius: 999,
+          padding: '13px 22px', fontSize: 14, fontWeight: 700,
+          cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
+          fontFamily: 'system-ui, sans-serif',
+          transition: 'background 0.15s',
+          display: 'flex', alignItems: 'center', gap: 8,
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = '#3f3f46'}
+        onMouseLeave={e => e.currentTarget.style.background = '#18181b'}
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        ¿Analizo tus emails?
+      </button>
+
+      {/* Floating button — Escribo tus emails */}
       <button
         onClick={() => setOpen(true)}
         style={{
@@ -176,7 +254,10 @@ export default function MailerLitePopup() {
         ¿Escribo tus emails?
       </button>
 
-      {/* Modal */}
+      {/* Modal — Analizo tus emails */}
+      {openAnalisis && <AnalizaPopup onClose={() => setOpenAnalisis(false)} />}
+
+      {/* Modal — Escribo tus emails */}
       {open && (
         <div
           onClick={() => setOpen(false)}
