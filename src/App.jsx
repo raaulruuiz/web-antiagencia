@@ -13,6 +13,7 @@ import Newsletter from './pages/Newsletter';
 import UltimoPaso from './pages/UltimoPaso';
 import YaPorFin from './pages/YaPorFin';
 import Home from './pages/Home';
+import HomeV2 from './pages/HomeV2';
 import AudioSecreto from './pages/AudioSecreto';
 import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotros from './pages/TrabajaConNosotros'
@@ -143,6 +144,7 @@ const AuthenticatedApp = () => {
     <>
     <Routes>
       <Route path="/" element={<SmartPage path="/"><PixelLayout><Home /></PixelLayout></SmartPage>} />
+      <Route path="/homev2" element={<PixelLayout><HomeV2 /></PixelLayout>} />
       <Route path="/webtipica" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route key={path} path={`/${path}`}
