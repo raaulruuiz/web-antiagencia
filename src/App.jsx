@@ -143,7 +143,7 @@ const AuthenticatedApp = () => {
   return (
     <>
     <Routes>
-      <Route path="/" element={<SmartPage path="/"><PixelLayout><HomeV2 /></PixelLayout></SmartPage>} />
+      <Route path="/" element={<SmartPage path="/"><PixelLayout><Home /></PixelLayout></SmartPage>} />
       <Route path="/homev2" element={<PixelLayout><HomeV2 /></PixelLayout>} />
       <Route path="/webtipica" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
