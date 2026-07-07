@@ -360,7 +360,7 @@ export default function BibliotecaPublica() {
                       </div>
                     </div>
                   </div>
-                  <BibliotecaCardMeta item={item} allTags={allTags} />
+                  <BibliotecaCardMeta item={item} allTags={allTags} hideSubtext />
                 </div>
               ) : (
                 <div key={item.id} onClick={() => navigate(`/anti-biblioteca/${item.id}`)} style={{ cursor: 'pointer' }}>
