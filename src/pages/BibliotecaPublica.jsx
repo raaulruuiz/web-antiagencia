@@ -307,78 +307,100 @@ export default function BibliotecaPublica() {
         )}
 
         {/* Filter panel */}
-        {showFilters && (
-          <div style={{ marginBottom: 16, background: '#111', border: '1px solid #27272a', borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {/* Row 1: selects + marca + fecha */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
-                <select value={filterCategoria} onChange={e => setFilterCategoria(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                  <option value="">Todas</option>
-                  <option value="email">Email</option>
-                  <option value="ficha">Ficha de Producto</option>
-                </select>
+        {showFilters && (() => {
+          const showSubcat  = filterCategoria !== 'ficha';
+          const showFecha   = filterCategoria !== 'ficha' && filterSubcat !== 'automatizacion';
+          const visibleTags = filterCategoria === 'ficha'
+            ? allTags.filter(t => t.subcategoria === 'ficha')
+            : filterCategoria === 'email'
+              ? allTags.filter(t => t.subcategoria === 'email' || !t.subcategoria)
+              : allTags;
+          return (
+            <div style={{ marginBottom: 16, background: '#111', border: '1px solid #27272a', borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Row 1: selects + marca + fecha */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
+                  <select value={filterCategoria} onChange={e => {
+                    const val = e.target.value;
+                    setFilterCategoria(val);
+                    if (val === 'ficha') { setFilterSubcat(''); setFilterFechaFrom(''); setFilterFechaTo(''); setFilterTagIds([]); }
+                  }} style={{ ...inputStyle, cursor: 'pointer' }}>
+                    <option value="">Todas</option>
+                    <option value="email">Email</option>
+                    <option value="ficha">Ficha de Producto</option>
+                  </select>
+                </div>
+                {showSubcat && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
+                    <select value={filterSubcat} onChange={e => {
+                      const val = e.target.value;
+                      setFilterSubcat(val);
+                      if (!filterCategoria) setFilterCategoria('email');
+                      if (val === 'automatizacion') { setFilterFechaFrom(''); setFilterFechaTo(''); }
+                    }} style={{ ...inputStyle, cursor: 'pointer' }}>
+                      <option value="">Todas</option>
+                      <option value="automatizacion">Automatización</option>
+                      <option value="campana">Campaña</option>
+                    </select>
+                  </div>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Marca</span>
+                  <input value={filterMarca} onChange={e => setFilterMarca(e.target.value)} placeholder="Filtrar…"
+                    style={{ ...inputStyle, width: 130 }} />
+                </div>
+                {showFecha && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</span>
+                    <DateRangePicker from={filterFechaFrom} to={filterFechaTo} onChange={({ from, to }) => { setFilterFechaFrom(from); setFilterFechaTo(to); }} />
+                  </div>
+                )}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
-                <select value={filterSubcat} onChange={e => setFilterSubcat(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                  <option value="">Todas</option>
-                  <option value="automatizacion">Automatización</option>
-                  <option value="campana">Campaña</option>
-                </select>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Marca</span>
-                <input value={filterMarca} onChange={e => setFilterMarca(e.target.value)} placeholder="Filtrar…"
-                  style={{ ...inputStyle, width: 130 }} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</span>
-                <DateRangePicker from={filterFechaFrom} to={filterFechaTo} onChange={({ from, to }) => { setFilterFechaFrom(from); setFilterFechaTo(to); }} />
-              </div>
+
+              {/* Row 2: Sector chips */}
+              {allSectors.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Sector</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                    {allSectors.map(sec => {
+                      const active = filterSectorIds.includes(sec.id);
+                      return (
+                        <button key={sec.id} onClick={() => toggleFilterSector(sec.id)} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: active ? sec.color + '33' : 'transparent', border: `1px solid ${active ? sec.color : '#3f3f46'}`, color: active ? sec.color : '#71717a' }}>
+                          {sec.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Row 3: Etiquetas chips (scoped by categoria) */}
+              {visibleTags.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                    {visibleTags.map(t => {
+                      const active = filterTagIds.includes(t.id);
+                      return (
+                        <button key={t.id} onClick={() => toggleFilterTag(t.id)} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: active ? t.color + '33' : 'transparent', border: `1px solid ${active ? t.color : '#3f3f46'}`, color: active ? t.color : '#71717a' }}>
+                          {t.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {activeFilterCount > 0 && (
+                <button onClick={clearFilters} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 8, padding: '6px 10px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  × Limpiar filtros
+                </button>
+              )}
             </div>
-
-            {/* Row 2: Sector chips */}
-            {allSectors.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Sector</span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                  {allSectors.map(s => {
-                    const active = filterSectorIds.includes(s.id);
-                    return (
-                      <button key={s.id} onClick={() => toggleFilterSector(s.id)} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: active ? s.color + '33' : 'transparent', border: `1px solid ${active ? s.color : '#3f3f46'}`, color: active ? s.color : '#71717a' }}>
-                        {s.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Row 3: Etiquetas chips */}
-            {allTags.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                  {allTags.map(t => {
-                    const active = filterTagIds.includes(t.id);
-                    return (
-                      <button key={t.id} onClick={() => toggleFilterTag(t.id)} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: active ? t.color + '33' : 'transparent', border: `1px solid ${active ? t.color : '#3f3f46'}`, color: active ? t.color : '#71717a' }}>
-                        {t.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {activeFilterCount > 0 && (
-              <button onClick={clearFilters} style={{ alignSelf: 'flex-start', background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 8, padding: '6px 10px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-                × Limpiar filtros
-              </button>
-            )}
-          </div>
-        )}
+          );
+        })()}
 
         {(searchQuery || activeFilterCount > 0) && !loading && (
           <p style={{ fontSize: 12, color: '#52525b', marginBottom: 12 }}>{filteredItems.length} {filteredItems.length === 1 ? 'resultado' : 'resultados'}</p>
