@@ -221,6 +221,10 @@ export default function Biblioteca() {
   const [showStats, setShowStats]           = useState(false);
   const [statsData, setStatsData]           = useState(null);
   const [statsLoading, setStatsLoading]     = useState(false);
+  const [showNuevo, setShowNuevo]           = useState(false);
+  const [nuevoUploading, setNuevoUploading] = useState(false);
+  const [nuevoDragOver, setNuevoDragOver]   = useState(false);
+  const nuevoFileRef = useRef(null);
   const [filterCategoria, setFilterCategoria]   = useState('');
   const [filterSubcat, setFilterSubcat]       = useState('');
   const [filterMarca, setFilterMarca]         = useState('');
@@ -276,6 +280,25 @@ export default function Biblioteca() {
   }, [items, searchQuery, filterCategoria, filterSubcat, filterMarca, filterTagId, filterFechaFrom, filterFechaTo]);
 
   const clearFilters = () => { setFilterCategoria(''); setFilterSubcat(''); setFilterMarca(''); setFilterTagId(''); setFilterFechaFrom(''); setFilterFechaTo(''); };
+
+  const handleNuevoFile = useCallback(async (file) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    setNuevoUploading(true);
+    try {
+      const token = await getToken();
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch(`${API_BASE}/biblioteca/upload`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: form });
+      if (!res.ok) throw new Error('Error al subir');
+      const data = await res.json();
+      setShowNuevo(false);
+      navigate(`/admin/biblioteca/${data.id}`);
+    } catch (err) {
+      alert('Error al subir imagen: ' + err.message);
+    } finally {
+      setNuevoUploading(false);
+    }
+  }, [navigate]);
 
   const deleteIds = useCallback(async (ids) => {
     setDeleting(true); setConfirm(null);
@@ -400,6 +423,12 @@ export default function Biblioteca() {
               <button onClick={() => setSelecting(true)} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors">Seleccionar</button>
               <button onClick={load} disabled={loading} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
                 {loading ? 'Cargando…' : 'Actualizar'}
+              </button>
+              <button onClick={() => setShowNuevo(true)}
+                style={{ fontSize: 12, fontWeight: 600, background: '#3b82f6', border: 'none', color: '#fff', borderRadius: 8, padding: '6px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
+                onMouseEnter={e => e.currentTarget.style.background = '#2563eb'}
+                onMouseLeave={e => e.currentTarget.style.background = '#3b82f6'}>
+                + Nuevo
               </button>
               <button onClick={toggle} title={theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
                 style={{ fontSize: 16, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', lineHeight: 1 }}>
@@ -603,6 +632,39 @@ export default function Biblioteca() {
               )}
             </div>
             {!statsLoading && statsData && <p style={{ fontSize:11, color:'var(--t-text-subtle)', margin:0 }}>{statsData.length} registro{statsData.length !== 1 ? 's' : ''} · ✓ = email en lista</p>}
+          </div>
+        </div>
+      )}
+
+      {showNuevo && (
+        <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,0.7)', display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+          onClick={e => { if (e.target === e.currentTarget) setShowNuevo(false); }}>
+          <div style={{ background:'var(--t-surface)', border:'1px solid var(--t-border)', borderRadius:14, padding:28, width:'100%', maxWidth:460, display:'flex', flexDirection:'column', gap:16 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <h3 style={{ fontSize:15, fontWeight:600, color:'var(--t-text)', margin:0 }}>Nuevo item</h3>
+              <button onClick={() => setShowNuevo(false)} style={{ background:'none', border:'none', color:'var(--t-text-subtle)', cursor:'pointer', fontSize:18, lineHeight:1 }}>×</button>
+            </div>
+            <div
+              onClick={() => !nuevoUploading && nuevoFileRef.current?.click()}
+              onDragOver={e => { e.preventDefault(); setNuevoDragOver(true); }}
+              onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setNuevoDragOver(false); }}
+              onDrop={e => { e.preventDefault(); setNuevoDragOver(false); const f = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/')); if (f) handleNuevoFile(f); }}
+              style={{ border: `2px dashed ${nuevoDragOver ? '#3b82f6' : 'var(--t-border-mid)'}`, borderRadius:12, padding:'48px 24px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:12, cursor: nuevoUploading ? 'not-allowed' : 'pointer', background: nuevoDragOver ? 'rgba(59,130,246,0.07)' : 'transparent', transition:'all 0.15s' }}>
+              {nuevoUploading ? (
+                <>
+                  <div style={{ width:32, height:32, border:'3px solid var(--t-border)', borderTop:'3px solid #3b82f6', borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
+                  <span style={{ fontSize:13, color:'var(--t-text-muted)' }}>Subiendo…</span>
+                </>
+              ) : (
+                <>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--t-text-subtle)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span style={{ fontSize:14, fontWeight:500, color:'var(--t-text-muted)' }}>Arrastra una imagen aquí</span>
+                  <span style={{ fontSize:12, color:'var(--t-text-subtle)' }}>o haz clic para elegir</span>
+                </>
+              )}
+            </div>
+            <input ref={nuevoFileRef} type="file" accept="image/*" style={{ display:'none' }}
+              onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) handleNuevoFile(f); }} />
           </div>
         </div>
       )}
