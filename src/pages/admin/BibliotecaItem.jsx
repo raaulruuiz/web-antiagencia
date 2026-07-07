@@ -2860,6 +2860,28 @@ export default function BibliotecaItem() {
                   {saving ? 'Guardando…' : 'Guardar'}
                 </button>
               )}
+              {obStep !== 'categoria' && (
+                <button
+                  onClick={() => {
+                    if (obStep === 'subcategoria') {
+                      setObCategoria(null);
+                      setObSubcat(null);
+                      setObStep('categoria');
+                    } else if (obStep === 'campos') {
+                      if (obCategoria === 'email') {
+                        setObStep('subcategoria');
+                      } else {
+                        setObCategoria(null);
+                        setObStep('categoria');
+                      }
+                    }
+                  }}
+                  style={{ width: '100%', background: 'transparent', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-subtle)', borderRadius: 8, padding: '10px 16px', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-subtle)'; }}>
+                  ← Volver
+                </button>
+              )}
               <button onClick={() => setDiscardConfirm(true)}
                 style={{ width: '100%', background: 'transparent', border: '1px solid var(--t-border-mid)', color: 'var(--t-text-muted)', borderRadius: 8, padding: '10px 16px', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#dc2626'; e.currentTarget.style.color = '#f87171'; }}
