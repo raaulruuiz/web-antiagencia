@@ -199,6 +199,8 @@ export default function BibliotecaPublica() {
   const [allSectors, setAllSectors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 640);
+  const [showMenu, setShowMenu] = useState(false);
 
   // Search & filters
   const [showSearch, setShowSearch]         = useState(false);
@@ -233,6 +235,12 @@ export default function BibliotecaPublica() {
     fetch(`${API_BASE}/biblioteca/sectores/public`).then(r => r.ok ? r.json() : []).then(setAllSectors).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, []);
+
   const filteredItems = useMemo(() => {
     let result = items;
     if (searchQuery.trim()) {
@@ -256,43 +264,83 @@ export default function BibliotecaPublica() {
   const inputStyle = { background: 'transparent', border: '1px solid #3f3f46', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', cursor: 'pointer' };
 
   return (
-    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
+    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', overflowX: 'hidden' }}>
       {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
       <MailerLitePopup />
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+      {showMenu && (
+        <>
+          <div onClick={() => setShowMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.5)' }} />
+          <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 260, zIndex: 101, background: 'var(--t-surface)', borderLeft: '1px solid var(--t-border)', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '16px', borderBottom: '1px solid var(--t-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--t-text)' }}>Menú</span>
+              <button onClick={() => setShowMenu(false)} style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>✕</button>
+            </div>
+            <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 10, overflowY: 'auto' }}>
+              <button onClick={() => { toggle(); setShowMenu(false); }}
+                style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 8, width: '100%', justifyContent: 'flex-start', boxSizing: 'border-box' }}>
+                {theme === 'dark' ? '☀️' : '🌙'} {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+              </button>
+              <button onClick={() => { setShowFilters(s => !s); setShowSearch(false); setShowMenu(false); }}
+                style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 8, width: '100%', justifyContent: 'flex-start', boxSizing: 'border-box', borderColor: activeFilterCount > 0 ? '#6366f1' : '#3f3f46', color: activeFilterCount > 0 ? '#a5b4fc' : 'var(--t-text)' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Filtrar {activeFilterCount > 0 && `(${activeFilterCount})`}
+              </button>
+              <button onClick={() => { load(); setShowMenu(false); }} disabled={loading}
+                style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 8, width: '100%', justifyContent: 'flex-start', boxSizing: 'border-box', opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                {loading ? 'Cargando…' : 'Actualizar'}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Sticky header */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'var(--t-bg)', borderBottom: '1px solid var(--t-border)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img src={theme === 'light' ? '/images/82b3b8d5c_freepik__background__33914.png' : '/images/9563e10d2_AALogo.png'} alt="Logo" style={{ height: '28px', width: 'auto' }} />
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Anti-Biblioteca</h1>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Theme toggle */}
-            <button onClick={toggle}
-              title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
-              style={{ display: 'flex', alignItems: 'center', padding: '6px 10px', borderRadius: 8, fontSize: 14, background: 'transparent', border: `1px solid ${theme === 'light' ? '#71717a' : '#3f3f46'}`, color: 'var(--t-text-muted)', cursor: 'pointer', lineHeight: 1 }}>
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
-            {/* Search */}
-            <button onClick={() => { setShowSearch(s => !s); setShowFilters(false); }}
-              style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: showSearch ? '#1a1a1a' : 'transparent' }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            </button>
-            {/* Filter */}
-            <button onClick={() => { setShowFilters(s => !s); setShowSearch(false); }}
-              style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: (showFilters || activeFilterCount > 0) ? '#1a1a1a' : 'transparent', borderColor: activeFilterCount > 0 ? '#6366f1' : '#3f3f46', color: activeFilterCount > 0 ? '#a5b4fc' : 'var(--t-text)' }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-              Filtrar
-              {activeFilterCount > 0 && <span style={{ background: '#6366f1', color: 'white', fontSize: 9, fontWeight: 700, borderRadius: 999, padding: '1px 5px' }}>{activeFilterCount}</span>}
-            </button>
-            <button onClick={load} disabled={loading}
-              style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              {loading ? 'Cargando…' : 'Actualizar'}
-            </button>
-          </div>
+          {isMobile ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button onClick={() => { setShowSearch(s => !s); setShowFilters(false); }}
+                style={{ ...inputStyle, display: 'flex', alignItems: 'center', background: showSearch ? '#1a1a1a' : 'transparent' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </button>
+              <button onClick={() => setShowMenu(true)}
+                style={{ ...inputStyle, display: 'flex', alignItems: 'center' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button onClick={toggle} title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+                style={{ display: 'flex', alignItems: 'center', padding: '6px 10px', borderRadius: 8, fontSize: 14, background: 'transparent', border: `1px solid ${theme === 'light' ? '#71717a' : '#3f3f46'}`, color: 'var(--t-text-muted)', cursor: 'pointer', lineHeight: 1 }}>
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </button>
+              <button onClick={() => { setShowSearch(s => !s); setShowFilters(false); }}
+                style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: showSearch ? '#1a1a1a' : 'transparent' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </button>
+              <button onClick={() => { setShowFilters(s => !s); setShowSearch(false); }}
+                style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: (showFilters || activeFilterCount > 0) ? '#1a1a1a' : 'transparent', borderColor: activeFilterCount > 0 ? '#6366f1' : '#3f3f46', color: activeFilterCount > 0 ? '#a5b4fc' : 'var(--t-text)' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Filtrar
+                {activeFilterCount > 0 && <span style={{ background: '#6366f1', color: 'white', fontSize: 9, fontWeight: 700, borderRadius: 999, padding: '1px 5px' }}>{activeFilterCount}</span>}
+              </button>
+              <button onClick={load} disabled={loading}
+                style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                {loading ? 'Cargando…' : 'Actualizar'}
+              </button>
+            </div>
+          )}
         </div>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 24px 32px' }}>
 
         {/* Search bar */}
         {showSearch && (

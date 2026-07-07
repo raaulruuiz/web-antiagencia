@@ -580,7 +580,7 @@ export default function BibliotecaItemPublica() {
   const blocksData      = item.blocks_data && item.blocks_data.blocks ? item.blocks_data : { blocks: [] };
 
   return (
-    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '32px 24px' }}>
+    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', padding: '24px', overflowX: 'hidden', boxSizing: 'border-box' }}>
       {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
       <MailerLitePopup />
       {showModal && item && <ImageModal imageUrl={item.url} alt={item.filename} onClose={() => setShowModal(false)} />}
@@ -596,7 +596,7 @@ export default function BibliotecaItemPublica() {
         </div>
       )}
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
 
         {/* Back button + theme toggle */}
         <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
