@@ -219,16 +219,16 @@ export default function MailerLitePopup() {
         onClick={() => setOpenAnalisis(true)}
         style={{
           position: 'fixed', bottom: 82, right: 24, zIndex: 900,
-          background: '#18181b', color: 'white',
+          background: '#7000FF', color: 'white',
           border: 'none', borderRadius: 999,
           padding: '13px 22px', fontSize: 14, fontWeight: 700,
-          cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
+          cursor: 'pointer', boxShadow: '0 4px 20px rgba(112,0,255,0.45)',
           fontFamily: 'system-ui, sans-serif',
           transition: 'background 0.15s',
           display: 'flex', alignItems: 'center', gap: 8,
         }}
-        onMouseEnter={e => e.currentTarget.style.background = '#3f3f46'}
-        onMouseLeave={e => e.currentTarget.style.background = '#18181b'}
+        onMouseEnter={e => e.currentTarget.style.background = '#0067FD'}
+        onMouseLeave={e => e.currentTarget.style.background = '#7000FF'}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         ¿Analizo tus emails?
