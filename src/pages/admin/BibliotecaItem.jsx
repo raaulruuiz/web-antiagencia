@@ -73,6 +73,13 @@ const IconEye = () => (
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
   </svg>
 );
+const IconEyeOff = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+  </svg>
+);
 const IconX = () => (
   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -2399,6 +2406,19 @@ export default function BibliotecaItem() {
     } finally { setSaving(false); }
   };
 
+  const togglePublico = async () => {
+    const next = item?.publico === false ? true : false;
+    setItem(prev => ({ ...prev, publico: next }));
+    try {
+      const token = await getToken();
+      await fetch(`${API_BASE}/biblioteca/${id}`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publico: next }),
+      });
+    } catch (_) {}
+  };
+
   const confirmDiscard = async () => {
     setDiscardConfirm(false);
     try {
@@ -2736,11 +2756,20 @@ export default function BibliotecaItem() {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           Biblioteca
         </button>
-        {item?.publico === false && (
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#f87171', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, padding: '3px 8px', letterSpacing: '0.02em' }}>
-            Oculto
-          </span>
-        )}
+        <button onClick={togglePublico} title={item?.publico === false ? 'Hacer visible' : 'Ocultar'}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            fontSize: 11, fontWeight: 600, borderRadius: 6, padding: '3px 8px',
+            cursor: 'pointer', border: 'none', transition: 'opacity 0.15s',
+            ...(item?.publico === false
+              ? { color: '#f87171', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)' }
+              : { color: '#71717a', background: 'transparent', border: '1px solid transparent' }),
+          }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+          {item?.publico === false ? <IconEyeOff /> : <IconEye />}
+          {item?.publico === false ? 'Oculto' : 'Visible'}
+        </button>
         {(saving || blocksSaving) && <span className="text-xs text-zinc-600">Guardando…</span>}
         <button onClick={toggle} title={theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
           style={{ marginLeft: 'auto', fontSize: 16, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', lineHeight: 1 }}>
