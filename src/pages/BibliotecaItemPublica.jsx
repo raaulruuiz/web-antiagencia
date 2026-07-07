@@ -392,14 +392,14 @@ function AsuntoAdelantoBlockView({ block, item, hideTitle, isMobile }) {
             }}>
               {it.show_asunto && item?.asunto && (
                 <>
-                  <span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Asunto</span>
-                  <span style={{ fontSize: 13, color: 'var(--t-text)', lineHeight: 1.4 }}>{item.asunto}</span>
+                  <span style={{ fontSize: 18, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Asunto</span>
+                  <span style={{ fontSize: 24, color: 'var(--t-text)', lineHeight: 1.3 }}>{item.asunto}</span>
                 </>
               )}
               {it.show_adelanto && item?.adelanto && (
                 <>
-                  <span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Adelanto</span>
-                  <span style={{ fontSize: 13, color: 'var(--t-text)', lineHeight: 1.4 }}>{item.adelanto}</span>
+                  <span style={{ fontSize: 18, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Adelanto</span>
+                  <span style={{ fontSize: 24, color: 'var(--t-text)', lineHeight: 1.3 }}>{item.adelanto}</span>
                 </>
               )}
             </div>
