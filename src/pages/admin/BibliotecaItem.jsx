@@ -537,7 +537,10 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
   const [cropBox, setCropBox]         = useState(null);
   const [dragHandle, setDragHandle]   = useState(null);
   const [aspectRatio, setAspectRatio] = useState(null);
+  const [zoom, setZoom]               = useState(1);
+  const [baseSize, setBaseSize]       = useState(null);
   const imgRef = useRef(null);
+  const ZOOM_STEPS = [0.5, 0.75, 1, 1.5, 2, 3, 4];
 
   useEffect(() => {
     const up = () => { setDragHandle(null); setFreeDrag(null); };
@@ -623,6 +626,22 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
     onCrop([{ x:Math.round(cropBox.x*sx), y:Math.round(cropBox.y*sy), w:Math.round(cropBox.w*sx), h:Math.round(cropBox.h*sy) }]);
   };
 
+  const changeZoom = useCallback((dir) => {
+    setZoom(prev => {
+      const idx = ZOOM_STEPS.findIndex(z => Math.abs(z - prev) < 0.01);
+      const ni = dir > 0 ? Math.min(idx + 1, ZOOM_STEPS.length - 1) : Math.max(idx - 1, 0);
+      return ZOOM_STEPS[ni];
+    });
+    setSavedRects([]);
+    setCropBox(null);
+  }, []);
+
+  useEffect(() => {
+    if (mode === 'ajustar' && imgRef.current) {
+      requestAnimationFrame(() => requestAnimationFrame(initCropBox));
+    }
+  }, [zoom, mode, initCropBox]);
+
   const startHandleDrag = (e, type) => {
     e.preventDefault(); e.stopPropagation();
     if (!imgRef.current) return;
@@ -640,6 +659,13 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
               style={{ padding:'5px 14px', fontSize:12, borderRadius:7, border:'none', cursor:'pointer', transition:'all 0.15s', background:mode===m.id?'var(--t-border)':'transparent', color:mode===m.id?'var(--t-text)':'var(--t-text-muted)' }}>{m.label}</button>
           ))}
         </div>
+        <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+          <button onClick={() => changeZoom(-1)} disabled={zoom <= ZOOM_STEPS[0]}
+            style={{ width:26, height:26, background:'var(--t-border-s)', border:'1px solid var(--t-border)', borderRadius:6, color:'var(--t-text)', fontSize:16, cursor: zoom <= ZOOM_STEPS[0] ? 'not-allowed' : 'pointer', opacity: zoom <= ZOOM_STEPS[0] ? 0.4 : 1, display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>−</button>
+          <span style={{ fontSize:11, color:'var(--t-text-muted)', minWidth:38, textAlign:'center' }}>{Math.round(zoom * 100)}%</span>
+          <button onClick={() => changeZoom(1)} disabled={zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}
+            style={{ width:26, height:26, background:'var(--t-border-s)', border:'1px solid var(--t-border)', borderRadius:6, color:'var(--t-text)', fontSize:16, cursor: zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1] ? 'not-allowed' : 'pointer', opacity: zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1] ? 0.4 : 1, display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>+</button>
+        </div>
         {mode === 'ajustar' && (
           <div style={{ display:'flex', gap:6, alignItems:'center' }}>
             <span style={{ fontSize:11, color:'var(--t-text-subtle)' }}>Proporción:</span>
@@ -651,11 +677,14 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
         )}
         {mode === 'libre' && <p style={{ color:'var(--t-text-muted)', fontSize:12, margin:0 }}>{savedRects.length === 0 ? 'Arrastra sobre la imagen para seleccionar el área' : `${savedRects.length} recorte${savedRects.length>1?'s':''} seleccionado${savedRects.length>1?'s':''}. Sigue dibujando o confirma.`}</p>}
       </div>
-      <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', width:'100%', overflow:'hidden', padding:'0 40px' }}>
+      <div style={{ flex:1, display:'flex', alignItems: zoom > 1 ? 'flex-start' : 'center', justifyContent: zoom > 1 ? 'flex-start' : 'center', width:'100%', overflow:'auto', padding: zoom > 1 ? '20px 40px' : '0 40px' }}>
         <div style={{ position:'relative', display:'inline-block' }}>
           <img ref={imgRef} src={imageUrl} crossOrigin="anonymous" alt="recortar"
-            onLoad={mode==='ajustar'?initCropBox:undefined}
-            style={{ maxWidth:'80vw', maxHeight:'62vh', display:'block', cursor:mode==='libre'?'crosshair':'default' }}
+            onLoad={e => {
+              setBaseSize(prev => prev || (e.target.offsetWidth > 0 ? { w: e.target.offsetWidth, h: e.target.offsetHeight } : null));
+              if (mode === 'ajustar') initCropBox();
+            }}
+            style={{ width: baseSize ? Math.round(baseSize.w * zoom) : undefined, height: baseSize ? Math.round(baseSize.h * zoom) : undefined, maxWidth: baseSize ? 'none' : '80vw', maxHeight: baseSize ? 'none' : '62vh', display:'block', cursor:mode==='libre'?'crosshair':'default' }}
             onMouseDown={mode==='libre'?(e)=>{ e.preventDefault(); const b=imgRef.current.getBoundingClientRect(); setFreeDrag({sx:e.clientX-b.left,sy:e.clientY-b.top}); setFreeRect(null); }:undefined}
             draggable={false} />
           {mode==='libre' && savedRects.map((r, i) => (
