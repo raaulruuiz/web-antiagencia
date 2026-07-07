@@ -351,8 +351,14 @@ export default function BibliotecaPublica() {
               const isBlurred = item.publico === false;
               return isBlurred ? (
                 <div key={item.id} style={{ cursor: 'default' }}>
-                  <div style={{ aspectRatio: '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', position: 'relative' }}>
-                    <img src={item.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'blur(12px)', transform: 'scale(1.05)' }} loading="lazy" />
+                  {item.categoria === 'email' && item.asunto && (
+                    <p style={{ fontSize: 13, color: '#ffffff', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.asunto}>{item.asunto}</p>
+                  )}
+                  {item.categoria === 'ficha' && item.ficha_url && (
+                    <p style={{ fontSize: 13, color: '#ffffff', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.ficha_url}>{item.ficha_url}</p>
+                  )}
+                  <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', position: 'relative' }}>
+                    <img src={item.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block', filter: 'blur(12px)', transform: 'scale(1.05)' }} loading="lazy" />
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ background: 'rgba(0,0,0,0.55)', borderRadius: 8, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -365,10 +371,10 @@ export default function BibliotecaPublica() {
               ) : (
                 <div key={item.id} onClick={() => navigate(`/anti-biblioteca/${item.id}`)} style={{ cursor: 'pointer' }}>
                   {item.categoria === 'email' && item.asunto && (
-                    <p style={{ fontSize: 11, color: '#71717a', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.asunto}>{item.asunto}</p>
+                    <p style={{ fontSize: 13, color: '#ffffff', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.asunto}>{item.asunto}</p>
                   )}
                   {item.categoria === 'ficha' && item.ficha_url && (
-                    <p style={{ fontSize: 11, color: '#71717a', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.ficha_url}>{item.ficha_url}</p>
+                    <p style={{ fontSize: 13, color: '#ffffff', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.ficha_url}>{item.ficha_url}</p>
                   )}
                   <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', transition: 'border-color 0.15s' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
