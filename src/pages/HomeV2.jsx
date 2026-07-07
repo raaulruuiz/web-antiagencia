@@ -44,7 +44,7 @@ function MailerLiteForm() {
               </div>
               <input type="hidden" name="ml-submit" value="1" />
               <div className="ml-form-embedSubmit">
-                <button type="submit" className="primary">Quiero el ebook gratis</button>
+                <button type="submit" className="primary">Quiero el ebook y la biblioteca</button>
                 <button disabled type="button" className="loading" style={{ display: "none" }}>
                   <div className="ml-form-embedSubmitLoad"></div>
                   <span className="sr-only">Loading...</span>
@@ -100,7 +100,7 @@ export default function HomeV2() {
           <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
             <div className="text-gray-800 text-base leading-relaxed">
 
-              <h1 className="text-[25px] md:text-4xl text-gray-900 mb-2" style={{ fontWeight: 400 }}>
+              <h1 className="text-[25px] md:text-4xl text-gray-900 mb-2 font-bold">
                 ¿Hacemos un trato?
               </h1>
               <h2 className="text-xl md:text-2xl text-gray-900 mb-1" style={{ fontWeight: 400 }}>Tu quieres vender más</h2>
@@ -124,11 +124,28 @@ export default function HomeV2() {
                 Así que este es el trato, tú me dejas <span className="underline">tu email</span> y yo te mando:
               </p>
 
-              <p className="mb-2">- <strong>Mi biblioteca personal de emails</strong> (los emails que analizo todas las semanas para estudiar).</p>
-              <p className="mb-2">- <strong>Analizo tus emails</strong> (cada semana tendrás la oportunidad de que tus emails salgan en esta biblioteca con su correspondiente análisis).</p>
-              <p className="mb-2">- Un ebook de 16 páginas para que <strong>aumentes las ventas de tu tienda en 5 minutos</strong> (literalmente, y con ejemplos).</p>
-              <p className="mb-2">- <strong>Un bonus secreto para aumentar todavía más las ventas.</strong></p>
-              <p className="mb-4">- <strong>Suscribirse es gratis</strong>, darse de baja, también.</p>
+              <ul className="mt-2 mb-6 space-y-4 list-none pl-0">
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
+                  <span><strong>Mi biblioteca personal de emails</strong> (los emails que analizo todas las semanas para estudiar).</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
+                  <span><strong>Analizo tus emails</strong> (cada semana tendrás la oportunidad de que tus emails salgan en esta biblioteca con su correspondiente análisis).</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
+                  <span>Un ebook de 16 páginas para que <strong>aumentes las ventas de tu tienda en 5 minutos</strong> (literalmente, y con ejemplos).</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
+                  <span><strong>Un bonus secreto para aumentar todavía más las ventas.</strong></span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
+                  <span><strong>Suscribirse es gratis</strong>, darse de baja, también.</span>
+                </li>
+              </ul>
 
               <br />
 
