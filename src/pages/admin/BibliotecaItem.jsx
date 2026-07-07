@@ -873,7 +873,7 @@ function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
 }
 
 // ── Block: card ───────────────────────────────────────────────────────────────
-function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onToggleVisible }) {
+function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onToggleVisible, itemAsunto, itemAdelanto }) {
   const bt = BLOCK_TYPES.find(b => b.type === block.type);
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
@@ -1119,8 +1119,8 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               const hasText  = it.texto?.trim();
               const fieldEl = hasField ? (
                 <div style={{ padding: '8px 10px', borderRadius: 7, fontSize: 11, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {it.show_asunto && <span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Asunto</span>}
-                  {it.show_adelanto && <span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Adelanto</span>}
+                  {it.show_asunto && <><span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Asunto</span>{itemAsunto && <span style={{ fontSize: 11, color: 'var(--t-text-muted)', marginTop: 2 }}>{itemAsunto}</span>}</>}
+                  {it.show_adelanto && <><span style={{ fontSize: 9, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Adelanto</span>{itemAdelanto && <span style={{ fontSize: 11, color: 'var(--t-text-muted)', marginTop: 2 }}>{itemAdelanto}</span>}</>}
                 </div>
               ) : null;
               const txtEl = hasText ? (
@@ -2020,9 +2020,12 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                 <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Elementos</label>
                 {(draft.items || []).map((it, itemIdx) => {
                   const isAsuntoActive = it.show_asunto;
-                  const asuntoDisabledByOther = !it.show_asunto && asuntoUsed;
                   const isAdelantoActive = it.show_adelanto;
+                  const asuntoDisabledByOther = !it.show_asunto && asuntoUsed;
                   const adelantoDisabledByOther = !it.show_adelanto && adelantoUsed;
+                  // Prevent deselecting if it's the only field selected in this item
+                  const asuntoCanDeselect = !(isAsuntoActive && !isAdelantoActive);
+                  const adelantoCanDeselect = !(isAdelantoActive && !isAsuntoActive);
                   return (
                     <div key={itemIdx} style={{ border: '1px solid var(--t-border)', borderRadius: 10, padding: '12px 12px 10px', display: 'flex', flexDirection: 'column', gap: 8, position: 'relative' }}>
                       {(draft.items || []).length > 1 && (
@@ -2037,14 +2040,14 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                       {/* Toggle buttons: Asunto / Adelanto */}
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button
-                          disabled={asuntoDisabledByOther}
-                          onClick={() => !asuntoDisabledByOther && updateAsItem(itemIdx, 'show_asunto', !it.show_asunto)}
+                          disabled={asuntoDisabledByOther || (isAsuntoActive && !asuntoCanDeselect)}
+                          onClick={() => !asuntoDisabledByOther && asuntoCanDeselect && updateAsItem(itemIdx, 'show_asunto', !it.show_asunto)}
                           style={{ flex: 1, background: isAsuntoActive ? 'var(--t-surface2)' : 'transparent', border: `1px dashed ${isAsuntoActive ? '#f59e0b' : 'var(--t-border-mid)'}`, borderRadius: 6, padding: '7px 8px', fontSize: 11, color: isAsuntoActive ? '#fcd34d' : 'var(--t-text-muted)', cursor: asuntoDisabledByOther ? 'not-allowed' : 'pointer', opacity: asuntoDisabledByOther ? 0.4 : 1, fontWeight: isAsuntoActive ? 600 : 400 }}>
                           Asunto
                         </button>
                         <button
-                          disabled={adelantoDisabledByOther}
-                          onClick={() => !adelantoDisabledByOther && updateAsItem(itemIdx, 'show_adelanto', !it.show_adelanto)}
+                          disabled={adelantoDisabledByOther || (isAdelantoActive && !adelantoCanDeselect)}
+                          onClick={() => !adelantoDisabledByOther && adelantoCanDeselect && updateAsItem(itemIdx, 'show_adelanto', !it.show_adelanto)}
                           style={{ flex: 1, background: isAdelantoActive ? 'var(--t-surface2)' : 'transparent', border: `1px dashed ${isAdelantoActive ? '#f59e0b' : 'var(--t-border-mid)'}`, borderRadius: 6, padding: '7px 8px', fontSize: 11, color: isAdelantoActive ? '#fcd34d' : 'var(--t-text-muted)', cursor: adelantoDisabledByOther ? 'not-allowed' : 'pointer', opacity: adelantoDisabledByOther ? 0.4 : 1, fontWeight: isAdelantoActive ? 600 : 400 }}>
                           Adelanto
                         </button>
@@ -2947,6 +2950,8 @@ export default function BibliotecaItem() {
                   onMoveUp={() => moveBlock(block.id, -1)}
                   onMoveDown={() => moveBlock(block.id, 1)}
                   onToggleVisible={() => toggleBlockVisible(block.id)}
+                  itemAsunto={asunto}
+                  itemAdelanto={adelanto}
                 />
               </div>
             ))}
