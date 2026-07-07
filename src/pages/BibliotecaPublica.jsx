@@ -264,7 +264,7 @@ export default function BibliotecaPublica() {
   const inputStyle = { background: 'transparent', border: '1px solid #3f3f46', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', cursor: 'pointer' };
 
   return (
-    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh', overflowX: 'hidden' }}>
+    <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
       {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
       <MailerLitePopup />
 
@@ -340,7 +340,7 @@ export default function BibliotecaPublica() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 24px 32px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 24px 32px', overflowX: 'hidden' }}>
 
         {/* Search bar */}
         {showSearch && (
