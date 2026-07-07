@@ -677,7 +677,7 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
         )}
         {mode === 'libre' && <p style={{ color:'var(--t-text-muted)', fontSize:12, margin:0 }}>{savedRects.length === 0 ? 'Arrastra sobre la imagen para seleccionar el área' : `${savedRects.length} recorte${savedRects.length>1?'s':''} seleccionado${savedRects.length>1?'s':''}. Sigue dibujando o confirma.`}</p>}
       </div>
-      <div style={{ flex:1, display:'flex', alignItems: zoom > 1 ? 'flex-start' : 'center', justifyContent: zoom > 1 ? 'flex-start' : 'center', width:'100%', overflow:'auto', padding: zoom > 1 ? '20px 40px' : '0 40px' }}>
+      <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', width:'100%', overflow:'auto', padding:'20px 40px' }}>
         <div style={{ position:'relative', display:'inline-block' }}>
           <img ref={imgRef} src={imageUrl} crossOrigin="anonymous" alt="recortar"
             onLoad={e => {
