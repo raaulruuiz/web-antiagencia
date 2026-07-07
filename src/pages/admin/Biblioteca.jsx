@@ -494,8 +494,23 @@ export default function Biblioteca() {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Biblioteca</h1>
-        <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <h1 className="text-2xl font-bold">Biblioteca</h1>
+          {selecting && (
+            <button
+              onClick={() => {
+                if (selected.size === filteredItems.length) {
+                  setSelected(new Set());
+                } else {
+                  setSelected(new Set(filteredItems.map(i => i.id)));
+                }
+              }}
+              style={{ fontSize: 11, color: 'var(--t-text-muted)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0, textDecoration: 'underline' }}>
+              {selected.size === filteredItems.length ? 'Quitar selección' : `Seleccionar todo (${filteredItems.length})`}
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-2" style={{ alignSelf: 'flex-start' }}>
           {selecting ? (
             <>
               {selected.size > 0 && (
