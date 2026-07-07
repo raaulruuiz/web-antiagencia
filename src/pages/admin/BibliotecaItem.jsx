@@ -1988,6 +1988,7 @@ export default function BibliotecaItem() {
   const [editingBlockId, setEditingBlockId]     = useState(null);
   const [showCropForModal, setShowCropForModal] = useState(false);
   const [showBlockSelectorModal, setShowBlockSelectorModal] = useState(false);
+  const [insertAtIndex, setInsertAtIndex] = useState(null);
   const [blocksSaving, setBlocksSaving]         = useState(false);
   const [blocksSaveError, setBlocksSaveError]   = useState(false);
   const cropForModalResolveRef = useRef(null);
@@ -2228,7 +2229,7 @@ export default function BibliotecaItem() {
     finally { setBlocksSaving(false); }
   }, [id]);
 
-  const addBlock = useCallback((type) => {
+  const addBlock = useCallback((type, atIndex = null) => {
     const newId = `blk_${Date.now()}`;
     const newBlock = {
       id: newId,
@@ -2250,11 +2251,15 @@ export default function BibliotecaItem() {
     };
     setBlocksData(prev => {
       let next;
-      const correccionIdx = prev.findIndex(b => b.type === 'correccion');
-      if (type === 'correccion' || correccionIdx === -1) {
-        next = [...prev, newBlock];
+      if (atIndex !== null) {
+        next = [...prev.slice(0, atIndex), newBlock, ...prev.slice(atIndex)];
       } else {
-        next = [...prev.slice(0, correccionIdx), newBlock, ...prev.slice(correccionIdx)];
+        const correccionIdx = prev.findIndex(b => b.type === 'correccion');
+        if (type === 'correccion' || correccionIdx === -1) {
+          next = [...prev, newBlock];
+        } else {
+          next = [...prev.slice(0, correccionIdx), newBlock, ...prev.slice(correccionIdx)];
+        }
       }
       saveBlocks(next);
       return next;
@@ -2453,12 +2458,12 @@ export default function BibliotecaItem() {
       {showCropForModal && item && <CropOverlay imageUrl={item.url} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
       {showBlockSelectorModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'var(--t-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-          onClick={() => setShowBlockSelectorModal(false)}>
+          onClick={() => { setShowBlockSelectorModal(false); setInsertAtIndex(null); }}>
           <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 480 }}>
             <BlockSelector
               hasCorreccion={blocksData.some(b => b.type === 'correccion')}
-              onSelect={(type) => { addBlock(type); setShowBlockSelectorModal(false); }}
-              onClose={() => setShowBlockSelectorModal(false)}
+              onSelect={(type) => { addBlock(type, insertAtIndex); setInsertAtIndex(null); setShowBlockSelectorModal(false); }}
+              onClose={() => { setShowBlockSelectorModal(false); setInsertAtIndex(null); }}
             />
           </div>
         </div>
@@ -2746,7 +2751,7 @@ export default function BibliotecaItem() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {blocksData.map((block, idx) => (
               <div key={block.id}>
-                <BlockDivider onAdd={() => setShowBlockSelectorModal(true)} />
+                <BlockDivider onAdd={() => { setInsertAtIndex(idx); setShowBlockSelectorModal(true); }} />
                 <BlockCard
                   block={block}
                   index={idx}
@@ -2759,9 +2764,9 @@ export default function BibliotecaItem() {
                 />
               </div>
             ))}
-            <BlockDivider onAdd={() => setShowBlockSelectorModal(true)} />
+            <BlockDivider onAdd={() => { setInsertAtIndex(blocksData.length); setShowBlockSelectorModal(true); }} />
             <button
-              onClick={() => setShowBlockSelectorModal(true)}
+              onClick={() => { setInsertAtIndex(null); setShowBlockSelectorModal(true); }}
               style={{ width: '100%', background: 'transparent', border: '1px dashed var(--t-border)', color: 'var(--t-text-subtle)', borderRadius: 10, padding: '12px 16px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s', marginTop: 4 }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text-subtle)'; }}>
