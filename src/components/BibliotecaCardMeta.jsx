@@ -25,6 +25,11 @@ export default function BibliotecaCardMeta({ item, allTags = [] }) {
           {new Date(item.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
         </p>
       )}
+      {(item.categoria === 'email' ? item.asunto : item.ficha_url) && (
+        <p style={{ fontSize: 12, color: 'var(--t-text-subtle)', margin: '2px 0 0', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {item.categoria === 'email' ? item.asunto : item.ficha_url}
+        </p>
+      )}
       {(item.categoria || item.subcategoria || resolvedTags.length > 0) && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 3 }}>
           {item.categoria && (
