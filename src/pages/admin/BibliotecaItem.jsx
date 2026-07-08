@@ -1789,13 +1789,15 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 5 }}>
                   {libraryImages.map((libImg, i) => {
                     const alreadyAdded = (draft.images || []).some(existing => existing.url === libImg.url);
+                    const mainBorder = libImg.isMain && !alreadyAdded ? `2px solid ${c}` : null;
                     return (
                       <div key={i} style={{ position: 'relative' }}>
                         <img src={libImg.url} alt="" onClick={() => { if (!alreadyAdded) addImage(libImg.url); }}
-                          style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 5, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
+                          style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 5, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : mainBorder || '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
                           onMouseEnter={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
-                          onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid transparent'; }} />
+                          onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = mainBorder || '2px solid transparent'; }} />
                         {alreadyAdded && <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconCheck /></div>}
+                        {libImg.isMain && !alreadyAdded && <div style={{ position: 'absolute', bottom: 2, left: 2, background: c, borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>MAIN</div>}
                       </div>
                     );
                   })}
@@ -1897,13 +1899,15 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
                         {libraryImages.map((libImg, i) => {
                           const alreadyAdded = (draft.links?.[linkIdx]?.images || []).some(existing => existing.url === libImg.url);
+                          const mainBorder = libImg.isMain && !alreadyAdded ? `2px solid ${c}` : null;
                           return (
                             <div key={i} style={{ position: 'relative' }}>
                               <img src={libImg.url} alt="" onClick={() => { if (!alreadyAdded) addLinkImage(linkIdx, libImg.url); }}
-                                style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
+                                style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : mainBorder || '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
                                 onMouseEnter={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
-                                onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid transparent'; }} />
+                                onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = mainBorder || '2px solid transparent'; }} />
                               {alreadyAdded && <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconCheck /></div>}
+                              {libImg.isMain && !alreadyAdded && <div style={{ position: 'absolute', bottom: 2, left: 2, background: c, borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>MAIN</div>}
                             </div>
                           );
                         })}
@@ -2023,10 +2027,13 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                             {libraryImages?.length > 0 ? (
                               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
                                 {libraryImages.map((libImg, i) => (
-                                  <img key={i} src={libImg.url} alt="" onClick={() => { setItemImage(itemIdx, libImg.url); setShowLibrary(null); }}
-                                    style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: 'pointer', border: '2px solid transparent' }}
-                                    onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
-                                    onMouseLeave={e => e.currentTarget.style.border = '2px solid transparent'} />
+                                  <div key={i} style={{ position: 'relative' }}>
+                                    <img src={libImg.url} alt="" onClick={() => { setItemImage(itemIdx, libImg.url); setShowLibrary(null); }}
+                                      style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: 'pointer', border: libImg.isMain ? `2px solid ${c}` : '2px solid transparent', display: 'block' }}
+                                      onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
+                                      onMouseLeave={e => e.currentTarget.style.border = libImg.isMain ? `2px solid ${c}` : '2px solid transparent'} />
+                                    {libImg.isMain && <div style={{ position: 'absolute', bottom: 2, left: 2, background: c, borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>MAIN</div>}
+                                  </div>
                                 ))}
                               </div>
                             ) : (
@@ -2309,13 +2316,15 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 5 }}>
                       {libraryImages.map((libImg, i) => {
                         const alreadyAdded = imgs.some(existing => existing.url === libImg.url);
+                        const mainBorder = libImg.isMain && !alreadyAdded ? `2px solid ${c}` : null;
                         return (
                           <div key={i} style={{ position: 'relative' }}>
                             <img src={libImg.url} alt="" onClick={() => { if (!alreadyAdded) addImage(libImg.url); }}
-                              style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
+                              style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : mainBorder || '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
                               onMouseEnter={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
-                              onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid transparent'; }} />
+                              onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = mainBorder || '2px solid transparent'; }} />
                             {alreadyAdded && <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconCheck /></div>}
+                            {libImg.isMain && !alreadyAdded && <div style={{ position: 'absolute', bottom: 2, left: 2, background: c, borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>MAIN</div>}
                           </div>
                         );
                       })}
@@ -2931,7 +2940,7 @@ export default function BibliotecaItem() {
     const imgs = [];
     // La imagen principal del item (screenshot) va siempre primera
     const mainUrl = item?.url;
-    if (mainUrl) { imgs.push({ url: mainUrl }); seen.add(mainUrl); }
+    if (mainUrl) { imgs.push({ url: mainUrl, isMain: true }); seen.add(mainUrl); }
     blocksLibrary.forEach(img => { if (!seen.has(img.url)) { imgs.push(img); seen.add(img.url); } });
     blocksData.forEach(b => {
       (b.images || []).forEach(img => {
