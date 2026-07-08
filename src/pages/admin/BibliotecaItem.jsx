@@ -1494,7 +1494,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 style={{ background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', color: 'var(--t-text)', cursor: 'pointer', padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500, textAlign: 'left' }}
                 onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--t-text-muted)'}
                 onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
-                Sacar los bloques fuera y eliminar solo la columna
+                Eliminar solo la columna
               </button>
               <button
                 onClick={() => { onDelete(); setShowColumnaModal(false); }}
