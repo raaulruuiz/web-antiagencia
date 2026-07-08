@@ -1298,7 +1298,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             const col = block.text_color || '#06b6d4';
             return (
               <div style={{ background: col + '18', border: `1px solid ${col}44`, borderRadius: 10, padding: '12px 14px' }}>
-                <p style={{ fontSize: 12, color: col, margin: 0, lineHeight: 1.6, textAlign: block.text_align || 'left', whiteSpace: 'pre-wrap', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                <p style={{ fontSize: 12, color: col, margin: 0, lineHeight: 1.6, textAlign: block.text_align || 'left', whiteSpace: 'pre-wrap' }}>
                   {block.texto}
                 </p>
               </div>
