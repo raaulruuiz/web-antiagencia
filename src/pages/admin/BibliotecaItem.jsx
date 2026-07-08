@@ -2879,8 +2879,10 @@ export default function BibliotecaItem() {
 
   const libraryImages = useMemo(() => {
     const seen = new Set();
-    const imgs = [...blocksLibrary];
-    blocksLibrary.forEach(img => seen.add(img.url));
+    const imgs = [];
+    // La imagen principal del item va siempre primera
+    if (itemUrl) { imgs.push({ url: itemUrl }); seen.add(itemUrl); }
+    blocksLibrary.forEach(img => { if (!seen.has(img.url)) { imgs.push(img); seen.add(img.url); } });
     blocksData.forEach(b => {
       (b.images || []).forEach(img => {
         if (!seen.has(img.url)) { seen.add(img.url); imgs.push(img); }
@@ -2897,7 +2899,7 @@ export default function BibliotecaItem() {
       });
     });
     return imgs;
-  }, [blocksData, blocksLibrary]);
+  }, [blocksData, blocksLibrary, itemUrl]);
 
   if (loading) return (
     <div data-theme={theme} className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--t-bg)' }}>
