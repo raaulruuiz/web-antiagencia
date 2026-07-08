@@ -1602,6 +1602,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [urlErrors, setUrlErrors] = useState({});
   const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number) | 'it-{idx}'
   const [transcribing, setTranscribing] = useState(false);
+  const [transcribedImages, setTranscribedImages] = useState(new Set());
   const fileInputRef = useRef(null);
   const transcribeFileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
@@ -2232,34 +2233,67 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 
         {draft.type === 'transcribir' && (() => {
           const imgs = draft.images || [];
+          const doneImgs = imgs.filter(i => transcribedImages.has(i.url));
+          const pendingImgs = imgs.filter(i => !transcribedImages.has(i.url));
+          const hasText = !!(draft.texto && draft.texto.trim());
 
-          const handleTranscribe = async () => {
-            if (!imgs.length || transcribing) return;
+          const handleTranscribe = async (mode) => {
+            if (!pendingImgs.length || transcribing) return;
             setTranscribing(true);
             try {
               const token = await getToken();
               const res = await fetch(`${API_BASE}/biblioteca/transcribe-images`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ images: imgs.map(i => i.url) }),
+                body: JSON.stringify({ images: pendingImgs.map(i => i.url) }),
               });
               const data = await res.json();
-              if (data.texto) update('texto', data.texto);
+              if (data.texto) {
+                if (mode === 'append') {
+                  update('texto', (draft.texto?.trim() ? draft.texto.trim() + '\n\n' : '') + data.texto);
+                } else {
+                  update('texto', data.texto);
+                }
+                setTranscribedImages(prev => {
+                  const next = new Set(prev);
+                  pendingImgs.forEach(i => next.add(i.url));
+                  return next;
+                });
+              }
             } catch { alert('Error al transcribir'); }
             finally { setTranscribing(false); }
           };
 
           return (
             <>
-              {/* Imágenes fuente */}
+              {/* Imágenes transcritas */}
+              {doneImgs.length > 0 && (
+                <div>
+                  <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Imágenes transcritas</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 6, marginBottom: 8 }}>
+                    {doneImgs.map((img, idx) => (
+                      <div key={idx} style={{ position: 'relative', aspectRatio: '1' }}>
+                        <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, display: 'block', opacity: 0.6 }} />
+                        <div style={{ position: 'absolute', inset: 0, borderRadius: 6, background: 'rgba(6,182,212,0.15)', border: '2px solid #06b6d4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <button onClick={() => removeImage(imgs.indexOf(img))}
+                          style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 13, lineHeight: 1 }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Imágenes a transcribir */}
               <div>
                 <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Imágenes a transcribir</label>
-                {imgs.length > 0 && (
+                {pendingImgs.length > 0 && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 6, marginBottom: 8 }}>
-                    {imgs.map((img, idx) => (
+                    {pendingImgs.map((img, idx) => (
                       <div key={idx} style={{ position: 'relative', aspectRatio: '1' }}>
                         <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, display: 'block' }} />
-                        <button onClick={() => removeImage(idx)}
+                        <button onClick={() => removeImage(imgs.indexOf(img))}
                           style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 13, lineHeight: 1 }}>×</button>
                       </div>
                     ))}
@@ -2325,22 +2359,39 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                 </div>
               </div>
 
-              {/* Transcribe button */}
-              {imgs.length > 0 && (
-                <button onClick={handleTranscribe} disabled={transcribing}
-                  style={{ width: '100%', background: transcribing ? 'var(--t-surface2)' : '#06b6d4', color: transcribing ? 'var(--t-text-muted)' : 'white', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: transcribing ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'background 0.15s' }}>
-                  {transcribing ? (
-                    <>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 0.7s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                      Transcribiendo…
-                    </>
-                  ) : (
-                    <>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      Confirmar y transcribir
-                    </>
-                  )}
-                </button>
+              {/* Transcribe buttons */}
+              {pendingImgs.length > 0 && (
+                transcribing ? (
+                  <button disabled style={{ width: '100%', background: 'var(--t-surface2)', color: 'var(--t-text-muted)', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 0.7s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    Transcribiendo…
+                  </button>
+                ) : hasText ? (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => handleTranscribe('replace')}
+                      style={{ flex: 1, background: '#06b6d4', color: 'white', border: 'none', borderRadius: 8, padding: '10px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#0891b2'}
+                      onMouseLeave={e => e.currentTarget.style.background = '#06b6d4'}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      Transcribir y sustituir
+                    </button>
+                    <button onClick={() => handleTranscribe('append')}
+                      style={{ flex: 1, background: 'transparent', color: '#06b6d4', border: '1px solid #06b6d4', borderRadius: 8, padding: '10px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#06b6d418'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Transcribir y añadir
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => handleTranscribe('replace')}
+                    style={{ width: '100%', background: '#06b6d4', color: 'white', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#0891b2'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#06b6d4'}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Confirmar y transcribir
+                  </button>
+                )
               )}
 
               {/* Texto transcrito editable */}
