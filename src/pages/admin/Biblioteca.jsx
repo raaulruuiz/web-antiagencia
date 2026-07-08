@@ -150,6 +150,36 @@ function DateRangePicker({ from, to, onChange }) {
   );
 }
 
+function ConfirmPublishModal({ pendingCount, onPublish, onDiscard, onCancel }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={onCancel}>
+      <div className="rounded-xl border border-zinc-700 p-6 flex flex-col gap-4" style={{ backgroundColor: 'var(--t-surface)', width: '340px' }} onClick={e => e.stopPropagation()}>
+        <p className="text-sm text-white font-medium">¿Qué quieres hacer con los cambios pendientes?</p>
+        <p className="text-xs text-zinc-400">{pendingCount === 1 ? '1 elemento tiene' : `${pendingCount} elementos tienen`} cambios sin publicar.</p>
+        <div className="flex flex-col gap-2">
+          <button onClick={onPublish}
+            className="text-sm text-white font-medium px-4 py-2 rounded-lg transition-colors"
+            style={{ background: '#3b82f6' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#2563eb'}
+            onMouseLeave={e => e.currentTarget.style.background = '#3b82f6'}>
+            Publicar cambios
+          </button>
+          <button onClick={onDiscard}
+            className="text-xs px-4 py-2 rounded-lg transition-colors"
+            style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.25)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'}>
+            Descartar cambios
+          </button>
+          <button onClick={onCancel} className="text-xs text-zinc-400 hover:text-white px-4 py-1.5 rounded-lg transition-colors">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ConfirmModal({ count, onConfirm, onCancel }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={onCancel}>
@@ -325,6 +355,7 @@ export default function Biblioteca() {
   // Publish system
   const [autopublish, setAutopublish] = useState(() => localStorage.getItem('biblioteca_autopublish') === 'true');
   const [publishing, setPublishing] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const pendingIds = useMemo(() => {
     try { return new Set(JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]')); } catch { return new Set(); }
   }, [items]); // recompute when items change (after publish clears storage)
@@ -339,6 +370,7 @@ export default function Biblioteca() {
   };
 
   const publishAll = async () => {
+    setShowPublishConfirm(false);
     if (!hasPending || publishing) return;
     setPublishing(true);
     try {
@@ -348,9 +380,24 @@ export default function Biblioteca() {
         fetch(`${API_BASE}/biblioteca/${id}/publish`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } })
       ));
       localStorage.setItem('biblioteca_pending_publish', '[]');
-      // force re-render of hasPending
       setItems(prev => [...prev]);
     } catch (e) { console.error('[publish]', e); }
+    finally { setPublishing(false); }
+  };
+
+  const discardAll = async () => {
+    setShowPublishConfirm(false);
+    if (!hasPending || publishing) return;
+    setPublishing(true);
+    try {
+      const token = await getToken();
+      const ids = [...pendingIds];
+      await Promise.all(ids.map(id =>
+        fetch(`${API_BASE}/biblioteca/${id}/discard`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } })
+      ));
+      localStorage.setItem('biblioteca_pending_publish', '[]');
+      setItems(prev => [...prev]);
+    } catch (e) { console.error('[discard]', e); }
     finally { setPublishing(false); }
   };
 
@@ -528,6 +575,7 @@ export default function Biblioteca() {
 
       {confirm && <ConfirmModal count={confirm.ids.length} onConfirm={() => deleteIds(confirm.ids)} onCancel={() => setConfirm(null)} />}
       {confirmVis && <ConfirmVisibilidadModal count={selected.size} publico={confirmVis.publico} onConfirm={() => bulkSetVisibilidad(confirmVis.publico)} onCancel={() => setConfirmVis(null)} />}
+      {showPublishConfirm && <ConfirmPublishModal pendingCount={pendingIds.size} onPublish={publishAll} onDiscard={discardAll} onCancel={() => setShowPublishConfirm(false)} />}
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -637,7 +685,7 @@ export default function Biblioteca() {
               {/* Publicar button — only when not autopublishing */}
               {!autopublish && (
                 <button
-                  onClick={publishAll}
+                  onClick={() => hasPending && !publishing && setShowPublishConfirm(true)}
                   disabled={publishing}
                   style={{
                     fontSize: 12, fontWeight: 600, borderRadius: 8, padding: '6px 14px', cursor: hasPending && !publishing ? 'pointer' : 'default', transition: 'all 0.15s',
