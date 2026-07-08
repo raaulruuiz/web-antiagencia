@@ -1602,7 +1602,8 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [urlErrors, setUrlErrors] = useState({});
   const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number) | 'it-{idx}'
   const [transcribing, setTranscribing] = useState(false);
-  const [transcribedImages, setTranscribedImages] = useState(new Set());
+  const [transcribedUrls, setTranscribedUrls] = useState([]);
+  useEffect(() => { if (!draft.texto?.trim()) setTranscribedUrls([]); }, [draft.texto]);
   const fileInputRef = useRef(null);
   const transcribeFileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
@@ -2240,8 +2241,8 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 
         {draft.type === 'transcribir' && (() => {
           const imgs = draft.images || [];
-          const doneImgs = imgs.filter(i => transcribedImages.has(i.url));
-          const pendingImgs = imgs.filter(i => !transcribedImages.has(i.url));
+          const doneImgs = imgs.filter(i => transcribedUrls.includes(i.url));
+          const pendingImgs = imgs.filter(i => !transcribedUrls.includes(i.url));
           const hasText = !!(draft.texto && draft.texto.trim());
 
           const handleTranscribe = async (mode) => {
@@ -2261,11 +2262,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                 } else {
                   update('texto', data.texto);
                 }
-                setTranscribedImages(prev => {
-                  const next = new Set(prev);
-                  pendingImgs.forEach(i => next.add(i.url));
-                  return next;
-                });
+                setTranscribedUrls(prev => [...new Set([...prev, ...pendingImgs.map(i => i.url)])]);
               }
             } catch { alert('Error al transcribir'); }
             finally { setTranscribing(false); }
