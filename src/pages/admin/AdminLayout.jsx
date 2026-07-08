@@ -33,13 +33,23 @@ function AdminLayoutInner() {
   const [pages, setPages] = useState([]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!data.session) { navigate('/admin/login'); return; }
-      const { data: { user } } = await supabase.auth.getUser();
+    async function loadUser() {
+      // getUser() validates + refreshes the session if expired
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (!user || error) { navigate('/admin/login'); return; }
       setRole(user?.app_metadata?.role ?? 'lector');
       setPages(user?.app_metadata?.pages ?? []);
       setChecked(true);
+    }
+
+    loadUser();
+
+    // Handle token refresh and forced sign-out from any tab
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') navigate('/admin/login');
     });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleSignOut = async () => {

@@ -214,7 +214,6 @@ const BLOCK_TYPES = [
   { type: 'enlaces',      label: 'Enlace',          icon: <IconChain /> },
   { type: 'imagen',       label: 'Imagen',           icon: <IconImageBlock /> },
   { type: 'imagen_texto', label: 'Imagen y/o Texto', icon: <IconImageText /> },
-  { type: 'correccion',   label: 'Corrección',       icon: <IconCorrection /> },
   { type: 'transcribir',  label: 'Transcribir',      icon: <IconChipSm /> },
   { type: 'columnas',     label: 'Columnas',         icon: <IconColumns /> },
 ];
@@ -904,18 +903,32 @@ function BlockDivider({ onAdd }) {
 }
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
-const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#8b5cf6' };
+const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6' };
 const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas' };
 
 function BlockSelector({ onSelect, hasCorreccion, onClose, categoria }) {
-  // Build full list of types to show
-  const allVisible = [
+  const gridTypes = [
     ...BLOCK_TYPES,
     ...(categoria === 'email' ? [{ type: 'asunto_adelanto', label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> }] : []),
   ];
-  const isOdd = allVisible.length % 2 !== 0;
-  const gridTypes = isOdd ? allVisible.slice(0, -1) : allVisible;
-  const fullWidthType = isOdd ? allVisible[allVisible.length - 1] : null;
+  const correccionBt = { type: 'correccion', label: 'Corrección', icon: <IconCorrection /> };
+  const isOdd = gridTypes.length % 2 !== 0;
+  const gridItems = isOdd ? gridTypes.slice(0, -1) : gridTypes;
+  const midFullWidth = isOdd ? gridTypes[gridTypes.length - 1] : null;
+
+  const renderFullWidthBtn = (bt) => {
+    const disabled = bt.type === 'correccion' && hasCorreccion;
+    const c = BLOCK_COLORS[bt.type];
+    return (
+      <button key={bt.type} onClick={() => !disabled && onSelect(bt.type)} disabled={disabled}
+        style={{ width: '100%', height: 50, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, border: `1px solid ${disabled ? 'var(--t-border)' : 'var(--t-border-mid)'}`, borderRadius: 12, background: 'transparent', color: disabled ? 'var(--t-text-faint)' : 'var(--t-text-muted)', cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: disabled ? 0.4 : 1 }}
+        onMouseEnter={e => { if (!disabled) { e.currentTarget.style.borderColor = c; e.currentTarget.style.color = c; e.currentTarget.style.background = c + '11'; }}}
+        onMouseLeave={e => { if (!disabled) { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}}>
+        <span style={{ color: 'inherit' }}>{bt.icon}</span>
+        <span style={{ fontSize: 13, fontWeight: 500, color: 'inherit' }}>{bt.label}</span>
+      </button>
+    );
+  };
 
   return (
     <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 14, padding: '16px 16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -924,34 +937,21 @@ function BlockSelector({ onSelect, hasCorreccion, onClose, categoria }) {
         {onClose && <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {gridTypes.map(bt => {
-          const disabled = bt.type === 'correccion' && hasCorreccion;
+        {gridItems.map(bt => {
           const c = BLOCK_COLORS[bt.type];
           return (
-            <button key={bt.type} onClick={() => !disabled && onSelect(bt.type)} disabled={disabled}
-              style={{ height: 130, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, border: `1px solid ${disabled ? 'var(--t-border)' : 'var(--t-border-mid)'}`, borderRadius: 12, background: 'transparent', color: disabled ? 'var(--t-text-faint)' : 'var(--t-text-muted)', cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: disabled ? 0.4 : 1 }}
-              onMouseEnter={e => { if (!disabled) { e.currentTarget.style.borderColor = c; e.currentTarget.style.color = c; e.currentTarget.style.background = c + '11'; }}}
-              onMouseLeave={e => { if (!disabled) { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}}>
+            <button key={bt.type} onClick={() => onSelect(bt.type)}
+              style={{ height: 130, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px solid var(--t-border-mid)', borderRadius: 12, background: 'transparent', color: 'var(--t-text-muted)', cursor: 'pointer', transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = c; e.currentTarget.style.color = c; e.currentTarget.style.background = c + '11'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}>
               <span style={{ color: 'inherit' }}>{bt.icon}</span>
               <span style={{ fontSize: 13, fontWeight: 500, color: 'inherit' }}>{bt.label}</span>
             </button>
           );
         })}
       </div>
-      {fullWidthType && (() => {
-        const bt = fullWidthType;
-        const disabled = bt.type === 'correccion' && hasCorreccion;
-        const c = BLOCK_COLORS[bt.type];
-        return (
-          <button onClick={() => !disabled && onSelect(bt.type)} disabled={disabled}
-            style={{ width: '100%', height: 50, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, border: `1px solid ${disabled ? 'var(--t-border)' : 'var(--t-border-mid)'}`, borderRadius: 12, background: 'transparent', color: disabled ? 'var(--t-text-faint)' : 'var(--t-text-muted)', cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: disabled ? 0.4 : 1 }}
-            onMouseEnter={e => { if (!disabled) { e.currentTarget.style.borderColor = c; e.currentTarget.style.color = c; e.currentTarget.style.background = c + '11'; }}}
-            onMouseLeave={e => { if (!disabled) { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}}>
-            <span style={{ color: 'inherit' }}>{bt.icon}</span>
-            <span style={{ fontSize: 13, fontWeight: 500, color: 'inherit' }}>{bt.label}</span>
-          </button>
-        );
-      })()}
+      {midFullWidth && renderFullWidthBtn(midFullWidth)}
+      {renderFullWidthBtn(correccionBt)}
     </div>
   );
 }
@@ -977,14 +977,33 @@ function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
 }
 
 // ── Block: card ───────────────────────────────────────────────────────────────
-function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onToggleVisible, itemAsunto, itemAdelanto }) {
-  const bt = BLOCK_TYPES.find(b => b.type === block.type);
+function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onToggleVisible, itemAsunto, itemAdelanto, onUpdateBlock, categoria }) {
+  const bt = BLOCK_TYPES.find(b => b.type === block.type) || { label: block.type };
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
   const imgs = block.images || [];
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [lightbox, setLightbox] = useState(null);
+  const [addingToCol, setAddingToCol] = useState(null);
   const { theme } = useTheme();
+
+  const addBlockToColumn = (colIdx, type) => {
+    const newBlock = {
+      id: `col_${Date.now()}_${Math.random().toString(36).substr(2,5)}`,
+      type, titulo: DEFAULT_TITLES[type] || '', subtitulo: '', images: [],
+      links: type === 'enlaces' ? [{ images: [], url: '' }] : [],
+      links_layout: 'columna', images_layout: 'columna', it_layout: 'img-text',
+      items: type === 'imagen_texto' ? [{ image: null, texto: '', text_color: '', text_align: 'left' }]
+           : type === 'asunto_adelanto' ? [{ show_asunto: false, show_adelanto: false, texto: '', text_color: '', text_align: 'left' }] : [],
+      email_blocks: [], texto: '', nota: '', visible: true,
+    };
+    const updatedBlock = {
+      ...block,
+      columns: (block.columns || []).map((col, i) => i === colIdx ? [...(col || []), newBlock] : (col || [])),
+    };
+    onUpdateBlock?.(updatedBlock);
+    setAddingToCol(null);
+  };
 
   return (
     <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border-s)', borderRadius: 10, overflow: 'hidden' }}>
@@ -1319,17 +1338,35 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             <div style={{ display: 'grid', gridTemplateColumns: `repeat(${block.num_columnas}, 1fr)`, gap: 4 }}>
               {Array.from({ length: block.num_columnas }, (_, ci) => {
                 const col = (block.columns || [])[ci] || [];
+                const colColor = '#14b8a6';
                 return (
-                  <div key={ci} style={{ border: '1px solid var(--t-border)', borderRadius: 5, padding: 5, minHeight: 28 }}>
+                  <div key={ci} style={{ border: `1px solid ${addingToCol === ci ? colColor + '66' : 'var(--t-border)'}`, borderRadius: 5, padding: 5, minHeight: 32, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     {col.map((b, bi) => (
-                      <div key={bi} style={{ fontSize: 9, color: 'var(--t-text-muted)', padding: '2px 4px', borderRadius: 3, background: (BLOCK_COLORS[b.type] || '#71717a') + '22', marginBottom: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                      <div key={bi} style={{ fontSize: 9, color: 'var(--t-text-muted)', padding: '2px 4px', borderRadius: 3, background: (BLOCK_COLORS[b.type] || '#71717a') + '22', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                         {b.titulo || b.type}
                       </div>
                     ))}
-                    {col.length === 0 && <div style={{ fontSize: 9, color: 'var(--t-text-faint)', textAlign: 'center', paddingTop: 4 }}>vacía</div>}
+                    <button onClick={() => setAddingToCol(addingToCol === ci ? null : ci)}
+                      style={{ background: 'transparent', border: `1px dashed ${addingToCol === ci ? colColor : 'var(--t-border-mid)'}`, borderRadius: 4, padding: '3px 0', fontSize: 9, color: addingToCol === ci ? colColor : 'var(--t-text-subtle)', cursor: 'pointer', width: '100%', marginTop: 'auto' }}>
+                      + bloque
+                    </button>
                   </div>
                 );
               })}
+            </div>
+          )}
+          {addingToCol !== null && (
+            <div style={{ marginTop: 6, background: 'var(--t-bg)', border: '1px solid var(--t-border)', borderRadius: 6, padding: 8 }}>
+              <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', marginBottom: 6 }}>Col. {addingToCol + 1} — elegir tipo:</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                {[...BLOCK_TYPES, ...(categoria === 'email' ? [{ type: 'asunto_adelanto', label: 'Asunto y/o Adelanto' }] : []), { type: 'correccion', label: 'Corrección' }].map(bt => (
+                  <button key={bt.type} onClick={() => addBlockToColumn(addingToCol, bt.type)}
+                    style={{ padding: '4px 8px', fontSize: 10, border: `1px solid ${(BLOCK_COLORS[bt.type] || '#71717a')}44`, borderRadius: 5, background: (BLOCK_COLORS[bt.type] || '#71717a') + '11', color: BLOCK_COLORS[bt.type] || 'var(--t-text-muted)', cursor: 'pointer', fontWeight: 500 }}>
+                    {bt.label}
+                  </button>
+                ))}
+                <button onClick={() => setAddingToCol(null)} style={{ padding: '4px 8px', fontSize: 10, border: '1px solid var(--t-border)', borderRadius: 5, background: 'transparent', color: 'var(--t-text-subtle)', cursor: 'pointer' }}>Cancelar</button>
+              </div>
             </div>
           )}
         </div>
@@ -1631,7 +1668,6 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number) | 'it-{idx}'
   const [transcribing, setTranscribing] = useState(false);
   const [editingNestedBlock, setEditingNestedBlock] = useState(null); // { colIdx, blockIdx }
-  const [addingBlockToColumn, setAddingBlockToColumn] = useState(null); // colIdx | null
   const fileInputRef = useRef(null);
   const transcribeFileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
@@ -2476,7 +2512,6 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             };
             const newIdx = ((draft.columns || [])[colIdx] || []).length;
             updateCols(prev => { const next = prev.map(c => [...c]); while (next.length <= colIdx) next.push([]); next[colIdx] = [...next[colIdx], newBlock]; return next; });
-            setAddingBlockToColumn(null);
             setEditingNestedBlock({ colIdx, blockIdx: newIdx });
           };
           const removeNestedBlock = (colIdx, blockIdx) => updateCols(prev => { const next = prev.map(c => [...c]); next[colIdx] = next[colIdx].filter((_, i) => i !== blockIdx); return next; });
@@ -2547,34 +2582,9 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                             </div>
                           );
                         })}
-                        <button onClick={() => setAddingBlockToColumn(addingBlockToColumn === colIdx ? null : colIdx)}
-                          style={{ background: 'transparent', border: `1px dashed ${addingBlockToColumn === colIdx ? '#8b5cf6' : 'var(--t-border-mid)'}`, borderRadius: 6, padding: '5px 4px', fontSize: 10, color: addingBlockToColumn === colIdx ? '#8b5cf6' : 'var(--t-text-subtle)', cursor: 'pointer', width: '100%', marginTop: 'auto' }}>
-                          + Añadir bloque
-                        </button>
                       </div>
                     );
                   })}
-                </div>
-              )}
-
-              {addingBlockToColumn !== null && numCols > 0 && (
-                <div style={{ border: '1px solid #8b5cf644', borderRadius: 8, padding: 12, background: '#8b5cf608' }}>
-                  <div style={{ fontSize: 11, color: '#8b5cf6', fontWeight: 600, marginBottom: 8 }}>Añadiendo a Columna {addingBlockToColumn + 1}</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, marginBottom: 8 }}>
-                    {nestedBlockTypes.map(bt => {
-                      const disabled = bt.type === 'correccion' && ((draft.columns || [])[addingBlockToColumn] || []).some(b => b.type === 'correccion');
-                      const bcolor = BLOCK_COLORS[bt.type];
-                      return (
-                        <button key={bt.type} onClick={() => !disabled && addNestedBlock(addingBlockToColumn, bt.type)} disabled={disabled}
-                          style={{ padding: '10px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, border: `1px solid ${disabled ? 'var(--t-border)' : 'var(--t-border-mid)'}`, borderRadius: 10, background: 'transparent', color: disabled ? 'var(--t-text-faint)' : 'var(--t-text-muted)', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1, fontSize: 11, fontWeight: 500 }}
-                          onMouseEnter={e => { if (!disabled) { e.currentTarget.style.borderColor = bcolor; e.currentTarget.style.color = bcolor; e.currentTarget.style.background = bcolor + '11'; }}}
-                          onMouseLeave={e => { if (!disabled) { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}}>
-                          <span style={{ color: 'inherit' }}>{bt.icon}</span>{bt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <button onClick={() => setAddingBlockToColumn(null)} style={{ width: '100%', background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '4px 0' }}>Cancelar</button>
                 </div>
               )}
 
@@ -3016,6 +3026,27 @@ export default function BibliotecaItem() {
       if (idx === -1) return prev;
       const newIdx = idx + direction;
       if (newIdx < 0 || newIdx >= prev.length) return prev;
+
+      // Moving UP into a Columnas block with empty columns → insert instead of swap
+      if (direction === -1) {
+        const target = prev[newIdx];
+        if (target.type === 'columnas') {
+          const cols = target.columns || [];
+          const emptyColIdx = cols.findIndex(col => !col || col.length === 0);
+          if (emptyColIdx !== -1) {
+            const blockToInsert = { ...prev[idx], id: `col_${Date.now()}_${Math.random().toString(36).substr(2,5)}` };
+            const updatedTarget = {
+              ...target,
+              columns: cols.map((col, i) => i === emptyColIdx ? [...(col || []), blockToInsert] : (col || [])),
+            };
+            const next = prev.filter((_, i) => i !== idx);
+            next[next.indexOf(target)] = updatedTarget;
+            saveBlocks(next);
+            return next;
+          }
+        }
+      }
+
       const next = [...prev];
       [next[idx], next[newIdx]] = [next[newIdx], next[idx]];
       saveBlocks(next);
@@ -3570,6 +3601,8 @@ export default function BibliotecaItem() {
                   onToggleVisible={() => toggleBlockVisible(block.id)}
                   itemAsunto={asunto}
                   itemAdelanto={adelanto}
+                  onUpdateBlock={updateBlock}
+                  categoria={categoria}
                 />
               </div>
             ))}
