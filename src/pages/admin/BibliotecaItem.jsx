@@ -1004,7 +1004,20 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
     const cols = block.columns || [];
     const col = [...(cols[colIdx] || [])];
     const newIdx = blockIdx + dir;
-    if (newIdx < 0 || newIdx >= col.length) return;
+    if (newIdx < 0) {
+      // Extract block and place it BEFORE the columnas block in the main list
+      const [extracted] = col.splice(blockIdx, 1);
+      const newCols = cols.map((c, i) => i === colIdx ? col : [...(c || [])]);
+      onUpdateBlock?.({ ...block, columns: newCols, _extractBefore: extracted });
+      return;
+    }
+    if (newIdx >= col.length) {
+      // Extract block and place it AFTER the columnas block in the main list
+      const [extracted] = col.splice(blockIdx, 1);
+      const newCols = cols.map((c, i) => i === colIdx ? col : [...(c || [])]);
+      onUpdateBlock?.({ ...block, columns: newCols, _extractAfter: extracted });
+      return;
+    }
     [col[blockIdx], col[newIdx]] = [col[newIdx], col[blockIdx]];
     const newCols = cols.map((c, i) => i === colIdx ? col : [...(c || [])]);
     onUpdateBlock?.({ ...block, columns: newCols });
@@ -1056,14 +1069,23 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         <div style={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 0 }}>
           {!isCorreccion && (
             <>
-              <button onClick={onMoveUp} disabled={index === 0}
-                style={{ background: 'none', border: 'none', color: index === 0 ? 'var(--t-text-faint)' : 'var(--t-text)', cursor: index === 0 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
-                <IconChevronUp />
-              </button>
-              <button onClick={onMoveDown} disabled={index === total - 1}
-                style={{ background: 'none', border: 'none', color: index === total - 1 ? 'var(--t-text-faint)' : 'var(--t-text)', cursor: index === total - 1 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
-                <IconChevronDown />
-              </button>
+              {(() => {
+                const isNested = onMoveLeft !== undefined || onMoveRight !== undefined;
+                const upDis = !isNested && index === 0;
+                const downDis = !isNested && index === total - 1;
+                return (
+                  <>
+                    <button onClick={onMoveUp} disabled={upDis}
+                      style={{ background: 'none', border: 'none', color: upDis ? 'var(--t-text-faint)' : 'var(--t-text)', cursor: upDis ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
+                      <IconChevronUp />
+                    </button>
+                    <button onClick={onMoveDown} disabled={downDis}
+                      style={{ background: 'none', border: 'none', color: downDis ? 'var(--t-text-faint)' : 'var(--t-text)', cursor: downDis ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
+                      <IconChevronDown />
+                    </button>
+                  </>
+                );
+              })()}
               {(onMoveLeft !== undefined || onMoveRight !== undefined) && (
                 <>
                   <button onClick={onMoveLeft || undefined} disabled={!onMoveLeft}
