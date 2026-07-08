@@ -1231,29 +1231,29 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         </div>
       )}
 
-      {block.type === 'imagen' && imgs.length > 0 && (
+      {block.type === 'imagen' && (
         <div style={{ padding: '12px 14px' }}>
-          {(block.titulo || block.subtitulo) && (
-            <div style={{ marginBottom: 10 }}>
-              {block.titulo && <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo}</div>}
-              {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
+          <div style={{ marginBottom: imgs.length > 0 ? 10 : 0 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Imagen'}</div>
+            {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
+          </div>
+          {imgs.length > 0 && (
+            <div style={
+              block.images_layout === 'fila'
+                ? { display: 'flex', flexDirection: 'row', gap: 10, overflowX: 'auto' }
+                : block.images_layout === 'grid'
+                ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }
+                : { display: 'flex', flexDirection: 'column', gap: 10 }
+            }>
+              {imgs.map((img, i) => (
+                block.images_layout === 'grid'
+                  ? <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
+                  : block.images_layout === 'fila'
+                  ? <PreviewImg key={i} src={img.url} imgStyle={{ height: 180, width: 'auto', borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} />
+                  : <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
+              ))}
             </div>
           )}
-          <div style={
-            block.images_layout === 'fila'
-              ? { display: 'flex', flexDirection: 'row', gap: 10, overflowX: 'auto' }
-              : block.images_layout === 'grid'
-              ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }
-              : { display: 'flex', flexDirection: 'column', gap: 10 }
-          }>
-            {imgs.map((img, i) => (
-              block.images_layout === 'grid'
-                ? <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
-                : block.images_layout === 'fila'
-                ? <PreviewImg key={i} src={img.url} imgStyle={{ height: 180, width: 'auto', borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} />
-                : <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
-            ))}
-          </div>
         </div>
       )}
 
@@ -1265,12 +1265,10 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         if (!items.length) return <div style={{ padding: '12px 14px' }}><span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span></div>;
         return (
           <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {(block.titulo || block.subtitulo) && (
-              <div style={{ marginBottom: 2 }}>
-                {block.titulo && <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo}</div>}
-                {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
-              </div>
-            )}
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Imagen y/o Texto'}</div>
+              {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
+            </div>
             {items.map((it, i) => {
               const tc = it.text_color;
               const hasImage = it.image?.url;
@@ -1302,12 +1300,10 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         if (!items.length) return <div style={{ padding: '12px 14px' }}><span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span></div>;
         return (
           <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {(block.titulo || block.subtitulo) && (
-              <div style={{ marginBottom: 2 }}>
-                {block.titulo && <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo}</div>}
-                {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
-              </div>
-            )}
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Asunto y/o Adelanto'}</div>
+              {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
+            </div>
             {items.map((it, i) => {
               const tc = it.text_color;
               const hasField = it.show_asunto || it.show_adelanto;
@@ -1336,12 +1332,10 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {block.type === 'correccion' && (
         <div style={{ padding: '10px 12px' }}>
-          {(block.titulo || block.subtitulo) && (
-            <div style={{ marginBottom: 10 }}>
-              {block.titulo && <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo}</div>}
-              {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
-            </div>
-          )}
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Corrección'}</div>
+            {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
+          </div>
           {(block.email_blocks || []).length > 0 ? (() => {
             const outerBg = theme === 'dark' ? '#1e1e1e' : '#e0e0e0';
             const emailBg = block.email_bg || '#ffffff';
@@ -1405,7 +1399,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {block.type === 'columnas' && (
         <div style={{ padding: '12px 14px' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', marginBottom: 8 }}>{block.titulo || 'Columnas'}</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, marginBottom: 8 }}>{block.titulo || 'Columnas'}</div>
           {block.num_columnas && (
             <div style={{ display: 'grid', gridTemplateColumns: `repeat(${block.num_columnas}, 1fr)`, gap: 6 }}>
               {Array.from({ length: block.num_columnas }, (_, ci) => {
