@@ -2878,8 +2878,9 @@ export default function BibliotecaItem() {
   const libraryImages = useMemo(() => {
     const seen = new Set();
     const imgs = [];
-    // La imagen principal del item va siempre primera
-    if (itemUrl) { imgs.push({ url: itemUrl }); seen.add(itemUrl); }
+    // La imagen principal del item (screenshot) va siempre primera
+    const mainUrl = item?.url;
+    if (mainUrl) { imgs.push({ url: mainUrl }); seen.add(mainUrl); }
     blocksLibrary.forEach(img => { if (!seen.has(img.url)) { imgs.push(img); seen.add(img.url); } });
     blocksData.forEach(b => {
       (b.images || []).forEach(img => {
@@ -2897,7 +2898,7 @@ export default function BibliotecaItem() {
       });
     });
     return imgs;
-  }, [blocksData, blocksLibrary, itemUrl]);
+  }, [blocksData, blocksLibrary, item?.url]);
 
   if (loading) return (
     <div data-theme={theme} className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--t-bg)' }}>
