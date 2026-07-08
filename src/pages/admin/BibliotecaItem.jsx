@@ -1602,8 +1602,6 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [urlErrors, setUrlErrors] = useState({});
   const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number) | 'it-{idx}'
   const [transcribing, setTranscribing] = useState(false);
-  const [transcribeVersion, setTranscribeVersion] = useState(0);
-  const transcribedUrlsRef = useRef([]);
   const fileInputRef = useRef(null);
   const transcribeFileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
@@ -2240,11 +2238,9 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         )}
 
         {draft.type === 'transcribir' && (() => {
-          void transcribeVersion; // depend on version to re-render
           const imgs = draft.images || [];
-          const doneUrls = transcribedUrlsRef.current;
-          const doneImgs = imgs.filter(i => doneUrls.includes(i.url));
-          const pendingImgs = imgs.filter(i => !doneUrls.includes(i.url));
+          const doneImgs = imgs.filter(i => i.transcribed);
+          const pendingImgs = imgs.filter(i => !i.transcribed);
           const hasText = !!(draft.texto && draft.texto.trim());
 
           const handleTranscribe = async (mode) => {
@@ -2259,12 +2255,15 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
               });
               const data = await res.json();
               if (data.texto) {
-                transcribedUrlsRef.current = [...new Set([...transcribedUrlsRef.current, ...pendingImgs.map(i => i.url)])];
+                const pendingUrls = new Set(pendingImgs.map(i => i.url));
                 const newTexto = mode === 'append'
                   ? (draft.texto?.trim() ? draft.texto.trim() + '\n\n' : '') + data.texto
                   : data.texto;
-                update('texto', newTexto);
-                setTranscribeVersion(v => v + 1);
+                setDraft(d => ({
+                  ...d,
+                  texto: newTexto,
+                  images: (d.images || []).map(img => pendingUrls.has(img.url) ? { ...img, transcribed: true } : img),
+                }));
               }
             } catch { alert('Error al transcribir'); }
             finally { setTranscribing(false); }
@@ -2406,7 +2405,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
               {draft.texto !== undefined && draft.texto !== null && (
                 <div>
                   <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Texto transcrito</label>
-                  <textarea value={draft.texto || ''} onChange={e => { const v = e.target.value; update('texto', v); if (!v.trim()) { transcribedUrlsRef.current = []; setTranscribeVersion(n => n + 1); } }}
+                  <textarea value={draft.texto || ''} onChange={e => { const v = e.target.value; if (!v.trim()) { setDraft(d => ({ ...d, texto: v, images: (d.images || []).map(img => ({ ...img, transcribed: false })) })); } else { update('texto', v); } }}
                     rows={8} placeholder="El texto transcrito aparecerá aquí. Puedes editarlo."
                     style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.6 }} />
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 8 }}>
