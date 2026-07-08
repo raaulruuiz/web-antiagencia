@@ -977,7 +977,7 @@ function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
 }
 
 // ── Block: card ───────────────────────────────────────────────────────────────
-function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onToggleVisible, itemAsunto, itemAdelanto, onUpdateBlock, categoria, onUploadImage, onCropFromEmail, libraryImages }) {
+function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onMoveLeft, onMoveRight, onToggleVisible, itemAsunto, itemAdelanto, onUpdateBlock, categoria, onUploadImage, onCropFromEmail, libraryImages }) {
   const bt = BLOCK_TYPES.find(b => b.type === block.type) || { label: block.type };
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
@@ -1017,11 +1017,15 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
     onUpdateBlock?.({ ...block, columns: newCols });
   };
 
-  const saveNestedBlock = (colIdx, blockIdx, updatedNestedBlock) => {
+  const updateNestedBlock = (colIdx, blockIdx, updatedNestedBlock) => {
     const cols = block.columns || [];
     const newCol = (cols[colIdx] || []).map((b, i) => i === blockIdx ? updatedNestedBlock : b);
     const newCols = cols.map((col, i) => i === colIdx ? newCol : [...(col || [])]);
     onUpdateBlock?.({ ...block, columns: newCols });
+  };
+
+  const saveNestedBlock = (colIdx, blockIdx, updatedNestedBlock) => {
+    updateNestedBlock(colIdx, blockIdx, updatedNestedBlock);
     setEditingNestedBlock(null);
   };
 
@@ -1060,6 +1064,14 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 style={{ background: 'none', border: 'none', color: index === total - 1 ? 'var(--t-text-faint)' : 'var(--t-text)', cursor: index === total - 1 ? 'default' : 'pointer', padding: 3, display: 'flex' }}>
                 <IconChevronDown />
               </button>
+              {(onMoveLeft !== undefined || onMoveRight !== undefined) && (
+                <>
+                  <button onClick={onMoveLeft || undefined} disabled={!onMoveLeft}
+                    style={{ background: 'none', border: 'none', color: onMoveLeft ? 'var(--t-text)' : 'var(--t-text-faint)', cursor: onMoveLeft ? 'pointer' : 'default', padding: 3, fontSize: 13, lineHeight: 1 }}>←</button>
+                  <button onClick={onMoveRight || undefined} disabled={!onMoveRight}
+                    style={{ background: 'none', border: 'none', color: onMoveRight ? 'var(--t-text)' : 'var(--t-text-faint)', cursor: onMoveRight ? 'pointer' : 'default', padding: 3, fontSize: 13, lineHeight: 1 }}>→</button>
+                </>
+              )}
             </>
           )}
           <button onClick={onToggleVisible}
@@ -1380,45 +1392,26 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 const numCols = block.num_columnas;
                 return (
                   <div key={ci} style={{ border: `1px solid ${addingToCol === ci ? colColor + '66' : 'var(--t-border)'}`, borderRadius: 6, padding: 4, minHeight: 48, display: 'flex', flexDirection: 'column', gap: 4, background: 'var(--t-bg)' }}>
-                    {col.map((nb, bi) => {
-                      const nbColor = BLOCK_COLORS[nb.type] || '#71717a';
-                      const nbLabel = (BLOCK_TYPES.find(btt => btt.type === nb.type) || { label: nb.type }).label;
-                      const canMoveUp = bi > 0;
-                      const canMoveDown = bi < col.length - 1;
-                      const canMoveLeft = ci > 0;
-                      const canMoveRight = ci < numCols - 1;
-                      return (
-                        <div key={bi} style={{ background: 'var(--t-surface)', border: `1px solid ${nbColor}33`, borderRadius: 5, overflow: 'hidden' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 6px', borderBottom: `1px solid ${nbColor}22`, background: nbColor + '11' }}>
-                            <span style={{ width: 7, height: 7, borderRadius: '50%', background: nbColor, flexShrink: 0, display: 'block' }} />
-                            <span style={{ flex: 1, fontSize: 9, color: nbColor, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{nbLabel}</span>
-                          </div>
-                          <div style={{ padding: '4px 6px' }}>
-                            <div style={{ fontSize: 10, color: 'var(--t-text)', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{nb.titulo || nbLabel}</div>
-                            {nb.subtitulo && <div style={{ fontSize: 9, color: 'var(--t-text-muted)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{nb.subtitulo}</div>}
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', padding: '2px 4px', gap: 1, borderTop: '1px solid var(--t-border-s)' }}>
-                            <button onClick={() => moveNestedUD(ci, bi, -1)} disabled={!canMoveUp}
-                              style={{ background: 'none', border: 'none', color: canMoveUp ? 'var(--t-text-muted)' : 'var(--t-text-faint)', cursor: canMoveUp ? 'pointer' : 'default', padding: '1px 3px', fontSize: 10, lineHeight: 1 }} title="Subir">↑</button>
-                            <button onClick={() => moveNestedUD(ci, bi, 1)} disabled={!canMoveDown}
-                              style={{ background: 'none', border: 'none', color: canMoveDown ? 'var(--t-text-muted)' : 'var(--t-text-faint)', cursor: canMoveDown ? 'pointer' : 'default', padding: '1px 3px', fontSize: 10, lineHeight: 1 }} title="Bajar">↓</button>
-                            <button onClick={() => moveNestedLR(ci, bi, -1)} disabled={!canMoveLeft}
-                              style={{ background: 'none', border: 'none', color: canMoveLeft ? 'var(--t-text-muted)' : 'var(--t-text-faint)', cursor: canMoveLeft ? 'pointer' : 'default', padding: '1px 3px', fontSize: 10, lineHeight: 1 }} title="Columna anterior">←</button>
-                            <button onClick={() => moveNestedLR(ci, bi, 1)} disabled={!canMoveRight}
-                              style={{ background: 'none', border: 'none', color: canMoveRight ? 'var(--t-text-muted)' : 'var(--t-text-faint)', cursor: canMoveRight ? 'pointer' : 'default', padding: '1px 3px', fontSize: 10, lineHeight: 1 }} title="Columna siguiente">→</button>
-                            <span style={{ flex: 1 }} />
-                            <button onClick={() => setEditingNestedBlock({ colIdx: ci, blockIdx: bi })}
-                              style={{ background: 'none', border: '1px solid var(--t-border-muted)', color: 'var(--t-text-muted)', cursor: 'pointer', padding: '1px 5px', borderRadius: 4, fontSize: 9 }}
-                              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--t-text)'; e.currentTarget.style.color = 'var(--t-text)'; }}
-                              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-muted)'; e.currentTarget.style.color = 'var(--t-text-muted)'; }}>Editar</button>
-                            <button onClick={() => removeNested(ci, bi)}
-                              style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', padding: '1px 3px', fontSize: 12, lineHeight: 1 }}
-                              onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-                              onMouseLeave={e => e.currentTarget.style.color = 'var(--t-text-muted)'}>×</button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {col.map((nb, bi) => (
+                      <BlockCard
+                        key={nb.id || bi}
+                        block={nb}
+                        index={bi}
+                        total={col.length}
+                        onEdit={() => setEditingNestedBlock({ colIdx: ci, blockIdx: bi })}
+                        onDelete={() => removeNested(ci, bi)}
+                        onMoveUp={() => moveNestedUD(ci, bi, -1)}
+                        onMoveDown={() => moveNestedUD(ci, bi, 1)}
+                        onMoveLeft={ci > 0 ? () => moveNestedLR(ci, bi, -1) : null}
+                        onMoveRight={ci < numCols - 1 ? () => moveNestedLR(ci, bi, 1) : null}
+                        onToggleVisible={() => updateNestedBlock(ci, bi, { ...nb, visible: nb.visible === false ? true : false })}
+                        onUpdateBlock={updated => updateNestedBlock(ci, bi, updated)}
+                        categoria={categoria}
+                        onUploadImage={onUploadImage}
+                        onCropFromEmail={onCropFromEmail}
+                        libraryImages={libraryImages}
+                      />
+                    ))}
                     <button onClick={() => setAddingToCol(addingToCol === ci ? null : ci)}
                       style={{ background: 'transparent', border: `1px dashed ${addingToCol === ci ? colColor : 'var(--t-border-mid)'}`, borderRadius: 4, padding: '4px 0', fontSize: 9, color: addingToCol === ci ? colColor : 'var(--t-text-subtle)', cursor: 'pointer', width: '100%', marginTop: 'auto' }}>
                       + bloque
@@ -3050,6 +3043,16 @@ export default function BibliotecaItem() {
           const newLib = [...blocksLibraryRef.current, ...newImgs];
           blocksLibraryRef.current = newLib;
           setBlocksLibrary(newLib);
+        }
+      }
+      // Columnas with nested blocks: extract them instead of deleting
+      if (blockToDelete?.type === 'columnas') {
+        const nestedBlocks = (blockToDelete.columns || []).flat().filter(Boolean);
+        if (nestedBlocks.length > 0) {
+          const idx = prev.findIndex(b => b.id === blockId);
+          const next = [...prev.slice(0, idx), ...nestedBlocks, ...prev.slice(idx + 1)];
+          saveBlocks(next);
+          return next;
         }
       }
       const next = prev.filter(b => b.id !== blockId);
