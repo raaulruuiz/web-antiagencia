@@ -1292,20 +1292,18 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {block.type === 'transcribir' && (
         <div style={{ padding: '14px' }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Transcripción'}</div>
-          {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginTop: 4 }}>{block.subtitulo}</div>}
-          {(block.images || []).length > 0 && (
-            <div style={{ marginTop: 10, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-              {block.images.slice(0, 4).map((img, i) => (
-                <img key={i} src={img.url} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 5, border: '1px solid var(--t-border)' }} />
-              ))}
-            </div>
-          )}
-          {block.texto && (
-            <p style={{ fontSize: 12, color: block.text_color || 'var(--t-text-muted)', margin: '10px 0 0', lineHeight: 1.6, textAlign: block.text_align || 'left', whiteSpace: 'pre-wrap', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-              {block.texto}
-            </p>
-          )}
+          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, marginBottom: block.subtitulo || block.texto ? 8 : 0 }}>{block.titulo || 'Transcripción'}</div>
+          {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginBottom: 8 }}>{block.subtitulo}</div>}
+          {block.texto && (() => {
+            const col = block.text_color || '#06b6d4';
+            return (
+              <div style={{ background: col + '18', border: `1px solid ${col}44`, borderRadius: 10, padding: '12px 14px' }}>
+                <p style={{ fontSize: 12, color: col, margin: 0, lineHeight: 1.6, textAlign: block.text_align || 'left', whiteSpace: 'pre-wrap', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {block.texto}
+                </p>
+              </div>
+            );
+          })()}
         </div>
       )}
 
