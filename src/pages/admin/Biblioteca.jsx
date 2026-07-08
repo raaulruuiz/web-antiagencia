@@ -322,6 +322,38 @@ export default function Biblioteca() {
   const [showBulkSectors, setShowBulkSectors] = useState(false);
   const [showBulkTags, setShowBulkTags] = useState(false);
 
+  // Publish system
+  const [autopublish, setAutopublish] = useState(() => localStorage.getItem('biblioteca_autopublish') === 'true');
+  const [publishing, setPublishing] = useState(false);
+  const pendingIds = useMemo(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]')); } catch { return new Set(); }
+  }, [items]); // recompute when items change (after publish clears storage)
+  const hasPending = pendingIds.size > 0;
+
+  const toggleAutopublish = () => {
+    setAutopublish(v => {
+      const next = !v;
+      localStorage.setItem('biblioteca_autopublish', String(next));
+      return next;
+    });
+  };
+
+  const publishAll = async () => {
+    if (!hasPending || publishing) return;
+    setPublishing(true);
+    try {
+      const token = await getToken();
+      const ids = [...pendingIds];
+      await Promise.all(ids.map(id =>
+        fetch(`${API_BASE}/biblioteca/${id}/publish`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } })
+      ));
+      localStorage.setItem('biblioteca_pending_publish', '[]');
+      // force re-render of hasPending
+      setItems(prev => [...prev]);
+    } catch (e) { console.error('[publish]', e); }
+    finally { setPublishing(false); }
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -587,9 +619,38 @@ export default function Biblioteca() {
                 )}
               </button>
               <button onClick={() => setSelecting(true)} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors">Seleccionar</button>
-              <button onClick={load} disabled={loading} className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
-                {loading ? 'Cargando…' : 'Actualizar'}
+              {/* Autopublish toggle */}
+              <button
+                onClick={toggleAutopublish}
+                title={autopublish ? 'Autopublicar activado — desactivar' : 'Autopublicar desactivado — activar'}
+                style={{
+                  fontSize: 11, fontWeight: 500, borderRadius: 8, padding: '5px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s',
+                  background: autopublish ? 'rgba(34,197,94,0.15)' : 'transparent',
+                  border: autopublish ? '1px solid rgba(34,197,94,0.5)' : '1px solid var(--t-border)',
+                  color: autopublish ? '#22c55e' : 'var(--t-text-muted)',
+                }}>
+                <span style={{ width: 28, height: 16, borderRadius: 999, background: autopublish ? '#22c55e' : 'var(--t-border-mid)', display: 'flex', alignItems: 'center', padding: '0 2px', transition: 'background 0.2s' }}>
+                  <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'transform 0.2s', transform: autopublish ? 'translateX(12px)' : 'translateX(0)' }} />
+                </span>
+                Autopublicar
               </button>
+              {/* Publicar button — only when not autopublishing */}
+              {!autopublish && (
+                <button
+                  onClick={publishAll}
+                  disabled={publishing}
+                  style={{
+                    fontSize: 12, fontWeight: 600, borderRadius: 8, padding: '6px 14px', cursor: hasPending && !publishing ? 'pointer' : 'default', transition: 'all 0.15s',
+                    background: hasPending ? '#3b82f6' : 'transparent',
+                    border: hasPending ? 'none' : '1px solid var(--t-border)',
+                    color: hasPending ? '#fff' : 'var(--t-text-muted)',
+                    opacity: publishing ? 0.6 : 1,
+                  }}
+                  onMouseEnter={e => { if (hasPending) e.currentTarget.style.background = '#2563eb'; }}
+                  onMouseLeave={e => { if (hasPending) e.currentTarget.style.background = '#3b82f6'; }}>
+                  {publishing ? 'Publicando…' : 'Publicar'}
+                </button>
+              )}
               <button onClick={() => setShowNuevo(true)}
                 style={{ fontSize: 12, fontWeight: 600, background: '#3b82f6', border: 'none', color: '#fff', borderRadius: 8, padding: '6px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
                 onMouseEnter={e => e.currentTarget.style.background = '#2563eb'}

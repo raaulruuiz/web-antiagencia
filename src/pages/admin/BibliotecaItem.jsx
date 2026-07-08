@@ -3010,10 +3010,29 @@ export default function BibliotecaItem() {
     setBlocksSaveError(false);
     try {
       const token = await getToken();
+      const autopublish = localStorage.getItem('biblioteca_autopublish') === 'true';
+      const blocksData = { blocks, library: blocksLibraryRef.current };
+      const body = { blocks_data: blocksData };
+      if (autopublish) {
+        body.blocks_data_published = blocksData;
+        // Remove from pending if autopublish is on
+        try {
+          const pending = new Set(JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]'));
+          pending.delete(id);
+          localStorage.setItem('biblioteca_pending_publish', JSON.stringify([...pending]));
+        } catch (_) {}
+      } else {
+        // Mark this item as having unpublished changes
+        try {
+          const pending = new Set(JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]'));
+          pending.add(id);
+          localStorage.setItem('biblioteca_pending_publish', JSON.stringify([...pending]));
+        } catch (_) {}
+      }
       const res = await fetch(`${API_BASE}/biblioteca/${id}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blocks_data: { blocks, library: blocksLibraryRef.current } }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) setBlocksSaveError(true);
     } catch (_) { setBlocksSaveError(true); }
