@@ -977,16 +977,18 @@ function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
 }
 
 // ── Block: card ───────────────────────────────────────────────────────────────
-function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onMoveLeft, onMoveRight, onToggleVisible, itemAsunto, itemAdelanto, onUpdateBlock, categoria, onUploadImage, onCropFromEmail, libraryImages }) {
+function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onMoveLeft, onMoveRight, onToggleVisible, itemAsunto, itemAdelanto, onUpdateBlock, onExtract, categoria, onUploadImage, onCropFromEmail, libraryImages }) {
   const bt = BLOCK_TYPES.find(b => b.type === block.type) || { label: block.type };
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
   const imgs = block.images || [];
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showColumnaModal, setShowColumnaModal] = useState(false);
   const [lightbox, setLightbox] = useState(null);
   const [addingToCol, setAddingToCol] = useState(null);
   const [editingNestedBlock, setEditingNestedBlock] = useState(null);
   const { theme } = useTheme();
+  const nestedCount = block.type === 'columnas' ? (block.columns || []).flat().filter(Boolean).length : 0;
 
   const moveNestedLR = (colIdx, blockIdx, dir) => {
     const cols = block.columns || [];
@@ -1133,7 +1135,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               </button>
             </div>
           ) : (
-            <button onClick={() => setConfirmDelete(true)}
+            <button onClick={() => block.type === 'columnas' && nestedCount > 0 ? setShowColumnaModal(true) : setConfirmDelete(true)}
               style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', padding: 3, display: 'flex' }}
               onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
               onMouseLeave={e => e.currentTarget.style.color = 'var(--t-text-muted)'}>
@@ -1467,6 +1469,41 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               />
             );
           })()}
+        </div>
+      )}
+
+      {/* Columnas delete modal */}
+      {showColumnaModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+          onClick={() => setShowColumnaModal(false)}>
+          <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 12, padding: '24px 28px', maxWidth: 360, width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--t-text)' }}>Eliminar bloque Columnas</div>
+            <div style={{ fontSize: 13, color: 'var(--t-text-muted)', lineHeight: 1.5 }}>
+              Este bloque contiene <strong style={{ color: 'var(--t-text)' }}>{nestedCount} bloque{nestedCount !== 1 ? 's' : ''}</strong> dentro. ¿Qué quieres hacer con ellos?
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button
+                onClick={() => { onExtract?.(); setShowColumnaModal(false); }}
+                style={{ background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', color: 'var(--t-text)', cursor: 'pointer', padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500, textAlign: 'left' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--t-text-muted)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
+                Sacar los bloques fuera y eliminar solo la columna
+              </button>
+              <button
+                onClick={() => { onDelete(); setShowColumnaModal(false); }}
+                style={{ background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.4)', color: '#ef4444', cursor: 'pointer', padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500, textAlign: 'left' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.22)'; e.currentTarget.style.borderColor = '#ef4444'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.12)'; e.currentTarget.style.borderColor = 'rgba(220,38,38,0.4)'; }}>
+                Eliminar todo (columna + bloques dentro)
+              </button>
+              <button
+                onClick={() => setShowColumnaModal(false)}
+                style={{ background: 'none', border: '1px solid var(--t-border)', color: 'var(--t-text-muted)', cursor: 'pointer', padding: '7px 16px', borderRadius: 8, fontSize: 13 }}>
+                Cancelar
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -3061,17 +3098,19 @@ export default function BibliotecaItem() {
           setBlocksLibrary(newLib);
         }
       }
-      // Columnas with nested blocks: extract them instead of deleting
-      if (blockToDelete?.type === 'columnas') {
-        const nestedBlocks = (blockToDelete.columns || []).flat().filter(Boolean);
-        if (nestedBlocks.length > 0) {
-          const idx = prev.findIndex(b => b.id === blockId);
-          const next = [...prev.slice(0, idx), ...nestedBlocks, ...prev.slice(idx + 1)];
-          saveBlocks(next);
-          return next;
-        }
-      }
       const next = prev.filter(b => b.id !== blockId);
+      saveBlocks(next);
+      return next;
+    });
+  }, [saveBlocks]);
+
+  const extractColumnas = useCallback((blockId) => {
+    setBlocksData(prev => {
+      const idx = prev.findIndex(b => b.id === blockId);
+      if (idx === -1) return prev;
+      const colBlock = prev[idx];
+      const nestedBlocks = (colBlock.columns || []).flat().filter(Boolean);
+      const next = [...prev.slice(0, idx), ...nestedBlocks, ...prev.slice(idx + 1)];
       saveBlocks(next);
       return next;
     });
@@ -3659,6 +3698,7 @@ export default function BibliotecaItem() {
                   itemAsunto={asunto}
                   itemAdelanto={adelanto}
                   onUpdateBlock={updateBlock}
+                  onExtract={() => extractColumnas(block.id)}
                   categoria={categoria}
                   onUploadImage={uploadImageForBlock}
                   onCropFromEmail={cropFromEmail}
