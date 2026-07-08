@@ -159,6 +159,24 @@ const IconAsuntoAdelanto = () => (
     <line x1="3" y1="18" x2="18" y2="18"/>
   </svg>
 );
+const IconChip = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="7" y="7" width="10" height="10" rx="1"/>
+    <path d="M7 9H4"/><path d="M7 12H4"/><path d="M7 15H4"/>
+    <path d="M17 9h3"/><path d="M17 12h3"/><path d="M17 15h3"/>
+    <path d="M9 7V4"/><path d="M12 7V4"/><path d="M15 7V4"/>
+    <path d="M9 17v3"/><path d="M12 17v3"/><path d="M15 17v3"/>
+  </svg>
+);
+const IconChipSm = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="7" y="7" width="10" height="10" rx="1"/>
+    <path d="M7 9H4"/><path d="M7 12H4"/><path d="M7 15H4"/>
+    <path d="M17 9h3"/><path d="M17 12h3"/><path d="M17 15h3"/>
+    <path d="M9 7V4"/><path d="M12 7V4"/><path d="M15 7V4"/>
+    <path d="M9 17v3"/><path d="M12 17v3"/><path d="M15 17v3"/>
+  </svg>
+);
 
 const CATEGORIAS = [
   { value: 'email', label: 'Email',            icon: <IconEmail /> },
@@ -193,6 +211,7 @@ const BLOCK_TYPES = [
   { type: 'imagen_texto',   label: 'Imagen y/o Texto',    icon: <IconImageText /> },
   { type: 'correccion',     label: 'Corrección',          icon: <IconCorrection /> },
   { type: 'asunto_adelanto',label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> },
+  { type: 'transcribir',    label: 'Transcribir',         icon: <IconChipSm /> },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -880,12 +899,19 @@ function BlockDivider({ onAdd }) {
 }
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
-const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b' };
-const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto' };
+const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4' };
+const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción' };
 
 function BlockSelector({ onSelect, hasCorreccion, onClose, categoria }) {
-  const mainTypes = BLOCK_TYPES.filter(bt => bt.type !== 'asunto_adelanto');
-  const c_aa = BLOCK_COLORS['asunto_adelanto'];
+  // Build full list of types to show
+  const allVisible = [
+    ...BLOCK_TYPES,
+    ...(categoria === 'email' ? [{ type: 'asunto_adelanto', label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> }] : []),
+  ];
+  const isOdd = allVisible.length % 2 !== 0;
+  const gridTypes = isOdd ? allVisible.slice(0, -1) : allVisible;
+  const fullWidthType = isOdd ? allVisible[allVisible.length - 1] : null;
+
   return (
     <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 14, padding: '16px 16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -893,7 +919,7 @@ function BlockSelector({ onSelect, hasCorreccion, onClose, categoria }) {
         {onClose && <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {mainTypes.map(bt => {
+        {gridTypes.map(bt => {
           const disabled = bt.type === 'correccion' && hasCorreccion;
           const c = BLOCK_COLORS[bt.type];
           return (
@@ -907,15 +933,20 @@ function BlockSelector({ onSelect, hasCorreccion, onClose, categoria }) {
           );
         })}
       </div>
-      {categoria === 'email' && (
-        <button onClick={() => onSelect('asunto_adelanto')}
-          style={{ width: '100%', height: 50, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px solid var(--t-border-mid)', borderRadius: 12, background: 'transparent', color: 'var(--t-text-muted)', cursor: 'pointer', transition: 'all 0.15s' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = c_aa; e.currentTarget.style.color = c_aa; e.currentTarget.style.background = c_aa + '11'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}>
-          <span style={{ color: 'inherit' }}><IconAsuntoAdelanto /></span>
-          <span style={{ fontSize: 13, fontWeight: 500, color: 'inherit' }}>Asunto y/o Adelanto</span>
-        </button>
-      )}
+      {fullWidthType && (() => {
+        const bt = fullWidthType;
+        const disabled = bt.type === 'correccion' && hasCorreccion;
+        const c = BLOCK_COLORS[bt.type];
+        return (
+          <button onClick={() => !disabled && onSelect(bt.type)} disabled={disabled}
+            style={{ width: '100%', height: 50, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, border: `1px solid ${disabled ? 'var(--t-border)' : 'var(--t-border-mid)'}`, borderRadius: 12, background: 'transparent', color: disabled ? 'var(--t-text-faint)' : 'var(--t-text-muted)', cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: disabled ? 0.4 : 1 }}
+            onMouseEnter={e => { if (!disabled) { e.currentTarget.style.borderColor = c; e.currentTarget.style.color = c; e.currentTarget.style.background = c + '11'; }}}
+            onMouseLeave={e => { if (!disabled) { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}}>
+            <span style={{ color: 'inherit' }}>{bt.icon}</span>
+            <span style={{ fontSize: 13, fontWeight: 500, color: 'inherit' }}>{bt.label}</span>
+          </button>
+        );
+      })()}
     </div>
   );
 }
@@ -1259,6 +1290,25 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         </div>
       )}
 
+      {block.type === 'transcribir' && (
+        <div style={{ padding: '14px' }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Transcripción'}</div>
+          {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginTop: 4 }}>{block.subtitulo}</div>}
+          {(block.images || []).length > 0 && (
+            <div style={{ marginTop: 10, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+              {block.images.slice(0, 4).map((img, i) => (
+                <img key={i} src={img.url} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 5, border: '1px solid var(--t-border)' }} />
+              ))}
+            </div>
+          )}
+          {block.texto && (
+            <p style={{ fontSize: 12, color: block.text_color || 'var(--t-text-muted)', margin: '10px 0 0', lineHeight: 1.6, textAlign: block.text_align || 'left', whiteSpace: 'pre-wrap', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {block.texto}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Lightbox */}
       {lightbox && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
@@ -1553,7 +1603,9 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [uploadingItem, setUploadingItem] = useState(null); // itemIdx
   const [urlErrors, setUrlErrors] = useState({});
   const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number) | 'it-{idx}'
+  const [transcribing, setTranscribing] = useState(false);
   const fileInputRef = useRef(null);
+  const transcribeFileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
   const itemFileInputRefs = useRef({});
 
@@ -2179,6 +2231,149 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
               libImages={libraryImages} />
           </div>
         )}
+
+        {draft.type === 'transcribir' && (() => {
+          const imgs = draft.images || [];
+
+          const handleTranscribe = async () => {
+            if (!imgs.length || transcribing) return;
+            setTranscribing(true);
+            try {
+              const token = await getToken();
+              const res = await fetch(`${API_BASE}/biblioteca/transcribe-images`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ images: imgs.map(i => i.url) }),
+              });
+              const data = await res.json();
+              if (data.texto) update('texto', data.texto);
+            } catch { alert('Error al transcribir'); }
+            finally { setTranscribing(false); }
+          };
+
+          return (
+            <>
+              {/* Imágenes fuente */}
+              <div>
+                <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Imágenes a transcribir</label>
+                {imgs.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 6, marginBottom: 8 }}>
+                    {imgs.map((img, idx) => (
+                      <div key={idx} style={{ position: 'relative', aspectRatio: '1' }}>
+                        <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, display: 'block' }} />
+                        <button onClick={() => removeImage(idx)}
+                          style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 13, lineHeight: 1 }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* Library picker */}
+                {showLibrary === 'transcribir' && libraryImages?.length > 0 && (
+                  <div style={{ border: '1px solid var(--t-border)', borderRadius: 8, padding: 8, marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Seleccionar de biblioteca</div>
+                      <button onClick={() => setShowLibrary(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 5 }}>
+                      {libraryImages.map((libImg, i) => {
+                        const alreadyAdded = imgs.some(existing => existing.url === libImg.url);
+                        return (
+                          <div key={i} style={{ position: 'relative' }}>
+                            <img src={libImg.url} alt="" onClick={() => { if (!alreadyAdded) addImage(libImg.url); }}
+                              style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
+                              onMouseEnter={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
+                              onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid transparent'; }} />
+                            {alreadyAdded && <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconCheck /></div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}
+                  onDragOver={e => { e.preventDefault(); e.currentTarget.style.outline = '2px dashed #3b82f6'; e.currentTarget.style.borderRadius = '8px'; }}
+                  onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.style.outline = ''; }}
+                  onDrop={async e => { e.preventDefault(); e.currentTarget.style.outline = ''; const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')); if (!files.length || uploading) return; setUploading(true); try { for (const f of files) { const url = await onUploadImage(f); addImage(url); } } catch { alert('Error al subir imagen'); } finally { setUploading(false); } }}>
+                  <button onClick={() => transcribeFileInputRef.current?.click()} disabled={uploading}
+                    style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: 'var(--t-text-muted)', cursor: uploading ? 'not-allowed' : 'pointer', minWidth: 100 }}
+                    onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = 'var(--t-border-muted)'; }}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
+                    {uploading ? 'Subiendo…' : '+ Imagen'}
+                  </button>
+                  <button onClick={handleCrop} disabled={uploading}
+                    style={{ flex: 1, background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: 'var(--t-text-muted)', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, minWidth: 100 }}
+                    onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = 'var(--t-border-muted)'; }}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
+                    <IconScissors /> Recortar
+                  </button>
+                  {libraryImages?.length > 0 && (
+                    <button onClick={() => setShowLibrary(showLibrary === 'transcribir' ? null : 'transcribir')}
+                      style={{ flex: 1, background: showLibrary === 'transcribir' ? 'var(--t-surface2)' : 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 8, padding: '9px 10px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer', minWidth: 100 }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--t-border-muted)'}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
+                      Seleccionar
+                    </button>
+                  )}
+                  <input ref={transcribeFileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
+                    onChange={async e => {
+                      const files = Array.from(e.target.files || []);
+                      e.target.value = '';
+                      if (!files.length) return;
+                      setUploading(true);
+                      try { for (const f of files) { const url = await onUploadImage(f); addImage(url); } }
+                      catch { alert('Error al subir imagen'); }
+                      finally { setUploading(false); }
+                    }} />
+                </div>
+              </div>
+
+              {/* Transcribe button */}
+              {imgs.length > 0 && (
+                <button onClick={handleTranscribe} disabled={transcribing}
+                  style={{ width: '100%', background: transcribing ? 'var(--t-surface2)' : '#06b6d4', color: transcribing ? 'var(--t-text-muted)' : 'white', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: transcribing ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'background 0.15s' }}>
+                  {transcribing ? (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 0.7s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                      Transcribiendo…
+                    </>
+                  ) : (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      Confirmar y transcribir
+                    </>
+                  )}
+                </button>
+              )}
+
+              {/* Texto transcrito editable */}
+              {draft.texto !== undefined && draft.texto !== null && (
+                <div>
+                  <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Texto transcrito</label>
+                  <textarea value={draft.texto || ''} onChange={e => update('texto', e.target.value)}
+                    rows={8} placeholder="El texto transcrito aparecerá aquí. Puedes editarlo."
+                    style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.6 }} />
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Color</label>
+                      <InlineColorPicker value={draft.text_color || ''} onChange={c => update('text_color', c)} />
+                    </div>
+                    <div style={{ display: 'flex', gap: 3 }}>
+                      {[['left','≡L'], ['center','≡C'], ['right','≡R'], ['justify','≡']].map(([val, icon]) => {
+                        const active = (draft.text_align || 'left') === val;
+                        return (
+                          <button key={val} onClick={() => update('text_align', val)} title={val}
+                            style={{ background: active ? 'var(--t-border)' : 'transparent', border: `1px solid ${active ? 'var(--t-text-muted)' : 'var(--t-border)'}`, borderRadius: 5, width: 28, height: 26, cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? 'var(--t-text)' : 'var(--t-text-subtle)', fontWeight: active ? 700 : 400 }}>
+                            {icon}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {/* Guardar / Cancelar */}
         <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>

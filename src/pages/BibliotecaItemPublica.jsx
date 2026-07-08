@@ -471,6 +471,19 @@ function CorreccionBlockView({ block, onPreview, hideTitle }) {
   );
 }
 
+function TranscribirBlockView({ block, hideTitle }) {
+  if (!block.texto) return null;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {!hideTitle && block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', margin: '0 0 4px' }}>{block.titulo}</h2>}
+      {!hideTitle && block.subtitulo && <p style={{ fontSize: 13, color: 'var(--t-text-muted)', margin: '0 0 6px', lineHeight: 1.5 }}>{block.subtitulo}</p>}
+      <p style={{ fontSize: 14, color: block.text_color || 'var(--t-text)', margin: 0, lineHeight: 1.7, textAlign: block.text_align || 'left', whiteSpace: 'pre-wrap' }}>
+        {block.texto}
+      </p>
+    </div>
+  );
+}
+
 function BlockView({ block, onPreview, theme, isMobile, item }) {
   const wrapStyle = { border: `1px solid ${theme === 'light' ? '#d4d4d8' : '#27272a'}`, borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
 
@@ -490,6 +503,7 @@ function BlockView({ block, onPreview, theme, isMobile, item }) {
       case 'imagen_texto':     content = <ImagenTextoBlockView block={block} onPreview={() => {}} hideTitle isMobile={isMobile} />; break;
       case 'correccion':       content = <CorreccionBlockView block={block} onPreview={() => {}} hideTitle />; break;
       case 'asunto_adelanto':  content = <AsuntoAdelantoBlockView block={block} item={item} hideTitle isMobile={isMobile} />; break;
+      case 'transcribir':      content = <TranscribirBlockView block={block} hideTitle />; break;
       default: content = null;
     }
     return (
@@ -516,6 +530,7 @@ function BlockView({ block, onPreview, theme, isMobile, item }) {
     case 'imagen_texto':    return <div style={wrapStyle}><ImagenTextoBlockView block={block} onPreview={onPreview} isMobile={isMobile} /></div>;
     case 'correccion':      return <div style={wrapStyle}><CorreccionBlockView block={block} onPreview={onPreview} /></div>;
     case 'asunto_adelanto': return <div style={wrapStyle}><AsuntoAdelantoBlockView block={block} item={item} isMobile={isMobile} /></div>;
+    case 'transcribir':     return <div style={wrapStyle}><TranscribirBlockView block={block} /></div>;
     default: return null;
   }
 }
