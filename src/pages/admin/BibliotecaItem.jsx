@@ -217,6 +217,12 @@ const BLOCK_TYPES = [
   { type: 'transcribir',  label: 'Transcribir',      icon: <IconChipSm /> },
   { type: 'columnas',     label: 'Columnas',         icon: <IconColumns /> },
 ];
+// Includes all types (for display/lookup in BlockCard, not for BlockSelector grid)
+const ALL_BLOCK_META = [
+  ...BLOCK_TYPES,
+  { type: 'asunto_adelanto', label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> },
+  { type: 'correccion',      label: 'Corrección',          icon: <IconCorrection /> },
+];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function catLabel(v)    { return CATEGORIAS.find(c => c.value === v)?.label || v; }
@@ -978,7 +984,7 @@ function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
 
 // ── Block: card ───────────────────────────────────────────────────────────────
 function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onMoveLeft, onMoveRight, onToggleVisible, itemAsunto, itemAdelanto, onUpdateBlock, onExtract, categoria, onUploadImage, onCropFromEmail, libraryImages }) {
-  const bt = BLOCK_TYPES.find(b => b.type === block.type) || { label: block.type };
+  const bt = ALL_BLOCK_META.find(b => b.type === block.type) || { label: block.type };
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
   const imgs = block.images || [];
@@ -1065,10 +1071,10 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
   return (
     <div style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border-s)', borderRadius: 10, overflow: 'hidden' }}>
       {/* Header bar */}
-      <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid var(--t-border-s)' }}>
+      <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid var(--t-border-s)', minWidth: 0 }}>
         <span style={{ color: c, display: 'flex', flexShrink: 0 }}>{bt?.icon}</span>
-        <span style={{ flex: 1, fontSize: 12, color: 'var(--t-text)', fontWeight: 500 }}>{bt?.label}</span>
-        <div style={{ display: 'flex', gap: 2, alignItems: 'center', flexShrink: 0 }}>
+        <span style={{ flex: 1, fontSize: 12, color: 'var(--t-text)', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', minWidth: 0 }}>{bt?.label}</span>
+        <div style={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {!isCorreccion && (
             <>
               {(() => {
@@ -1409,7 +1415,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 const colColor = '#14b8a6';
                 const numCols = block.num_columnas;
                 return (
-                  <div key={ci} style={{ border: `1px solid ${addingToCol === ci ? colColor + '66' : 'var(--t-border)'}`, borderRadius: 6, padding: 4, minHeight: 48, display: 'flex', flexDirection: 'column', gap: 4, background: 'var(--t-bg)' }}>
+                  <div key={ci} style={{ border: `1px solid ${addingToCol === ci ? colColor + '66' : 'var(--t-border)'}`, borderRadius: 6, padding: 4, minHeight: 48, display: 'flex', flexDirection: 'column', gap: 4, background: 'var(--t-bg)', minWidth: 0, overflow: 'hidden' }}>
                     {col.map((nb, bi) => (
                       <BlockCard
                         key={nb.id || bi}
@@ -3123,23 +3129,22 @@ export default function BibliotecaItem() {
       const newIdx = idx + direction;
       if (newIdx < 0 || newIdx >= prev.length) return prev;
 
-      // Moving UP into a Columnas block with empty columns → insert instead of swap
-      if (direction === -1) {
-        const target = prev[newIdx];
-        if (target.type === 'columnas') {
-          const cols = target.columns || [];
-          const emptyColIdx = cols.findIndex(col => !col || col.length === 0);
-          if (emptyColIdx !== -1) {
-            const blockToInsert = { ...prev[idx], id: `col_${Date.now()}_${Math.random().toString(36).substr(2,5)}` };
-            const updatedTarget = {
-              ...target,
-              columns: cols.map((col, i) => i === emptyColIdx ? [...(col || []), blockToInsert] : (col || [])),
-            };
-            const next = prev.filter((_, i) => i !== idx);
-            next[next.indexOf(target)] = updatedTarget;
-            saveBlocks(next);
-            return next;
-          }
+      // Moving into a Columnas block with empty columns → insert instead of swap
+      const target = prev[newIdx];
+      if (target.type === 'columnas') {
+        const cols = target.columns || [];
+        const emptyColIdx = cols.findIndex(col => !col || col.length === 0);
+        if (emptyColIdx !== -1) {
+          const blockToInsert = { ...prev[idx], id: `col_${Date.now()}_${Math.random().toString(36).substr(2,5)}` };
+          const updatedTarget = {
+            ...target,
+            columns: cols.map((col, i) => i === emptyColIdx ? [...(col || []), blockToInsert] : (col || [])),
+          };
+          const next = prev.filter((_, i) => i !== idx);
+          const targetIdx = next.findIndex(b => b.id === target.id);
+          next[targetIdx] = updatedTarget;
+          saveBlocks(next);
+          return next;
         }
       }
 
