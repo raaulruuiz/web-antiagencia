@@ -177,6 +177,11 @@ const IconChipSm = () => (
     <path d="M9 17v3"/><path d="M12 17v3"/><path d="M15 17v3"/>
   </svg>
 );
+const IconColumns = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="3" width="6" height="18" rx="1"/><rect x="9" y="3" width="6" height="18" rx="1"/><rect x="16" y="3" width="6" height="18" rx="1"/>
+  </svg>
+);
 
 const CATEGORIAS = [
   { value: 'email', label: 'Email',            icon: <IconEmail /> },
@@ -206,12 +211,12 @@ const RESIZE_HANDLES = [
 
 // ── Block types ───────────────────────────────────────────────────────────────
 const BLOCK_TYPES = [
-  { type: 'enlaces',        label: 'Enlace',              icon: <IconChain /> },
-  { type: 'imagen',         label: 'Imagen',              icon: <IconImageBlock /> },
-  { type: 'imagen_texto',   label: 'Imagen y/o Texto',    icon: <IconImageText /> },
-  { type: 'correccion',     label: 'Corrección',          icon: <IconCorrection /> },
-  { type: 'asunto_adelanto',label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> },
-  { type: 'transcribir',    label: 'Transcribir',         icon: <IconChipSm /> },
+  { type: 'enlaces',      label: 'Enlace',          icon: <IconChain /> },
+  { type: 'imagen',       label: 'Imagen',           icon: <IconImageBlock /> },
+  { type: 'imagen_texto', label: 'Imagen y/o Texto', icon: <IconImageText /> },
+  { type: 'correccion',   label: 'Corrección',       icon: <IconCorrection /> },
+  { type: 'transcribir',  label: 'Transcribir',      icon: <IconChipSm /> },
+  { type: 'columnas',     label: 'Columnas',         icon: <IconColumns /> },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -899,8 +904,8 @@ function BlockDivider({ onAdd }) {
 }
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
-const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4' };
-const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción' };
+const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#8b5cf6' };
+const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas' };
 
 function BlockSelector({ onSelect, hasCorreccion, onClose, categoria }) {
   // Build full list of types to show
@@ -1307,6 +1312,29 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         </div>
       )}
 
+      {block.type === 'columnas' && (
+        <div style={{ padding: '12px 14px' }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', marginBottom: 6 }}>{block.titulo || 'Columnas'}</div>
+          {block.num_columnas && (
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${block.num_columnas}, 1fr)`, gap: 4 }}>
+              {Array.from({ length: block.num_columnas }, (_, ci) => {
+                const col = (block.columns || [])[ci] || [];
+                return (
+                  <div key={ci} style={{ border: '1px solid var(--t-border)', borderRadius: 5, padding: 5, minHeight: 28 }}>
+                    {col.map((b, bi) => (
+                      <div key={bi} style={{ fontSize: 9, color: 'var(--t-text-muted)', padding: '2px 4px', borderRadius: 3, background: (BLOCK_COLORS[b.type] || '#71717a') + '22', marginBottom: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                        {b.titulo || b.type}
+                      </div>
+                    ))}
+                    {col.length === 0 && <div style={{ fontSize: 9, color: 'var(--t-text-faint)', textAlign: 'center', paddingTop: 4 }}>vacía</div>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Lightbox */}
       {lightbox && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
@@ -1583,7 +1611,7 @@ function EBCanvas({ blocks, onChange, onUpload, onCrop, libImages, nested = fals
 }
 
 // ── Block: editor modal ───────────────────────────────────────────────────────
-function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages }) {
+function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages, categoria }) {
   const [draft, setDraft] = useState(() => {
     const d = { ...block };
     // Migrate old enlaces structure to new links structure
@@ -1602,6 +1630,8 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [urlErrors, setUrlErrors] = useState({});
   const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number) | 'it-{idx}'
   const [transcribing, setTranscribing] = useState(false);
+  const [editingNestedBlock, setEditingNestedBlock] = useState(null); // { colIdx, blockIdx }
+  const [addingBlockToColumn, setAddingBlockToColumn] = useState(null); // colIdx | null
   const fileInputRef = useRef(null);
   const transcribeFileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
@@ -2431,6 +2461,136 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           );
         })()}
 
+        {draft.type === 'columnas' && (() => {
+          const numCols = draft.num_columnas || 0;
+          const updateCols = (fn) => setDraft(d => ({ ...d, columns: fn(d.columns || []) }));
+          const addNestedBlock = (colIdx, type) => {
+            const newBlock = {
+              id: `col_${Date.now()}_${Math.random().toString(36).substr(2,5)}`,
+              type, titulo: DEFAULT_TITLES[type] || '', subtitulo: '', images: [],
+              links: type === 'enlaces' ? [{ images: [], url: '' }] : [],
+              links_layout: 'columna', images_layout: 'columna', it_layout: 'img-text',
+              items: type === 'imagen_texto' ? [{ image: null, texto: '', text_color: '', text_align: 'left' }]
+                   : type === 'asunto_adelanto' ? [{ show_asunto: false, show_adelanto: false, texto: '', text_color: '', text_align: 'left' }] : [],
+              email_blocks: [], texto: '', nota: '', visible: true,
+            };
+            const newIdx = ((draft.columns || [])[colIdx] || []).length;
+            updateCols(prev => { const next = prev.map(c => [...c]); while (next.length <= colIdx) next.push([]); next[colIdx] = [...next[colIdx], newBlock]; return next; });
+            setAddingBlockToColumn(null);
+            setEditingNestedBlock({ colIdx, blockIdx: newIdx });
+          };
+          const removeNestedBlock = (colIdx, blockIdx) => updateCols(prev => { const next = prev.map(c => [...c]); next[colIdx] = next[colIdx].filter((_, i) => i !== blockIdx); return next; });
+          const moveNestedLR = (colIdx, blockIdx, dir) => {
+            const tgt = colIdx + dir;
+            if (tgt < 0 || tgt >= numCols) return;
+            updateCols(prev => { const next = prev.map(c => [...c]); const [blk] = next[colIdx].splice(blockIdx, 1); next[tgt] = [...(next[tgt] || []), blk]; return next; });
+          };
+          const extractNestedBlock = (colIdx, blockIdx, pos) => {
+            const blk = ((draft.columns || [])[colIdx] || [])[blockIdx];
+            const extracted = { ...blk, id: `blk_${Date.now()}_${Math.random().toString(36).substr(2,5)}` };
+            updateCols(prev => { const next = prev.map(c => [...c]); next[colIdx].splice(blockIdx, 1); return next; });
+            const key = pos === 'before' ? '_extractBefore' : '_extractAfter';
+            setDraft(d => ({ ...d, [key]: [...(d[key] || []), extracted] }));
+          };
+          const updateNestedBlock = (colIdx, blockIdx, updated) => {
+            updateCols(prev => { const next = prev.map(c => [...c]); next[colIdx][blockIdx] = updated; return next; });
+            setEditingNestedBlock(null);
+          };
+          const colIcons = [null,null,
+            <svg key={2} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="9" height="18" rx="1"/><rect x="13" y="3" width="9" height="18" rx="1"/></svg>,
+            <svg key={3} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="6" height="18" rx="1"/><rect x="9" y="3" width="6" height="18" rx="1"/><rect x="16" y="3" width="6" height="18" rx="1"/></svg>,
+            <svg key={4} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="5" height="18" rx="1"/><rect x="7" y="3" width="4" height="18" rx="1"/><rect x="13" y="3" width="4" height="18" rx="1"/><rect x="19" y="3" width="4" height="18" rx="1"/></svg>,
+          ];
+          const nestedBlockTypes = [...BLOCK_TYPES.filter(bt => bt.type !== 'columnas'), ...(categoria === 'email' ? [{ type: 'asunto_adelanto', label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> }] : [])];
+          return (
+            <>
+              <div>
+                <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Número de columnas</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {[2, 3, 4].map(n => (
+                    <button key={n} onClick={() => {
+                      const currentCols = draft.columns || [];
+                      const nc = Array.from({ length: n }, (_, i) => currentCols[i] || []);
+                      const removed = [];
+                      for (let i = n; i < currentCols.length; i++) {
+                        (currentCols[i] || []).forEach(b => removed.push({ ...b, id: `blk_${Date.now()}_${Math.random().toString(36).substr(2,5)}` }));
+                      }
+                      setDraft(d => ({ ...d, num_columnas: n, columns: nc, ...(removed.length ? { _extractAfter: [...(d._extractAfter || []), ...removed] } : {}) }));
+                    }}
+                      style={{ flex: 1, padding: '10px 6px', border: `1px solid ${numCols === n ? '#8b5cf6' : 'var(--t-border-mid)'}`, borderRadius: 8, background: numCols === n ? '#8b5cf611' : 'transparent', color: numCols === n ? '#8b5cf6' : 'var(--t-text-muted)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500 }}>
+                      {colIcons[n]}{n} Columnas
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {numCols > 0 && (
+                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${numCols}, 1fr)`, gap: 8 }}>
+                  {Array.from({ length: numCols }, (_, colIdx) => {
+                    const col = (draft.columns || [])[colIdx] || [];
+                    return (
+                      <div key={colIdx} style={{ border: '1px solid var(--t-border)', borderRadius: 8, padding: 8, display: 'flex', flexDirection: 'column', gap: 5, minHeight: 60 }}>
+                        <div style={{ fontSize: 9, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center', paddingBottom: 5, borderBottom: '1px solid var(--t-border-s)', marginBottom: 1 }}>Col. {colIdx + 1}</div>
+                        {col.map((nb, bi) => {
+                          const bcolor = BLOCK_COLORS[nb.type] || '#71717a';
+                          return (
+                            <div key={nb.id || bi} style={{ border: `1px solid ${bcolor}44`, borderRadius: 6, background: bcolor + '08', padding: '5px 7px' }}>
+                              <div style={{ fontSize: 10, color: 'var(--t-text)', fontWeight: 600, marginBottom: 4, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{nb.titulo || BLOCK_TYPES.find(b => b.type === nb.type)?.label || nb.type}</div>
+                              <div style={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                <button onClick={() => extractNestedBlock(colIdx, bi, 'before')} title="Sacar antes" style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', padding: '1px 3px', fontSize: 11 }}>↑</button>
+                                <button onClick={() => extractNestedBlock(colIdx, bi, 'after')} title="Sacar después" style={{ background: 'none', border: 'none', color: 'var(--t-text-muted)', cursor: 'pointer', padding: '1px 3px', fontSize: 11 }}>↓</button>
+                                <button onClick={() => moveNestedLR(colIdx, bi, -1)} disabled={colIdx === 0} style={{ background: 'none', border: 'none', color: colIdx === 0 ? 'var(--t-text-faint)' : 'var(--t-text-muted)', cursor: colIdx === 0 ? 'default' : 'pointer', padding: '1px 3px', fontSize: 11 }}>←</button>
+                                <button onClick={() => moveNestedLR(colIdx, bi, 1)} disabled={colIdx >= numCols - 1} style={{ background: 'none', border: 'none', color: colIdx >= numCols - 1 ? 'var(--t-text-faint)' : 'var(--t-text-muted)', cursor: colIdx >= numCols - 1 ? 'default' : 'pointer', padding: '1px 3px', fontSize: 11 }}>→</button>
+                                <button onClick={() => setEditingNestedBlock({ colIdx, blockIdx: bi })} style={{ background: 'none', border: '1px solid var(--t-border-mid)', borderRadius: 4, color: 'var(--t-text-muted)', cursor: 'pointer', padding: '1px 6px', fontSize: 10, marginLeft: 'auto' }}>Editar</button>
+                                <button onClick={() => removeNestedBlock(colIdx, bi)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '1px 3px', fontSize: 13 }}>×</button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <button onClick={() => setAddingBlockToColumn(addingBlockToColumn === colIdx ? null : colIdx)}
+                          style={{ background: 'transparent', border: `1px dashed ${addingBlockToColumn === colIdx ? '#8b5cf6' : 'var(--t-border-mid)'}`, borderRadius: 6, padding: '5px 4px', fontSize: 10, color: addingBlockToColumn === colIdx ? '#8b5cf6' : 'var(--t-text-subtle)', cursor: 'pointer', width: '100%', marginTop: 'auto' }}>
+                          + Añadir bloque
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {addingBlockToColumn !== null && numCols > 0 && (
+                <div style={{ border: '1px solid #8b5cf644', borderRadius: 8, padding: 12, background: '#8b5cf608' }}>
+                  <div style={{ fontSize: 11, color: '#8b5cf6', fontWeight: 600, marginBottom: 8 }}>Añadiendo a Columna {addingBlockToColumn + 1}</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, marginBottom: 8 }}>
+                    {nestedBlockTypes.map(bt => {
+                      const disabled = bt.type === 'correccion' && ((draft.columns || [])[addingBlockToColumn] || []).some(b => b.type === 'correccion');
+                      const bcolor = BLOCK_COLORS[bt.type];
+                      return (
+                        <button key={bt.type} onClick={() => !disabled && addNestedBlock(addingBlockToColumn, bt.type)} disabled={disabled}
+                          style={{ padding: '10px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, border: `1px solid ${disabled ? 'var(--t-border)' : 'var(--t-border-mid)'}`, borderRadius: 10, background: 'transparent', color: disabled ? 'var(--t-text-faint)' : 'var(--t-text-muted)', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1, fontSize: 11, fontWeight: 500 }}
+                          onMouseEnter={e => { if (!disabled) { e.currentTarget.style.borderColor = bcolor; e.currentTarget.style.color = bcolor; e.currentTarget.style.background = bcolor + '11'; }}}
+                          onMouseLeave={e => { if (!disabled) { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}}>
+                          <span style={{ color: 'inherit' }}>{bt.icon}</span>{bt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button onClick={() => setAddingBlockToColumn(null)} style={{ width: '100%', background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '4px 0' }}>Cancelar</button>
+                </div>
+              )}
+
+              {editingNestedBlock && (() => {
+                const { colIdx, blockIdx } = editingNestedBlock;
+                const nb = ((draft.columns || [])[colIdx] || [])[blockIdx];
+                if (!nb) return null;
+                return (
+                  <BlockEditorModal block={nb} onSave={u => updateNestedBlock(colIdx, blockIdx, u)} onClose={() => setEditingNestedBlock(null)}
+                    onUploadImage={onUploadImage} onCropFromEmail={onCropFromEmail} libraryImages={libraryImages} categoria={categoria} />
+                );
+              })()}
+            </>
+          );
+        })()}
+
         {/* Guardar / Cancelar */}
         <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
           <button onClick={handleSave}
@@ -2779,6 +2939,7 @@ export default function BibliotecaItem() {
       texto: '',
       nota: '',
       visible: type !== 'correccion',
+      ...(type === 'columnas' ? { num_columnas: 2, columns: [[], []] } : {}),
     };
     setBlocksData(prev => {
       let next;
@@ -2799,8 +2960,14 @@ export default function BibliotecaItem() {
   }, [saveBlocks]);
 
   const updateBlock = useCallback((updatedBlock) => {
+    const { _extractBefore, _extractAfter, ...block } = updatedBlock;
     setBlocksData(prev => {
-      const next = prev.map(b => b.id === updatedBlock.id ? updatedBlock : b);
+      let next = prev.map(b => b.id === block.id ? block : b);
+      if (_extractBefore || _extractAfter) {
+        const idx = next.findIndex(b => b.id === block.id);
+        if (_extractAfter) [].concat(_extractAfter).forEach((b, i) => next.splice(idx + 1 + i, 0, b));
+        if (_extractBefore) [].concat(_extractBefore).reverse().forEach(b => next.splice(idx, 0, b));
+      }
       saveBlocks(next);
       return next;
     });
@@ -2987,6 +3154,7 @@ export default function BibliotecaItem() {
           onUploadImage={uploadImageForBlock}
           onCropFromEmail={cropFromEmail}
           libraryImages={libraryImages}
+          categoria={categoria}
         />
       ) : null; })()}
       {showCropForModal && item && <CropOverlay imageUrl={item.url} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}

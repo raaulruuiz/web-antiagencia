@@ -486,6 +486,29 @@ function TranscribirBlockView({ block, hideTitle }) {
   );
 }
 
+function ColumnasBlockView({ block, onPreview, theme, isMobile, item }) {
+  const numCols = block.num_columnas || 2;
+  const columns = block.columns || [];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', margin: '0 0 4px' }}>{block.titulo}</h2>}
+      {block.subtitulo && <p style={{ fontSize: 13, color: 'var(--t-text-muted)', margin: '0 0 6px', lineHeight: 1.5 }}>{block.subtitulo}</p>}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : `repeat(${numCols}, 1fr)`, gap: 12 }}>
+        {Array.from({ length: numCols }, (_, ci) => {
+          const col = columns[ci] || [];
+          return (
+            <div key={ci} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {col.map((nb, bi) => (
+                <BlockView key={nb.id || bi} block={nb} onPreview={onPreview} theme={theme} isMobile={isMobile} item={item} />
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function BlockView({ block, onPreview, theme, isMobile, item }) {
   const wrapStyle = { border: `1px solid ${theme === 'light' ? '#d4d4d8' : '#27272a'}`, borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
 
@@ -533,6 +556,7 @@ function BlockView({ block, onPreview, theme, isMobile, item }) {
     case 'correccion':      return <div style={wrapStyle}><CorreccionBlockView block={block} onPreview={onPreview} /></div>;
     case 'asunto_adelanto': return <div style={wrapStyle}><AsuntoAdelantoBlockView block={block} item={item} isMobile={isMobile} /></div>;
     case 'transcribir':     return <div style={wrapStyle}><TranscribirBlockView block={block} /></div>;
+    case 'columnas':        return <div style={wrapStyle}><ColumnasBlockView block={block} onPreview={onPreview} theme={theme} isMobile={isMobile} item={item} /></div>;
     default: return null;
   }
 }
