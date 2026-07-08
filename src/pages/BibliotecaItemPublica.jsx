@@ -5,6 +5,7 @@ import MailerLitePopup from '@/components/MailerLitePopup';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 const SESSION_KEY = 'biblioteca_acceso_email';
+const PRO_KEY = 'biblioteca_pro_access';
 const SESSION_TTL = 30 * 24 * 60 * 60 * 1000;
 
 function loadSession() {
@@ -18,6 +19,15 @@ function loadSession() {
 }
 function saveSession(email) {
   localStorage.setItem(SESSION_KEY, JSON.stringify({ email, ts: Date.now() }));
+}
+function loadProSession() {
+  try {
+    const raw = localStorage.getItem(PRO_KEY);
+    if (!raw) return false;
+    const { ts } = JSON.parse(raw);
+    if (Date.now() - ts > SESSION_TTL) { localStorage.removeItem(PRO_KEY); return false; }
+    return true;
+  } catch { return false; }
 }
 
 function Gate({ onAcceso }) {
@@ -509,7 +519,7 @@ function ColumnasBlockView({ block, onPreview, theme, isMobile, item }) {
   );
 }
 
-function BlockView({ block, onPreview, theme, isMobile, item }) {
+function BlockView({ block, onPreview, theme, isMobile, item, isPro }) {
   const wrapStyle = { border: `1px solid ${theme === 'light' ? '#d4d4d8' : '#27272a'}`, borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
 
   // Determine visibility: explicit false = hidden; undefined defaults: correccion=hidden, others=visible
@@ -517,7 +527,7 @@ function BlockView({ block, onPreview, theme, isMobile, item }) {
     ? block.visible !== false
     : block.type !== 'correccion';
 
-  if (!isVisible) {
+  if (!isVisible && !isPro) {
     // Render title + blurred content
     const title = block.titulo;
     const subtitle = block.subtitulo;
@@ -576,6 +586,7 @@ export default function BibliotecaItemPublica() {
   const [showModal, setShowModal] = useState(false);
   const [imageHover, setImageHover] = useState(false);
   const [acceso, setAcceso] = useState(() => !!loadSession());
+  const [isPro] = useState(() => loadProSession());
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
   useEffect(() => {
@@ -759,7 +770,7 @@ export default function BibliotecaItemPublica() {
         {(item.categoria === 'email' || item.categoria === 'ficha') && blocksData.blocks.length > 0 && (
           <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {blocksData.blocks.map(block => (
-              <BlockView key={block.id} block={block} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={item} />
+              <BlockView key={block.id} block={block} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={item} isPro={isPro} />
             ))}
           </div>
         )}

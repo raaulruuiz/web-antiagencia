@@ -6,6 +6,7 @@ import MailerLitePopup from '@/components/MailerLitePopup';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 const SESSION_KEY = 'biblioteca_acceso_email';
+const PRO_KEY = 'biblioteca_pro_access';
 const SESSION_TTL = 30 * 24 * 60 * 60 * 1000; // 30 días
 
 function saveSession(email) {
@@ -19,6 +20,18 @@ function loadSession() {
     if (Date.now() - ts > SESSION_TTL) { localStorage.removeItem(SESSION_KEY); return null; }
     return email;
   } catch { return null; }
+}
+function saveProSession() {
+  localStorage.setItem(PRO_KEY, JSON.stringify({ ts: Date.now() }));
+}
+function loadProSession() {
+  try {
+    const raw = localStorage.getItem(PRO_KEY);
+    if (!raw) return false;
+    const { ts } = JSON.parse(raw);
+    if (Date.now() - ts > SESSION_TTL) { localStorage.removeItem(PRO_KEY); return false; }
+    return true;
+  } catch { return false; }
 }
 
 function Gate({ onAcceso }) {
@@ -190,10 +203,74 @@ function DateRangePicker({ from, to, onChange }) {
   );
 }
 
+function ProModal({ onClose, onProActivated }) {
+  const [token, setToken] = useState('');
+  const [estado, setEstado] = useState('idle'); // idle | cargando | error
+
+  async function verificar(e) {
+    e.preventDefault();
+    if (!token.trim()) return;
+    setEstado('cargando');
+    try {
+      const res = await fetch(`${API_BASE}/biblioteca/pro/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token.trim() }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        saveProSession();
+        onProActivated();
+      } else {
+        setEstado('error');
+      }
+    } catch {
+      setEstado('error');
+    }
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+      onClick={onClose}>
+      <div style={{ background: '#111', border: '1px solid #27272a', borderRadius: 14, padding: '32px 28px', maxWidth: 400, width: '100%' }}
+        onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <h2 style={{ fontSize: 17, fontWeight: 700, color: 'white', margin: 0 }}>Modo PRO</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>✕</button>
+        </div>
+        <p style={{ fontSize: 13, color: '#a1a1aa', lineHeight: 1.6, marginBottom: 20 }}>
+          De momento el modo PRO solo es accesible para perfiles manuales, si eres uno de ellos, introduce el token.
+        </p>
+        <form onSubmit={verificar} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <input
+            type="text"
+            placeholder="Token de acceso"
+            value={token}
+            onChange={e => { setToken(e.target.value); setEstado('idle'); }}
+            autoFocus
+            style={{ background: '#1a1a1a', border: `1px solid ${estado === 'error' ? '#ef4444' : '#3f3f46'}`, borderRadius: 8, padding: '10px 12px', fontSize: 14, color: 'white', outline: 'none', colorScheme: 'dark' }}
+          />
+          {estado === 'error' && (
+            <p style={{ color: '#f87171', fontSize: 12, margin: 0 }}>Token incorrecto. Comprueba que lo has escrito bien.</p>
+          )}
+          <button
+            type="submit"
+            disabled={estado === 'cargando' || !token.trim()}
+            style={{ background: estado === 'cargando' || !token.trim() ? '#1d4ed8' : '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '11px', fontSize: 14, fontWeight: 600, cursor: estado === 'cargando' || !token.trim() ? 'not-allowed' : 'pointer', opacity: estado === 'cargando' || !token.trim() ? 0.6 : 1, transition: 'opacity 0.15s' }}>
+            {estado === 'cargando' ? 'Verificando…' : 'Acceder'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function BibliotecaPublica() {
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
   const [acceso, setAcceso] = useState(() => !!loadSession());
+  const [isPro, setIsPro] = useState(() => loadProSession());
+  const [showProModal, setShowProModal] = useState(false);
   const [items, setItems]     = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [allSectors, setAllSectors] = useState([]);
@@ -266,6 +343,7 @@ export default function BibliotecaPublica() {
   return (
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
       {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
+      {showProModal && <ProModal onClose={() => setShowProModal(false)} onProActivated={() => { setIsPro(true); setShowProModal(false); }} />}
       <MailerLitePopup />
 
       {showMenu && (
@@ -291,6 +369,17 @@ export default function BibliotecaPublica() {
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                 {loading ? 'Cargando…' : 'Actualizar'}
               </button>
+              {!isPro && (
+                <button onClick={() => { setShowProModal(true); setShowMenu(false); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', justifyContent: 'flex-start', boxSizing: 'border-box', padding: '6px 10px', borderRadius: 8, fontSize: 12, background: '#0067FD', border: 'none', color: 'white', fontWeight: 600, cursor: 'pointer' }}>
+                  ⚡ Pasar a PRO
+                </button>
+              )}
+              {isPro && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 8, fontSize: 12, background: 'rgba(0,103,253,0.15)', border: '1px solid rgba(0,103,253,0.4)', color: '#60a5fa' }}>
+                  ⚡ PRO activo
+                </div>
+              )}
             </div>
           </div>
         </>
@@ -335,6 +424,18 @@ export default function BibliotecaPublica() {
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                 {loading ? 'Cargando…' : 'Actualizar'}
               </button>
+              {isPro ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(0,103,253,0.15)', border: '1px solid rgba(0,103,253,0.4)', color: '#60a5fa' }}>
+                  ⚡ PRO activo
+                </div>
+              ) : (
+                <button onClick={() => setShowProModal(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: '#0067FD', border: 'none', color: 'white', cursor: 'pointer', transition: 'opacity 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+                  ⚡ Pasar a PRO
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -461,7 +562,7 @@ export default function BibliotecaPublica() {
         {filteredItems.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px' }}>
             {filteredItems.map(item => {
-              const isBlurred = item.publico === false;
+              const isBlurred = item.publico === false && !isPro;
               return isBlurred ? (
                 <div key={item.id} style={{ cursor: 'default' }}>
                   <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', position: 'relative' }}>
