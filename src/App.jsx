@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -87,7 +88,7 @@ function SmartPage({ path, children }) {
   }, [dbData]);
 
   if (dbData === undefined) return null; // loading
-  if (dbData?.contenido) return <div dangerouslySetInnerHTML={{ __html: dbData.contenido }} />;
+  if (dbData?.contenido) return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(dbData.contenido) }} />;
   return children;
 }
 
@@ -109,7 +110,7 @@ function DynamicPage() {
 
   if (page === undefined) return null;
   if (!page) return <PageNotFound />;
-  return <div dangerouslySetInnerHTML={{ __html: page.contenido }} />;
+  return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.contenido) }} />;
 }
 
 const { Pages, Layout, mainPage } = pagesConfig;

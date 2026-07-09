@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
-import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
+import { supabase } from '@/lib/supabaseClient';
+import { BACKEND_URL as BACKEND } from '@/lib/config';
+
+async function getToken() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || null;
+}
 
 const TIPO_LABEL = { cron: 'Cron', webhook: 'Webhook', bot: 'Bot' };
 const TIPO_COLOR = {
@@ -15,7 +21,8 @@ export default function Automatizaciones() {
   const TIPO_ORDER = { cron: 0, webhook: 1, bot: 2, workflow: 3 };
 
   useEffect(() => {
-    fetch(`${BACKEND}/admin/automatizaciones`, { headers: { 'x-api-key': API_KEY } })
+    getToken().then(token =>
+    fetch(`${BACKEND}/admin/automatizaciones`, { headers: { 'Authorization': `Bearer ${token}` } }))
       .then(r => r.json())
       .then(data => {
         const sorted = [...data].sort((a, b) => {

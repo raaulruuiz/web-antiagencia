@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
+import { supabase } from '@/lib/supabaseClient';
+import { BACKEND_URL as BACKEND } from '@/lib/config';
+
+async function getToken() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || null;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -317,8 +323,9 @@ export default function Briefing() {
     setLoading(true);
     setError(null);
     try {
+      const token = await getToken();
       const res = await fetch(`${BACKEND}/admin/briefing`, {
-        headers: { 'x-api-key': API_KEY },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
       if (!res.ok) throw new Error(`Error ${res.status}`);
       const json = await res.json();
@@ -343,8 +350,9 @@ export default function Briefing() {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
+        const token = await getToken();
         const res = await fetch(`${BACKEND}/admin/briefing`, {
-          headers: { 'x-api-key': API_KEY },
+          headers: { 'Authorization': `Bearer ${token}` },
         });
         if (!res.ok) return;
         const json = await res.json();
@@ -358,18 +366,20 @@ export default function Briefing() {
     setEmailsByAccount(prev =>
       prev.map(a => ({ ...a, emails: a.emails.filter(e => e.id !== id) }))
     );
+    const token = await getToken();
     await fetch(`${BACKEND}/admin/briefing/email/read`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ id, cuenta }),
     }).catch(() => {});
   }
 
   async function sendReply(replyBody) {
     if (!emailModal) return;
+    const token = await getToken();
     await fetch(`${BACKEND}/admin/briefing/email/reply`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({
         threadId: emailModal.threadId,
         to: emailModal.de,

@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
+import { BACKEND_URL as BACKEND } from '@/lib/config';
+
+async function getToken() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || null;
+}
 
 const SITE_URL = 'https://antiagencia.es';
 
@@ -126,9 +131,10 @@ export default function Paginas() {
     setChatLoading(true);
 
     try {
+      const token = await getToken();
       const res = await fetch(`${BACKEND}/admin/paginas/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           path: selected?.path || '/',
           mensaje,

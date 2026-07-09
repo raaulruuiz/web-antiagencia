@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { BACKEND_URL, LOOM_API_KEY } from '@/lib/config';
+import { BACKEND_URL } from '@/lib/config';
 import { supabase } from '@/lib/supabaseClient';
 import { useAdmin } from '@/pages/admin/AdminLayout';
 
@@ -595,6 +595,7 @@ export default function Pomodoro() {
   const { role } = useAdmin();
   const isAdmin = role === 'admin';
 
+  const [token, setToken] = useState(null);
   const [userId, setUserId] = useState(null);
   const [pomodoros, setPomodoros] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -611,15 +612,16 @@ export default function Pomodoro() {
   const editParamHandled = useRef(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id ?? null);
+      setToken(session?.access_token ?? null);
+    });
   }, []);
 
   function buildHeaders() {
     return {
       'Content-Type': 'application/json',
-      'x-api-key': LOOM_API_KEY,
-      ...(userId ? { 'x-user-id': userId } : {}),
-      'x-user-role': role,
+      'Authorization': token ? `Bearer ${token}` : '',
     };
   }
 
@@ -636,7 +638,7 @@ export default function Pomodoro() {
       setLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, role]);
+  }, [token]);
 
   useEffect(() => { fetchPomodoros(); }, [fetchPomodoros]);
 
@@ -647,7 +649,7 @@ export default function Pomodoro() {
       setStrictMode(await res.json());
     } catch {}
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, role]);
+  }, [token]);
 
   useEffect(() => { loadStrictMode(); }, [loadStrictMode]);
 

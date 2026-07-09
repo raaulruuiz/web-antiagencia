@@ -449,7 +449,16 @@ export default function Biblioteca() {
   const [publishing, setPublishing] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const pendingIds = useMemo(() => {
-    try { return new Set(JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]')); } catch { return new Set(); }
+    try {
+      const raw = JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]');
+      const existingIds = new Set(items.map(i => i.id));
+      // Filter out IDs that no longer exist in the current items list (stale entries)
+      const valid = raw.filter(id => existingIds.has(id));
+      if (valid.length !== raw.length) {
+        localStorage.setItem('biblioteca_pending_publish', JSON.stringify(valid));
+      }
+      return new Set(valid);
+    } catch { return new Set(); }
   }, [items]); // recompute when items change (after publish clears storage)
   const hasPending = pendingIds.size > 0;
 

@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { BACKEND_URL, LOOM_API_KEY } from '@/lib/config';
+import { BACKEND_URL } from '@/lib/config';
+
+async function getToken() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || null;
+}
 import * as XLSX from 'xlsx';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -608,9 +613,10 @@ function FileImportModal({ userId, onClose, onSave }) {
     setStep('parsing');
     try {
       const content = await readFileAsText(file);
+      const token = await getToken();
       const res = await fetch(`${BACKEND_URL}/admin/parse-routine`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': LOOM_API_KEY },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ content, filename: file.name }),
       });
       if (!res.ok) throw new Error(`Error del servidor (${res.status})`);

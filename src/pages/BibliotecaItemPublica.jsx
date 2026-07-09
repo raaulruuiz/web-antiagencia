@@ -30,6 +30,10 @@ function loadProSession() {
   } catch { return false; }
 }
 
+function getBibliotecaToken() {
+  return localStorage.getItem('biblioteca_session_token') || null;
+}
+
 function Gate({ onAcceso }) {
   const [email, setEmail] = useState('');
   const [estado, setEstado] = useState('idle'); // idle | cargando | error
@@ -47,6 +51,7 @@ function Gate({ onAcceso }) {
       const data = await res.json();
       if (data.acceso) {
         saveSession(email);
+        if (data.session_token) localStorage.setItem('biblioteca_session_token', data.session_token);
         onAcceso();
       } else {
         setEstado('error');
@@ -596,8 +601,10 @@ export default function BibliotecaItemPublica() {
   }, []);
 
   useEffect(() => {
+    const biblToken = getBibliotecaToken();
+    const authHeaders = biblToken ? { 'Authorization': `Bearer ${biblToken}` } : {};
     Promise.all([
-      fetch(`${API_BASE}/biblioteca/${id}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(r.status === 404 ? 'No encontrado' : 'Error')),
+      fetch(`${API_BASE}/biblioteca/${id}`, { cache: 'no-store', headers: authHeaders }).then(r => r.ok ? r.json() : Promise.reject(r.status === 404 ? 'No encontrado' : r.status === 401 ? 'Acceso requerido' : 'Error')),
       fetch(`${API_BASE}/biblioteca/tags/public`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []),
       fetch(`${API_BASE}/biblioteca/sectores/public`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []),
     ])

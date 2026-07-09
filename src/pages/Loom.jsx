@@ -1,8 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { BACKEND_URL, LOOM_API_KEY } from '@/lib/config';
+import { BACKEND_URL } from '@/lib/config';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
+
+async function getToken() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || null;
+}
 
 const BUBBLE_SIZE = 240;
 
@@ -754,9 +759,10 @@ export default function Loom() {
       form.append('file', blob, fileName);
       form.append('fileName', fileName);
 
+      const token = await getToken();
       const res = await fetch(`${BACKEND_URL}/loom/upload`, {
         method: 'POST',
-        headers: { 'x-api-key': LOOM_API_KEY },
+        headers: { 'Authorization': `Bearer ${token}` },
         body: form,
       });
 
@@ -829,9 +835,10 @@ export default function Loom() {
       const form = new FormData();
       form.append('file', blob, name);
       form.append('fileName', name);
+      const token = await getToken();
       const res = await fetch(`${BACKEND_URL}/loom/upload`, {
         method: 'POST',
-        headers: { 'x-api-key': LOOM_API_KEY },
+        headers: { 'Authorization': `Bearer ${token}` },
         body: form,
       });
       if (!res.ok) throw new Error(await res.text());

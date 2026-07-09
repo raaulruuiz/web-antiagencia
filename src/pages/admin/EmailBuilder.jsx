@@ -1,6 +1,12 @@
 import { useRef, useState, useCallback } from 'react';
 import EmailEditor from 'react-email-editor';
-import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
+import { supabase } from '@/lib/supabaseClient';
+import { BACKEND_URL as BACKEND } from '@/lib/config';
+
+async function getToken() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || null;
+}
 
 // ─── Zona de imágenes drag & drop ────────────────────────────────────────────
 
@@ -100,9 +106,10 @@ export default function EmailBuilder() {
     setError('');
     setHtmlGenerado('');
     try {
+      const token = await getToken();
       const res = await fetch(`${BACKEND}/admin/email-builder/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           descripcion, textoExacto, urlMarca,
           imagenes: imagenes.map(i => i.dataUrl),

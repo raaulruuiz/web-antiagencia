@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
+import { BACKEND_URL as BACKEND } from '@/lib/config';
+
+async function getToken() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || null;
+}
 
 // Tests A/B activos — añade aquí cada test cuando lo actives
 const AB_TESTS = [
@@ -65,9 +70,10 @@ export default function Dashboard() {
 
     // MailerLite desde Railway
     try {
+      const token = await getToken();
       const params = new URLSearchParams({ from: from.toISOString(), to: to.toISOString() });
       const res = await fetch(`${BACKEND}/admin/mailerlite?${params}`, {
-        headers: { 'x-api-key': API_KEY },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
       if (res.ok) setMailerlite(await res.json());
     } catch (_) {}
@@ -75,11 +81,12 @@ export default function Dashboard() {
     // A/B stats
     if (AB_TESTS.length > 0) {
       const results = {};
+      const token = await getToken();
       await Promise.all(AB_TESTS.map(async test => {
         try {
           const params = new URLSearchParams({ test_id: test.id, url: test.url, from: from.toISOString(), to: to.toISOString() });
           const r = await fetch(`${BACKEND}/admin/ab-tests?${params}`, {
-            headers: { 'x-api-key': API_KEY },
+            headers: { 'Authorization': `Bearer ${token}` },
           });
           if (r.ok) results[test.id] = await r.json();
         } catch (_) {}

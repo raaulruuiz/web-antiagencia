@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAdmin } from './AdminLayout';
+import { supabase } from '@/lib/supabaseClient';
+import { BACKEND_URL as BACKEND } from '@/lib/config';
 
-import { BACKEND_URL as BACKEND, LOOM_API_KEY as API_KEY } from '@/lib/config';
+async function getToken() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || null;
+}
 
 const PAGE_OPTIONS = [
   { value: 'automatizaciones', label: 'Automatizaciones' },
@@ -123,7 +128,8 @@ export default function AdminUsers() {
 
   async function fetchUsers() {
     setLoading(true);
-    const res = await fetch(`${BACKEND}/admin/users`, { headers: { 'x-api-key': API_KEY } });
+    const token = await getToken();
+    const res = await fetch(`${BACKEND}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
     if (res.ok) setUsers(await res.json());
     setLoading(false);
   }
@@ -133,9 +139,10 @@ export default function AdminUsers() {
     if (!email) return;
     setInviting(true);
     setMsg('');
+    const token = await getToken();
     const res = await fetch(`${BACKEND}/admin/invite-user`, {
       method: 'POST',
-      headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, role: inviteRole, pages: inviteRole === 'admin' ? [] : invitePages, ext_pages: inviteRole === 'admin' ? [] : inviteExtPages }),
     });
     const data = await res.json();
@@ -163,9 +170,10 @@ export default function AdminUsers() {
   async function saveEdit(u) {
     const { role, pages, ext_pages } = editing[u.id];
     setSaving(prev => ({ ...prev, [u.id]: true }));
+    const token = await getToken();
     await fetch(`${BACKEND}/admin/users/${u.id}`, {
       method: 'PATCH',
-      headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ role, pages, ext_pages }),
     });
     setSaving(prev => { const n = { ...prev }; delete n[u.id]; return n; });
@@ -180,9 +188,10 @@ export default function AdminUsers() {
   async function confirmDeleteUser() {
     const { id } = confirmDelete;
     setConfirmDelete(null);
+    const token = await getToken();
     await fetch(`${BACKEND}/admin/users/${id}`, {
       method: 'DELETE',
-      headers: { 'x-api-key': API_KEY },
+      headers: { 'Authorization': `Bearer ${token}` },
     });
     fetchUsers();
   }
@@ -254,8 +263,9 @@ export default function AdminUsers() {
           <button
             onClick={async () => {
               const expired = users.filter(u => !u.confirmed && daysAgo(u.invited_at) >= INVITE_EXPIRY_DAYS);
+              const tok = await getToken();
               for (const u of expired) {
-                await fetch(`${BACKEND}/admin/users/${u.id}`, { method: 'DELETE', headers: { 'x-api-key': API_KEY } });
+                await fetch(`${BACKEND}/admin/users/${u.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${tok}` } });
               }
               fetchUsers();
             }}
@@ -344,9 +354,10 @@ export default function AdminUsers() {
                     <button
                       onClick={async () => {
                         setResetting(prev => ({ ...prev, [u.id]: true }));
+                        const tok = await getToken();
                         await fetch(`${BACKEND}/admin/users/${u.id}/reset-password`, {
                           method: 'POST',
-                          headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
+                          headers: { 'Authorization': `Bearer ${tok}`, 'Content-Type': 'application/json' },
                           body: JSON.stringify({ email: u.email }),
                         });
                         setResetting(prev => ({ ...prev, [u.id]: 'done' }));

@@ -9,8 +9,13 @@ const SESSION_KEY = 'biblioteca_acceso_email';
 const PRO_KEY = 'biblioteca_pro_access';
 const SESSION_TTL = 30 * 24 * 60 * 60 * 1000; // 30 días
 
-function saveSession(email) {
+function saveSession(email, sessionToken) {
   localStorage.setItem(SESSION_KEY, JSON.stringify({ email, ts: Date.now() }));
+  if (sessionToken) localStorage.setItem('biblioteca_session_token', sessionToken);
+}
+
+function getBibliotecaToken() {
+  return localStorage.getItem('biblioteca_session_token') || null;
 }
 function loadSession() {
   try {
@@ -50,8 +55,8 @@ function Gate({ onAcceso }) {
       });
       const data = await res.json();
       if (data.acceso) {
-        saveSession(email);
-        onAcceso();
+        saveSession(email, data.session_token);
+        onAcceso(data.session_token);
       } else {
         setEstado('error');
       }
@@ -219,6 +224,7 @@ function ProModal({ onClose, onProActivated }) {
       });
       const data = await res.json();
       if (data.valid) {
+        if (data.session_token) localStorage.setItem('biblioteca_session_token', data.session_token);
         saveProSession();
         onProActivated();
       } else {
@@ -271,6 +277,14 @@ export default function BibliotecaPublica() {
   const [acceso, setAcceso] = useState(() => !!loadSession());
   const [isPro, setIsPro] = useState(() => loadProSession());
   const [showProModal, setShowProModal] = useState(false);
+
+  const logoutPro = () => {
+    localStorage.removeItem(PRO_KEY);
+    localStorage.removeItem('biblioteca_session_token');
+    setIsPro(false);
+    // Reload to re-fetch content without PRO access
+    load();
+  };
   const [items, setItems]     = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [allSectors, setAllSectors] = useState([]);
@@ -299,7 +313,9 @@ export default function BibliotecaPublica() {
   const load = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch(`${API_BASE}/biblioteca/public`);
+      const biblToken = getBibliotecaToken();
+      const headers = biblToken ? { 'Authorization': `Bearer ${biblToken}` } : {};
+      const res = await fetch(`${API_BASE}/biblioteca/public`, { headers });
       if (!res.ok) throw new Error('Error al cargar');
       setItems(await res.json());
     } catch(e) { setError(e.message); }
@@ -376,8 +392,16 @@ export default function BibliotecaPublica() {
                 </button>
               )}
               {isPro && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 8, fontSize: 12, background: 'rgba(0,103,253,0.15)', border: '1px solid rgba(0,103,253,0.4)', color: '#60a5fa' }}>
-                  ⚡ PRO activo
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 8, fontSize: 12, background: 'rgba(0,103,253,0.15)', border: '1px solid rgba(0,103,253,0.4)', color: '#60a5fa' }}>
+                    ⚡ PRO activo
+                  </div>
+                  <button onClick={() => { logoutPro(); setShowMenu(false); }}
+                    style={{ fontSize: 11, color: '#71717a', background: 'none', border: '1px solid #3f3f46', borderRadius: 6, cursor: 'pointer', padding: '5px 8px', lineHeight: 1 }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = '#f87171'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#71717a'; e.currentTarget.style.borderColor = '#3f3f46'; }}>
+                    Salir
+                  </button>
                 </div>
               )}
             </div>
@@ -425,8 +449,17 @@ export default function BibliotecaPublica() {
                 {loading ? 'Cargando…' : 'Actualizar'}
               </button>
               {isPro ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(0,103,253,0.15)', border: '1px solid rgba(0,103,253,0.4)', color: '#60a5fa' }}>
-                  ⚡ PRO activo
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(0,103,253,0.15)', border: '1px solid rgba(0,103,253,0.4)', color: '#60a5fa' }}>
+                    ⚡ PRO activo
+                  </div>
+                  <button onClick={logoutPro}
+                    style={{ fontSize: 11, color: '#52525b', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', borderRadius: 6, transition: 'color 0.15s', lineHeight: 1 }}
+                    onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
+                    onMouseLeave={e => e.currentTarget.style.color = '#52525b'}
+                    title="Cerrar sesión PRO">
+                    Salir
+                  </button>
                 </div>
               ) : (
                 <button onClick={() => setShowProModal(true)}
