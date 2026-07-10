@@ -13,6 +13,7 @@ import { useEffect } from "react";
  *   instanceId   — Sufijo único para los elementos style/script del DOM (ej: "home", "homev2").
  *   successRedirect — URL a la que redirigir tras el envío exitoso.
  *   scriptVersion — Hash de versión del script de MailerLite (ej: "vb397d78ebaa8a0f631d35384c46d781b").
+ *   noSetup      — Si true, solo renderiza el HTML sin inyectar CSS/script (para segundas instancias en la misma página).
  */
 export default function MailerLiteForm({
   mlb2Id,
@@ -23,8 +24,10 @@ export default function MailerLiteForm({
   instanceId,
   successRedirect = "https://antiagencia.es/yaporfin",
   scriptVersion = "",
+  noSetup = false,
 }) {
   useEffect(() => {
+    if (noSetup) return;
     const style = document.createElement("style");
     style.innerHTML = css;
     style.id = `mailerlite-css-${instanceId}`;
