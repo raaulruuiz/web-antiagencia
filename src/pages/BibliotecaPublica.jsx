@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import BibliotecaCardMeta from '@/components/BibliotecaCardMeta';
 import { useTheme } from '@/lib/ThemeContext';
@@ -357,6 +358,11 @@ export default function BibliotecaPublica() {
   const inputStyle = { background: 'transparent', border: '1px solid #3f3f46', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', cursor: 'pointer' };
 
   return (
+    <>
+    <Helmet>
+      <title>Anti-Biblioteca — Antiagencia</title>
+      <meta name="description" content="Mi biblioteca personal de emails de ecommerce. Análisis semanales de los mejores emails para que puedas aprender y mejorar tus campañas." />
+    </Helmet>
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
       {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
       {showProModal && <ProModal onClose={() => setShowProModal(false)} onProActivated={() => { setIsPro(true); setShowProModal(false); }} />}
@@ -624,5 +630,6 @@ export default function BibliotecaPublica() {
         )}
       </div>
     </div>
+    </>
   );
 }

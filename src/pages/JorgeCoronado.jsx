@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
 const mailerLiteCSS = `
@@ -39,6 +40,11 @@ export default function JorgeCoronado() {
   }, []);
 
   return (
+    <>
+    <Helmet>
+      <title>Jorge Coronado × Antiagencia — Email marketing para ecommerce</title>
+      <meta name="description" content="Colaboración especial con Jorge Coronado. Todo lo que necesitas saber sobre email marketing para escalar tu tienda online." />
+    </Helmet>
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
         <div className="w-full max-w-2xl">
@@ -134,5 +140,6 @@ export default function JorgeCoronado() {
       </div>
       <FooterMinimal />
     </div>
+    </>
   );
 }

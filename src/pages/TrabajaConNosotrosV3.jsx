@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
 const mailerLiteCSS = `
@@ -193,6 +194,11 @@ export default function TrabajaConNosotrosV3() {
   };
 
   return (
+    <>
+    <Helmet>
+      <title>Trabaja con nosotros — Antiagencia</title>
+      <meta name="description" content="¿Quieres que gestionemos el email marketing de tu ecommerce? Cuéntanos tu proyecto y te decimos si encajamos." />
+    </Helmet>
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
         <div className="w-full max-w-5xl">
@@ -493,5 +499,6 @@ export default function TrabajaConNosotrosV3() {
       </div>
       <FooterMinimal />
     </div>
+    </>
   );
 }

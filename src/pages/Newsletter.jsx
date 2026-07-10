@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
 const mailerLiteCSS = `
@@ -49,6 +50,11 @@ export default function Newsletter() {
   }, []);
 
   return (
+    <>
+    <Helmet>
+      <title>Newsletter — Antiagencia</title>
+      <meta name="description" content="Suscríbete y recibe cada semana los mejores emails de ecommerce analizados, más el ebook gratuito para aumentar tus ventas." />
+    </Helmet>
     <div className="min-h-screen bg-[#121212] text-white flex flex-col">
       <div className="flex-1 flex flex-col items-center px-6 pt-6 md:pt-16 pb-16">
         <div className="max-w-2xl w-full">
@@ -180,5 +186,6 @@ export default function Newsletter() {
       </div>
       <FooterMinimal />
     </div>
+    </>
   );
 }

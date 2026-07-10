@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import MailerLiteForm from "@/components/MailerLiteForm";
 
@@ -11,6 +12,11 @@ const ML_CSS = `
 
 export default function Home() {
   return (
+    <>
+    <Helmet>
+      <title>Antiagencia - Hago email marketing</title>
+      <meta name="description" content="Agencia o freelance de email marketing para ecommerce, como prefieras llamarlo. Somos mi novia y yo. Escribimos tus emails y lo hacemos muy bien." />
+    </Helmet>
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
         <div className="w-full max-w-3xl">
@@ -109,5 +115,6 @@ export default function Home() {
       </div>
       <FooterMinimal />
     </div>
+    </>
   );
 }
