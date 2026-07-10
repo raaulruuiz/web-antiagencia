@@ -4,13 +4,17 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /loom-login
+Disallow: /loom
 Disallow: /audiosecreto
 Disallow: /tiktok-connect
+Disallow: /homev2
 Disallow: /UltimoPaso
 Disallow: /YaPorFin
 Disallow: /Gracias
+Disallow: /gracias-podcast
 Disallow: /newsletter-vieja
 Disallow: /trabajaconnosotros-old
 Disallow: /webtipica
+Disallow: /q3
 
 Sitemap: https://antiagencia.es/sitemap.xml

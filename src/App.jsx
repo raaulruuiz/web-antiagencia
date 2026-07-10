@@ -17,7 +17,6 @@ import Home from './pages/Home';
 import HomeV2 from './pages/HomeV2';
 import AudioSecreto from './pages/AudioSecreto';
 import CookieBanner from './components/CookieBanner';
-import TrabajaConNosotros from './pages/TrabajaConNosotros'
 import TrabajaConNosotrosOld from './pages/TrabajaConNosotrosOld'
 import TrabajaConNosotrosV3 from './pages/TrabajaConNosotrosV3'
 import PlanningQ3 from './pages/PlanningQ3'
