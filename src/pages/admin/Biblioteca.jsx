@@ -451,15 +451,18 @@ export default function Biblioteca() {
   const pendingIds = useMemo(() => {
     try {
       const raw = JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]');
-      const existingIds = new Set(items.map(i => i.id));
-      // Filter out IDs that no longer exist in the current items list (stale entries)
-      const valid = raw.filter(id => existingIds.has(id));
-      if (valid.length !== raw.length) {
-        localStorage.setItem('biblioteca_pending_publish', JSON.stringify(valid));
+      if (!loading && items.length > 0) {
+        // Only clean stale entries once items are loaded
+        const existingIds = new Set(items.map(i => i.id));
+        const valid = raw.filter(id => existingIds.has(id));
+        if (valid.length !== raw.length) {
+          localStorage.setItem('biblioteca_pending_publish', JSON.stringify(valid));
+        }
+        return new Set(valid);
       }
-      return new Set(valid);
+      return new Set(raw);
     } catch { return new Set(); }
-  }, [items]); // recompute when items change (after publish clears storage)
+  }, [items, loading]);
   const hasPending = pendingIds.size > 0;
 
   const toggleAutopublish = () => {
