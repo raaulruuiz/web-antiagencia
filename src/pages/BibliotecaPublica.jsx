@@ -370,7 +370,7 @@ export default function BibliotecaPublica() {
       <meta name="description" content="Mi biblioteca personal de emails de ecommerce. Análisis semanales de los mejores emails para que puedas aprender y mejorar tus campañas." />
     </Helmet>
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
-      {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
+      {!acceso && <Gate onAcceso={() => { setAcceso(true); load(); }} />}
       {showProModal && <ProModal onClose={() => setShowProModal(false)} onProActivated={() => { setIsPro(true); setShowProModal(false); }} />}
       <MailerLitePopup />
 
