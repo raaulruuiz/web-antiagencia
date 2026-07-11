@@ -629,7 +629,10 @@ export default function BibliotecaPublica() {
                   <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', transition: 'border-color 0.15s' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = '#27272a'}>
-                    <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block' }} loading="lazy" />
+                    {item.url
+                      ? <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block' }} loading="lazy" />
+                      : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(160deg, #1e1b2e 0%, #2a1f3d 25%, #1a2640 50%, #2d1b3d 75%, #1e1b2e 100%)' }} />
+                    }
                   </div>
                   <BibliotecaCardMeta item={item} allTags={allTags} allSectors={allSectors} />
                 </div>
