@@ -212,6 +212,7 @@ function DateRangePicker({ from, to, onChange }) {
 function ProModal({ onClose, onProActivated }) {
   const [token, setToken] = useState('');
   const [estado, setEstado] = useState('idle'); // idle | cargando | error
+  const [showToken, setShowToken] = useState(false);
 
   async function verificar(e) {
     e.preventDefault();
@@ -249,14 +250,23 @@ function ProModal({ onClose, onProActivated }) {
           De momento el modo PRO solo es accesible para perfiles manuales, si eres uno de ellos, introduce el token.
         </p>
         <form onSubmit={verificar} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <input
-            type="text"
-            placeholder="Token de acceso"
-            value={token}
-            onChange={e => { setToken(e.target.value); setEstado('idle'); }}
-            autoFocus
-            style={{ background: '#1a1a1a', border: `1px solid ${estado === 'error' ? '#ef4444' : '#3f3f46'}`, borderRadius: 8, padding: '10px 12px', fontSize: 14, color: 'white', outline: 'none', colorScheme: 'dark' }}
-          />
+          <div style={{ position: 'relative' }}>
+            <input
+              type={showToken ? 'text' : 'password'}
+              placeholder="Token de acceso"
+              value={token}
+              onChange={e => { setToken(e.target.value); setEstado('idle'); }}
+              autoFocus
+              style={{ background: '#1a1a1a', border: `1px solid ${estado === 'error' ? '#ef4444' : '#3f3f46'}`, borderRadius: 8, padding: '10px 40px 10px 12px', fontSize: 14, color: 'white', outline: 'none', colorScheme: 'dark', width: '100%', boxSizing: 'border-box' }}
+            />
+            <button type="button" onClick={() => setShowToken(v => !v)}
+              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', padding: 4, lineHeight: 1 }}>
+              {showToken
+                ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              }
+            </button>
+          </div>
           {estado === 'error' && (
             <p style={{ color: '#f87171', fontSize: 12, margin: 0 }}>Token incorrecto. Comprueba que lo has escrito bien.</p>
           )}
@@ -319,6 +329,22 @@ export default function BibliotecaPublica() {
       const res = await fetch(`${API_BASE}/biblioteca/public`, { headers });
       if (res.status === 401) {
         localStorage.removeItem('biblioteca_session_token');
+        const email = loadSession();
+        if (email) {
+          // Try to silently re-verify with stored email to get a fresh JWT
+          try {
+            const r = await fetch(`${API_BASE}/api/verificar-acceso-q3`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email }),
+            });
+            const d = await r.json();
+            if (d.acceso && d.session_token) {
+              localStorage.setItem('biblioteca_session_token', d.session_token);
+              const retry = await fetch(`${API_BASE}/biblioteca/public`, { headers: { 'Authorization': `Bearer ${d.session_token}` } });
+              if (retry.ok) { setItems(await retry.json()); return; }
+            }
+          } catch (_) {}
+        }
         localStorage.removeItem(SESSION_KEY);
         setAcceso(false);
         return;
@@ -371,7 +397,7 @@ export default function BibliotecaPublica() {
     </Helmet>
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
       {!acceso && <Gate onAcceso={() => { setAcceso(true); load(); }} />}
-      {showProModal && <ProModal onClose={() => setShowProModal(false)} onProActivated={() => { setIsPro(true); setShowProModal(false); }} />}
+      {showProModal && <ProModal onClose={() => setShowProModal(false)} onProActivated={() => { setIsPro(true); setShowProModal(false); load(); }} />}
       <MailerLitePopup />
 
       {showMenu && (
