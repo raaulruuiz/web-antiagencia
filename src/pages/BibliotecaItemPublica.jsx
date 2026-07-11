@@ -505,6 +505,8 @@ function TranscribirBlockView({ block, hideTitle }) {
 function ColumnasBlockView({ block, onPreview, theme, isMobile, item }) {
   const numCols = block.num_columnas || 2;
   const columns = block.columns || [];
+  const hasContent = columns.some(col => Array.isArray(col) && col.length > 0);
+  if (!hasContent) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', margin: '0 0 4px' }}>{block.titulo}</h2>}
