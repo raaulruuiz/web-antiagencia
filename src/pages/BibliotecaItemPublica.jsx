@@ -210,7 +210,8 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
   const links = block.links?.length
     ? block.links
     : (block.url ? [{ images: block.images || [], url: block.url }] : []);
-  if (!links.length) return null;
+  if (!links.length && !block.titulo && !block.subtitulo) return null;
+  if (!links.length) return hideTitle ? null : <div><BlockHeader title={block.titulo} subtitle={block.subtitulo} /></div>;
   const layout = block.links_layout || 'columna';
   const isGrid = layout === 'grid';
   const isFila = layout === 'fila';
@@ -294,7 +295,8 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
 
 function ImagenBlockView({ block, onPreview, hideTitle }) {
   const images = block.images || [];
-  if (!images.length) return null;
+  if (!images.length && !block.titulo && !block.subtitulo) return null;
+  if (!images.length) return hideTitle ? null : <div><BlockHeader title={block.titulo} subtitle={block.subtitulo} /></div>;
   const layout = block.images_layout;
 
   if (layout === 'fila') {
@@ -344,7 +346,8 @@ function ImagenBlockView({ block, onPreview, hideTitle }) {
 
 function ImagenTextoBlockView({ block, onPreview, hideTitle, isMobile }) {
   const items = block.items || [];
-  if (!items.length) return null;
+  if (!items.length && !block.titulo && !block.subtitulo) return null;
+  if (!items.length) return hideTitle ? null : <div><BlockHeader title={block.titulo} subtitle={block.subtitulo} /></div>;
   const layout   = block.it_layout || 'img-text';
   const isHoriz  = !isMobile && (layout === 'img-text' || layout === 'text-img');
   const imgFirst = layout === 'img-text' || layout === 'img-top';
@@ -383,7 +386,8 @@ function ImagenTextoBlockView({ block, onPreview, hideTitle, isMobile }) {
 
 function AsuntoAdelantoBlockView({ block, item, hideTitle, isMobile }) {
   const items = block.items || [];
-  if (!items.length) return null;
+  if (!items.length && !block.titulo && !block.subtitulo) return null;
+  if (!items.length) return hideTitle ? null : <div><BlockHeader title={block.titulo} subtitle={block.subtitulo} /></div>;
   const layout   = block.it_layout || 'img-text';
   const isHoriz  = !isMobile && (layout === 'img-text' || layout === 'text-img');
   const fieldFirst = layout === 'img-text' || layout === 'img-top';
@@ -471,7 +475,8 @@ function renderEBBlock(eb, i, colMode, onPreview) {
 function CorreccionBlockView({ block, onPreview, hideTitle }) {
   const { theme } = useTheme();
   const emailBlocks = block.email_blocks || [];
-  if (!emailBlocks.length) return null;
+  if (!emailBlocks.length && !block.titulo && !block.subtitulo) return null;
+  if (!emailBlocks.length) return hideTitle ? null : <div><BlockHeader title={block.titulo} subtitle={block.subtitulo} /></div>;
   const emailBg  = block.email_bg || '#ffffff';
   const outerBg  = theme === 'dark' ? '#1e1e1e' : '#e0e0e0';
 
@@ -488,7 +493,8 @@ function CorreccionBlockView({ block, onPreview, hideTitle }) {
 }
 
 function TranscribirBlockView({ block, hideTitle }) {
-  if (!block.texto) return null;
+  if (!block.texto && !block.titulo && !block.subtitulo) return null;
+  if (!block.texto) return hideTitle ? null : <div><BlockHeader title={block.titulo} subtitle={block.subtitulo} /></div>;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {!hideTitle && block.titulo && <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', margin: '0 0 4px' }}>{block.titulo}</h2>}
