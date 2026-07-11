@@ -186,6 +186,8 @@ function TokensModal({ onClose }) {
   const [newToken, setNewToken] = useState('');
   const [newLabel, setNewLabel] = useState('');
   const [creating, setCreating] = useState(false);
+  const [visibleTokenIds, setVisibleTokenIds] = useState(new Set());
+  const toggleVisible = (id) => setVisibleTokenIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
 
   useEffect(() => {
     (async () => {
@@ -238,10 +240,19 @@ function TokensModal({ onClose }) {
           {!loading && tokens.length === 0 && <p className="text-xs text-zinc-400">Sin tokens todavía.</p>}
           {tokens.map(t => (
             <div key={t.id} className="flex items-center justify-between gap-3 rounded-lg p-3" style={{ background: 'var(--t-surface2)', border: '1px solid var(--t-border)' }}>
-              <div className="flex flex-col gap-0.5 min-w-0">
+              <div className="flex flex-col gap-0.5 min-w-0" style={{ flex: 1 }}>
                 {t.label && <span className="text-xs font-medium text-white truncate">{t.label}</span>}
-                <span className="text-xs font-mono" style={{ color: '#a1a1aa' }}>{t.token}</span>
-                <span className="text-xs" style={{ color: '#52525b' }}>{new Date(t.created_at).toLocaleDateString('es-ES')}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span className="text-xs font-mono" style={{ color: '#a1a1aa' }}>
+                    {visibleTokenIds.has(t.id) ? t.token : '••••••••••••••••'}
+                  </span>
+                  <button type="button" onClick={() => toggleVisible(t.id)} style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 0, lineHeight: 1, flexShrink: 0 }}>
+                    {visibleTokenIds.has(t.id)
+                      ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    }
+                  </button>
+                </div>
               </div>
               <button onClick={() => remove(t.id)} className="text-zinc-500 hover:text-red-400 transition-colors flex-shrink-0" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16 }}>×</button>
             </div>
