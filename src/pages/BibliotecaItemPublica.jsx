@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import MailerLitePopup from '@/components/MailerLitePopup';
@@ -175,7 +176,7 @@ function ImageModal({ imageUrl, alt, onClose }) {
 function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
   const [hov, setHov] = useState(false);
   const mobile = window.innerWidth < 640;
-  const imgEl = <img src={src} alt="" style={{ display: 'block', ...imgStyle }} />;
+  const imgEl = <img src={src} alt="" loading="lazy" style={{ display: 'block', ...imgStyle }} />;
   return (
     <div style={{ position: 'relative', ...wrapperStyle }}
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
@@ -639,6 +640,11 @@ export default function BibliotecaItemPublica() {
   const blocksData      = (item.blocks_data_published?.blocks ? item.blocks_data_published : null) || (item.blocks_data?.blocks ? item.blocks_data : null) || { blocks: [] };
 
   return (
+    <>
+    <Helmet>
+      <title>{item?.titulo ? `${item.titulo} — Anti-Biblioteca` : 'Anti-Biblioteca — Antiagencia'}</title>
+      <meta name="description" content={item?.titulo ? `Análisis de ${item.titulo} en la Anti-Biblioteca de Antiagencia.` : 'Anti-Biblioteca — Antiagencia'} />
+    </Helmet>
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
       {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
       <MailerLitePopup />
@@ -687,7 +693,7 @@ export default function BibliotecaItemPublica() {
             onMouseEnter={() => setImageHover(true)}
             onMouseLeave={() => setImageHover(false)}>
             <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid var(--t-border)' }}>
-              <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />
+              <img src={item.url} alt={item.filename} loading="lazy" style={{ width: '100%', display: 'block' }} />
             </div>
             {(imageHover || isMobile) && (
               <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
@@ -785,5 +791,6 @@ export default function BibliotecaItemPublica() {
         </div>
       </div>
     </div>
+    </>
   );
 }

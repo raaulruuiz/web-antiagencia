@@ -317,11 +317,17 @@ export default function BibliotecaPublica() {
       const biblToken = getBibliotecaToken();
       const headers = biblToken ? { 'Authorization': `Bearer ${biblToken}` } : {};
       const res = await fetch(`${API_BASE}/biblioteca/public`, { headers });
+      if (res.status === 401) {
+        localStorage.removeItem('biblioteca_session_token');
+        localStorage.removeItem(SESSION_KEY);
+        setAcceso(false);
+        return;
+      }
       if (!res.ok) throw new Error('Error al cargar');
       setItems(await res.json());
     } catch(e) { setError(e.message); }
     finally { setLoading(false); }
-  }, []);
+  }, [setAcceso]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
