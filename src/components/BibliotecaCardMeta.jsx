@@ -26,8 +26,8 @@ export default function BibliotecaCardMeta({ item, allTags = [], allSectors = []
           {new Date(item.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
         </p>
       )}
-      {!hideSubtext && !blurred && (item.categoria === 'email' ? item.asunto : item.ficha_url) && (
-        <p style={{ fontSize: 12, color: 'var(--t-text)', margin: '2px 0 0', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+      {!hideSubtext && (item.categoria === 'email' ? item.asunto : item.ficha_url) && (
+        <p style={{ fontSize: 12, color: 'var(--t-text)', margin: '2px 0 0', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', ...(blurred ? { filter: 'blur(5px)', userSelect: 'none' } : {}) }}>
           {item.categoria === 'email' ? item.asunto : item.ficha_url}
         </p>
       )}
