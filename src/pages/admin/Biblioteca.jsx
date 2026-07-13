@@ -632,54 +632,74 @@ export default function Biblioteca() {
 
   const askBulkVisibilidad = (publico) => setConfirmVis({ publico });
 
-  const bulkAddSector = useCallback(async (sectorId) => {
-    const ids = [...selected];
-    setItems(prev => prev.map(i => ids.includes(i.id) && !(i.sector || []).includes(sectorId)
-      ? { ...i, sector: [...(i.sector || []), sectorId] } : i));
-    const token = await getToken();
-    await Promise.all(ids.map(id => {
-      const item = items.find(i => i.id === id);
-      const cur = item?.sector || [];
-      if (cur.includes(sectorId)) return;
-      const ns = [...cur, sectorId];
-      return fetch(`${API_BASE}/biblioteca/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ sector: ns }) });
-    }));
-  }, [selected, items]);
-
-  const bulkRemoveSector = useCallback(async (sectorId) => {
-    const ids = [...selected];
-    setItems(prev => prev.map(i => ids.includes(i.id) ? { ...i, sector: (i.sector || []).filter(x => x !== sectorId) } : i));
-    const token = await getToken();
-    await Promise.all(ids.map(id => {
-      const item = items.find(i => i.id === id);
-      const ns = (item?.sector || []).filter(x => x !== sectorId);
-      return fetch(`${API_BASE}/biblioteca/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ sector: ns }) });
-    }));
-  }, [selected, items]);
+  const addToPending = (ids) => {
+    try {
+      const raw = JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]');
+      const merged = [...new Set([...raw, ...ids])];
+      localStorage.setItem('biblioteca_pending_publish', JSON.stringify(merged));
+    } catch {}
+  };
 
   const bulkAddTag = useCallback(async (tagId) => {
     const ids = [...selected];
     setItems(prev => prev.map(i => ids.includes(i.id) && !(i.tags || []).includes(tagId)
       ? { ...i, tags: [...(i.tags || []), tagId] } : i));
     const token = await getToken();
+    const changed = [];
     await Promise.all(ids.map(id => {
       const item = items.find(i => i.id === id);
       const cur = item?.tags || [];
       if (cur.includes(tagId)) return;
+      changed.push(id);
       const nt = [...cur, tagId];
       return fetch(`${API_BASE}/biblioteca/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ tags: nt }) });
     }));
+    if (changed.length) addToPending(changed);
   }, [selected, items]);
 
   const bulkRemoveTag = useCallback(async (tagId) => {
     const ids = [...selected];
     setItems(prev => prev.map(i => ids.includes(i.id) ? { ...i, tags: (i.tags || []).filter(x => x !== tagId) } : i));
     const token = await getToken();
+    const changed = [];
     await Promise.all(ids.map(id => {
       const item = items.find(i => i.id === id);
+      changed.push(id);
       const nt = (item?.tags || []).filter(x => x !== tagId);
       return fetch(`${API_BASE}/biblioteca/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ tags: nt }) });
     }));
+    if (changed.length) addToPending(changed);
+  }, [selected, items]);
+
+  const bulkAddSector = useCallback(async (sectorId) => {
+    const ids = [...selected];
+    setItems(prev => prev.map(i => ids.includes(i.id) && !(i.sector || []).includes(sectorId)
+      ? { ...i, sector: [...(i.sector || []), sectorId] } : i));
+    const token = await getToken();
+    const changed = [];
+    await Promise.all(ids.map(id => {
+      const item = items.find(i => i.id === id);
+      const cur = item?.sector || [];
+      if (cur.includes(sectorId)) return;
+      changed.push(id);
+      const ns = [...cur, sectorId];
+      return fetch(`${API_BASE}/biblioteca/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ sector: ns }) });
+    }));
+    if (changed.length) addToPending(changed);
+  }, [selected, items]);
+
+  const bulkRemoveSector = useCallback(async (sectorId) => {
+    const ids = [...selected];
+    setItems(prev => prev.map(i => ids.includes(i.id) ? { ...i, sector: (i.sector || []).filter(x => x !== sectorId) } : i));
+    const token = await getToken();
+    const changed = [];
+    await Promise.all(ids.map(id => {
+      const item = items.find(i => i.id === id);
+      changed.push(id);
+      const ns = (item?.sector || []).filter(x => x !== sectorId);
+      return fetch(`${API_BASE}/biblioteca/${id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ sector: ns }) });
+    }));
+    if (changed.length) addToPending(changed);
   }, [selected, items]);
 
   const inputStyle = { background: 'var(--t-surface2)', border: '1px solid #27272a', borderRadius: 8, padding: '5px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark' };
