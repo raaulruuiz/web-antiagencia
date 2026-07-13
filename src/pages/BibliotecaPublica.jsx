@@ -638,8 +638,8 @@ export default function BibliotecaPublica() {
                 <div key={item.id} style={{ cursor: 'default' }}>
                   <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', position: 'relative' }}>
                     {item.url
-                      ? <img src={item.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block', filter: 'blur(12px)', transform: 'scale(1.05)' }} loading="lazy" />
-                      : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(160deg, #1e1b2e 0%, #2a1f3d 25%, #1a2640 50%, #2d1b3d 75%, #1e1b2e 100%)', filter: 'blur(8px)', transform: 'scale(1.05)' }} />
+                      ? <img src={item.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block', filter: 'blur(18px) brightness(0.6)', transform: 'scale(1.08)' }} loading="lazy" />
+                      : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(160deg, #1e1b2e 0%, #2a1f3d 25%, #1a2640 50%, #2d1b3d 75%, #1e1b2e 100%)' }} />
                     }
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ background: 'rgba(0,0,0,0.55)', borderRadius: 8, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
