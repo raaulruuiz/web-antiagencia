@@ -2460,6 +2460,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                 body: JSON.stringify({ images: pendingImgs.map(i => i.url) }),
               });
               const data = await res.json();
+              if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
               if (data.texto) {
                 const pendingUrls = new Set(pendingImgs.map(i => i.url));
                 const newTexto = mode === 'append'
@@ -2471,7 +2472,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                   images: (d.images || []).map(img => pendingUrls.has(img.url) ? { ...img, transcribed: true } : img),
                 }));
               }
-            } catch { alert('Error al transcribir'); }
+            } catch (err) { alert('Error al transcribir: ' + (err.message || err)); }
             finally { setTranscribing(false); }
           };
 
