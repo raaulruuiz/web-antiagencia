@@ -10,7 +10,7 @@ const SUBCAT_TEXT = {
   light: { automatizacion: '#15803d', campana: '#c2410c' },
 };
 
-export default function BibliotecaCardMeta({ item, allTags = [], allSectors = [], hideSubtext = false }) {
+export default function BibliotecaCardMeta({ item, allTags = [], allSectors = [], hideSubtext = false, blurred = false }) {
   const { theme } = useTheme();
   const resolvedTags = (item.tags || []).map(id => allTags.find(t => t.id === id)).filter(Boolean);
   const resolvedSectors = (item.sector || []).map(id => allSectors.find(s => s.id === id)).filter(Boolean);
@@ -18,15 +18,15 @@ export default function BibliotecaCardMeta({ item, allTags = [], allSectors = []
   return (
     <div style={{ marginTop: 4 }}>
       {item.marca ? (
-        <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--t-text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--t-text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', ...(blurred ? { filter: 'blur(5px)', userSelect: 'none' } : {}) }}>
           {item.marca}
         </p>
       ) : (
-        <p style={{ fontSize: 11, color: 'var(--t-text-subtle)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontSize: 11, color: 'var(--t-text-subtle)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', ...(blurred ? { filter: 'blur(5px)', userSelect: 'none' } : {}) }}>
           {new Date(item.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
         </p>
       )}
-      {!hideSubtext && (item.categoria === 'email' ? item.asunto : item.ficha_url) && (
+      {!hideSubtext && !blurred && (item.categoria === 'email' ? item.asunto : item.ficha_url) && (
         <p style={{ fontSize: 12, color: 'var(--t-text)', margin: '2px 0 0', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {item.categoria === 'email' ? item.asunto : item.ficha_url}
         </p>

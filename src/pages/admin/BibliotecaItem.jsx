@@ -991,7 +991,8 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showColumnaModal, setShowColumnaModal] = useState(false);
   const [lightbox, setLightbox] = useState(null);
-  const [addingToCol, setAddingToCol] = useState(null);
+  const [addingToCol, setAddingToCol] = useState(null); // eslint-disable-line no-unused-vars
+  const [colPickerIdx, setColPickerIdx] = useState(null);
   const [editingNestedBlock, setEditingNestedBlock] = useState(null);
   const { theme } = useTheme();
   const nestedCount = block.type === 'columnas' ? (block.columns || []).flat().filter(Boolean).length : 0;
@@ -1060,12 +1061,14 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
            : type === 'asunto_adelanto' ? [{ show_asunto: false, show_adelanto: false, texto: '', text_color: '', text_align: 'left' }] : [],
       email_blocks: [], texto: '', nota: '', visible: true,
     };
+    const newBlockIdx = ((block.columns || [])[colIdx] || []).length;
     const updatedBlock = {
       ...block,
       columns: (block.columns || []).map((col, i) => i === colIdx ? [...(col || []), newBlock] : (col || [])),
     };
     onUpdateBlock?.(updatedBlock);
-    setAddingToCol(null);
+    setColPickerIdx(null);
+    setTimeout(() => setEditingNestedBlock({ colIdx, blockIdx: newBlockIdx }), 50);
   };
 
   return (
@@ -1436,8 +1439,8 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                         libraryImages={libraryImages}
                       />
                     ))}
-                    <button onClick={() => setAddingToCol(addingToCol === ci ? null : ci)}
-                      style={{ background: 'transparent', border: `1px dashed ${addingToCol === ci ? colColor : 'var(--t-border-mid)'}`, borderRadius: 4, padding: '4px 0', fontSize: 9, color: addingToCol === ci ? colColor : 'var(--t-text-subtle)', cursor: 'pointer', width: '100%', marginTop: 'auto' }}>
+                    <button onClick={() => setColPickerIdx(ci)}
+                      style={{ background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 4, padding: '4px 0', fontSize: 9, color: 'var(--t-text-subtle)', cursor: 'pointer', width: '100%', marginTop: 'auto' }}>
                       + bloque
                     </button>
                   </div>
@@ -1445,17 +1448,16 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               })}
             </div>
           )}
-          {addingToCol !== null && (
-            <div style={{ marginTop: 6, background: 'var(--t-bg)', border: '1px solid var(--t-border)', borderRadius: 6, padding: 8 }}>
-              <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', marginBottom: 6 }}>Col. {addingToCol + 1} — elegir tipo:</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                {[...BLOCK_TYPES, ...(categoria === 'email' ? [{ type: 'asunto_adelanto', label: 'Asunto y/o Adelanto' }] : []), { type: 'correccion', label: 'Corrección' }].map(btt => (
-                  <button key={btt.type} onClick={() => addBlockToColumn(addingToCol, btt.type)}
-                    style={{ padding: '4px 8px', fontSize: 10, border: `1px solid ${(BLOCK_COLORS[btt.type] || '#71717a')}44`, borderRadius: 5, background: (BLOCK_COLORS[btt.type] || '#71717a') + '11', color: BLOCK_COLORS[btt.type] || 'var(--t-text-muted)', cursor: 'pointer', fontWeight: 500 }}>
-                    {btt.label}
-                  </button>
-                ))}
-                <button onClick={() => setAddingToCol(null)} style={{ padding: '4px 8px', fontSize: 10, border: '1px solid var(--t-border)', borderRadius: 5, background: 'transparent', color: 'var(--t-text-subtle)', cursor: 'pointer' }}>Cancelar</button>
+          {colPickerIdx !== null && (
+            <div style={{ position: 'fixed', inset: 0, background: 'var(--t-overlay)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+              onClick={() => setColPickerIdx(null)}>
+              <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 480 }}>
+                <BlockSelector
+                  hasCorreccion={false}
+                  onSelect={(type) => addBlockToColumn(colPickerIdx, type)}
+                  onClose={() => setColPickerIdx(null)}
+                  categoria={categoria}
+                />
               </div>
             </div>
           )}
