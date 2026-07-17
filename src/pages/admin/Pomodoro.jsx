@@ -596,6 +596,7 @@ export default function Pomodoro() {
   const isAdmin = role === 'admin';
 
   const [token, setToken] = useState(null);
+  const [tokenReady, setTokenReady] = useState(false);
   const [userId, setUserId] = useState(null);
   const [pomodoros, setPomodoros] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -615,6 +616,7 @@ export default function Pomodoro() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUserId(session?.user?.id ?? null);
       setToken(session?.access_token ?? null);
+      setTokenReady(true);
     });
   }, []);
 
@@ -626,6 +628,7 @@ export default function Pomodoro() {
   }
 
   const fetchPomodoros = useCallback(async () => {
+    if (!tokenReady) return;
     try {
       const res = await fetch(`${BACKEND_URL}/admin/pomodoros`, { headers: buildHeaders() });
       const data = await res.json();
@@ -638,18 +641,19 @@ export default function Pomodoro() {
       setLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, tokenReady]);
 
   useEffect(() => { fetchPomodoros(); }, [fetchPomodoros]);
 
   const loadStrictMode = useCallback(async () => {
+    if (!tokenReady) return;
     try {
       const res = await fetch(`${BACKEND_URL}/admin/strict-mode`, { headers: buildHeaders() });
       if (!res.ok) return;
       setStrictMode(await res.json());
     } catch {}
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, tokenReady]);
 
   useEffect(() => { loadStrictMode(); }, [loadStrictMode]);
 

@@ -842,7 +842,7 @@ export default function Biblioteca() {
                 </button>
               )}
               <button onClick={() => setShowNuevo(true)}
-                style={{ fontSize: 12, fontWeight: 600, background: '#3b82f6', border: 'none', color: '#fff', borderRadius: 8, padding: '6px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
+                style={{ fontSize: 12, fontWeight: 600, background: '#3b82f6', border: 'none', color: '#fff', borderRadius: 8, padding: '6px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#2563eb'}
                 onMouseLeave={e => e.currentTarget.style.background = '#3b82f6'}>
                 + Nuevo

@@ -39,6 +39,9 @@ export default function Paginas() {
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
+  // Mobile preview toggle
+  const [mobileShowPreview, setMobileShowPreview] = useState(false);
+
   // SEO
   const [seoOpen, setSeoOpen] = useState(false);
   const [seoForm, setSeoForm] = useState({ meta_titulo: '', meta_descripcion: '', indexada: true, publicada: true });
@@ -74,6 +77,7 @@ export default function Paginas() {
   function seleccionarPagina(page) {
     setSelected(page);
     setCreatingNew(false);
+    setMobileShowPreview(false);
     setHtmlActual(page.contenido || null);
     setHtmlPropuesto(null);
     setMensajes([{
@@ -388,21 +392,44 @@ export default function Paginas() {
           {/* Contenido: preview + chat */}
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
-            {/* Preview iframe */}
-            <div style={{ flex: 1, borderRight: '1px solid #27272a', position: 'relative', overflow: 'hidden' }}>
-              {previewSrcDoc ? (
-                <iframe srcDoc={previewSrcDoc} style={{ width: '100%', height: '100%', border: 'none' }} title="preview" />
-              ) : previewSrc ? (
-                <iframe src={previewSrc} style={{ width: '100%', height: '100%', border: 'none' }} title="preview" />
-              ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3f3f46', fontSize: 14 }}>
-                  Sin contenido aún
-                </div>
-              )}
+            {/* Preview iframe — oculto en mobile salvo que mobileShowPreview */}
+            <div
+              className={`${mobileShowPreview ? 'flex' : 'hidden'} sm:flex flex-col`}
+              style={{ flex: 1, borderRight: '1px solid #27272a', position: 'relative', overflow: 'hidden' }}
+            >
+              <button
+                onClick={() => setMobileShowPreview(false)}
+                className="sm:hidden flex items-center gap-1 text-xs text-zinc-400 hover:text-white px-3 py-2 border-b border-zinc-800 flex-shrink-0"
+              >
+                ← Cerrar preview
+              </button>
+              <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                {previewSrcDoc ? (
+                  <iframe srcDoc={previewSrcDoc} style={{ width: '100%', height: '100%', border: 'none' }} title="preview" />
+                ) : previewSrc ? (
+                  <iframe src={previewSrc} style={{ width: '100%', height: '100%', border: 'none' }} title="preview" />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3f3f46', fontSize: 14 }}>
+                    Sin contenido aún
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Chat */}
-            <div style={{ width: 360, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+            {/* Chat — oculto en mobile cuando se muestra el preview */}
+            <div
+              className={`${mobileShowPreview ? 'hidden sm:flex' : 'flex'} flex-col w-full sm:w-[360px] sm:flex-shrink-0`}
+            >
+              {/* Ver preview — solo mobile */}
+              {(previewSrcDoc || previewSrc) && (
+                <button
+                  onClick={() => setMobileShowPreview(true)}
+                  className="sm:hidden flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white px-4 py-2 border-b border-zinc-800 flex-shrink-0 w-full"
+                >
+                  👁 Ver preview
+                </button>
+              )}
+
               {/* Messages */}
               <div style={{ flex: 1, overflowY: 'auto', padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {mensajes.map((m, i) => (
