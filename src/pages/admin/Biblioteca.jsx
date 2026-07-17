@@ -714,7 +714,7 @@ export default function Biblioteca() {
       {showTokens && <TokensModal onClose={() => setShowTokens(false)} />}
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col gap-3 mb-4">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <h1 className="text-2xl font-bold">Biblioteca</h1>
           {selecting && (
@@ -731,7 +731,7 @@ export default function Biblioteca() {
             </button>
           )}
         </div>
-        <div className="flex items-center gap-2" style={{ alignSelf: 'flex-start' }}>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1" style={{ flexShrink: 0 }}>
           {selecting ? (
             <>
               {selected.size > 0 && (

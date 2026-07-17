@@ -910,7 +910,7 @@ export default function Loom() {
         </a>
       </div>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 gap-8">
+      <main className="flex-1 flex flex-col items-center justify-start sm:justify-center px-6 pt-8 pb-12 gap-8">
 
 
         {/* Idle */}

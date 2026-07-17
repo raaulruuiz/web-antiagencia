@@ -318,20 +318,20 @@ export default function Paginas() {
             >
               ← Volver
             </button>
-            <span style={{ color: 'white', fontWeight: 600, fontSize: 15, flex: 1 }}>{selected.nombre}</span>
-            <code style={{ color: '#71717a', fontSize: 12, background: '#18181b', padding: '3px 8px', borderRadius: 6 }}>{selected.path}</code>
-            <a href={`${SITE_URL}${selected.path}`} target="_blank" rel="noreferrer"
-              style={{ color: '#71717a', fontSize: 13, textDecoration: 'none', padding: '5px 10px', borderRadius: 8, border: '1px solid #27272a' }}>
-              Ver en web ↗
+            <span style={{ color: 'white', fontWeight: 600, fontSize: 15, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selected.nombre}</span>
+            <code className="hidden sm:block" style={{ color: '#71717a', fontSize: 12, background: '#18181b', padding: '3px 8px', borderRadius: 6, flexShrink: 0 }}>{selected.path}</code>
+            <a href={`${SITE_URL}${selected.path}`} target="_blank" rel="noreferrer" className="hidden sm:block"
+              style={{ color: '#71717a', fontSize: 13, textDecoration: 'none', padding: '5px 10px', borderRadius: 8, border: '1px solid #27272a', flexShrink: 0 }}>
+              ↗
             </a>
             <button onClick={() => setSeoOpen(o => !o)}
-              style={{ color: seoOpen ? 'white' : '#71717a', fontSize: 13, padding: '5px 10px', borderRadius: 8, border: '1px solid #27272a', background: seoOpen ? '#27272a' : 'transparent', cursor: 'pointer' }}>
+              style={{ color: seoOpen ? 'white' : '#71717a', fontSize: 13, padding: '5px 10px', borderRadius: 8, border: '1px solid #27272a', background: seoOpen ? '#27272a' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               SEO
             </button>
             {!selected.es_hardcoded && (
               <button onClick={eliminarPagina}
-                style={{ color: '#ef4444', fontSize: 13, padding: '5px 10px', borderRadius: 8, background: 'transparent', border: '1px solid #27272a', cursor: 'pointer' }}>
-                Eliminar
+                style={{ color: '#ef4444', fontSize: 13, padding: '5px 10px', borderRadius: 8, background: 'transparent', border: '1px solid #27272a', cursor: 'pointer', flexShrink: 0 }}>
+                🗑
               </button>
             )}
             {htmlPropuesto && (
