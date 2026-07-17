@@ -57,9 +57,9 @@ export default function Automatizaciones() {
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${TIPO_COLOR[item.tipo] ?? 'bg-zinc-700 text-zinc-300'}`}>
                   {TIPO_LABEL[item.tipo] ?? item.tipo}
                 </span>
-                <span className="text-white text-sm font-medium flex-1">{item.nombre}</span>
-                <span className="text-zinc-500 text-xs">{item.schedule}</span>
-                <span className="text-zinc-600 ml-2">{isOpen ? '▲' : '▼'}</span>
+                <span className="text-white text-sm font-medium flex-1 truncate">{item.nombre}</span>
+                <span className="hidden sm:block text-zinc-500 text-xs shrink-0">{item.schedule}</span>
+                <span className="text-zinc-600 ml-2 shrink-0">{isOpen ? '▲' : '▼'}</span>
               </button>
 
               {isOpen && (

@@ -858,11 +858,11 @@ export default function Pomodoro() {
 
       {view === 'list' && (
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <p className="text-sm text-zinc-400">
               {pomodoros.length === 0 ? 'No hay Pomodoros.' : `${pomodoros.length} Pomodoro${pomodoros.length !== 1 ? 's' : ''}`}
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button onClick={handleStrictModeToggle}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
                   strictMode.enabled
@@ -870,11 +870,12 @@ export default function Pomodoro() {
                     : 'border-zinc-700 bg-zinc-900 text-zinc-400 hover:text-zinc-200'
                 }`}>
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${strictMode.enabled ? 'bg-red-400' : 'bg-zinc-600'}`} />
-                {strictMode.enabled ? 'Modo estricto activado' : 'Modo estricto desactivado'}
+                <span className="hidden sm:inline">{strictMode.enabled ? 'Modo estricto activado' : 'Modo estricto desactivado'}</span>
+                <span className="sm:hidden">{strictMode.enabled ? 'Estricto ON' : 'Estricto OFF'}</span>
               </button>
               <button onClick={() => { setEditing(null); setView('create'); }}
                 className="px-4 py-2 rounded-lg text-sm font-medium bg-white text-black hover:bg-zinc-100 transition-colors">
-                + Crear Pomodoro
+                + Crear
               </button>
             </div>
           </div>

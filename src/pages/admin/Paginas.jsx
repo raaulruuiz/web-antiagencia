@@ -212,11 +212,17 @@ export default function Paginas() {
   const previewSrcDoc = htmlPropuesto || htmlActual;
   const previewSrc    = !previewSrcDoc && selected ? `${SITE_URL}${selected.path}` : undefined;
 
+  // En mobile: muestra lista o editor, no ambos a la vez
+  const mobileShowEditor = !!(selected || creatingNew);
+
   return (
     <div style={{ height: '100vh', display: 'flex', overflow: 'hidden' }}>
 
       {/* ── Lista izquierda ── */}
-      <div style={{ width: 260, flexShrink: 0, borderRight: '1px solid #27272a', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div
+        className={`${mobileShowEditor ? 'hidden' : 'flex'} sm:flex flex-col h-full`}
+        style={{ width: 260, flexShrink: 0, borderRight: '1px solid #27272a' }}
+      >
         <div style={{ padding: '16px 12px 12px', borderBottom: '1px solid #27272a', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <span style={{ color: 'white', fontWeight: 600, fontSize: 15 }}>Páginas</span>
@@ -262,7 +268,14 @@ export default function Paginas() {
 
       {/* ── Crear nueva página ── */}
       {creatingNew && (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 40, flexDirection: 'column', gap: 0 }}>
+          <button
+            onClick={() => setCreatingNew(false)}
+            className="sm:hidden text-zinc-400 hover:text-white text-sm flex items-center gap-1 px-5 pb-4"
+          >
+            ← Volver
+          </button>
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
           <div style={{ background: '#18181b', border: '1px solid #27272a', borderRadius: 16, padding: 32, width: 400, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <h3 style={{ color: 'white', margin: 0, fontSize: 18, fontWeight: 600 }}>Nueva página</h3>
             <div>
@@ -288,6 +301,7 @@ export default function Paginas() {
               </button>
             </div>
           </div>
+          </div>
         </div>
       )}
 
@@ -296,7 +310,14 @@ export default function Paginas() {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           {/* Header */}
-          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 20px', borderBottom: '1px solid #27272a' }}>
+          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: '1px solid #27272a', overflowX: 'auto' }}>
+            {/* Botón volver — solo mobile */}
+            <button
+              onClick={() => setSelected(null)}
+              className="sm:hidden text-zinc-400 hover:text-white text-sm flex items-center gap-1 mr-1"
+            >
+              ← Volver
+            </button>
             <span style={{ color: 'white', fontWeight: 600, fontSize: 15, flex: 1 }}>{selected.nombre}</span>
             <code style={{ color: '#71717a', fontSize: 12, background: '#18181b', padding: '3px 8px', borderRadius: 6 }}>{selected.path}</code>
             <a href={`${SITE_URL}${selected.path}`} target="_blank" rel="noreferrer"

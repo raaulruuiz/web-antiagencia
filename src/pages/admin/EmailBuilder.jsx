@@ -148,26 +148,30 @@ export default function EmailBuilder() {
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center gap-3 px-6 py-4 border-b border-zinc-800">
-        <h1 className="text-white text-xl font-semibold flex-1">Email Builder</h1>
-        {tab === 'editor' && editorReady && (
-          <button onClick={exportarHtml}
-            className="px-3 py-1.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
-            ⬇ Exportar HTML
+      <div className="flex-shrink-0 border-b border-zinc-800">
+        <div className="flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-4">
+          <h1 className="text-white text-base sm:text-xl font-semibold flex-1">Email Builder</h1>
+          {tab === 'editor' && editorReady && (
+            <button onClick={exportarHtml}
+              className="px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+              ⬇ <span className="hidden sm:inline">Exportar </span>HTML
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-1 px-4 sm:px-6 pb-3 overflow-x-auto">
+          <button onClick={() => switchTab('editor')}
+            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm whitespace-nowrap transition-colors ${tab === 'editor' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>
+            ✍️ Editor visual
           </button>
-        )}
-        <button onClick={() => switchTab('editor')}
-          className={`px-4 py-1.5 rounded-lg text-sm transition-colors ${tab === 'editor' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>
-          ✍️ Editor visual
-        </button>
-        <button onClick={() => switchTab('html')} disabled={!editorReady}
-          className={`px-4 py-1.5 rounded-lg text-sm transition-colors ${tab === 'html' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'} disabled:opacity-40`}>
-          {'</>'} HTML
-        </button>
-        <button onClick={() => switchTab('ia')}
-          className={`px-4 py-1.5 rounded-lg text-sm transition-colors ${tab === 'ia' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>
-          🤖 Generar con IA
-        </button>
+          <button onClick={() => switchTab('html')} disabled={!editorReady}
+            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm whitespace-nowrap transition-colors ${tab === 'html' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'} disabled:opacity-40`}>
+            {'</>'} HTML
+          </button>
+          <button onClick={() => switchTab('ia')}
+            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm whitespace-nowrap transition-colors ${tab === 'ia' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>
+            🤖 IA
+          </button>
+        </div>
       </div>
 
       {/* Editor Unlayer — siempre montado */}
