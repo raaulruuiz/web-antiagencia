@@ -31,7 +31,7 @@ export default function HomeV2() {
                 LOS 3 GRANDES PODERES
               </h1>
 
-              <p className="mb-4">ME LLAMO RAÚL RUIZ Y EN 2018 HACÍA ECOMMERCE. ME ARRUINÉ.</p>
+              <p className="mb-4">ME LLAMO RAÚL RUIZ Y EN 2018 HACÍA ECOMMERCE. EN 2022 TUVE QUE CERRAR TODO.</p>
               <p className="mb-4">EN 2023 MANDÉ MI PRIMER EMAIL EN FRÍO A UNA EMPRESA. ME CONTRATÓ.</p>
               <p className="mb-4">DESDE ENTONCES HE LEVANTADO (Y SIGO HACIÉNDOLO) MI NEGOCIO MANDANDO EMAILS.</p>
               <p className="mb-4">Y LO HAGO PARA CIENTOS DE CLIENTES TAMBIÉN.</p>
