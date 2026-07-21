@@ -23,54 +23,26 @@ export default function HomeV2() {
           <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
             <div className="text-gray-800 text-base leading-relaxed">
 
-              <h1 className="text-[25px] md:text-4xl text-gray-900 mb-2 font-bold">
-                ¿Hacemos un trato?
+              <h2 className="text-xl md:text-2xl text-gray-900 mb-6" style={{ fontWeight: 400 }}>
+                ¿CÓMO SE CONSTRUYEN LAS MARCAS QUE TODO EL MUNDO CONOCE Y QUE GENERAN MILLONES DE EUROS?
+              </h2>
+
+              <h1 className="text-[25px] md:text-4xl text-gray-900 mb-6 font-normal">
+                LOS 3 GRANDES PODERES
               </h1>
-              <h2 className="text-xl md:text-2xl text-gray-900 mb-1" style={{ fontWeight: 400 }}>Tu quieres vender más</h2>
-              <h2 className="text-xl md:text-2xl text-gray-900 mb-1" style={{ fontWeight: 400 }}>y vender en automático</h2>
-              <h2 className="text-xl md:text-2xl text-gray-900 mb-1" style={{ fontWeight: 400 }}>y vender sin gastar más en publicidad</h2>
-              <h2 className="text-xl md:text-2xl text-gray-900 mb-4" style={{ fontWeight: 400 }}>y tener más beneficio</h2>
+
+              <p className="mb-4">ME LLAMO RAÚL RUIZ Y EN 2018 HACÍA ECOMMERCE. ME ARRUINÉ.</p>
+              <p className="mb-4">EN 2023 MANDÉ MI PRIMER EMAIL EN FRÍO A UNA EMPRESA. ME CONTRATÓ.</p>
+              <p className="mb-4">DESDE ENTONCES HE LEVANTADO (Y SIGO HACIÉNDOLO) MI NEGOCIO MANDANDO EMAILS.</p>
+              <p className="mb-4">Y LO HAGO PARA CIENTOS DE CLIENTES TAMBIÉN.</p>
 
               <br />
 
-              <p className="mb-4"><strong>Parece algo loco, ¿no?</strong></p>
-
-              <p className="mb-4">Pues todo esto se puede conseguir con email, todo a la vez.</p>
-
-              <p className="mb-1">Y yo me dedico a eso.</p>
-              <p className="mb-4">
-                Y como no te pido que me creas,{' '}
-                <strong style={{ color: '#0000ff' }}>te lo voy a demostrar</strong>.
-              </p>
-
-              <p className="mb-4">
-                Así que este es el trato, tú me dejas <span className="underline">tu email</span> y yo te mando:
-              </p>
+              <p className="mb-4">EN ESTA LISTA APRENDERÁS A USAR LOS 3 GRANDES PODERES QUE TE PERMITIRÁN HACERLO A TI TAMBIÉN</p>
 
               <br />
 
-              <ul className="mt-2 mb-6 space-y-4 list-none pl-0">
-                <li className="flex items-start gap-3">
-                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
-                  <span><strong>Mi biblioteca personal de emails</strong> (los emails que analizo todas las semanas para estudiar).</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
-                  <span><strong>Analizo tus emails</strong> (cada semana tendrás la oportunidad de que tus emails salgan en esta biblioteca con su correspondiente análisis).</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
-                  <span>Un ebook de 16 páginas para que <strong>aumentes las ventas de tu tienda en 5 minutos</strong> (literalmente, y con ejemplos).</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
-                  <span><strong>Un bonus secreto para aumentar todavía más las ventas.</strong></span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "#0067FD", minWidth: "20px" }}>✓</span>
-                  <span><strong>Suscribirse es gratis</strong>, darse de baja, también.</span>
-                </li>
-              </ul>
+              <p className="mb-4"><strong>¿FAMA? ¿DINERO? ¿RECONOCIMIENTO? ¿TIEMPO? VERÁS CÓMO PUEDES CONSEGUIR TODO ESO</strong></p>
 
               <br />
 
@@ -86,6 +58,10 @@ export default function HomeV2() {
 
               <br />
               <p className="mb-4 text-xs text-gray-400">Para cumplir con el RGPD (Reglamento General de Protección de Datos) y entender que tus datos están seguros, debes leer y aceptar la política de privacidad. Tus datos serán guardados en MailerLite, proveedor de email marketing. MailerLite también cumple con el RGPD, así que todo está protegido y amparado por la ley.</p>
+
+              <br /><br />
+
+              <p className="mb-4"><strong>P.D.</strong> APRENDE A CONTAR TU HISTORIA Y A VENDERLA POR EMAIL Y CONSEGUIRÁS TODOS LOS OBJETIVOS QUE TE PROMETIÓ EL EMPRENDIMIENTO. NO TIENES QUE COMPLICARLO MÁS.</p>
 
               <br /><br />
 
