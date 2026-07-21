@@ -27,7 +27,7 @@ export default function HomeV2() {
                 ¿CÓMO SE CONSTRUYEN LAS MARCAS QUE TODO EL MUNDO CONOCE Y QUE GENERAN MILLONES DE EUROS?
               </h2>
 
-              <h1 className="text-[25px] md:text-4xl text-gray-900 mb-6 font-normal">
+              <h1 className="text-[25px] md:text-4xl text-gray-900 mb-6 font-bold">
                 LOS 3 GRANDES PODERES
               </h1>
 
