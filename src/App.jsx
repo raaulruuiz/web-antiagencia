@@ -25,6 +25,7 @@ import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import TikTokConnect from './pages/TikTokConnect';
 import JorgeCoronado from './pages/JorgeCoronado';
 import GraciasJorgeCoronado from './pages/GraciasJorgeCoronado';
+import CapsuleDigital from './pages/CapsuleDigital';
 import PixelLayout from './Layout';
 import LoomLogin from './pages/LoomLogin';
 import Loom from './pages/Loom';
@@ -166,6 +167,7 @@ const AuthenticatedApp = () => {
       <Route path="/q3" element={<PlanningQ3 />} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
       <Route path="/jorge-coronado" element={<PixelLayout><JorgeCoronado /></PixelLayout>} />
+      <Route path="/capsula-digital" element={<PixelLayout><CapsuleDigital /></PixelLayout>} />
       <Route path="/gracias-podcast" element={<PixelLayout><GraciasJorgeCoronado /></PixelLayout>} />
       <Route path="*" element={<DynamicPage />} />
     </Routes>
