@@ -410,6 +410,36 @@ const btnStyle = (active) => ({
   color: active ? 'var(--t-text)' : '#a1a1aa',
 });
 
+function InstallExtensionModal({ onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="relative w-full max-w-md mx-4 border border-zinc-800 rounded-xl p-6" style={{ backgroundColor: '#111' }}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white text-lg leading-none">✕</button>
+        <h2 className="text-base font-semibold mb-1">Instalar extensión de Biblioteca</h2>
+        <p className="text-sm text-zinc-400 mb-5">La extensión captura páginas web y las guarda en tu biblioteca.</p>
+        <ol className="space-y-4 text-sm text-zinc-300 mb-6">
+          {[
+            <><a href="/biblioteca-extension.zip" download className="underline text-white hover:text-zinc-300">Descarga la extensión</a> y descomprime el ZIP.</>,
+            <>Abre Chrome y ve a <code className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 text-xs">chrome://extensions</code></>,
+            <>Activa el <strong>Modo desarrollador</strong> (arriba a la derecha).</>,
+            <>Haz clic en <strong>Cargar descomprimida</strong> y selecciona la carpeta de la extensión.</>,
+            <>Listo. Haz clic en el icono de la extensión para capturar cualquier página.</>,
+          ].map((content, i) => (
+            <li key={i} className="flex gap-3">
+              <span className="flex-shrink-0 w-6 h-6 rounded-full border border-zinc-600 flex items-center justify-center text-xs text-zinc-400">{i + 1}</span>
+              <span>{content}</span>
+            </li>
+          ))}
+        </ol>
+        <button onClick={onClose} className="w-full px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 transition-colors">
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Biblioteca() {
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
@@ -424,6 +454,7 @@ export default function Biblioteca() {
   const [confirm, setConfirm]     = useState(null);
   const [confirmVis, setConfirmVis] = useState(null); // { publico: boolean }
   const [showTokens, setShowTokens] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
 
   // Search
   const [showSearch, setShowSearch] = useState(false);
@@ -712,9 +743,10 @@ export default function Biblioteca() {
       {confirmVis && <ConfirmVisibilidadModal count={selected.size} publico={confirmVis.publico} onConfirm={() => bulkSetVisibilidad(confirmVis.publico)} onCancel={() => setConfirmVis(null)} />}
       {showPublishConfirm && <ConfirmPublishModal pendingCount={pendingIds.size} onPublish={publishAll} onDiscard={discardAll} onCancel={() => setShowPublishConfirm(false)} />}
       {showTokens && <TokensModal onClose={() => setShowTokens(false)} />}
+      {showInstall && <InstallExtensionModal onClose={() => setShowInstall(false)} />}
 
       {/* Header */}
-      <div className="flex flex-col gap-3 mb-4">
+      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <h1 className="text-2xl font-bold">Biblioteca</h1>
           {selecting && (
@@ -773,6 +805,12 @@ export default function Biblioteca() {
                 </svg>
                 Enlace público
               </a>
+              <button onClick={() => setShowInstall(true)}
+                className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Extensión
+              </button>
               <button onClick={() => setShowTokens(true)}
                 className="text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-colors"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
