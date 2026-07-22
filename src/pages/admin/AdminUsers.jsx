@@ -10,11 +10,15 @@ async function getToken() {
 
 const PAGE_OPTIONS = [
   { value: 'automatizaciones', label: 'Automatizaciones' },
+  { value: 'biblioteca',       label: 'Biblioteca' },
   { value: 'briefing',         label: 'Briefing' },
   { value: 'copywriting',      label: 'Copywriting' },
   { value: 'dashboard',        label: 'Dashboard' },
+  { value: 'email-builder',    label: 'Email Builder' },
   { value: 'gym',              label: 'Entrenos' },
   { value: 'loom',             label: 'Loom' },
+  { value: 'paginas',          label: 'Páginas' },
+  { value: 'pomodoro',         label: 'Pomodoro' },
 ];
 
 const EXT_OPTIONS = [
