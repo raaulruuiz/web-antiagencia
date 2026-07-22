@@ -983,7 +983,7 @@ function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
 }
 
 // ── Block: card ───────────────────────────────────────────────────────────────
-function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onMoveLeft, onMoveRight, onToggleVisible, itemAsunto, itemAdelanto, onUpdateBlock, onExtract, categoria, onUploadImage, onCropFromEmail, libraryImages }) {
+function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onMoveLeft, onMoveRight, onToggleVisible, itemAsunto, itemAdelanto, onUpdateBlock, onExtract, categoria, onUploadImage, onCropFromEmail, libraryImages, isMobile }) {
   const bt = ALL_BLOCK_META.find(b => b.type === block.type) || { label: block.type };
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
@@ -1293,7 +1293,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               const first = imgFirst ? imgEl : txtEl;
               const second = imgFirst ? txtEl : imgEl;
               return (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasImage && hasText ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start' }}>
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasImage && hasText && !isMobile ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start' }}>
                   {first}
                   {second}
                 </div>
@@ -1331,7 +1331,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               const first = fieldFirst ? fieldEl : txtEl;
               const second = fieldFirst ? txtEl : fieldEl;
               return (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasField && hasText ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start' }}>
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasField && hasText && !isMobile ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start' }}>
                   {first}
                   {second}
                 </div>
@@ -1366,7 +1366,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                   </div>
                 )}
                 {eb.type === 'columns' && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
                     {['left','right'].map(side => (
                       <div key={side} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         {(eb[side] || []).map((sub, j) => renderEBBlock(sub, j, true))}
@@ -3034,6 +3034,7 @@ export default function BibliotecaItem() {
           const pending = new Set(JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]'));
           pending.delete(id);
           localStorage.setItem('biblioteca_pending_publish', JSON.stringify([...pending]));
+          setHasPendingItem(false);
         } catch (_) {}
       } else {
         // Mark this item as having unpublished changes
@@ -3041,6 +3042,7 @@ export default function BibliotecaItem() {
           const pending = new Set(JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]'));
           pending.add(id);
           localStorage.setItem('biblioteca_pending_publish', JSON.stringify([...pending]));
+          setHasPendingItem(true);
         } catch (_) {}
       }
       const res = await fetch(`${API_BASE}/biblioteca/${id}`, {
@@ -3756,6 +3758,7 @@ export default function BibliotecaItem() {
                   onUploadImage={uploadImageForBlock}
                   onCropFromEmail={cropFromEmail}
                   libraryImages={libraryImages}
+                  isMobile={isMobile}
                 />
               </div>
             ))}
