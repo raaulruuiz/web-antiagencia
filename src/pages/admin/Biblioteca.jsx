@@ -1172,7 +1172,7 @@ export default function Biblioteca() {
       )}
 
       {filteredItems.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
           {filteredItems.map(item => {
             const isSelected = selected.has(item.id);
             return (
