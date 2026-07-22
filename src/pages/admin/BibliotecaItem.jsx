@@ -2777,6 +2777,15 @@ export default function BibliotecaItem() {
   const [cropConfirm, setCropConfirm]   = useState(null);
   const [replacing, setReplacing]       = useState(false);
   const [showModal, setShowModal]       = useState(false);
+  const [isMobile, setIsMobile]         = useState(() => window.innerWidth < 640);
+  const [autopublish]                   = useState(() => localStorage.getItem('biblioteca_autopublish') === 'true');
+  const [hasPendingItem, setHasPendingItem] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -2805,6 +2814,8 @@ export default function BibliotecaItem() {
         setBlocksLibrary(lib);
         blocksLibraryRef.current = lib;
         if (data.categoria) setMode('display');
+        const pending = JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]');
+        setHasPendingItem(pending.includes(id));
       } catch (e) { setError(e.message); }
       finally { setLoading(false); }
     })();
@@ -3279,6 +3290,15 @@ export default function BibliotecaItem() {
     return imgs;
   }, [blocksData, blocksLibrary, item?.url]);
 
+  const publishItem = useCallback(async () => {
+    const token = await getToken();
+    if (!token) return;
+    await fetch(`${API_BASE}/biblioteca/${id}/publish`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+    const raw = JSON.parse(localStorage.getItem('biblioteca_pending_publish') || '[]');
+    localStorage.setItem('biblioteca_pending_publish', JSON.stringify(raw.filter(x => x !== id)));
+    setHasPendingItem(false);
+  }, [id]);
+
   if (loading) return (
     <div data-theme={theme} className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--t-bg)' }}>
       <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
@@ -3347,6 +3367,12 @@ export default function BibliotecaItem() {
           {item?.publico === false ? 'Oculto' : 'Visible'}
         </button>
         {(saving || blocksSaving) && <span className="text-xs text-zinc-600">Guardando…</span>}
+        {!autopublish && hasPendingItem && (
+          <button onClick={publishItem}
+            style={{ fontSize: 12, fontWeight: 600, background: '#3b82f6', border: 'none', color: '#fff', borderRadius: 8, padding: '6px 14px', cursor: 'pointer' }}>
+            Publicar
+          </button>
+        )}
         <button onClick={toggle} title={theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
           style={{ marginLeft: 'auto', fontSize: 16, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', lineHeight: 1 }}>
           {theme === 'dark' ? '☀️' : '🌙'}
@@ -3354,7 +3380,7 @@ export default function BibliotecaItem() {
       </div>
 
       {/* Two columns */}
-      <div className="grid grid-cols-2 gap-8 items-start">
+      <div className={isMobile ? 'flex flex-col gap-6' : 'grid grid-cols-2 gap-8 items-start'}>
 
         {/* Left: image */}
         <div style={{ position: 'relative' }}

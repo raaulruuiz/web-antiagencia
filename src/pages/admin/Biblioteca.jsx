@@ -466,6 +466,7 @@ export default function Biblioteca() {
   const [statsData, setStatsData]           = useState(null);
   const [statsLoading, setStatsLoading]     = useState(false);
   const [showNuevo, setShowNuevo]           = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [nuevoUploading, setNuevoUploading] = useState(false);
   const [nuevoDragOver, setNuevoDragOver]   = useState(false);
   const nuevoFileRef = useRef(null);
@@ -763,7 +764,94 @@ export default function Biblioteca() {
             </button>
           )}
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-1" style={{ flexShrink: 0 }}>
+        {/* Mobile: dropdown menu */}
+        {!selecting && (
+          <div className="flex md:hidden items-center gap-2 relative">
+            <button onClick={() => setShowNuevo(true)}
+              style={{ fontSize: 12, fontWeight: 600, background: '#3b82f6', border: 'none', color: '#fff', borderRadius: 8, padding: '6px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' }}>
+              + Nuevo
+            </button>
+            <button onClick={() => setShowMobileMenu(s => !s)}
+              style={{ fontSize: 18, fontWeight: 700, background: 'none', border: '1px solid var(--t-border)', color: 'var(--t-text-muted)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', lineHeight: 1 }}>
+              ···
+            </button>
+            {showMobileMenu && (
+              <div style={{ position: 'absolute', right: 0, top: '110%', zIndex: 50, background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 12, padding: '6px', display: 'flex', flexDirection: 'column', gap: 2, minWidth: 180 }}
+                onClick={() => setShowMobileMenu(false)}>
+                <a href="/anti-biblioteca" target="_blank" rel="noopener noreferrer"
+                  style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, fontSize: 13, color: 'var(--t-text)', background: 'transparent' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--t-surface2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  Enlace público
+                </a>
+                <button onClick={() => setShowInstall(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, fontSize: 13, color: 'var(--t-text)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--t-surface2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Extensión
+                </button>
+                <button onClick={() => setShowTokens(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, fontSize: 13, color: 'var(--t-text)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--t-surface2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Tokens
+                </button>
+                <button onClick={async () => {
+                  setShowStats(true);
+                  if (!statsData) {
+                    setStatsLoading(true);
+                    try {
+                      const token = await getToken();
+                      const res = await fetch(`${API_BASE}/api/biblioteca-accesos`, { headers: { 'Authorization': `Bearer ${token}` } });
+                      const data = await res.json();
+                      setStatsData(data);
+                    } catch { setStatsData([]); }
+                    setStatsLoading(false);
+                  }
+                }} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, fontSize: 13, color: 'var(--t-text)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--t-surface2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  Estadísticas
+                </button>
+                <button onClick={() => { setShowFilters(s => !s); setShowSearch(false); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, fontSize: 13, color: 'var(--t-text)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--t-surface2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                  Filtrar {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+                </button>
+                <button onClick={() => setSelecting(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, fontSize: 13, color: 'var(--t-text)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--t-surface2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  Seleccionar
+                </button>
+                <button onClick={toggleAutopublish}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, fontSize: 13, color: autopublish ? '#22c55e' : 'var(--t-text)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--t-surface2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <span style={{ width: 28, height: 16, borderRadius: 999, background: autopublish ? '#22c55e' : 'var(--t-border-mid)', display: 'flex', alignItems: 'center', padding: '0 2px', flexShrink: 0 }}>
+                    <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'transform 0.2s', transform: autopublish ? 'translateX(12px)' : 'translateX(0)' }} />
+                  </span>
+                  Autopublicar
+                </button>
+                {!autopublish && hasPending && (
+                  <button onClick={() => { setShowMobileMenu(false); hasPending && !publishing && setShowPublishConfirm(true); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, fontSize: 13, color: '#fff', background: '#3b82f6', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', fontWeight: 600, marginTop: 4 }}>
+                    Publicar ({pendingIds.size})
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Desktop: full button row */}
+        <div className="hidden md:flex items-center gap-2 overflow-x-auto pb-1" style={{ flexShrink: 0 }}>
           {selecting ? (
             <>
               {selected.size > 0 && (
