@@ -27,6 +27,7 @@ import JorgeCoronado from './pages/JorgeCoronado';
 import GraciasJorgeCoronado from './pages/GraciasJorgeCoronado';
 import CapsuleDigital from './pages/CapsuleDigital';
 import HablemosDeEmprender from './pages/HablemosDeEmprender';
+import ProhibidoEstacionarse from './pages/ProhibidoEstacionarse';
 import PixelLayout from './Layout';
 import LoomLogin from './pages/LoomLogin';
 import Loom from './pages/Loom';
@@ -170,6 +171,7 @@ const AuthenticatedApp = () => {
       <Route path="/jorge-coronado" element={<PixelLayout><JorgeCoronado /></PixelLayout>} />
       <Route path="/capsula-digital" element={<PixelLayout><CapsuleDigital /></PixelLayout>} />
       <Route path="/hablemos-de-emprender" element={<PixelLayout><HablemosDeEmprender /></PixelLayout>} />
+      <Route path="/prohibido-estacionarse" element={<PixelLayout><ProhibidoEstacionarse /></PixelLayout>} />
       <Route path="/gracias-podcast" element={<PixelLayout><GraciasJorgeCoronado /></PixelLayout>} />
       <Route path="*" element={<DynamicPage />} />
     </Routes>
