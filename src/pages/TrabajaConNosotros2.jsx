@@ -296,7 +296,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p><strong>Por un lado,</strong> no me gusta la gente llorona, los flojos, los socialistas, la gente que se queja cuando algo le va mal en vez de buscar solución o su "solución" es sacarse un descuento de la manga o cualquier gilipollez por el estilo.</p>
               <p>&nbsp;</p>
-              <p>Esto son negocios. Tienes que echarle cojones, tienes que buscarte la vida y no llorar para que te den alguna paguita.</p>
+              <p>Esto son negocios. Tienes que echarle cojones, tienes que buscarte la vida, como ya has hecho otras veces, y no llorar para que te den alguna paguita.</p>
               <p><br /><br /></p>
               <p>
                 <img src="/foto2-tcn2.png" alt="" style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto' }} />
