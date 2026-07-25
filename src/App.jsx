@@ -19,6 +19,7 @@ import AudioSecreto from './pages/AudioSecreto';
 import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotrosOld from './pages/TrabajaConNosotrosOld'
 import TrabajaConNosotrosV3 from './pages/TrabajaConNosotrosV3'
+import TrabajaConNosotros2 from './pages/TrabajaConNosotros2'
 import PlanningQ3 from './pages/PlanningQ3'
 import PlanningQ3Venta from './pages/PlanningQ3Venta'
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
@@ -163,6 +164,7 @@ const AuthenticatedApp = () => {
       <Route path="/UltimoPaso" element={<SmartPage path="/UltimoPaso"><LayoutWrapper currentPageName="UltimoPaso"><UltimoPaso /></LayoutWrapper></SmartPage>} />
       <Route path="/YaPorFin" element={<SmartPage path="/YaPorFin"><LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper></SmartPage>} />
       <Route path="/trabajaconnosotros" element={<TrabajaConNosotrosV3 />} />
+      <Route path="/trabajaconnosotros2" element={<TrabajaConNosotros2 />} />
       <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
       {/* <Route path="/planningq3" element={<PlanningQ3Venta />} /> */}
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
