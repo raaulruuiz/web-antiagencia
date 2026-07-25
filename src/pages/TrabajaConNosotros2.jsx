@@ -294,7 +294,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Para contratar a un profesional, yo no se lo que tú buscas. Pero si se lo pido yo.</p>
               <p>&nbsp;</p>
-              <p><strong>Por un lado,</strong> no me gusta la gente llorona, los flojos, los socialistas, la gente que se queja cuando algo le va mal en vez de buscar solución o se pone a hacer descuentos sin ton ni son o cualquier gilipollez por el estilo.</p>
+              <p><strong>Por un lado,</strong> no me gusta la gente llorona, los flojos, los socialistas, la gente que se queja cuando algo le va mal en vez de buscar solución o su "solución" es sacarse un descuento de la manga o cualquier gilipollez por el estilo.</p>
               <p>&nbsp;</p>
               <p>Esto son negocios. Tienes que echarle cojones, tienes que buscarte la vida y no llorar para que te den alguna paguita.</p>
               <p><br /><br /></p>
