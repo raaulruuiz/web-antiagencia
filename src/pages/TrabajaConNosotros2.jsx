@@ -375,7 +375,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p><strong>Por eso, si vas a hacer algún cambio en la estrategia que te plantee, me lo tendrás que comunicar.</strong></p>
               <p>&nbsp;</p>
-              <p>Y esto no te lo digo por ser elitista o porque me vaya a ofender. No, tu haces lo que te de la gana. Te lo digo porque los emails, los mensajes que mandas, son calve para construir una marca y para ganar ingentes cantidades de dinero.</p>
+              <p>Y esto no te lo digo por ser elitista o porque me vaya a ofender. No, tu haces lo que te de la gana. Te lo digo porque <strong>los emails, los mensajes que mandas, son calve para construir una marca</strong> y para ganar ingentes cantidades de dinero.</p>
               <p>&nbsp;</p>
               <p>Y ya sea conmigo o con otro, asegurate que es alguien muy bueno. No quieres dejar tanto dinero por ganar en manos de un patán.</p>
               <p>&nbsp;</p>
