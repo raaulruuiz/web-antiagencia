@@ -389,7 +389,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>50% para reservar y el otro 50% antes de reunirnos.</p>
               <p><br /><br /></p>
-              <p>Si no cobro, no trabajo. </p>
+              <p><strong>Si no cobro, no trabajo.</strong></p>
               <p>&nbsp;</p>
               <p>Y si, yo a la gente que contrato, les pago por adelantado. Y no les digo como tienen que hacer su trabajo.</p>
               <p>&nbsp;</p>
