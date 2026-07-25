@@ -403,7 +403,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Hay quien entiende esto y quien no. Pero no es negociable y yo solo trabajo con quien lo entiende.</p>
               <p><br /><br /></p>
-              <p>Si te interesa, puedes pedir información rellenando el formulario de abajo. Si me interesa tu proyecto te llamaré para pedirte más información.</p>
+              <p>Si te interesa, puedes pedir información rellenando el formulario de abajo. Si me interesa tu proyecto te llamaré para pedirte más información. Después, te pasaré un presupuesto.</p>
               <p>Si no me interesa, te contactaré para agradecerte la confianza y decirte que no estoy interesado.</p>
               <p>&nbsp;</p>
               <p>Disfruta la vida.</p>
