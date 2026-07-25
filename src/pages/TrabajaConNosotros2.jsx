@@ -397,7 +397,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Bien.</p>
               <p>&nbsp;</p>
-              <p>Después de esto, puede que pienses que soy un capullo elitista, o un elitista capullo, pero como te dije al inicio, no pretendo hacer amigos ni regalarte los oídos. Me tengo por alguien alegre y educado, pero no me gusta perder mi tiempo ni hacértelo perder a ti, así que tengo que ser claro y directo.</p>
+              <p>Después de esto, <strong>puede que pienses que soy un capullo elitista, o un elitista capullo</strong>, pero como te dije al inicio, no pretendo hacer amigos ni regalarte los oídos. Me tengo por alguien alegre y educado, pero no me gusta perder mi tiempo ni hacértelo perder a ti, así que tengo que ser claro y directo.</p>
               <p>&nbsp;</p>
               <p>Ya sabes que hay clientes que se quejan si no les das descuentos. Yo no quiero de esos. Y si trabajas conmigo, tú tampoco los tendrás.</p>
               <p>&nbsp;</p>
