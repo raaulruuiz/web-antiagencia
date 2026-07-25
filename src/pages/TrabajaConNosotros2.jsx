@@ -173,7 +173,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Esta carta está formada por varios "emails". El motivo lo entenderás mientras lees.</p>
               <p>&nbsp;</p>
-              <p>El caso es que en esta carta no encontrarás ningún vídeo de 4 minutos hablándote de lo bueno que soy, ni una oferta con garantía de resultados, ni un botón para agendar una llamada vestida de "asesoría gratuita" en la que intentaré lavarte el cerebro para que me compres. No.</p>
+              <p>El caso es que en esta carta no encontrarás ningún vídeo de 4 minutos hablándote de lo bueno que soy, ni una oferta con garantía de resultados, ni un botón para agendar una llamada vestida de "asesoría gratuita" en la que intentaré lavarte el cerebro para que me compres.<br />No.</p>
               <p>&nbsp;</p>
               <p><strong>La realidad es que no nos conocemos.</strong> Te voy a decir las cosas como las pienso, con respeto pero sin tratar de caerte bien. Te hablaré como a cualquier amigo o, como mínimo, cualquier persona que acabo de conocer y no sé quién es.</p>
               <p>&nbsp;</p>
