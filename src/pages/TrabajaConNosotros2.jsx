@@ -391,7 +391,7 @@ export default function TrabajaConNosotros2() {
               <p><br /><br /></p>
               <p><strong>Si no cobro, no trabajo.</strong></p>
               <p>&nbsp;</p>
-              <p>Y si, yo a la gente que contrato, les pago por adelantado. Y no les digo como tienen que hacer su trabajo.</p>
+              <p>Y si, yo a la gente que contrato, les pago por adelantado. Y no les digo como tienen que hacer su trabajo. Ni les regateo el precio.</p>
               <p>&nbsp;</p>
               <p>Contratarme cada día será menos barato y más difícil, hasta que llegue el punto en el que sea imposible hacerlo.</p>
               <p>&nbsp;</p>
