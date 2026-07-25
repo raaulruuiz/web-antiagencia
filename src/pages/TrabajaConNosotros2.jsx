@@ -332,7 +332,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Sin muchos detalles, me dijo que no podía pararme cuando me saliera de los cojones y yo le dije que entonces, me pagara, lo cual lo hizo enfadar todavía más.</p>
               <p>&nbsp;</p>
-              <p>Después, en el descanso para comer. Mi madre, que es bastante más sutil que mi padre, me explicó que precisamente porque nosotros somos los jefes, somos los que tenemos que trabajar más duro.</p>
+              <p>Después, en el descanso para comer. Mi madre, que es bastante más sutil que mi padre, me explicó que precisamente porque nosotros somos los jefes, somos los que tenemos que trabajar más duro. Tenemos que liderar.</p>
               <p>&nbsp;</p>
               <p>Que a los trabajadores tenemos que mostrarles que tienen que trabajar, no que pueden parar cuando quieran, que eso nos perjudica y nos hace perder dinero. El pastor tiene que pastorear, me dijo.</p>
               <p><br /><br /></p>
