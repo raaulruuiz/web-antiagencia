@@ -217,17 +217,20 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Buscan vídeos (o le aparecen ads) que no sirven de nada y son jodidamente aburridos con:</p>
               <p>&nbsp;</p>
-              <ul style={{ paddingLeft: '1.5rem', listStyleType: 'disc' }}>
-                <li>La segmentación definitiva que tienes que hacer para vender de verdad. (Quizá esto sea una de las tonterías más grandes… <strong>Las personas son personas</strong> y cada una tiene su propia vida, pero muchos "expertos" tratan de ocultar su falta de humanidad detrás del nuevo objeto brillante de turno.)</li>
-              </ul>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#0067FD] flex items-center justify-center text-white text-xs font-bold">✓</span>
+                <span>La segmentación definitiva que tienes que hacer para vender de verdad. (Quizá esto sea una de las tonterías más grandes… <strong>Las personas son personas</strong> y cada una tiene su propia vida, pero muchos "expertos" tratan de ocultar su falta de humanidad detrás del nuevo objeto brillante de turno.)</span>
+              </div>
               <p>&nbsp;</p>
-              <ul style={{ paddingLeft: '1.5rem', listStyleType: 'disc' }}>
-                <li>Las 9 automatizaciones con la IA <strong>de tu tía</strong> que debes tener sí o sí.</li>
-              </ul>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#0067FD] flex items-center justify-center text-white text-xs font-bold">✓</span>
+                <span>Las 9 automatizaciones con la IA <strong>de tu tía</strong> que debes tener sí o sí.</span>
+              </div>
               <p>&nbsp;</p>
-              <ul style={{ paddingLeft: '1.5rem', listStyleType: 'disc' }}>
-                <li><strong>Esto NO es para ti si eres de los que le pide consejos amorosos a ChatGPT</strong> y no estás dispuesto a contar tu verdadera historia.</li>
-              </ul>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#0067FD] flex items-center justify-center text-white text-xs font-bold">✓</span>
+                <span><strong>Esto NO es para ti si eres de los que le pide consejos amorosos a ChatGPT</strong> y no estás dispuesto a contar tu verdadera historia.</span>
+              </div>
               <p><br /><br /></p>
               <p>Bueno, creo que esto es suficiente para este email. </p>
               <p>&nbsp;</p>
@@ -258,21 +261,25 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>A ver, antes de que te de una taquicardia, esto es impepinable:</p>
               <p>&nbsp;</p>
-              <ul style={{ paddingLeft: '1.5rem', listStyleType: 'disc' }}>
-                <li>Si tu producto es bueno pero no sabes comunicarlo, no vendes. Mala cosa.</li>
-              </ul>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#0067FD] flex items-center justify-center text-white text-xs font-bold">✓</span>
+                <span>Si tu producto es bueno pero no sabes comunicarlo, no vendes. Mala cosa.</span>
+              </div>
               <p>&nbsp;</p>
-              <ul style={{ paddingLeft: '1.5rem', listStyleType: 'disc' }}>
-                <li>Si tu producto es bueno y sabes comunicarlo, vendes, creces, te recuerdan, te haces grande. Buena cosa. Esto es lo que quieres.</li>
-              </ul>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#0067FD] flex items-center justify-center text-white text-xs font-bold">✓</span>
+                <span>Si tu producto es bueno y sabes comunicarlo, vendes, creces, te recuerdan, te haces grande. Buena cosa. Esto es lo que quieres.</span>
+              </div>
               <p>&nbsp;</p>
-              <ul style={{ paddingLeft: '1.5rem', listStyleType: 'disc' }}>
-                <li>Si tu producto no es bueno y no sabes comunicarlo, no vendes. Bien, ahorras al mundo de comprar tu basura, busca trabajo.</li>
-              </ul>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#0067FD] flex items-center justify-center text-white text-xs font-bold">✓</span>
+                <span>Si tu producto no es bueno y no sabes comunicarlo, no vendes. Bien, ahorras al mundo de comprar tu basura, busca trabajo.</span>
+              </div>
               <p>&nbsp;</p>
-              <ul style={{ paddingLeft: '1.5rem', listStyleType: 'disc' }}>
-                <li>Si tu producto no es bueno pero sabes comunicarlo, vendes. Pero luego tendrás muchas devoluciones y clientes descontectos. No tienes mucho recorrido, pero eres un gran estafador. Usa sabiamente este poder.</li>
-              </ul>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#0067FD] flex items-center justify-center text-white text-xs font-bold">✓</span>
+                <span>Si tu producto no es bueno pero sabes comunicarlo, vendes. Pero luego tendrás muchas devoluciones y clientes descontectos. No tienes mucho recorrido, pero eres un gran estafador. Usa sabiamente este poder.</span>
+              </div>
               <p><br /><br /></p>
               <p>Cómo ves, el producto da igual para vender (para crecer es otra cosa). Pero lo que no admite discusión es que necesitas comunicarlo bien. <strong>Y si además de vender mucho, lo que quieres es una marca que la gente reconozca por la calle… necesitas comunicar MUY bien.</strong></p>
               <p><br /><br /></p>
