@@ -318,7 +318,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Los hombres, como veían que yo me levantaba cuando me daba la gana, hacían lo mismo. </p>
               <p>&nbsp;</p>
-              <p>Excepto cuando venía mi padre. </p>
+              <p><strong>Excepto cuando venía mi padre.</strong></p>
               <p>&nbsp;</p>
               <p>Mi padre es un tío duro, de más de 100 kilos, y además era el que pagaba, así que no querías que te viese vagueando en el trabajo.</p>
               <p>&nbsp;</p>
