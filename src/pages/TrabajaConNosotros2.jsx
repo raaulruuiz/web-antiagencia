@@ -308,7 +308,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Bien.</p>
               <p>&nbsp;</p>
-              <p>Pues uno de esos veranos, con 15 o 16 años, estábamos quitando mamones a los tomates. El trabajo era sencillo. Entre el tallo principal y las hojas, los tomates crecen otros tallos, a los que se llama mamones, porque quitan agua y nutrientes al tallo principal (como los clientes tóxicos le hacen a tu tienda), así que había que quitarlos mientras aún estaban pequeños.</p>
+              <p>Pues uno de esos veranos, con 15 o 16 años, estábamos quitando mamones a los tomates. El trabajo era sencillo. Entre el tallo principal y las hojas, los tomates crecen otros tallos, a los que se llama mamones, porque quitan agua y nutrientes al tallo principal <strong>(como los clientes tóxicos le hacen a tu tienda)</strong>, así que había que quitarlos mientras aún estaban pequeños.</p>
               <p>&nbsp;</p>
               <p>La única dificultad era que los tomates aún estaban muy bajos, por lo que había que estar agachado. Durante las 5-6 horas que trabajábamos por la mañana y las 3-4 horas que echábamos por la tarde.</p>
               <p>&nbsp;</p>
