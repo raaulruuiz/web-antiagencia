@@ -190,6 +190,7 @@ export default function MailerLitePopup() {
         $('.ml-subscribe-form-38800152 .row-success').show();
         $('.ml-subscribe-form-38800152 .row-form').hide();
       }
+      if (window.gtag) gtag('event', 'conversion', { send_to: 'AW-18151398838/oGQaCMfhrqocELa7oc9D' });
     };
 
     fetch('https://assets.mailerlite.com/jsonp/686354/forms/182583896449222335/takel');
