@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
 export default function YaPorFin() {
+  useEffect(() => {
+    if (window.gtag) gtag('event', 'conversion', { send_to: 'AW-18151398838/oGQaCMfhrqocELa7oc9D' });
+  }, []);
+
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <div className="flex-1 flex flex-col items-center px-6 pt-16 pb-16">
