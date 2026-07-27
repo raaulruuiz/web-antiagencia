@@ -415,7 +415,7 @@ export default function TrabajaConNosotros2() {
               <p>Raúl.</p>
               <p><br /><br /></p>
               <p><strong>P.D.</strong> En el siguiente email, el bonus indisciplinado</p>
-              <p><br /><br /></p>
+              <p><br /></p>
               <p><strong>P.D.2.</strong> Pide información por aquí: </p>
               <p>&nbsp;</p>
               <MailerLiteForm />
