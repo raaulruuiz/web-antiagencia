@@ -663,8 +663,16 @@ export default function BibliotecaPublica() {
               ) : (
                 <div key={item.id} onClick={() => { trackClick(`item: ${item.titulo || item.filename || item.id}`); navigate(`/anti-biblioteca/${item.id}`); }} style={{ cursor: 'pointer' }}>
                   <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', transition: 'border-color 0.15s', position: 'relative' }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = '#27272a'}>
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = '#52525b';
+                      const badge = e.currentTarget.querySelector('[data-score-badge]');
+                      if (badge) badge.style.transform = 'translateX(calc(-100% - 12px))';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = '#27272a';
+                      const badge = e.currentTarget.querySelector('[data-score-badge]');
+                      if (badge) badge.style.transform = 'translateX(0)';
+                    }}>
                     {item.url
                       ? <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block' }} loading="lazy" />
                       : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(160deg, #1e1b2e 0%, #2a1f3d 25%, #1a2640 50%, #2d1b3d 75%, #1e1b2e 100%)' }} />
@@ -673,9 +681,8 @@ export default function BibliotecaPublica() {
                       const s = item.puntuacion;
                       const col = s < 5 ? '#ef4444' : s < 7.5 ? '#f97316' : '#22c55e';
                       return (
-                        <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.82)', borderRadius: 8, padding: '6px 10px', backdropFilter: 'blur(4px)', pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: 46 }}>
+                        <div data-score-badge="true" style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.82)', borderRadius: 8, padding: '6px 10px', backdropFilter: 'blur(4px)', pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 46, transition: 'transform 0.25s ease' }}>
                           <span style={{ fontSize: 17, fontWeight: 800, color: col, lineHeight: 1 }}>{s}</span>
-                          <span style={{ fontSize: 8, fontWeight: 500, color: 'rgba(255,255,255,0.45)', lineHeight: 1, marginTop: 2 }}>/10</span>
                         </div>
                       );
                     })()}

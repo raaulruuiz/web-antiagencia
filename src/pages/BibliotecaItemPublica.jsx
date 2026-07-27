@@ -539,10 +539,11 @@ function PuntuacionBlockView({ block }) {
   const col = s < 5 ? '#ef4444' : s < 7.5 ? '#f97316' : '#22c55e';
   const label = s < 5 ? 'Suspenso' : s < 7.5 ? 'Notable' : 'Sobresaliente';
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '20px 0' }}>
-      <span style={{ fontSize: 52, fontWeight: 800, color: col, lineHeight: 1 }}>
-        {s}<span style={{ fontSize: 22, fontWeight: 600, color: 'var(--t-text-muted)', marginLeft: 3 }}>/10</span>
-      </span>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '12px 0' }}>
+      <div style={{ border: `2px solid ${col}44`, borderRadius: 14, padding: '14px 24px', background: col + '0d', display: 'flex', alignItems: 'baseline', gap: 3 }}>
+        <span style={{ fontSize: 52, fontWeight: 800, color: col, lineHeight: 1 }}>{s}</span>
+        <span style={{ fontSize: 20, fontWeight: 500, color: 'var(--t-text-muted)' }}>/10</span>
+      </div>
       <span style={{ fontSize: 13, fontWeight: 600, color: col, opacity: 0.8 }}>{label}</span>
     </div>
   );
