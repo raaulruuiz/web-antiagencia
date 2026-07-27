@@ -415,6 +415,113 @@ export default function TrabajaConNosotros2() {
               <MailerLiteForm />
             </Carta>
 
+            {/* CARTA 6: Bonus indisciplinado */}
+            <Carta>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Asunto: Bonus indisciplinado</h1>
+              <p><br /><br /></p>
+              <p>2 cosas. Muy rápidas.</p>
+              <p>&nbsp;</p>
+              <p><strong>Cosa 1</strong></p>
+              <p>&nbsp;</p>
+              <p>Me quedan solo dos plazas para servicio en Septiembre. Si, no podemos empezar el servicio antes. Y la fecha exacta no tiene por qué ser el 1. Dependerá de mi agenda.</p>
+              <p>&nbsp;</p>
+              <p>Pero eso, solo 2 más.</p>
+              <p>&nbsp;</p>
+              <p>Una vez se acaben las 2 plazas, llegar (a tiempo y haciendo las cosas bien) a Black Friday se empieza a complicar. Hacer las cosas bien lleva su tiempo y planificación.</p>
+              <p>&nbsp;</p>
+              <p>Si has leído hasta aquí, estoy convencido que eres de los que entienden que las cosas bien hechas no se hacen de un día para otro. Si es tu caso, pide presupuesto abajo. Si no, mejor no lo pidas.</p>
+              <p><br /><br /></p>
+              <p><strong>Cosa 2</strong></p>
+              <p>&nbsp;</p>
+              <p>A todo el que pida presupuesto antes del 31 de Agosto antes de las 23:59, en el presupuesto le incluiré el copy de las fichas de producto.</p>
+              <p>&nbsp;</p>
+              <p>Es algo que a partir de ahora no volveré a incluir (se cobrará aparte). Pero hasta el 31 de Agosto a las 23:59 aún lo tienes. Luego, no.</p>
+              <p><br /><br /></p>
+              <p>¿Y esto es importante?</p>
+              <p>&nbsp;</p>
+              <p>Joder si es importante…</p>
+              <p>&nbsp;</p>
+              <p>Imagina que entran 100 personas a tu web y te compra 1.</p>
+              <p>&nbsp;</p>
+              <p>Pues pasar de 1 a 2 es duplicar tu facturación y beneficios. Sin tocar publicidad, sin tocar costes, solo palabras.</p>
+              <p>&nbsp;</p>
+              <p>Pasar de facturar 30.000€ a 60.000€. Sin gasto extra. Solo palabras.</p>
+              <p>&nbsp;</p>
+              <p>De 50.000€ a 100.000€. Sin gasto extra. Solo palabras.</p>
+              <p>&nbsp;</p>
+              <p>De 100.000€ a 200.000€. Sin gasto extra. Solo palabras.</p>
+              <p><br /><br /></p>
+              <p>Esa es la importancia.</p>
+              <p>&nbsp;</p>
+              <p>Esto, como todo, hay quien lo entiende y quien no. Si eres de los que lo entiende, pide tu presupuesto aquí abajo.</p>
+              <p><br /><br /></p>
+              <p>Por cierto, esto no tiene nada que ver con lo de las 2 plazas. Si se acaban y te doy fecha de inicio en 2027, lo tienes incluido.</p>
+              <p>&nbsp;</p>
+              <p>Y por supuestos, los clientes actuales lo tienen, faltaría más.</p>
+              <p>&nbsp;</p>
+              <p>Pues eso. Pide tu presupuesto.</p>
+              <p><br /><br /></p>
+              <p><strong>P.D.</strong> Solo 2 plazas para Septiembre y te incluyo el copy de las fichas de producto hasta el 31 de Agosto a las 23:59 (no tiene nada que ver con las plazas).</p>
+              <p><br /><br /></p>
+              <p><strong>P.D.2</strong> Pide información aquí:</p>
+              <p>&nbsp;</p>
+              <MailerLiteForm />
+            </Carta>
+
+            {/* CARTA 7: FAKs */}
+            <Carta>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Asunto: FAKs</h1>
+              <p>&nbsp;</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Qué incluye el servicio?</h3>
+              <p>&nbsp;</p>
+              <p>Email marketing. Redactaremos y programaremos todos los mails (campañas de newsletters periódicas y automatizaciones) y los formularios de captación.</p>
+              <p>&nbsp;</p>
+              <p>Por supuesto, todos los emails los escribimos con Inteligencia Humana y no Inteligencia Artificial.</p>
+              <p>&nbsp;</p>
+              <p><strong>Además</strong>, si pides el presupuesto antes del 31 de Agosto a las 23:59, te incluimos el copy de las fichas de producto, para que aumentes la cantidad de gente que te compra en la tienda sin aumentar presupuestos.</p>
+              <p><br /><br /></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Cuánto dura el servicio?</h3>
+              <p>&nbsp;</p>
+              <p>Si es la primera vez que me contratas, pagarás 3 meses por adelantado. Después de estos 3 meses, seguiremos mes a mes y sin ningún tipo de permanencia.</p>
+              <p><br /><br /></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Es muy caro? ¿Es barato?</h3>
+              <p>&nbsp;</p>
+              <p>Es cierto, no es barato. No te voy a negar esa realidad. Le doy más importancia a otras cosas muy por encima del precio. E invierto en ello para dar unos resultados y una experiencia de cliente más especial. Mucha gente no valora eso y sólo busca precio, lo respeto, pero no es al público al que va dirigido este servicio.</p>
+              <p><br /><br /></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Qué perfil de personas le sacará mejor partido?</h3>
+              <p>&nbsp;</p>
+              <p>Las personas que más partido le sacan al servicio son personas con una lista de cierto tamaño, más 5.000 personas.</p>
+              <p><br /><br /></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Cómo es la comunicación?</h3>
+              <p>&nbsp;</p>
+              <p>Nos comunicaremos por WhatsApp, en un grupo donde estará Pili, yo y quién quieras de tu equipo.</p>
+              <p><br /><br /></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Hay algún tipo de garantía?</h3>
+              <p>&nbsp;</p>
+              <p>No.</p>
+              <p><br /><br /></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Hay que pagar todo por adelantado?</h3>
+              <p>&nbsp;</p>
+              <p>Si. Si no cobro, no trabajo. Pagarás un 50% para reservar y el otro 50% antes de comenzar.</p>
+              <p><br /><br /></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Hay algún bonus?</h3>
+              <p>&nbsp;</p>
+              <p>Si, hasta el 31 de Agosto a las 23:59, tienes incluido el copywriting de las fichas de producto.</p>
+              <p><br /><br /></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Es una buena inversión?</h3>
+              <p>&nbsp;</p>
+              <p>Si quieres tener una lista fiel, una marca que crece, que se vuelve reconocida, que genera (mucho) dinero y que te permite crecer sin sacrificar beneficio ni invertir cada vez más en anuncios, si, lo es. Pero claro, yo soy parte interesada, así que lo tendrás que decidir por ti mismo.</p>
+              <p><br /><br /></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Dónde pido más información?</h3>
+              <p>&nbsp;</p>
+              <p>Aquí:</p>
+              <p>&nbsp;</p>
+              <MailerLiteForm />
+              <p>&nbsp;</p>
+              <p>&nbsp;</p>
+              <p><strong>P.D.</strong> En el formulario de arriba para solicitar más información.</p>
+            </Carta>
+
           </div>
         </div>
         <FooterMinimal />
