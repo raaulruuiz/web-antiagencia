@@ -170,6 +170,7 @@ export default function TrabajaConNosotros2() {
             {/* CARTA 1: Capullo Elitista */}
             <Carta>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Asunto: Capullo Elitista</h1>
+              <p><br /></p>
               <p style={{ textAlign: 'right' }}><span style={{ color: '#0067FD' }}><strong>IMPORTANTE</strong></span><strong>: Solo me quedan 2 plazas para empezar en Septiembre.</strong></p>
               <p style={{ textAlign: 'right' }}><strong>Y otra cosa de la que no te he hablado en ningún sitio.</strong></p>
               <p style={{ textAlign: 'right' }}><strong>Te lo cuento en el mail "Bonus Indisciplinado"</strong></p>
