@@ -673,9 +673,9 @@ export default function BibliotecaPublica() {
                       const s = item.puntuacion;
                       const col = s < 5 ? '#ef4444' : s < 7.5 ? '#f97316' : '#22c55e';
                       return (
-                        <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.75)', borderRadius: 6, padding: '3px 7px', backdropFilter: 'blur(4px)', pointerEvents: 'none' }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: col }}>{s}</span>
-                          <span style={{ fontSize: 9, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>/10</span>
+                        <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.82)', borderRadius: 8, padding: '6px 10px', backdropFilter: 'blur(4px)', pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: 46 }}>
+                          <span style={{ fontSize: 17, fontWeight: 800, color: col, lineHeight: 1 }}>{s}</span>
+                          <span style={{ fontSize: 8, fontWeight: 500, color: 'rgba(255,255,255,0.45)', lineHeight: 1, marginTop: 2 }}>/10</span>
                         </div>
                       );
                     })()}

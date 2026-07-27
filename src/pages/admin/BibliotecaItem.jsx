@@ -915,7 +915,7 @@ function BlockDivider({ onAdd }) {
 }
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
-const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#f59e0b' };
+const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#e879f9' };
 const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas', puntuacion: 'Puntuación' };
 function scoreColor(s) { if (s == null) return '#71717a'; if (s < 5) return '#ef4444'; if (s < 7.5) return '#f97316'; return '#22c55e'; }
 
@@ -1490,12 +1490,16 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       )}
 
       {block.type === 'puntuacion' && (
-        <div style={{ padding: '20px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-          {block.valor != null ? (
-            <span style={{ fontSize: 32, fontWeight: 800, color: scoreColor(block.valor), lineHeight: 1 }}>
-              {block.valor}<span style={{ fontSize: 15, fontWeight: 500, color: 'var(--t-text-muted)' }}>/10</span>
-            </span>
-          ) : (
+        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+          {block.valor != null ? (() => {
+            const col = scoreColor(block.valor);
+            return (
+              <div style={{ border: `2px solid ${col}44`, borderRadius: 14, padding: '14px 24px', background: col + '0d', display: 'flex', alignItems: 'baseline', gap: 3 }}>
+                <span style={{ fontSize: 52, fontWeight: 800, color: col, lineHeight: 1 }}>{block.valor}</span>
+                <span style={{ fontSize: 18, fontWeight: 500, color: 'var(--t-text-muted)' }}>/10</span>
+              </div>
+            );
+          })() : (
             <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin puntuación</span>
           )}
         </div>

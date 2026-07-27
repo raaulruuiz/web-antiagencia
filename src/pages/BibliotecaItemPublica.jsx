@@ -557,7 +557,7 @@ function BlockView({ block, onPreview, theme, isMobile, item, isPro }) {
     : block.type !== 'correccion';
 
   // Puntuacion is always public
-  if (block.type === 'puntuacion') return <PuntuacionBlockView block={block} />;
+  if (block.type === 'puntuacion') return <div style={wrapStyle}><PuntuacionBlockView block={block} /></div>;
 
   if (!isVisible && !isPro) {
     // Render title + blurred content
@@ -599,7 +599,7 @@ function BlockView({ block, onPreview, theme, isMobile, item, isPro }) {
     case 'asunto_adelanto': return <div style={wrapStyle}><AsuntoAdelantoBlockView block={block} item={item} isMobile={isMobile} /></div>;
     case 'transcribir':     return <div style={wrapStyle}><TranscribirBlockView block={block} /></div>;
     case 'columnas':        return <div style={wrapStyle}><ColumnasBlockView block={block} onPreview={onPreview} theme={theme} isMobile={isMobile} item={item} /></div>;
-    case 'puntuacion':      return <PuntuacionBlockView block={block} />;
+    case 'puntuacion':      return <div style={wrapStyle}><PuntuacionBlockView block={block} /></div>;
     default: return null;
   }
 }
