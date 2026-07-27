@@ -164,6 +164,7 @@ const AuthenticatedApp = () => {
       <Route path="/UltimoPaso" element={<SmartPage path="/UltimoPaso"><LayoutWrapper currentPageName="UltimoPaso"><UltimoPaso /></LayoutWrapper></SmartPage>} />
       <Route path="/YaPorFin" element={<SmartPage path="/YaPorFin"><LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper></SmartPage>} />
       <Route path="/trabajaconnosotros" element={<TrabajaConNosotros2 />} />
+      <Route path="/trabajaconnosotros2" element={<TrabajaConNosotrosV3 />} />
       <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
       {/* <Route path="/planningq3" element={<PlanningQ3Venta />} /> */}
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
