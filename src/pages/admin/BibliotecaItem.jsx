@@ -1490,14 +1490,18 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       )}
 
       {block.type === 'puntuacion' && (
-        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
           {block.valor != null ? (() => {
             const col = scoreColor(block.valor);
+            const label = block.valor < 5 ? 'Suspenso' : block.valor < 7.5 ? 'Notable' : 'Sobresaliente';
             return (
-              <div style={{ border: `2px solid ${col}44`, borderRadius: 14, padding: '14px 24px', background: col + '0d', display: 'flex', alignItems: 'baseline', gap: 3 }}>
-                <span style={{ fontSize: 52, fontWeight: 800, color: col, lineHeight: 1 }}>{block.valor}</span>
-                <span style={{ fontSize: 18, fontWeight: 500, color: 'var(--t-text-muted)' }}>/10</span>
-              </div>
+              <>
+                <div style={{ border: `2px solid ${col}44`, borderRadius: 14, padding: '14px 24px', background: col + '0d', display: 'flex', alignItems: 'baseline', gap: 3 }}>
+                  <span style={{ fontSize: 52, fontWeight: 800, color: col, lineHeight: 1 }}>{block.valor}</span>
+                  <span style={{ fontSize: 18, fontWeight: 500, color: 'var(--t-text-muted)' }}>/10</span>
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 600, color: col, opacity: 0.8 }}>{label}</span>
+              </>
             );
           })() : (
             <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin puntuación</span>
