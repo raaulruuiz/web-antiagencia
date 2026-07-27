@@ -282,6 +282,16 @@ function ProModal({ onClose, onProActivated }) {
   );
 }
 
+function trackClick(elemento) {
+  const email = loadSession();
+  if (!email) return;
+  fetch(`${API_BASE}/api/biblioteca-click`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, elemento }),
+  }).catch(() => {});
+}
+
 export default function BibliotecaPublica() {
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
@@ -316,8 +326,8 @@ export default function BibliotecaPublica() {
   const [filterFechaFrom, setFilterFechaFrom]   = useState('');
   const [filterFechaTo, setFilterFechaTo]       = useState('');
 
-  const toggleFilterTag    = (id) => setFilterTagIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
-  const toggleFilterSector = (id) => setFilterSectorIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const toggleFilterTag    = (id) => { const tag = allTags.find(t => t.id === id); trackClick(`filtro tag: ${tag?.nombre || id}`); setFilterTagIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]); };
+  const toggleFilterSector = (id) => { const sec = allSectors.find(s => s.id === id); trackClick(`filtro sector: ${sec?.nombre || id}`); setFilterSectorIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]); };
 
   const activeFilterCount = [filterCategoria, filterSubcat, filterMarca, filterTagIds.length ? '1' : '', filterSectorIds.length ? '1' : '', (filterFechaFrom || filterFechaTo) ? '1' : ''].filter(Boolean).length;
 
@@ -651,7 +661,7 @@ export default function BibliotecaPublica() {
                   <BibliotecaCardMeta item={item} allTags={allTags} allSectors={allSectors} blurred />
                 </div>
               ) : (
-                <div key={item.id} onClick={() => navigate(`/anti-biblioteca/${item.id}`)} style={{ cursor: 'pointer' }}>
+                <div key={item.id} onClick={() => { trackClick(`item: ${item.titulo || item.filename || item.id}`); navigate(`/anti-biblioteca/${item.id}`); }} style={{ cursor: 'pointer' }}>
                   <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', transition: 'border-color 0.15s' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = '#27272a'}>

@@ -617,7 +617,19 @@ export default function BibliotecaItemPublica() {
       fetch(`${API_BASE}/biblioteca/tags/public`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []),
       fetch(`${API_BASE}/biblioteca/sectores/public`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []),
     ])
-      .then(([itemData, tagsData, sectorsData]) => { setItem(itemData); setAllTags(tagsData); setAllSectors(sectorsData); })
+      .then(([itemData, tagsData, sectorsData]) => {
+        setItem(itemData);
+        setAllTags(tagsData);
+        setAllSectors(sectorsData);
+        const email = loadSession();
+        if (email && itemData?.titulo) {
+          fetch(`${API_BASE}/api/biblioteca-click`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, elemento: `item: ${itemData.titulo}` }),
+          }).catch(() => {});
+        }
+      })
       .catch(e => setError(typeof e === 'string' ? e : 'Error al cargar'))
       .finally(() => setLoading(false));
   }, [id]);

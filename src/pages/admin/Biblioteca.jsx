@@ -483,6 +483,9 @@ export default function Biblioteca() {
   const [showStats, setShowStats]           = useState(false);
   const [statsData, setStatsData]           = useState(null);
   const [statsLoading, setStatsLoading]     = useState(false);
+  const [expandedRow, setExpandedRow]       = useState(null); // {email, accessed_at}
+  const [clicksData, setClicksData]         = useState({});   // { "email|accessed_at": [...] }
+  const [clicksLoading, setClicksLoading]   = useState({});
   const [showNuevo, setShowNuevo]           = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [nuevoUploading, setNuevoUploading] = useState(false);
@@ -1241,11 +1244,11 @@ export default function Biblioteca() {
 
       {showStats && (
         <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,0.7)', display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
-          onClick={e => { if (e.target === e.currentTarget) setShowStats(false); }}>
-          <div style={{ background:'var(--t-surface)', border:'1px solid var(--t-border)', borderRadius:12, padding:24, width:'100%', maxWidth:540, maxHeight:'80vh', display:'flex', flexDirection:'column', gap:12 }}>
+          onClick={e => { if (e.target === e.currentTarget) { setShowStats(false); setExpandedRow(null); } }}>
+          <div style={{ background:'var(--t-surface)', border:'1px solid var(--t-border)', borderRadius:12, padding:24, width:'100%', maxWidth:580, maxHeight:'80vh', display:'flex', flexDirection:'column', gap:12 }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
               <h3 style={{ fontSize:15, fontWeight:600, color:'var(--t-text)', margin:0 }}>Accesos a la Anti-Biblioteca</h3>
-              <button onClick={() => setShowStats(false)} style={{ background:'none', border:'none', color:'var(--t-text-subtle)', cursor:'pointer', fontSize:18, lineHeight:1 }}>×</button>
+              <button onClick={() => { setShowStats(false); setExpandedRow(null); }} style={{ background:'none', border:'none', color:'var(--t-text-subtle)', cursor:'pointer', fontSize:18, lineHeight:1 }}>×</button>
             </div>
             <div style={{ overflowY:'auto', flex:1 }}>
               {statsLoading && <p style={{ fontSize:13, color:'var(--t-text-muted)', textAlign:'center', padding:'20px 0' }}>Cargando...</p>}
@@ -1260,18 +1263,68 @@ export default function Biblioteca() {
                     </tr>
                   </thead>
                   <tbody>
-                    {statsData.map((row, i) => (
-                      <tr key={i} style={{ borderBottom:'1px solid var(--t-border-s)' }}>
-                        <td style={{ padding:'7px 8px', color:'var(--t-text)' }}>{row.email}</td>
-                        <td style={{ padding:'7px 8px', color:'var(--t-text-muted)', whiteSpace:'nowrap' }}>{new Date(row.accessed_at).toLocaleString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
-                        <td style={{ padding:'7px 8px', textAlign:'center' }}>{row.valid ? <span style={{ color:'#22c55e', fontSize:14 }}>✓</span> : <span style={{ color:'#71717a', fontSize:14 }}>—</span>}</td>
-                      </tr>
-                    ))}
+                    {statsData.map((row, i) => {
+                      const rowKey = `${row.email}|${row.accessed_at}`;
+                      const isExpanded = expandedRow === rowKey;
+                      const rowClicks = clicksData[rowKey];
+                      const isLoadingClicks = clicksLoading[rowKey];
+
+                      async function toggleRow() {
+                        if (isExpanded) { setExpandedRow(null); return; }
+                        setExpandedRow(rowKey);
+                        if (rowClicks !== undefined) return; // ya cargado
+                        setClicksLoading(p => ({ ...p, [rowKey]: true }));
+                        try {
+                          const token = await getToken();
+                          const email = encodeURIComponent(row.email);
+                          const since = encodeURIComponent(row.accessed_at);
+                          const res = await fetch(`${API_BASE}/api/biblioteca-clicks/${email}?since=${since}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                          const data = await res.json();
+                          setClicksData(p => ({ ...p, [rowKey]: Array.isArray(data) ? data : [] }));
+                        } catch { setClicksData(p => ({ ...p, [rowKey]: [] })); }
+                        setClicksLoading(p => ({ ...p, [rowKey]: false }));
+                      }
+
+                      return (
+                        <>
+                          <tr key={i} onClick={toggleRow} style={{ borderBottom: isExpanded ? 'none' : '1px solid var(--t-border-s)', cursor:'pointer', background: isExpanded ? 'var(--t-surface2)' : 'transparent' }}
+                            onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = 'var(--t-surface2)'; }}
+                            onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = 'transparent'; }}>
+                            <td style={{ padding:'7px 8px', color:'var(--t-text)' }}>
+                              <span style={{ marginRight:6, fontSize:10, color:'var(--t-text-subtle)' }}>{isExpanded ? '▼' : '▶'}</span>
+                              {row.email}
+                            </td>
+                            <td style={{ padding:'7px 8px', color:'var(--t-text-muted)', whiteSpace:'nowrap' }}>{new Date(row.accessed_at).toLocaleString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
+                            <td style={{ padding:'7px 8px', textAlign:'center' }}>{row.valid ? <span style={{ color:'#22c55e', fontSize:14 }}>✓</span> : <span style={{ color:'#71717a', fontSize:14 }}>—</span>}</td>
+                          </tr>
+                          {isExpanded && (
+                            <tr key={`${i}-clicks`} style={{ borderBottom:'1px solid var(--t-border-s)' }}>
+                              <td colSpan={3} style={{ padding:'4px 8px 12px 28px', background:'var(--t-surface2)' }}>
+                                {isLoadingClicks && <p style={{ fontSize:11, color:'var(--t-text-muted)', margin:'6px 0' }}>Cargando clics...</p>}
+                                {!isLoadingClicks && rowClicks && rowClicks.length === 0 && <p style={{ fontSize:11, color:'var(--t-text-subtle)', margin:'6px 0' }}>Sin clics registrados en esta sesión.</p>}
+                                {!isLoadingClicks && rowClicks && rowClicks.length > 0 && (
+                                  <div style={{ display:'flex', flexDirection:'column', gap:2, marginTop:4 }}>
+                                    {rowClicks.map((c, j) => (
+                                      <div key={j} style={{ display:'flex', alignItems:'center', gap:8, fontSize:11 }}>
+                                        <span style={{ color:'var(--t-text-subtle)', whiteSpace:'nowrap', flexShrink:0 }}>
+                                          {new Date(c.clicked_at).toLocaleString('es-ES', { hour:'2-digit', minute:'2-digit', second:'2-digit' })}
+                                        </span>
+                                        <span style={{ color:'var(--t-text-muted)' }}>{c.elemento}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
             </div>
-            {!statsLoading && statsData && <p style={{ fontSize:11, color:'var(--t-text-subtle)', margin:0 }}>{statsData.length} registro{statsData.length !== 1 ? 's' : ''} · ✓ = email en lista</p>}
+            {!statsLoading && statsData && <p style={{ fontSize:11, color:'var(--t-text-subtle)', margin:0 }}>{statsData.length} registro{statsData.length !== 1 ? 's' : ''} · ✓ = email en lista · clic en fila para ver actividad</p>}
           </div>
         </div>
       )}
