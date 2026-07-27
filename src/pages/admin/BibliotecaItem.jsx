@@ -1490,10 +1490,13 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         </div>
       )}
 
-      {block.type === 'puntuacion' && (
-        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-          {block.titulo && <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, textAlign: 'center' }}>{block.titulo}</div>}
-          {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', textAlign: 'center', marginTop: block.titulo ? -4 : 0 }}>{block.subtitulo}</div>}
+      {block.type === 'puntuacion' && (() => {
+        const align = block.text_align || 'center';
+        const alignItems = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
+        return (
+        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', alignItems, gap: 10 }}>
+          {block.titulo && <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, textAlign: align }}>{block.titulo}</div>}
+          {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', textAlign: align, marginTop: block.titulo ? -4 : 0 }}>{block.subtitulo}</div>}
           {block.valor != null ? (() => {
             const col = scoreColor(block.valor);
             const label = block.valor < 5 ? 'Suspenso' : block.valor < 7.5 ? 'Notable' : 'Sobresaliente';
@@ -1510,7 +1513,8 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin puntuación</span>
           )}
         </div>
-      )}
+        );
+      })()}
 
       {/* Columnas delete modal */}
       {showColumnaModal && (
@@ -1970,27 +1974,43 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>
         </div>
 
-        {/* Puntuación — solo número */}
+        {/* Puntuación — número + alineación */}
         {draft.type === 'puntuacion' && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '12px 0' }}>
-            <input
-              type="number" min="0" max="10" step="0.01"
-              value={draft.valor ?? ''}
-              onChange={e => {
-                const raw = e.target.value;
-                if (raw === '') { update('valor', null); return; }
-                const n = Math.min(10, Math.max(0, parseFloat(parseFloat(raw).toFixed(2))));
-                update('valor', isNaN(n) ? null : n);
-              }}
-              placeholder="0 – 10"
-              style={{ width: 140, background: 'var(--t-surface2)', border: `2px solid ${scoreColor(draft.valor)}`, borderRadius: 12, padding: '14px 18px', fontSize: 36, fontWeight: 800, color: scoreColor(draft.valor), outline: 'none', colorScheme: 'dark', textAlign: 'center', boxSizing: 'border-box' }}
-            />
-            {draft.valor != null && (
-              <span style={{ fontSize: 13, color: scoreColor(draft.valor), fontWeight: 600 }}>
-                {draft.valor < 5 ? 'Suspenso' : draft.valor < 7.5 ? 'Notable' : 'Sobresaliente'}
-              </span>
-            )}
-          </div>
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '12px 0' }}>
+              <input
+                type="number" min="0" max="10" step="0.01"
+                value={draft.valor ?? ''}
+                onChange={e => {
+                  const raw = e.target.value;
+                  if (raw === '') { update('valor', null); return; }
+                  const n = Math.min(10, Math.max(0, parseFloat(parseFloat(raw).toFixed(2))));
+                  update('valor', isNaN(n) ? null : n);
+                }}
+                placeholder="0 – 10"
+                style={{ width: 140, background: 'var(--t-surface2)', border: `2px solid ${scoreColor(draft.valor)}`, borderRadius: 12, padding: '14px 18px', fontSize: 36, fontWeight: 800, color: scoreColor(draft.valor), outline: 'none', colorScheme: 'dark', textAlign: 'center', boxSizing: 'border-box' }}
+              />
+              {draft.valor != null && (
+                <span style={{ fontSize: 13, color: scoreColor(draft.valor), fontWeight: 600 }}>
+                  {draft.valor < 5 ? 'Suspenso' : draft.valor < 7.5 ? 'Notable' : 'Sobresaliente'}
+                </span>
+              )}
+            </div>
+            <div>
+              <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Alineación</label>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {[{ value: 'left', label: 'Izquierda' }, { value: 'center', label: 'Centro' }, { value: 'right', label: 'Derecha' }].map(opt => {
+                  const active = (draft.text_align || 'center') === opt.value;
+                  return (
+                    <button key={opt.value} onClick={() => update('text_align', opt.value)}
+                      style={{ flex: 1, background: active ? 'var(--t-surface2)' : 'transparent', border: `1px solid ${active ? '#6366f1' : 'var(--t-border-mid)'}`, borderRadius: 8, padding: '7px 10px', fontSize: 12, color: active ? '#a5b4fc' : 'var(--t-text-muted)', cursor: 'pointer', fontWeight: active ? 600 : 400 }}>
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
         )}
 
         {/* Título */}
