@@ -421,32 +421,32 @@ export default function TrabajaConNosotros2() {
             {/* CARTA 6: Bonus indisciplinado */}
             <Carta>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Asunto: Bonus indisciplinado</h1>
-              <p><br /><br /></p>
+              <p><br /></p>
               <p>2 cosas. Muy rápidas.</p>
               <p>&nbsp;</p>
-              <p><strong>Cosa 1</strong></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Cosa 1</h3>
               <p>&nbsp;</p>
               <p>Me quedan solo dos plazas para servicio en Septiembre. Si, no podemos empezar el servicio antes. Y la fecha exacta no tiene por qué ser el 1. Dependerá de mi agenda.</p>
               <p>&nbsp;</p>
               <p>Pero eso, solo 2 más.</p>
               <p>&nbsp;</p>
-              <p>Una vez se acaben las 2 plazas, llegar (a tiempo y haciendo las cosas bien) a Black Friday se empieza a complicar. Hacer las cosas bien lleva su tiempo y planificación.</p>
+              <p>Una vez se acaben las 2 plazas, llegar (a tiempo y haciendo las cosas bien) a Black Friday se empieza a complicar. <strong>Hacer las cosas bien lleva su tiempo y planificación.</strong></p>
               <p>&nbsp;</p>
               <p>Si has leído hasta aquí, estoy convencido que eres de los que entienden que las cosas bien hechas no se hacen de un día para otro. Si es tu caso, pide presupuesto abajo. Si no, mejor no lo pidas.</p>
               <p><br /><br /></p>
-              <p><strong>Cosa 2</strong></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Cosa 2</h3>
               <p>&nbsp;</p>
-              <p>A todo el que pida presupuesto antes del 31 de Agosto antes de las 23:59, en el presupuesto le incluiré el copy de las fichas de producto.</p>
+              <p>A todo el que pida presupuesto <strong>antes del 31 de Agosto antes de las 23:59</strong>, en el presupuesto le incluiré el copy de las fichas de producto.</p>
               <p>&nbsp;</p>
               <p>Es algo que a partir de ahora no volveré a incluir (se cobrará aparte). Pero hasta el 31 de Agosto a las 23:59 aún lo tienes. Luego, no.</p>
               <p><br /><br /></p>
-              <p>¿Y esto es importante?</p>
+              <p><strong>¿Y esto es importante?</strong></p>
               <p>&nbsp;</p>
               <p>Joder si es importante…</p>
               <p>&nbsp;</p>
               <p>Imagina que entran 100 personas a tu web y te compra 1.</p>
               <p>&nbsp;</p>
-              <p>Pues pasar de 1 a 2 es duplicar tu facturación y beneficios. Sin tocar publicidad, sin tocar costes, solo palabras.</p>
+              <p><strong>Pues pasar de 1 a 2 es duplicar tu facturación y beneficios. Sin tocar publicidad, sin tocar costes, solo palabras.</strong></p>
               <p>&nbsp;</p>
               <p>Pasar de facturar 30.000€ a 60.000€. Sin gasto extra. Solo palabras.</p>
               <p>&nbsp;</p>
@@ -474,6 +474,8 @@ export default function TrabajaConNosotros2() {
             {/* CARTA 7: FAKs */}
             <Carta>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Asunto: FAKs</h1>
+              <p>&nbsp;</p>
+              <p>Te voy a dejar por aquí las preguntas más frecuentes que me hacen siempre antes de contratarme. Espero que te sirvan.</p>
               <p>&nbsp;</p>
               <h3 className="text-xl font-bold text-gray-900 mb-2">¿Qué incluye el servicio?</h3>
               <p>&nbsp;</p>
