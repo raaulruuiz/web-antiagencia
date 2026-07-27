@@ -441,7 +441,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>A todo el que pida presupuesto <strong>antes del 31 de Agosto antes de las 23:59</strong>, en el presupuesto le incluiré el copy de las fichas de producto.</p>
               <p>&nbsp;</p>
-              <p>Es algo que a partir de ahora no volveré a incluir (se cobrará aparte). Pero hasta el 31 de Agosto a las 23:59 aún lo tienes. Luego, no.</p>
+              <p>Es algo que a partir de ahora no volveré a incluir (se cobrará aparte, y el precio del servicio será el mismo). Pero hasta el 31 de Agosto a las 23:59 aún lo tienes. Luego, no.</p>
               <p><br /><br /></p>
               <p><strong>¿Y esto es importante?</strong></p>
               <p>&nbsp;</p>
