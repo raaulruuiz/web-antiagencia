@@ -662,13 +662,23 @@ export default function BibliotecaPublica() {
                 </div>
               ) : (
                 <div key={item.id} onClick={() => { trackClick(`item: ${item.titulo || item.filename || item.id}`); navigate(`/anti-biblioteca/${item.id}`); }} style={{ cursor: 'pointer' }}>
-                  <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', transition: 'border-color 0.15s' }}
+                  <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', transition: 'border-color 0.15s', position: 'relative' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = '#52525b'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = '#27272a'}>
                     {item.url
                       ? <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block' }} loading="lazy" />
                       : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(160deg, #1e1b2e 0%, #2a1f3d 25%, #1a2640 50%, #2d1b3d 75%, #1e1b2e 100%)' }} />
                     }
+                    {item.puntuacion != null && (() => {
+                      const s = item.puntuacion;
+                      const col = s < 5 ? '#ef4444' : s < 7.5 ? '#f97316' : '#22c55e';
+                      return (
+                        <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.75)', borderRadius: 6, padding: '3px 7px', backdropFilter: 'blur(4px)', pointerEvents: 'none' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: col }}>{s}</span>
+                          <span style={{ fontSize: 9, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>/10</span>
+                        </div>
+                      );
+                    })()}
                   </div>
                   <BibliotecaCardMeta item={item} allTags={allTags} allSectors={allSectors} />
                 </div>

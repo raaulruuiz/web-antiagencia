@@ -1184,6 +1184,18 @@ export default function Biblioteca() {
                 <div className="bg-zinc-900 rounded-lg overflow-hidden border transition-colors relative" style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', borderColor: isSelected ? '#fff' : item.publico === false ? '#f97316' : 'var(--t-border)', borderWidth: item.publico === false ? 2 : 1 }}>
                   <img src={item.url} alt={item.filename} className="w-full h-full object-cover" style={{ objectPosition: item.categoria === 'email' ? 'top' : 'center' }} loading="lazy" />
 
+                  {/* Score badge */}
+                  {item.puntuacion != null && (() => {
+                    const s = item.puntuacion;
+                    const col = s < 5 ? '#ef4444' : s < 7.5 ? '#f97316' : '#22c55e';
+                    return (
+                      <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.75)', borderRadius: 6, padding: '3px 7px', backdropFilter: 'blur(4px)', pointerEvents: 'none' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: col }}>{s}</span>
+                        <span style={{ fontSize: 9, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>/10</span>
+                      </div>
+                    );
+                  })()}
+
                   {/* Permanent badge — visible at a glance when item is hidden */}
                   {item.publico === false && (
                     <div style={{ position: 'absolute', bottom: 8, left: 8, background: 'rgba(234,88,12,0.9)', borderRadius: 6, padding: '3px 5px', display: 'flex', alignItems: 'center', backdropFilter: 'blur(4px)', pointerEvents: 'none' }}>

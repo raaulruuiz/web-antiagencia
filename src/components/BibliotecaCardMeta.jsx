@@ -43,16 +43,6 @@ export default function BibliotecaCardMeta({ item, allTags = [], allSectors = []
               {item.categoria === 'email' ? 'Email' : 'Ficha'}
             </span>
           )}
-          {resolvedSectors.map(s => (
-            <span key={s.id} style={{
-              fontSize: 10, borderRadius: 999, padding: '1px 7px', fontWeight: 500,
-              background: s.color + '22',
-              border: `1px solid ${s.color}`,
-              color: s.color,
-            }}>
-              {s.name}
-            </span>
-          ))}
           {item.subcategoria && (
             <span style={{
               fontSize: 10, borderRadius: 999, padding: '1px 7px', fontWeight: 500,
@@ -63,6 +53,16 @@ export default function BibliotecaCardMeta({ item, allTags = [], allSectors = []
               {item.subcategoria === 'automatizacion' ? 'Automatización' : 'Campaña'}
             </span>
           )}
+          {resolvedSectors.map(s => (
+            <span key={s.id} style={{
+              fontSize: 10, borderRadius: 999, padding: '1px 7px', fontWeight: 500,
+              background: s.color + '22',
+              border: `1px solid ${s.color}`,
+              color: s.color,
+            }}>
+              {s.name}
+            </span>
+          ))}
           {resolvedTags.map(tag => (
             <span key={tag.id} style={{
               fontSize: 10, borderRadius: 999, padding: '1px 7px', fontWeight: 500,

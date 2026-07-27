@@ -182,6 +182,11 @@ const IconColumns = () => (
     <rect x="2" y="3" width="6" height="18" rx="1"/><rect x="9" y="3" width="6" height="18" rx="1"/><rect x="16" y="3" width="6" height="18" rx="1"/>
   </svg>
 );
+const IconStar = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </svg>
+);
 
 const CATEGORIAS = [
   { value: 'email', label: 'Email',            icon: <IconEmail /> },
@@ -222,6 +227,7 @@ const ALL_BLOCK_META = [
   ...BLOCK_TYPES,
   { type: 'asunto_adelanto', label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> },
   { type: 'correccion',      label: 'Corrección',          icon: <IconCorrection /> },
+  { type: 'puntuacion',      label: 'Puntuación',          icon: <IconStar /> },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -909,21 +915,23 @@ function BlockDivider({ onAdd }) {
 }
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
-const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6' };
-const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas' };
+const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#f59e0b' };
+const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas', puntuacion: 'Puntuación' };
+function scoreColor(s) { if (s == null) return '#71717a'; if (s < 5) return '#ef4444'; if (s < 7.5) return '#f97316'; return '#22c55e'; }
 
-function BlockSelector({ onSelect, hasCorreccion, onClose, categoria }) {
+function BlockSelector({ onSelect, hasCorreccion, hasPuntuacion, onClose, categoria }) {
   const gridTypes = [
     ...BLOCK_TYPES,
     ...(categoria === 'email' ? [{ type: 'asunto_adelanto', label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> }] : []),
   ];
-  const correccionBt = { type: 'correccion', label: 'Corrección', icon: <IconCorrection /> };
+  const correccionBt  = { type: 'correccion',  label: 'Corrección',  icon: <IconCorrection /> };
+  const puntuacionBt  = { type: 'puntuacion',  label: 'Puntuación',  icon: <IconStar /> };
   const isOdd = gridTypes.length % 2 !== 0;
   const gridItems = isOdd ? gridTypes.slice(0, -1) : gridTypes;
   const midFullWidth = isOdd ? gridTypes[gridTypes.length - 1] : null;
 
   const renderFullWidthBtn = (bt) => {
-    const disabled = bt.type === 'correccion' && hasCorreccion;
+    const disabled = (bt.type === 'correccion' && hasCorreccion) || (bt.type === 'puntuacion' && hasPuntuacion);
     const c = BLOCK_COLORS[bt.type];
     return (
       <button key={bt.type} onClick={() => !disabled && onSelect(bt.type)} disabled={disabled}
@@ -942,6 +950,7 @@ function BlockSelector({ onSelect, hasCorreccion, onClose, categoria }) {
         <span style={{ fontSize: 12, color: 'var(--t-text-muted)', fontWeight: 500 }}>Añadir bloque</span>
         {onClose && <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>}
       </div>
+      {renderFullWidthBtn(puntuacionBt)}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {gridItems.map(bt => {
           const c = BLOCK_COLORS[bt.type];
@@ -1480,6 +1489,18 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         </div>
       )}
 
+      {block.type === 'puntuacion' && (
+        <div style={{ padding: '20px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+          {block.valor != null ? (
+            <span style={{ fontSize: 32, fontWeight: 800, color: scoreColor(block.valor), lineHeight: 1 }}>
+              {block.valor}<span style={{ fontSize: 15, fontWeight: 500, color: 'var(--t-text-muted)' }}>/10</span>
+            </span>
+          ) : (
+            <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin puntuación</span>
+          )}
+        </div>
+      )}
+
       {/* Columnas delete modal */}
       {showColumnaModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
@@ -1922,7 +1943,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     onClose();
   };
 
-  const bt = BLOCK_TYPES.find(b => b.type === block.type);
+  const bt = ALL_BLOCK_META.find(b => b.type === block.type);
   const c = BLOCK_COLORS[block.type] || '#71717a';
 
   return (
@@ -1938,20 +1959,47 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', display: 'flex', padding: 2 }}><IconX /></button>
         </div>
 
+        {/* Puntuación — solo número */}
+        {draft.type === 'puntuacion' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '12px 0' }}>
+            <input
+              type="number" min="0" max="10" step="0.01"
+              value={draft.valor ?? ''}
+              onChange={e => {
+                const raw = e.target.value;
+                if (raw === '') { update('valor', null); return; }
+                const n = Math.min(10, Math.max(0, parseFloat(parseFloat(raw).toFixed(2))));
+                update('valor', isNaN(n) ? null : n);
+              }}
+              placeholder="0 – 10"
+              style={{ width: 140, background: 'var(--t-surface2)', border: `2px solid ${scoreColor(draft.valor)}`, borderRadius: 12, padding: '14px 18px', fontSize: 36, fontWeight: 800, color: scoreColor(draft.valor), outline: 'none', colorScheme: 'dark', textAlign: 'center', boxSizing: 'border-box' }}
+            />
+            {draft.valor != null && (
+              <span style={{ fontSize: 13, color: scoreColor(draft.valor), fontWeight: 600 }}>
+                {draft.valor < 5 ? 'Suspenso' : draft.valor < 7.5 ? 'Notable' : 'Sobresaliente'}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Título */}
+        {draft.type !== 'puntuacion' && (
         <div>
           <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Título</label>
           <input value={draft.titulo || ''} onChange={e => update('titulo', e.target.value)}
             style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
         </div>
+        )}
 
         {/* Subtítulo */}
+        {draft.type !== 'puntuacion' && (
         <div>
           <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Subtítulo</label>
           <input value={draft.subtitulo || ''} onChange={e => update('subtitulo', e.target.value)}
             placeholder="Opcional…"
             style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
         </div>
+        )}
 
         {/* Layout selector para imagen (antes de las imágenes) */}
         {draft.type === 'imagen' && (
@@ -3026,7 +3074,8 @@ export default function BibliotecaItem() {
       const token = await getToken();
       const autopublish = localStorage.getItem('biblioteca_autopublish') === 'true';
       const blocksData = { blocks, library: blocksLibraryRef.current };
-      const body = { blocks_data: blocksData };
+      const puntuacionBlk = blocks.find(b => b.type === 'puntuacion');
+      const body = { blocks_data: blocksData, puntuacion: puntuacionBlk?.valor != null ? Number(puntuacionBlk.valor) : null };
       if (autopublish) {
         body.blocks_data_published = blocksData;
         // Remove from pending if autopublish is on
@@ -3078,7 +3127,9 @@ export default function BibliotecaItem() {
     };
     setBlocksData(prev => {
       let next;
-      if (atIndex !== null && type !== 'correccion') {
+      if (type === 'puntuacion') {
+        next = [newBlock, ...prev];
+      } else if (atIndex !== null && type !== 'correccion') {
         next = [...prev.slice(0, atIndex), newBlock, ...prev.slice(atIndex)];
       } else {
         const correccionIdx = prev.findIndex(b => b.type === 'correccion');
@@ -3340,6 +3391,7 @@ export default function BibliotecaItem() {
           <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 480 }}>
             <BlockSelector
               hasCorreccion={blocksData.some(b => b.type === 'correccion')}
+              hasPuntuacion={blocksData.some(b => b.type === 'puntuacion')}
               onSelect={(type) => { addBlock(type, insertAtIndex); setInsertAtIndex(null); setShowBlockSelectorModal(false); }}
               onClose={() => { setShowBlockSelectorModal(false); setInsertAtIndex(null); }}
               categoria={categoria}

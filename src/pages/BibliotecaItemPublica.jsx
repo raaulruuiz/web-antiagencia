@@ -533,6 +533,21 @@ function ColumnasBlockView({ block, onPreview, theme, isMobile, item }) {
   );
 }
 
+function PuntuacionBlockView({ block }) {
+  const s = block.valor;
+  if (s == null) return null;
+  const col = s < 5 ? '#ef4444' : s < 7.5 ? '#f97316' : '#22c55e';
+  const label = s < 5 ? 'Suspenso' : s < 7.5 ? 'Notable' : 'Sobresaliente';
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '20px 0' }}>
+      <span style={{ fontSize: 52, fontWeight: 800, color: col, lineHeight: 1 }}>
+        {s}<span style={{ fontSize: 22, fontWeight: 600, color: 'var(--t-text-muted)', marginLeft: 3 }}>/10</span>
+      </span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: col, opacity: 0.8 }}>{label}</span>
+    </div>
+  );
+}
+
 function BlockView({ block, onPreview, theme, isMobile, item, isPro }) {
   const wrapStyle = { border: `1px solid ${theme === 'light' ? '#d4d4d8' : '#27272a'}`, borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
 
@@ -540,6 +555,9 @@ function BlockView({ block, onPreview, theme, isMobile, item, isPro }) {
   const isVisible = block.visible !== undefined
     ? block.visible !== false
     : block.type !== 'correccion';
+
+  // Puntuacion is always public
+  if (block.type === 'puntuacion') return <PuntuacionBlockView block={block} />;
 
   if (!isVisible && !isPro) {
     // Render title + blurred content
@@ -581,6 +599,7 @@ function BlockView({ block, onPreview, theme, isMobile, item, isPro }) {
     case 'asunto_adelanto': return <div style={wrapStyle}><AsuntoAdelantoBlockView block={block} item={item} isMobile={isMobile} /></div>;
     case 'transcribir':     return <div style={wrapStyle}><TranscribirBlockView block={block} /></div>;
     case 'columnas':        return <div style={wrapStyle}><ColumnasBlockView block={block} onPreview={onPreview} theme={theme} isMobile={isMobile} item={item} /></div>;
+    case 'puntuacion':      return <PuntuacionBlockView block={block} />;
     default: return null;
   }
 }
