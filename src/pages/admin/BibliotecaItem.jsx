@@ -996,6 +996,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
   const bt = ALL_BLOCK_META.find(b => b.type === block.type) || { label: block.type };
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
+  const isPuntuacion = block.type === 'puntuacion';
   const imgs = block.images || [];
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showColumnaModal, setShowColumnaModal] = useState(false);
@@ -1087,12 +1088,12 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         <span style={{ color: c, display: 'flex', flexShrink: 0 }}>{bt?.icon}</span>
         <span style={{ flex: 1, fontSize: 12, color: 'var(--t-text)', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', minWidth: 0 }}>{bt?.label}</span>
         <div style={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          {!isCorreccion && (
+          {!isCorreccion && !isPuntuacion && (
             <>
               {(() => {
                 const isNested = onMoveLeft !== undefined || onMoveRight !== undefined;
-                const upDis = !isNested && index === 0;
-                const downDis = !isNested && index === total - 1;
+                const upDis = !isNested && !onMoveUp;
+                const downDis = !isNested && !onMoveDown;
                 return (
                   <>
                     <button onClick={onMoveUp} disabled={upDis}
@@ -1491,6 +1492,8 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {block.type === 'puntuacion' && (
         <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+          {block.titulo && <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, textAlign: 'center' }}>{block.titulo}</div>}
+          {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', textAlign: 'center', marginTop: block.titulo ? -4 : 0 }}>{block.subtitulo}</div>}
           {block.valor != null ? (() => {
             const col = scoreColor(block.valor);
             const label = block.valor < 5 ? 'Suspenso' : block.valor < 7.5 ? 'Notable' : 'Sobresaliente';
@@ -1991,23 +1994,19 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         )}
 
         {/* Título */}
-        {draft.type !== 'puntuacion' && (
         <div>
           <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Título</label>
           <input value={draft.titulo || ''} onChange={e => update('titulo', e.target.value)}
             style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
         </div>
-        )}
 
         {/* Subtítulo */}
-        {draft.type !== 'puntuacion' && (
         <div>
           <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>Subtítulo</label>
           <input value={draft.subtitulo || ''} onChange={e => update('subtitulo', e.target.value)}
             placeholder="Opcional…"
             style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
         </div>
-        )}
 
         {/* Layout selector para imagen (antes de las imágenes) */}
         {draft.type === 'imagen' && (
@@ -3798,7 +3797,12 @@ export default function BibliotecaItem() {
             </span>
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {blocksData.map((block, idx) => (
+            {blocksData.map((block, idx) => {
+              const hasPuntuacionFirst = blocksData[0]?.type === 'puntuacion';
+              const correccionIdx = blocksData.findIndex(b => b.type === 'correccion');
+              const canMoveUp = idx > 0 && !(hasPuntuacionFirst && idx === 1);
+              const canMoveDown = idx < blocksData.length - 1 && !(correccionIdx !== -1 && idx === correccionIdx - 1);
+              return (
               <div key={block.id}>
                 <BlockDivider onAdd={() => { setInsertAtIndex(idx); setShowBlockSelectorModal(true); }} />
                 <BlockCard
@@ -3807,8 +3811,8 @@ export default function BibliotecaItem() {
                   total={blocksData.length}
                   onEdit={() => setEditingBlockId(block.id)}
                   onDelete={() => deleteBlock(block.id)}
-                  onMoveUp={() => moveBlock(block.id, -1)}
-                  onMoveDown={() => moveBlock(block.id, 1)}
+                  onMoveUp={canMoveUp ? () => moveBlock(block.id, -1) : null}
+                  onMoveDown={canMoveDown ? () => moveBlock(block.id, 1) : null}
                   onToggleVisible={() => toggleBlockVisible(block.id)}
                   itemAsunto={asunto}
                   itemAdelanto={adelanto}
@@ -3821,7 +3825,8 @@ export default function BibliotecaItem() {
                   isMobile={isMobile}
                 />
               </div>
-            ))}
+              );
+            })}
             <BlockDivider onAdd={() => { setInsertAtIndex(blocksData.length); setShowBlockSelectorModal(true); }} />
             <button
               onClick={() => { setInsertAtIndex(null); setShowBlockSelectorModal(true); }}
