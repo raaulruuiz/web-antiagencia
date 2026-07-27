@@ -296,7 +296,7 @@ export default function TrabajaConNosotros2() {
             <Carta>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Asunto: Sembrando tomates</h1>
               <p>&nbsp;</p>
-              <p>Para contratar a un profesional, yo no se lo que tú buscas. Pero si se lo pido yo.</p>
+              <p>Para contratar a un profesional, yo no se lo que tú buscas. Pero sí se lo que pido yo.</p>
               <p>&nbsp;</p>
               <p><strong>Por un lado,</strong> no me gusta la gente llorona, los flojos, los socialistas, la gente que se queja cuando algo le va mal en vez de buscar solución o su "solución" es sacarse un descuento de la manga o cualquier gilipollez por el estilo.</p>
               <p>&nbsp;</p>
