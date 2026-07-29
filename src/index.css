@@ -122,3 +122,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.blog-post-body a {
+  color: #7000FF;
+  text-decoration: underline;
+}

@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -90,9 +91,9 @@ export default function BlogPost({ slug }) {
           </p>
 
           {/* Body */}
-          <div className="text-gray-800 leading-relaxed space-y-6 text-lg">
+          <div className="text-gray-800 leading-relaxed space-y-6 text-lg blog-post-body">
             {paragraphs.map((p, i) => (
-              <p key={i}>{p}</p>
+              <p key={i} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p) }} />
             ))}
           </div>
         </article>
