@@ -128,7 +128,7 @@ export default function BlogPost({ slug }) {
               <Link
                 to={`/blog-email-marketing/${prev.slug}`}
                 style={{ color: "#7000FF" }}
-                className="hover:underline md:max-w-xs text-center md:text-left"
+                className="hover:underline w-full md:w-auto md:max-w-xs text-center md:text-left"
                 onClick={() => window.scrollTo(0, 0)}
               >
                 ← {prev.subject}
@@ -140,7 +140,7 @@ export default function BlogPost({ slug }) {
               <Link
                 to={`/blog-email-marketing/${next.slug}`}
                 style={{ color: "#7000FF" }}
-                className="hover:underline md:max-w-xs md:text-right text-center"
+                className="hover:underline w-full md:w-auto md:max-w-xs text-center md:text-right"
                 onClick={() => window.scrollTo(0, 0)}
               >
                 {next.subject} →
