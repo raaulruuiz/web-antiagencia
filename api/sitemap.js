@@ -1,4 +1,4 @@
-const https = require('https');
+import https from 'https';
 
 const SUPABASE_HOST = 'wphvmyqsxicyoifrlevt.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_cB3mpag9moVvhekQG6GBWw_ogz_nb9M';
@@ -19,7 +19,7 @@ const STATIC_URLS = [
 ];
 
 function fetchPosts() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const options = {
       hostname: SUPABASE_HOST,
       path: '/rest/v1/blog_posts?select=slug,published_at&published=eq.true&order=published_at.desc',
@@ -32,14 +32,13 @@ function fetchPosts() {
       let body = '';
       response.on('data', (chunk) => { body += chunk; });
       response.on('end', () => {
-        try { resolve(JSON.parse(body)); }
-        catch (e) { resolve([]); }
+        try { resolve(JSON.parse(body)); } catch { resolve([]); }
       });
     }).on('error', () => resolve([]));
   });
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   const posts = await fetchPosts();
 
   const blogUrls = (Array.isArray(posts) ? posts : []).map((p) => ({
@@ -63,4 +62,4 @@ ${allUrls.map((u) => `  <url>
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
   res.status(200).send(xml);
-};
+}
