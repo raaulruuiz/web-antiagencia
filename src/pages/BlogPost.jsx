@@ -123,12 +123,12 @@ export default function BlogPost({ slug }) {
 
         {/* Prev / Next navigation */}
         {(prev || next) && (
-          <nav className="mt-16 pt-8 border-t border-gray-200 flex flex-col md:flex-row md:justify-between gap-4 text-lg">
+          <nav className="mt-16 pt-8 border-t border-gray-200 flex flex-col md:flex-row md:justify-between gap-4 text-lg items-center md:items-start">
             {prev ? (
               <Link
                 to={`/blog-email-marketing/${prev.slug}`}
                 style={{ color: "#7000FF" }}
-                className="hover:underline md:max-w-xs"
+                className="hover:underline md:max-w-xs text-center md:text-left"
                 onClick={() => window.scrollTo(0, 0)}
               >
                 ← {prev.subject}
@@ -140,7 +140,7 @@ export default function BlogPost({ slug }) {
               <Link
                 to={`/blog-email-marketing/${next.slug}`}
                 style={{ color: "#7000FF" }}
-                className="hover:underline md:max-w-xs text-right"
+                className="hover:underline md:max-w-xs md:text-right text-center"
                 onClick={() => window.scrollTo(0, 0)}
               >
                 {next.subject} →
