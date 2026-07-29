@@ -29,6 +29,7 @@ import GraciasJorgeCoronado from './pages/GraciasJorgeCoronado';
 import CapsuleDigital from './pages/CapsuleDigital';
 import HablemosDeEmprender from './pages/HablemosDeEmprender';
 import BlogEmailMarketing from './pages/BlogEmailMarketing';
+import BlogPost from './pages/BlogPost';
 import ProhibidoEstacionarse from './pages/ProhibidoEstacionarse';
 import PixelLayout from './Layout';
 import LoomLogin from './pages/LoomLogin';
@@ -99,12 +100,28 @@ function SmartPage({ path, children }) {
 // ── Páginas dinámicas (creadas desde el admin, no hardcodeadas) ──
 function DynamicPage() {
   const location = useLocation();
+  const [blogPost, setBlogPost] = useState(undefined); // undefined=loading, null=not found
   const [page, setPage] = useState(undefined);
 
+  const slug = location.pathname.replace(/^\//, '');
+
   useEffect(() => {
-    supabase.from('paginas').select('*')
-      .eq('path', location.pathname).eq('publicada', true).maybeSingle()
-      .then(({ data }) => setPage(data || null));
+    setBlogPost(undefined);
+    setPage(undefined);
+
+    // 1. Check blog_posts first
+    supabase.from('blog_posts').select('slug').eq('slug', slug).eq('published', true).maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setBlogPost(data);
+        } else {
+          setBlogPost(null);
+          // 2. Fall through to paginas
+          supabase.from('paginas').select('*')
+            .eq('path', location.pathname).eq('publicada', true).maybeSingle()
+            .then(({ data: pageData }) => setPage(pageData || null));
+        }
+      });
   }, [location.pathname]);
 
   useEffect(() => {
@@ -112,6 +129,13 @@ function DynamicPage() {
     if (page.meta_titulo) document.title = page.meta_titulo;
   }, [page]);
 
+  // Still loading
+  if (blogPost === undefined) return null;
+
+  // It's a blog post
+  if (blogPost !== null) return <BlogPost slug={slug} />;
+
+  // Waiting for paginas check
   if (page === undefined) return null;
   if (!page) return <PageNotFound />;
   return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.contenido) }} />;
