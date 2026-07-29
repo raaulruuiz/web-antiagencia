@@ -81,6 +81,7 @@ export default function BlogPost({ slug }) {
 
   return (
     <>
+      <style>{`.blog-center { display: block; text-align: center; }`}</style>
       <Helmet>
         <title>{post.subject} — Anti-Blog Raúl Ruiz</title>
         <meta name="description" content={post.excerpt || post.subject} />
