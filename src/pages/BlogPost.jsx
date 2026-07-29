@@ -61,23 +61,21 @@ export default function BlogPost({ slug }) {
   if (post === undefined) return null;
   if (!post) return null; // caller handles 404
 
-  // Parsear el contenido en grupos con su nivel de espacio posterior:
-  // \n   = línea del mismo bloque → <br>
-  // \n\n = párrafo normal → mb-6
-  // \n\n\n = espacio grande (2 separadores en el email) → mb-12
+  // Parsear el contenido línea a línea preservando el tamaño del salto posterior:
+  // \n   = líneas adyacentes → mb-3 (pequeño espacio)
+  // \n\n = párrafo normal   → mb-8
+  // \n\n\n = sección grande → mb-12
   const paragraphGroups = (() => {
     const content = post.content_html || "";
     const groups = [];
-    let lastIndex = 0;
-    const re = /\n{2,}/g;
-    let m;
-    while ((m = re.exec(content)) !== null) {
-      const text = content.slice(lastIndex, m.index).trim();
-      if (text) groups.push({ text, bigGap: m[0].length >= 3 });
-      lastIndex = m.index + m[0].length;
+    const parts = content.split(/(\n+)/); // alterna: texto, saltos, texto, saltos...
+    for (let i = 0; i < parts.length; i += 2) {
+      const text = parts[i].trim();
+      const gap = parts[i + 1] || '';
+      if (!text) continue;
+      const gapSize = gap.length >= 3 ? 'xl' : gap.length >= 2 ? 'lg' : 'sm';
+      groups.push({ text, gapSize });
     }
-    const last = content.slice(lastIndex).trim();
-    if (last) groups.push({ text: last, bigGap: false });
     return groups;
   })();
 
@@ -107,16 +105,11 @@ export default function BlogPost({ slug }) {
 
           {/* Body */}
           <div className="text-gray-800 leading-relaxed text-lg blog-post-body">
-            {paragraphGroups.map(({ text, bigGap }, i) => {
-              const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            {paragraphGroups.map(({ text, gapSize }, i) => {
+              const mb = gapSize === 'xl' ? 'mb-12' : gapSize === 'lg' ? 'mb-8' : 'mb-3';
               return (
-                <p key={i} className={bigGap ? "mb-14" : "mb-8"}>
-                  {lines.map((line, j) => (
-                    <span key={j}>
-                      {j > 0 && <br />}
-                      <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line) }} />
-                    </span>
-                  ))}
+                <p key={i} className={mb}>
+                  <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(text) }} />
                 </p>
               );
             })}
