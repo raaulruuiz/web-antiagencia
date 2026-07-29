@@ -110,7 +110,7 @@ export default function BlogPost({ slug }) {
             {paragraphGroups.map(({ text, bigGap }, i) => {
               const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
               return (
-                <p key={i} className={bigGap ? "mb-12" : "mb-6"}>
+                <p key={i} className={bigGap ? "mb-14" : "mb-8"}>
                   {lines.map((line, j) => (
                     <span key={j}>
                       {j > 0 && <br />}
