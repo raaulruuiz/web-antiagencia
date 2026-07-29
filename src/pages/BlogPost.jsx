@@ -61,7 +61,7 @@ export default function BlogPost({ slug }) {
   if (!post) return null; // caller handles 404
 
   const paragraphs = (post.content_html || "")
-    .split(/\n\n+/)
+    .split(/\n/)
     .map((p) => p.trim())
     .filter((p) => p.length > 0);
 
@@ -83,17 +83,14 @@ export default function BlogPost({ slug }) {
           </h1>
 
           {/* Meta */}
-          <p className="text-sm text-gray-400 mb-10">
+          <p className="text-lg mb-10">
             <Link to="/" style={{ color: "#7000FF" }}>
               Por Raúl Ruiz
             </Link>
-            {post.published_at && (
-              <> · {formatDate(post.published_at)}</>
-            )}
           </p>
 
           {/* Body */}
-          <div className="text-gray-800 leading-relaxed space-y-5">
+          <div className="text-gray-800 leading-relaxed space-y-6 text-lg">
             {paragraphs.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
@@ -102,7 +99,7 @@ export default function BlogPost({ slug }) {
 
         {/* Prev / Next navigation */}
         {(prev || next) && (
-          <nav className="mt-16 pt-8 border-t border-gray-200 flex justify-between gap-4 text-sm">
+          <nav className="mt-16 pt-8 border-t border-gray-200 flex justify-between gap-4 text-lg">
             {prev ? (
               <Link
                 to={`/${prev.slug}`}
@@ -128,9 +125,10 @@ export default function BlogPost({ slug }) {
 
         {/* Subscribe form */}
         <div className="mt-16 pt-8 border-t border-gray-200">
-          <p className="text-gray-700 mb-6">
-            Si te ha gustado esto, en mi lista mando emails así cada semana.
+          <p className="text-center font-bold text-gray-900 text-lg mb-6">
+            Suscríbete gratis y date de baja cuando te apetezca
           </p>
+          <div style={{ color: '#000' }}>
           <MailerLiteForm
             mlb2Id="38376765"
             accountId="686354"
@@ -140,6 +138,7 @@ export default function BlogPost({ slug }) {
             instanceId="blogpost"
             scriptVersion="vb397d78ebaa8a0f631d35384c46d781b"
           />
+          </div>
         </div>
       </BlogLayout>
     </>
