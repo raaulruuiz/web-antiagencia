@@ -128,7 +128,7 @@ export default function BlogPost({ slug }) {
           <nav className="mt-16 pt-8 border-t border-gray-200 flex justify-between gap-4 text-lg">
             {prev ? (
               <Link
-                to={`/${prev.slug}`}
+                to={`/blog-email-marketing/${prev.slug}`}
                 style={{ color: "#7000FF" }}
                 className="hover:underline max-w-xs"
               >
@@ -139,7 +139,7 @@ export default function BlogPost({ slug }) {
             )}
             {next && (
               <Link
-                to={`/${next.slug}`}
+                to={`/blog-email-marketing/${next.slug}`}
                 style={{ color: "#7000FF" }}
                 className="hover:underline max-w-xs text-right"
               >

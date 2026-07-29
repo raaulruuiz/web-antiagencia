@@ -4,7 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -30,6 +30,10 @@ import CapsuleDigital from './pages/CapsuleDigital';
 import HablemosDeEmprender from './pages/HablemosDeEmprender';
 import BlogEmailMarketing from './pages/BlogEmailMarketing';
 import BlogPost from './pages/BlogPost';
+function BlogPostPage() {
+  const { slug } = useParams();
+  return <BlogPost slug={slug} />;
+}
 import ProhibidoEstacionarse from './pages/ProhibidoEstacionarse';
 import PixelLayout from './Layout';
 import LoomLogin from './pages/LoomLogin';
@@ -200,6 +204,7 @@ const AuthenticatedApp = () => {
       <Route path="/prohibido-estacionarse" element={<PixelLayout><ProhibidoEstacionarse /></PixelLayout>} />
       <Route path="/gracias-podcast" element={<PixelLayout><GraciasJorgeCoronado /></PixelLayout>} />
       <Route path="/blog-email-marketing" element={<BlogEmailMarketing />} />
+      <Route path="/blog-email-marketing/:slug" element={<BlogPostPage />} />
       <Route path="*" element={<DynamicPage />} />
     </Routes>
     <CookieBanner />

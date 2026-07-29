@@ -55,7 +55,7 @@ export default function BlogEmailMarketing() {
               <div key={post.slug}>
                 <article className="py-8">
                   <h2 className="text-2xl md:text-3xl text-gray-900 font-normal mb-2 leading-snug">
-                    <Link to={`/${post.slug}`} className="hover:underline">
+                    <Link to={`/blog-email-marketing/${post.slug}`} className="hover:underline">
                       {post.subject}
                     </Link>
                   </h2>
@@ -66,7 +66,7 @@ export default function BlogEmailMarketing() {
                     <p className="text-gray-700 leading-relaxed mb-4">{post.excerpt}</p>
                   )}
                   <Link
-                    to={`/${post.slug}`}
+                    to={`/blog-email-marketing/${post.slug}`}
                     className="text-sm hover:underline"
                     style={{ color: "#7000FF" }}
                   >
