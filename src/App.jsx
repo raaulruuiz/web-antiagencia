@@ -28,6 +28,7 @@ import JorgeCoronado from './pages/JorgeCoronado';
 import GraciasJorgeCoronado from './pages/GraciasJorgeCoronado';
 import CapsuleDigital from './pages/CapsuleDigital';
 import HablemosDeEmprender from './pages/HablemosDeEmprender';
+import BlogEmailMarketing from './pages/BlogEmailMarketing';
 import ProhibidoEstacionarse from './pages/ProhibidoEstacionarse';
 import PixelLayout from './Layout';
 import LoomLogin from './pages/LoomLogin';
@@ -174,6 +175,7 @@ const AuthenticatedApp = () => {
       <Route path="/hablemos-de-emprender" element={<PixelLayout><HablemosDeEmprender /></PixelLayout>} />
       <Route path="/prohibido-estacionarse" element={<PixelLayout><ProhibidoEstacionarse /></PixelLayout>} />
       <Route path="/gracias-podcast" element={<PixelLayout><GraciasJorgeCoronado /></PixelLayout>} />
+      <Route path="/blog-email-marketing" element={<BlogEmailMarketing />} />
       <Route path="*" element={<DynamicPage />} />
     </Routes>
     <CookieBanner />
