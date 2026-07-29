@@ -125,6 +125,7 @@ export default function BlogPost({ slug }) {
                 to={`/blog-email-marketing/${prev.slug}`}
                 style={{ color: "#7000FF" }}
                 className="hover:underline max-w-xs"
+                onClick={() => window.scrollTo(0, 0)}
               >
                 ← {prev.subject}
               </Link>
@@ -136,6 +137,7 @@ export default function BlogPost({ slug }) {
                 to={`/blog-email-marketing/${next.slug}`}
                 style={{ color: "#7000FF" }}
                 className="hover:underline max-w-xs text-right"
+                onClick={() => window.scrollTo(0, 0)}
               >
                 {next.subject} →
               </Link>
