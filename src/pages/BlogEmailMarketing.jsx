@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/lib/supabaseClient";
 import BlogLayout from "@/components/blog/BlogLayout";
 
-const POSTS_PER_PAGE = 10;
+const POSTS_PER_PAGE = 5;
 
 export default function BlogEmailMarketing() {
   const [posts, setPosts] = useState([]);
