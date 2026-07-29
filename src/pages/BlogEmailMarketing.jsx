@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/lib/supabaseClient";
 import BlogLayout from "@/components/blog/BlogLayout";
@@ -7,9 +7,12 @@ import BlogLayout from "@/components/blog/BlogLayout";
 const POSTS_PER_PAGE = 5;
 
 export default function BlogEmailMarketing() {
+  const { page: pageParam } = useParams();
+  const navigate = useNavigate();
+  const page = Math.max(1, parseInt(pageParam, 10) || 1);
+
   const [posts, setPosts] = useState([]);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,14 +35,33 @@ export default function BlogEmailMarketing() {
 
   const totalPages = Math.ceil(total / POSTS_PER_PAGE);
 
+  function goToPage(p) {
+    window.scrollTo(0, 0);
+    if (p === 1) {
+      navigate("/blog-email-marketing");
+    } else {
+      navigate(`/blog-email-marketing/page/${p}`);
+    }
+  }
+
   return (
     <>
       <Helmet>
-        <title>Anti-Blog de Email Marketing — Raúl Ruiz Antiagencia</title>
+        <title>
+          {page > 1
+            ? `Anti-Blog de Email Marketing — Página ${page} — Raúl Ruiz Antiagencia`
+            : "Anti-Blog de Email Marketing — Raúl Ruiz Antiagencia"}
+        </title>
         <meta
           name="description"
           content="Los emails que mando a mi lista, publicados tal cual. Email marketing sin filtros."
         />
+        {page > 1 && (
+          <link
+            rel="canonical"
+            href={`https://antiagencia.es/blog-email-marketing/page/${page}`}
+          />
+        )}
       </Helmet>
 
       <BlogLayout>
@@ -93,7 +115,7 @@ export default function BlogEmailMarketing() {
                     ) : (
                       <button
                         key={p}
-                        onClick={() => { setPage(p); window.scrollTo(0, 0); }}
+                        onClick={() => goToPage(p)}
                         className="w-9 h-9 text-sm rounded transition-colors"
                         style={
                           p === page
@@ -107,7 +129,7 @@ export default function BlogEmailMarketing() {
                   )}
                 {page < totalPages && (
                   <button
-                    onClick={() => { setPage(prev => prev + 1); window.scrollTo(0, 0); }}
+                    onClick={() => goToPage(page + 1)}
                     className="ml-2 text-sm hover:underline"
                     style={{ color: "#7000FF" }}
                   >

@@ -204,6 +204,7 @@ const AuthenticatedApp = () => {
       <Route path="/prohibido-estacionarse" element={<PixelLayout><ProhibidoEstacionarse /></PixelLayout>} />
       <Route path="/gracias-podcast" element={<PixelLayout><GraciasJorgeCoronado /></PixelLayout>} />
       <Route path="/blog-email-marketing" element={<BlogEmailMarketing />} />
+      <Route path="/blog-email-marketing/page/:page" element={<BlogEmailMarketing />} />
       <Route path="/blog-email-marketing/:slug" element={<BlogPostPage />} />
       <Route path="*" element={<DynamicPage />} />
     </Routes>
