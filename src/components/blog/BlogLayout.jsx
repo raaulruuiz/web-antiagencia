@@ -5,7 +5,7 @@ export default function BlogLayout({ children }) {
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ fontFamily: "'Georgia', serif" }}>
       {/* Header */}
-      <header className="px-8 py-5 flex items-center justify-between w-full">
+      <header className="px-16 py-5 flex items-center justify-between w-full">
         <Link to="/" style={{ color: "#0067FD" }} className="text-lg font-bold">
           Raúl Ruiz — Antiagencia
         </Link>
