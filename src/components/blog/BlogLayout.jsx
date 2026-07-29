@@ -1,18 +1,18 @@
 import { Link } from "react-router-dom";
-import Footer from "@/components/landing/Footer";
+import { createPageUrl } from "@/utils";
 
-export default function BlogLayout({ children, showBlogLink = false }) {
+export default function BlogLayout({ children }) {
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ fontFamily: "'Georgia', serif" }}>
       {/* Header */}
-      <header className="px-6 py-5 flex items-center justify-between max-w-3xl mx-auto w-full">
-        <span className="font-bold text-lg" style={{ color: "#0067FD" }}>
+      <header className="px-3 py-5 flex items-center justify-between w-full">
+        <Link to="/" style={{ color: "#0067FD" }} className="text-lg">
           Raúl Ruiz — Antiagencia
-        </span>
+        </Link>
         <Link
           to="/blog-email-marketing"
-          className="text-sm uppercase tracking-wide font-semibold border px-3 py-1"
-          style={{ color: "#7000FF", borderColor: "#7000FF" }}
+          className="text-sm uppercase tracking-wide"
+          style={{ color: "#7000FF" }}
         >
           Anti-Blog
         </Link>
@@ -25,17 +25,27 @@ export default function BlogLayout({ children, showBlogLink = false }) {
         </div>
       </main>
 
-      {/* Logo centrado encima del footer */}
-      <div className="flex justify-center py-8 border-t border-gray-200">
+      {/* Logo centrado */}
+      <div className="flex justify-center py-8">
         <img
-          src="/images/86f91b46c_LogotextoAnti-Agencia.png"
+          src="/images/82b3b8d5c_freepik__background__33914.png"
           alt="Antiagencia"
-          className="h-10 w-auto object-contain"
-          style={{ filter: "brightness(0)" }}
+          className="h-16 w-auto object-contain"
         />
       </div>
 
-      <Footer />
+      {/* Footer mínimo */}
+      <footer className="bg-[#0a0a0a] text-white py-8">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-white/40 mb-4">
+          <Link to={createPageUrl("PoliticaPrivacidad")} className="hover:text-white transition-colors">Privacidad</Link>
+          <Link to={createPageUrl("AvisoLegal")} className="hover:text-white transition-colors">Aviso Legal</Link>
+          <Link to={createPageUrl("PoliticaCookies")} className="hover:text-white transition-colors">Política de Cookies</Link>
+          <a href="mailto:raul@antiagencia.es" className="hover:text-white transition-colors">raul@antiagencia.es</a>
+        </div>
+        <p className="text-white/25 text-xs tracking-widest text-center">
+          ANTIAGENCIA | Copyright 2026 ©
+        </p>
+      </footer>
     </div>
   );
 }
