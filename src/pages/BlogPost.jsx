@@ -123,24 +123,24 @@ export default function BlogPost({ slug }) {
 
         {/* Prev / Next navigation */}
         {(prev || next) && (
-          <nav className="mt-16 pt-8 border-t border-gray-200 flex justify-between gap-4 text-lg">
+          <nav className="mt-16 pt-8 border-t border-gray-200 flex flex-col md:flex-row md:justify-between gap-4 text-lg">
             {prev ? (
               <Link
                 to={`/blog-email-marketing/${prev.slug}`}
                 style={{ color: "#7000FF" }}
-                className="hover:underline max-w-xs"
+                className="hover:underline md:max-w-xs"
                 onClick={() => window.scrollTo(0, 0)}
               >
                 ← {prev.subject}
               </Link>
             ) : (
-              <span />
+              <span className="hidden md:block" />
             )}
             {next && (
               <Link
                 to={`/blog-email-marketing/${next.slug}`}
                 style={{ color: "#7000FF" }}
-                className="hover:underline max-w-xs text-right"
+                className="hover:underline md:max-w-xs text-right"
                 onClick={() => window.scrollTo(0, 0)}
               >
                 {next.subject} →
