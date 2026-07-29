@@ -61,12 +61,25 @@ export default function BlogPost({ slug }) {
   if (post === undefined) return null;
   if (!post) return null; // caller handles 404
 
-  // Separar por doble salto (= nuevo párrafo con espacio grande)
-  // Dentro de cada grupo, los \n simples son saltos de línea dentro del mismo párrafo
-  const paragraphGroups = (post.content_html || "")
-    .split(/\n\n+/)
-    .map((g) => g.trim())
-    .filter((g) => g.length > 0);
+  // Parsear el contenido en grupos con su nivel de espacio posterior:
+  // \n   = línea del mismo bloque → <br>
+  // \n\n = párrafo normal → mb-6
+  // \n\n\n = espacio grande (2 separadores en el email) → mb-12
+  const paragraphGroups = (() => {
+    const content = post.content_html || "";
+    const groups = [];
+    let lastIndex = 0;
+    const re = /\n{2,}/g;
+    let m;
+    while ((m = re.exec(content)) !== null) {
+      const text = content.slice(lastIndex, m.index).trim();
+      if (text) groups.push({ text, bigGap: m[0].length >= 3 });
+      lastIndex = m.index + m[0].length;
+    }
+    const last = content.slice(lastIndex).trim();
+    if (last) groups.push({ text: last, bigGap: false });
+    return groups;
+  })();
 
   return (
     <>
@@ -94,10 +107,10 @@ export default function BlogPost({ slug }) {
 
           {/* Body */}
           <div className="text-gray-800 leading-relaxed text-lg blog-post-body">
-            {paragraphGroups.map((group, i) => {
-              const lines = group.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            {paragraphGroups.map(({ text, bigGap }, i) => {
+              const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
               return (
-                <p key={i} className="mb-8">
+                <p key={i} className={bigGap ? "mb-12" : "mb-6"}>
                   {lines.map((line, j) => (
                     <span key={j}>
                       {j > 0 && <br />}
