@@ -137,7 +137,7 @@ export default function BlogPost({ slug }) {
         )}
 
         {/* Subscribe form */}
-        <div className="mt-16 pt-8 border-t border-gray-200">
+        <div className="mt-16 pt-8 border-t border-gray-200 blog-subscribe-form">
           <p className="text-center font-bold text-gray-900 text-lg mb-6">
             Suscríbete gratis y date de baja cuando te apetezca
           </p>
@@ -151,6 +151,9 @@ export default function BlogPost({ slug }) {
             instanceId="blogpost"
             scriptVersion="vb397d78ebaa8a0f631d35384c46d781b"
           />
+          <p className="text-xs text-gray-400 mt-4 leading-relaxed">
+            Para cumplir con el RGPD (Reglamento General de Protección de Datos) y entender que tus datos están seguros, debes leer y aceptar la política de privacidad. Tus datos serán guardados en MailerLite, proveedor de email marketing. MailerLite también cumple con el RGPD, así que todo está protegido y amparado por la ley.
+          </p>
           </div>
         </div>
       </BlogLayout>
