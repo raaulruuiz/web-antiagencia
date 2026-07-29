@@ -59,8 +59,8 @@ export default function BlogEmailMarketing() {
                       {post.subject}
                     </Link>
                   </h2>
-                  <p className="text-sm mb-4" style={{ color: "#7000FF" }}>
-                    Por Raúl Ruiz
+                  <p className="text-sm mb-4">
+                    <Link to="/" style={{ color: "#7000FF" }}>Por Raúl Ruiz</Link>
                   </p>
                   {post.excerpt && (
                     <p className="text-gray-700 leading-relaxed mb-4">{post.excerpt}</p>
