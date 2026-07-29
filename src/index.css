@@ -127,3 +127,19 @@
   color: #7000FF;
   text-decoration: underline;
 }
+
+/* MailerLite form: checkbox inline con el label */
+.ml-form-checkboxRow label.checkbox {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 8px;
+  padding-left: 0 !important;
+  min-height: 0 !important;
+}
+.ml-form-checkboxRow .label-description {
+  color: #000 !important;
+}
+.ml-form-checkboxRow .label-description p,
+.ml-form-checkboxRow .label-description a {
+  color: #000 !important;
+}

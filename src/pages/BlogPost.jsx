@@ -61,10 +61,12 @@ export default function BlogPost({ slug }) {
   if (post === undefined) return null;
   if (!post) return null; // caller handles 404
 
-  const paragraphs = (post.content_html || "")
-    .split(/\n/)
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0);
+  // Separar por doble salto (= nuevo párrafo con espacio grande)
+  // Dentro de cada grupo, los \n simples son saltos de línea dentro del mismo párrafo
+  const paragraphGroups = (post.content_html || "")
+    .split(/\n\n+/)
+    .map((g) => g.trim())
+    .filter((g) => g.length > 0);
 
   return (
     <>
@@ -91,10 +93,20 @@ export default function BlogPost({ slug }) {
           </p>
 
           {/* Body */}
-          <div className="text-gray-800 leading-relaxed space-y-6 text-lg blog-post-body">
-            {paragraphs.map((p, i) => (
-              <p key={i} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p) }} />
-            ))}
+          <div className="text-gray-800 leading-relaxed text-lg blog-post-body">
+            {paragraphGroups.map((group, i) => {
+              const lines = group.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+              return (
+                <p key={i} className="mb-8">
+                  {lines.map((line, j) => (
+                    <span key={j}>
+                      {j > 0 && <br />}
+                      <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line) }} />
+                    </span>
+                  ))}
+                </p>
+              );
+            })}
           </div>
         </article>
 
