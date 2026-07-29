@@ -81,7 +81,11 @@ export default function BlogPost({ slug }) {
 
   return (
     <>
-      <style>{`.blog-center { display: block; text-align: center; }`}</style>
+      <style>{`
+        .blog-center { display: block; text-align: center; }
+        .blog-post-body u { text-decoration: underline; }
+        .blog-post-body img { max-width: 100%; height: auto; margin: 0.5rem 0; }
+      `}</style>
       <Helmet>
         <title>{post.subject} — Anti-Blog Raúl Ruiz</title>
         <meta name="description" content={post.excerpt || post.subject} />
