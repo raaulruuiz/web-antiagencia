@@ -760,11 +760,11 @@ export default function BibliotecaPublica() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18, padding: '12px 14px', background: '#18181b', borderRadius: 8, border: '1px solid #27272a' }}>
                     <p style={{ margin: 0, fontSize: 12, color: 'var(--t-text)', lineHeight: 1.6 }}>
                       La puntuación media de los emails es <strong style={{ color: statsData.mediaGeneral < 5 ? '#ef4444' : statsData.mediaGeneral < 7.5 ? '#f97316' : '#22c55e' }}>{statsData.mediaGeneral.toFixed(1)}</strong> <span style={{ fontWeight: 400 }}>(de {statsData.totalEmails} emails evaluados)</span>
-                      {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> que se mandan tienen una nota suspensa <span style={{ fontWeight: 400 }}>(un {statsData.pctEmailsSuspensas}%)</span></>}.
+                      {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> <span style={{ fontWeight: 400 }}>(un {statsData.pctEmailsSuspensas.toFixed(2)}%)</span> que se mandan tienen una nota suspensa</>}.
                     </p>
                     <p style={{ margin: 0, fontSize: 12, color: 'var(--t-text)', lineHeight: 1.6 }}>
                       De las <strong>{statsData.totalMarcas} marcas</strong> que se han analizado, <strong>{statsData.marcasSuspensas}</strong> tienen una media de emails suspensa
-                      {statsData.cadaZMarcas != null && <>, lo que significa que <strong>1 de cada {statsData.cadaZMarcas} marcas</strong> manda malos emails <span style={{ fontWeight: 400 }}>(un {statsData.pctMarcasSuspensas}%)</span></>}.
+                      {statsData.cadaZMarcas != null && <>, lo que significa que <strong>1 de cada {statsData.cadaZMarcas} marcas</strong> <span style={{ fontWeight: 400 }}>(un {statsData.pctMarcasSuspensas.toFixed(2)}%)</span> manda malos emails</>}.
                     </p>
                   </div>
                   {/* Quartile chart */}
@@ -949,11 +949,11 @@ export default function BibliotecaPublica() {
             <div style={{ marginBottom: 16, background: '#111', border: '1px solid #27272a', borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
               <p style={{ margin: 0, fontSize: 13, color: 'var(--t-text)', lineHeight: 1.6 }}>
                 La puntuación media de los emails es <strong style={{ color: statsData.mediaGeneral < 5 ? '#ef4444' : statsData.mediaGeneral < 7.5 ? '#f97316' : '#22c55e' }}>{statsData.mediaGeneral.toFixed(1)}</strong> <span style={{ fontWeight: 400 }}>(de {statsData.totalEmails} emails evaluados)</span>
-                {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> que se mandan tienen una nota suspensa <span style={{ fontWeight: 400 }}>(un {statsData.pctEmailsSuspensas}%)</span></>}.
+                {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> <span style={{ fontWeight: 400 }}>(un {statsData.pctEmailsSuspensas.toFixed(2)}%)</span> que se mandan tienen una nota suspensa</>}.
               </p>
               <p style={{ margin: 0, fontSize: 13, color: 'var(--t-text)', lineHeight: 1.6 }}>
                 De las <strong>{statsData.totalMarcas} marcas</strong> que se han analizado, <strong>{statsData.marcasSuspensas}</strong> tienen una media de emails suspensa
-                {statsData.cadaZMarcas != null && <>, lo que significa que <strong>1 de cada {statsData.cadaZMarcas} marcas</strong> manda malos emails <span style={{ fontWeight: 400 }}>(un {statsData.pctMarcasSuspensas}%)</span></>}.
+                {statsData.cadaZMarcas != null && <>, lo que significa que <strong>1 de cada {statsData.cadaZMarcas} marcas</strong> <span style={{ fontWeight: 400 }}>(un {statsData.pctMarcasSuspensas.toFixed(2)}%)</span> manda malos emails</>}.
               </p>
               <button onClick={() => setShowStatsModal(true)} style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, color: '#6366f1', fontSize: 12, cursor: 'pointer', textDecoration: 'underline' }}>
                 Mostrar análisis completo
