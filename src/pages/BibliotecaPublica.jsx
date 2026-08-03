@@ -431,6 +431,7 @@ export default function BibliotecaPublica() {
     const mediaGeneral = scored.reduce((s, i) => s + i.puntuacion, 0) / scored.length;
     const suspensas = scored.filter(i => i.puntuacion < 5);
     const cadaXEmails = suspensas.length > 0 ? parseFloat((scored.length / suspensas.length).toFixed(2)) : null;
+    const pctEmailsSuspensas = parseFloat(((suspensas.length / scored.length) * 100).toFixed(1));
     // Per-brand stats
     const marcaMap = {};
     scored.forEach(i => {
@@ -449,6 +450,7 @@ export default function BibliotecaPublica() {
     }).sort((a, b) => a.avg - b.avg);
     const marcasSuspensas = marcas.filter(m => m.avg < 5);
     const cadaZMarcas = marcasSuspensas.length > 0 ? parseFloat((marcas.length / marcasSuspensas.length).toFixed(2)) : null;
+    const pctMarcasSuspensas = marcas.length > 0 ? parseFloat(((marcasSuspensas.length / marcas.length) * 100).toFixed(1)) : null;
 
     // Evolución temporal (por mes)
     const byMonth = {};
@@ -475,7 +477,7 @@ export default function BibliotecaPublica() {
       automatizaciones: { count: automatizaciones.length, avg: automatizaciones.length ? automatizaciones.reduce((s, i) => s + i.puntuacion, 0) / automatizaciones.length : null },
     };
 
-    return { mediaGeneral, cadaXEmails, totalEmails: scored.length, totalMarcas: marcas.length, marcasSuspensas: marcasSuspensas.length, cadaZMarcas, marcas, evolucion, histograma, subcat };
+    return { mediaGeneral, cadaXEmails, pctEmailsSuspensas, totalEmails: scored.length, totalMarcas: marcas.length, marcasSuspensas: marcasSuspensas.length, cadaZMarcas, pctMarcasSuspensas, marcas, evolucion, histograma, subcat };
   }, [items, isPro]);
 
   const s = { fontFamily: 'system-ui, sans-serif' };
@@ -758,11 +760,11 @@ export default function BibliotecaPublica() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18, padding: '12px 14px', background: '#18181b', borderRadius: 8, border: '1px solid #27272a' }}>
                     <p style={{ margin: 0, fontSize: 12, color: 'var(--t-text)', lineHeight: 1.6 }}>
                       La puntuación media de los emails es <strong style={{ color: statsData.mediaGeneral < 5 ? '#ef4444' : statsData.mediaGeneral < 7.5 ? '#f97316' : '#22c55e' }}>{statsData.mediaGeneral.toFixed(1)}</strong> <span style={{ fontWeight: 400 }}>(de {statsData.totalEmails} emails evaluados)</span>
-                      {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> que se mandan tienen una nota suspensa</>}.
+                      {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> que se mandan tienen una nota suspensa <span style={{ fontWeight: 400 }}>(un {statsData.pctEmailsSuspensas}%)</span></>}.
                     </p>
                     <p style={{ margin: 0, fontSize: 12, color: 'var(--t-text)', lineHeight: 1.6 }}>
                       De las <strong>{statsData.totalMarcas} marcas</strong> que se han analizado, <strong>{statsData.marcasSuspensas}</strong> tienen una media de emails suspensa
-                      {statsData.cadaZMarcas != null && <>, lo que significa que <strong>1 de cada {statsData.cadaZMarcas} marcas</strong> manda malos emails</>}.
+                      {statsData.cadaZMarcas != null && <>, lo que significa que <strong>1 de cada {statsData.cadaZMarcas} marcas</strong> manda malos emails <span style={{ fontWeight: 400 }}>(un {statsData.pctMarcasSuspensas}%)</span></>}.
                     </p>
                   </div>
                   {/* Quartile chart */}
@@ -947,11 +949,11 @@ export default function BibliotecaPublica() {
             <div style={{ marginBottom: 16, background: '#111', border: '1px solid #27272a', borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
               <p style={{ margin: 0, fontSize: 13, color: 'var(--t-text)', lineHeight: 1.6 }}>
                 La puntuación media de los emails es <strong style={{ color: statsData.mediaGeneral < 5 ? '#ef4444' : statsData.mediaGeneral < 7.5 ? '#f97316' : '#22c55e' }}>{statsData.mediaGeneral.toFixed(1)}</strong> <span style={{ fontWeight: 400 }}>(de {statsData.totalEmails} emails evaluados)</span>
-                {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> que se mandan tienen una nota suspensa</>}.
+                {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> que se mandan tienen una nota suspensa <span style={{ fontWeight: 400 }}>(un {statsData.pctEmailsSuspensas}%)</span></>}.
               </p>
               <p style={{ margin: 0, fontSize: 13, color: 'var(--t-text)', lineHeight: 1.6 }}>
                 De las <strong>{statsData.totalMarcas} marcas</strong> que se han analizado, <strong>{statsData.marcasSuspensas}</strong> tienen una media de emails suspensa
-                {statsData.cadaZMarcas != null && <>, lo que significa que <strong>1 de cada {statsData.cadaZMarcas} marcas</strong> manda malos emails</>}.
+                {statsData.cadaZMarcas != null && <>, lo que significa que <strong>1 de cada {statsData.cadaZMarcas} marcas</strong> manda malos emails <span style={{ fontWeight: 400 }}>(un {statsData.pctMarcasSuspensas}%)</span></>}.
               </p>
               <button onClick={() => setShowStatsModal(true)} style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, color: '#6366f1', fontSize: 12, cursor: 'pointer', textDecoration: 'underline' }}>
                 Mostrar análisis completo
