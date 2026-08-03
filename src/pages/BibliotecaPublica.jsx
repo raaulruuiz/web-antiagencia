@@ -723,11 +723,61 @@ export default function BibliotecaPublica() {
             {showStatsModal && (
               <>
                 <div onClick={() => setShowStatsModal(false)} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.6)' }} />
-                <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 201, background: 'var(--t-surface, #111)', border: '1px solid #27272a', borderRadius: 12, padding: '24px', width: 'min(520px, 90vw)', maxHeight: '80vh', overflowY: 'auto' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 201, background: 'var(--t-surface, #111)', border: '1px solid #27272a', borderRadius: 12, padding: '24px', width: 'min(560px, 92vw)', maxHeight: '85vh', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--t-text)' }}>Análisis por marca</span>
                     <button onClick={() => setShowStatsModal(false)} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>✕</button>
                   </div>
+                  {/* Summary lines */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18, padding: '12px 14px', background: '#18181b', borderRadius: 8, border: '1px solid #27272a' }}>
+                    <p style={{ margin: 0, fontSize: 12, color: 'var(--t-text)', lineHeight: 1.6 }}>
+                      La puntuación media de los emails es <strong style={{ color: statsData.mediaGeneral < 5 ? '#ef4444' : statsData.mediaGeneral < 7.5 ? '#f97316' : '#22c55e' }}>{statsData.mediaGeneral.toFixed(1)}</strong>
+                      {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> que se mandan tienen una nota suspensa</>}.
+                    </p>
+                    <p style={{ margin: 0, fontSize: 12, color: 'var(--t-text)', lineHeight: 1.6 }}>
+                      De las <strong>{statsData.totalMarcas} marcas</strong> que se han analizado, <strong>{statsData.marcasSuspensas}</strong> tienen una media de emails suspensa
+                      {statsData.cadaZMarcas != null && <>, lo que significa que <strong>1 de cada {statsData.cadaZMarcas} marcas</strong> manda malos emails</>}.
+                    </p>
+                  </div>
+                  {/* Quartile chart */}
+                  {(() => {
+                    const avgs = statsData.marcas.map(m => m.avg).sort((a, b) => a - b);
+                    const q1 = avgs[Math.floor((avgs.length - 1) * 0.25)];
+                    const q2 = avgs[Math.floor((avgs.length - 1) * 0.5)];
+                    const q3 = avgs[Math.floor((avgs.length - 1) * 0.75)];
+                    const quartiles = [
+                      { label: 'Q1', range: `0–${q1.toFixed(1)}`, color: '#ef4444', bg: 'rgba(239,68,68,0.08)', marks: statsData.marcas.filter(m => m.avg <= q1) },
+                      { label: 'Q2', range: `${q1.toFixed(1)}–${q2.toFixed(1)}`, color: '#f97316', bg: 'rgba(249,115,22,0.08)', marks: statsData.marcas.filter(m => m.avg > q1 && m.avg <= q2) },
+                      { label: 'Q3', range: `${q2.toFixed(1)}–${q3.toFixed(1)}`, color: '#eab308', bg: 'rgba(234,179,8,0.08)', marks: statsData.marcas.filter(m => m.avg > q2 && m.avg <= q3) },
+                      { label: 'Q4', range: `${q3.toFixed(1)}–10`, color: '#22c55e', bg: 'rgba(34,197,94,0.08)', marks: statsData.marcas.filter(m => m.avg > q3) },
+                    ];
+                    return (
+                      <div style={{ marginBottom: 18 }}>
+                        <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Distribución por cuartil</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                          {quartiles.map(q => (
+                            <div key={q.label} style={{ background: q.bg, border: `1px solid ${q.color}33`, borderRadius: 8, padding: '8px 10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 6 }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: q.color }}>{q.label}</span>
+                                <span style={{ fontSize: 9, color: '#52525b' }}>{q.range}</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                {q.marks.length === 0 && <span style={{ fontSize: 10, color: '#3f3f46', fontStyle: 'italic' }}>—</span>}
+                                {q.marks.map(m => (
+                                  <div key={m.name} style={{ display: 'flex', alignItems: 'center', gap: 5, filter: m.blurred ? 'blur(4px)' : 'none', userSelect: m.blurred ? 'none' : 'auto' }}>
+                                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: q.color, flexShrink: 0, display: 'inline-block' }} />
+                                    <span style={{ fontSize: 10, color: 'var(--t-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</span>
+                                    <span style={{ fontSize: 10, fontWeight: 700, color: q.color, marginLeft: 'auto', flexShrink: 0 }}>{m.avg.toFixed(1)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  {/* Table */}
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid #27272a' }}>
