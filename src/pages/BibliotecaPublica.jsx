@@ -449,7 +449,33 @@ export default function BibliotecaPublica() {
     }).sort((a, b) => a.avg - b.avg);
     const marcasSuspensas = marcas.filter(m => m.avg < 5);
     const cadaZMarcas = marcasSuspensas.length > 0 ? parseFloat((marcas.length / marcasSuspensas.length).toFixed(2)) : null;
-    return { mediaGeneral, cadaXEmails, totalMarcas: marcas.length, marcasSuspensas: marcasSuspensas.length, cadaZMarcas, marcas };
+
+    // Evolución temporal (por mes)
+    const byMonth = {};
+    scored.filter(i => i.enviado_el).forEach(i => {
+      const mes = i.enviado_el.substring(0, 7); // YYYY-MM
+      if (!byMonth[mes]) byMonth[mes] = [];
+      byMonth[mes].push(i.puntuacion);
+    });
+    const evolucion = Object.entries(byMonth)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([mes, punts]) => ({ mes, avg: punts.reduce((s, v) => s + v, 0) / punts.length, count: punts.length }));
+
+    // Histograma de distribución (0–10 enteros)
+    const histograma = Array.from({ length: 11 }, (_, i) => ({
+      score: i,
+      count: scored.filter(e => Math.round(e.puntuacion) === i).length,
+    }));
+
+    // Campañas vs automatizaciones
+    const campanas = scored.filter(i => i.subcategoria === 'campana');
+    const automatizaciones = scored.filter(i => i.subcategoria === 'automatizacion');
+    const subcat = {
+      campanas: { count: campanas.length, avg: campanas.length ? campanas.reduce((s, i) => s + i.puntuacion, 0) / campanas.length : null },
+      automatizaciones: { count: automatizaciones.length, avg: automatizaciones.length ? automatizaciones.reduce((s, i) => s + i.puntuacion, 0) / automatizaciones.length : null },
+    };
+
+    return { mediaGeneral, cadaXEmails, totalMarcas: marcas.length, marcasSuspensas: marcasSuspensas.length, cadaZMarcas, marcas, evolucion, histograma, subcat };
   }, [items, isPro]);
 
   const s = { fontFamily: 'system-ui, sans-serif' };
@@ -781,6 +807,118 @@ export default function BibliotecaPublica() {
                       </div>
                     );
                   })()}
+                  {/* Evolución temporal */}
+                  {statsData.evolucion.length >= 2 && (() => {
+                    const W = 460, H = 90, pad = { t: 8, r: 8, b: 28, l: 32 };
+                    const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+                    const avgs = statsData.evolucion.map(d => d.avg);
+                    const minV = Math.min(...avgs), maxV = Math.max(...avgs);
+                    const rangeV = maxV - minV || 1;
+                    const xOf = (i) => pad.l + (i / (avgs.length - 1)) * iw;
+                    const yOf = (v) => pad.t + ih - ((v - minV) / rangeV) * ih;
+                    const pts = avgs.map((v, i) => `${xOf(i)},${yOf(v)}`).join(' ');
+                    const area = `M${xOf(0)},${yOf(avgs[0])} ` + avgs.slice(1).map((v, i) => `L${xOf(i + 1)},${yOf(v)}`).join(' ') + ` L${xOf(avgs.length - 1)},${pad.t + ih} L${xOf(0)},${pad.t + ih} Z`;
+                    const labelStep = Math.ceil(statsData.evolucion.length / 6);
+                    return (
+                      <div style={{ marginBottom: 18 }}>
+                        <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Evolución temporal (media por mes)</span>
+                        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+                          <defs>
+                            <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#6366f1" stopOpacity="0.35" />
+                              <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                            </linearGradient>
+                          </defs>
+                          {/* Grid lines */}
+                          {[0, 0.5, 1].map(t => {
+                            const y = pad.t + ih * (1 - t);
+                            const val = minV + rangeV * t;
+                            return (
+                              <g key={t}>
+                                <line x1={pad.l} y1={y} x2={pad.l + iw} y2={y} stroke="#27272a" strokeWidth="1" />
+                                <text x={pad.l - 4} y={y + 3} textAnchor="end" fontSize="8" fill="#52525b">{val.toFixed(1)}</text>
+                              </g>
+                            );
+                          })}
+                          {/* Area */}
+                          <path d={area} fill="url(#lg)" />
+                          {/* Line */}
+                          <polyline points={pts} fill="none" stroke="#6366f1" strokeWidth="1.5" strokeLinejoin="round" />
+                          {/* Dots + labels */}
+                          {statsData.evolucion.map((d, i) => (
+                            <g key={d.mes}>
+                              <circle cx={xOf(i)} cy={yOf(d.avg)} r="2.5" fill="#6366f1" />
+                              {i % labelStep === 0 && (
+                                <text x={xOf(i)} y={H - 4} textAnchor="middle" fontSize="8" fill="#52525b">
+                                  {d.mes.substring(5)}/{d.mes.substring(2, 4)}
+                                </text>
+                              )}
+                            </g>
+                          ))}
+                        </svg>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Histograma de distribución */}
+                  {(() => {
+                    const maxCount = Math.max(...statsData.histograma.map(h => h.count), 1);
+                    const W = 460, H = 80, pad = { t: 4, r: 4, b: 20, l: 24 };
+                    const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+                    const barW = iw / 11 * 0.7, gap = iw / 11;
+                    return (
+                      <div style={{ marginBottom: 18 }}>
+                        <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Distribución de notas</span>
+                        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+                          {statsData.histograma.map((h, i) => {
+                            const bh = (h.count / maxCount) * ih;
+                            const x = pad.l + i * gap + (gap - barW) / 2;
+                            const y = pad.t + ih - bh;
+                            const col = h.score < 5 ? '#ef4444' : h.score < 7.5 ? '#f97316' : '#22c55e';
+                            return (
+                              <g key={h.score}>
+                                {h.count > 0 && <rect x={x} y={y} width={barW} height={bh} fill={col} fillOpacity="0.75" rx="2" />}
+                                <text x={x + barW / 2} y={H - 4} textAnchor="middle" fontSize="8" fill="#52525b">{h.score}</text>
+                                {h.count > 0 && <text x={x + barW / 2} y={y - 2} textAnchor="middle" fontSize="7" fill={col}>{h.count}</text>}
+                              </g>
+                            );
+                          })}
+                        </svg>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Campañas vs Automatizaciones */}
+                  {(statsData.subcat.campanas.count > 0 || statsData.subcat.automatizaciones.count > 0) && (() => {
+                    const items2 = [
+                      { label: 'Campañas', ...statsData.subcat.campanas },
+                      { label: 'Automatizaciones', ...statsData.subcat.automatizaciones },
+                    ].filter(x => x.count > 0);
+                    const maxAvg = Math.max(...items2.map(x => x.avg));
+                    return (
+                      <div style={{ marginBottom: 18 }}>
+                        <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Campañas vs Automatizaciones</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {items2.map(x => {
+                            const col = x.avg < 5 ? '#ef4444' : x.avg < 7.5 ? '#f97316' : '#22c55e';
+                            const pct = (x.avg / 10) * 100;
+                            return (
+                              <div key={x.label}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                  <span style={{ fontSize: 11, color: 'var(--t-text)' }}>{x.label} <span style={{ color: '#52525b' }}>({x.count})</span></span>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: col }}>{x.avg.toFixed(1)}</span>
+                                </div>
+                                <div style={{ height: 6, background: '#27272a', borderRadius: 99 }}>
+                                  <div style={{ height: '100%', width: `${pct}%`, background: col, borderRadius: 99, transition: 'width 0.4s ease' }} />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {/* Table */}
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                     <thead>
