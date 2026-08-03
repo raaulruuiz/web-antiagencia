@@ -326,11 +326,12 @@ export default function BibliotecaPublica() {
   const [filterFechaFrom, setFilterFechaFrom]   = useState('');
   const [filterFechaTo, setFilterFechaTo]       = useState('');
   const [filterScoreMin, setFilterScoreMin]     = useState(null);
+  const [filterSinNota, setFilterSinNota]       = useState(false);
 
   const toggleFilterTag    = (id) => { const tag = allTags.find(t => t.id === id); trackClick(`filtro tag: ${tag?.nombre || id}`); setFilterTagIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]); };
   const toggleFilterSector = (id) => { const sec = allSectors.find(s => s.id === id); trackClick(`filtro sector: ${sec?.nombre || id}`); setFilterSectorIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]); };
 
-  const activeFilterCount = [filterCategoria, filterSubcat, filterMarca, filterTagIds.length ? '1' : '', filterSectorIds.length ? '1' : '', (filterFechaFrom || filterFechaTo) ? '1' : '', filterScoreMin != null ? '1' : ''].filter(Boolean).length;
+  const activeFilterCount = [filterCategoria, filterSubcat, filterMarca, filterTagIds.length ? '1' : '', filterSectorIds.length ? '1' : '', (filterFechaFrom || filterFechaTo) ? '1' : '', filterScoreMin != null ? '1' : '', filterSinNota ? '1' : ''].filter(Boolean).length;
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
@@ -392,11 +393,12 @@ export default function BibliotecaPublica() {
     if (filterFechaFrom)        result = result.filter(i => i.enviado_el && i.enviado_el >= filterFechaFrom);
     if (filterFechaTo)          result = result.filter(i => i.enviado_el && i.enviado_el <= filterFechaTo);
     if (filterScoreMin != null) result = result.filter(i => i.puntuacion != null && i.puntuacion >= filterScoreMin);
+    if (filterSinNota)          result = result.filter(i => i.puntuacion == null);
     // Visible items first, blurred last
     return result.sort((a, b) => (a.publico === false ? 1 : 0) - (b.publico === false ? 1 : 0));
-  }, [items, searchQuery, filterCategoria, filterSubcat, filterMarca, filterSectorIds, filterTagIds, filterFechaFrom, filterFechaTo, filterScoreMin]);
+  }, [items, searchQuery, filterCategoria, filterSubcat, filterMarca, filterSectorIds, filterTagIds, filterFechaFrom, filterFechaTo, filterScoreMin, filterSinNota]);
 
-  const clearFilters = () => { setFilterCategoria(''); setFilterSubcat(''); setFilterMarca(''); setFilterTagIds([]); setFilterSectorIds([]); setFilterFechaFrom(''); setFilterFechaTo(''); setFilterScoreMin(null); };
+  const clearFilters = () => { setFilterCategoria(''); setFilterSubcat(''); setFilterMarca(''); setFilterTagIds([]); setFilterSectorIds([]); setFilterFechaFrom(''); setFilterFechaTo(''); setFilterScoreMin(null); setFilterSinNota(false); };
 
   const s = { fontFamily: 'system-ui, sans-serif' };
   const inputStyle = { background: 'transparent', border: '1px solid #3f3f46', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', cursor: 'pointer' };
@@ -615,11 +617,14 @@ export default function BibliotecaPublica() {
                   {[5, 6, 7, 8, 9].map(score => {
                     const active = filterScoreMin === score;
                     return (
-                      <button key={score} onClick={() => setFilterScoreMin(active ? null : score)} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: active ? '#16a34a33' : 'transparent', border: `1px solid ${active ? '#16a34a' : '#3f3f46'}`, color: active ? '#16a34a' : '#71717a' }}>
+                      <button key={score} onClick={() => { setFilterScoreMin(active ? null : score); setFilterSinNota(false); }} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: active ? '#16a34a33' : 'transparent', border: `1px solid ${active ? '#16a34a' : '#3f3f46'}`, color: active ? '#16a34a' : '#71717a' }}>
                         {score}+
                       </button>
                     );
                   })}
+                  <button onClick={() => { setFilterSinNota(v => !v); setFilterScoreMin(null); }} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: filterSinNota ? '#71717a33' : 'transparent', border: `1px solid ${filterSinNota ? '#71717a' : '#3f3f46'}`, color: filterSinNota ? '#a1a1aa' : '#71717a' }}>
+                    Sin nota
+                  </button>
                 </div>
               </div>
 
