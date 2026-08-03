@@ -1152,7 +1152,7 @@ export default function Biblioteca() {
                 Puntuación{filterScoreMin != null && filterScoreMax != null ? ` ${filterScoreMin}–${filterScoreMax}` : filterScoreMin != null ? ` ${filterScoreMin}+` : ''}
               </span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                <button onClick={() => { setFilterSinNota(v => !v); setFilterScoreMin(null); setFilterScoreMax(null); }} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: filterSinNota ? '#71717a33' : 'transparent', border: `1px solid ${filterSinNota ? '#71717a' : '#3f3f46'}`, color: filterSinNota ? '#a1a1aa' : '#71717a' }}>
+                <button onClick={() => { if (filterSinNota) { setFilterSinNota(false); } else { setFilterSinNota(true); setFilterScoreMin(null); setFilterScoreMax(null); } }} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: filterSinNota ? '#71717a33' : 'transparent', border: `1px solid ${filterSinNota ? '#71717a' : '#3f3f46'}`, color: filterSinNota ? '#a1a1aa' : '#71717a' }}>
                   Sin nota
                 </button>
                 {[0,1,2,3,4,5,6,7,8,9,10].map(score => {
