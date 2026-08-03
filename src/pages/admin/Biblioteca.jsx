@@ -498,11 +498,12 @@ export default function Biblioteca() {
   const [filterSectorIds, setFilterSectorIds]   = useState([]);
   const [filterFechaFrom, setFilterFechaFrom]   = useState('');
   const [filterFechaTo, setFilterFechaTo]       = useState('');
+  const [filterScoreMin, setFilterScoreMin]     = useState(null);
 
   const toggleFilterTag    = (id) => setFilterTagIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   const toggleFilterSector = (id) => setFilterSectorIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
 
-  const activeFilterCount = [filterCategoria, filterSubcat, filterMarca, filterTagIds.length ? '1' : '', filterSectorIds.length ? '1' : '', (filterFechaFrom || filterFechaTo) ? '1' : ''].filter(Boolean).length;
+  const activeFilterCount = [filterCategoria, filterSubcat, filterMarca, filterTagIds.length ? '1' : '', filterSectorIds.length ? '1' : '', (filterFechaFrom || filterFechaTo) ? '1' : '', filterScoreMin != null ? '1' : ''].filter(Boolean).length;
 
   // Bulk sector/tag panel
   const [showBulkSectors, setShowBulkSectors] = useState(false);
@@ -614,10 +615,11 @@ export default function Biblioteca() {
     if (filterTagIds.length)   result = result.filter(i => filterTagIds.some(tid => (i.tags || []).includes(tid)));
     if (filterFechaFrom)       result = result.filter(i => i.enviado_el && i.enviado_el >= filterFechaFrom);
     if (filterFechaTo)         result = result.filter(i => i.enviado_el && i.enviado_el <= filterFechaTo);
+    if (filterScoreMin != null) result = result.filter(i => i.puntuacion != null && i.puntuacion >= filterScoreMin);
     return result;
-  }, [items, searchQuery, filterCategoria, filterSubcat, filterMarca, filterSectorIds, filterTagIds, filterFechaFrom, filterFechaTo]);
+  }, [items, searchQuery, filterCategoria, filterSubcat, filterMarca, filterSectorIds, filterTagIds, filterFechaFrom, filterFechaTo, filterScoreMin]);
 
-  const clearFilters = () => { setFilterCategoria(''); setFilterSubcat(''); setFilterMarca(''); setFilterTagIds([]); setFilterSectorIds([]); setFilterFechaFrom(''); setFilterFechaTo(''); };
+  const clearFilters = () => { setFilterCategoria(''); setFilterSubcat(''); setFilterMarca(''); setFilterTagIds([]); setFilterSectorIds([]); setFilterFechaFrom(''); setFilterFechaTo(''); setFilterScoreMin(null); };
 
   const handleNuevoFile = useCallback(async (file) => {
     if (!file || !file.type.startsWith('image/')) return;
@@ -1128,7 +1130,22 @@ export default function Biblioteca() {
               </div>
             )}
 
-            {/* Row 3: Etiquetas chips (scoped by categoria) */}
+            {/* Row 3: Puntuación mínima chips */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={{ fontSize: 10, color: 'var(--t-border-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Puntuación mínima</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                {[5, 6, 7, 8, 9].map(score => {
+                  const active = filterScoreMin === score;
+                  return (
+                    <button key={score} onClick={() => setFilterScoreMin(active ? null : score)} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: active ? '#16a34a33' : 'transparent', border: `1px solid ${active ? '#16a34a' : '#3f3f46'}`, color: active ? '#16a34a' : '#71717a' }}>
+                      {score}+
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Row 4: Etiquetas chips (scoped by categoria) */}
             {visibleTags.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span style={{ fontSize: 10, color: 'var(--t-border-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Etiquetas</span>
