@@ -475,7 +475,7 @@ export default function BibliotecaPublica() {
       automatizaciones: { count: automatizaciones.length, avg: automatizaciones.length ? automatizaciones.reduce((s, i) => s + i.puntuacion, 0) / automatizaciones.length : null },
     };
 
-    return { mediaGeneral, cadaXEmails, totalMarcas: marcas.length, marcasSuspensas: marcasSuspensas.length, cadaZMarcas, marcas, evolucion, histograma, subcat };
+    return { mediaGeneral, cadaXEmails, totalEmails: scored.length, totalMarcas: marcas.length, marcasSuspensas: marcasSuspensas.length, cadaZMarcas, marcas, evolucion, histograma, subcat };
   }, [items, isPro]);
 
   const s = { fontFamily: 'system-ui, sans-serif' };
@@ -757,7 +757,7 @@ export default function BibliotecaPublica() {
                   {/* Summary lines */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18, padding: '12px 14px', background: '#18181b', borderRadius: 8, border: '1px solid #27272a' }}>
                     <p style={{ margin: 0, fontSize: 12, color: 'var(--t-text)', lineHeight: 1.6 }}>
-                      La puntuación media de los emails es <strong style={{ color: statsData.mediaGeneral < 5 ? '#ef4444' : statsData.mediaGeneral < 7.5 ? '#f97316' : '#22c55e' }}>{statsData.mediaGeneral.toFixed(1)}</strong>
+                      La puntuación media de los emails es <strong style={{ color: statsData.mediaGeneral < 5 ? '#ef4444' : statsData.mediaGeneral < 7.5 ? '#f97316' : '#22c55e' }}>{statsData.mediaGeneral.toFixed(1)}</strong> <span style={{ color: '#52525b', fontWeight: 400 }}>(de {statsData.totalEmails} emails evaluados)</span>
                       {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> que se mandan tienen una nota suspensa</>}.
                     </p>
                     <p style={{ margin: 0, fontSize: 12, color: 'var(--t-text)', lineHeight: 1.6 }}>
@@ -946,7 +946,7 @@ export default function BibliotecaPublica() {
             )}
             <div style={{ marginBottom: 16, background: '#111', border: '1px solid #27272a', borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
               <p style={{ margin: 0, fontSize: 13, color: 'var(--t-text)', lineHeight: 1.6 }}>
-                La puntuación media de los emails es <strong style={{ color: statsData.mediaGeneral < 5 ? '#ef4444' : statsData.mediaGeneral < 7.5 ? '#f97316' : '#22c55e' }}>{statsData.mediaGeneral.toFixed(1)}</strong>
+                La puntuación media de los emails es <strong style={{ color: statsData.mediaGeneral < 5 ? '#ef4444' : statsData.mediaGeneral < 7.5 ? '#f97316' : '#22c55e' }}>{statsData.mediaGeneral.toFixed(1)}</strong> <span style={{ color: '#52525b', fontWeight: 400 }}>(de {statsData.totalEmails} emails evaluados)</span>
                 {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> que se mandan tienen una nota suspensa</>}.
               </p>
               <p style={{ margin: 0, fontSize: 13, color: 'var(--t-text)', lineHeight: 1.6 }}>
