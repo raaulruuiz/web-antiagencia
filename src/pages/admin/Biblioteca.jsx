@@ -499,12 +499,25 @@ export default function Biblioteca() {
   const [filterFechaFrom, setFilterFechaFrom]   = useState('');
   const [filterFechaTo, setFilterFechaTo]       = useState('');
   const [filterScoreMin, setFilterScoreMin]     = useState(null);
+  const [filterScoreMax, setFilterScoreMax]     = useState(null);
   const [filterSinNota, setFilterSinNota]       = useState(false);
 
   const toggleFilterTag    = (id) => setFilterTagIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   const toggleFilterSector = (id) => setFilterSectorIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
 
   const activeFilterCount = [filterCategoria, filterSubcat, filterMarca, filterTagIds.length ? '1' : '', filterSectorIds.length ? '1' : '', (filterFechaFrom || filterFechaTo) ? '1' : '', filterScoreMin != null ? '1' : '', filterSinNota ? '1' : ''].filter(Boolean).length;
+  const handleScoreClick = (score) => {
+    setFilterSinNota(false);
+    if (filterScoreMin === null) {
+      setFilterScoreMin(score); setFilterScoreMax(null);
+    } else if (filterScoreMax === null) {
+      if (score === filterScoreMin) { setFilterScoreMin(null); }
+      else if (score < filterScoreMin) { setFilterScoreMax(filterScoreMin); setFilterScoreMin(score); }
+      else { setFilterScoreMax(score); }
+    } else {
+      setFilterScoreMin(score); setFilterScoreMax(null);
+    }
+  };
 
   // Bulk sector/tag panel
   const [showBulkSectors, setShowBulkSectors] = useState(false);
@@ -616,12 +629,13 @@ export default function Biblioteca() {
     if (filterTagIds.length)   result = result.filter(i => filterTagIds.some(tid => (i.tags || []).includes(tid)));
     if (filterFechaFrom)       result = result.filter(i => i.enviado_el && i.enviado_el >= filterFechaFrom);
     if (filterFechaTo)         result = result.filter(i => i.enviado_el && i.enviado_el <= filterFechaTo);
-    if (filterScoreMin != null) result = result.filter(i => i.puntuacion != null && i.puntuacion >= filterScoreMin);
-    if (filterSinNota)          result = result.filter(i => i.puntuacion == null);
+    if (filterScoreMin != null && filterScoreMax != null) result = result.filter(i => i.puntuacion != null && i.puntuacion >= filterScoreMin && i.puntuacion <= filterScoreMax);
+    else if (filterScoreMin != null) result = result.filter(i => i.puntuacion != null && i.puntuacion >= filterScoreMin);
+    if (filterSinNota) result = result.filter(i => i.puntuacion == null);
     return result;
-  }, [items, searchQuery, filterCategoria, filterSubcat, filterMarca, filterSectorIds, filterTagIds, filterFechaFrom, filterFechaTo, filterScoreMin, filterSinNota]);
+  }, [items, searchQuery, filterCategoria, filterSubcat, filterMarca, filterSectorIds, filterTagIds, filterFechaFrom, filterFechaTo, filterScoreMin, filterScoreMax, filterSinNota]);
 
-  const clearFilters = () => { setFilterCategoria(''); setFilterSubcat(''); setFilterMarca(''); setFilterTagIds([]); setFilterSectorIds([]); setFilterFechaFrom(''); setFilterFechaTo(''); setFilterScoreMin(null); setFilterSinNota(false); };
+  const clearFilters = () => { setFilterCategoria(''); setFilterSubcat(''); setFilterMarca(''); setFilterTagIds([]); setFilterSectorIds([]); setFilterFechaFrom(''); setFilterFechaTo(''); setFilterScoreMin(null); setFilterScoreMax(null); setFilterSinNota(false); };
 
   const handleNuevoFile = useCallback(async (file) => {
     if (!file || !file.type.startsWith('image/')) return;
@@ -1132,21 +1146,26 @@ export default function Biblioteca() {
               </div>
             )}
 
-            {/* Row 3: Puntuación mínima chips */}
+            {/* Row 3: Puntuación chips */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: 10, color: 'var(--t-border-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Puntuación mínima</span>
+              <span style={{ fontSize: 10, color: 'var(--t-border-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                Puntuación{filterScoreMin != null && filterScoreMax != null ? ` ${filterScoreMin}–${filterScoreMax}` : filterScoreMin != null ? ` ${filterScoreMin}+` : ''}
+              </span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                {[5, 6, 7, 8, 9].map(score => {
-                  const active = filterScoreMin === score;
+                <button onClick={() => { setFilterSinNota(v => !v); setFilterScoreMin(null); setFilterScoreMax(null); }} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: filterSinNota ? '#71717a33' : 'transparent', border: `1px solid ${filterSinNota ? '#71717a' : '#3f3f46'}`, color: filterSinNota ? '#a1a1aa' : '#71717a' }}>
+                  Sin nota
+                </button>
+                {[0,1,2,3,4,5,6,7,8,9,10].map(score => {
+                  const isMin = filterScoreMin === score;
+                  const isMax = filterScoreMax === score;
+                  const inRange = filterScoreMin != null && filterScoreMax != null && score > filterScoreMin && score < filterScoreMax;
+                  const active = isMin || isMax || inRange;
                   return (
-                    <button key={score} onClick={() => { setFilterScoreMin(active ? null : score); setFilterSinNota(false); }} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: active ? '#16a34a33' : 'transparent', border: `1px solid ${active ? '#16a34a' : '#3f3f46'}`, color: active ? '#16a34a' : '#71717a' }}>
-                      {score}+
+                    <button key={score} onClick={() => handleScoreClick(score)} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: active ? '#16a34a33' : 'transparent', border: `1px solid ${(isMin || isMax) ? '#16a34a' : inRange ? '#16a34a88' : '#3f3f46'}`, color: active ? '#16a34a' : '#71717a' }}>
+                      {score}
                     </button>
                   );
                 })}
-                <button onClick={() => { setFilterSinNota(v => !v); setFilterScoreMin(null); }} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: filterSinNota ? '#71717a33' : 'transparent', border: `1px solid ${filterSinNota ? '#71717a' : '#3f3f46'}`, color: filterSinNota ? '#a1a1aa' : '#71717a' }}>
-                  Sin nota
-                </button>
               </div>
             </div>
 
