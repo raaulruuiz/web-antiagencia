@@ -809,7 +809,7 @@ export default function BibliotecaPublica() {
                   })()}
                   {/* Evolución temporal */}
                   {statsData.evolucion.length >= 2 && (() => {
-                    const W = 460, H = 90, pad = { t: 8, r: 8, b: 28, l: 32 };
+                    const W = 460, H = 200, pad = { t: 16, r: 8, b: 36, l: 36 };
                     const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
                     const avgs = statsData.evolucion.map(d => d.avg);
                     const minV = Math.min(...avgs), maxV = Math.max(...avgs);
@@ -830,13 +830,13 @@ export default function BibliotecaPublica() {
                             </linearGradient>
                           </defs>
                           {/* Grid lines */}
-                          {[0, 0.5, 1].map(t => {
+                          {[0, 0.25, 0.5, 0.75, 1].map(t => {
                             const y = pad.t + ih * (1 - t);
                             const val = minV + rangeV * t;
                             return (
                               <g key={t}>
                                 <line x1={pad.l} y1={y} x2={pad.l + iw} y2={y} stroke="#27272a" strokeWidth="1" />
-                                <text x={pad.l - 4} y={y + 3} textAnchor="end" fontSize="8" fill="#52525b">{val.toFixed(1)}</text>
+                                <text x={pad.l - 4} y={y + 3} textAnchor="end" fontSize="9" fill="#52525b">{val.toFixed(1)}</text>
                               </g>
                             );
                           })}
@@ -849,7 +849,7 @@ export default function BibliotecaPublica() {
                             <g key={d.mes}>
                               <circle cx={xOf(i)} cy={yOf(d.avg)} r="2.5" fill="#6366f1" />
                               {i % labelStep === 0 && (
-                                <text x={xOf(i)} y={H - 4} textAnchor="middle" fontSize="8" fill="#52525b">
+                                <text x={xOf(i)} y={H - 6} textAnchor="middle" fontSize="9" fill="#52525b">
                                   {d.mes.substring(5)}/{d.mes.substring(2, 4)}
                                 </text>
                               )}
@@ -863,7 +863,7 @@ export default function BibliotecaPublica() {
                   {/* Histograma de distribución */}
                   {(() => {
                     const maxCount = Math.max(...statsData.histograma.map(h => h.count), 1);
-                    const W = 460, H = 80, pad = { t: 4, r: 4, b: 20, l: 24 };
+                    const W = 460, H = 180, pad = { t: 16, r: 4, b: 28, l: 28 };
                     const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
                     const barW = iw / 11 * 0.7, gap = iw / 11;
                     return (
@@ -878,8 +878,8 @@ export default function BibliotecaPublica() {
                             return (
                               <g key={h.score}>
                                 {h.count > 0 && <rect x={x} y={y} width={barW} height={bh} fill={col} fillOpacity="0.75" rx="2" />}
-                                <text x={x + barW / 2} y={H - 4} textAnchor="middle" fontSize="8" fill="#52525b">{h.score}</text>
-                                {h.count > 0 && <text x={x + barW / 2} y={y - 2} textAnchor="middle" fontSize="7" fill={col}>{h.count}</text>}
+                                <text x={x + barW / 2} y={H - 6} textAnchor="middle" fontSize="10" fill="#52525b">{h.score}</text>
+                                {h.count > 0 && <text x={x + barW / 2} y={y - 4} textAnchor="middle" fontSize="9" fill={col}>{h.count}</text>}
                               </g>
                             );
                           })}
