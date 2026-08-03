@@ -754,7 +754,7 @@ export default function BibliotecaPublica() {
                     return (
                       <div style={{ marginBottom: 18 }}>
                         <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Distribución por cuartil</span>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: 6 }}>
                           {quartiles.map(q => {
                             const qAvg = q.marks.length > 0 ? q.marks.reduce((s, m) => s + m.avg, 0) / q.marks.length : null;
                             return (
