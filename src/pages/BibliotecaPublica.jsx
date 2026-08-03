@@ -315,6 +315,8 @@ export default function BibliotecaPublica() {
   const [showMenu, setShowMenu] = useState(false);
 
   // Search & filters
+  const [showStats, setShowStats]           = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
   const [showSearch, setShowSearch]         = useState(false);
   const [searchQuery, setSearchQuery]       = useState('');
   const [showFilters, setShowFilters]       = useState(false);
@@ -422,6 +424,34 @@ export default function BibliotecaPublica() {
 
   const clearFilters = () => { setFilterCategoria(''); setFilterSubcat(''); setFilterMarca(''); setFilterTagIds([]); setFilterSectorIds([]); setFilterFechaFrom(''); setFilterFechaTo(''); setFilterScoreMin(null); setFilterScoreMax(null); setFilterSinNota(false); };
 
+  const statsData = useMemo(() => {
+    const emailItems = items.filter(i => i.categoria === 'email');
+    const scored = emailItems.filter(i => i.puntuacion != null);
+    if (scored.length === 0) return null;
+    const mediaGeneral = scored.reduce((s, i) => s + i.puntuacion, 0) / scored.length;
+    const suspensas = scored.filter(i => i.puntuacion < 5);
+    const cadaXEmails = suspensas.length > 0 ? Math.round(scored.length / suspensas.length) : null;
+    // Per-brand stats
+    const marcaMap = {};
+    scored.forEach(i => {
+      const m = i.marca || '(sin marca)';
+      if (!marcaMap[m]) marcaMap[m] = { scored: [], allEmailItems: [] };
+      marcaMap[m].scored.push(i);
+    });
+    emailItems.forEach(i => {
+      const m = i.marca || '(sin marca)';
+      if (marcaMap[m]) marcaMap[m].allEmailItems.push(i);
+    });
+    const marcas = Object.entries(marcaMap).map(([name, { scored, allEmailItems }]) => {
+      const avg = scored.reduce((s, i) => s + i.puntuacion, 0) / scored.length;
+      const blurred = !isPro && allEmailItems.every(i => i.publico === false);
+      return { name, count: scored.length, avg, blurred };
+    }).sort((a, b) => a.avg - b.avg);
+    const marcasSuspensas = marcas.filter(m => m.avg < 5);
+    const cadaZMarcas = marcasSuspensas.length > 0 ? Math.round(marcas.length / marcasSuspensas.length) : null;
+    return { mediaGeneral, cadaXEmails, totalMarcas: marcas.length, marcasSuspensas: marcasSuspensas.length, cadaZMarcas, marcas };
+  }, [items, isPro]);
+
   const s = { fontFamily: 'system-ui, sans-serif' };
   const inputStyle = { background: 'transparent', border: '1px solid #3f3f46', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', cursor: 'pointer' };
 
@@ -507,6 +537,12 @@ export default function BibliotecaPublica() {
                 style={{ display: 'flex', alignItems: 'center', padding: '6px 10px', borderRadius: 8, fontSize: 14, background: 'transparent', border: `1px solid ${theme === 'light' ? '#71717a' : '#3f3f46'}`, color: 'var(--t-text-muted)', cursor: 'pointer', lineHeight: 1 }}>
                 {theme === 'dark' ? '☀️' : '🌙'}
               </button>
+              {statsData && (
+                <button onClick={() => setShowStats(s => !s)} title="Estadísticas"
+                  style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: showStats ? '#1a1a1a' : 'transparent' }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </button>
+              )}
               <button onClick={() => { setShowSearch(s => !s); setShowFilters(false); }}
                 style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: showSearch ? '#1a1a1a' : 'transparent' }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -680,6 +716,57 @@ export default function BibliotecaPublica() {
             </div>
           );
         })()}
+
+        {/* Stats panel */}
+        {showStats && statsData && (
+          <>
+            {showStatsModal && (
+              <>
+                <div onClick={() => setShowStatsModal(false)} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.6)' }} />
+                <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 201, background: 'var(--t-surface, #111)', border: '1px solid #27272a', borderRadius: 12, padding: '24px', width: 'min(520px, 90vw)', maxHeight: '80vh', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--t-text)' }}>Análisis por marca</span>
+                    <button onClick={() => setShowStatsModal(false)} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>✕</button>
+                  </div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid #27272a' }}>
+                        <th style={{ textAlign: 'left', padding: '6px 8px', color: '#71717a', fontWeight: 500 }}>Marca</th>
+                        <th style={{ textAlign: 'center', padding: '6px 8px', color: '#71717a', fontWeight: 500 }}>Emails</th>
+                        <th style={{ textAlign: 'center', padding: '6px 8px', color: '#71717a', fontWeight: 500 }}>Media</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statsData.marcas.map(m => {
+                        const col = m.avg < 5 ? '#ef4444' : m.avg < 7.5 ? '#f97316' : '#22c55e';
+                        return (
+                          <tr key={m.name} style={{ borderBottom: '1px solid #1f1f23', filter: m.blurred ? 'blur(5px)' : 'none', userSelect: m.blurred ? 'none' : 'auto' }}>
+                            <td style={{ padding: '8px 8px', color: 'var(--t-text)' }}>{m.name}</td>
+                            <td style={{ padding: '8px 8px', textAlign: 'center', color: '#71717a' }}>{m.count}</td>
+                            <td style={{ padding: '8px 8px', textAlign: 'center', fontWeight: 700, color: col }}>{m.avg.toFixed(1)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+            <div style={{ marginBottom: 16, background: '#111', border: '1px solid #27272a', borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--t-text)', lineHeight: 1.6 }}>
+                La puntuación media de los emails es <strong style={{ color: statsData.mediaGeneral < 5 ? '#ef4444' : statsData.mediaGeneral < 7.5 ? '#f97316' : '#22c55e' }}>{statsData.mediaGeneral.toFixed(1)}</strong>
+                {statsData.cadaXEmails != null && <>, lo que significa que <strong>1 de cada {statsData.cadaXEmails} emails</strong> que se mandan tienen una nota suspensa</>}.
+              </p>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--t-text)', lineHeight: 1.6 }}>
+                De las <strong>{statsData.totalMarcas} marcas</strong> que se han analizado, <strong>{statsData.marcasSuspensas}</strong> tienen una media de emails suspensa
+                {statsData.cadaZMarcas != null && <>, lo que significa que <strong>1 de cada {statsData.cadaZMarcas} marcas</strong> manda malos emails</>}.
+              </p>
+              <button onClick={() => setShowStatsModal(true)} style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, color: '#6366f1', fontSize: 12, cursor: 'pointer', textDecoration: 'underline' }}>
+                Mostrar análisis completo
+              </button>
+            </div>
+          </>
+        )}
 
         {(searchQuery || activeFilterCount > 0) && !loading && (
           <p style={{ fontSize: 12, color: '#52525b', marginBottom: 12 }}>{filteredItems.length} {filteredItems.length === 1 ? 'resultado' : 'resultados'}</p>
