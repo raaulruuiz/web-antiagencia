@@ -430,7 +430,7 @@ export default function BibliotecaPublica() {
     if (scored.length === 0) return null;
     const mediaGeneral = scored.reduce((s, i) => s + i.puntuacion, 0) / scored.length;
     const suspensas = scored.filter(i => i.puntuacion < 5);
-    const cadaXEmails = suspensas.length > 0 ? Math.round(scored.length / suspensas.length) : null;
+    const cadaXEmails = suspensas.length > 0 ? parseFloat((scored.length / suspensas.length).toFixed(2)) : null;
     // Per-brand stats
     const marcaMap = {};
     scored.forEach(i => {
@@ -448,7 +448,7 @@ export default function BibliotecaPublica() {
       return { name, count: scored.length, avg, blurred };
     }).sort((a, b) => a.avg - b.avg);
     const marcasSuspensas = marcas.filter(m => m.avg < 5);
-    const cadaZMarcas = marcasSuspensas.length > 0 ? Math.round(marcas.length / marcasSuspensas.length) : null;
+    const cadaZMarcas = marcasSuspensas.length > 0 ? parseFloat((marcas.length / marcasSuspensas.length).toFixed(2)) : null;
     return { mediaGeneral, cadaXEmails, totalMarcas: marcas.length, marcasSuspensas: marcasSuspensas.length, cadaZMarcas, marcas };
   }, [items, isPro]);
 
