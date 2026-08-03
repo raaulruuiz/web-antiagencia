@@ -334,7 +334,6 @@ export default function BibliotecaPublica() {
 
   const activeFilterCount = [filterCategoria, filterSubcat, filterMarca, filterTagIds.length ? '1' : '', filterSectorIds.length ? '1' : '', (filterFechaFrom || filterFechaTo) ? '1' : '', filterScoreMin != null ? '1' : '', filterSinNota ? '1' : ''].filter(Boolean).length;
   const handleScoreClick = (score) => {
-    setFilterSinNota(false);
     if (filterScoreMin === null) {
       setFilterScoreMin(score); setFilterScoreMax(null);
     } else if (filterScoreMax === null) {
@@ -405,9 +404,18 @@ export default function BibliotecaPublica() {
     if (filterTagIds.length)    result = result.filter(i => filterTagIds.some(tid => (i.tags || []).includes(tid)));
     if (filterFechaFrom)        result = result.filter(i => i.enviado_el && i.enviado_el >= filterFechaFrom);
     if (filterFechaTo)          result = result.filter(i => i.enviado_el && i.enviado_el <= filterFechaTo);
-    if (filterScoreMin != null && filterScoreMax != null) result = result.filter(i => i.puntuacion != null && i.puntuacion >= filterScoreMin && i.puntuacion <= filterScoreMax);
-    else if (filterScoreMin != null) result = result.filter(i => i.puntuacion != null && i.puntuacion >= filterScoreMin);
-    if (filterSinNota) result = result.filter(i => i.puntuacion == null);
+    const tieneRango = filterScoreMin != null;
+    const tieneSinNota = filterSinNota;
+    if (tieneRango || tieneSinNota) {
+      result = result.filter(i => {
+        if (tieneSinNota && i.puntuacion == null) return true;
+        if (tieneRango && i.puntuacion != null) {
+          if (filterScoreMax != null) return i.puntuacion >= filterScoreMin && i.puntuacion <= filterScoreMax;
+          return i.puntuacion >= filterScoreMin;
+        }
+        return false;
+      });
+    }
     // Visible items first, blurred last
     return result.sort((a, b) => (a.publico === false ? 1 : 0) - (b.publico === false ? 1 : 0));
   }, [items, searchQuery, filterCategoria, filterSubcat, filterMarca, filterSectorIds, filterTagIds, filterFechaFrom, filterFechaTo, filterScoreMin, filterScoreMax, filterSinNota]);
@@ -630,7 +638,7 @@ export default function BibliotecaPublica() {
                   Puntuación{filterScoreMin != null && filterScoreMax != null ? ` ${filterScoreMin}–${filterScoreMax}` : filterScoreMin != null ? ` ${filterScoreMin}+` : ''}
                 </span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                  <button onClick={() => { if (filterSinNota) { setFilterSinNota(false); } else { setFilterSinNota(true); setFilterScoreMin(null); setFilterScoreMax(null); } }} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: filterSinNota ? '#71717a33' : 'transparent', border: `1px solid ${filterSinNota ? '#71717a' : '#3f3f46'}`, color: filterSinNota ? '#a1a1aa' : '#71717a' }}>
+                  <button onClick={() => setFilterSinNota(v => !v)} style={{ fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.1s', background: filterSinNota ? '#71717a33' : 'transparent', border: `1px solid ${filterSinNota ? '#71717a' : '#3f3f46'}`, color: filterSinNota ? '#a1a1aa' : '#71717a' }}>
                     Sin nota
                   </button>
                   {[0,1,2,3,4,5,6,7,8,9,10].map(score => {
