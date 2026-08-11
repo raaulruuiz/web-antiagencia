@@ -171,7 +171,7 @@ export default function TrabajaConNosotros2() {
             <Carta>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Asunto: Capullo Elitista</h1>
               <p><br /></p>
-              <p style={{ textAlign: 'right' }}><span style={{ color: '#0067FD' }}><strong>IMPORTANTE</strong></span><strong>: Solo me quedan 2 plazas para empezar en Septiembre.</strong></p>
+              <p style={{ textAlign: 'right' }}><span style={{ color: '#0067FD' }}><strong>IMPORTANTE</strong></span><strong>: Solo me queda 1 plaza para empezar en Septiembre.</strong></p>
               <p style={{ textAlign: 'right' }}><strong>Y otra cosa de la que no te he hablado en ningún sitio.</strong></p>
               <p style={{ textAlign: 'right' }}><strong>Te lo cuento en el mail "Bonus Indisciplinado"</strong></p>
               <p>&nbsp;</p>
@@ -429,11 +429,11 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Cosa 1</h3>
               <p>&nbsp;</p>
-              <p>Me quedan solo dos plazas para servicio en Septiembre. Si, no podemos empezar el servicio antes. Y la fecha exacta no tiene por qué ser el 1. Dependerá de mi agenda.</p>
+              <p>Me queda solo una plaza para servicio en Septiembre. Si, no podemos empezar el servicio antes. Y la fecha exacta no tiene por qué ser el 1. Dependerá de mi agenda.</p>
               <p>&nbsp;</p>
-              <p>Pero eso, solo 2 más.</p>
+              <p>Pero eso, solo 1 más.</p>
               <p>&nbsp;</p>
-              <p>Una vez se acaben las 2 plazas, llegar (a tiempo y haciendo las cosas bien) a Black Friday se empieza a complicar. <strong>Hacer las cosas bien lleva su tiempo y planificación.</strong></p>
+              <p>Una vez se acabe esa plaza, llegar (a tiempo y haciendo las cosas bien) a Black Friday se empieza a complicar. <strong>Hacer las cosas bien lleva su tiempo y planificación.</strong></p>
               <p>&nbsp;</p>
               <p>Si has leído hasta aquí, estoy convencido que eres de los que entienden que las cosas bien hechas no se hacen de un día para otro. Si es tu caso, pide presupuesto abajo. Si no, mejor no lo pidas.</p>
               <p><br /><br /></p>
@@ -461,13 +461,13 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Esto, como todo, hay quien lo entiende y quien no. Si eres de los que lo entiende, pide tu presupuesto aquí abajo.</p>
               <p><br /><br /></p>
-              <p>Por cierto, esto no tiene nada que ver con lo de las 2 plazas. Si se acaban y te doy fecha de inicio en 2027, lo tienes incluido.</p>
+              <p>Por cierto, esto no tiene nada que ver con lo de la plaza. Si se acaban y te doy fecha de inicio en 2027, lo tienes incluido.</p>
               <p>&nbsp;</p>
               <p>Y por supuestos, los clientes actuales lo tienen, faltaría más.</p>
               <p>&nbsp;</p>
               <p>Pues eso. Pide tu presupuesto.</p>
               <p><br /><br /></p>
-              <p><strong>P.D.</strong> Solo 2 plazas para Septiembre y te incluyo el copy de las fichas de producto hasta el 31 de Agosto a las 23:59 (no tiene nada que ver con las plazas).</p>
+              <p><strong>P.D.</strong> Solo 1 plaza para Septiembre y te incluyo el copy de las fichas de producto hasta el 31 de Agosto a las 23:59 (no tiene nada que ver con las plazas).</p>
               <p><br /><br /></p>
               <p><strong>P.D.2</strong> Pide información aquí:</p>
               <p>&nbsp;</p>
