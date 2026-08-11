@@ -461,7 +461,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Esto, como todo, hay quien lo entiende y quien no. Si eres de los que lo entiende, pide tu presupuesto aquí abajo.</p>
               <p><br /><br /></p>
-              <p>Por cierto, esto no tiene nada que ver con lo de la plaza. Si se acaban y te doy fecha de inicio en 2027, lo tienes incluido.</p>
+              <p>Por cierto, esto no tiene nada que ver con lo de la plaza. Si se acaba y te doy fecha de inicio en 2027, lo tienes incluido.</p>
               <p>&nbsp;</p>
               <p>Y por supuestos, los clientes actuales lo tienen, faltaría más.</p>
               <p>&nbsp;</p>
