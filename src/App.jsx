@@ -29,6 +29,7 @@ import GraciasJorgeCoronado from './pages/GraciasJorgeCoronado';
 import CapsuleDigital from './pages/CapsuleDigital';
 import HablemosDeEmprender from './pages/HablemosDeEmprender';
 import BlogEmailMarketing from './pages/BlogEmailMarketing';
+import AgenciaShopifyGranada from './pages/AgenciaShopifyGranada';
 import BlogPost from './pages/BlogPost';
 function BlogPostPage() {
   const { slug } = useParams();
@@ -203,6 +204,7 @@ const AuthenticatedApp = () => {
       <Route path="/hablemos-de-emprender" element={<PixelLayout><HablemosDeEmprender /></PixelLayout>} />
       <Route path="/prohibido-estacionarse" element={<PixelLayout><ProhibidoEstacionarse /></PixelLayout>} />
       <Route path="/gracias-podcast" element={<PixelLayout><GraciasJorgeCoronado /></PixelLayout>} />
+      <Route path="/agencia-shopify-granada" element={<AgenciaShopifyGranada />} />
       <Route path="/blog-email-marketing" element={<BlogEmailMarketing />} />
       <Route path="/blog-email-marketing/page/:page" element={<BlogEmailMarketing />} />
       <Route path="/blog-email-marketing/:slug" element={<BlogPostPage />} />
