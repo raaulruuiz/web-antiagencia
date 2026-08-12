@@ -1,6 +1,10 @@
 {
   "redirects": [
-    { "source": "/newsletter", "destination": "/", "permanent": false }
+    { "source": "/newsletter", "destination": "/", "permanent": false },
+    { "source": "/facebook-instagram", "destination": "/", "permanent": true },
+    { "source": "/facebook-instagram/", "destination": "/", "permanent": true },
+    { "source": "/anti-newsletter", "destination": "/", "permanent": true },
+    { "source": "/anti-newsletter/", "destination": "/", "permanent": true }
   ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
