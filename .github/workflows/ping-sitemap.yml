@@ -33,9 +33,10 @@ jobs:
           );
           oauth2.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
           const sc = google.searchconsole({ version: 'v1', auth: oauth2 });
-          const siteUrl = encodeURIComponent('https://antiagencia.es/');
-          const feedpath = encodeURIComponent('https://antiagencia.es/sitemap.xml');
-          sc.sitemaps.submit({ siteUrl, feedpath })
+          sc.sitemaps.submit({
+            siteUrl: 'https://antiagencia.es/',
+            feedpath: 'https://antiagencia.es/sitemap.xml'
+          })
             .then(() => console.log('✅ Sitemap enviado a GSC'))
             .catch(e => { console.error('❌ Error:', e.message); process.exit(1); });
           "
