@@ -46,6 +46,7 @@ export default function Dashboard() {
   const [pageMetrics, setPageMetrics] = useState(null);
   const [mailerlite, setMailerlite]   = useState(null);
   const [abStats, setAbStats]         = useState({});
+  const [gsc, setGsc]                 = useState(null);
 
   useEffect(() => {
     fetchMetrics();
@@ -76,6 +77,15 @@ export default function Dashboard() {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       if (res.ok) setMailerlite(await res.json());
+    } catch (_) {}
+
+    // GSC
+    try {
+      const token = await getToken();
+      const gscRes = await fetch(`${BACKEND}/admin/gsc?days=${preset || 7}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (gscRes.ok) setGsc(await gscRes.json());
     } catch (_) {}
 
     // A/B stats
@@ -175,6 +185,52 @@ export default function Dashboard() {
                 </div>
               );
             })}
+          </div>
+        </section>
+      )}
+
+      {/* Google Search Console */}
+      {gsc && (
+        <section className="mb-8">
+          <h2 className="text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-3">
+            Google Search Console · {activePreset?.label}
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+            {[
+              { label: 'Clics', value: gsc.resumen.clicks },
+              { label: 'Impresiones', value: gsc.resumen.impressions },
+              { label: 'CTR', value: `${(gsc.resumen.ctr * 100).toFixed(1)}%` },
+              { label: 'Posición media', value: gsc.resumen.position?.toFixed(1) },
+            ].map(({ label, value }) => (
+              <div key={label} className="rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-4">
+                <p className="text-white text-2xl font-semibold">{value}</p>
+                <p className="text-zinc-500 text-xs mt-1">{label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-4">
+              <p className="text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-3">Top Consultas</p>
+              <div className="space-y-2">
+                {gsc.queries.slice(0, 8).map((q, i) => (
+                  <div key={i} className="flex justify-between items-center text-sm">
+                    <span className="text-zinc-300 truncate max-w-[60%]">{q.keys[0]}</span>
+                    <span className="text-zinc-500 text-xs">{q.clicks} clics · pos {q.position?.toFixed(0)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-4">
+              <p className="text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-3">Top Páginas</p>
+              <div className="space-y-2">
+                {gsc.pages.slice(0, 8).map((p, i) => (
+                  <div key={i} className="flex justify-between items-center text-sm">
+                    <span className="text-zinc-300 truncate max-w-[60%]">{p.keys[0].replace('https://antiagencia.es', '') || '/'}</span>
+                    <span className="text-zinc-500 text-xs">{p.clicks} clics</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
       )}
