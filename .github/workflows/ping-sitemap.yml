@@ -1,0 +1,61 @@
+name: Ping sitemap a Google Search Console
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  ping-sitemap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Esperar deploy Vercel (60s)
+        run: sleep 60
+
+      - name: Enviar sitemap a GSC
+        run: |
+          node -e "
+          const https = require('https');
+
+          // Obtener access token desde refresh token
+          const params = new URLSearchParams({
+            client_id: '${{ secrets.GOOGLE_CLIENT_ID }}',
+            client_secret: '${{ secrets.GOOGLE_CLIENT_SECRET }}',
+            refresh_token: '${{ secrets.GOOGLE_REFRESH_TOKEN }}',
+            grant_type: 'refresh_token'
+          });
+
+          const tokenReq = https.request({
+            hostname: 'oauth2.googleapis.com',
+            path: '/token',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+          }, res => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => {
+              const { access_token } = JSON.parse(data);
+              if (!access_token) { console.error('No access_token:', data); process.exit(1); }
+
+              // Enviar sitemap
+              const siteUrl = encodeURIComponent('https://antiagencia.es/');
+              const feedpath = encodeURIComponent('https://antiagencia.es/sitemap.xml');
+              const req = https.request({
+                hostname: 'searchconsole.googleapis.com',
+                path: '/webmasters/v3/sites/' + siteUrl + '/sitemaps/' + feedpath,
+                method: 'PUT',
+                headers: { Authorization: 'Bearer ' + access_token, 'Content-Length': 0 }
+              }, r => {
+                console.log('GSC sitemap ping status:', r.statusCode);
+                if (r.statusCode === 200 || r.statusCode === 204) {
+                  console.log('Sitemap enviado correctamente');
+                } else {
+                  r.on('data', d => console.error('Error body:', d.toString()));
+                  process.exit(1);
+                }
+              });
+              req.end();
+            });
+          });
+          tokenReq.write(params.toString());
+          tokenReq.end();
+          "
