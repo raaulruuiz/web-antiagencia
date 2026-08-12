@@ -1,10 +1,15 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import Footer from "@/components/landing/Footer";
 
 export default function PoliticaPrivacidad() {
   return (
+    <>
+    <Helmet>
+      <meta name="robots" content="noindex" />
+    </Helmet>
     <div className="min-h-screen bg-[#121212] text-white flex flex-col">
       <div className="max-w-3xl mx-auto px-6 py-20">
         <Link to={createPageUrl("Home")} className="text-[#0067FD] hover:underline text-sm mb-10 inline-block">
@@ -109,5 +114,6 @@ export default function PoliticaPrivacidad() {
       </div>
       <Footer />
     </div>
+    </>
   );
 }
