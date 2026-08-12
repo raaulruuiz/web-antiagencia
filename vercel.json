@@ -4,7 +4,10 @@
     { "source": "/facebook-instagram", "destination": "/", "permanent": true },
     { "source": "/facebook-instagram/", "destination": "/", "permanent": true },
     { "source": "/anti-newsletter", "destination": "/", "permanent": true },
-    { "source": "/anti-newsletter/", "destination": "/", "permanent": true }
+    { "source": "/anti-newsletter/", "destination": "/", "permanent": true },
+    { "source": "/PoliticaPrivacidad", "destination": "/politica-privacidad", "permanent": true },
+    { "source": "/r", "destination": "/", "permanent": true },
+    { "source": "/r/", "destination": "/", "permanent": true }
   ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
