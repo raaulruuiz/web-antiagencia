@@ -823,10 +823,17 @@ export default function Finanzas() {
                       <BarChart barSize={dashComp ? 9 : 18}
                         data={d.evolucionMensual.map((e, i) => {
                           const c = dashComp?.evolucionMensual?.[i];
-                          return { mes: mesLabel(e.mes), ingresos: e.ingresos, gastos: e.gastos, ...(c ? { ingresosAnt: c.ingresos, gastosAnt: c.gastos } : {}) };
+                          return { mes: e.mes, ingresos: e.ingresos, gastos: e.gastos, ...(c ? { ingresosAnt: c.ingresos, gastosAnt: c.gastos } : {}) };
                         })}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                        <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
+                          tickFormatter={(yyyymm) => {
+                            const [anio, mes] = yyyymm.split('-');
+                            const label = mesLabel(yyyymm);
+                            const multiAnio = new Set(d.evolucionMensual.map(e => e.mes.slice(0, 4))).size > 1;
+                            return multiAnio && mes === '01' ? `${label} '${anio.slice(2)}` : label;
+                          }}
+                        />
                         <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                         <Tooltip
                           contentStyle={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, fontSize: 12 }}
@@ -836,7 +843,7 @@ export default function Finanzas() {
                             const ant  = payload.filter(p =>  String(p.dataKey).endsWith('Ant'));
                             return (
                               <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
-                                <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{label}</p>
+                                <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{mesLabel(label)} {label.slice(0, 4)}</p>
                                 {curr.map(e => <p key={e.dataKey} style={{ color: e.fill, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}
                                 {ant.length > 0 && <><div style={{ borderTop: '1px solid #27272a', margin: '5px 0' }} />{ant.map(e => <p key={e.dataKey} style={{ color: e.fill, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}</>}
                               </div>
