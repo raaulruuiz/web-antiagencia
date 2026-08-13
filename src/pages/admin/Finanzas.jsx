@@ -62,14 +62,21 @@ const RANGOS_PRESET = () => {
   const a = h.getFullYear();
   const m = h.getMonth();
   const q = Math.floor(m / 3);
+  const hoy = toISO(h);
+  const manana = toISO(addDays(h, 1));
+  const ayer = toISO(addDays(h, -1));
   return [
-    { label: 'Este mes',            desde: toISO(new Date(a, m, 1)),       hasta: toISO(new Date(a, m + 1, 1)) },
-    { label: 'Mes anterior',        desde: toISO(new Date(a, m - 1, 1)),   hasta: toISO(new Date(a, m, 1)) },
-    { label: 'Este trimestre',      desde: toISO(new Date(a, q*3, 1)),     hasta: toISO(new Date(a, q*3 + 3, 1)) },
-    { label: 'Trimestre anterior',  desde: toISO(new Date(a, (q-1)*3, 1)), hasta: toISO(new Date(a, q*3, 1)) },
-    { label: 'Este año',            desde: `${a}-01-01`,                   hasta: `${a + 1}-01-01` },
-    { label: 'Año anterior',        desde: `${a - 1}-01-01`,               hasta: `${a}-01-01` },
-    { label: 'Máximo',              desde: '2023-01-01',                   hasta: toISO(addDays(new Date(), 1)) },
+    { label: 'Hoy',                  desde: hoy,                            hasta: manana },
+    { label: 'Ayer',                 desde: ayer,                           hasta: hoy },
+    { label: 'Últimos 7 días',       desde: toISO(addDays(h, -7)),          hasta: manana },
+    { label: 'Últimos 30 días',      desde: toISO(addDays(h, -30)),         hasta: manana },
+    { label: 'Mes hasta la fecha',   desde: toISO(new Date(a, m, 1)),       hasta: manana },
+    { label: 'Mes anterior',         desde: toISO(new Date(a, m - 1, 1)),   hasta: toISO(new Date(a, m, 1)) },
+    { label: 'Trimestre hasta la fecha', desde: toISO(new Date(a, q*3, 1)), hasta: manana },
+    { label: 'Trimestre anterior',   desde: toISO(new Date(a, (q-1)*3, 1)), hasta: toISO(new Date(a, q*3, 1)) },
+    { label: 'Año hasta la fecha',   desde: `${a}-01-01`,                   hasta: manana },
+    { label: 'Año anterior',         desde: `${a - 1}-01-01`,               hasta: `${a}-01-01` },
+    { label: 'Máximo',               desde: '2023-01-01',                   hasta: manana },
   ];
 };
 
@@ -153,7 +160,7 @@ function DateRangePicker({ desde, hasta, onChange }) {
           style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#27272a', border: '1px solid #3f3f46', borderRadius: 8, color: 'white', padding: '7px 12px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}
         >
           <span style={{ fontSize: 14 }}>📅</span>
-          <span>{fmtRango(desde, hasta)}</span>
+          <span>{activePreset ? `${activePreset.label} (${fmtRango(desde, hasta)})` : fmtRango(desde, hasta)}</span>
           <span style={{ color: '#71717a', fontSize: 10 }}>▾</span>
         </button>
 
@@ -484,7 +491,7 @@ function TabFiscal() {
 // ── Componente principal ────────────────────────────────────────
 
 export default function Finanzas() {
-  const initAnio = RANGOS_PRESET().find(p => p.label === 'Este año');
+  const initAnio = RANGOS_PRESET().find(p => p.label === 'Año hasta la fecha');
   const [desde, setDesde] = useState(initAnio.desde);
   const [hasta, setHasta] = useState(initAnio.hasta);
   const [dashboard, setDashboard] = useState(null);
