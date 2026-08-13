@@ -94,9 +94,29 @@ function fmtRango(desde, hasta) {
 function periodoAnterior(desde, hasta) {
   const d = new Date(desde + 'T12:00:00');
   const h = new Date(hasta + 'T12:00:00');
+  // Si desde cae en día 1, usar aritmética de meses para no perder días en años bisiestos
+  if (d.getDate() === 1) {
+    let shiftMonths;
+    if (h.getDate() === 1) {
+      // Periodo completo de meses (ej: "Año anterior", "Mes anterior", "Trimestre anterior")
+      shiftMonths = (h.getFullYear() - d.getFullYear()) * 12 + (h.getMonth() - d.getMonth());
+    } else {
+      // "Hasta la fecha": el inicio es día 1 del mes/trimestre/año → determinar unidad
+      const m = d.getMonth(); // 0=Ene
+      shiftMonths = m === 0 ? 12 : [3, 6, 9].includes(m) ? 3 : 1;
+    }
+    if (shiftMonths > 0) {
+      const nd = new Date(d.getFullYear(), d.getMonth() - shiftMonths, d.getDate());
+      const nh = new Date(h.getFullYear(), h.getMonth() - shiftMonths, h.getDate());
+      return { desde: toISO(nd), hasta: toISO(nh) };
+    }
+  }
+  // Fallback: mismo número de días hacia atrás
   const diffDays = Math.round((h - d) / 86400000);
   return { desde: toISO(addDays(d, -diffDays)), hasta: desde };
 }
+
+const DIM_COLOR = { '#22c55e': '#166534', '#f87171': '#991b1b', '#f59e0b': '#92400e', '#8b5cf6': '#5b21b6' };
 
 function Delta({ value, comp }) {
   if (comp == null || comp === 0 || value == null) return null;
@@ -424,14 +444,15 @@ function FilaMovimiento({ m, onEditar }) {
 
 function MetricCard({ label, value, color, sub, compValue }) {
   const numericValue = compValue != null ? parseFloat(String(value).replace(/[^0-9,-]/g, '').replace(',', '.')) : null;
+  const antColor = DIM_COLOR[color] || '#52525b';
   return (
     <div style={S.card}>
       <p style={{ color: '#71717a', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{label}</p>
       <p style={{ color: color || 'white', fontSize: 22, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>{value}</p>
       {compValue != null && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5, flexWrap: 'nowrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
           <Delta value={numericValue} comp={compValue} />
-          <span style={{ color: '#3f3f46', fontSize: 10 }}>ant <span style={{ color: '#52525b', fontWeight: 500 }}>{fmt(compValue)}</span></span>
+          <span style={{ color: antColor, fontSize: 10, fontWeight: 500 }}>ant {fmt(compValue)}</span>
         </div>
       )}
       {sub && <p style={{ color: '#52525b', fontSize: 11, marginTop: 4 }}>{sub}</p>}
@@ -441,6 +462,7 @@ function MetricCard({ label, value, color, sub, compValue }) {
 
 function SaldoCard({ cuenta, compSaldo }) {
   const color = cuenta.saldo >= 0 ? '#22c55e' : '#f87171';
+  const antColor = cuenta.saldo >= 0 ? '#166534' : '#991b1b';
   return (
     <div style={{ ...S.card, borderLeft: `3px solid ${cuenta.color}` }}>
       <p style={{ color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{cuenta.label}</p>
@@ -448,7 +470,7 @@ function SaldoCard({ cuenta, compSaldo }) {
       {compSaldo != null && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
           <Delta value={cuenta.saldo} comp={compSaldo} />
-          <span style={{ color: '#3f3f46', fontSize: 10 }}>ant <span style={{ color: '#52525b', fontWeight: 500 }}>{fmt(compSaldo)}</span></span>
+          <span style={{ color: antColor, fontSize: 10, fontWeight: 500 }}>ant {fmt(compSaldo)}</span>
         </div>
       )}
     </div>
