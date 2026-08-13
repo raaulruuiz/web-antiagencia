@@ -91,6 +91,24 @@ function fmtRango(desde, hasta) {
   return fmtD === fmtH ? fmtD : `${fmtD} – ${fmtH}`;
 }
 
+function periodoAnterior(desde, hasta) {
+  const d = new Date(desde + 'T12:00:00');
+  const h = new Date(hasta + 'T12:00:00');
+  const diffDays = Math.round((h - d) / 86400000);
+  return { desde: toISO(addDays(d, -diffDays)), hasta: desde };
+}
+
+function Delta({ value, comp }) {
+  if (comp == null || comp === 0 || value == null) return null;
+  const pct = Math.round(((value - comp) / Math.abs(comp)) * 100);
+  const up = pct >= 0;
+  return (
+    <span style={{ fontSize: 11, fontWeight: 600, color: up ? '#22c55e' : '#f87171', marginLeft: 6, whiteSpace: 'nowrap' }}>
+      {up ? '▲' : '▼'} {Math.abs(pct)}%
+    </span>
+  );
+}
+
 // ── Date Range Picker ───────────────────────────────────────────
 
 const dpStyles = `
@@ -107,9 +125,10 @@ const dpStyles = `
   .rdp-nav_button:hover { background: #27272a; color: white; }
 `;
 
-function DateRangePicker({ desde, hasta, onChange }) {
+function DateRangePicker({ desde, hasta, onChange, showComparar, comparar, onCompararChange, desdeComp, hastaComp, onCompChange }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(undefined);
+  const [compEditando, setCompEditando] = useState(false);
   const ref = useRef(null);
   const firstClick = useRef(true); // true = esperando primer clic en calendario
   const presets = RANGOS_PRESET();
@@ -174,30 +193,65 @@ function DateRangePicker({ desde, hasta, onChange }) {
         </button>
 
         {open && (
-          <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 200, display: 'flex', background: '#0d0d0d', border: '1px solid #27272a', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
-            {/* Presets */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '12px 8px', borderRight: '1px solid #27272a', minWidth: 180 }}>
-              {presets.map(p => {
-                const isActive = activePreset?.label === p.label;
-                return (
-                  <button key={p.label} onClick={() => applyPreset(p)}
-                    style={{ background: isActive ? '#1a2a3f' : 'transparent', color: isActive ? '#60a5fa' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                    {p.label}
-                  </button>
-                );
-              })}
+          <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 200, background: '#0d0d0d', border: '1px solid #27272a', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
+            <div style={{ display: 'flex' }}>
+              {/* Presets */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '12px 8px', borderRight: '1px solid #27272a', minWidth: 180 }}>
+                {presets.map(p => {
+                  const isActive = activePreset?.label === p.label;
+                  return (
+                    <button key={p.label} onClick={() => applyPreset(p)}
+                      style={{ background: isActive ? '#1a2a3f' : 'transparent', color: isActive ? '#60a5fa' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer', textAlign: 'left', whiteSpace: 'nowrap' }}>
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+              {/* Calendar */}
+              <div style={{ padding: '8px 4px' }}>
+                <DayPicker
+                  mode="range"
+                  selected={selected}
+                  onSelect={handleSelect}
+                  numberOfMonths={2}
+                  locale={es}
+                  weekStartsOn={1}
+                />
+              </div>
             </div>
-            {/* Calendar */}
-            <div style={{ padding: '8px 4px' }}>
-              <DayPicker
-                mode="range"
-                selected={selected}
-                onSelect={handleSelect}
-                numberOfMonths={2}
-                locale={es}
-                weekStartsOn={1}
-              />
-            </div>
+            {/* Comparar section */}
+            {showComparar && (
+              <div style={{ borderTop: '1px solid #27272a', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: '#a1a1aa', fontSize: 12 }}>
+                  <input type="checkbox" checked={!!comparar} onChange={e => { onCompararChange(e.target.checked); setCompEditando(false); }} style={{ accentColor: '#0067FD', cursor: 'pointer' }} />
+                  Comparar con periodo anterior
+                </label>
+                {comparar && desdeComp && hastaComp && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ color: '#52525b', fontSize: 11 }}>vs</span>
+                    {compEditando ? (
+                      <>
+                        <input type="date" value={desdeComp}
+                          onChange={e => onCompChange(e.target.value, hastaComp)}
+                          style={{ background: '#27272a', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '3px 8px', fontSize: 12, outline: 'none' }} />
+                        <span style={{ color: '#71717a', fontSize: 11 }}>–</span>
+                        <input type="date" value={toISO(addDays(new Date(hastaComp + 'T12:00:00'), -1))}
+                          onChange={e => onCompChange(desdeComp, toISO(addDays(new Date(e.target.value + 'T12:00:00'), 1)))}
+                          style={{ background: '#27272a', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '3px 8px', fontSize: 12, outline: 'none' }} />
+                        <button onClick={() => setCompEditando(false)}
+                          style={{ background: '#0067FD', border: 'none', borderRadius: 5, color: 'white', padding: '3px 10px', fontSize: 11, cursor: 'pointer' }}>✓</button>
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ color: '#a1a1aa', fontSize: 12 }}>{fmtRango(desdeComp, hastaComp)}</span>
+                        <button onClick={() => setCompEditando(true)}
+                          style={{ background: 'none', border: '1px solid #3f3f46', borderRadius: 5, color: '#71717a', padding: '2px 8px', fontSize: 11, cursor: 'pointer' }}>Editar</button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -368,11 +422,15 @@ function FilaMovimiento({ m, onEditar }) {
 
 // ── Métricas ────────────────────────────────────────────────────
 
-function MetricCard({ label, value, color, sub }) {
+function MetricCard({ label, value, color, sub, compValue }) {
   return (
     <div style={S.card}>
       <p style={{ color: '#71717a', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{label}</p>
-      <p style={{ color: color || 'white', fontSize: 22, fontWeight: 700, margin: 0 }}>{value}</p>
+      <p style={{ color: color || 'white', fontSize: 22, fontWeight: 700, margin: 0, display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: 4 }}>
+        {value}
+        {compValue != null && <Delta value={parseFloat(String(value).replace(/[^0-9,-]/g, '').replace(',', '.'))} comp={compValue} />}
+      </p>
+      {compValue != null && <p style={{ color: '#52525b', fontSize: 11, marginTop: 2 }}>ant: {compValue >= 0 ? '' : ''}{new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(compValue)}</p>}
       {sub && <p style={{ color: '#52525b', fontSize: 12, marginTop: 4 }}>{sub}</p>}
     </div>
   );
@@ -515,8 +573,22 @@ export default function Finanzas() {
   const [pagMovs, setPagMovs] = useState(1);
   const [tab, setTab] = useState('dashboard');
   const [movEditando, setMovEditando] = useState(null);
+  const [comparar, setComparar] = useState(false);
+  const [desdeComp, setDesdeComp] = useState('');
+  const [hastaComp, setHastaComp] = useState('');
+  const [dashComp, setDashComp] = useState(null);
+  const [loadingComp, setLoadingComp] = useState(false);
+  const [errComp, setErrComp] = useState(null);
 
-  function handleRangoChange(d, h) { setDesde(d); setHasta(h); }
+  function handleRangoChange(d, h) {
+    setDesde(d);
+    setHasta(h);
+    if (comparar) {
+      const p = periodoAnterior(d, h);
+      setDesdeComp(p.desde);
+      setHastaComp(p.hasta);
+    }
+  }
 
   const cargarDashboard = useCallback(async () => {
     setLoadingDash(true);
@@ -535,6 +607,25 @@ export default function Finanzas() {
       setLoadingDash(false);
     }
   }, [desde, hasta]);
+
+  const cargarDashboardComp = useCallback(async () => {
+    if (!comparar || !desdeComp || !hastaComp) return;
+    setLoadingComp(true);
+    setErrComp(null);
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/dashboard?desde=${desdeComp}&hasta=${hastaComp}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await r.json();
+      if (!r.ok) { setErrComp(data.error || `Error ${r.status}`); return; }
+      setDashComp(data);
+    } catch (e) {
+      setErrComp(e.message);
+    } finally {
+      setLoadingComp(false);
+    }
+  }, [comparar, desdeComp, hastaComp]);
 
   const cargarMovimientos = useCallback(async (page = 1) => {
     setLoadingMovs(true);
@@ -560,6 +651,23 @@ export default function Finanzas() {
 
   useEffect(() => { cargarDashboard(); }, [cargarDashboard]);
   useEffect(() => { if (tab === 'movimientos') cargarMovimientos(pagMovs); }, [tab, pagMovs, cargarMovimientos]);
+  useEffect(() => {
+    if (comparar && desdeComp && hastaComp) cargarDashboardComp();
+    else setDashComp(null);
+  }, [cargarDashboardComp, comparar, desdeComp, hastaComp]);
+
+  function handleCompararChange(val) {
+    setComparar(val);
+    if (val) {
+      const p = periodoAnterior(desde, hasta);
+      setDesdeComp(p.desde);
+      setHastaComp(p.hasta);
+    } else {
+      setDashComp(null);
+    }
+  }
+
+  function handleCompChange(d, h) { setDesdeComp(d); setHastaComp(h); }
 
   const tabStyle = (t) => ({
     background: tab === t ? '#27272a' : 'transparent',
@@ -598,20 +706,29 @@ export default function Finanzas() {
       {tab === 'dashboard' && (
         <>
           <div style={{ marginBottom: 20 }}>
-            <DateRangePicker desde={desde} hasta={hasta} onChange={handleRangoChange} />
+            <DateRangePicker
+              desde={desde} hasta={hasta} onChange={handleRangoChange}
+              showComparar
+              comparar={comparar} onCompararChange={handleCompararChange}
+              desdeComp={desdeComp} hastaComp={hastaComp} onCompChange={handleCompChange}
+            />
           </div>
+
+          {comparar && loadingComp && <p style={{ color: '#52525b', fontSize: 12, marginBottom: 8 }}>Cargando comparación…</p>}
 
           {loadingDash ? <p style={{ color: '#52525b' }}>Cargando…</p> : errDash ? (
             <p style={{ color: '#f87171', fontSize: 13, background: '#1a0a0a', border: '1px solid #7f1d1d', borderRadius: 8, padding: '10px 14px' }}>Error: {errDash}</p>
           ) : d?.resumen ? (
             <>
+              {(() => { const dc = dashComp?.resumen; return (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', gap: 12, marginBottom: 20 }}>
-                <MetricCard label="Ingresos"      value={fmt(d.resumen.totalIngresos)}  color="#22c55e" />
-                <MetricCard label="Gastos"        value={fmt(d.resumen.totalGastos)}    color="#f87171" />
-                <MetricCard label="Beneficio"     value={fmt(d.resumen.beneficioNeto)}  color={d.resumen.beneficioNeto >= 0 ? '#22c55e' : '#f87171'} />
-                <MetricCard label="IVA a pagar"   value={fmt(d.resumen.ivaAPagar)}      color="#f59e0b" sub={`Rep: ${fmt(d.resumen.ivaRepercutido)} · Sop: ${fmt(d.resumen.ivaSoportado)}`} />
-                <MetricCard label="IRPF retenido" value={fmt(d.resumen.irpfRetenido)}   color="#8b5cf6" />
+                <MetricCard label="Ingresos"      value={fmt(d.resumen.totalIngresos)}  color="#22c55e" compValue={dc ? dc.totalIngresos : null} />
+                <MetricCard label="Gastos"        value={fmt(d.resumen.totalGastos)}    color="#f87171" compValue={dc ? dc.totalGastos : null} />
+                <MetricCard label="Beneficio"     value={fmt(d.resumen.beneficioNeto)}  color={d.resumen.beneficioNeto >= 0 ? '#22c55e' : '#f87171'} compValue={dc ? dc.beneficioNeto : null} />
+                <MetricCard label="IVA a pagar"   value={fmt(d.resumen.ivaAPagar)}      color="#f59e0b" sub={`Rep: ${fmt(d.resumen.ivaRepercutido)} · Sop: ${fmt(d.resumen.ivaSoportado)}`} compValue={dc ? dc.ivaAPagar : null} />
+                <MetricCard label="IRPF retenido" value={fmt(d.resumen.irpfRetenido)}   color="#8b5cf6" compValue={dc ? dc.irpfRetenido : null} />
               </div>
+              ); })()}
 
               <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Saldo por cuenta</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(148px, 1fr))', gap: 10, marginBottom: 24 }}>
