@@ -1,4 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { DayPicker } from 'react-day-picker';
+import { es } from 'date-fns/locale';
+import 'react-day-picker/dist/style.css';
 import { supabase } from '@/lib/supabaseClient';
 import { BACKEND_URL } from '@/lib/config';
 import {
@@ -51,9 +54,128 @@ async function getToken() {
   return session?.access_token || null;
 }
 
-function getRangoAnio()      { const a = new Date().getFullYear(); return { desde: `${a}-01-01`, hasta: `${a+1}-01-01` }; }
-function getRangoMes()       { const h = new Date(); return { desde: new Date(h.getFullYear(), h.getMonth(), 1).toISOString().slice(0,10), hasta: new Date(h.getFullYear(), h.getMonth()+1, 1).toISOString().slice(0,10) }; }
-function getRangoTrimestre() { const h = new Date(); const q = Math.floor(h.getMonth()/3); return { desde: new Date(h.getFullYear(), q*3, 1).toISOString().slice(0,10), hasta: new Date(h.getFullYear(), q*3+3, 1).toISOString().slice(0,10) }; }
+function toISO(d) { return d.toISOString().slice(0, 10); }
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+
+const RANGOS_PRESET = () => {
+  const h = new Date();
+  const a = h.getFullYear();
+  const m = h.getMonth();
+  const q = Math.floor(m / 3);
+  return [
+    { label: 'Este mes',            desde: toISO(new Date(a, m, 1)),     hasta: toISO(new Date(a, m + 1, 1)) },
+    { label: 'Mes anterior',        desde: toISO(new Date(a, m - 1, 1)), hasta: toISO(new Date(a, m, 1)) },
+    { label: 'Este trimestre',      desde: toISO(new Date(a, q*3, 1)),   hasta: toISO(new Date(a, q*3 + 3, 1)) },
+    { label: 'Trimestre anterior',  desde: toISO(new Date(a, (q-1)*3, 1)), hasta: toISO(new Date(a, q*3, 1)) },
+    { label: 'Este año',            desde: `${a}-01-01`,                 hasta: `${a + 1}-01-01` },
+    { label: 'Año anterior',        desde: `${a - 1}-01-01`,             hasta: `${a}-01-01` },
+  ];
+};
+
+function fmtRango(desde, hasta) {
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const d = new Date(desde + 'T12:00:00');
+  const h = addDays(new Date(hasta + 'T12:00:00'), -1);
+  const fmtD = `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+  const fmtH = `${h.getDate()} ${meses[h.getMonth()]} ${h.getFullYear()}`;
+  return fmtD === fmtH ? fmtD : `${fmtD} – ${fmtH}`;
+}
+
+// ── Date Range Picker ───────────────────────────────────────────
+
+const dpStyles = `
+  .rdp { --rdp-accent-color: #0067FD; --rdp-background-color: #27272a; margin: 0; }
+  .rdp-months { background: #0d0d0d; }
+  .rdp-caption_label { color: white; font-size: 13px; }
+  .rdp-head_cell { color: #71717a; font-size: 11px; font-weight: 600; }
+  .rdp-day { color: #a1a1aa; font-size: 13px; border-radius: 6px; }
+  .rdp-day:hover:not([disabled]):not(.rdp-day_selected) { background: #27272a; color: white; }
+  .rdp-day_today { color: white; font-weight: 700; }
+  .rdp-day_selected, .rdp-day_range_start, .rdp-day_range_end { background: #0067FD !important; color: white !important; border-radius: 6px !important; }
+  .rdp-day_range_middle { background: #27272a !important; color: white !important; border-radius: 0 !important; }
+  .rdp-nav_button { color: #71717a; }
+  .rdp-nav_button:hover { background: #27272a; color: white; }
+`;
+
+function DateRangePicker({ desde, hasta, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState(undefined);
+  const ref = useRef(null);
+  const presets = RANGOS_PRESET();
+
+  // Sync selected from props
+  useEffect(() => {
+    const from = new Date(desde + 'T12:00:00');
+    const to   = addDays(new Date(hasta + 'T12:00:00'), -1);
+    setSelected({ from, to });
+  }, [desde, hasta]);
+
+  // Click outside → close
+  useEffect(() => {
+    if (!open) return;
+    function handle(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [open]);
+
+  function applyPreset(p) {
+    onChange(p.desde, p.hasta);
+    setOpen(false);
+  }
+
+  function handleSelect(range) {
+    setSelected(range);
+    if (range?.from && range?.to) {
+      const desde = toISO(range.from);
+      const hasta = toISO(addDays(range.to, 1));
+      onChange(desde, hasta);
+      setOpen(false);
+    }
+  }
+
+  const activePreset = presets.find(p => p.desde === desde && p.hasta === hasta);
+
+  return (
+    <>
+      <style>{dpStyles}</style>
+      <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+        <button
+          onClick={() => setOpen(o => !o)}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#27272a', border: '1px solid #3f3f46', borderRadius: 8, color: 'white', padding: '7px 12px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}
+        >
+          <span style={{ fontSize: 14 }}>📅</span>
+          <span>{activePreset ? activePreset.label : fmtRango(desde, hasta)}</span>
+          <span style={{ color: '#71717a', fontSize: 10 }}>▾</span>
+        </button>
+
+        {open && (
+          <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 200, display: 'flex', background: '#0d0d0d', border: '1px solid #27272a', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
+            {/* Presets */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '12px 8px', borderRight: '1px solid #27272a', minWidth: 160 }}>
+              {presets.map(p => (
+                <button key={p.label} onClick={() => applyPreset(p)}
+                  style={{ background: (activePreset?.label === p.label) ? '#1a2a3f' : 'transparent', color: (activePreset?.label === p.label) ? '#60a5fa' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer', textAlign: 'left', whiteSpace: 'nowrap' }}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            {/* Calendar */}
+            <div style={{ padding: '8px 4px' }}>
+              <DayPicker
+                mode="range"
+                selected={selected}
+                onSelect={handleSelect}
+                numberOfMonths={2}
+                locale={es}
+                weekStartsOn={1}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
 
 // ── Formulario (nuevo y edición) ────────────────────────────────
 
@@ -350,7 +472,9 @@ function TabFiscal() {
 // ── Componente principal ────────────────────────────────────────
 
 export default function Finanzas() {
-  const [periodo, setPeriodo] = useState('anio');
+  const initAnio = RANGOS_PRESET().find(p => p.label === 'Este año');
+  const [desde, setDesde] = useState(initAnio.desde);
+  const [hasta, setHasta] = useState(initAnio.hasta);
   const [dashboard, setDashboard] = useState(null);
   const [movimientos, setMovimientos] = useState({ items: [], total: 0, page: 1, pages: 1 });
   const [loadingDash, setLoadingDash] = useState(true);
@@ -364,18 +488,13 @@ export default function Finanzas() {
   const [tab, setTab] = useState('dashboard');
   const [movEditando, setMovEditando] = useState(null);
 
-  function getRango() {
-    if (periodo === 'mes') return getRangoMes();
-    if (periodo === 'trimestre') return getRangoTrimestre();
-    return getRangoAnio();
-  }
+  function handleRangoChange(d, h) { setDesde(d); setHasta(h); }
 
   const cargarDashboard = useCallback(async () => {
     setLoadingDash(true);
     setErrDash(null);
     try {
       const token = await getToken();
-      const { desde, hasta } = getRango();
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/dashboard?desde=${desde}&hasta=${hasta}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -387,14 +506,13 @@ export default function Finanzas() {
     } finally {
       setLoadingDash(false);
     }
-  }, [periodo]);
+  }, [desde, hasta]);
 
   const cargarMovimientos = useCallback(async (page = 1) => {
     setLoadingMovs(true);
     setErrMovs(null);
     try {
       const token = await getToken();
-      const { desde, hasta } = getRango();
       const params = new URLSearchParams({ desde, hasta, page });
       if (filtroTipo) params.set('tipo', filtroTipo);
       if (filtroCuenta) params.set('cuenta', filtroCuenta);
@@ -410,7 +528,7 @@ export default function Finanzas() {
     } finally {
       setLoadingMovs(false);
     }
-  }, [periodo, filtroTipo, filtroCuenta, filtroCat]);
+  }, [desde, hasta, filtroTipo, filtroCuenta, filtroCat]);
 
   useEffect(() => { cargarDashboard(); }, [cargarDashboard]);
   useEffect(() => { if (tab === 'movimientos') cargarMovimientos(pagMovs); }, [tab, pagMovs, cargarMovimientos]);
@@ -451,13 +569,8 @@ export default function Finanzas() {
       {/* ── DASHBOARD ── */}
       {tab === 'dashboard' && (
         <>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
-            {[['mes','Este mes'],['trimestre','Este trimestre'],['anio','Este año']].map(([k,l]) => (
-              <button key={k} onClick={() => setPeriodo(k)}
-                style={{ background: periodo === k ? '#0067FD' : '#27272a', color: 'white', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 13, cursor: 'pointer' }}>
-                {l}
-              </button>
-            ))}
+          <div style={{ marginBottom: 20 }}>
+            <DateRangePicker desde={desde} hasta={hasta} onChange={handleRangoChange} />
           </div>
 
           {loadingDash ? <p style={{ color: '#52525b' }}>Cargando…</p> : errDash ? (
@@ -524,7 +637,8 @@ export default function Finanzas() {
       {/* ── MOVIMIENTOS ── */}
       {tab === 'movimientos' && (
         <>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+            <DateRangePicker desde={desde} hasta={hasta} onChange={(d, h) => { handleRangoChange(d, h); setPagMovs(1); }} />
             <select style={{ ...S.select, width: 'auto', minWidth: 120 }} value={filtroTipo} onChange={e => { setFiltroTipo(e.target.value); setPagMovs(1); }}>
               <option value="">Todos los tipos</option>
               <option value="Ingreso">Ingresos</option>
@@ -538,12 +652,6 @@ export default function Finanzas() {
               <option value="">Todas las categorías</option>
               {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-            {[['mes','Mes'],['trimestre','Trim.'],['anio','Año']].map(([k,l]) => (
-              <button key={k} onClick={() => { setPeriodo(k); setPagMovs(1); }}
-                style={{ background: periodo === k ? '#0067FD' : '#27272a', color: 'white', border: 'none', borderRadius: 8, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}>
-                {l}
-              </button>
-            ))}
             <button style={S.ghost} onClick={() => cargarMovimientos(pagMovs)}>↺</button>
           </div>
 
