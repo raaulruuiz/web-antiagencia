@@ -588,10 +588,17 @@ function TabFiscal() {
 
 // ── Componente principal ────────────────────────────────────────
 
+function lsGet(key, fallback) { try { const v = localStorage.getItem(key); return v != null ? JSON.parse(v) : fallback; } catch { return fallback; } }
+function lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+
 export default function Finanzas() {
   const initAnio = RANGOS_PRESET().find(p => p.label === 'Año hasta la fecha');
-  const [desde, setDesde] = useState(initAnio.desde);
-  const [hasta, setHasta] = useState(initAnio.hasta);
+  const [desde, setDesde] = useState(() => lsGet('fin_desde', initAnio.desde));
+  const [hasta, setHasta] = useState(() => lsGet('fin_hasta', initAnio.hasta));
+  const [tab, setTab]     = useState(() => lsGet('fin_tab', 'dashboard'));
+  const [comparar, setComparar]   = useState(() => lsGet('fin_comparar', false));
+  const [desdeComp, setDesdeComp] = useState(() => lsGet('fin_desdeComp', ''));
+  const [hastaComp, setHastaComp] = useState(() => lsGet('fin_hastaComp', ''));
   const [dashboard, setDashboard] = useState(null);
   const [movimientos, setMovimientos] = useState({ items: [], total: 0, page: 1, pages: 1 });
   const [loadingDash, setLoadingDash] = useState(true);
@@ -602,14 +609,18 @@ export default function Finanzas() {
   const [filtroCuenta, setFiltroCuenta] = useState('');
   const [filtroCat, setFiltroCat] = useState('');
   const [pagMovs, setPagMovs] = useState(1);
-  const [tab, setTab] = useState('dashboard');
   const [movEditando, setMovEditando] = useState(null);
-  const [comparar, setComparar] = useState(false);
-  const [desdeComp, setDesdeComp] = useState('');
-  const [hastaComp, setHastaComp] = useState('');
   const [dashComp, setDashComp] = useState(null);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errComp, setErrComp] = useState(null);
+
+  // Persistir en localStorage cuando cambian
+  useEffect(() => { lsSet('fin_desde', desde); }, [desde]);
+  useEffect(() => { lsSet('fin_hasta', hasta); }, [hasta]);
+  useEffect(() => { lsSet('fin_tab', tab); }, [tab]);
+  useEffect(() => { lsSet('fin_comparar', comparar); }, [comparar]);
+  useEffect(() => { lsSet('fin_desdeComp', desdeComp); }, [desdeComp]);
+  useEffect(() => { lsSet('fin_hastaComp', hastaComp); }, [hastaComp]);
 
   function handleRangoChange(d, h) {
     setDesde(d);
