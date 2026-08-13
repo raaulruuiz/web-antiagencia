@@ -423,16 +423,16 @@ function FilaMovimiento({ m, onEditar }) {
 // ── Métricas ────────────────────────────────────────────────────
 
 function MetricCard({ label, value, color, sub, compValue }) {
+  const numericValue = compValue != null ? parseFloat(String(value).replace(/[^0-9,-]/g, '').replace(',', '.')) : null;
   return (
     <div style={S.card}>
       <p style={{ color: '#71717a', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{label}</p>
-      <p style={{ color: color || 'white', fontSize: 22, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
-        {value} {compValue != null && <Delta value={parseFloat(String(value).replace(/[^0-9,-]/g, '').replace(',', '.'))} comp={compValue} />}
-      </p>
+      <p style={{ color: color || 'white', fontSize: 22, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>{value}</p>
       {compValue != null && (
-        <p style={{ color: '#3f3f46', fontSize: 10, marginTop: 4, letterSpacing: '0.02em' }}>
-          ant <span style={{ color: '#52525b', fontWeight: 500 }}>{new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(compValue)}</span>
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5, flexWrap: 'nowrap' }}>
+          <Delta value={numericValue} comp={compValue} />
+          <span style={{ color: '#3f3f46', fontSize: 10 }}>ant <span style={{ color: '#52525b', fontWeight: 500 }}>{fmt(compValue)}</span></span>
+        </div>
       )}
       {sub && <p style={{ color: '#52525b', fontSize: 11, marginTop: 4 }}>{sub}</p>}
     </div>
@@ -444,13 +444,12 @@ function SaldoCard({ cuenta, compSaldo }) {
   return (
     <div style={{ ...S.card, borderLeft: `3px solid ${cuenta.color}` }}>
       <p style={{ color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{cuenta.label}</p>
-      <p style={{ color, fontSize: 20, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
-        {fmt(cuenta.saldo)} {compSaldo != null && <Delta value={cuenta.saldo} comp={compSaldo} />}
-      </p>
+      <p style={{ color, fontSize: 20, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>{fmt(cuenta.saldo)}</p>
       {compSaldo != null && (
-        <p style={{ color: '#3f3f46', fontSize: 10, marginTop: 4 }}>
-          ant <span style={{ color: '#52525b', fontWeight: 500 }}>{fmt(compSaldo)}</span>
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
+          <Delta value={cuenta.saldo} comp={compSaldo} />
+          <span style={{ color: '#3f3f46', fontSize: 10 }}>ant <span style={{ color: '#52525b', fontWeight: 500 }}>{fmt(compSaldo)}</span></span>
+        </div>
       )}
     </div>
   );
@@ -754,7 +753,7 @@ export default function Finanzas() {
                   <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Evolución mensual</h2>
                   <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
                     <ResponsiveContainer width="100%" height={200}>
-                      <BarChart barSize={dashComp ? 10 : 18}
+                      <BarChart barSize={dashComp ? 9 : 18}
                         data={d.evolucionMensual.map((e, i) => {
                           const c = dashComp?.evolucionMensual?.[i];
                           return { mes: mesLabel(e.mes), ingresos: e.ingresos, gastos: e.gastos, ...(c ? { ingresosAnt: c.ingresos, gastosAnt: c.gastos } : {}) };
@@ -762,12 +761,28 @@ export default function Finanzas() {
                         <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                         <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                         <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
-                        <Tooltip formatter={v => fmt(v)} contentStyle={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, color: 'white' }} />
-                        <Legend wrapperStyle={{ fontSize: 12, color: '#71717a' }} />
-                        {dashComp && <Bar dataKey="ingresosAnt" name="Ingresos ant." fill="#22c55e" opacity={0.3} radius={[3,3,0,0]} />}
-                        {dashComp && <Bar dataKey="gastosAnt"   name="Gastos ant."   fill="#f87171" opacity={0.3} radius={[3,3,0,0]} />}
-                        <Bar dataKey="ingresos" name="Ingresos" fill="#22c55e" radius={[4,4,0,0]} />
-                        <Bar dataKey="gastos"   name="Gastos"   fill="#f87171" radius={[4,4,0,0]} />
+                        <Tooltip
+                          contentStyle={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, fontSize: 12 }}
+                          content={({ active, payload, label }) => {
+                            if (!active || !payload?.length) return null;
+                            const curr = payload.filter(p => !String(p.dataKey).endsWith('Ant'));
+                            const ant  = payload.filter(p =>  String(p.dataKey).endsWith('Ant'));
+                            return (
+                              <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
+                                <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{label}</p>
+                                {curr.map(e => <p key={e.dataKey} style={{ color: e.fill, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}
+                                {ant.length > 0 && <><div style={{ borderTop: '1px solid #27272a', margin: '5px 0' }} />{ant.map(e => <p key={e.dataKey} style={{ color: e.fill, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}</>}
+                              </div>
+                            );
+                          }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: 12 }}
+                          formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>}
+                        />
+                        <Bar dataKey="ingresos"    name="Ingresos"      fill="#22c55e" radius={[4,4,0,0]} />
+                        <Bar dataKey="gastos"      name="Gastos"        fill="#f87171" radius={[4,4,0,0]} />
+                        {dashComp && <Bar dataKey="ingresosAnt" name="Ingresos ant." fill="#166534" radius={[3,3,0,0]} />}
+                        {dashComp && <Bar dataKey="gastosAnt"   name="Gastos ant."   fill="#991b1b" radius={[3,3,0,0]} />}
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -778,19 +793,37 @@ export default function Finanzas() {
                 <>
                   <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Gastos por categoría</h2>
                   <div style={S.card}>
-                    {Object.entries(d.gastosPorCategoria).filter(([,v]) => v > 0).sort(([,a],[,b]) => b - a).slice(0, 8).map(([cat, total]) => {
-                      const max = Math.max(...Object.values(d.gastosPorCategoria).filter(v => v > 0));
-                      const pct = Math.round((total / max) * 100);
-                      return (
-                        <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                          <span style={{ color: '#a1a1aa', fontSize: 12, minWidth: 140, flexShrink: 0 }}>{cat}</span>
-                          <div style={{ flex: 1, background: '#27272a', borderRadius: 4, height: 6 }}>
-                            <div style={{ width: `${pct}%`, background: '#f87171', borderRadius: 4, height: 6 }} />
+                    {(() => {
+                      const entries = Object.entries(d.gastosPorCategoria).filter(([,v]) => v > 0).sort(([,a],[,b]) => b - a).slice(0, 8);
+                      const compCats = dashComp?.gastosPorCategoria || {};
+                      const allVals = [...entries.map(([,v]) => v), ...entries.map(([cat]) => compCats[cat] || 0)].filter(v => v > 0);
+                      const max = Math.max(...allVals);
+                      return entries.map(([cat, total]) => {
+                        const pct = Math.round((total / max) * 100);
+                        const compTotal = compCats[cat] || 0;
+                        const compPct = dashComp ? Math.round((compTotal / max) * 100) : 0;
+                        return (
+                          <div key={cat} style={{ marginBottom: dashComp ? 14 : 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: dashComp ? 3 : 0 }}>
+                              <span style={{ color: '#a1a1aa', fontSize: 12, minWidth: 140, flexShrink: 0 }}>{cat}</span>
+                              <div style={{ flex: 1, background: '#27272a', borderRadius: 4, height: 6 }}>
+                                <div style={{ width: `${pct}%`, background: '#f87171', borderRadius: 4, height: 6 }} />
+                              </div>
+                              <span style={{ color: '#f87171', fontSize: 12, minWidth: 60, textAlign: 'right', flexShrink: 0 }}>{fmt(total)}</span>
+                            </div>
+                            {dashComp && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <span style={{ minWidth: 140, flexShrink: 0 }} />
+                                <div style={{ flex: 1, background: '#1f1f1f', borderRadius: 4, height: 4 }}>
+                                  <div style={{ width: `${compPct}%`, background: '#991b1b', borderRadius: 4, height: 4 }} />
+                                </div>
+                                <span style={{ color: '#991b1b', fontSize: 11, minWidth: 60, textAlign: 'right', flexShrink: 0 }}>{fmt(compTotal)}</span>
+                              </div>
+                            )}
                           </div>
-                          <span style={{ color: '#f87171', fontSize: 12, minWidth: 60, textAlign: 'right', flexShrink: 0 }}>{fmt(total)}</span>
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                    })()}
                   </div>
                 </>
               )}
