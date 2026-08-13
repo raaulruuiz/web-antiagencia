@@ -425,23 +425,33 @@ function FilaMovimiento({ m, onEditar }) {
 function MetricCard({ label, value, color, sub, compValue }) {
   return (
     <div style={S.card}>
-      <p style={{ color: '#71717a', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{label}</p>
-      <p style={{ color: color || 'white', fontSize: 22, fontWeight: 700, margin: 0, display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: 4 }}>
-        {value}
-        {compValue != null && <Delta value={parseFloat(String(value).replace(/[^0-9,-]/g, '').replace(',', '.'))} comp={compValue} />}
+      <p style={{ color: '#71717a', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{label}</p>
+      <p style={{ color: color || 'white', fontSize: 22, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
+        {value} {compValue != null && <Delta value={parseFloat(String(value).replace(/[^0-9,-]/g, '').replace(',', '.'))} comp={compValue} />}
       </p>
-      {compValue != null && <p style={{ color: '#52525b', fontSize: 11, marginTop: 2 }}>ant: {compValue >= 0 ? '' : ''}{new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(compValue)}</p>}
-      {sub && <p style={{ color: '#52525b', fontSize: 12, marginTop: 4 }}>{sub}</p>}
+      {compValue != null && (
+        <p style={{ color: '#3f3f46', fontSize: 10, marginTop: 4, letterSpacing: '0.02em' }}>
+          ant <span style={{ color: '#52525b', fontWeight: 500 }}>{new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(compValue)}</span>
+        </p>
+      )}
+      {sub && <p style={{ color: '#52525b', fontSize: 11, marginTop: 4 }}>{sub}</p>}
     </div>
   );
 }
 
-function SaldoCard({ cuenta }) {
+function SaldoCard({ cuenta, compSaldo }) {
   const color = cuenta.saldo >= 0 ? '#22c55e' : '#f87171';
   return (
     <div style={{ ...S.card, borderLeft: `3px solid ${cuenta.color}` }}>
       <p style={{ color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{cuenta.label}</p>
-      <p style={{ color, fontSize: 20, fontWeight: 700, margin: 0 }}>{fmt(cuenta.saldo)}</p>
+      <p style={{ color, fontSize: 20, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
+        {fmt(cuenta.saldo)} {compSaldo != null && <Delta value={cuenta.saldo} comp={compSaldo} />}
+      </p>
+      {compSaldo != null && (
+        <p style={{ color: '#3f3f46', fontSize: 10, marginTop: 4 }}>
+          ant <span style={{ color: '#52525b', fontWeight: 500 }}>{fmt(compSaldo)}</span>
+        </p>
+      )}
     </div>
   );
 }
@@ -705,7 +715,7 @@ export default function Finanzas() {
       {/* ── DASHBOARD ── */}
       {tab === 'dashboard' && (
         <>
-          <div style={{ marginBottom: 20 }}>
+          <div style={{ marginBottom: comparar && desdeComp ? 8 : 20 }}>
             <DateRangePicker
               desde={desde} hasta={hasta} onChange={handleRangoChange}
               showComparar
@@ -713,8 +723,12 @@ export default function Finanzas() {
               desdeComp={desdeComp} hastaComp={hastaComp} onCompChange={handleCompChange}
             />
           </div>
-
-          {comparar && loadingComp && <p style={{ color: '#52525b', fontSize: 12, marginBottom: 8 }}>Cargando comparación…</p>}
+          {comparar && desdeComp && hastaComp && (
+            <p style={{ color: '#52525b', fontSize: 12, marginBottom: 16 }}>
+              Comparando con <span style={{ color: '#71717a', fontWeight: 500 }}>{fmtRango(desdeComp, hastaComp)}</span>
+              {loadingComp && <span style={{ marginLeft: 8 }}>·&nbsp;cargando…</span>}
+            </p>
+          )}
 
           {loadingDash ? <p style={{ color: '#52525b' }}>Cargando…</p> : errDash ? (
             <p style={{ color: '#f87171', fontSize: 13, background: '#1a0a0a', border: '1px solid #7f1d1d', borderRadius: 8, padding: '10px 14px' }}>Error: {errDash}</p>
@@ -732,7 +746,7 @@ export default function Finanzas() {
 
               <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Saldo por cuenta</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(148px, 1fr))', gap: 10, marginBottom: 24 }}>
-                {CUENTAS.map(c => <SaldoCard key={c.key} cuenta={{ ...c, saldo: d.saldos[c.key] ?? 0 }} />)}
+                {CUENTAS.map(c => <SaldoCard key={c.key} cuenta={{ ...c, saldo: d.saldos[c.key] ?? 0 }} compSaldo={dashComp ? (dashComp.saldos[c.key] ?? 0) : null} />)}
               </div>
 
               {d.evolucionMensual.length > 1 && (
@@ -740,12 +754,18 @@ export default function Finanzas() {
                   <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Evolución mensual</h2>
                   <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
                     <ResponsiveContainer width="100%" height={200}>
-                      <BarChart data={d.evolucionMensual.map(e => ({ ...e, mes: mesLabel(e.mes) }))} barSize={18}>
+                      <BarChart barSize={dashComp ? 10 : 18}
+                        data={d.evolucionMensual.map((e, i) => {
+                          const c = dashComp?.evolucionMensual?.[i];
+                          return { mes: mesLabel(e.mes), ingresos: e.ingresos, gastos: e.gastos, ...(c ? { ingresosAnt: c.ingresos, gastosAnt: c.gastos } : {}) };
+                        })}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                         <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                         <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                         <Tooltip formatter={v => fmt(v)} contentStyle={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, color: 'white' }} />
                         <Legend wrapperStyle={{ fontSize: 12, color: '#71717a' }} />
+                        {dashComp && <Bar dataKey="ingresosAnt" name="Ingresos ant." fill="#22c55e" opacity={0.3} radius={[3,3,0,0]} />}
+                        {dashComp && <Bar dataKey="gastosAnt"   name="Gastos ant."   fill="#f87171" opacity={0.3} radius={[3,3,0,0]} />}
                         <Bar dataKey="ingresos" name="Ingresos" fill="#22c55e" radius={[4,4,0,0]} />
                         <Bar dataKey="gastos"   name="Gastos"   fill="#f87171" radius={[4,4,0,0]} />
                       </BarChart>
