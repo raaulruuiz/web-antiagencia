@@ -151,10 +151,10 @@ const dpStyles = `
 function DateRangePicker({ desde, hasta, onApply, showComparar, comparar, desdeComp, hastaComp }) {
   const [open, setOpen]           = useState(false);
   const [selected, setSelected]   = useState(undefined);
+  const [pendingFrom, setPendingFrom] = useState(null);
   const [compEditando, setCompEditando] = useState(false);
-  const ref       = useRef(null);
-  const firstClick = useRef(true);
-  const presets   = RANGOS_PRESET();
+  const ref     = useRef(null);
+  const presets = RANGOS_PRESET();
 
   // Draft state: valores pendientes de aplicar
   const [dDesde, setDDesde]           = useState(desde);
@@ -181,7 +181,7 @@ function DateRangePicker({ desde, hasta, onApply, showComparar, comparar, desdeC
       const from = new Date(desde + 'T12:00:00');
       const to   = addDays(new Date(hasta + 'T12:00:00'), -1);
       setSelected(from <= to ? { from, to } : undefined);
-      firstClick.current = true;
+      setPendingFrom(null);
     }
     setOpen(o => !o);
   }
@@ -191,31 +191,29 @@ function DateRangePicker({ desde, hasta, onApply, showComparar, comparar, desdeC
     const from = new Date(p.desde + 'T12:00:00');
     const to   = addDays(new Date(p.hasta + 'T12:00:00'), -1);
     setSelected(from <= to ? { from, to } : undefined);
-    firstClick.current = true;
+    setPendingFrom(null);
     if (dComparar) {
       const pc = periodoAnterior(p.desde, p.hasta);
       setDDesdeComp(pc.desde); setDHastaComp(pc.hasta);
     }
   }
 
-  function handleSelect(range) {
-    if (!range?.from) { firstClick.current = true; setSelected(undefined); return; }
-    if (firstClick.current) {
-      firstClick.current = false;
-      setSelected({ from: range.from, to: undefined });
+  function handleDayClick(day, modifiers) {
+    if (modifiers.disabled || modifiers.outside) return;
+    if (pendingFrom === null) {
+      // Primer clic: marcar inicio
+      setPendingFrom(day);
+      setSelected({ from: day, to: undefined });
     } else {
-      firstClick.current = true;
-      if (range.from && range.to) {
-        setSelected(range);
-        const nd = toISO(range.from), nh = toISO(addDays(range.to, 1));
-        setDDesde(nd); setDHasta(nh);
-        if (dComparar) {
-          const pc = periodoAnterior(nd, nh);
-          setDDesdeComp(pc.desde); setDHastaComp(pc.hasta);
-        }
-      } else {
-        firstClick.current = false;
-        setSelected({ from: range.from, to: undefined });
+      // Segundo clic: completar rango
+      const [start, end] = pendingFrom <= day ? [pendingFrom, day] : [day, pendingFrom];
+      setSelected({ from: start, to: end });
+      setPendingFrom(null);
+      const nd = toISO(start), nh = toISO(addDays(end, 1));
+      setDDesde(nd); setDHasta(nh);
+      if (dComparar) {
+        const pc = periodoAnterior(nd, nh);
+        setDDesdeComp(pc.desde); setDHastaComp(pc.hasta);
       }
     }
   }
@@ -267,7 +265,8 @@ function DateRangePicker({ desde, hasta, onApply, showComparar, comparar, desdeC
               </div>
               {/* Calendar */}
               <div style={{ padding: '8px 4px' }}>
-                <DayPicker mode="range" selected={selected} onSelect={handleSelect}
+                <DayPicker mode="range" selected={selected} onSelect={() => {}}
+                  onDayClick={handleDayClick}
                   numberOfMonths={2} locale={es} weekStartsOn={1} />
               </div>
             </div>
