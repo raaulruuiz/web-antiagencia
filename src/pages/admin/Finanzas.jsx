@@ -54,7 +54,9 @@ async function getToken() {
   return session?.access_token || null;
 }
 
-function toISO(d) { return d.toISOString().slice(0, 10); }
+function toISO(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
 
 const RANGOS_PRESET = () => {
@@ -121,8 +123,10 @@ function DateRangePicker({ desde, hasta, onChange }) {
   }, [open]);
 
   function openToggle() {
-    // Al abrir: limpiar selección del calendario para empezar fresh
-    setSelected(undefined);
+    // Al abrir: mostrar el rango actual en el calendario
+    const from = new Date(desde + 'T12:00:00');
+    const to   = addDays(new Date(hasta + 'T12:00:00'), -1);
+    setSelected(from <= to ? { from, to } : undefined);
     firstClick.current = true;
     setOpen(o => !o);
   }
