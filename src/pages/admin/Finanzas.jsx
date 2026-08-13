@@ -40,7 +40,9 @@ const S = {
 
 function fmt(n) {
   if (n == null) return '—';
-  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  const r = Math.round(n);
+  const abs = String(Math.abs(r)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return (r < 0 ? '-' : '') + abs + ' €';
 }
 
 function mesLabel(yyyymm) {
