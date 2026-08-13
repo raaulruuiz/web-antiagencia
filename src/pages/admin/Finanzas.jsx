@@ -63,12 +63,13 @@ const RANGOS_PRESET = () => {
   const m = h.getMonth();
   const q = Math.floor(m / 3);
   return [
-    { label: 'Este mes',            desde: toISO(new Date(a, m, 1)),     hasta: toISO(new Date(a, m + 1, 1)) },
-    { label: 'Mes anterior',        desde: toISO(new Date(a, m - 1, 1)), hasta: toISO(new Date(a, m, 1)) },
-    { label: 'Este trimestre',      desde: toISO(new Date(a, q*3, 1)),   hasta: toISO(new Date(a, q*3 + 3, 1)) },
+    { label: 'Este mes',            desde: toISO(new Date(a, m, 1)),       hasta: toISO(new Date(a, m + 1, 1)) },
+    { label: 'Mes anterior',        desde: toISO(new Date(a, m - 1, 1)),   hasta: toISO(new Date(a, m, 1)) },
+    { label: 'Este trimestre',      desde: toISO(new Date(a, q*3, 1)),     hasta: toISO(new Date(a, q*3 + 3, 1)) },
     { label: 'Trimestre anterior',  desde: toISO(new Date(a, (q-1)*3, 1)), hasta: toISO(new Date(a, q*3, 1)) },
-    { label: 'Este año',            desde: `${a}-01-01`,                 hasta: `${a + 1}-01-01` },
-    { label: 'Año anterior',        desde: `${a - 1}-01-01`,             hasta: `${a}-01-01` },
+    { label: 'Este año',            desde: `${a}-01-01`,                   hasta: `${a + 1}-01-01` },
+    { label: 'Año anterior',        desde: `${a - 1}-01-01`,               hasta: `${a}-01-01` },
+    { label: 'Máximo',              desde: '2020-01-01',                   hasta: '2100-01-01', noFecha: true },
   ];
 };
 
@@ -101,14 +102,8 @@ function DateRangePicker({ desde, hasta, onChange }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(undefined);
   const ref = useRef(null);
+  const firstClick = useRef(true); // true = esperando primer clic en calendario
   const presets = RANGOS_PRESET();
-
-  // Sync selected from props
-  useEffect(() => {
-    const from = new Date(desde + 'T12:00:00');
-    const to   = addDays(new Date(hasta + 'T12:00:00'), -1);
-    setSelected({ from, to });
-  }, [desde, hasta]);
 
   // Click outside → close
   useEffect(() => {
@@ -118,6 +113,13 @@ function DateRangePicker({ desde, hasta, onChange }) {
     return () => document.removeEventListener('mousedown', handle);
   }, [open]);
 
+  function openToggle() {
+    // Al abrir: limpiar selección del calendario para empezar fresh
+    setSelected(undefined);
+    firstClick.current = true;
+    setOpen(o => !o);
+  }
+
   function applyPreset(p) {
     onChange(p.desde, p.hasta);
     setOpen(false);
@@ -125,11 +127,18 @@ function DateRangePicker({ desde, hasta, onChange }) {
 
   function handleSelect(range) {
     setSelected(range);
-    if (range?.from && range?.to) {
-      const desde = toISO(range.from);
-      const hasta = toISO(addDays(range.to, 1));
-      onChange(desde, hasta);
-      setOpen(false);
+    if (!range?.from) { firstClick.current = true; return; }
+
+    if (firstClick.current) {
+      // Primer clic: guardar inicio, esperar fin
+      firstClick.current = false;
+    } else {
+      // Segundo clic: aplicar si hay rango completo
+      firstClick.current = true;
+      if (range.from && range.to) {
+        onChange(toISO(range.from), toISO(addDays(range.to, 1)));
+        setOpen(false);
+      }
     }
   }
 
@@ -140,7 +149,7 @@ function DateRangePicker({ desde, hasta, onChange }) {
       <style>{dpStyles}</style>
       <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
         <button
-          onClick={() => setOpen(o => !o)}
+          onClick={openToggle}
           style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#27272a', border: '1px solid #3f3f46', borderRadius: 8, color: 'white', padding: '7px 12px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}
         >
           <span style={{ fontSize: 14 }}>📅</span>
@@ -151,13 +160,21 @@ function DateRangePicker({ desde, hasta, onChange }) {
         {open && (
           <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 200, display: 'flex', background: '#0d0d0d', border: '1px solid #27272a', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
             {/* Presets */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '12px 8px', borderRight: '1px solid #27272a', minWidth: 160 }}>
-              {presets.map(p => (
-                <button key={p.label} onClick={() => applyPreset(p)}
-                  style={{ background: (activePreset?.label === p.label) ? '#1a2a3f' : 'transparent', color: (activePreset?.label === p.label) ? '#60a5fa' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                  {p.label}
-                </button>
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '12px 8px', borderRight: '1px solid #27272a', minWidth: 180 }}>
+              {presets.map(p => {
+                const isActive = activePreset?.label === p.label;
+                return (
+                  <button key={p.label} onClick={() => applyPreset(p)}
+                    style={{ background: isActive ? '#1a2a3f' : 'transparent', color: isActive ? '#60a5fa' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer', textAlign: 'left' }}>
+                    <span>{p.label}</span>
+                    {!p.noFecha && (
+                      <span style={{ display: 'block', color: isActive ? '#3b82f6' : '#52525b', fontSize: 10, marginTop: 1 }}>
+                        {fmtRango(p.desde, p.hasta)}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
             {/* Calendar */}
             <div style={{ padding: '8px 4px' }}>
