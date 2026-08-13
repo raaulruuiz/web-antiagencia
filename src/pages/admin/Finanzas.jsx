@@ -147,15 +147,23 @@ const dpStyles = `
   .rdp-nav_button:hover { background: #27272a; color: white; }
 `;
 
-function DateRangePicker({ desde, hasta, onChange, showComparar, comparar, onCompararChange, desdeComp, hastaComp, onCompChange }) {
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(undefined);
+// onApply(desde, hasta) o onApply(desde, hasta, comparar, desdeComp, hastaComp) si showComparar
+function DateRangePicker({ desde, hasta, onApply, showComparar, comparar, desdeComp, hastaComp }) {
+  const [open, setOpen]           = useState(false);
+  const [selected, setSelected]   = useState(undefined);
   const [compEditando, setCompEditando] = useState(false);
-  const ref = useRef(null);
-  const firstClick = useRef(true); // true = esperando primer clic en calendario
-  const presets = RANGOS_PRESET();
+  const ref       = useRef(null);
+  const firstClick = useRef(true);
+  const presets   = RANGOS_PRESET();
 
-  // Click outside → close
+  // Draft state: valores pendientes de aplicar
+  const [dDesde, setDDesde]           = useState(desde);
+  const [dHasta, setDHasta]           = useState(hasta);
+  const [dComparar, setDComparar]     = useState(!!comparar);
+  const [dDesdeComp, setDDesdeComp]   = useState(desdeComp || '');
+  const [dHastaComp, setDHastaComp]   = useState(hastaComp || '');
+
+  // Click outside → cerrar sin aplicar
   useEffect(() => {
     if (!open) return;
     function handle(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
@@ -164,51 +172,79 @@ function DateRangePicker({ desde, hasta, onChange, showComparar, comparar, onCom
   }, [open]);
 
   function openToggle() {
-    // Al abrir: mostrar el rango actual en el calendario
-    const from = new Date(desde + 'T12:00:00');
-    const to   = addDays(new Date(hasta + 'T12:00:00'), -1);
-    setSelected(from <= to ? { from, to } : undefined);
-    firstClick.current = true;
+    if (!open) {
+      // Reiniciar draft con valores comprometidos actuales
+      setDDesde(desde); setDHasta(hasta);
+      setDComparar(!!comparar);
+      setDDesdeComp(desdeComp || ''); setDHastaComp(hastaComp || '');
+      setCompEditando(false);
+      const from = new Date(desde + 'T12:00:00');
+      const to   = addDays(new Date(hasta + 'T12:00:00'), -1);
+      setSelected(from <= to ? { from, to } : undefined);
+      firstClick.current = true;
+    }
     setOpen(o => !o);
   }
 
-  function applyPreset(p) {
-    onChange(p.desde, p.hasta);
-    setOpen(false);
+  function selectPreset(p) {
+    setDDesde(p.desde); setDHasta(p.hasta);
+    const from = new Date(p.desde + 'T12:00:00');
+    const to   = addDays(new Date(p.hasta + 'T12:00:00'), -1);
+    setSelected(from <= to ? { from, to } : undefined);
+    firstClick.current = true;
+    if (dComparar) {
+      const pc = periodoAnterior(p.desde, p.hasta);
+      setDDesdeComp(pc.desde); setDHastaComp(pc.hasta);
+    }
   }
 
   function handleSelect(range) {
     if (!range?.from) { firstClick.current = true; setSelected(undefined); return; }
-
     if (firstClick.current) {
-      // Primer clic: forzar selección parcial independientemente de lo que devuelva el picker
       firstClick.current = false;
       setSelected({ from: range.from, to: undefined });
     } else {
-      // Segundo clic: aplicar rango
       firstClick.current = true;
       if (range.from && range.to) {
         setSelected(range);
-        onChange(toISO(range.from), toISO(addDays(range.to, 1)));
-        setOpen(false);
+        const nd = toISO(range.from), nh = toISO(addDays(range.to, 1));
+        setDDesde(nd); setDHasta(nh);
+        if (dComparar) {
+          const pc = periodoAnterior(nd, nh);
+          setDDesdeComp(pc.desde); setDHastaComp(pc.hasta);
+        }
       } else {
-        // Sin to: empezar de nuevo
         firstClick.current = false;
         setSelected({ from: range.from, to: undefined });
       }
     }
   }
 
-  const activePreset = presets.find(p => p.desde === desde && p.hasta === hasta);
+  function handleToggleComparar(val) {
+    setDComparar(val);
+    if (val && !dDesdeComp) {
+      const pc = periodoAnterior(dDesde, dHasta);
+      setDDesdeComp(pc.desde); setDHastaComp(pc.hasta);
+    }
+  }
+
+  function handleApply() {
+    if (showComparar) onApply(dDesde, dHasta, dComparar, dDesdeComp, dHastaComp);
+    else onApply(dDesde, dHasta);
+    setOpen(false);
+  }
+
+  const draftPreset  = presets.find(p => p.desde === dDesde && p.hasta === dHasta);
+  const activePreset = presets.find(p => p.desde === desde  && p.hasta === hasta);
+  const hasChanges   = dDesde !== desde || dHasta !== hasta
+    || (showComparar && (dComparar !== !!comparar || dDesdeComp !== (desdeComp||'') || dHastaComp !== (hastaComp||'')));
 
   return (
     <>
       <style>{dpStyles}</style>
       <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-        <button
-          onClick={openToggle}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#27272a', border: '1px solid #3f3f46', borderRadius: 8, color: 'white', padding: '7px 12px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}
-        >
+        <button onClick={openToggle}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#27272a', border: '1px solid #3f3f46', borderRadius: 8, color: 'white', padding: '7px 12px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
           <span style={{ fontSize: 14 }}>📅</span>
           <span>{activePreset ? `${activePreset.label} (${fmtRango(desde, hasta)})` : fmtRango(desde, hasta)}</span>
           <span style={{ color: '#71717a', fontSize: 10 }}>▾</span>
@@ -220,9 +256,9 @@ function DateRangePicker({ desde, hasta, onChange, showComparar, comparar, onCom
               {/* Presets */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '12px 8px', borderRight: '1px solid #27272a', minWidth: 180 }}>
                 {presets.map(p => {
-                  const isActive = activePreset?.label === p.label;
+                  const isActive = draftPreset?.label === p.label;
                   return (
-                    <button key={p.label} onClick={() => applyPreset(p)}
+                    <button key={p.label} onClick={() => selectPreset(p)}
                       style={{ background: isActive ? '#1a2a3f' : 'transparent', color: isActive ? '#60a5fa' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer', textAlign: 'left', whiteSpace: 'nowrap' }}>
                       {p.label}
                     </button>
@@ -231,41 +267,35 @@ function DateRangePicker({ desde, hasta, onChange, showComparar, comparar, onCom
               </div>
               {/* Calendar */}
               <div style={{ padding: '8px 4px' }}>
-                <DayPicker
-                  mode="range"
-                  selected={selected}
-                  onSelect={handleSelect}
-                  numberOfMonths={2}
-                  locale={es}
-                  weekStartsOn={1}
-                />
+                <DayPicker mode="range" selected={selected} onSelect={handleSelect}
+                  numberOfMonths={2} locale={es} weekStartsOn={1} />
               </div>
             </div>
-            {/* Comparar section */}
+
+            {/* Comparar */}
             {showComparar && (
               <div style={{ borderTop: '1px solid #27272a', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: '#a1a1aa', fontSize: 12 }}>
-                  <input type="checkbox" checked={!!comparar} onChange={e => { onCompararChange(e.target.checked); setCompEditando(false); }} style={{ accentColor: '#0067FD', cursor: 'pointer' }} />
+                  <input type="checkbox" checked={dComparar} onChange={e => handleToggleComparar(e.target.checked)} style={{ accentColor: '#0067FD', cursor: 'pointer' }} />
                   Comparar con periodo anterior
                 </label>
-                {comparar && desdeComp && hastaComp && (
+                {dComparar && dDesdeComp && dHastaComp && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <span style={{ color: '#52525b', fontSize: 11 }}>vs</span>
                     {compEditando ? (
                       <>
-                        <input type="date" value={desdeComp}
-                          onChange={e => onCompChange(e.target.value, hastaComp)}
+                        <input type="date" value={dDesdeComp} onChange={e => setDDesdeComp(e.target.value)}
                           style={{ background: '#27272a', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '3px 8px', fontSize: 12, outline: 'none' }} />
                         <span style={{ color: '#71717a', fontSize: 11 }}>–</span>
-                        <input type="date" value={toISO(addDays(new Date(hastaComp + 'T12:00:00'), -1))}
-                          onChange={e => onCompChange(desdeComp, toISO(addDays(new Date(e.target.value + 'T12:00:00'), 1)))}
+                        <input type="date" value={toISO(addDays(new Date(dHastaComp + 'T12:00:00'), -1))}
+                          onChange={e => setDHastaComp(toISO(addDays(new Date(e.target.value + 'T12:00:00'), 1)))}
                           style={{ background: '#27272a', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '3px 8px', fontSize: 12, outline: 'none' }} />
                         <button onClick={() => setCompEditando(false)}
                           style={{ background: '#0067FD', border: 'none', borderRadius: 5, color: 'white', padding: '3px 10px', fontSize: 11, cursor: 'pointer' }}>✓</button>
                       </>
                     ) : (
                       <>
-                        <span style={{ color: '#a1a1aa', fontSize: 12 }}>{fmtRango(desdeComp, hastaComp)}</span>
+                        <span style={{ color: '#a1a1aa', fontSize: 12 }}>{fmtRango(dDesdeComp, dHastaComp)}</span>
                         <button onClick={() => setCompEditando(true)}
                           style={{ background: 'none', border: '1px solid #3f3f46', borderRadius: 5, color: '#71717a', padding: '2px 8px', fontSize: 11, cursor: 'pointer' }}>Editar</button>
                       </>
@@ -274,6 +304,23 @@ function DateRangePicker({ desde, hasta, onChange, showComparar, comparar, onCom
                 )}
               </div>
             )}
+
+            {/* Footer: Aplicar */}
+            <div style={{ borderTop: '1px solid #27272a', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: '#52525b', fontSize: 11 }}>
+                {draftPreset ? `${draftPreset.label} · ` : ''}{fmtRango(dDesde, dHasta)}
+              </span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setOpen(false)}
+                  style={{ background: 'none', border: '1px solid #3f3f46', borderRadius: 7, color: '#71717a', padding: '6px 14px', fontSize: 12, cursor: 'pointer' }}>
+                  Cancelar
+                </button>
+                <button onClick={handleApply}
+                  style={{ background: hasChanges ? '#0067FD' : '#27272a', border: 'none', borderRadius: 7, color: 'white', padding: '6px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                  Aplicar
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -624,14 +671,15 @@ export default function Finanzas() {
   useEffect(() => { lsSet('fin_desdeComp', desdeComp); }, [desdeComp]);
   useEffect(() => { lsSet('fin_hastaComp', hastaComp); }, [hastaComp]);
 
-  function handleRangoChange(d, h) {
-    setDesde(d);
-    setHasta(h);
-    if (comparar) {
-      const p = periodoAnterior(d, h);
-      setDesdeComp(p.desde);
-      setHastaComp(p.hasta);
-    }
+  function handleApplyDashboard(d, h, doComp, dComp, hComp) {
+    setDesde(d); setHasta(h);
+    setComparar(doComp);
+    if (doComp) { setDesdeComp(dComp); setHastaComp(hComp); }
+    else { setDashComp(null); }
+  }
+
+  function handleApplyMovimientos(d, h) {
+    setDesde(d); setHasta(h); setPagMovs(1);
   }
 
   const cargarDashboard = useCallback(async () => {
@@ -700,19 +748,6 @@ export default function Finanzas() {
     else setDashComp(null);
   }, [cargarDashboardComp, comparar, desdeComp, hastaComp]);
 
-  function handleCompararChange(val) {
-    setComparar(val);
-    if (val) {
-      const p = periodoAnterior(desde, hasta);
-      setDesdeComp(p.desde);
-      setHastaComp(p.hasta);
-    } else {
-      setDashComp(null);
-    }
-  }
-
-  function handleCompChange(d, h) { setDesdeComp(d); setHastaComp(h); }
-
   const tabStyle = (t) => ({
     background: tab === t ? '#27272a' : 'transparent',
     color: tab === t ? 'white' : '#71717a',
@@ -751,10 +786,8 @@ export default function Finanzas() {
         <>
           <div style={{ marginBottom: comparar && desdeComp ? 8 : 20 }}>
             <DateRangePicker
-              desde={desde} hasta={hasta} onChange={handleRangoChange}
-              showComparar
-              comparar={comparar} onCompararChange={handleCompararChange}
-              desdeComp={desdeComp} hastaComp={hastaComp} onCompChange={handleCompChange}
+              desde={desde} hasta={hasta} onApply={handleApplyDashboard}
+              showComparar comparar={comparar} desdeComp={desdeComp} hastaComp={hastaComp}
             />
           </div>
           {comparar && desdeComp && hastaComp && (
@@ -871,7 +904,7 @@ export default function Finanzas() {
       {tab === 'movimientos' && (
         <>
           <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-            <DateRangePicker desde={desde} hasta={hasta} onChange={(d, h) => { handleRangoChange(d, h); setPagMovs(1); }} />
+            <DateRangePicker desde={desde} hasta={hasta} onApply={handleApplyMovimientos} />
             <select style={{ ...S.select, width: 'auto', minWidth: 120 }} value={filtroTipo} onChange={e => { setFiltroTipo(e.target.value); setPagMovs(1); }}>
               <option value="">Todos los tipos</option>
               <option value="Ingreso">Ingresos</option>
