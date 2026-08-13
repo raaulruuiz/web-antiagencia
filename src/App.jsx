@@ -51,6 +51,7 @@ import AdminHome from './pages/admin/AdminHome';
 import EmailBuilder from './pages/admin/EmailBuilder';
 import Paginas from './pages/admin/Paginas';
 import Pomodoro from './pages/admin/Pomodoro';
+import Finanzas from './pages/admin/Finanzas';
 import Biblioteca from './pages/admin/Biblioteca';
 import BibliotecaItem from './pages/admin/BibliotecaItem';
 import BibliotecaPublica from './pages/BibliotecaPublica';
@@ -242,6 +243,7 @@ function App() {
               <Route path="biblioteca"       element={<RequirePage page="biblioteca"><Biblioteca /></RequirePage>} />
               <Route path="biblioteca/:id"  element={<RequirePage page="biblioteca"><BibliotecaItem /></RequirePage>} />
               <Route path="pomodoro"        element={<RequirePage page="pomodoro"><Pomodoro /></RequirePage>} />
+              <Route path="finanzas"        element={<RequirePage page="finanzas"><Finanzas /></RequirePage>} />
             </Route>
             <Route path="/anti-biblioteca" element={<BibliotecaPublica />} />
             <Route path="/anti-biblioteca/:id" element={<BibliotecaItemPublica />} />

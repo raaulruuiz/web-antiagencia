@@ -15,6 +15,7 @@ const PAGE_OPTIONS = [
   { value: 'copywriting',      label: 'Copywriting' },
   { value: 'dashboard',        label: 'Dashboard' },
   { value: 'email-builder',    label: 'Email Builder' },
+  { value: 'finanzas',         label: 'Finanzas' },
   { value: 'gym',              label: 'Entrenos' },
   { value: 'loom',             label: 'Loom' },
   { value: 'paginas',          label: 'Páginas' },

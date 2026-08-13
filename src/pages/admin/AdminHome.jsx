@@ -10,6 +10,7 @@ const ALL_NAV = [
   { to: '/admin/paginas',          label: 'Páginas',          icon: '🌐', page: 'paginas',          desc: 'Gestiona y edita las páginas de la web con IA' },
   { to: '/admin/dashboard',        label: 'Dashboard',        icon: '📊', page: 'dashboard',        desc: 'Analytics, conversiones y tests A/B' },
   { to: '/admin/gym',              label: 'Entrenos',         icon: '🏋️', page: 'gym',              desc: 'Registro y seguimiento de entrenamientos' },
+  { to: '/admin/finanzas',         label: 'Finanzas',         icon: '💰', page: 'finanzas',         desc: 'Ingresos, gastos, IVA e IRPF del negocio' },
   { to: '/admin/loom',             label: 'Loom',             icon: '🎥', page: 'loom',             desc: 'Graba tu pantalla o audio y súbelo a Drive' },
   { to: '/admin/pomodoro',         label: 'Pomodoro',         icon: '🍅', page: 'pomodoro',         desc: 'Bloquea distracciones y gestiona tu tiempo' },
   { to: '/admin/users',            label: 'Usuarios',         icon: '👥', page: 'users',            desc: 'Gestiona los accesos al panel' },

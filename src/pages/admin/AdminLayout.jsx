@@ -14,6 +14,7 @@ const ALL_NAV = [
   { to: '/admin/dashboard',        label: 'Dashboard',        icon: '📊', page: 'dashboard' },
   { to: '/admin/email-builder',    label: 'Email Builder',    icon: '📧', page: 'email-builder' },
   { to: '/admin/gym',              label: 'Entrenos',         icon: '🏋️', page: 'gym' },
+  { to: '/admin/finanzas',         label: 'Finanzas',         icon: '💰', page: 'finanzas' },
   { to: '/admin/loom',             label: 'Loom',             icon: '🎥', page: 'loom' },
   { to: '/admin/paginas',          label: 'Páginas',          icon: '🌐', page: 'paginas' },
   { to: '/admin/pomodoro',         label: 'Pomodoro',         icon: '🍅', page: 'pomodoro' },
