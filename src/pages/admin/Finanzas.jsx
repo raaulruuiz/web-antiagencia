@@ -137,18 +137,23 @@ function DateRangePicker({ desde, hasta, onChange }) {
   }
 
   function handleSelect(range) {
-    setSelected(range);
-    if (!range?.from) { firstClick.current = true; return; }
+    if (!range?.from) { firstClick.current = true; setSelected(undefined); return; }
 
     if (firstClick.current) {
-      // Primer clic: guardar inicio, esperar fin
+      // Primer clic: forzar selección parcial independientemente de lo que devuelva el picker
       firstClick.current = false;
+      setSelected({ from: range.from, to: undefined });
     } else {
-      // Segundo clic: aplicar si hay rango completo
+      // Segundo clic: aplicar rango
       firstClick.current = true;
       if (range.from && range.to) {
+        setSelected(range);
         onChange(toISO(range.from), toISO(addDays(range.to, 1)));
         setOpen(false);
+      } else {
+        // Sin to: empezar de nuevo
+        firstClick.current = false;
+        setSelected({ from: range.from, to: undefined });
       }
     }
   }
