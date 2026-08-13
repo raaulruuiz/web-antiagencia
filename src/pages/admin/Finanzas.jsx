@@ -69,7 +69,7 @@ const RANGOS_PRESET = () => {
     { label: 'Trimestre anterior',  desde: toISO(new Date(a, (q-1)*3, 1)), hasta: toISO(new Date(a, q*3, 1)) },
     { label: 'Este año',            desde: `${a}-01-01`,                   hasta: `${a + 1}-01-01` },
     { label: 'Año anterior',        desde: `${a - 1}-01-01`,               hasta: `${a}-01-01` },
-    { label: 'Máximo',              desde: '2020-01-01',                   hasta: '2100-01-01', noFecha: true },
+    { label: 'Máximo',              desde: '2023-01-01',                   hasta: toISO(addDays(new Date(), 1)) },
   ];
 };
 
@@ -153,7 +153,7 @@ function DateRangePicker({ desde, hasta, onChange }) {
           style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#27272a', border: '1px solid #3f3f46', borderRadius: 8, color: 'white', padding: '7px 12px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}
         >
           <span style={{ fontSize: 14 }}>📅</span>
-          <span>{activePreset ? activePreset.label : fmtRango(desde, hasta)}</span>
+          <span>{fmtRango(desde, hasta)}</span>
           <span style={{ color: '#71717a', fontSize: 10 }}>▾</span>
         </button>
 
@@ -165,13 +165,8 @@ function DateRangePicker({ desde, hasta, onChange }) {
                 const isActive = activePreset?.label === p.label;
                 return (
                   <button key={p.label} onClick={() => applyPreset(p)}
-                    style={{ background: isActive ? '#1a2a3f' : 'transparent', color: isActive ? '#60a5fa' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer', textAlign: 'left' }}>
-                    <span>{p.label}</span>
-                    {!p.noFecha && (
-                      <span style={{ display: 'block', color: isActive ? '#3b82f6' : '#52525b', fontSize: 10, marginTop: 1 }}>
-                        {fmtRango(p.desde, p.hasta)}
-                      </span>
-                    )}
+                    style={{ background: isActive ? '#1a2a3f' : 'transparent', color: isActive ? '#60a5fa' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer', textAlign: 'left', whiteSpace: 'nowrap' }}>
+                    {p.label}
                   </button>
                 );
               })}
