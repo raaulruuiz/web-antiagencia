@@ -70,8 +70,8 @@ const RANGOS_PRESET = () => {
   return [
     { label: 'Hoy',                  desde: hoy,                            hasta: manana },
     { label: 'Ayer',                 desde: ayer,                           hasta: hoy },
-    { label: 'Últimos 7 días',       desde: toISO(addDays(h, -7)),          hasta: manana },
-    { label: 'Últimos 30 días',      desde: toISO(addDays(h, -30)),         hasta: manana },
+    { label: 'Últimos 7 días',       desde: toISO(addDays(h, -7)),          hasta: hoy },
+    { label: 'Últimos 30 días',      desde: toISO(addDays(h, -30)),         hasta: hoy },
     { label: 'Mes hasta la fecha',   desde: toISO(new Date(a, m, 1)),       hasta: manana },
     { label: 'Mes anterior',         desde: toISO(new Date(a, m - 1, 1)),   hasta: toISO(new Date(a, m, 1)) },
     { label: 'Trimestre hasta la fecha', desde: toISO(new Date(a, q*3, 1)), hasta: manana },
