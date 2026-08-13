@@ -244,15 +244,21 @@ function TabFiscal() {
   const [anio, setAnio] = useState(new Date().getFullYear());
   const [datos, setDatos] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState(null);
 
   const cargar = useCallback(async () => {
     setLoading(true);
+    setErr(null);
     try {
       const token = await getToken();
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/fiscal?anio=${anio}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setDatos(await r.json());
+      const data = await r.json();
+      if (!r.ok) { setErr(data.error || `Error ${r.status}`); return; }
+      setDatos(data);
+    } catch (e) {
+      setErr(e.message);
     } finally {
       setLoading(false);
     }
@@ -263,6 +269,7 @@ function TabFiscal() {
   const anios = [new Date().getFullYear(), new Date().getFullYear() - 1, new Date().getFullYear() - 2];
 
   if (loading) return <p style={{ color: '#52525b' }}>Cargando…</p>;
+  if (err)    return <p style={{ color: '#f87171', fontSize: 13, background: '#1a0a0a', border: '1px solid #7f1d1d', borderRadius: 8, padding: '10px 14px' }}>Error: {err}</p>;
   if (!datos)  return null;
 
   const { trimestres, anual } = datos;
@@ -348,6 +355,8 @@ export default function Finanzas() {
   const [movimientos, setMovimientos] = useState({ items: [], total: 0, page: 1, pages: 1 });
   const [loadingDash, setLoadingDash] = useState(true);
   const [loadingMovs, setLoadingMovs] = useState(true);
+  const [errDash, setErrDash] = useState(null);
+  const [errMovs, setErrMovs] = useState(null);
   const [filtroTipo, setFiltroTipo] = useState('');
   const [filtroCuenta, setFiltroCuenta] = useState('');
   const [filtroCat, setFiltroCat] = useState('');
@@ -363,13 +372,18 @@ export default function Finanzas() {
 
   const cargarDashboard = useCallback(async () => {
     setLoadingDash(true);
+    setErrDash(null);
     try {
       const token = await getToken();
       const { desde, hasta } = getRango();
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/dashboard?desde=${desde}&hasta=${hasta}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setDashboard(await r.json());
+      const data = await r.json();
+      if (!r.ok) { setErrDash(data.error || `Error ${r.status}`); return; }
+      setDashboard(data);
+    } catch (e) {
+      setErrDash(e.message);
     } finally {
       setLoadingDash(false);
     }
@@ -377,6 +391,7 @@ export default function Finanzas() {
 
   const cargarMovimientos = useCallback(async (page = 1) => {
     setLoadingMovs(true);
+    setErrMovs(null);
     try {
       const token = await getToken();
       const { desde, hasta } = getRango();
@@ -387,7 +402,11 @@ export default function Finanzas() {
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMovimientos(await r.json());
+      const data = await r.json();
+      if (!r.ok) { setErrMovs(data.error || `Error ${r.status}`); return; }
+      setMovimientos(data);
+    } catch (e) {
+      setErrMovs(e.message);
     } finally {
       setLoadingMovs(false);
     }
@@ -441,7 +460,9 @@ export default function Finanzas() {
             ))}
           </div>
 
-          {loadingDash ? <p style={{ color: '#52525b' }}>Cargando…</p> : d ? (
+          {loadingDash ? <p style={{ color: '#52525b' }}>Cargando…</p> : errDash ? (
+            <p style={{ color: '#f87171', fontSize: 13, background: '#1a0a0a', border: '1px solid #7f1d1d', borderRadius: 8, padding: '10px 14px' }}>Error: {errDash}</p>
+          ) : d?.resumen ? (
             <>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', gap: 12, marginBottom: 20 }}>
                 <MetricCard label="Ingresos"      value={fmt(d.resumen.totalIngresos)}  color="#22c55e" />
@@ -529,6 +550,8 @@ export default function Finanzas() {
           <div style={S.card}>
             {loadingMovs ? (
               <p style={{ color: '#52525b', textAlign: 'center', padding: 24 }}>Cargando…</p>
+            ) : errMovs ? (
+              <p style={{ color: '#f87171', fontSize: 13, padding: 16 }}>Error: {errMovs}</p>
             ) : movimientos.items.length === 0 ? (
               <p style={{ color: '#52525b', textAlign: 'center', padding: 24 }}>Sin movimientos para este periodo</p>
             ) : (
