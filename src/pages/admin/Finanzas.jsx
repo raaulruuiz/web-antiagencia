@@ -1006,19 +1006,32 @@ export default function Finanzas() {
               <p style={{ color: '#f87171', fontSize: 13, padding: 16 }}>Error: {errMovs}</p>
             ) : movimientos.items.length === 0 ? (
               <p style={{ color: '#52525b', textAlign: 'center', padding: 24 }}>Sin movimientos para este periodo</p>
-            ) : (
-              <>
-                <p style={{ color: '#52525b', fontSize: 12, marginBottom: 12 }}>{movimientos.total} movimientos</p>
-                {movimientos.items.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
-                {movimientos.pages > 1 && (
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
-                    <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
-                    <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {movimientos.pages}</span>
-                    <button style={S.ghost} disabled={pagMovs >= movimientos.pages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
-                  </div>
-                )}
-              </>
-            )}
+            ) : (() => {
+              const normales  = movimientos.items.filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
+              const traspasos = movimientos.items.filter(m =>  (m.categorias || []).includes('Traspaso Entre Cuentas'));
+              return (
+                <>
+                  <p style={{ color: '#52525b', fontSize: 12, marginBottom: 12 }}>{movimientos.total} movimientos</p>
+                  {normales.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
+                  {traspasos.length > 0 && (
+                    <>
+                      <div style={{ borderTop: '1px solid #27272a', margin: '16px 0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Traspasos entre cuentas</span>
+                        <span style={{ color: '#3f3f46', fontSize: 11 }}>({traspasos.length})</span>
+                      </div>
+                      {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
+                    </>
+                  )}
+                  {movimientos.pages > 1 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
+                      <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
+                      <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {movimientos.pages}</span>
+                      <button style={S.ghost} disabled={pagMovs >= movimientos.pages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </>
       )}
