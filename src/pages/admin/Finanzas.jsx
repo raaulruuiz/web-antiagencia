@@ -805,7 +805,10 @@ export default function Finanzas() {
         <button style={tabStyle('dashboard')}   onClick={() => setTab('dashboard')}>Dashboard</button>
         <button style={tabStyle('movimientos')} onClick={() => setTab('movimientos')}>Movimientos</button>
         <button style={tabStyle('fiscal')}      onClick={() => setTab('fiscal')}>Fiscal</button>
-        <button style={tabStyle('nuevo')}       onClick={() => setTab('nuevo')}>+ Nuevo</button>
+        <button onClick={() => setTab('nuevo')}
+          style={{ background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 14, cursor: 'pointer', fontWeight: 600 }}>
+          + Nuevo
+        </button>
       </div>
 
       {/* ── DASHBOARD ── */}
