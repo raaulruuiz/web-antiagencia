@@ -1011,17 +1011,18 @@ export default function Finanzas() {
               const traspasos = movimientos.items.filter(m =>  (m.categorias || []).includes('Traspaso Entre Cuentas'));
               return (
                 <>
-                  <p style={{ color: '#52525b', fontSize: 12, marginBottom: 12 }}>{movimientos.total} movimientos</p>
-                  {normales.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
-                  {traspasos.length > 0 && (
-                    <>
-                      <div style={{ borderTop: '1px solid #27272a', margin: '16px 0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Traspasos entre cuentas</span>
-                        <span style={{ color: '#3f3f46', fontSize: 11 }}>({traspasos.length})</span>
+                  <div style={{ display: 'grid', gridTemplateColumns: traspasos.length > 0 ? '1fr 1fr' : '1fr', gap: 24 }}>
+                    <div>
+                      <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Movimientos ({normales.length})</p>
+                      {normales.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
+                    </div>
+                    {traspasos.length > 0 && (
+                      <div style={{ borderLeft: '1px solid #27272a', paddingLeft: 24 }}>
+                        <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Traspasos ({traspasos.length})</p>
+                        {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
                       </div>
-                      {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
-                    </>
-                  )}
+                    )}
+                  </div>
                   {movimientos.pages > 1 && (
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
                       <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
