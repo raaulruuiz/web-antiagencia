@@ -527,11 +527,32 @@ function SaldoCard({ cuenta, compSaldo }) {
 
 // ── Vista fiscal ────────────────────────────────────────────────
 
+function FiscalMetric({ label, value, color, comp }) {
+  const pct = comp != null && comp !== 0 ? Math.round(((value - comp) / Math.abs(comp)) * 100) : null;
+  const up = pct >= 0;
+  return (
+    <div>
+      <p style={{ color: '#71717a', fontSize: 11, margin: '0 0 2px' }}>{label}</p>
+      <p style={{ color, fontSize: 16, fontWeight: 700, margin: 0 }}>{fmt(value)}</p>
+      {comp != null && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+          {pct !== null && <span style={{ fontSize: 10, fontWeight: 600, color: up ? '#22c55e' : '#f87171' }}>{up ? '▲' : '▼'} {Math.abs(pct)}%</span>}
+          <span style={{ color: '#52525b', fontSize: 10 }}>ant {fmt(comp)}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TabFiscal() {
   const [anio, setAnio] = useState(new Date().getFullYear());
   const [datos, setDatos] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
+  const [comparar, setComparar] = useState(false);
+  const [anioComp, setAnioComp] = useState(null);
+  const [datosComp, setDatosComp] = useState(null);
+  const [loadingComp, setLoadingComp] = useState(false);
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -551,7 +572,23 @@ function TabFiscal() {
     }
   }, [anio]);
 
+  const cargarComp = useCallback(async () => {
+    if (!comparar || !anioComp) { setDatosComp(null); return; }
+    setLoadingComp(true);
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/fiscal?anio=${anioComp}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await r.json();
+      if (r.ok) setDatosComp(data);
+    } catch { /* silencioso */ } finally {
+      setLoadingComp(false);
+    }
+  }, [comparar, anioComp]);
+
   useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => { cargarComp(); }, [cargarComp]);
 
   const anios = [new Date().getFullYear(), new Date().getFullYear() - 1, new Date().getFullYear() - 2];
 
@@ -560,75 +597,79 @@ function TabFiscal() {
   if (!datos)  return null;
 
   const { trimestres, anual } = datos;
+  const ca = datosComp?.anual;
 
   return (
     <div>
-      {/* Selector año */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
+      {/* Selector año + comparar */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         {anios.map(a => (
           <button key={a} onClick={() => setAnio(a)}
             style={{ background: anio === a ? '#0067FD' : '#27272a', color: 'white', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 13, cursor: 'pointer' }}>
             {a}
           </button>
         ))}
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#a1a1aa', fontSize: 12, marginLeft: 8 }}>
+          <input type="checkbox" checked={comparar} onChange={e => { setComparar(e.target.checked); if (!e.target.checked) { setDatosComp(null); setAnioComp(null); } }} style={{ accentColor: '#0067FD', cursor: 'pointer' }} />
+          Comparar con
+        </label>
+        {comparar && anios.filter(a => a !== anio).map(a => (
+          <button key={a} onClick={() => setAnioComp(a)}
+            style={{ background: anioComp === a ? '#27272a' : 'transparent', color: anioComp === a ? 'white' : '#71717a', border: '1px solid #3f3f46', borderRadius: 8, padding: '5px 12px', fontSize: 13, cursor: 'pointer' }}>
+            {a}
+          </button>
+        ))}
+        {loadingComp && <span style={{ color: '#52525b', fontSize: 12 }}>cargando…</span>}
       </div>
 
       {/* Resumen anual */}
-      <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Resumen anual {anio}</h2>
+      <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+        Resumen anual {anio}{datosComp ? ` vs ${anioComp}` : ''}
+      </h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10, marginBottom: 24 }}>
-        <MetricCard label="Facturación"    value={fmt(anual.facturacion)}    color="#22c55e" />
-        <MetricCard label="Gastos totales" value={fmt(anual.totalGastos)}    color="#f87171" />
-        <MetricCard label="IVA repercutido" value={fmt(anual.ivaRepercutido)} color="#f59e0b" />
-        <MetricCard label="IVA soportado"  value={fmt(anual.ivaSoportado)}   color="#f59e0b" />
-        <MetricCard label="IVA a pagar"    value={fmt(anual.ivaAPagar)}      color={anual.ivaAPagar > 0 ? '#f59e0b' : '#22c55e'} />
-        <MetricCard label="IRPF retenido"  value={fmt(anual.irpfRetenido)}   color="#8b5cf6" />
+        <MetricCard label="Facturación"     value={fmt(anual.facturacion)}    color="#22c55e" compValue={ca ? ca.facturacion : null} />
+        <MetricCard label="Gastos totales"  value={fmt(anual.totalGastos)}    color="#f87171" compValue={ca ? ca.totalGastos : null} />
+        <MetricCard label="IVA repercutido" value={fmt(anual.ivaRepercutido)} color="#f59e0b" compValue={ca ? ca.ivaRepercutido : null} />
+        <MetricCard label="IVA soportado"   value={fmt(anual.ivaSoportado)}   color="#f59e0b" compValue={ca ? ca.ivaSoportado : null} />
+        <MetricCard label="IVA a pagar"     value={fmt(anual.ivaAPagar)}      color={anual.ivaAPagar > 0 ? '#f59e0b' : '#22c55e'} compValue={ca ? ca.ivaAPagar : null} />
+        <MetricCard label="IRPF retenido"   value={fmt(anual.irpfRetenido)}   color="#8b5cf6" compValue={ca ? ca.irpfRetenido : null} />
       </div>
 
       {/* Detalle por trimestre */}
       <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Por trimestre</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-        {trimestres.map((t, i) => (
-          <div key={i} style={S.card}>
-            <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: '0 0 12px' }}>{t.label}</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
-              <div>
-                <p style={{ color: '#71717a', fontSize: 11, margin: '0 0 2px' }}>Facturación</p>
-                <p style={{ color: '#22c55e', fontSize: 16, fontWeight: 700, margin: 0 }}>{fmt(t.facturacion)}</p>
+        {trimestres.map((t, i) => {
+          const tc = datosComp?.trimestres?.[i];
+          return (
+            <div key={i} style={S.card}>
+              <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: '0 0 12px' }}>
+                {t.label}{tc ? <span style={{ color: '#52525b', fontWeight: 400, fontSize: 12, marginLeft: 8 }}>vs {anioComp}</span> : null}
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+                <FiscalMetric label="Facturación"      value={t.facturacion}    color="#22c55e" comp={tc ? tc.facturacion : null} />
+                <FiscalMetric label="IVA repercutido"  value={t.ivaRepercutido} color="#f59e0b" comp={tc ? tc.ivaRepercutido : null} />
+                <FiscalMetric label="IVA soportado"    value={t.ivaSoportado}   color="#f59e0b" comp={tc ? tc.ivaSoportado : null} />
+                <FiscalMetric label="IVA a pagar (303)" value={t.ivaAPagar}    color={t.ivaAPagar > 0 ? '#f59e0b' : '#22c55e'} comp={tc ? tc.ivaAPagar : null} />
+                <FiscalMetric label="IRPF retenido (130)" value={t.irpfRetenido} color="#8b5cf6" comp={tc ? tc.irpfRetenido : null} />
               </div>
-              <div>
-                <p style={{ color: '#71717a', fontSize: 11, margin: '0 0 2px' }}>IVA repercutido</p>
-                <p style={{ color: '#f59e0b', fontSize: 16, fontWeight: 700, margin: 0 }}>{fmt(t.ivaRepercutido)}</p>
-              </div>
-              <div>
-                <p style={{ color: '#71717a', fontSize: 11, margin: '0 0 2px' }}>IVA soportado</p>
-                <p style={{ color: '#f59e0b', fontSize: 16, fontWeight: 700, margin: 0 }}>{fmt(t.ivaSoportado)}</p>
-              </div>
-              <div>
-                <p style={{ color: '#71717a', fontSize: 11, margin: '0 0 2px' }}>IVA a pagar (303)</p>
-                <p style={{ color: t.ivaAPagar > 0 ? '#f59e0b' : '#22c55e', fontSize: 16, fontWeight: 700, margin: 0 }}>{fmt(t.ivaAPagar)}</p>
-              </div>
-              <div>
-                <p style={{ color: '#71717a', fontSize: 11, margin: '0 0 2px' }}>IRPF retenido (130)</p>
-                <p style={{ color: '#8b5cf6', fontSize: 16, fontWeight: 700, margin: 0 }}>{fmt(t.irpfRetenido)}</p>
-              </div>
-            </div>
 
-            {/* IRPF por cliente */}
-            {Object.keys(t.irpfPorCliente).length > 0 && (
-              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #27272a' }}>
-                <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>IRPF retenido por cliente</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {Object.entries(t.irpfPorCliente).sort(([,a],[,b]) => b - a).map(([nombre, irpf]) => (
-                    <div key={nombre} style={{ background: '#0d0d0d', border: '1px solid #3f3f46', borderRadius: 8, padding: '6px 10px' }}>
-                      <p style={{ color: '#a1a1aa', fontSize: 11, margin: 0 }}>{nombre}</p>
-                      <p style={{ color: '#8b5cf6', fontSize: 13, fontWeight: 700, margin: 0 }}>{fmt(irpf)}</p>
-                    </div>
-                  ))}
+              {/* IRPF por cliente */}
+              {Object.keys(t.irpfPorCliente).length > 0 && (
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #27272a' }}>
+                  <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>IRPF retenido por cliente</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {Object.entries(t.irpfPorCliente).sort(([,a],[,b]) => b - a).map(([nombre, irpf]) => (
+                      <div key={nombre} style={{ background: '#0d0d0d', border: '1px solid #3f3f46', borderRadius: 8, padding: '6px 10px' }}>
+                        <p style={{ color: '#a1a1aa', fontSize: 11, margin: 0 }}>{nombre}</p>
+                        <p style={{ color: '#8b5cf6', fontSize: 13, fontWeight: 700, margin: 0 }}>{fmt(irpf)}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
