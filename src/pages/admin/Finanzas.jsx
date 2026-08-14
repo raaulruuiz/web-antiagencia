@@ -1016,12 +1016,12 @@ export default function Finanzas() {
               return (
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: traspasos.length > 0 ? '1fr 1fr' : '1fr', gap: 24 }}>
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                       <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Movimientos ({normales.length})</p>
                       {normales.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
                     </div>
                     {traspasos.length > 0 && (
-                      <div style={{ borderLeft: '1px solid #27272a', paddingLeft: 24 }}>
+                      <div style={{ minWidth: 0, borderLeft: '1px solid #27272a', paddingLeft: 24 }}>
                         <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Traspasos ({traspasos.length})</p>
                         {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
                       </div>
