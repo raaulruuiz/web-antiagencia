@@ -698,6 +698,7 @@ export default function Finanzas() {
   const [filtroCuenta, setFiltroCuenta] = useState('');
   const [filtroCat, setFiltroCat] = useState('');
   const [pagMovs, setPagMovs] = useState(1);
+  const [mostrarTodos, setMostrarTodos] = useState(false);
   const [movEditando, setMovEditando] = useState(null);
   const [dashComp, setDashComp] = useState(null);
   const [loadingComp, setLoadingComp] = useState(false);
@@ -760,7 +761,7 @@ export default function Finanzas() {
     }
   }, [comparar, desdeComp, hastaComp]);
 
-  const cargarMovimientos = useCallback(async (page = 1) => {
+  const cargarMovimientos = useCallback(async (page = 1, todos = false) => {
     setLoadingMovs(true);
     setErrMovs(null);
     try {
@@ -769,6 +770,7 @@ export default function Finanzas() {
       if (filtroTipo) params.set('tipo', filtroTipo);
       if (filtroCuenta) params.set('cuenta', filtroCuenta);
       if (filtroCat) params.set('categoria', filtroCat);
+      if (todos) params.set('todos', '1');
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -801,7 +803,7 @@ export default function Finanzas() {
     }
     checkMovimientosMesActual();
   }, [dashboard]);
-  useEffect(() => { if (tab === 'movimientos') cargarMovimientos(pagMovs); }, [tab, pagMovs, cargarMovimientos]);
+  useEffect(() => { if (tab === 'movimientos') cargarMovimientos(pagMovs, mostrarTodos); }, [tab, pagMovs, mostrarTodos, cargarMovimientos]);
   useEffect(() => {
     if (comparar && desdeComp && hastaComp) cargarDashboardComp();
     else setDashComp(null);
@@ -816,7 +818,7 @@ export default function Finanzas() {
   const d = dashboard;
 
   return (
-    <div style={{ padding: '16px', maxWidth: 960, fontFamily: 'inherit' }}>
+    <div style={{ padding: '16px', maxWidth: 1140, fontFamily: 'inherit' }}>
       {/* Modal edición */}
       {movEditando && (
         <ModalEditar
@@ -982,7 +984,10 @@ export default function Finanzas() {
       {tab === 'movimientos' && (
         <>
           <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-            <DateRangePicker desde={desde} hasta={hasta} onApply={handleApplyMovimientos} />
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+              <DateRangePicker desde={desde} hasta={hasta} onApply={handleApplyMovimientos} />
+              <button style={S.ghost} onClick={() => cargarMovimientos(pagMovs, mostrarTodos)}>↺</button>
+            </div>
             <select style={{ ...S.select, width: 'auto', minWidth: 120 }} value={filtroTipo} onChange={e => { setFiltroTipo(e.target.value); setPagMovs(1); }}>
               <option value="">Todos los tipos</option>
               <option value="Ingreso">Ingresos</option>
@@ -996,7 +1001,6 @@ export default function Finanzas() {
               <option value="">Todas las categorías</option>
               {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-            <button style={S.ghost} onClick={() => cargarMovimientos(pagMovs)}>↺</button>
           </div>
 
           <div style={S.card}>
@@ -1023,13 +1027,20 @@ export default function Finanzas() {
                       </div>
                     )}
                   </div>
-                  {movimientos.pages > 1 && (
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
-                      <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
-                      <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {movimientos.pages}</span>
-                      <button style={S.ghost} disabled={pagMovs >= movimientos.pages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
-                    </div>
-                  )}
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                    {!mostrarTodos && movimientos.pages > 1 && (
+                      <>
+                        <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
+                        <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {movimientos.pages}</span>
+                        <button style={S.ghost} disabled={pagMovs >= movimientos.pages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
+                      </>
+                    )}
+                    {movimientos.total > 50 && (
+                      <button style={S.ghost} onClick={() => { setMostrarTodos(t => !t); setPagMovs(1); }}>
+                        {mostrarTodos ? `Paginar (50/pág)` : `Mostrar todos (${movimientos.total})`}
+                      </button>
+                    )}
+                  </div>
                 </>
               );
             })()}
