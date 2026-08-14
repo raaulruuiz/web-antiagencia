@@ -463,11 +463,21 @@ function ModalEditar({ movimiento, onGuardado, onCerrar }) {
 
 function FilaMovimiento({ m, onEditar }) {
   const esIngreso = m.tipo === 'Ingreso';
+  const [tooltip, setTooltip] = useState(false);
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid #27272a' }}>
       <span style={{ color: esIngreso ? '#22c55e' : '#f87171', fontSize: 16, flexShrink: 0 }}>{esIngreso ? '↑' : '↓'}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p title={m.nombre} style={{ color: 'white', fontSize: 14, margin: 0, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'default' }}>{m.nombre}</p>
+        <div style={{ position: 'relative' }}
+          onMouseEnter={() => setTooltip(true)}
+          onMouseLeave={() => setTooltip(false)}>
+          <p style={{ color: 'white', fontSize: 14, margin: 0, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'default' }}>{m.nombre}</p>
+          {tooltip && (
+            <div style={{ position: 'absolute', bottom: 'calc(100% + 4px)', left: 0, background: '#18181b', border: '1px solid #3f3f46', borderRadius: 6, padding: '5px 10px', fontSize: 13, color: 'white', whiteSpace: 'nowrap', zIndex: 50, pointerEvents: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+              {m.nombre}
+            </div>
+          )}
+        </div>
         <p style={{ color: '#52525b', fontSize: 12, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.fecha} · {m.cuenta}</p>
       </div>
       <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
