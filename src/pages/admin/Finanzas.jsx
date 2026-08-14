@@ -791,6 +791,15 @@ export default function Finanzas() {
         <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Ingresos, gastos, saldos y fiscalidad</p>
       </div>
 
+      {/* Alerta trackeo */}
+      {sinMovimientosMes && (
+        <div style={{ background: '#1c1007', border: '1px solid #92400e', borderRadius: 10, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 18 }}>⚠️</span>
+          <span style={{ color: '#fbbf24', fontSize: 14, fontWeight: 600 }}>Tienes que trackear, no lo olvides</span>
+          <span style={{ color: '#78716c', fontSize: 13, marginLeft: 4 }}>— este mes todavía no hay ningún movimiento registrado.</span>
+        </div>
+      )}
+
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 20, flexWrap: 'wrap' }}>
         <button style={tabStyle('dashboard')}   onClick={() => setTab('dashboard')}>Dashboard</button>
@@ -802,14 +811,6 @@ export default function Finanzas() {
       {/* ── DASHBOARD ── */}
       {tab === 'dashboard' && (
         <>
-          {sinMovimientosMes && (
-            <div style={{ background: '#1c1007', border: '1px solid #92400e', borderRadius: 10, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 18 }}>⚠️</span>
-              <span style={{ color: '#fbbf24', fontSize: 14, fontWeight: 600 }}>Tienes que trackear, no lo olvides</span>
-              <span style={{ color: '#78716c', fontSize: 13, marginLeft: 4 }}>— este mes todavía no hay ningún movimiento registrado.</span>
-            </div>
-          )}
-
           <div style={{ marginBottom: comparar && desdeComp ? 8 : 20 }}>
             <DateRangePicker
               desde={desde} hasta={hasta} onApply={handleApplyDashboard}
