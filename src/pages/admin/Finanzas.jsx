@@ -464,22 +464,22 @@ function ModalEditar({ movimiento, onGuardado, onCerrar }) {
 function FilaMovimiento({ m, onEditar }) {
   const esIngreso = m.tipo === 'Ingreso';
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid #27272a', flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid #27272a' }}>
       <span style={{ color: esIngreso ? '#22c55e' : '#f87171', fontSize: 16, flexShrink: 0 }}>{esIngreso ? '↑' : '↓'}</span>
-      <div style={{ flex: 1, minWidth: 120 }}>
-        <p style={{ color: 'white', fontSize: 14, margin: 0, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.nombre}</p>
-        <p style={{ color: '#52525b', fontSize: 12, margin: 0 }}>{m.fecha} · {m.cuenta}</p>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p title={m.nombre} style={{ color: 'white', fontSize: 14, margin: 0, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'default' }}>{m.nombre}</p>
+        <p style={{ color: '#52525b', fontSize: 12, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.fecha} · {m.cuenta}</p>
       </div>
-      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+        {m.categorias.slice(0,2).map(c => (
+          <span key={c} style={{ background: '#27272a', color: '#a1a1aa', fontSize: 10, padding: '2px 6px', borderRadius: 4, whiteSpace: 'nowrap' }}>{c}</span>
+        ))}
+      </div>
+      <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 70 }}>
         <p style={{ color: esIngreso ? '#22c55e' : '#f87171', fontSize: 14, fontWeight: 700, margin: 0 }}>{esIngreso ? '+' : '-'}{fmt(m.cantidad)}</p>
         {(m.iva !== '0%' || m.irpf !== '0%') && (
           <p style={{ color: '#52525b', fontSize: 11, margin: 0 }}>IVA {m.iva} · IRPF {m.irpf}</p>
         )}
-      </div>
-      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-        {m.categorias.slice(0,2).map(c => (
-          <span key={c} style={{ background: '#27272a', color: '#a1a1aa', fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>{c}</span>
-        ))}
       </div>
       <button onClick={() => onEditar(m)} style={{ background: 'none', border: '1px solid #3f3f46', borderRadius: 6, color: '#71717a', padding: '4px 10px', fontSize: 12, cursor: 'pointer', flexShrink: 0 }}>
         Editar
