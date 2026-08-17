@@ -15,6 +15,7 @@ import UltimoPaso from './pages/UltimoPaso';
 import YaPorFin from './pages/YaPorFin';
 import Home from './pages/Home';
 import HomeV2 from './pages/HomeV2';
+import LandingPrueba from './pages/LandingPrueba';
 import AudioSecreto from './pages/AudioSecreto';
 import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotrosOld from './pages/TrabajaConNosotrosOld'
@@ -180,6 +181,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<SmartPage path="/"><PixelLayout><HomeV2 /></PixelLayout></SmartPage>} />
       <Route path="/homev2" element={<PixelLayout><HomeV2 /></PixelLayout>} />
+      <Route path="/landingprueba" element={<LandingPrueba />} />
       <Route path="/webtipica" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route key={path} path={`/${path}`}
