@@ -28,7 +28,7 @@ export default function LandingPrueba() {
               </h2>
 
               <h1 className="text-[25px] md:text-4xl text-gray-900 mb-6 font-bold">
-                LOS 3 GRANDES PODERES
+                PRUEBA
               </h1>
 
               <p className="mb-4">YA TE HAN DICHO QUE TIENES QUE TENER 9 AUTOMATIZACIONES, HIPER-SEMENTACIONES Y DISEÑOS BONITOS. BIEN. AHORA VAMOS A VER LO QUE DE VERDAD FUNCIONA.</p>
