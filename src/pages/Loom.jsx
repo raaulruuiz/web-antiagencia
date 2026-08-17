@@ -1288,8 +1288,19 @@ export default function Loom() {
               />
               <span className="text-zinc-500 text-sm">.webm</span>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap justify-center">
               <button onClick={uploadToDrive} className="bg-white text-black rounded-full px-6 py-2.5 text-sm font-medium hover:bg-zinc-100 transition-colors">Subir a Drive</button>
+              <button
+                onClick={() => {
+                  const a = document.createElement('a');
+                  a.href = previewUrl;
+                  a.download = (customFileName.trim() || 'grabacion') + '.webm';
+                  a.click();
+                }}
+                className="border border-zinc-600 text-zinc-300 rounded-full px-6 py-2.5 text-sm hover:border-zinc-400 transition-colors"
+              >
+                ⬇ Descargar en PC
+              </button>
               <button onClick={resetState} className="border border-zinc-600 text-zinc-300 rounded-full px-6 py-2.5 text-sm hover:border-zinc-400 transition-colors">Descartar</button>
             </div>
           </div>
