@@ -946,7 +946,9 @@ export default function Loom() {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ url }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error('El servidor aún está desplegando, espera un momento e inténtalo de nuevo'); }
       if (!res.ok) throw new Error(data.error || 'Error desconocido');
       setDlInfo(data);
       setDlPhase('ready');
@@ -967,8 +969,10 @@ export default function Loom() {
         body: JSON.stringify({ url: dlUrl, destination, title: dlInfo?.title }),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Error desconocido' }));
-        throw new Error(data.error || 'Error desconocido');
+        const text = await res.text().catch(() => '');
+        let msg = 'Error desconocido';
+        try { msg = JSON.parse(text).error || msg; } catch { msg = 'El servidor no está disponible, espera un momento'; }
+        throw new Error(msg);
       }
       if (destination === 'drive') {
         const { link } = await res.json();
