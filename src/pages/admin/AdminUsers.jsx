@@ -24,6 +24,8 @@ const PAGE_OPTIONS = [
 
 const EXT_OPTIONS = [
   { value: 'biblioteca', label: 'Biblioteca' },
+  { value: 'pomodoro',   label: 'Pomodoro' },
+  { value: 'css',        label: 'CSS Inspector' },
 ];
 
 function timeAgo(dateStr) {
