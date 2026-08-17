@@ -24,9 +24,9 @@ const PAGE_OPTIONS = [
 
 const EXT_OPTIONS = [
   { value: 'biblioteca', label: 'Biblioteca' },
-  { value: 'pomodoro',   label: 'Pomodoro' },
   { value: 'css',        label: 'CSS Inspector' },
   { value: 'loom',       label: 'Loom' },
+  { value: 'pomodoro',   label: 'Pomodoro' },
 ];
 
 // Permisos que deben estar sincronizados entre páginas y extensión (css solo existe en ext)
