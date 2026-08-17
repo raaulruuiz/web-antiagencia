@@ -816,6 +816,9 @@ export default function Loom() {
     }
 
     // Visible / full — try extension first (silent, no picker)
+    const timeout = mode === 'visible' ? 5000 : 60000;
+    setCaptureState({ phase: 'loading', label: mode === 'visible' ? 'Capturando…' : 'Capturando página completa…' });
+
     const extData = await Promise.race([
       new Promise((resolve) => {
         const handler = (e) => {
@@ -826,13 +829,15 @@ export default function Loom() {
         window.addEventListener('message', handler);
         window.postMessage({ source: 'antiagencia-page', type: 'bibCaptureRequest', mode: mode === 'visible' ? 'visible' : 'full' }, '*');
       }),
-      new Promise(resolve => setTimeout(() => resolve(null), 2000)),
+      new Promise(resolve => setTimeout(() => resolve(null), timeout)),
     ]);
 
     if (extData?.ok && extData.dataUrl) {
       await applyDataUrl(extData.dataUrl);
       return;
     }
+
+    setCaptureState(null);
 
     // Fallback: getDisplayMedia (if extension not installed)
     let stream;
@@ -1143,6 +1148,15 @@ export default function Loom() {
           <div style={{ marginTop: 8, textAlign: 'center' }}>
             <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>Arrastra para posicionar</span>
           </div>
+        </div>
+      )}
+
+      {/* Capture loading overlay */}
+      {captureState?.phase === 'loading' && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+          <div style={{ width: 32, height: 32, border: '3px solid #3f3f46', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+          <p style={{ color: '#a1a1aa', fontSize: 14 }}>{captureState.label}</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       )}
 
