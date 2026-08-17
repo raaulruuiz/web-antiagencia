@@ -26,7 +26,20 @@ const EXT_OPTIONS = [
   { value: 'biblioteca', label: 'Biblioteca' },
   { value: 'pomodoro',   label: 'Pomodoro' },
   { value: 'css',        label: 'CSS Inspector' },
+  { value: 'loom',       label: 'Loom' },
 ];
+
+// Permisos que deben estar sincronizados entre páginas y extensión
+const LINKED_PERMS = ['biblioteca', 'loom'];
+
+function syncLinked(changed, other) {
+  let result = [...other];
+  for (const key of LINKED_PERMS) {
+    if (changed.includes(key) && !result.includes(key)) result = [...result, key];
+    if (!changed.includes(key) && result.includes(key)) result = result.filter(p => p !== key);
+  }
+  return result;
+}
 
 function timeAgo(dateStr) {
   if (!dateStr) return 'Nunca';
@@ -250,11 +263,11 @@ export default function AdminUsers() {
               <div className="flex flex-col gap-3">
                 <div>
                   <p className="text-zinc-500 text-xs mb-1">Páginas accesibles (además de Usuarios):</p>
-                  <PageCheckboxes selected={invitePages} onChange={setInvitePages} />
+                  <PageCheckboxes selected={invitePages} onChange={pages => { setInvitePages(pages); setInviteExtPages(prev => syncLinked(pages, prev)); }} />
                 </div>
                 <div>
                   <p className="text-zinc-500 text-xs mb-1">Extensión:</p>
-                  <PageCheckboxes selected={inviteExtPages} onChange={setInviteExtPages} options={EXT_OPTIONS} />
+                  <PageCheckboxes selected={inviteExtPages} onChange={ext => { setInviteExtPages(ext); setInvitePages(prev => syncLinked(ext, prev)); }} options={EXT_OPTIONS} />
                 </div>
               </div>
             )}
@@ -337,14 +350,14 @@ export default function AdminUsers() {
                         <p className="text-zinc-500 text-xs mb-1">Páginas accesibles (además de Usuarios):</p>
                         <PageCheckboxes
                           selected={editState.pages}
-                          onChange={pages => setEditing(prev => ({ ...prev, [u.id]: { ...prev[u.id], pages } }))}
+                          onChange={pages => setEditing(prev => ({ ...prev, [u.id]: { ...prev[u.id], pages, ext_pages: syncLinked(pages, prev[u.id].ext_pages) } }))}
                         />
                       </div>
                       <div>
                         <p className="text-zinc-500 text-xs mb-1">Extensión:</p>
                         <PageCheckboxes
                           selected={editState.ext_pages}
-                          onChange={ext_pages => setEditing(prev => ({ ...prev, [u.id]: { ...prev[u.id], ext_pages } }))}
+                          onChange={ext_pages => setEditing(prev => ({ ...prev, [u.id]: { ...prev[u.id], ext_pages, pages: syncLinked(ext_pages, prev[u.id].pages) } }))}
                           options={EXT_OPTIONS}
                         />
                       </div>
