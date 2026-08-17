@@ -29,8 +29,8 @@ const EXT_OPTIONS = [
   { value: 'loom',       label: 'Loom' },
 ];
 
-// Permisos que deben estar sincronizados entre páginas y extensión
-const LINKED_PERMS = ['biblioteca', 'loom'];
+// Permisos que deben estar sincronizados entre páginas y extensión (css solo existe en ext)
+const LINKED_PERMS = ['biblioteca', 'loom', 'pomodoro'];
 
 function syncLinked(changed, other) {
   let result = [...other];
