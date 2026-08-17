@@ -230,9 +230,20 @@ function CaptureConfirmModal({ imageUrl, fileName, onFileNameChange, onConfirm, 
               />
               <span style={{ color: '#52525b', fontSize: 13 }}>.png</span>
             </div>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <button onClick={onCancel} style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '7px 18px', fontSize: 13, cursor: 'pointer' }}>
                 Descartar
+              </button>
+              <button
+                onClick={() => {
+                  const a = document.createElement('a');
+                  a.href = imageUrl;
+                  a.download = (fileName || 'captura') + '.png';
+                  a.click();
+                }}
+                style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '7px 18px', fontSize: 13, cursor: 'pointer' }}
+              >
+                ⬇ Descargar en PC
               </button>
               <button onClick={onConfirm} disabled={uploading} style={{ background: uploading ? '#3f3f46' : 'white', color: uploading ? '#a1a1aa' : 'black', border: 'none', borderRadius: 999, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {uploading && <div style={{ width: 12, height: 12, border: '2px solid #71717a', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />}
@@ -780,6 +791,50 @@ export default function Loom() {
   // ── Capture ─────────────────────────────────────────────────────────────────
   const doCapture = async (mode) => {
     setErrorMsg('');
+
+    const now = new Date();
+    const fileName = `Captura ${now.toLocaleDateString('es-ES')} ${now.getHours()}-${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const applyDataUrl = async (dataUrl) => {
+      const blob = await fetch(dataUrl).then(r => r.blob());
+      const imageUrl = URL.createObjectURL(blob);
+      setCaptureLink('');
+      setCaptureState({ phase: 'confirm', imageUrl, blob, fileName });
+    };
+
+    if (mode === 'area') {
+      // Inject extension area selector overlay
+      const handler = (e) => {
+        if (e.data?.source !== 'antiagencia-ext' || e.data?.type !== 'bibCaptureResponse') return;
+        window.removeEventListener('message', handler);
+        if (e.data.ok && e.data.dataUrl) applyDataUrl(e.data.dataUrl);
+        else if (e.data.error) setErrorMsg('Error al capturar: ' + e.data.error);
+      };
+      window.addEventListener('message', handler);
+      window.postMessage({ source: 'antiagencia-page', type: 'bibAreaCaptureRequest' }, '*');
+      return;
+    }
+
+    // Visible / full — try extension first (silent, no picker)
+    const extData = await Promise.race([
+      new Promise((resolve) => {
+        const handler = (e) => {
+          if (e.data?.source !== 'antiagencia-ext' || e.data?.type !== 'bibCaptureResponse') return;
+          window.removeEventListener('message', handler);
+          resolve(e.data);
+        };
+        window.addEventListener('message', handler);
+        window.postMessage({ source: 'antiagencia-page', type: 'bibCaptureRequest', mode: mode === 'visible' ? 'visible' : 'full' }, '*');
+      }),
+      new Promise(resolve => setTimeout(() => resolve(null), 2000)),
+    ]);
+
+    if (extData?.ok && extData.dataUrl) {
+      await applyDataUrl(extData.dataUrl);
+      return;
+    }
+
+    // Fallback: getDisplayMedia (if extension not installed)
     let stream;
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
@@ -787,30 +842,19 @@ export default function Loom() {
       if (err.name !== 'NotAllowedError') setErrorMsg('No se pudo capturar: ' + err.message);
       return;
     }
-
     const video = document.createElement('video');
     video.srcObject = stream;
     video.muted = true;
     await video.play();
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
     stream.getTracks().forEach(t => t.stop());
-
-    const now = new Date();
-    const fileName = `Captura ${now.toLocaleDateString('es-ES')} ${now.getHours()}-${String(now.getMinutes()).padStart(2, '0')}`;
-
     canvas.toBlob(blob => {
       const imageUrl = URL.createObjectURL(blob);
-      if (mode === 'area') {
-        setCaptureState({ phase: 'cropping', imageUrl, blob, fileName, originalCanvas: canvas });
-      } else {
-        setCaptureLink('');
-        setCaptureState({ phase: 'confirm', imageUrl, blob, fileName });
-      }
+      setCaptureLink('');
+      setCaptureState({ phase: 'confirm', imageUrl, blob, fileName });
     }, 'image/png');
   };
 
