@@ -135,6 +135,15 @@ function DynamicPage() {
     if (page.meta_titulo) document.title = page.meta_titulo;
   }, [page]);
 
+  // Añadir noindex cuando la página no existe (evita indexar 404s en el SPA)
+  useEffect(() => {
+    if (page !== null) return;
+    let robots = document.querySelector('meta[name="robots"]');
+    if (!robots) { robots = document.createElement('meta'); robots.name = 'robots'; document.head.appendChild(robots); }
+    robots.content = 'noindex';
+    return () => { robots.remove(); };
+  }, [page]);
+
   // Still loading
   if (blogPost === undefined) return null;
 
