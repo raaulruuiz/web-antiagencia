@@ -11,6 +11,25 @@ async function getToken() {
 
 const BUBBLE_SIZE = 240;
 
+function detectPlatform(url) {
+  if (/youtube\.com|youtu\.be/.test(url)) return 'YouTube';
+  if (/instagram\.com/.test(url)) return 'Instagram';
+  if (/tiktok\.com/.test(url)) return 'TikTok';
+  if (/facebook\.com|fb\.watch/.test(url)) return 'Facebook';
+  if (/twitter\.com|x\.com/.test(url)) return 'X / Twitter';
+  if (/vimeo\.com/.test(url)) return 'Vimeo';
+  if (/twitch\.tv/.test(url)) return 'Twitch';
+  return null;
+}
+
+function formatDuration(s) {
+  if (!s) return '';
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
 
 function formatTime(s) {
   return `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
@@ -322,6 +341,14 @@ export default function Loom() {
   // null | { phase: 'cropping'|'confirm', imageUrl, blob, fileName, originalCanvas? }
   const [captureUploading, setCaptureUploading] = useState(false);
   const [captureLink, setCaptureLink] = useState('');
+
+  // Download state
+  const [dlUrl, setDlUrl] = useState('');
+  const [dlInfo, setDlInfo] = useState(null);
+  const [dlPhase, setDlPhase] = useState('idle'); // 'idle'|'fetching'|'ready'|'downloading'|'done'
+  const [dlError, setDlError] = useState('');
+  const [dlResult, setDlResult] = useState(''); // drive link
+  const [dlCopyLabel, setDlCopyLabel] = useState('Copiar link');
 
   const setStatusSync = (s) => { statusRef.current = s; setStatus(s); };
   const setCountdownSync = (n) => { countdownRef.current = n; setCountdown(n); };
@@ -906,6 +933,63 @@ export default function Loom() {
     setCaptureLink('');
   };
 
+  // ── Video downloader ─────────────────────────────────────────────────────────
+  const fetchDlInfo = async (url) => {
+    setDlPhase('fetching');
+    setDlError('');
+    setDlInfo(null);
+    setDlResult('');
+    try {
+      const token = await getToken();
+      const res = await fetch(`${BACKEND_URL}/loom/video-info`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error desconocido');
+      setDlInfo(data);
+      setDlPhase('ready');
+    } catch (err) {
+      setDlError(err.message);
+      setDlPhase('idle');
+    }
+  };
+
+  const downloadVideo = async (destination) => {
+    setDlPhase('downloading');
+    setDlError('');
+    try {
+      const token = await getToken();
+      const res = await fetch(`${BACKEND_URL}/loom/video-download`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ url: dlUrl, destination, title: dlInfo?.title }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: 'Error desconocido' }));
+        throw new Error(data.error || 'Error desconocido');
+      }
+      if (destination === 'drive') {
+        const { link } = await res.json();
+        setDlResult(link);
+        setDlPhase('done');
+      } else {
+        const blob = await res.blob();
+        const bUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = bUrl;
+        a.download = `${(dlInfo?.title || 'video').replace(/[/\\:*?"<>|]/g, '-').slice(0, 100)}.mp4`;
+        a.click();
+        URL.revokeObjectURL(bUrl);
+        setDlPhase('ready');
+      }
+    } catch (err) {
+      setDlError(err.message);
+      setDlPhase('ready');
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/loom-login');
@@ -1014,6 +1098,111 @@ export default function Loom() {
                     {label}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="hidden md:block w-px bg-zinc-800 self-stretch" />
+
+            {/* Descargar */}
+            <div className="flex flex-col items-center gap-6" style={{ width: 260 }}>
+              <h2 className="text-white text-2xl font-semibold tracking-tight">Descargar</h2>
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <input
+                  type="text"
+                  value={dlUrl}
+                  onChange={e => {
+                    setDlUrl(e.target.value);
+                    setDlInfo(null);
+                    setDlPhase('idle');
+                    setDlResult('');
+                    setDlError('');
+                  }}
+                  onKeyDown={e => e.key === 'Enter' && dlUrl.trim() && fetchDlInfo(dlUrl.trim())}
+                  placeholder="Pega la URL del video…"
+                  style={{ width: '100%', boxSizing: 'border-box', background: '#09090b', border: '1px solid #3f3f46', borderRadius: 10, padding: '8px 12px', color: 'white', fontSize: 13, outline: 'none' }}
+                />
+
+                {dlUrl.trim() && detectPlatform(dlUrl) && (
+                  <p style={{ color: '#71717a', fontSize: 12, margin: 0 }}>Plataforma detectada: {detectPlatform(dlUrl)}</p>
+                )}
+
+                {dlUrl.trim() && dlPhase === 'idle' && (
+                  <button
+                    onClick={() => fetchDlInfo(dlUrl.trim())}
+                    className="bg-white text-black rounded-full text-sm font-semibold hover:bg-zinc-100 transition-colors"
+                    style={{ padding: '7px 18px', border: 'none', cursor: 'pointer' }}
+                  >
+                    Verificar
+                  </button>
+                )}
+
+                {dlPhase === 'fetching' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#71717a', fontSize: 13 }}>
+                    <div className="w-4 h-4 border-2 border-zinc-600 border-t-white rounded-full animate-spin" />
+                    Verificando…
+                  </div>
+                )}
+
+                {dlPhase === 'downloading' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#71717a', fontSize: 13 }}>
+                    <div className="w-4 h-4 border-2 border-zinc-600 border-t-white rounded-full animate-spin" />
+                    Descargando… puede tardar unos minutos
+                  </div>
+                )}
+
+                {dlInfo && dlPhase !== 'fetching' && (
+                  <div style={{ background: '#111', border: '1px solid #27272a', borderRadius: 12, padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {dlInfo.thumbnail && (
+                      <img src={dlInfo.thumbnail} alt="" style={{ width: '100%', borderRadius: 8, objectFit: 'cover', maxHeight: 130 }} />
+                    )}
+                    <p style={{ color: 'white', fontSize: 13, fontWeight: 500, margin: 0, lineHeight: 1.4 }}>{dlInfo.title}</p>
+                    <div style={{ display: 'flex', gap: 8, color: '#71717a', fontSize: 12 }}>
+                      {dlInfo.uploader && <span>{dlInfo.uploader}</span>}
+                      {dlInfo.duration && <span>· {formatDuration(dlInfo.duration)}</span>}
+                    </div>
+
+                    {dlPhase === 'done' && dlResult ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <p style={{ color: '#22c55e', fontSize: 12, margin: 0 }}>✓ Subido a Drive</p>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(dlResult); setDlCopyLabel('Copiado'); setTimeout(() => setDlCopyLabel('Copiar link'), 2000); }}
+                            style={{ flex: 1, background: 'white', color: 'black', border: 'none', borderRadius: 999, padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                          >
+                            {dlCopyLabel}
+                          </button>
+                          <a href={dlResult} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '6px 10px', fontSize: 12, cursor: 'pointer', textDecoration: 'none' }}>
+                            Abrir
+                          </a>
+                        </div>
+                        <button
+                          onClick={() => { setDlPhase('ready'); setDlResult(''); }}
+                          style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 999, padding: '5px 10px', fontSize: 11, cursor: 'pointer' }}
+                        >
+                          Descargar en PC también
+                        </button>
+                      </div>
+                    ) : dlPhase === 'ready' ? (
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                          onClick={() => downloadVideo('drive')}
+                          style={{ flex: 1, background: 'white', color: 'black', border: 'none', borderRadius: 999, padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                        >
+                          Subir a Drive
+                        </button>
+                        <button
+                          onClick={() => downloadVideo('pc')}
+                          style={{ flex: 1, background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 999, padding: '6px 10px', fontSize: 12, cursor: 'pointer' }}
+                        >
+                          ⬇ PC
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+
+                {dlError && <p style={{ color: '#f87171', fontSize: 12, margin: 0 }}>{dlError}</p>}
               </div>
             </div>
 
