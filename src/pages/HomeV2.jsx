@@ -41,7 +41,7 @@ export default function HomeV2() {
 
               <br />
 
-              <p className="mb-4">Apúntate gratis. Al hacerlo, recibirás 2 regalos. Date de baja cuando quieras, también es gratis.</p>
+              <p className="mb-4">Apúntate gratis y date de baja cuando quieras, también gratis.</p>
 
               <br />
 
@@ -60,7 +60,7 @@ export default function HomeV2() {
 
               <br /><br />
 
-              <p className="mb-4"><strong>P.D.</strong> Aprende a contar tu historia y a venderla por email y conseguirás todos los objetivos que te prometió el emprendimiento. No tienes que complicarlo más.</p>
+              <p className="mb-4"><strong>P.D.</strong> Al apuntarte recibirás 2 regalos que te van a ayudar a vender más por email. Mucho más.</p>
 
               <br /><br />
 
