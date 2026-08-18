@@ -33,18 +33,15 @@ export default function HomeV2() {
 
               <p className="mb-4">Ya te han dicho que tienes que tener 9 automatizaciones, hiper-segmentaciones y diseños bonitos. Bien. Ahora vamos a ver lo que de verdad funciona.</p>
 
-              <p className="mb-4">Me llamo Raúl Ruiz y en 2018 hacía ecommerce. En 2022 tuve que cerrar todo.</p>
-              <p className="mb-4">En 2023 mandé mi primer email en frío a una empresa. Me contrató.</p>
-              <p className="mb-4">Desde entonces he levantado (y sigo haciéndolo) mi negocio mandando emails.</p>
-              <p className="mb-4">Y lo hago para cientos de clientes también.</p>
+              <p className="mb-4"><strong>¿Fama? ¿Dinero? ¿Reconocimiento? ¿Tiempo?</strong></p>
 
               <br />
 
-              <p className="mb-4">En esta lista aprenderás a usar los 3 grandes poderes que te permitirán hacerlo a ti también</p>
+              <p className="mb-4">Cada día recibirás un email en el que te doy un consejo para conseguir todo esto.</p>
 
               <br />
 
-              <p className="mb-4"><strong>¿Fama? ¿Dinero? ¿Reconocimiento? ¿Tiempo? Verás cómo puedes conseguir todo eso</strong></p>
+              <p className="mb-4">Apúntate gratis. Al hacerlo, recibirás 2 regalos. Date de baja cuando quieras, también es gratis.</p>
 
               <br />
 
