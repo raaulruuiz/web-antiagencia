@@ -26,7 +26,7 @@ export default function YaPorFin() {
         <div className="font-body text-gray-600 text-base md:text-lg text-center max-w-xl leading-relaxed mb-10">
           <p className="mb-6">Ya por fin estás dentro de esta increíble lista. Ahora te llegará un mail llamado <strong>YAESTASDENTRO</strong> en el que te doy tus regalos y te cuento otra cosa que lo mismo te interesa.</p>
           <p className="mb-6">Tenle paciencia al sistema, puede tardar un poco en mandarte el mail. Si ves que no te llega, revisa spam o notificaciones y si sigue sin llegarte, escríbeme a raul@antiagencia.es y le echo un ojo.</p>
-          <p className="mb-6">Por cierto, te dejo un regalo extra y secreto y que no doy en otro lado aquí:</p>
+          <p className="mb-6">Por cierto, <strong>te dejo un regalo extra y secreto y que no doy en otro lado aquí:</strong></p>
         </div>
 
         {/* PDF embed — desktop */}
