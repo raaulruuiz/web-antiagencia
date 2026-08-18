@@ -24,22 +24,9 @@ export default function YaPorFin() {
 
         {/* Texto principal */}
         <div className="font-body text-gray-600 text-base md:text-lg text-center max-w-xl leading-relaxed mb-10">
-          <p className="mb-6">Ya por fin estás dentro de esta increíble lista. Ahora te llegará un mail llamado <strong>LOS 3 GRANDES PODERES</strong> en el que te cuento cuáles son.</p>
+          <p className="mb-6">Ya por fin estás dentro de esta increíble lista. Ahora te llegará un mail llamado <strong>YAESTASDENTRO</strong> en el que te doy tus regalos y te cuento otra cosa que lo mismo te interesa.</p>
           <p className="mb-6">Tenle paciencia al sistema, puede tardar un poco en mandarte el mail. Si ves que no te llega, revisa spam o notificaciones y si sigue sin llegarte, escríbeme a raul@antiagencia.es y le echo un ojo.</p>
-          <p className="mb-6">Por cierto, te dejo un par de regalos por aquí:</p>
-        </div>
-
-        {/* Enlace biblioteca */}
-        <div className="w-full max-w-3xl mb-6 text-center">
-          <a
-            href="https://antiagencia.es/anti-biblioteca/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-base md:text-lg font-bold underline"
-            style={{ color: '#7000FF' }}
-          >
-            Mi biblioteca de emails donde analizo algunos mails que me llegan cada semana
-          </a>
+          <p className="mb-6">Por cierto, te dejo un regalo extra y secreto y que no doy en otro lado aquí:</p>
         </div>
 
         {/* PDF embed — desktop */}
@@ -73,7 +60,7 @@ export default function YaPorFin() {
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#0067FD'; e.currentTarget.style.color = '#0067FD'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = '#7000FF'; e.currentTarget.style.color = '#7000FF'; }}
           >
-            Descargar PDF
+            Descargar Ebook en PDF
           </a>
         </div>
 
