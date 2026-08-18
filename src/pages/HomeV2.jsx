@@ -44,7 +44,7 @@ export default function HomeV2() {
                 accountId="686354"
                 formActionId="181751106241562330"
                 css={ML_CSS}
-                submitText="Quiero el ebook y la biblioteca"
+                submitText="Quiero apuntarme"
                 instanceId="homev2"
                 scriptVersion="vb397d78ebaa8a0f631d35384c46d781b"
               />
