@@ -28,7 +28,7 @@ export default function HomeV2() {
               </h2>
 
               <h1 className="text-[25px] md:text-4xl text-gray-900 mb-6 font-bold">
-                El email marketing debería ser feo, manual, sin segmentar y (muy) frecuente
+                El email marketing debería ser Feo, Manual, Sin Segmentar y (MUY) Frecuente
               </h1>
 
               <p className="mb-4">Ya te han dicho que tienes que tener 9 automatizaciones, hiper-segmentaciones y diseños bonitos. Bien. Ahora vamos a ver lo que de verdad funciona.</p>
