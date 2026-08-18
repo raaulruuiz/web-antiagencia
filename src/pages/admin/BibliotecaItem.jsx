@@ -917,6 +917,35 @@ function BlockDivider({ onAdd }) {
 // ── Block: selector panel ─────────────────────────────────────────────────────
 const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#e879f9' };
 const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas', puntuacion: 'Puntuación' };
+
+const PLANTILLA_TYPES = {
+  completo: ['puntuacion', 'imagen', 'enlaces', 'transcribir', 'asunto_adelanto', 'imagen_texto', 'correccion'],
+  simple:   ['puntuacion', 'asunto_adelanto', 'imagen_texto', 'correccion'],
+};
+
+function makeTemplateBlocks(plantilla) {
+  const types = PLANTILLA_TYPES[plantilla] || [];
+  return types.map((type, i) => ({
+    id: `blk_${Date.now()}_${i}`,
+    type,
+    titulo: DEFAULT_TITLES[type] || '',
+    subtitulo: '',
+    images: [],
+    url: '',
+    texto_boton: '',
+    links: type === 'enlaces' ? [{ images: [], url: '' }] : [],
+    links_layout: 'columna',
+    images_layout: 'columna',
+    it_layout: 'img-text',
+    items: type === 'imagen_texto'    ? [{ image: null, texto: '', text_color: '', text_align: 'left' }]
+         : type === 'asunto_adelanto' ? [{ show_asunto: false, show_adelanto: false, texto: '', text_color: '', text_align: 'left' }]
+         : [],
+    email_blocks: [],
+    texto: '',
+    nota: '',
+    visible: type !== 'correccion',
+  }));
+}
 function scoreColor(s) { if (s == null) return '#71717a'; if (s < 5) return '#ef4444'; if (s < 7.5) return '#f97316'; return '#22c55e'; }
 
 function BlockSelector({ onSelect, hasCorreccion, hasPuntuacion, onClose, categoria }) {
@@ -2806,6 +2835,7 @@ export default function BibliotecaItem() {
   const [allSectors, setAllSectors] = useState([]);
   const [sector, setSector]         = useState([]);   // display mode: uuid[]
   const [obSector, setObSector]     = useState([]);   // onboarding: uuid[]
+  const [obPlantilla, setObPlantilla] = useState(null); // null | 'completo' | 'simple'
   const [sectorInput, setSectorInput] = useState('');
 
   // ── Onboarding state ─────────────────────────────────────────────────────
@@ -2976,7 +3006,7 @@ export default function BibliotecaItem() {
       ficha_url: obCategoria === 'ficha' ? (urlTrimmed || null) : null,
       fecha_analisis: obCategoria === 'ficha' ? (obFechaAnalisis || null) : null,
       tags: obTags,
-      blocks_data: { blocks: blocksData, library: blocksLibraryRef.current },
+      blocks_data: { blocks: makeTemplateBlocks(obPlantilla), library: blocksLibraryRef.current },
     };
     setSaving(true);
     try {
@@ -3509,7 +3539,7 @@ export default function BibliotecaItem() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
-                    <Tag colors={CAT_COLORS[obCategoria]} label={catLabel(obCategoria)} onRemove={() => { setObCategoria(null); setObSubcat(null); setObSector([]); setObStep('categoria'); }} />
+                    <Tag colors={CAT_COLORS[obCategoria]} label={catLabel(obCategoria)} onRemove={() => { setObCategoria(null); setObSubcat(null); setObSector([]); setObPlantilla(null); setObStep('categoria'); }} />
                   </div>
                   {obSector.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -3580,6 +3610,39 @@ export default function BibliotecaItem() {
                       );
                     })}
                   </div>
+                  {/* Selector de plantilla */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <span style={{ fontSize: 11, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Plantilla de bloques</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                      {[
+                        { id: 'completo', label: 'Análisis Completo', icon: (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/>
+                          </svg>
+                        )},
+                        { id: 'simple', label: 'Análisis Simple', icon: (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="4" width="18" height="5" rx="1"/><rect x="3" y="13" width="18" height="5" rx="1"/>
+                          </svg>
+                        )},
+                        { id: null, label: 'En Blanco', icon: (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                          </svg>
+                        )},
+                      ].map(({ id, label, icon }) => {
+                        const active = obPlantilla === id;
+                        return (
+                          <button key={String(id)} onClick={() => setObPlantilla(id)}
+                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '10px 6px', borderRadius: 8, border: `1px solid ${active ? '#6366f1' : 'var(--t-border)'}`, background: active ? 'rgba(99,102,241,0.12)' : 'transparent', color: active ? '#a5b4fc' : 'var(--t-text-muted)', fontSize: 11, cursor: 'pointer', transition: 'all 0.15s', textAlign: 'center', lineHeight: 1.3 }}>
+                            {icon}
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   <button
                     onClick={() => setObStep(obCategoria === 'email' ? 'subcategoria' : 'campos')}
                     disabled={obSector.length === 0}
@@ -3758,7 +3821,7 @@ export default function BibliotecaItem() {
               {categoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Categoría</span>
-                  <Tag colors={CAT_COLORS[categoria]} label={catLabel(categoria)} onRemove={() => { setCategoria(null); setSubcat(null); setSector([]); patch({ categoria: null, subcategoria: null, sector: [], ficha_url: null, fecha_analisis: null }); setObMarca(''); setObUrl(''); setObFechaAnalisis(''); setObTags([]); setObSector([]); setMode('onboarding'); setObStep('categoria'); setObCategoria(null); setObSubcat(null); }} />
+                  <Tag colors={CAT_COLORS[categoria]} label={catLabel(categoria)} onRemove={() => { setCategoria(null); setSubcat(null); setSector([]); patch({ categoria: null, subcategoria: null, sector: [], ficha_url: null, fecha_analisis: null }); setObMarca(''); setObUrl(''); setObFechaAnalisis(''); setObTags([]); setObSector([]); setObPlantilla(null); setMode('onboarding'); setObStep('categoria'); setObCategoria(null); setObSubcat(null); }} />
                 </div>
               )}
               {categoria && (
