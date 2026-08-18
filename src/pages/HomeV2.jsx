@@ -31,7 +31,7 @@ export default function HomeV2() {
                 El email marketing debería ser Feo, Manual, Sin Segmentar y (MUY) Frecuente
               </h1>
 
-              <p className="mb-4">Ya te han dicho que tienes que tener 9 automatizaciones, hiper-segmentaciones y diseños bonitos. Bien. Ahora vamos a ver lo que de verdad funciona.</p>
+              <p className="mb-4">Illo. Ya te han dicho que tienes que tener 9 automatizaciones, hiper-segmentaciones y diseños bonitos. Bien. Ahora vamos a ver lo que de verdad funciona.</p>
 
               <p className="mb-4">¿Fama? ¿Dinero? ¿Reconocimiento? ¿Tiempo?</p>
               <p className="mb-4"><strong>Cada día recibirás un email en el que te doy un consejo para conseguir todo esto.</strong></p>
