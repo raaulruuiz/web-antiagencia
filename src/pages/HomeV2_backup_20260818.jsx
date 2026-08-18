@@ -24,27 +24,27 @@ export default function HomeV2() {
             <div className="text-gray-800 text-base leading-relaxed">
 
               <h2 className="text-xl md:text-2xl text-gray-900 mb-6" style={{ fontWeight: 400 }}>
-                ¿Cómo se construyen las marcas que todo el mundo conoce y que generan millones de euros?
+                ¿CÓMO SE CONSTRUYEN LAS MARCAS QUE TODO EL MUNDO CONOCE Y QUE GENERAN MILLONES DE EUROS?
               </h2>
 
               <h1 className="text-[25px] md:text-4xl text-gray-900 mb-6 font-bold">
-                El email marketing debería ser feo, manual, sin segmentar y (muy) frecuente
+                LOS 3 GRANDES PODERES
               </h1>
 
-              <p className="mb-4">Ya te han dicho que tienes que tener 9 automatizaciones, hiper-segmentaciones y diseños bonitos. Bien. Ahora vamos a ver lo que de verdad funciona.</p>
+              <p className="mb-4">YA TE HAN DICHO QUE TIENES QUE TENER 9 AUTOMATIZACIONES, HIPER-SEMENTACIONES Y DISEÑOS BONITOS. BIEN. AHORA VAMOS A VER LO QUE DE VERDAD FUNCIONA.</p>
 
-              <p className="mb-4">Me llamo Raúl Ruiz y en 2018 hacía ecommerce. En 2022 tuve que cerrar todo.</p>
-              <p className="mb-4">En 2023 mandé mi primer email en frío a una empresa. Me contrató.</p>
-              <p className="mb-4">Desde entonces he levantado (y sigo haciéndolo) mi negocio mandando emails.</p>
-              <p className="mb-4">Y lo hago para cientos de clientes también.</p>
-
-              <br />
-
-              <p className="mb-4">En esta lista aprenderás a usar los 3 grandes poderes que te permitirán hacerlo a ti también</p>
+              <p className="mb-4">ME LLAMO RAÚL RUIZ Y EN 2018 HACÍA ECOMMERCE. EN 2022 TUVE QUE CERRAR TODO.</p>
+              <p className="mb-4">EN 2023 MANDÉ MI PRIMER EMAIL EN FRÍO A UNA EMPRESA. ME CONTRATÓ.</p>
+              <p className="mb-4">DESDE ENTONCES HE LEVANTADO (Y SIGO HACIÉNDOLO) MI NEGOCIO MANDANDO EMAILS.</p>
+              <p className="mb-4">Y LO HAGO PARA CIENTOS DE CLIENTES TAMBIÉN.</p>
 
               <br />
 
-              <p className="mb-4"><strong>¿Fama? ¿Dinero? ¿Reconocimiento? ¿Tiempo? Verás cómo puedes conseguir todo eso</strong></p>
+              <p className="mb-4">EN ESTA LISTA APRENDERÁS A USAR LOS 3 GRANDES PODERES QUE TE PERMITIRÁN HACERLO A TI TAMBIÉN</p>
+
+              <br />
+
+              <p className="mb-4"><strong>¿FAMA? ¿DINERO? ¿RECONOCIMIENTO? ¿TIEMPO? VERÁS CÓMO PUEDES CONSEGUIR TODO ESO</strong></p>
 
               <br />
 
@@ -63,7 +63,7 @@ export default function HomeV2() {
 
               <br /><br />
 
-              <p className="mb-4"><strong>P.D.</strong> Aprende a contar tu historia y a venderla por email y conseguirás todos los objetivos que te prometió el emprendimiento. No tienes que complicarlo más.</p>
+              <p className="mb-4"><strong>P.D.</strong> APRENDE A CONTAR TU HISTORIA Y A VENDERLA POR EMAIL Y CONSEGUIRÁS TODOS LOS OBJETIVOS QUE TE PROMETIÓ EL EMPRENDIMIENTO. NO TIENES QUE COMPLICARLO MÁS.</p>
 
               <br /><br />
 
