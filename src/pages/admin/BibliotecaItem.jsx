@@ -2846,6 +2846,7 @@ export default function BibliotecaItem() {
 
   // Misc
   const [allMarcas, setAllMarcas]       = useState([]);
+  const [marcaSectorMap, setMarcaSectorMap] = useState({});
   const [discardConfirm, setDiscardConfirm] = useState(false);
   const [imageHover, setImageHover]     = useState(false);
   const [showCrop, setShowCrop]         = useState(false);
@@ -2894,7 +2895,12 @@ export default function BibliotecaItem() {
       } catch (e) { setError(e.message); }
       finally { setLoading(false); }
     })();
-    fetch(`${API_BASE}/biblioteca/marcas`).then(r => r.ok ? r.json() : []).then(setAllMarcas).catch(() => {});
+    fetch(`${API_BASE}/biblioteca/marcas`).then(r => r.ok ? r.json() : []).then(data => {
+      setAllMarcas(data.map(m => m.name));
+      const map = {};
+      for (const m of data) map[m.name] = m.sectors || [];
+      setMarcaSectorMap(map);
+    }).catch(() => {});
     (async () => {
       const token2 = await getToken();
       if (token2) {
@@ -3001,6 +3007,12 @@ export default function BibliotecaItem() {
         setMode('display');
         if (marcaTrimmed && !allMarcas.includes(marcaTrimmed)) {
           setAllMarcas(prev => [...prev, marcaTrimmed].sort((a,b) => a.localeCompare(b)));
+          setMarcaSectorMap(prev => ({ ...prev, [marcaTrimmed]: obSector }));
+        } else if (marcaTrimmed) {
+          setMarcaSectorMap(prev => ({
+            ...prev,
+            [marcaTrimmed]: [...new Set([...(prev[marcaTrimmed] || []), ...obSector])],
+          }));
         }
       }
     } finally { setSaving(false); }
@@ -3612,7 +3624,13 @@ export default function BibliotecaItem() {
                       {obMarca.length > 0 && allMarcas.filter(s => s.toLowerCase().includes(obMarca.toLowerCase()) && s !== obMarca).length > 0 && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--t-border-s)', border: '1px solid var(--t-border)', borderRadius: 8, marginTop: 4, zIndex: 20, overflow: 'hidden' }}>
                           {allMarcas.filter(s => s.toLowerCase().includes(obMarca.toLowerCase()) && s !== obMarca).slice(0, 6).map(s => (
-                            <div key={s} onMouseDown={() => setObMarca(s)}
+                            <div key={s} onMouseDown={() => {
+                              setObMarca(s);
+                              const sectorIds = marcaSectorMap[s] || [];
+                              if (sectorIds.length) {
+                                setObSector(prev => [...new Set([...prev, ...sectorIds])]);
+                              }
+                            }}
                               style={{ padding: '7px 12px', fontSize: 13, color: 'var(--t-text)', cursor: 'pointer' }}
                               onMouseEnter={e => e.currentTarget.style.background = 'var(--t-border)'}
                               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>{s}</div>
@@ -3781,7 +3799,17 @@ export default function BibliotecaItem() {
             </div>
 
             <FieldRow label="Marca" savedValue={marca} required
-              onSave={v => { setMarca(v); patch({ marca: v }); if (v && !allMarcas.includes(v)) setAllMarcas(p => [...p, v].sort((a,b) => a.localeCompare(b))); }}
+              onSave={v => {
+                setMarca(v);
+                patch({ marca: v });
+                if (v && !allMarcas.includes(v)) setAllMarcas(p => [...p, v].sort((a,b) => a.localeCompare(b)));
+                // Auto-fill sectors from this brand if current item has none
+                if (v && marcaSectorMap[v]?.length && !sector.length) {
+                  const ns = marcaSectorMap[v];
+                  setSector(ns);
+                  patch({ sector: ns });
+                }
+              }}
               allowEmpty={false} suggestions={allMarcas} />
             {categoria === 'email' && (
               <FieldRow label="Asunto" savedValue={asunto} onSave={v => { setAsunto(v); patch({ asunto: v }); }} placeholder="Asunto del email…" />
