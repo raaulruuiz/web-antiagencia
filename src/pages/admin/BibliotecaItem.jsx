@@ -948,6 +948,23 @@ function makeTemplateBlocks(plantilla) {
 }
 function scoreColor(s) { if (s == null) return '#71717a'; if (s < 5) return '#ef4444'; if (s < 7.5) return '#f97316'; return '#22c55e'; }
 
+function calcularPuntuacion(blocks) {
+  const TARGET = new Set(['imagen_texto', 'asunto_adelanto']);
+  let total = 0, verdes = 0, amarillos = 0;
+  for (const block of (blocks || [])) {
+    if (!TARGET.has(block.type)) continue;
+    for (const it of (block.items || [])) {
+      if (!it.texto?.trim()) continue;
+      total++;
+      if (it.text_color === '#22c55e') verdes++;
+      else if (it.text_color === '#eab308') amarillos++;
+    }
+  }
+  if (total === 0) return null;
+  const raw = (verdes * 10 + amarillos * 5) / total;
+  return Math.round(raw * 100) / 100;
+}
+
 function BlockSelector({ onSelect, hasCorreccion, hasPuntuacion, onClose, categoria }) {
   const gridTypes = [
     ...BLOCK_TYPES,
@@ -1877,7 +1894,7 @@ function EBCanvas({ blocks, onChange, onUpload, onCrop, libImages, nested = fals
 }
 
 // ── Block: editor modal ───────────────────────────────────────────────────────
-function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages, categoria }) {
+function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages, categoria, allBlocks = [] }) {
   const [draft, setDraft] = useState(() => {
     const d = { ...block };
     // Migrate old enlaces structure to new links structure
@@ -2045,6 +2062,17 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                   {draft.valor < 5 ? 'Suspenso' : draft.valor < 7.5 ? 'Notable' : 'Sobresaliente'}
                 </span>
               )}
+              <button
+                onClick={() => {
+                  const v = calcularPuntuacion(allBlocks);
+                  update('valor', v);
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: 8, padding: '7px 16px', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M17 17h.01M14 14h6v6h-6z"/>
+                </svg>
+                Calcular
+              </button>
             </div>
             <div>
               <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Alineación</label>
@@ -3218,7 +3246,9 @@ export default function BibliotecaItem() {
     setBlocksData(prev => {
       let next;
       if (type === 'puntuacion') {
-        next = [newBlock, ...prev];
+        const autoValor = calcularPuntuacion(prev);
+        const punBlock = autoValor !== null ? { ...newBlock, valor: autoValor } : newBlock;
+        next = [punBlock, ...prev];
       } else if (atIndex !== null && type !== 'correccion') {
         next = [...prev.slice(0, atIndex), newBlock, ...prev.slice(atIndex)];
       } else {
@@ -3472,6 +3502,7 @@ export default function BibliotecaItem() {
           onCropFromEmail={cropFromEmail}
           libraryImages={libraryImages}
           categoria={categoria}
+          allBlocks={blocksData}
         />
       ) : null; })()}
       {showCropForModal && item && <CropOverlay imageUrl={item.url} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
