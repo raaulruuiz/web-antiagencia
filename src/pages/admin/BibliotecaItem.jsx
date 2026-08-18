@@ -944,6 +944,7 @@ function makeTemplateBlocks(plantilla) {
     texto: '',
     nota: '',
     visible: type !== 'correccion',
+    ...(type === 'puntuacion' ? { autocalcular: true } : {}),
   }));
 }
 function scoreColor(s) { if (s == null) return '#71717a'; if (s < 5) return '#ef4444'; if (s < 7.5) return '#f97316'; return '#22c55e'; }
@@ -2048,31 +2049,33 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
               <input
                 type="number" min="0" max="10" step="0.01"
                 value={draft.valor ?? ''}
+                disabled={!!draft.autocalcular}
                 onChange={e => {
+                  if (draft.autocalcular) return;
                   const raw = e.target.value;
                   if (raw === '') { update('valor', null); return; }
                   const n = Math.min(10, Math.max(0, parseFloat(parseFloat(raw).toFixed(2))));
                   update('valor', isNaN(n) ? null : n);
                 }}
                 placeholder="0 – 10"
-                style={{ width: 140, background: 'var(--t-surface2)', border: `2px solid ${scoreColor(draft.valor)}`, borderRadius: 12, padding: '14px 18px', fontSize: 36, fontWeight: 800, color: scoreColor(draft.valor), outline: 'none', colorScheme: 'dark', textAlign: 'center', boxSizing: 'border-box' }}
+                style={{ width: 140, background: draft.autocalcular ? 'var(--t-surface2)' : 'var(--t-surface2)', border: `2px solid ${scoreColor(draft.valor)}`, borderRadius: 12, padding: '14px 18px', fontSize: 36, fontWeight: 800, color: draft.autocalcular ? scoreColor(draft.valor) + 'aa' : scoreColor(draft.valor), outline: 'none', colorScheme: 'dark', textAlign: 'center', boxSizing: 'border-box', opacity: draft.autocalcular ? 0.7 : 1, cursor: draft.autocalcular ? 'default' : 'text' }}
               />
               {draft.valor != null && (
                 <span style={{ fontSize: 13, color: scoreColor(draft.valor), fontWeight: 600 }}>
                   {draft.valor < 5 ? 'Suspenso' : draft.valor < 7.5 ? 'Notable' : 'Sobresaliente'}
                 </span>
               )}
-              <button
-                onClick={() => {
-                  const v = calcularPuntuacion(allBlocks);
-                  update('valor', v);
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', userSelect: 'none' }}>
+                <div onClick={() => {
+                  const next = !draft.autocalcular;
+                  update('autocalcular', next);
+                  if (next) update('valor', calcularPuntuacion(allBlocks));
                 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc', borderRadius: 8, padding: '7px 16px', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M17 17h.01M14 14h6v6h-6z"/>
-                </svg>
-                Calcular
-              </button>
+                  style={{ width: 36, height: 20, borderRadius: 10, background: draft.autocalcular ? '#6366f1' : 'var(--t-border-mid)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
+                  <div style={{ position: 'absolute', top: 3, left: draft.autocalcular ? 19 : 3, width: 14, height: 14, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                </div>
+                <span style={{ fontSize: 12, color: draft.autocalcular ? '#a5b4fc' : 'var(--t-text-muted)', fontWeight: draft.autocalcular ? 600 : 400 }}>Autocalcular</span>
+              </label>
             </div>
             <div>
               <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Alineación</label>
@@ -3247,7 +3250,7 @@ export default function BibliotecaItem() {
       let next;
       if (type === 'puntuacion') {
         const autoValor = calcularPuntuacion(prev);
-        const punBlock = autoValor !== null ? { ...newBlock, valor: autoValor } : newBlock;
+        const punBlock = { ...newBlock, autocalcular: true, valor: autoValor ?? null };
         next = [punBlock, ...prev];
       } else if (atIndex !== null && type !== 'correccion') {
         next = [...prev.slice(0, atIndex), newBlock, ...prev.slice(atIndex)];
@@ -3462,6 +3465,17 @@ export default function BibliotecaItem() {
     });
     return imgs;
   }, [blocksData, blocksLibrary, item?.url]);
+
+  // Auto-recalculate puntuacion in real time when autocalcular is ON
+  useEffect(() => {
+    const punBlk = blocksData.find(b => b.type === 'puntuacion' && b.autocalcular);
+    if (!punBlk) return;
+    const newValor = calcularPuntuacion(blocksData);
+    if (newValor === punBlk.valor) return;
+    const next = blocksData.map(b => b.id === punBlk.id ? { ...b, valor: newValor } : b);
+    setBlocksData(next);
+    saveBlocks(next);
+  }, [blocksData, saveBlocks]);
 
   const publishItem = useCallback(async () => {
     const token = await getToken();
