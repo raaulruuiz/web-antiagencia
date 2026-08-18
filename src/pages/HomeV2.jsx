@@ -54,7 +54,7 @@ export default function HomeV2() {
 
               <br />
 
-              <p className="mb-4">Me llamo Raúl y levanté mi negocio a base de mandar emails. Y hago lo mismo para cientos de clientes que quieren levantar el suyo.</p>
+              <p className="mb-4">Me llamo Raúl Ruiz y levanté mi negocio a base de mandar emails. Y hago lo mismo para cientos de clientes que quieren levantar el suyo.</p>
 
               <br />
 
