@@ -50,7 +50,7 @@ export default function HomeV2() {
               />
 
               <br />
-              <p className="mb-4 text-xs text-gray-400">Para cumplir con el RGPD (Reglamento General de Protección de Datos) y entender que tus datos están seguros, debes leer y aceptar la política de privacidad. Tus datos serán guardados en MailerLite, proveedor de email marketing. MailerLite también cumple con el RGPD, así que todo está protegido y amparado por la ley.</p>
+              <p className="mb-4 text-xs text-gray-400" style={{ textTransform: 'none' }}>Para cumplir con el RGPD (Reglamento General de Protección de Datos) y entender que tus datos están seguros, debes leer y aceptar la política de privacidad. Tus datos serán guardados en MailerLite, proveedor de email marketing. MailerLite también cumple con el RGPD, así que todo está protegido y amparado por la ley.</p>
 
               <br />
 
