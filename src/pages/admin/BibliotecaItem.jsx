@@ -1597,10 +1597,31 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 }
 
 // ── InlineColorPicker (tag-style) ─────────────────────────────────────────────
-function InlineColorPicker({ value, onChange }) {
+const RESTRICTED_COLORS = ['#22c55e', '#eab308', '#ef4444'];
+
+function InlineColorPicker({ value, onChange, restricted = false }) {
   const [open, setOpen] = useState(false);
   const [hex, setHex] = useState(value || '');
   const apply = (color) => { onChange(color); setOpen(false); };
+
+  if (restricted) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        {RESTRICTED_COLORS.map(c => (
+          <button key={c} onClick={() => onChange(value === c ? '' : c)}
+            style={{ width: 22, height: 22, borderRadius: '50%', background: c, border: `2px solid ${value === c ? 'white' : 'transparent'}`, cursor: 'pointer', flexShrink: 0 }}
+            title={c} />
+        ))}
+        {value && (
+          <>
+            <span style={{ fontSize: 10, borderRadius: 999, padding: '2px 8px', fontWeight: 600, background: value + '22', border: `1px solid ${value}`, color: value }}>Aa</span>
+            <button onClick={() => onChange('')} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: 0 }}>✕</button>
+          </>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -2386,7 +2407,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                     <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Color</label>
-                        <InlineColorPicker value={it.text_color || ''} onChange={c => updateItemField(itemIdx, 'text_color', c)} />
+                        <InlineColorPicker value={it.text_color || ''} onChange={c => updateItemField(itemIdx, 'text_color', c)} restricted />
                       </div>
                       <div style={{ display: 'flex', gap: 3 }}>
                         {[['left','≡L'], ['center','≡C'], ['right','≡R'], ['justify','≡']].map(([val, icon]) => {
@@ -2499,7 +2520,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <label style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Color</label>
-                          <InlineColorPicker value={it.text_color || ''} onChange={c => updateAsItem(itemIdx, 'text_color', c)} />
+                          <InlineColorPicker value={it.text_color || ''} onChange={c => updateAsItem(itemIdx, 'text_color', c)} restricted />
                         </div>
                         <div style={{ display: 'flex', gap: 3 }}>
                           {[['left','≡L'], ['center','≡C'], ['right','≡R'], ['justify','≡']].map(([val, icon]) => {
