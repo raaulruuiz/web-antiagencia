@@ -21,7 +21,7 @@ export default function HomeV2() {
       <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
         <div className="w-full max-w-3xl">
           <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12" style={{ fontFamily: "'Georgia', serif" }}>
-            <div className="text-gray-800 text-base leading-relaxed">
+            <div className="text-gray-800 text-base leading-relaxed" style={{ textTransform: 'uppercase' }}>
 
               <h2 className="text-xl md:text-2xl text-gray-900 mb-6" style={{ fontWeight: 400 }}>
                 ¿Cómo se construyen las marcas que todo el mundo conoce y que generan millones de euros?
