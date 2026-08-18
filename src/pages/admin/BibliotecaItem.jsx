@@ -3196,8 +3196,10 @@ export default function BibliotecaItem() {
       const autopublish = localStorage.getItem('biblioteca_autopublish') === 'true';
       const blocksData = { blocks, library: blocksLibraryRef.current };
       const puntuacionBlk = blocks.find(b => b.type === 'puntuacion');
-      const body = { blocks_data: blocksData, puntuacion: puntuacionBlk?.valor != null ? Number(puntuacionBlk.valor) : null };
+      const body = { blocks_data: blocksData };
       if (autopublish) {
+        // When autopublishing, sync score and published blocks together
+        body.puntuacion = puntuacionBlk?.valor != null ? Number(puntuacionBlk.valor) : null;
         body.blocks_data_published = blocksData;
         // Remove from pending if autopublish is on
         try {
