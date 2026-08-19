@@ -5,7 +5,7 @@ import 'react-day-picker/dist/style.css';
 import { supabase } from '@/lib/supabaseClient';
 import { BACKEND_URL } from '@/lib/config';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 
 const CUENTAS = [
@@ -1010,6 +1010,69 @@ export default function Finanzas() {
                   </div>
                 </>
               )}
+
+              {d.evolucionPorCategoria?.datos?.length > 1 && d.evolucionPorCategoria.categorias.length > 0 && (() => {
+                const ROJOS = ['#f87171','#fca5a5','#dc2626','#fb7185','#b91c1c','#fda4af','#991b1b','#ef4444'];
+                const gran = d.granularidad || 'mes';
+                const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+                const multiAnio = new Set(d.evolucionPorCategoria.datos.map(e => e.periodo.slice(0, 4))).size > 1;
+
+                function fmtEje(key) {
+                  if (gran === 'anio') return key;
+                  if (gran === 'mes') {
+                    const [anio, mes] = key.split('-');
+                    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+                    const label = meses[parseInt(mes, 10) - 1];
+                    return multiAnio && mes === '01' ? `${label} '${anio.slice(2)}` : label;
+                  }
+                  const dt = new Date(key + 'T12:00:00');
+                  const mo = MESES_CORTO[dt.getMonth()];
+                  return multiAnio ? `${dt.getDate()} ${mo} '${String(dt.getFullYear()).slice(2)}` : `${dt.getDate()} ${mo}`;
+                }
+
+                function fmtTooltip(key) {
+                  if (gran === 'anio') return key;
+                  if (gran === 'mes') {
+                    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+                    return `${meses[parseInt(key.split('-')[1], 10) - 1]} ${key.slice(0, 4)}`;
+                  }
+                  const dt = new Date(key + 'T12:00:00');
+                  return `${dt.getDate()} ${MESES_CORTO[dt.getMonth()]} ${dt.getFullYear()}`;
+                }
+
+                return (
+                  <>
+                    <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10, marginTop: 24 }}>Evolución por categoría</h2>
+                    <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
+                      <ResponsiveContainer width="100%" height={220}>
+                        <LineChart data={d.evolucionPorCategoria.datos}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                          <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
+                            interval="preserveStartEnd" tickFormatter={fmtEje} />
+                          <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                          <Tooltip
+                            content={({ active, payload, label }) => {
+                              if (!active || !payload?.length) return null;
+                              const entries = payload.filter(p => p.value > 0).sort((a, b) => b.value - a.value);
+                              return (
+                                <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
+                                  <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTooltip(label)}</p>
+                                  {entries.map(e => <p key={e.dataKey} style={{ color: e.stroke, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}
+                                </div>
+                              );
+                            }}
+                          />
+                          <Legend wrapperStyle={{ fontSize: 11 }} formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>} />
+                          {d.evolucionPorCategoria.categorias.map((cat, i) => (
+                            <Line key={cat} type="monotone" dataKey={cat} name={cat}
+                              stroke={ROJOS[i % ROJOS.length]} strokeWidth={2} dot={false} connectNulls />
+                          ))}
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </>
+                );
+              })()}
             </>
           ) : null}
         </>
