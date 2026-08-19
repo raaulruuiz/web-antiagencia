@@ -974,6 +974,10 @@ export default function Finanzas() {
                 const evolYMax = Math.max(0, ...evolYVals);
                 const evolYPad = Math.max((evolYMax - evolYMin) * 0.08, 10);
                 const evolDomain = [Math.floor(evolYMin - evolYPad), Math.ceil(evolYMax + evolYPad)];
+                const evolTicks = (() => {
+                  const [lo, hi] = evolDomain;
+                  return Array.from({ length: 5 }, (_, i) => Math.round(lo + (hi - lo) * i / 4));
+                })();
                 const EVOL_Y_W = 52;
                 const pxPerPtEvol = zoomEvol === 1 ? 50 : 100;
                 const zWidthEvol = Math.max(900, evolData.length * pxPerPtEvol);
@@ -1009,7 +1013,7 @@ export default function Finanzas() {
                 const zoomedAxesEvol = (<>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                   <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval={zIntervalEvol} tickFormatter={fmtEjeLabel} />
-                  <YAxis hide domain={evolDomain} />
+                  <YAxis hide domain={evolDomain} ticks={evolTicks} />
                   <Tooltip content={evolTooltip} />
                 </>);
 
@@ -1035,11 +1039,16 @@ export default function Finanzas() {
                             {evolLegendItems.map(l => <span key={l.name} style={{ color: l.color, fontSize: 11 }}>● {l.name}</span>)}
                           </div>
                           <div style={{ display: 'flex' }}>
-                            <div style={{ width: EVOL_Y_W, flexShrink: 0 }}>
-                              <BarChart width={EVOL_Y_W} height={ZOOM_H} data={evolData.slice(0,1)} barSize={zBarWEvol} margin={ZOOM_MY}>
-                                <YAxis domain={evolDomain} tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} width={EVOL_Y_W - 2} />
-                                <Bar dataKey="ingresos" fill="transparent" legendType="none" isAnimationActive={false} />
-                              </BarChart>
+                            <div style={{ width: EVOL_Y_W, flexShrink: 0, position: 'relative', height: ZOOM_H }}>
+                              {evolTicks.map(v => {
+                                const frac = (v - evolDomain[0]) / (evolDomain[1] - evolDomain[0]);
+                                const y = ZOOM_M.top + (ZOOM_H - ZOOM_M.top - ZOOM_M.bottom) * (1 - frac);
+                                return (
+                                  <div key={v} style={{ position: 'absolute', top: y - 6, left: 0, right: 4, fontSize: 11, color: '#71717a', textAlign: 'right', lineHeight: 1 }}>
+                                    {fmtY(v)}
+                                  </div>
+                                );
+                              })}
                             </div>
                             <div style={{ flex: 1, overflowX: 'auto' }}>
                               {viewEvol === 'barras' ? (
@@ -1288,6 +1297,10 @@ export default function Finanzas() {
                 const ctaYMax = Math.max(0, ...ctaYVals);
                 const ctaYPad = Math.max((ctaYMax - ctaYMin) * 0.08, 10);
                 const ctaDomain = [Math.floor(ctaYMin - ctaYPad), Math.ceil(ctaYMax + ctaYPad)];
+                const ctaTicks = (() => {
+                  const [lo, hi] = ctaDomain;
+                  return Array.from({ length: 5 }, (_, i) => Math.round(lo + (hi - lo) * i / 4));
+                })();
                 const CTA_Y_W = 52;
                 const pxPerPtCta = zoomCuenta === 1 ? 70 : 140;
                 const zWidthCta = Math.max(900, ctaData.length * pxPerPtCta);
@@ -1302,7 +1315,7 @@ export default function Finanzas() {
                 const zoomedAxesCta = (<>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                   <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval={zIntervalCta} tickFormatter={fmtEjeCta} />
-                  <YAxis hide domain={ctaDomain} />
+                  <YAxis hide domain={ctaDomain} ticks={ctaTicks} />
                   <Tooltip content={ctaTooltip} />
                 </>);
 
@@ -1327,11 +1340,16 @@ export default function Finanzas() {
                             {ctaLegendItems.map(l => <span key={l.name} style={{ color: l.color, fontSize: 11 }}>● {l.name}</span>)}
                           </div>
                           <div style={{ display: 'flex' }}>
-                            <div style={{ width: CTA_Y_W, flexShrink: 0 }}>
-                              <BarChart width={CTA_Y_W} height={CTA_H} data={ctaData.slice(0,1)} barSize={zBarWCta} margin={CTA_MY}>
-                                <YAxis domain={ctaDomain} tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} width={CTA_Y_W - 2} />
-                                <Bar dataKey={cuentas[0] || 'ingresos'} fill="transparent" legendType="none" isAnimationActive={false} />
-                              </BarChart>
+                            <div style={{ width: CTA_Y_W, flexShrink: 0, position: 'relative', height: CTA_H }}>
+                              {ctaTicks.map(v => {
+                                const frac = (v - ctaDomain[0]) / (ctaDomain[1] - ctaDomain[0]);
+                                const y = CTA_M.top + (CTA_H - CTA_M.top - CTA_M.bottom) * (1 - frac);
+                                return (
+                                  <div key={v} style={{ position: 'absolute', top: y - 6, left: 0, right: 4, fontSize: 11, color: '#71717a', textAlign: 'right', lineHeight: 1 }}>
+                                    {fmtY(v)}
+                                  </div>
+                                );
+                              })}
                             </div>
                             <div style={{ flex: 1, overflowX: 'auto' }}>
                               {viewCuenta === 'barras' ? (
