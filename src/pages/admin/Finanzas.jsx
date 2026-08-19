@@ -715,6 +715,9 @@ export default function Finanzas() {
   const [clientes, setClientes] = useState([]);
   const [loadingClientes, setLoadingClientes] = useState(false);
   const [clienteAbierto, setClienteAbierto] = useState(null);
+  const [movFiltroTipo, setMovFiltroTipo] = useState('todos');
+  const [movPagina, setMovPagina] = useState(1);
+  const [movPorPagina, setMovPorPagina] = useState(10);
   const [syncingClientes, setSyncingClientes] = useState(false);
   const scrollEvolRef = useRef(null);
   const xAxisEvolRef  = useRef(null);
@@ -1542,7 +1545,7 @@ export default function Finanzas() {
           const balance   = ingresos - gastos;
           return (
             <div key={c.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
-              <div onClick={() => setClienteAbierto(abierto ? null : c.id)}
+              <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
                 style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', gap: 12 }}>
                 <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none' }}>▶</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -1580,25 +1583,57 @@ export default function Finanzas() {
                   )}
                   {!tieneMovs ? (
                     <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin movimientos en el periodo seleccionado.</p>
-                  ) : (
-                    <>
-                      <p style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>Movimientos</p>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        {movsFiltered.map(m => (
-                          <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e' }}>
-                            <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
-                            <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
-                            {(m.categorias || []).slice(0, 2).map(cat => (
-                              <span key={cat} style={{ background: '#27272a', color: '#71717a', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{cat}</span>
-                            ))}
-                            <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600, flexShrink: 0, minWidth: 70, textAlign: 'right' }}>
-                              {fmt(m.tipo === 'Ingreso' ? m.cantidad : -m.cantidad)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
+                  ) : (() => {
+                    const movsTipo = movFiltroTipo === 'todos' ? movsFiltered : movsFiltered.filter(m => m.tipo === movFiltroTipo);
+                    const totalMovs = movsTipo.length;
+                    const paginas = movPorPagina === 'todos' ? 1 : Math.ceil(totalMovs / movPorPagina);
+                    const movsPag = movPorPagina === 'todos' ? movsTipo : movsTipo.slice((movPagina - 1) * movPorPagina, movPagina * movPorPagina);
+                    return (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                          <span style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 4 }}>Movimientos</span>
+                          {['todos', 'Ingreso', 'Gasto'].map(t => (
+                            <button key={t} onClick={() => { setMovFiltroTipo(t); setMovPagina(1); }}
+                              style={{ background: movFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: movFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
+                              {t === 'todos' ? 'Todos' : t === 'Ingreso' ? 'Ingresos' : 'Gastos'}
+                            </button>
+                          ))}
+                          <span style={{ color: '#52525b', fontSize: 11, marginLeft: 'auto' }}>{totalMovs} movimientos</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {movsPag.map(m => (
+                            <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e' }}>
+                              <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
+                              <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
+                              {(m.categorias || []).slice(0, 2).map(cat => (
+                                <span key={cat} style={{ background: '#27272a', color: '#71717a', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{cat}</span>
+                              ))}
+                              <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600, flexShrink: 0, minWidth: 70, textAlign: 'right' }}>
+                                {fmt(m.tipo === 'Ingreso' ? m.cantidad : -m.cantidad)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        {/* Controles paginación */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                          <select value={movPorPagina} onChange={e => { setMovPorPagina(e.target.value === 'todos' ? 'todos' : parseInt(e.target.value)); setMovPagina(1); }}
+                            style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 8px', fontSize: 12, cursor: 'pointer' }}>
+                            {[10, 50, 100].map(n => <option key={n} value={n}>{n} por página</option>)}
+                            <option value="todos">Todos</option>
+                          </select>
+                          {movPorPagina !== 'todos' && paginas > 1 && (
+                            <>
+                              <button onClick={() => setMovPagina(p => Math.max(1, p - 1))} disabled={movPagina === 1}
+                                style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>‹</button>
+                              <span style={{ color: '#71717a', fontSize: 12 }}>{movPagina} / {paginas}</span>
+                              <button onClick={() => setMovPagina(p => Math.min(paginas, p + 1))} disabled={movPagina === paginas}
+                                style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>›</button>
+                            </>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </div>
