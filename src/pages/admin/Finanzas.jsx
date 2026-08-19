@@ -1597,22 +1597,8 @@ export default function Finanzas() {
 
         return (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ marginBottom: 16 }}>
               <DateRangePicker desde={desde} hasta={hasta} onApply={(d, h) => { setDesde(d); setHasta(h); }} />
-              <button
-                onClick={async () => {
-                  setSyncingClientes(true);
-                  try {
-                    const token = await getToken();
-                    await fetch(`${BACKEND_URL}/admin/finanzas/clientes/sync`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-                    await cargarClientes();
-                  } finally { setSyncingClientes(false); }
-                }}
-                disabled={syncingClientes}
-                style={{ background: '#27272a', color: syncingClientes ? '#71717a' : '#fff', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 14px', fontSize: 13, cursor: syncingClientes ? 'default' : 'pointer' }}
-              >
-                {syncingClientes ? 'Sincronizando…' : '↻ Sync Notion'}
-              </button>
             </div>
 
             {loadingClientes ? (
