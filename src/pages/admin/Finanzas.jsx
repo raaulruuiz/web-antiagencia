@@ -1086,19 +1086,21 @@ export default function Finanzas() {
                             <Tooltip
                               position={{ y: 10 }}
                               wrapperStyle={{ zIndex: 100 }}
-                              content={({ active, label, payload }) => {
+                              content={({ active, label }) => {
                                 if (!active) return null;
                                 const punto = datosEvo.find(e => e.periodo === label);
                                 const compPunto = dashComp?.evolucionPorCategoria?.datos?.find?.(e => e.periodo === label);
                                 return (
-                                  <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
-                                    <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTipCat(label)}</p>
-                                    {cats.map((cat, i) => (
-                                      <div key={cat}>
-                                        <p style={{ color: ROJOS[i % ROJOS.length], margin: '2px 0' }}>{cat}: {fmt(punto?.[cat] || 0)}</p>
-                                        {dashComp && <p style={{ color: ROJOS[i % ROJOS.length], opacity: 0.5, margin: '1px 0 4px 8px', fontSize: 11 }}>ant.: {fmt(compPunto?.[cat] || 0)}</p>}
-                                      </div>
-                                    ))}
+                                  <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 11 }}>
+                                    <p style={{ color: '#71717a', margin: '0 0 8px', fontWeight: 600, fontSize: 12 }}>{fmtTipCat(label)}</p>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 20px' }}>
+                                      {cats.map((cat, i) => (
+                                        <div key={cat} style={{ marginBottom: dashComp ? 6 : 3 }}>
+                                          <p style={{ color: ROJOS[i % ROJOS.length], margin: 0 }}>{cat}: {fmt(punto?.[cat] || 0)}</p>
+                                          {dashComp && <p style={{ color: ROJOS[i % ROJOS.length], opacity: 0.5, margin: '1px 0 0 6px' }}>ant.: {fmt(compPunto?.[cat] || 0)}</p>}
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
                                 );
                               }}
