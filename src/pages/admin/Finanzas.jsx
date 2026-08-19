@@ -699,6 +699,7 @@ export default function Finanzas() {
   const [desdeComp, setDesdeComp] = useState(() => lsGet('fin_desdeComp', ''));
   const [hastaComp, setHastaComp] = useState(() => lsGet('fin_hastaComp', ''));
   const [dashboard, setDashboard] = useState(null);
+  const [viewCat, setViewCat] = useState('total');
   const [movimientos, setMovimientos] = useState({ items: [], total: 0, page: 1, pages: 1 });
   const [loadingDash, setLoadingDash] = useState(true);
   const [loadingMovs, setLoadingMovs] = useState(true);
@@ -972,52 +973,13 @@ export default function Finanzas() {
                 );
               })()}
 
-              {Object.keys(d.gastosPorCategoria).length > 0 && (
-                <>
-                  <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Gastos por categoría</h2>
-                  <div style={S.card}>
-                    {(() => {
-                      const entries = Object.entries(d.gastosPorCategoria).filter(([,v]) => v > 0).sort(([,a],[,b]) => b - a).slice(0, 8);
-                      const compCats = dashComp?.gastosPorCategoria || {};
-                      const allVals = [...entries.map(([,v]) => v), ...entries.map(([cat]) => compCats[cat] || 0)].filter(v => v > 0);
-                      const max = Math.max(...allVals);
-                      return entries.map(([cat, total]) => {
-                        const pct = Math.round((total / max) * 100);
-                        const compTotal = compCats[cat] || 0;
-                        const compPct = dashComp ? Math.round((compTotal / max) * 100) : 0;
-                        return (
-                          <div key={cat} style={{ marginBottom: dashComp ? 14 : 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: dashComp ? 3 : 0 }}>
-                              <span style={{ color: '#a1a1aa', fontSize: 12, minWidth: 140, flexShrink: 0 }}>{cat}</span>
-                              <div style={{ flex: 1, background: '#27272a', borderRadius: 4, height: 6 }}>
-                                <div style={{ width: `${pct}%`, background: '#f87171', borderRadius: 4, height: 6 }} />
-                              </div>
-                              <span style={{ color: '#f87171', fontSize: 12, minWidth: 60, textAlign: 'right', flexShrink: 0 }}>{fmt(total)}</span>
-                            </div>
-                            {dashComp && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <span style={{ minWidth: 140, flexShrink: 0 }} />
-                                <div style={{ flex: 1, background: '#1f1f1f', borderRadius: 4, height: 4 }}>
-                                  <div style={{ width: `${compPct}%`, background: '#991b1b', borderRadius: 4, height: 4 }} />
-                                </div>
-                                <span style={{ color: '#991b1b', fontSize: 11, minWidth: 60, textAlign: 'right', flexShrink: 0 }}>{fmt(compTotal)}</span>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-                </>
-              )}
-
-              {d.evolucionPorCategoria?.datos?.length > 1 && d.evolucionPorCategoria.categorias.length > 0 && (() => {
-                const ROJOS = ['#f87171','#fca5a5','#dc2626','#fb7185','#b91c1c','#fda4af','#991b1b','#ef4444'];
+              {Object.keys(d.gastosPorCategoria).length > 0 && (() => {
+                const ROJOS = ['#ef4444','#fca5a5','#dc2626','#fda4af','#b91c1c','#fb7185','#991b1b','#f43f5e','#7f1d1d','#e11d48','#ff6b6b','#be123c','#ff8a80','#9f1239'];
                 const gran = d.granularidad || 'mes';
                 const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-                const multiAnio = new Set(d.evolucionPorCategoria.datos.map(e => e.periodo.slice(0, 4))).size > 1;
+                const multiAnio = new Set((d.evolucionPorCategoria?.datos || []).map(e => e.periodo.slice(0, 4))).size > 1;
 
-                function fmtEje(key) {
+                function fmtEjeCat(key) {
                   if (gran === 'anio') return key;
                   if (gran === 'mes') {
                     const [anio, mes] = key.split('-');
@@ -1030,7 +992,7 @@ export default function Finanzas() {
                   return multiAnio ? `${dt.getDate()} ${mo} '${String(dt.getFullYear()).slice(2)}` : `${dt.getDate()} ${mo}`;
                 }
 
-                function fmtTooltip(key) {
+                function fmtTipCat(key) {
                   if (gran === 'anio') return key;
                   if (gran === 'mes') {
                     const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -1040,36 +1002,92 @@ export default function Finanzas() {
                   return `${dt.getDate()} ${MESES_CORTO[dt.getMonth()]} ${dt.getFullYear()}`;
                 }
 
+                const entries = Object.entries(d.gastosPorCategoria).filter(([,v]) => v > 0).sort(([,a],[,b]) => b - a);
+                const compCats = dashComp?.gastosPorCategoria || {};
+                const allVals = [...entries.map(([,v]) => v), ...entries.map(([cat]) => compCats[cat] || 0)].filter(v => v > 0);
+                const max = Math.max(...allVals);
+                const cats = d.evolucionPorCategoria?.categorias || [];
+                const datosEvo = d.evolucionPorCategoria?.datos || [];
+
                 return (
                   <>
-                    <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10, marginTop: 24 }}>Evolución por categoría</h2>
-                    <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
-                      <ResponsiveContainer width="100%" height={220}>
-                        <LineChart data={d.evolucionPorCategoria.datos}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                          <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
-                            interval="preserveStartEnd" tickFormatter={fmtEje} />
-                          <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
-                          <Tooltip
-                            content={({ active, payload, label }) => {
-                              if (!active || !payload?.length) return null;
-                              const entries = payload.filter(p => p.value > 0).sort((a, b) => b.value - a.value);
-                              return (
-                                <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
-                                  <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTooltip(label)}</p>
-                                  {entries.map(e => <p key={e.dataKey} style={{ color: e.stroke, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}
-                                </div>
-                              );
-                            }}
-                          />
-                          <Legend wrapperStyle={{ fontSize: 11 }} formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>} />
-                          {d.evolucionPorCategoria.categorias.map((cat, i) => (
-                            <Line key={cat} type="monotone" dataKey={cat} name={cat}
-                              stroke={ROJOS[i % ROJOS.length]} strokeWidth={2} dot={false} connectNulls />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                      <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Gastos por categoría</h2>
+                      {datosEvo.length > 1 && (
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          {[['total','Total'],['evolucion','Evolución']].map(([v, label]) => (
+                            <button key={v} onClick={() => setViewCat(v)} style={{
+                              background: viewCat === v ? '#27272a' : 'transparent',
+                              border: '1px solid #27272a', borderRadius: 6,
+                              color: viewCat === v ? '#fff' : '#71717a',
+                              fontSize: 11, padding: '3px 10px', cursor: 'pointer',
+                            }}>{label}</button>
                           ))}
-                        </LineChart>
-                      </ResponsiveContainer>
+                        </div>
+                      )}
                     </div>
+
+                    {viewCat === 'total' ? (
+                      <div style={S.card}>
+                        {entries.map(([cat, total]) => {
+                          const pct = Math.round((total / max) * 100);
+                          const compTotal = compCats[cat] || 0;
+                          const compPct = dashComp ? Math.round((compTotal / max) * 100) : 0;
+                          return (
+                            <div key={cat} style={{ marginBottom: dashComp ? 14 : 10 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: dashComp ? 3 : 0 }}>
+                                <span style={{ color: '#a1a1aa', fontSize: 12, minWidth: 140, flexShrink: 0 }}>{cat}</span>
+                                <div style={{ flex: 1, background: '#27272a', borderRadius: 4, height: 6 }}>
+                                  <div style={{ width: `${pct}%`, background: '#f87171', borderRadius: 4, height: 6 }} />
+                                </div>
+                                <span style={{ color: '#f87171', fontSize: 12, minWidth: 60, textAlign: 'right', flexShrink: 0 }}>{fmt(total)}</span>
+                              </div>
+                              {dashComp && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                  <span style={{ minWidth: 140, flexShrink: 0 }} />
+                                  <div style={{ flex: 1, background: '#1f1f1f', borderRadius: 4, height: 4 }}>
+                                    <div style={{ width: `${compPct}%`, background: '#991b1b', borderRadius: 4, height: 4 }} />
+                                  </div>
+                                  <span style={{ color: '#991b1b', fontSize: 11, minWidth: 60, textAlign: 'right', flexShrink: 0 }}>{fmt(compTotal)}</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div style={{ ...S.card, padding: '16px 8px' }}>
+                        <ResponsiveContainer width="100%" height={220}>
+                          <LineChart data={datosEvo}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                            <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
+                              interval="preserveStartEnd" tickFormatter={fmtEjeCat} />
+                            <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                            <Tooltip
+                              content={({ active, label }) => {
+                                if (!active) return null;
+                                const punto = datosEvo.find(e => e.periodo === label);
+                                return (
+                                  <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12, maxHeight: 300, overflowY: 'auto' }}>
+                                    <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTipCat(label)}</p>
+                                    {cats.map((cat, i) => (
+                                      <p key={cat} style={{ color: ROJOS[i % ROJOS.length], margin: '2px 0' }}>
+                                        {cat}: {fmt(punto?.[cat] || 0)}
+                                      </p>
+                                    ))}
+                                  </div>
+                                );
+                              }}
+                            />
+                            <Legend wrapperStyle={{ fontSize: 11 }} formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>} />
+                            {cats.map((cat, i) => (
+                              <Line key={cat} type="monotone" dataKey={cat} name={cat}
+                                stroke={ROJOS[i % ROJOS.length]} strokeWidth={2} dot={false} connectNulls />
+                            ))}
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
                   </>
                 );
               })()}
