@@ -45,6 +45,14 @@ function fmt(n) {
   return (r < 0 ? '-' : '') + abs + ' €';
 }
 
+function fmtY(v) {
+  if (v === 0) return '0';
+  const abs = Math.abs(v);
+  if (abs >= 10000) return `${(v / 1000).toFixed(0)}k`;
+  if (abs >= 1000)  return `${(v / 1000).toFixed(1)}k`;
+  return `${Math.round(v)}`;
+}
+
 function mesLabel(yyyymm) {
   const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const [, m] = yyyymm.split('-');
@@ -950,7 +958,7 @@ export default function Finanzas() {
                   <>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval="preserveStartEnd" tickFormatter={fmtEjeLabel} />
-                    <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip content={evolTooltip} />
                     <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>} />
                   </>
@@ -1087,7 +1095,7 @@ export default function Finanzas() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                             <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
                               interval="preserveStartEnd" tickFormatter={fmtEjeCat} />
-                            <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                            <YAxis tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                             <Tooltip
                               position={{ y: 10 }}
                               wrapperStyle={{ zIndex: 100 }}
@@ -1195,7 +1203,7 @@ export default function Finanzas() {
                   <>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval="preserveStartEnd" tickFormatter={fmtEjeCta} />
-                    <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip content={ctaTooltip} />
                     <Legend wrapperStyle={{ fontSize: 11 }} formatter={(value, entry) => !String(value).endsWith(' ant.') ? <span style={{ color: entry.color }}>{value}</span> : null} />
                   </>
