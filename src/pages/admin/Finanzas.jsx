@@ -710,8 +710,8 @@ export default function Finanzas() {
   const [viewCat, setViewCat] = useState('total');
   const [viewEvol, setViewEvol] = useState('barras');
   const [viewCuenta, setViewCuenta] = useState('barras');
-  const [zoomEvol, setZoomEvol] = useState(false);
-  const [zoomCuenta, setZoomCuenta] = useState(false);
+  const [zoomEvol, setZoomEvol] = useState(0);
+  const [zoomCuenta, setZoomCuenta] = useState(0);
   const [movimientos, setMovimientos] = useState({ items: [], total: 0, page: 1, pages: 1 });
   const [loadingDash, setLoadingDash] = useState(true);
   const [loadingMovs, setLoadingMovs] = useState(true);
@@ -975,11 +975,20 @@ export default function Finanzas() {
                 const evolYPad = Math.max((evolYMax - evolYMin) * 0.08, 10);
                 const evolDomain = [Math.floor(evolYMin - evolYPad), Math.ceil(evolYMax + evolYPad)];
                 const EVOL_Y_W = 52;
-                const zWidthEvol = Math.max(900, evolData.length * 50);
-                const zBarWEvol = dashComp ? 14 : 20;
+                const pxPerPtEvol = zoomEvol === 1 ? 50 : 100;
+                const zWidthEvol = Math.max(900, evolData.length * pxPerPtEvol);
+                const zBarWEvol = zoomEvol === 2 ? (dashComp ? 22 : 32) : (dashComp ? 14 : 20);
                 const zIntervalEvol = Math.max(0, Math.floor(evolData.length / 15));
+                const ZOOM_H = 200;
+                const ZOOM_M = { top: 5, right: 10, left: 0, bottom: 30 };
+                const ZOOM_MY = { top: 5, right: 0, left: 0, bottom: 30 };
 
-                const evolBars = (zMode) => (<>
+                const evolLegendItems = [
+                  { name: 'Ingresos', color: '#22c55e' }, { name: 'Gastos', color: '#f87171' }, { name: 'Beneficio', color: '#60a5fa' },
+                  ...(dashComp ? [{ name: 'Ingresos ant.', color: '#166534' }, { name: 'Gastos ant.', color: '#991b1b' }, { name: 'Beneficio ant.', color: '#1d4ed8' }] : []),
+                ];
+
+                const evolBars = () => (<>
                   <Bar dataKey="ingresos"    name="Ingresos"      fill="#22c55e" radius={[4,4,0,0]} />
                   <Bar dataKey="gastos"      name="Gastos"        fill="#f87171" radius={[4,4,0,0]} />
                   <Bar dataKey="beneficio"   name="Beneficio"     fill="#60a5fa" radius={[4,4,0,0]} />
@@ -996,12 +1005,12 @@ export default function Finanzas() {
                   {dashComp && <Line dataKey="beneficioAnt" name="Beneficio ant." stroke="#1d4ed8" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
                 </>);
 
+                // Ejes del modo zoom: sin Legend (se renderiza fuera para no afectar la altura)
                 const zoomedAxesEvol = (<>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                   <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval={zIntervalEvol} tickFormatter={fmtEjeLabel} />
                   <YAxis hide domain={evolDomain} />
                   <Tooltip content={evolTooltip} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>} />
                 </>);
 
                 return (
@@ -1009,32 +1018,41 @@ export default function Finanzas() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                       <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Evolución</h2>
                       <div style={{ display: 'flex', gap: 4 }}>
-                        <button onClick={() => setZoomEvol(z => !z)} style={{ background: zoomEvol ? '#0067FD' : 'transparent', border: '1px solid #27272a', borderRadius: 6, color: zoomEvol ? '#fff' : '#71717a', fontSize: 11, padding: '3px 10px', cursor: 'pointer' }}>⟺</button>
+                        {[[0,'Auto'],[1,'×1'],[2,'×2']].map(([v, label]) => (
+                          <button key={v} onClick={() => setZoomEvol(v)} style={{ background: zoomEvol === v ? (v === 0 ? '#27272a' : '#0067FD') : 'transparent', border: '1px solid #27272a', borderRadius: 6, color: zoomEvol === v ? '#fff' : '#71717a', fontSize: 11, padding: '3px 10px', cursor: 'pointer' }}>{label}</button>
+                        ))}
+                        <div style={{ width: 1, background: '#3f3f46', margin: '0 2px' }} />
                         {[['barras','Barras'],['lineas','Líneas']].map(([v, label]) => (
                           <button key={v} onClick={() => setViewEvol(v)} style={{ background: viewEvol === v ? '#27272a' : 'transparent', border: '1px solid #27272a', borderRadius: 6, color: viewEvol === v ? '#fff' : '#71717a', fontSize: 11, padding: '3px 10px', cursor: 'pointer' }}>{label}</button>
                         ))}
                       </div>
                     </div>
                     <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
-                      {zoomEvol ? (
-                        <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                          <div style={{ width: EVOL_Y_W, flexShrink: 0 }}>
-                            <BarChart width={EVOL_Y_W} height={220} data={evolData.slice(0,1)} margin={{ top: 5, right: 0, left: 0, bottom: 50 }}>
-                              <YAxis domain={evolDomain} tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} width={EVOL_Y_W - 2} />
-                            </BarChart>
+                      {zoomEvol > 0 ? (
+                        <>
+                          {/* Leyenda fuera del chart para no afectar la altura del área */}
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 14px', marginBottom: 6, paddingLeft: EVOL_Y_W + 4 }}>
+                            {evolLegendItems.map(l => <span key={l.name} style={{ color: l.color, fontSize: 11 }}>● {l.name}</span>)}
                           </div>
-                          <div style={{ flex: 1, overflowX: 'auto' }}>
-                            {viewEvol === 'barras' ? (
-                              <BarChart width={zWidthEvol} height={220} data={evolData} barSize={zBarWEvol} margin={{ top: 5, right: 10, left: 0, bottom: 50 }}>
-                                {zoomedAxesEvol}{evolBars()}
+                          <div style={{ display: 'flex' }}>
+                            <div style={{ width: EVOL_Y_W, flexShrink: 0 }}>
+                              <BarChart width={EVOL_Y_W} height={ZOOM_H} data={evolData.slice(0,1)} margin={ZOOM_MY}>
+                                <YAxis domain={evolDomain} tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} width={EVOL_Y_W - 2} />
                               </BarChart>
-                            ) : (
-                              <LineChart width={zWidthEvol} height={220} data={evolData} margin={{ top: 5, right: 10, left: 0, bottom: 50 }}>
-                                {zoomedAxesEvol}{evolLines}
-                              </LineChart>
-                            )}
+                            </div>
+                            <div style={{ flex: 1, overflowX: 'auto' }}>
+                              {viewEvol === 'barras' ? (
+                                <BarChart width={zWidthEvol} height={ZOOM_H} data={evolData} barSize={zBarWEvol} margin={ZOOM_M}>
+                                  {zoomedAxesEvol}{evolBars()}
+                                </BarChart>
+                              ) : (
+                                <LineChart width={zWidthEvol} height={ZOOM_H} data={evolData} margin={ZOOM_M}>
+                                  {zoomedAxesEvol}{evolLines}
+                                </LineChart>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        </>
                       ) : (
                         <ResponsiveContainer width="100%" height={200}>
                           {viewEvol === 'barras' ? (
@@ -1270,16 +1288,21 @@ export default function Finanzas() {
                 const ctaYPad = Math.max((ctaYMax - ctaYMin) * 0.08, 10);
                 const ctaDomain = [Math.floor(ctaYMin - ctaYPad), Math.ceil(ctaYMax + ctaYPad)];
                 const CTA_Y_W = 52;
-                const zWidthCta = Math.max(900, ctaData.length * 70);
-                const zBarWCta = dashComp ? 8 : 14;
+                const pxPerPtCta = zoomCuenta === 1 ? 70 : 140;
+                const zWidthCta = Math.max(900, ctaData.length * pxPerPtCta);
+                const zBarWCta = zoomCuenta === 2 ? (dashComp ? 12 : 18) : (dashComp ? 8 : 14);
                 const zIntervalCta = Math.max(0, Math.floor(ctaData.length / 15));
+                const CTA_H = 220;
+                const CTA_M  = { top: 5, right: 10, left: 0, bottom: 30 };
+                const CTA_MY = { top: 5, right: 0,  left: 0, bottom: 30 };
+
+                const ctaLegendItems = cuentas.map(c => ({ name: CUENTA_LABELS[c], color: CUENTA_COLORS[c] }));
 
                 const zoomedAxesCta = (<>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                   <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval={zIntervalCta} tickFormatter={fmtEjeCta} />
                   <YAxis hide domain={ctaDomain} />
                   <Tooltip content={ctaTooltip} />
-                  <Legend wrapperStyle={{ fontSize: 11 }} formatter={(value, entry) => !String(value).endsWith(' ant.') ? <span style={{ color: entry.color }}>{value}</span> : null} />
                 </>);
 
                 return (
@@ -1287,36 +1310,44 @@ export default function Finanzas() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, marginTop: 24 }}>
                       <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Evolución por cuenta</h2>
                       <div style={{ display: 'flex', gap: 4 }}>
-                        <button onClick={() => setZoomCuenta(z => !z)} style={{ background: zoomCuenta ? '#0067FD' : 'transparent', border: '1px solid #27272a', borderRadius: 6, color: zoomCuenta ? '#fff' : '#71717a', fontSize: 11, padding: '3px 10px', cursor: 'pointer' }}>⟺</button>
+                        {[[0,'Auto'],[1,'×1'],[2,'×2']].map(([v, label]) => (
+                          <button key={v} onClick={() => setZoomCuenta(v)} style={{ background: zoomCuenta === v ? (v === 0 ? '#27272a' : '#0067FD') : 'transparent', border: '1px solid #27272a', borderRadius: 6, color: zoomCuenta === v ? '#fff' : '#71717a', fontSize: 11, padding: '3px 10px', cursor: 'pointer' }}>{label}</button>
+                        ))}
+                        <div style={{ width: 1, background: '#3f3f46', margin: '0 2px' }} />
                         {[['barras','Barras'],['lineas','Líneas']].map(([v, label]) => (
                           <button key={v} onClick={() => setViewCuenta(v)} style={{ background: viewCuenta === v ? '#27272a' : 'transparent', border: '1px solid #27272a', borderRadius: 6, color: viewCuenta === v ? '#fff' : '#71717a', fontSize: 11, padding: '3px 10px', cursor: 'pointer' }}>{label}</button>
                         ))}
                       </div>
                     </div>
                     <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
-                      {zoomCuenta ? (
-                        <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                          <div style={{ width: CTA_Y_W, flexShrink: 0 }}>
-                            <BarChart width={CTA_Y_W} height={240} data={ctaData.slice(0,1)} margin={{ top: 5, right: 0, left: 0, bottom: 60 }}>
-                              <YAxis domain={ctaDomain} tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} width={CTA_Y_W - 2} />
-                            </BarChart>
+                      {zoomCuenta > 0 ? (
+                        <>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 14px', marginBottom: 6, paddingLeft: CTA_Y_W + 4 }}>
+                            {ctaLegendItems.map(l => <span key={l.name} style={{ color: l.color, fontSize: 11 }}>● {l.name}</span>)}
                           </div>
-                          <div style={{ flex: 1, overflowX: 'auto' }}>
-                            {viewCuenta === 'barras' ? (
-                              <BarChart width={zWidthCta} height={240} data={ctaData} barSize={zBarWCta} margin={{ top: 5, right: 10, left: 0, bottom: 60 }}>
-                                {zoomedAxesCta}
-                                {cuentas.map(c => <Bar key={c} dataKey={c} name={CUENTA_LABELS[c]} fill={CUENTA_COLORS[c]} radius={[4,4,0,0]} />)}
-                                {dashComp && cuentas.map(c => <Bar key={c+'Ant'} dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} fill={CUENTA_COLORS[c]} fillOpacity={0.4} radius={[3,3,0,0]} legendType="none" />)}
+                          <div style={{ display: 'flex' }}>
+                            <div style={{ width: CTA_Y_W, flexShrink: 0 }}>
+                              <BarChart width={CTA_Y_W} height={CTA_H} data={ctaData.slice(0,1)} margin={CTA_MY}>
+                                <YAxis domain={ctaDomain} tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} width={CTA_Y_W - 2} />
                               </BarChart>
-                            ) : (
-                              <LineChart width={zWidthCta} height={240} data={ctaData} margin={{ top: 5, right: 10, left: 0, bottom: 60 }}>
-                                {zoomedAxesCta}
-                                {cuentas.map(c => <Line key={c} type="monotone" dataKey={c} name={CUENTA_LABELS[c]} stroke={CUENTA_COLORS[c]} strokeWidth={2} dot={false} connectNulls />)}
-                                {dashComp && cuentas.map(c => <Line key={c+'Ant'} type="monotone" dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} stroke={CUENTA_COLORS[c]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" />)}
-                              </LineChart>
-                            )}
+                            </div>
+                            <div style={{ flex: 1, overflowX: 'auto' }}>
+                              {viewCuenta === 'barras' ? (
+                                <BarChart width={zWidthCta} height={CTA_H} data={ctaData} barSize={zBarWCta} margin={CTA_M}>
+                                  {zoomedAxesCta}
+                                  {cuentas.map(c => <Bar key={c} dataKey={c} name={CUENTA_LABELS[c]} fill={CUENTA_COLORS[c]} radius={[4,4,0,0]} />)}
+                                  {dashComp && cuentas.map(c => <Bar key={c+'Ant'} dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} fill={CUENTA_COLORS[c]} fillOpacity={0.4} radius={[3,3,0,0]} legendType="none" />)}
+                                </BarChart>
+                              ) : (
+                                <LineChart width={zWidthCta} height={CTA_H} data={ctaData} margin={CTA_M}>
+                                  {zoomedAxesCta}
+                                  {cuentas.map(c => <Line key={c} type="monotone" dataKey={c} name={CUENTA_LABELS[c]} stroke={CUENTA_COLORS[c]} strokeWidth={2} dot={false} connectNulls />)}
+                                  {dashComp && cuentas.map(c => <Line key={c+'Ant'} type="monotone" dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} stroke={CUENTA_COLORS[c]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" />)}
+                                </LineChart>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        </>
                       ) : (
                         <ResponsiveContainer width="100%" height={220}>
                           {viewCuenta === 'barras' ? (
