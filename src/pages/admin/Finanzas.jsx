@@ -1607,8 +1607,20 @@ export default function Finanzas() {
 
         return (
           <div>
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
               <DateRangePicker desde={desde} hasta={hasta} onApply={(d, h) => { setDesde(d); setHasta(h); }} />
+              <button
+                onClick={async () => {
+                  setSyncingClientes(true);
+                  try {
+                    const { data: { session } } = await sb.auth.getSession();
+                    await fetch(`${API}/admin/finanzas/clientes/sync`, { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } });
+                    await cargarClientes();
+                  } finally { setSyncingClientes(false); }
+                }}
+                disabled={syncingClientes}
+                style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', flexShrink: 0 }}
+              >{syncingClientes ? 'Sincronizando…' : '↻ Sync Notion'}</button>
             </div>
 
             {loadingClientes ? (
@@ -1642,7 +1654,7 @@ export default function Finanzas() {
                 {inactivos.length > 0 && (
                   <div>
                     <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-                      Inactivos <span style={{ color: '#52525b' }}>({inactivos.length})</span>
+                      Inactivos <span style={{ color: '#f87171' }}>({inactivos.length})</span>
                     </h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {inactivos.map(renderCliente)}
