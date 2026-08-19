@@ -712,6 +712,10 @@ export default function Finanzas() {
   const [viewCuenta, setViewCuenta] = useState('barras');
   const [zoomEvol, setZoomEvol] = useState(0);
   const [zoomCuenta, setZoomCuenta] = useState(0);
+  const [clientes, setClientes] = useState([]);
+  const [loadingClientes, setLoadingClientes] = useState(false);
+  const [clienteAbierto, setClienteAbierto] = useState(null);
+  const [syncingClientes, setSyncingClientes] = useState(false);
   const scrollEvolRef = useRef(null);
   const xAxisEvolRef  = useRef(null);
   const scrollCtaRef  = useRef(null);
@@ -836,6 +840,27 @@ export default function Finanzas() {
     else setDashComp(null);
   }, [cargarDashboardComp, comparar, desdeComp, hastaComp]);
 
+  const cargarClientes = useCallback(async () => {
+    setLoadingClientes(true);
+    try {
+      const token = await getToken();
+      const params = new URLSearchParams();
+      if (desde) params.set('desde', desde);
+      if (hasta) params.set('hasta', hasta);
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/clientes?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await r.json();
+      setClientes(data.clientes || []);
+    } catch (e) {
+      console.error('Error cargando clientes:', e);
+    } finally {
+      setLoadingClientes(false);
+    }
+  }, [desde, hasta]);
+
+  useEffect(() => { if (tab === 'clientes') cargarClientes(); }, [tab, cargarClientes]);
+
   const tabStyle = (t) => ({
     background: tab === t ? '#27272a' : 'transparent',
     color: tab === t ? 'white' : '#71717a',
@@ -875,6 +900,7 @@ export default function Finanzas() {
         <button style={tabStyle('dashboard')}   onClick={() => setTab('dashboard')}>Dashboard</button>
         <button style={tabStyle('movimientos')} onClick={() => setTab('movimientos')}>Movimientos</button>
         <button style={tabStyle('fiscal')}      onClick={() => setTab('fiscal')}>Fiscal</button>
+        <button style={tabStyle('clientes')}    onClick={() => setTab('clientes')}>Clientes</button>
         <button onClick={() => setTab('nuevo')}
           style={{ background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 14, cursor: 'pointer', fontWeight: 600 }}>
           + Nuevo
@@ -1494,6 +1520,128 @@ export default function Finanzas() {
 
       {/* ── FISCAL ── */}
       {tab === 'fiscal' && <TabFiscal />}
+
+      {/* ── CLIENTES ── */}
+      {tab === 'clientes' && (
+        <div>
+          {/* Cabecera */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <DateRangePicker
+                desde={desde} hasta={hasta} onApply={({ desde: d, hasta: h }) => {
+                  setDesde(d); setHasta(h);
+                }}
+              />
+            </div>
+            <button
+              onClick={async () => {
+                setSyncingClientes(true);
+                try {
+                  const token = await getToken();
+                  await fetch(`${BACKEND_URL}/admin/finanzas/clientes/sync`, {
+                    method: 'POST', headers: { Authorization: `Bearer ${token}` },
+                  });
+                  await cargarClientes();
+                } finally { setSyncingClientes(false); }
+              }}
+              disabled={syncingClientes}
+              style={{ background: '#27272a', color: syncingClientes ? '#71717a' : '#fff', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 14px', fontSize: 13, cursor: syncingClientes ? 'default' : 'pointer' }}
+            >
+              {syncingClientes ? 'Sincronizando…' : '↻ Sync Notion'}
+            </button>
+          </div>
+
+          {loadingClientes ? (
+            <p style={{ color: '#71717a', fontSize: 14 }}>Cargando clientes…</p>
+          ) : clientes.length === 0 ? (
+            <div style={{ ...S.card, padding: 24, textAlign: 'center' }}>
+              <p style={{ color: '#71717a', fontSize: 14, margin: 0 }}>No hay clientes. Pulsa «↻ Sync Notion» para importarlos.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {clientes.map(c => {
+                const abierto = clienteAbierto === c.id;
+                const tieneMovs = c.movimientos?.length > 0;
+                return (
+                  <div key={c.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
+                    {/* Fila cliente */}
+                    <div
+                      onClick={() => setClienteAbierto(abierto ? null : c.id)}
+                      style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', gap: 12 }}
+                    >
+                      {/* Flecha */}
+                      <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block' }}>▶</span>
+                      {/* Nombre */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{c.nombre}</span>
+                        {c.nombre_empresa && c.nombre_empresa !== c.nombre && (
+                          <span style={{ color: '#71717a', fontSize: 12, marginLeft: 8 }}>{c.nombre_empresa}</span>
+                        )}
+                      </div>
+                      {/* Resumen compacto */}
+                      <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
+                        <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(c.ingresos)} €</span>
+                        <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>-{fmt(c.gastos)} €</span>
+                        <span style={{ fontSize: 13, color: c.ingresos - c.gastos >= 0 ? '#60a5fa' : '#fb923c', fontWeight: 600 }}>{fmt(c.ingresos - c.gastos)} €</span>
+                      </div>
+                    </div>
+
+                    {/* Desplegable */}
+                    {abierto && (
+                      <div style={{ borderTop: '1px solid #27272a', padding: '16px' }}>
+                        {/* Resumen */}
+                        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+                          {[
+                            { label: 'Ingresos', val: c.ingresos, color: '#22c55e' },
+                            { label: 'Gastos',   val: c.gastos,   color: '#f87171' },
+                            { label: 'Balance',  val: c.ingresos - c.gastos, color: c.ingresos - c.gastos >= 0 ? '#60a5fa' : '#fb923c' },
+                          ].map(({ label, val, color }) => (
+                            <div key={label} style={{ ...S.card, padding: '10px 16px', flex: 1, minWidth: 100 }}>
+                              <p style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>{label}</p>
+                              <p style={{ color, fontSize: 20, fontWeight: 700, margin: 0 }}>{fmt(val)} €</p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Info fiscal */}
+                        {(c.nif_cif || c.email) && (
+                          <div style={{ display: 'flex', gap: 16, marginBottom: 14, flexWrap: 'wrap' }}>
+                            {c.nif_cif && <span style={{ color: '#71717a', fontSize: 12 }}>NIF: <span style={{ color: '#a1a1aa' }}>{c.nif_cif}</span></span>}
+                            {c.email   && <span style={{ color: '#71717a', fontSize: 12 }}>Email: <span style={{ color: '#a1a1aa' }}>{c.email}</span></span>}
+                          </div>
+                        )}
+
+                        {/* Movimientos */}
+                        {!tieneMovs ? (
+                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin movimientos en el periodo seleccionado.</p>
+                        ) : (
+                          <div>
+                            <p style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8, marginTop: 0 }}>Movimientos</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                              {c.movimientos.map(m => (
+                                <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e' }}>
+                                  <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
+                                  <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
+                                  {(m.categorias || []).slice(0, 2).map(cat => (
+                                    <span key={cat} style={{ background: '#27272a', color: '#71717a', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{cat}</span>
+                                  ))}
+                                  <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600, flexShrink: 0, minWidth: 70, textAlign: 'right' }}>
+                                    {m.tipo === 'Ingreso' ? '' : '-'}{fmt(m.cantidad)} €
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── NUEVO ── */}
       {tab === 'nuevo' && (
