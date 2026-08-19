@@ -1002,10 +1002,11 @@ export default function Finanzas() {
                   return `${dt.getDate()} ${MESES_CORTO[dt.getMonth()]} ${dt.getFullYear()}`;
                 }
 
-                const entries = Object.entries(d.gastosPorCategoria).filter(([,v]) => v > 0).sort(([,a],[,b]) => b - a);
+                const todasCats = d.todasCategorias || Object.keys(d.gastosPorCategoria).sort((a,b) => (d.gastosPorCategoria[b]||0) - (d.gastosPorCategoria[a]||0));
+                const entries = todasCats.map(cat => [cat, d.gastosPorCategoria[cat] || 0]);
                 const compCats = dashComp?.gastosPorCategoria || {};
                 const allVals = [...entries.map(([,v]) => v), ...entries.map(([cat]) => compCats[cat] || 0)].filter(v => v > 0);
-                const max = Math.max(...allVals);
+                const max = Math.max(...allVals, 1);
                 const cats = d.evolucionPorCategoria?.categorias || [];
                 const datosEvo = d.evolucionPorCategoria?.datos || [];
 
