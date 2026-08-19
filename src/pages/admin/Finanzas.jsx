@@ -701,6 +701,7 @@ export default function Finanzas() {
   const [dashboard, setDashboard] = useState(null);
   const [viewCat, setViewCat] = useState('total');
   const [viewEvol, setViewEvol] = useState('barras');
+  const [viewCuenta, setViewCuenta] = useState('barras');
   const [movimientos, setMovimientos] = useState({ items: [], total: 0, page: 1, pages: 1 });
   const [loadingDash, setLoadingDash] = useState(true);
   const [loadingMovs, setLoadingMovs] = useState(true);
@@ -931,7 +932,7 @@ export default function Finanzas() {
 
                 const evolData = d.evolucionMensual.map((e, i) => {
                   const c = dashComp?.evolucionMensual?.[i];
-                  return { mes: e.mes, ingresos: e.ingresos, gastos: e.gastos, ...(c ? { ingresosAnt: c.ingresos, gastosAnt: c.gastos } : {}) };
+                  return { mes: e.mes, ingresos: e.ingresos, gastos: e.gastos, beneficio: e.beneficio, ...(c ? { ingresosAnt: c.ingresos, gastosAnt: c.gastos, beneficioAnt: c.beneficio } : {}) };
                 });
                 const evolTooltip = ({ active, payload, label }) => {
                   if (!active || !payload?.length) return null;
@@ -971,16 +972,20 @@ export default function Finanzas() {
                             {evolAxes}
                             <Bar dataKey="ingresos"    name="Ingresos"      fill="#22c55e" radius={[4,4,0,0]} />
                             <Bar dataKey="gastos"      name="Gastos"        fill="#f87171" radius={[4,4,0,0]} />
-                            {dashComp && <Bar dataKey="ingresosAnt" name="Ingresos ant." fill="#166534" radius={[3,3,0,0]} />}
-                            {dashComp && <Bar dataKey="gastosAnt"   name="Gastos ant."   fill="#991b1b" radius={[3,3,0,0]} />}
+                            <Bar dataKey="beneficio"   name="Beneficio"     fill="#60a5fa" radius={[4,4,0,0]} />
+                            {dashComp && <Bar dataKey="ingresosAnt"  name="Ingresos ant."  fill="#166534" radius={[3,3,0,0]} />}
+                            {dashComp && <Bar dataKey="gastosAnt"    name="Gastos ant."    fill="#991b1b" radius={[3,3,0,0]} />}
+                            {dashComp && <Bar dataKey="beneficioAnt" name="Beneficio ant." fill="#1d4ed8" radius={[3,3,0,0]} />}
                           </BarChart>
                         ) : (
                           <LineChart data={evolData}>
                             {evolAxes}
                             <Line dataKey="ingresos"    name="Ingresos"      stroke="#22c55e" strokeWidth={2} dot={false} connectNulls />
                             <Line dataKey="gastos"      name="Gastos"        stroke="#f87171" strokeWidth={2} dot={false} connectNulls />
-                            {dashComp && <Line dataKey="ingresosAnt" name="Ingresos ant." stroke="#166534" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
-                            {dashComp && <Line dataKey="gastosAnt"   name="Gastos ant."   stroke="#991b1b" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
+                            <Line dataKey="beneficio"   name="Beneficio"     stroke="#60a5fa" strokeWidth={2} dot={false} connectNulls />
+                            {dashComp && <Line dataKey="ingresosAnt"  name="Ingresos ant."  stroke="#166534" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
+                            {dashComp && <Line dataKey="gastosAnt"    name="Gastos ant."    stroke="#991b1b" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
+                            {dashComp && <Line dataKey="beneficioAnt" name="Beneficio ant." stroke="#1d4ed8" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
                           </LineChart>
                         )}
                       </ResponsiveContainer>
@@ -1119,6 +1124,110 @@ export default function Finanzas() {
                         </ResponsiveContainer>
                       </div>
                     )}
+                  </>
+                );
+              })()}
+
+              {d.evolucionPorCuenta?.datos?.length > 1 && (() => {
+                const CUENTA_COLORS = {
+                  'Ingresos': '#22c55e', 'Impuestos': '#f59e0b',
+                  'Compensación del Dueño': '#3b82f6', 'Gastos de Operación': '#8b5cf6',
+                  'Ganancia': '#10b981', 'Freelancers y Material': '#ec4899',
+                };
+                const CUENTA_LABELS = {
+                  'Ingresos': 'Ingresos', 'Impuestos': 'Impuestos',
+                  'Compensación del Dueño': 'Comp. Dueño', 'Gastos de Operación': 'Gastos Op.',
+                  'Ganancia': 'Ganancias', 'Freelancers y Material': 'Freelancers',
+                };
+                const gran = d.granularidad || 'mes';
+                const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+                const cuentas = d.evolucionPorCuenta.cuentas;
+                const multiAnio = new Set(d.evolucionPorCuenta.datos.map(e => e.periodo.slice(0, 4))).size > 1;
+                const barW = gran === 'dia' ? (dashComp ? 2 : 4) : gran === 'anio' ? (dashComp ? 12 : 24) : (dashComp ? 6 : 12);
+
+                function fmtEjeCta(key) {
+                  if (gran === 'anio') return key;
+                  if (gran === 'mes') {
+                    const [anio, mes] = key.split('-');
+                    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+                    const label = meses[parseInt(mes, 10) - 1];
+                    return multiAnio && mes === '01' ? `${label} '${anio.slice(2)}` : label;
+                  }
+                  const dt = new Date(key + 'T12:00:00');
+                  const mo = MESES_CORTO[dt.getMonth()];
+                  return multiAnio ? `${dt.getDate()} ${mo} '${String(dt.getFullYear()).slice(2)}` : `${dt.getDate()} ${mo}`;
+                }
+
+                function fmtTipCta(key) {
+                  if (gran === 'anio') return key;
+                  if (gran === 'mes') {
+                    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+                    return `${meses[parseInt(key.split('-')[1], 10) - 1]} ${key.slice(0, 4)}`;
+                  }
+                  const dt = new Date(key + 'T12:00:00');
+                  return `${dt.getDate()} ${MESES_CORTO[dt.getMonth()]} ${dt.getFullYear()}`;
+                }
+
+                const ctaData = d.evolucionPorCuenta.datos.map((e, i) => {
+                  const c = dashComp?.evolucionPorCuenta?.datos?.[i];
+                  return { ...e, ...(c ? cuentas.reduce((acc, k) => ({ ...acc, [k + 'Ant']: c[k] || 0 }), {}) : {}) };
+                });
+
+                const ctaTooltip = ({ active, label }) => {
+                  if (!active) return null;
+                  const idx = ctaData.findIndex(e => e.periodo === label);
+                  const punto = ctaData[idx];
+                  const compPunto = dashComp?.evolucionPorCuenta?.datos?.[idx];
+                  return (
+                    <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
+                      <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTipCta(label)}</p>
+                      {cuentas.map(c => (
+                        <div key={c} style={{ marginBottom: dashComp ? 4 : 2 }}>
+                          <p style={{ color: CUENTA_COLORS[c], margin: 0 }}>{CUENTA_LABELS[c]}: {fmt(punto?.[c] || 0)}</p>
+                          {dashComp && <p style={{ color: CUENTA_COLORS[c], opacity: 0.5, margin: '1px 0 0 8px', fontSize: 11 }}>ant.: {fmt(compPunto?.[c] || 0)}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                };
+
+                const ctaAxes = (
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                    <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval="preserveStartEnd" tickFormatter={fmtEjeCta} />
+                    <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <Tooltip content={ctaTooltip} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} formatter={(value, entry) => !String(value).endsWith(' ant.') ? <span style={{ color: entry.color }}>{value}</span> : null} />
+                  </>
+                );
+
+                return (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, marginTop: 24 }}>
+                      <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Evolución por cuenta</h2>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        {[['barras','Barras'],['lineas','Líneas']].map(([v, label]) => (
+                          <button key={v} onClick={() => setViewCuenta(v)} style={{ background: viewCuenta === v ? '#27272a' : 'transparent', border: '1px solid #27272a', borderRadius: 6, color: viewCuenta === v ? '#fff' : '#71717a', fontSize: 11, padding: '3px 10px', cursor: 'pointer' }}>{label}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
+                      <ResponsiveContainer width="100%" height={220}>
+                        {viewCuenta === 'barras' ? (
+                          <BarChart barSize={barW} data={ctaData}>
+                            {ctaAxes}
+                            {cuentas.map(c => <Bar key={c} dataKey={c} name={CUENTA_LABELS[c]} fill={CUENTA_COLORS[c]} radius={[4,4,0,0]} />)}
+                            {dashComp && cuentas.map(c => <Bar key={c+'Ant'} dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} fill={CUENTA_COLORS[c]} fillOpacity={0.4} radius={[3,3,0,0]} legendType="none" />)}
+                          </BarChart>
+                        ) : (
+                          <LineChart data={ctaData}>
+                            {ctaAxes}
+                            {cuentas.map(c => <Line key={c} type="monotone" dataKey={c} name={CUENTA_LABELS[c]} stroke={CUENTA_COLORS[c]} strokeWidth={2} dot={false} connectNulls />)}
+                            {dashComp && cuentas.map(c => <Line key={c+'Ant'} type="monotone" dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} stroke={CUENTA_COLORS[c]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" />)}
+                          </LineChart>
+                        )}
+                      </ResponsiveContainer>
+                    </div>
                   </>
                 );
               })()}
