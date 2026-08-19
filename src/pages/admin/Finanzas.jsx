@@ -1036,8 +1036,9 @@ export default function Finanzas() {
                           </div>
                           <div style={{ display: 'flex' }}>
                             <div style={{ width: EVOL_Y_W, flexShrink: 0 }}>
-                              <BarChart width={EVOL_Y_W} height={ZOOM_H} data={evolData.slice(0,1)} margin={ZOOM_MY}>
+                              <BarChart width={EVOL_Y_W} height={ZOOM_H} data={evolData.slice(0,1)} barSize={zBarWEvol} margin={ZOOM_MY}>
                                 <YAxis domain={evolDomain} tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} width={EVOL_Y_W - 2} />
+                                <Bar dataKey="ingresos" fill="transparent" legendType="none" isAnimationActive={false} />
                               </BarChart>
                             </div>
                             <div style={{ flex: 1, overflowX: 'auto' }}>
@@ -1327,8 +1328,9 @@ export default function Finanzas() {
                           </div>
                           <div style={{ display: 'flex' }}>
                             <div style={{ width: CTA_Y_W, flexShrink: 0 }}>
-                              <BarChart width={CTA_Y_W} height={CTA_H} data={ctaData.slice(0,1)} margin={CTA_MY}>
+                              <BarChart width={CTA_Y_W} height={CTA_H} data={ctaData.slice(0,1)} barSize={zBarWCta} margin={CTA_MY}>
                                 <YAxis domain={ctaDomain} tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} width={CTA_Y_W - 2} />
+                                <Bar dataKey={cuentas[0] || 'ingresos'} fill="transparent" legendType="none" isAnimationActive={false} />
                               </BarChart>
                             </div>
                             <div style={{ flex: 1, overflowX: 'auto' }}>
