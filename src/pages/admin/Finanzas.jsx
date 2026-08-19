@@ -1523,7 +1523,12 @@ export default function Finanzas() {
 
       {/* ── CLIENTES ── */}
       {tab === 'clientes' && (() => {
-        const sortByBeneficio = arr => [...arr].sort((a, b) => (b.ingresos - b.gastos) - (a.ingresos - a.gastos));
+        const beneficioSinTraspasos = c => {
+          const movs = (c.movimientos || []).filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
+          return movs.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + m.cantidad, 0)
+               - movs.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + m.cantidad, 0);
+        };
+        const sortByBeneficio = arr => [...arr].sort((a, b) => beneficioSinTraspasos(b) - beneficioSinTraspasos(a));
         const yo        = clientes.filter(c => c.nombre === 'Anti-Agencia');
         const activos   = sortByBeneficio(clientes.filter(c => c.activo  && c.nombre !== 'Anti-Agencia'));
         const inactivos = sortByBeneficio(clientes.filter(c => !c.activo && c.nombre !== 'Anti-Agencia'));
@@ -1532,7 +1537,9 @@ export default function Finanzas() {
           const abierto   = clienteAbierto === c.id;
           const movsFiltered = (c.movimientos || []).filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
           const tieneMovs = movsFiltered.length > 0;
-          const balance   = c.ingresos - c.gastos;
+          const ingresos  = movsFiltered.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + m.cantidad, 0);
+          const gastos    = movsFiltered.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + m.cantidad, 0);
+          const balance   = ingresos - gastos;
           return (
             <div key={c.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
               <div onClick={() => setClienteAbierto(abierto ? null : c.id)}
@@ -1545,8 +1552,8 @@ export default function Finanzas() {
                   )}
                 </div>
                 <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
-                  <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(c.ingresos)}</span>
-                  <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-c.gastos)}</span>
+                  <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
+                  <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
                   <span style={{ fontSize: 13, color: balance >= 0 ? '#60a5fa' : '#fb923c', fontWeight: 600 }}>{fmt(balance)}</span>
                 </div>
               </div>
@@ -1555,8 +1562,8 @@ export default function Finanzas() {
                 <div style={{ borderTop: '1px solid #27272a', padding: 16 }}>
                   <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
                     {[
-                      { label: 'Ingresos', val: c.ingresos,  color: '#22c55e' },
-                      { label: 'Gastos',   val: -c.gastos,   color: '#f87171' },
+                      { label: 'Ingresos', val: ingresos,  color: '#22c55e' },
+                      { label: 'Gastos',   val: -gastos,   color: '#f87171' },
                       { label: 'Balance',  val: balance, color: balance >= 0 ? '#60a5fa' : '#fb923c' },
                     ].map(({ label, val, color }) => (
                       <div key={label} style={{ ...S.card, padding: '10px 16px', flex: 1, minWidth: 100 }}>
