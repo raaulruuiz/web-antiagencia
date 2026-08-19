@@ -915,7 +915,7 @@ export default function Finanzas() {
                 const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
                 const multiAnio = new Set(d.evolucionMensual.map(e => e.mes.slice(0, 4))).size > 1;
                 const tituloGran = '';
-                const barW = gran === 'dia' ? (dashComp ? 3 : 6) : gran === 'anio' ? (dashComp ? 18 : 36) : (dashComp ? 9 : 18);
+                const barW = gran === 'dia' ? (dashComp ? 10 : 20) : gran === 'anio' ? (dashComp ? 18 : 36) : (dashComp ? 9 : 18);
 
                 function fmtEjeLabel(key) {
                   if (gran === 'anio') return key;
@@ -1151,7 +1151,7 @@ export default function Finanzas() {
                 const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
                 const cuentas = d.evolucionPorCuenta.cuentas;
                 const multiAnio = new Set(d.evolucionPorCuenta.datos.map(e => e.periodo.slice(0, 4))).size > 1;
-                const barW = gran === 'dia' ? (dashComp ? 2 : 4) : gran === 'anio' ? (dashComp ? 12 : 24) : (dashComp ? 6 : 12);
+                const barW = gran === 'dia' ? (dashComp ? 6 : 12) : gran === 'anio' ? (dashComp ? 12 : 24) : (dashComp ? 6 : 12);
 
                 function fmtEjeCta(key) {
                   if (gran === 'anio') return key;
