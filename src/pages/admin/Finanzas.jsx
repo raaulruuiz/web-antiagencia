@@ -1065,13 +1065,12 @@ export default function Finanzas() {
                               interval="preserveStartEnd" tickFormatter={fmtEjeCat} />
                             <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                             <Tooltip
-                              allowEscapeViewBox={{ x: false, y: true }}
-                              wrapperStyle={{ zIndex: 100, overflow: 'visible' }}
+                              wrapperStyle={{ zIndex: 100 }}
                               content={({ active, label }) => {
                                 if (!active) return null;
                                 const punto = datosEvo.find(e => e.periodo === label);
                                 return (
-                                  <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
+                                  <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12, maxHeight: 260, overflowY: 'auto' }}>
                                     <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTipCat(label)}</p>
                                     {cats.map((cat, i) => (
                                       <p key={cat} style={{ color: ROJOS[i % ROJOS.length], margin: '2px 0' }}>
