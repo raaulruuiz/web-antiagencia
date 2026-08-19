@@ -1058,19 +1058,20 @@ export default function Finanzas() {
                       </div>
                     ) : (
                       <div style={{ ...S.card, padding: '16px 8px' }}>
-                        <ResponsiveContainer width="100%" height={220}>
+                        <ResponsiveContainer width="100%" height={320}>
                           <LineChart data={datosEvo}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                             <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
                               interval="preserveStartEnd" tickFormatter={fmtEjeCat} />
                             <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                             <Tooltip
+                              position={{ y: 10 }}
                               wrapperStyle={{ zIndex: 100 }}
                               content={({ active, label }) => {
                                 if (!active) return null;
                                 const punto = datosEvo.find(e => e.periodo === label);
                                 return (
-                                  <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12, maxHeight: 260, overflowY: 'auto' }}>
+                                  <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
                                     <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTipCat(label)}</p>
                                     {cats.map((cat, i) => (
                                       <p key={cat} style={{ color: ROJOS[i % ROJOS.length], margin: '2px 0' }}>
