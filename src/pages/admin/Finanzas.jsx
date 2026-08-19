@@ -1088,8 +1088,9 @@ export default function Finanzas() {
                               wrapperStyle={{ zIndex: 100 }}
                               content={({ active, label }) => {
                                 if (!active) return null;
-                                const punto = datosEvo.find(e => e.periodo === label);
-                                const compPunto = dashComp?.evolucionPorCategoria?.datos?.find?.(e => e.periodo === label);
+                                const idx = datosEvo.findIndex(e => e.periodo === label);
+                                const punto = datosEvo[idx];
+                                const compPunto = dashComp?.evolucionPorCategoria?.datos?.[idx];
                                 return (
                                   <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 11 }}>
                                     <p style={{ color: '#71717a', margin: '0 0 8px', fontWeight: 600, fontSize: 12 }}>{fmtTipCat(label)}</p>
