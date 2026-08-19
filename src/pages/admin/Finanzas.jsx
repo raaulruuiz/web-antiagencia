@@ -11,7 +11,7 @@ import {
 const CUENTAS = [
   { key: 'Ingresos',               label: 'Ingresos',            color: '#22c55e' },
   { key: 'Impuestos',              label: 'Impuestos',           color: '#f59e0b' },
-  { key: 'Compensación del Dueño', label: 'Compensación Dueño',  color: '#3b82f6' },
+  { key: 'Compensación del Dueño', label: 'Com. Dueño',          color: '#3b82f6' },
   { key: 'Gastos de Operación',    label: 'Gastos Operación',    color: '#8b5cf6' },
   { key: 'Ganancia',               label: 'Ganancias',           color: '#10b981' },
   { key: 'Freelancers y Material', label: 'Freelancers',         color: '#ec4899' },
