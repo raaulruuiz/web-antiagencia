@@ -700,6 +700,7 @@ export default function Finanzas() {
   const [hastaComp, setHastaComp] = useState(() => lsGet('fin_hastaComp', ''));
   const [dashboard, setDashboard] = useState(null);
   const [viewCat, setViewCat] = useState('total');
+  const [viewEvol, setViewEvol] = useState('barras');
   const [movimientos, setMovimientos] = useState({ items: [], total: 0, page: 1, pages: 1 });
   const [loadingDash, setLoadingDash] = useState(true);
   const [loadingMovs, setLoadingMovs] = useState(true);
@@ -928,45 +929,60 @@ export default function Finanzas() {
                   return `${dt.getDate()} ${MESES_CORTO[dt.getMonth()]} ${dt.getFullYear()}`;
                 }
 
+                const evolData = d.evolucionMensual.map((e, i) => {
+                  const c = dashComp?.evolucionMensual?.[i];
+                  return { mes: e.mes, ingresos: e.ingresos, gastos: e.gastos, ...(c ? { ingresosAnt: c.ingresos, gastosAnt: c.gastos } : {}) };
+                });
+                const evolTooltip = ({ active, payload, label }) => {
+                  if (!active || !payload?.length) return null;
+                  const curr = payload.filter(p => !String(p.dataKey).endsWith('Ant'));
+                  const ant  = payload.filter(p =>  String(p.dataKey).endsWith('Ant'));
+                  return (
+                    <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
+                      <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTooltipLabel(label)}</p>
+                      {curr.map(e => <p key={e.dataKey} style={{ color: e.color || e.fill || e.stroke, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}
+                      {ant.length > 0 && <><div style={{ borderTop: '1px solid #27272a', margin: '5px 0' }} />{ant.map(e => <p key={e.dataKey} style={{ color: e.color || e.fill || e.stroke, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}</>}
+                    </div>
+                  );
+                };
+                const evolAxes = (
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                    <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval="preserveStartEnd" tickFormatter={fmtEjeLabel} />
+                    <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <Tooltip content={evolTooltip} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>} />
+                  </>
+                );
                 return (
                   <>
-                    <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Evolución</h2>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                      <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Evolución</h2>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        {[['barras','Barras'],['lineas','Líneas']].map(([v, label]) => (
+                          <button key={v} onClick={() => setViewEvol(v)} style={{ background: viewEvol === v ? '#27272a' : 'transparent', border: '1px solid #27272a', borderRadius: 6, color: viewEvol === v ? '#fff' : '#71717a', fontSize: 11, padding: '3px 10px', cursor: 'pointer' }}>{label}</button>
+                        ))}
+                      </div>
+                    </div>
                     <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
                       <ResponsiveContainer width="100%" height={200}>
-                        <BarChart barSize={barW}
-                          data={d.evolucionMensual.map((e, i) => {
-                            const c = dashComp?.evolucionMensual?.[i];
-                            return { mes: e.mes, ingresos: e.ingresos, gastos: e.gastos, ...(c ? { ingresosAnt: c.ingresos, gastosAnt: c.gastos } : {}) };
-                          })}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                          <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
-                            interval="preserveStartEnd"
-                            tickFormatter={fmtEjeLabel}
-                          />
-                          <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
-                          <Tooltip
-                            contentStyle={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, fontSize: 12 }}
-                            content={({ active, payload, label }) => {
-                              if (!active || !payload?.length) return null;
-                              const curr = payload.filter(p => !String(p.dataKey).endsWith('Ant'));
-                              const ant  = payload.filter(p =>  String(p.dataKey).endsWith('Ant'));
-                              return (
-                                <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
-                                  <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTooltipLabel(label)}</p>
-                                  {curr.map(e => <p key={e.dataKey} style={{ color: e.fill, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}
-                                  {ant.length > 0 && <><div style={{ borderTop: '1px solid #27272a', margin: '5px 0' }} />{ant.map(e => <p key={e.dataKey} style={{ color: e.fill, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}</>}
-                                </div>
-                              );
-                            }}
-                          />
-                          <Legend wrapperStyle={{ fontSize: 12 }}
-                            formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>}
-                          />
-                          <Bar dataKey="ingresos"    name="Ingresos"      fill="#22c55e" radius={[4,4,0,0]} />
-                          <Bar dataKey="gastos"      name="Gastos"        fill="#f87171" radius={[4,4,0,0]} />
-                          {dashComp && <Bar dataKey="ingresosAnt" name="Ingresos ant." fill="#166534" radius={[3,3,0,0]} />}
-                          {dashComp && <Bar dataKey="gastosAnt"   name="Gastos ant."   fill="#991b1b" radius={[3,3,0,0]} />}
-                        </BarChart>
+                        {viewEvol === 'barras' ? (
+                          <BarChart barSize={barW} data={evolData}>
+                            {evolAxes}
+                            <Bar dataKey="ingresos"    name="Ingresos"      fill="#22c55e" radius={[4,4,0,0]} />
+                            <Bar dataKey="gastos"      name="Gastos"        fill="#f87171" radius={[4,4,0,0]} />
+                            {dashComp && <Bar dataKey="ingresosAnt" name="Ingresos ant." fill="#166534" radius={[3,3,0,0]} />}
+                            {dashComp && <Bar dataKey="gastosAnt"   name="Gastos ant."   fill="#991b1b" radius={[3,3,0,0]} />}
+                          </BarChart>
+                        ) : (
+                          <LineChart data={evolData}>
+                            {evolAxes}
+                            <Line dataKey="ingresos"    name="Ingresos"      stroke="#22c55e" strokeWidth={2} dot={false} connectNulls />
+                            <Line dataKey="gastos"      name="Gastos"        stroke="#f87171" strokeWidth={2} dot={false} connectNulls />
+                            {dashComp && <Line dataKey="ingresosAnt" name="Ingresos ant." stroke="#166534" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
+                            {dashComp && <Line dataKey="gastosAnt"   name="Gastos ant."   stroke="#991b1b" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
+                          </LineChart>
+                        )}
                       </ResponsiveContainer>
                     </div>
                   </>
@@ -1059,7 +1075,10 @@ export default function Finanzas() {
                     ) : (
                       <div style={{ ...S.card, padding: '16px 8px' }}>
                         <ResponsiveContainer width="100%" height={320}>
-                          <LineChart data={datosEvo}>
+                          <LineChart data={datosEvo.map((e, i) => {
+                            const c = dashComp?.evolucionPorCategoria?.datos?.[i];
+                            return { ...e, ...(c ? cats.reduce((acc, cat) => ({ ...acc, [cat + 'Ant']: c[cat] || 0 }), {}) : {}) };
+                          })}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                             <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
                               interval="preserveStartEnd" tickFormatter={fmtEjeCat} />
@@ -1067,25 +1086,31 @@ export default function Finanzas() {
                             <Tooltip
                               position={{ y: 10 }}
                               wrapperStyle={{ zIndex: 100 }}
-                              content={({ active, label }) => {
+                              content={({ active, label, payload }) => {
                                 if (!active) return null;
                                 const punto = datosEvo.find(e => e.periodo === label);
+                                const compPunto = dashComp?.evolucionPorCategoria?.datos?.find?.(e => e.periodo === label);
                                 return (
                                   <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
                                     <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTipCat(label)}</p>
                                     {cats.map((cat, i) => (
-                                      <p key={cat} style={{ color: ROJOS[i % ROJOS.length], margin: '2px 0' }}>
-                                        {cat}: {fmt(punto?.[cat] || 0)}
-                                      </p>
+                                      <div key={cat}>
+                                        <p style={{ color: ROJOS[i % ROJOS.length], margin: '2px 0' }}>{cat}: {fmt(punto?.[cat] || 0)}</p>
+                                        {dashComp && <p style={{ color: ROJOS[i % ROJOS.length], opacity: 0.5, margin: '1px 0 4px 8px', fontSize: 11 }}>ant.: {fmt(compPunto?.[cat] || 0)}</p>}
+                                      </div>
                                     ))}
                                   </div>
                                 );
                               }}
                             />
-                            <Legend wrapperStyle={{ fontSize: 11 }} formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>} />
+                            <Legend wrapperStyle={{ fontSize: 11 }} formatter={(value, entry) => !String(value).endsWith(' ant.') ? <span style={{ color: entry.color }}>{value}</span> : null} />
                             {cats.map((cat, i) => (
                               <Line key={cat} type="monotone" dataKey={cat} name={cat}
                                 stroke={ROJOS[i % ROJOS.length]} strokeWidth={2} dot={false} connectNulls />
+                            ))}
+                            {dashComp && cats.map((cat, i) => (
+                              <Line key={cat + 'Ant'} type="monotone" dataKey={cat + 'Ant'} name={cat + ' ant.'}
+                                stroke={ROJOS[i % ROJOS.length]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" />
                             ))}
                           </LineChart>
                         </ResponsiveContainer>
