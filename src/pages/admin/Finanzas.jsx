@@ -899,53 +899,78 @@ export default function Finanzas() {
                 {CUENTAS.map(c => <SaldoCard key={c.key} cuenta={{ ...c, saldo: d.saldos[c.key] ?? 0 }} compSaldo={dashComp ? (dashComp.saldos[c.key] ?? 0) : null} />)}
               </div>
 
-              {d.evolucionMensual.length > 1 && (
-                <>
-                  <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Evolución mensual</h2>
-                  <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <BarChart barSize={dashComp ? 9 : 18}
-                        data={d.evolucionMensual.map((e, i) => {
-                          const c = dashComp?.evolucionMensual?.[i];
-                          return { mes: e.mes, ingresos: e.ingresos, gastos: e.gastos, ...(c ? { ingresosAnt: c.ingresos, gastosAnt: c.gastos } : {}) };
-                        })}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                        <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
-                          tickFormatter={(yyyymm) => {
-                            const [anio, mes] = yyyymm.split('-');
-                            const label = mesLabel(yyyymm);
-                            const multiAnio = new Set(d.evolucionMensual.map(e => e.mes.slice(0, 4))).size > 1;
-                            return multiAnio && mes === '01' ? `${label} '${anio.slice(2)}` : label;
-                          }}
-                        />
-                        <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
-                        <Tooltip
-                          contentStyle={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, fontSize: 12 }}
-                          content={({ active, payload, label }) => {
-                            if (!active || !payload?.length) return null;
-                            const curr = payload.filter(p => !String(p.dataKey).endsWith('Ant'));
-                            const ant  = payload.filter(p =>  String(p.dataKey).endsWith('Ant'));
-                            return (
-                              <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
-                                <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{mesLabel(label)} {label.slice(0, 4)}</p>
-                                {curr.map(e => <p key={e.dataKey} style={{ color: e.fill, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}
-                                {ant.length > 0 && <><div style={{ borderTop: '1px solid #27272a', margin: '5px 0' }} />{ant.map(e => <p key={e.dataKey} style={{ color: e.fill, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}</>}
-                              </div>
-                            );
-                          }}
-                        />
-                        <Legend wrapperStyle={{ fontSize: 12 }}
-                          formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>}
-                        />
-                        <Bar dataKey="ingresos"    name="Ingresos"      fill="#22c55e" radius={[4,4,0,0]} />
-                        <Bar dataKey="gastos"      name="Gastos"        fill="#f87171" radius={[4,4,0,0]} />
-                        {dashComp && <Bar dataKey="ingresosAnt" name="Ingresos ant." fill="#166534" radius={[3,3,0,0]} />}
-                        {dashComp && <Bar dataKey="gastosAnt"   name="Gastos ant."   fill="#991b1b" radius={[3,3,0,0]} />}
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </>
-              )}
+              {d.evolucionMensual.length > 1 && (() => {
+                const gran = d.granularidad || 'mes';
+                const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+                const multiAnio = new Set(d.evolucionMensual.map(e => e.mes.slice(0, 4))).size > 1;
+                const tituloGran = gran === 'dia' ? 'diaria' : gran === 'anio' ? 'anual' : 'mensual';
+                const barW = gran === 'dia' ? (dashComp ? 3 : 6) : gran === 'anio' ? (dashComp ? 18 : 36) : (dashComp ? 9 : 18);
+
+                function fmtEjeLabel(key) {
+                  if (gran === 'anio') return key;
+                  if (gran === 'mes') {
+                    const [anio, mes] = key.split('-');
+                    const label = mesLabel(key);
+                    return multiAnio && mes === '01' ? `${label} '${anio.slice(2)}` : label;
+                  }
+                  // dia: yyyy-mm-dd
+                  const dt = new Date(key + 'T12:00:00');
+                  const d2 = dt.getDate();
+                  const mo = MESES_CORTO[dt.getMonth()];
+                  return multiAnio ? `${d2} ${mo} '${String(dt.getFullYear()).slice(2)}` : `${d2} ${mo}`;
+                }
+
+                function fmtTooltipLabel(key) {
+                  if (gran === 'anio') return key;
+                  if (gran === 'mes') return `${mesLabel(key)} ${key.slice(0, 4)}`;
+                  const dt = new Date(key + 'T12:00:00');
+                  return `${dt.getDate()} ${MESES_CORTO[dt.getMonth()]} ${dt.getFullYear()}`;
+                }
+
+                return (
+                  <>
+                    <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Evolución {tituloGran}</h2>
+                    <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <BarChart barSize={barW}
+                          data={d.evolucionMensual.map((e, i) => {
+                            const c = dashComp?.evolucionMensual?.[i];
+                            return { mes: e.mes, ingresos: e.ingresos, gastos: e.gastos, ...(c ? { ingresosAnt: c.ingresos, gastosAnt: c.gastos } : {}) };
+                          })}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                          <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
+                            interval="preserveStartEnd"
+                            tickFormatter={fmtEjeLabel}
+                          />
+                          <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                          <Tooltip
+                            contentStyle={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, fontSize: 12 }}
+                            content={({ active, payload, label }) => {
+                              if (!active || !payload?.length) return null;
+                              const curr = payload.filter(p => !String(p.dataKey).endsWith('Ant'));
+                              const ant  = payload.filter(p =>  String(p.dataKey).endsWith('Ant'));
+                              return (
+                                <div style={{ background: '#161616', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
+                                  <p style={{ color: '#71717a', margin: '0 0 6px', fontWeight: 600 }}>{fmtTooltipLabel(label)}</p>
+                                  {curr.map(e => <p key={e.dataKey} style={{ color: e.fill, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}
+                                  {ant.length > 0 && <><div style={{ borderTop: '1px solid #27272a', margin: '5px 0' }} />{ant.map(e => <p key={e.dataKey} style={{ color: e.fill, margin: '2px 0' }}>{e.name}: {fmt(e.value)}</p>)}</>}
+                                </div>
+                              );
+                            }}
+                          />
+                          <Legend wrapperStyle={{ fontSize: 12 }}
+                            formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>}
+                          />
+                          <Bar dataKey="ingresos"    name="Ingresos"      fill="#22c55e" radius={[4,4,0,0]} />
+                          <Bar dataKey="gastos"      name="Gastos"        fill="#f87171" radius={[4,4,0,0]} />
+                          {dashComp && <Bar dataKey="ingresosAnt" name="Ingresos ant." fill="#166534" radius={[3,3,0,0]} />}
+                          {dashComp && <Bar dataKey="gastosAnt"   name="Gastos ant."   fill="#991b1b" radius={[3,3,0,0]} />}
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </>
+                );
+              })()}
 
               {Object.keys(d.gastosPorCategoria).length > 0 && (
                 <>
