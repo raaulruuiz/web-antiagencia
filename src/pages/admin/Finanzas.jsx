@@ -1522,126 +1522,132 @@ export default function Finanzas() {
       {tab === 'fiscal' && <TabFiscal />}
 
       {/* ── CLIENTES ── */}
-      {tab === 'clientes' && (
-        <div>
-          {/* Cabecera */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <DateRangePicker
-                desde={desde} hasta={hasta} onApply={({ desde: d, hasta: h }) => {
-                  setDesde(d); setHasta(h);
-                }}
-              />
-            </div>
-            <button
-              onClick={async () => {
-                setSyncingClientes(true);
-                try {
-                  const token = await getToken();
-                  await fetch(`${BACKEND_URL}/admin/finanzas/clientes/sync`, {
-                    method: 'POST', headers: { Authorization: `Bearer ${token}` },
-                  });
-                  await cargarClientes();
-                } finally { setSyncingClientes(false); }
-              }}
-              disabled={syncingClientes}
-              style={{ background: '#27272a', color: syncingClientes ? '#71717a' : '#fff', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 14px', fontSize: 13, cursor: syncingClientes ? 'default' : 'pointer' }}
-            >
-              {syncingClientes ? 'Sincronizando…' : '↻ Sync Notion'}
-            </button>
-          </div>
+      {tab === 'clientes' && (() => {
+        const activos   = clientes.filter(c => c.activo);
+        const inactivos = clientes.filter(c => !c.activo);
 
-          {loadingClientes ? (
-            <p style={{ color: '#71717a', fontSize: 14 }}>Cargando clientes…</p>
-          ) : clientes.length === 0 ? (
-            <div style={{ ...S.card, padding: 24, textAlign: 'center' }}>
-              <p style={{ color: '#71717a', fontSize: 14, margin: 0 }}>No hay clientes. Pulsa «↻ Sync Notion» para importarlos.</p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {clientes.map(c => {
-                const abierto = clienteAbierto === c.id;
-                const tieneMovs = c.movimientos?.length > 0;
-                return (
-                  <div key={c.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
-                    {/* Fila cliente */}
-                    <div
-                      onClick={() => setClienteAbierto(abierto ? null : c.id)}
-                      style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', gap: 12 }}
-                    >
-                      {/* Flecha */}
-                      <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block' }}>▶</span>
-                      {/* Nombre */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{c.nombre}</span>
-                        {c.nombre_empresa && c.nombre_empresa !== c.nombre && (
-                          <span style={{ color: '#71717a', fontSize: 12, marginLeft: 8 }}>{c.nombre_empresa}</span>
-                        )}
+        const renderCliente = (c) => {
+          const abierto   = clienteAbierto === c.id;
+          const tieneMovs = c.movimientos?.length > 0;
+          const balance   = c.ingresos - c.gastos;
+          return (
+            <div key={c.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
+              <div onClick={() => setClienteAbierto(abierto ? null : c.id)}
+                style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', gap: 12 }}>
+                <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none' }}>▶</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{c.nombre}</span>
+                  {c.nombre_empresa && c.nombre_empresa !== c.nombre && (
+                    <span style={{ color: '#71717a', fontSize: 12, marginLeft: 8 }}>{c.nombre_empresa}</span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
+                  <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(c.ingresos)}</span>
+                  <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-c.gastos)}</span>
+                  <span style={{ fontSize: 13, color: balance >= 0 ? '#60a5fa' : '#fb923c', fontWeight: 600 }}>{fmt(balance)}</span>
+                </div>
+              </div>
+
+              {abierto && (
+                <div style={{ borderTop: '1px solid #27272a', padding: 16 }}>
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+                    {[
+                      { label: 'Ingresos', val: c.ingresos,  color: '#22c55e' },
+                      { label: 'Gastos',   val: -c.gastos,   color: '#f87171' },
+                      { label: 'Balance',  val: balance, color: balance >= 0 ? '#60a5fa' : '#fb923c' },
+                    ].map(({ label, val, color }) => (
+                      <div key={label} style={{ ...S.card, padding: '10px 16px', flex: 1, minWidth: 100 }}>
+                        <p style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>{label}</p>
+                        <p style={{ color, fontSize: 20, fontWeight: 700, margin: 0 }}>{fmt(val)}</p>
                       </div>
-                      {/* Resumen compacto */}
-                      <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
-                        <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(c.ingresos)} €</span>
-                        <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>-{fmt(c.gastos)} €</span>
-                        <span style={{ fontSize: 13, color: c.ingresos - c.gastos >= 0 ? '#60a5fa' : '#fb923c', fontWeight: 600 }}>{fmt(c.ingresos - c.gastos)} €</span>
-                      </div>
-                    </div>
-
-                    {/* Desplegable */}
-                    {abierto && (
-                      <div style={{ borderTop: '1px solid #27272a', padding: '16px' }}>
-                        {/* Resumen */}
-                        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-                          {[
-                            { label: 'Ingresos', val: c.ingresos, color: '#22c55e' },
-                            { label: 'Gastos',   val: c.gastos,   color: '#f87171' },
-                            { label: 'Balance',  val: c.ingresos - c.gastos, color: c.ingresos - c.gastos >= 0 ? '#60a5fa' : '#fb923c' },
-                          ].map(({ label, val, color }) => (
-                            <div key={label} style={{ ...S.card, padding: '10px 16px', flex: 1, minWidth: 100 }}>
-                              <p style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>{label}</p>
-                              <p style={{ color, fontSize: 20, fontWeight: 700, margin: 0 }}>{fmt(val)} €</p>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Info fiscal */}
-                        {(c.nif_cif || c.email) && (
-                          <div style={{ display: 'flex', gap: 16, marginBottom: 14, flexWrap: 'wrap' }}>
-                            {c.nif_cif && <span style={{ color: '#71717a', fontSize: 12 }}>NIF: <span style={{ color: '#a1a1aa' }}>{c.nif_cif}</span></span>}
-                            {c.email   && <span style={{ color: '#71717a', fontSize: 12 }}>Email: <span style={{ color: '#a1a1aa' }}>{c.email}</span></span>}
-                          </div>
-                        )}
-
-                        {/* Movimientos */}
-                        {!tieneMovs ? (
-                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin movimientos en el periodo seleccionado.</p>
-                        ) : (
-                          <div>
-                            <p style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8, marginTop: 0 }}>Movimientos</p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                              {c.movimientos.map(m => (
-                                <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e' }}>
-                                  <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
-                                  <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
-                                  {(m.categorias || []).slice(0, 2).map(cat => (
-                                    <span key={cat} style={{ background: '#27272a', color: '#71717a', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{cat}</span>
-                                  ))}
-                                  <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600, flexShrink: 0, minWidth: 70, textAlign: 'right' }}>
-                                    {m.tipo === 'Ingreso' ? '' : '-'}{fmt(m.cantidad)} €
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    ))}
                   </div>
-                );
-              })}
+                  {(c.nif_cif || c.email) && (
+                    <div style={{ display: 'flex', gap: 16, marginBottom: 14, flexWrap: 'wrap' }}>
+                      {c.nif_cif && <span style={{ color: '#71717a', fontSize: 12 }}>NIF: <span style={{ color: '#a1a1aa' }}>{c.nif_cif}</span></span>}
+                      {c.email   && <span style={{ color: '#71717a', fontSize: 12 }}>Email: <span style={{ color: '#a1a1aa' }}>{c.email}</span></span>}
+                    </div>
+                  )}
+                  {!tieneMovs ? (
+                    <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin movimientos en el periodo seleccionado.</p>
+                  ) : (
+                    <>
+                      <p style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>Movimientos</p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {c.movimientos.map(m => (
+                          <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e' }}>
+                            <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
+                            <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
+                            {(m.categorias || []).slice(0, 2).map(cat => (
+                              <span key={cat} style={{ background: '#27272a', color: '#71717a', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{cat}</span>
+                            ))}
+                            <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600, flexShrink: 0, minWidth: 70, textAlign: 'right' }}>
+                              {fmt(m.tipo === 'Ingreso' ? m.cantidad : -m.cantidad)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      )}
+          );
+        };
+
+        return (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <DateRangePicker desde={desde} hasta={hasta} onApply={(d, h) => { setDesde(d); setHasta(h); }} />
+              <button
+                onClick={async () => {
+                  setSyncingClientes(true);
+                  try {
+                    const token = await getToken();
+                    await fetch(`${BACKEND_URL}/admin/finanzas/clientes/sync`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+                    await cargarClientes();
+                  } finally { setSyncingClientes(false); }
+                }}
+                disabled={syncingClientes}
+                style={{ background: '#27272a', color: syncingClientes ? '#71717a' : '#fff', border: '1px solid #3f3f46', borderRadius: 8, padding: '7px 14px', fontSize: 13, cursor: syncingClientes ? 'default' : 'pointer' }}
+              >
+                {syncingClientes ? 'Sincronizando…' : '↻ Sync Notion'}
+              </button>
+            </div>
+
+            {loadingClientes ? (
+              <p style={{ color: '#71717a', fontSize: 14 }}>Cargando clientes…</p>
+            ) : clientes.length === 0 ? (
+              <div style={{ ...S.card, padding: 24, textAlign: 'center' }}>
+                <p style={{ color: '#71717a', fontSize: 14, margin: 0 }}>No hay clientes. Pulsa «↻ Sync Notion» para importarlos.</p>
+              </div>
+            ) : (
+              <>
+                {activos.length > 0 && (
+                  <div style={{ marginBottom: 24 }}>
+                    <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+                      Activos <span style={{ color: '#22c55e' }}>({activos.length})</span>
+                    </h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {activos.map(renderCliente)}
+                    </div>
+                  </div>
+                )}
+                {inactivos.length > 0 && (
+                  <div>
+                    <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+                      Ex-clientes / Inactivos <span style={{ color: '#52525b' }}>({inactivos.length})</span>
+                    </h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {inactivos.map(renderCliente)}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── NUEVO ── */}
       {tab === 'nuevo' && (
