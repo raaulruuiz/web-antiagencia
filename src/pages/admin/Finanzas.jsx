@@ -712,6 +712,10 @@ export default function Finanzas() {
   const [viewCuenta, setViewCuenta] = useState('barras');
   const [zoomEvol, setZoomEvol] = useState(0);
   const [zoomCuenta, setZoomCuenta] = useState(0);
+  const scrollEvolRef = useRef(null);
+  const xAxisEvolRef  = useRef(null);
+  const scrollCtaRef  = useRef(null);
+  const xAxisCtaRef   = useRef(null);
   const [movimientos, setMovimientos] = useState({ items: [], total: 0, page: 1, pages: 1 });
   const [loadingDash, setLoadingDash] = useState(true);
   const [loadingMovs, setLoadingMovs] = useState(true);
@@ -983,9 +987,10 @@ export default function Finanzas() {
                 const zWidthEvol = Math.max(900, evolData.length * pxPerPtEvol);
                 const zBarWEvol = zoomEvol === 2 ? (dashComp ? 22 : 32) : (dashComp ? 14 : 20);
                 const zIntervalEvol = Math.max(0, Math.floor(evolData.length / 15));
-                const ZOOM_H = 200;
-                const ZOOM_M = { top: 5, right: 10, left: 0, bottom: 30 };
-                const ZOOM_MY = { top: 5, right: 0, left: 0, bottom: 30 };
+                const ZOOM_H    = 200;
+                const ZOOM_XH   = 30;
+                const ZOOM_M    = { top: 5, right: 10, left: 0, bottom: 5 };
+                const ZOOM_MX   = { top: 0, right: 10, left: 0, bottom: 5 };
 
                 const evolLegendItems = [
                   { name: 'Ingresos', color: '#22c55e' }, { name: 'Gastos', color: '#f87171' }, { name: 'Beneficio', color: '#60a5fa' },
@@ -1009,10 +1014,10 @@ export default function Finanzas() {
                   {dashComp && <Line dataKey="beneficioAnt" name="Beneficio ant." stroke="#1d4ed8" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
                 </>);
 
-                // Ejes del modo zoom: sin Legend (se renderiza fuera para no afectar la altura)
+                // Ejes del modo zoom: XAxis fuera del chart (scroll sincronizado), sin Legend
                 const zoomedAxesEvol = (<>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                  <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval={zIntervalEvol} tickFormatter={fmtEjeLabel} />
+                  <XAxis dataKey="mes" hide />
                   <YAxis hide domain={evolDomain} ticks={evolTicks} />
                   <Tooltip content={evolTooltip} />
                 </>);
@@ -1039,18 +1044,21 @@ export default function Finanzas() {
                             {evolLegendItems.map(l => <span key={l.name} style={{ color: l.color, fontSize: 11 }}>● {l.name}</span>)}
                           </div>
                           <div style={{ display: 'flex' }}>
+                            {/* Eje Y fijo: labels HTML con posición matemática exacta */}
                             <div style={{ width: EVOL_Y_W, flexShrink: 0, position: 'relative', height: ZOOM_H }}>
                               {evolTicks.map(v => {
                                 const frac = (v - evolDomain[0]) / (evolDomain[1] - evolDomain[0]);
                                 const y = ZOOM_M.top + (ZOOM_H - ZOOM_M.top - ZOOM_M.bottom) * (1 - frac);
                                 return (
-                                  <div key={v} style={{ position: 'absolute', top: y - 6, left: 0, right: 4, fontSize: 11, color: '#71717a', textAlign: 'right', lineHeight: 1 }}>
+                                  <div key={v} style={{ position: 'absolute', top: y, left: 0, right: 4, fontSize: 11, color: '#71717a', textAlign: 'right', lineHeight: 1, transform: 'translateY(-50%)' }}>
                                     {fmtY(v)}
                                   </div>
                                 );
                               })}
                             </div>
-                            <div style={{ flex: 1, overflowX: 'auto' }}>
+                            {/* Área scrollable: solo barras, sin XAxis */}
+                            <div ref={scrollEvolRef} style={{ flex: 1, overflowX: 'auto' }}
+                              onScroll={e => { if (xAxisEvolRef.current) xAxisEvolRef.current.scrollLeft = e.target.scrollLeft; }}>
                               {viewEvol === 'barras' ? (
                                 <BarChart width={zWidthEvol} height={ZOOM_H} data={evolData} barSize={zBarWEvol} margin={ZOOM_M}>
                                   {zoomedAxesEvol}{evolBars()}
@@ -1060,6 +1068,15 @@ export default function Finanzas() {
                                   {zoomedAxesEvol}{evolLines}
                                 </LineChart>
                               )}
+                            </div>
+                          </div>
+                          {/* Eje X fijo: scroll sincronizado con las barras */}
+                          <div style={{ display: 'flex' }}>
+                            <div style={{ width: EVOL_Y_W, flexShrink: 0 }} />
+                            <div ref={xAxisEvolRef} style={{ flex: 1, overflowX: 'hidden', pointerEvents: 'none' }}>
+                              <BarChart width={zWidthEvol} height={ZOOM_XH} data={evolData} margin={ZOOM_MX}>
+                                <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval={zIntervalEvol} tickFormatter={fmtEjeLabel} />
+                              </BarChart>
                             </div>
                           </div>
                         </>
@@ -1306,15 +1323,16 @@ export default function Finanzas() {
                 const zWidthCta = Math.max(900, ctaData.length * pxPerPtCta);
                 const zBarWCta = zoomCuenta === 2 ? (dashComp ? 12 : 18) : (dashComp ? 8 : 14);
                 const zIntervalCta = Math.max(0, Math.floor(ctaData.length / 15));
-                const CTA_H = 220;
-                const CTA_M  = { top: 5, right: 10, left: 0, bottom: 30 };
-                const CTA_MY = { top: 5, right: 0,  left: 0, bottom: 30 };
+                const CTA_H  = 220;
+                const CTA_XH = 30;
+                const CTA_M  = { top: 5, right: 10, left: 0, bottom: 5 };
+                const CTA_MX = { top: 0, right: 10, left: 0, bottom: 5 };
 
                 const ctaLegendItems = cuentas.map(c => ({ name: CUENTA_LABELS[c], color: CUENTA_COLORS[c] }));
 
                 const zoomedAxesCta = (<>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                  <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval={zIntervalCta} tickFormatter={fmtEjeCta} />
+                  <XAxis dataKey="periodo" hide />
                   <YAxis hide domain={ctaDomain} ticks={ctaTicks} />
                   <Tooltip content={ctaTooltip} />
                 </>);
@@ -1340,18 +1358,21 @@ export default function Finanzas() {
                             {ctaLegendItems.map(l => <span key={l.name} style={{ color: l.color, fontSize: 11 }}>● {l.name}</span>)}
                           </div>
                           <div style={{ display: 'flex' }}>
+                            {/* Eje Y fijo: labels HTML con posición matemática exacta */}
                             <div style={{ width: CTA_Y_W, flexShrink: 0, position: 'relative', height: CTA_H }}>
                               {ctaTicks.map(v => {
                                 const frac = (v - ctaDomain[0]) / (ctaDomain[1] - ctaDomain[0]);
                                 const y = CTA_M.top + (CTA_H - CTA_M.top - CTA_M.bottom) * (1 - frac);
                                 return (
-                                  <div key={v} style={{ position: 'absolute', top: y - 6, left: 0, right: 4, fontSize: 11, color: '#71717a', textAlign: 'right', lineHeight: 1 }}>
+                                  <div key={v} style={{ position: 'absolute', top: y, left: 0, right: 4, fontSize: 11, color: '#71717a', textAlign: 'right', lineHeight: 1, transform: 'translateY(-50%)' }}>
                                     {fmtY(v)}
                                   </div>
                                 );
                               })}
                             </div>
-                            <div style={{ flex: 1, overflowX: 'auto' }}>
+                            {/* Área scrollable: solo barras, sin XAxis */}
+                            <div ref={scrollCtaRef} style={{ flex: 1, overflowX: 'auto' }}
+                              onScroll={e => { if (xAxisCtaRef.current) xAxisCtaRef.current.scrollLeft = e.target.scrollLeft; }}>
                               {viewCuenta === 'barras' ? (
                                 <BarChart width={zWidthCta} height={CTA_H} data={ctaData} barSize={zBarWCta} margin={CTA_M}>
                                   {zoomedAxesCta}
@@ -1365,6 +1386,15 @@ export default function Finanzas() {
                                   {dashComp && cuentas.map(c => <Line key={c+'Ant'} type="monotone" dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} stroke={CUENTA_COLORS[c]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" />)}
                                 </LineChart>
                               )}
+                            </div>
+                          </div>
+                          {/* Eje X fijo: scroll sincronizado con las barras */}
+                          <div style={{ display: 'flex' }}>
+                            <div style={{ width: CTA_Y_W, flexShrink: 0 }} />
+                            <div ref={xAxisCtaRef} style={{ flex: 1, overflowX: 'hidden', pointerEvents: 'none' }}>
+                              <BarChart width={zWidthCta} height={CTA_XH} data={ctaData} margin={CTA_MX}>
+                                <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval={zIntervalCta} tickFormatter={fmtEjeCta} />
+                              </BarChart>
                             </div>
                           </div>
                         </>
