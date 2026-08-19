@@ -903,7 +903,7 @@ export default function Finanzas() {
                 const gran = d.granularidad || 'mes';
                 const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
                 const multiAnio = new Set(d.evolucionMensual.map(e => e.mes.slice(0, 4))).size > 1;
-                const tituloGran = gran === 'dia' ? 'diaria' : gran === 'anio' ? 'anual' : 'mensual';
+                const tituloGran = '';
                 const barW = gran === 'dia' ? (dashComp ? 3 : 6) : gran === 'anio' ? (dashComp ? 18 : 36) : (dashComp ? 9 : 18);
 
                 function fmtEjeLabel(key) {
@@ -929,7 +929,7 @@ export default function Finanzas() {
 
                 return (
                   <>
-                    <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Evolución {tituloGran}</h2>
+                    <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Evolución</h2>
                     <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
                       <ResponsiveContainer width="100%" height={200}>
                         <BarChart barSize={barW}
