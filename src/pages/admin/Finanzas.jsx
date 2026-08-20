@@ -719,6 +719,8 @@ export default function Finanzas() {
   const [movPagina, setMovPagina] = useState(1);
   const [movPorPagina, setMovPorPagina] = useState(10);
   const [syncingClientes, setSyncingClientes] = useState(false);
+  const [clienteSort, setClienteSort] = useState({ campo: 'beneficio', dir: 'desc' });
+  const [clienteBusqueda, setClienteBusqueda] = useState('');
   const scrollEvolRef = useRef(null);
   const xAxisEvolRef  = useRef(null);
   const scrollCtaRef  = useRef(null);
@@ -1531,10 +1533,30 @@ export default function Finanzas() {
           return movs.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + m.cantidad, 0)
                - movs.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + m.cantidad, 0);
         };
-        const sortByBeneficio = arr => [...arr].sort((a, b) => beneficioSinTraspasos(b) - beneficioSinTraspasos(a));
-        const yo        = clientes.filter(c => c.nombre === 'Anti-Agencia');
-        const activos   = sortByBeneficio(clientes.filter(c => c.activo  && c.nombre !== 'Anti-Agencia'));
-        const inactivos = sortByBeneficio(clientes.filter(c => !c.activo && c.nombre !== 'Anti-Agencia'));
+        const getValorSort = (c, campo) => {
+          const movs = (c.movimientos || []).filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
+          const ing  = movs.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + m.cantidad, 0);
+          const gas  = movs.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + m.cantidad, 0);
+          if (campo === 'facturacion') return ing;
+          if (campo === 'gasto') return gas;
+          return ing - gas; // beneficio
+        };
+        const sortClientes = arr => [...arr].sort((a, b) => {
+          const va = getValorSort(a, clienteSort.campo);
+          const vb = getValorSort(b, clienteSort.campo);
+          return clienteSort.dir === 'desc' ? vb - va : va - vb;
+        });
+        const buscarFiltro = arr => {
+          const q = clienteBusqueda.trim().toLowerCase();
+          if (!q) return arr;
+          return arr.filter(c =>
+            c.nombre.toLowerCase().includes(q) ||
+            (c.nombre_empresa || '').toLowerCase().includes(q)
+          );
+        };
+        const yo        = buscarFiltro(clientes.filter(c => c.nombre === 'Anti-Agencia'));
+        const activos   = sortClientes(buscarFiltro(clientes.filter(c => c.activo  && c.nombre !== 'Anti-Agencia')));
+        const inactivos = sortClientes(buscarFiltro(clientes.filter(c => !c.activo && c.nombre !== 'Anti-Agencia')));
 
         const renderCliente = (c) => {
           const abierto   = clienteAbierto === c.id;
@@ -1642,7 +1664,7 @@ export default function Finanzas() {
 
         return (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
               <DateRangePicker desde={desde} hasta={hasta} onApply={(d, h) => { setDesde(d); setHasta(h); }} />
               <button
                 onClick={async () => {
@@ -1656,6 +1678,35 @@ export default function Finanzas() {
                 disabled={syncingClientes}
                 style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', flexShrink: 0 }}
               >{syncingClientes ? 'Sincronizando…' : '↻ Sync Notion'}</button>
+
+              {/* Buscador */}
+              <input
+                type="text"
+                placeholder="Buscar cliente…"
+                value={clienteBusqueda}
+                onChange={e => setClienteBusqueda(e.target.value)}
+                style={{ background: '#18181b', border: '1px solid #3f3f46', color: 'white', borderRadius: 8, padding: '8px 12px', fontSize: 13, outline: 'none', width: 180 }}
+              />
+
+              {/* Ordenar por */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '4px 6px' }}>
+                <span style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', paddingLeft: 4 }}>Ordenar</span>
+                {[
+                  { key: 'beneficio',   label: 'Beneficio' },
+                  { key: 'facturacion', label: 'Facturación' },
+                  { key: 'gasto',       label: 'Gasto' },
+                ].map(({ key, label }) => (
+                  <button key={key}
+                    onClick={() => setClienteSort(s => s.campo === key ? { campo: key, dir: s.dir === 'desc' ? 'asc' : 'desc' } : { campo: key, dir: 'desc' })}
+                    style={{
+                      background: clienteSort.campo === key ? '#3f3f46' : 'transparent',
+                      border: 'none', color: clienteSort.campo === key ? 'white' : '#71717a',
+                      borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer',
+                    }}>
+                    {label}{clienteSort.campo === key ? (clienteSort.dir === 'desc' ? ' ↓' : ' ↑') : ''}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {loadingClientes ? (
