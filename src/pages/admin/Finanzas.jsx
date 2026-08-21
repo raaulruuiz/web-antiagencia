@@ -865,6 +865,34 @@ function ModalMovimiento({ m, onClose, onEditar }) {
           <Field label="Equipo" value={(m.equipo_info || []).length ? m.equipo_info.map(e => e.nombre).join(', ') : null} />
         </div>
 
+        {/* Reparto — solo si hay múltiples clientes o equipo */}
+        {((m.clientes_info?.length > 1) || (m.equipo_info?.length > 1)) && (() => {
+          const porCliente = m.clientes_info?.length > 1 ? Math.round(m.cantidad / m.clientes_info.length * 100) / 100 : null;
+          const porMiembro = m.equipo_info?.length > 1 ? Math.round(m.cantidad / m.equipo_info.length * 100) / 100 : null;
+          return (
+            <div style={{ background: '#0d0d0d', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
+              <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px 0' }}>Reparto</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {porCliente != null && m.clientes_info.map(c => (
+                  <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: '#a1a1aa' }}>{c.nombre}</span>
+                    <span style={{ color: 'white', fontWeight: 600 }}>{fmt(porCliente)}</span>
+                  </div>
+                ))}
+                {porMiembro != null && m.equipo_info.map(e => (
+                  <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: '#a1a1aa' }}>{e.nombre}</span>
+                    <span style={{ color: 'white', fontWeight: 600 }}>{fmt(porMiembro)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 20px', marginBottom: 20, display: 'none' }}>
+        </div>
+
         {/* Categorías */}
         <div style={{ marginBottom: 16 }}>
           <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px 0' }}>Categorías</p>
@@ -2122,8 +2150,9 @@ export default function Finanzas() {
           const abierto   = clienteAbierto === c.id;
           const movsFiltered = (c.movimientos || []).filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
           const tieneMovs = movsFiltered.length > 0;
-          const ingresos  = movsFiltered.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + m.cantidad, 0);
-          const gastos    = movsFiltered.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + m.cantidad, 0);
+          const cantidadPro = m => m.cantidad / Math.max(m.cliente_ids?.length || 1, 1);
+          const ingresos  = movsFiltered.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + cantidadPro(m), 0);
+          const gastos    = movsFiltered.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + cantidadPro(m), 0);
           const balance   = ingresos - gastos;
           return (
             <div key={c.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
@@ -2190,8 +2219,15 @@ export default function Finanzas() {
                               {(m.categorias || []).slice(0, 2).map(cat => (
                                 <span key={cat} style={{ background: '#27272a', color: '#71717a', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{cat}</span>
                               ))}
-                              <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600, flexShrink: 0, minWidth: 70, textAlign: 'right' }}>
-                                {fmt(m.tipo === 'Ingreso' ? m.cantidad : -m.cantidad)}
+                              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, minWidth: 70 }}>
+                                <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600 }}>
+                                  {fmt(m.tipo === 'Ingreso' ? m.cantidad : -m.cantidad)}
+                                </span>
+                                {(m.cliente_ids?.length || 1) > 1 && (
+                                  <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 10, opacity: 0.7 }}>
+                                    corr. {fmt(cantidadPro(m))}
+                                  </span>
+                                )}
                               </span>
                             </div>
                           ))}
@@ -2341,8 +2377,9 @@ export default function Finanzas() {
           const abierto = equipoAbierto === e.id;
           const movsFiltered = (e.movimientos || []).filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
           const tieneMovs = movsFiltered.length > 0;
-          const ingresos  = movsFiltered.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + m.cantidad, 0);
-          const gastos    = movsFiltered.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + m.cantidad, 0);
+          const cantidadPro = m => m.cantidad / Math.max(m.equipo_ids?.length || 1, 1);
+          const ingresos  = movsFiltered.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + cantidadPro(m), 0);
+          const gastos    = movsFiltered.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + cantidadPro(m), 0);
           const balance   = ingresos - gastos;
           return (
             <div key={e.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
@@ -2401,8 +2438,15 @@ export default function Finanzas() {
                               {(m.categorias || []).slice(0, 2).map(cat => (
                                 <span key={cat} style={{ background: '#27272a', color: '#71717a', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{cat}</span>
                               ))}
-                              <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600, flexShrink: 0, minWidth: 70, textAlign: 'right' }}>
-                                {fmt(m.tipo === 'Ingreso' ? m.cantidad : -m.cantidad)}
+                              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, minWidth: 70 }}>
+                                <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600 }}>
+                                  {fmt(m.tipo === 'Ingreso' ? m.cantidad : -m.cantidad)}
+                                </span>
+                                {(m.equipo_ids?.length || 1) > 1 && (
+                                  <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 10, opacity: 0.7 }}>
+                                    corr. {fmt(cantidadPro(m))}
+                                  </span>
+                                )}
                               </span>
                             </div>
                           ))}
