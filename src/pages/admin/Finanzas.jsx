@@ -738,7 +738,7 @@ export default function Finanzas() {
   const [syncingEquipo, setSyncingEquipo] = useState(false);
   const [equipoAbierto, setEquipoAbierto] = useState(null);
   const [equipoBusqueda, setEquipoBusqueda] = useState('');
-  const [equipoSort, setEquipoSort] = useState({ campo: 'beneficio', dir: 'desc' });
+  const [equipoSort, setEquipoSort] = useState({ campo: 'beneficio', dir: 'asc' });
   const [movFiltroTipo, setMovFiltroTipo] = useState('todos');
   const [movPagina, setMovPagina] = useState(1);
   const [movPorPagina, setMovPorPagina] = useState(10);
