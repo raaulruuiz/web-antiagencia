@@ -1743,6 +1743,7 @@ export default function Finanzas() {
               <button style={S.ghost} onClick={() => cargarMovimientos(pagMovs, mostrarTodos)}>↺</button>
             </div>
             <button
+              onMouseDown={e => e.preventDefault()}
               onClick={() => { setPanelFiltro(p => !p); setPanelOrdenar(false); }}
               style={{ ...S.ghost, outline: 'none', display: 'flex', alignItems: 'center', gap: 6, ...(movFiltros.length > 0 ? { borderColor: '#0067FD', color: '#0067FD' } : {}) }}>
               ⚡ Filtros
@@ -1753,6 +1754,7 @@ export default function Finanzas() {
               )}
             </button>
             <button
+              onMouseDown={e => e.preventDefault()}
               onClick={() => { setPanelOrdenar(p => !p); setPanelFiltro(false); }}
               style={{ ...S.ghost, outline: 'none', display: 'flex', alignItems: 'center', gap: 6, ...(movSorts.length > 0 ? { borderColor: '#8b5cf6', color: '#8b5cf6' } : {}) }}>
               ↕ Ordenar
