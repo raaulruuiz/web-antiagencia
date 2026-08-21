@@ -796,7 +796,6 @@ function ModalMovimiento({ m, onClose, onEditar }) {
           <Field label="IRPF retenido (yo)" value={fmt(m.irpf_retenido_yo)} />
           <Field label="Importe Factura" value={fmt(m.importe_factura)} />
           <Field label="Fecha Factura"   value={m.fecha_factura || '—'} />
-          <Field label="Creado en Notion" value={m.notion_created_at ? m.notion_created_at.slice(0, 10) : '—'} />
         </div>
 
         {/* Categorías */}
@@ -810,10 +809,16 @@ function ModalMovimiento({ m, onClose, onEditar }) {
           </div>
         </div>
 
-        {/* ID Notion */}
-        <div>
-          <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0' }}>Notion ID</p>
-          <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>{m.notion_id || '—'}</span>
+        {/* Metadatos Notion — zona dim */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div>
+            <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0' }}>Creado en Notion</p>
+            <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>{m.notion_created_at ? m.notion_created_at.slice(0, 10) : '—'}</span>
+          </div>
+          <div>
+            <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0' }}>Notion ID</p>
+            <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>{m.notion_id || '—'}</span>
+          </div>
         </div>
       </div>
     </div>
