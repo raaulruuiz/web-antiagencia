@@ -28,6 +28,39 @@ const IVA_OPTS  = ['0%','10%','21%'];
 const IRPF_OPTS = ['0%','7%','15%'];
 const TIPOS     = ['Ingreso','Gasto'];
 
+const CAMPOS_FILTRO = [
+  { key: 'nombre',          label: 'Nombre',          tipo: 'text' },
+  { key: 'fecha',           label: 'Fecha',           tipo: 'date' },
+  { key: 'tipo',            label: 'Tipo',            tipo: 'select',          ops: ['Ingreso','Gasto'] },
+  { key: 'cuenta',          label: 'Cuenta',          tipo: 'select',          ops: CUENTAS.map(c => c.key) },
+  { key: 'categorias',      label: 'Categoría',       tipo: 'array',           ops: CATEGORIAS },
+  { key: 'cantidad',        label: 'Cantidad (€)',     tipo: 'number' },
+  { key: 'beneficio',       label: 'Beneficio (€)',   tipo: 'number' },
+  { key: 'base_imponible',  label: 'Base Imponible',  tipo: 'number' },
+  { key: 'iva',             label: 'IVA',             tipo: 'select',          ops: IVA_OPTS },
+  { key: 'irpf',            label: 'IRPF',            tipo: 'select',          ops: IRPF_OPTS },
+  { key: 'importe_factura', label: 'Importe Factura', tipo: 'number_nullable' },
+  { key: 'fecha_factura',   label: 'Fecha Factura',   tipo: 'date' },
+];
+
+const OPS_POR_TIPO = {
+  text:            [['ilike','contiene'],['not_ilike','no contiene'],['eq','es igual a']],
+  date:            [['gte','es o después de'],['lte','es o antes de'],['gt','después de'],['lt','antes de'],['eq','es exactamente']],
+  number:          [['eq','='],['neq','≠'],['gt','>'],['gte','≥'],['lt','<'],['lte','≤']],
+  number_nullable: [['eq','='],['neq','≠'],['gt','>'],['gte','≥'],['lt','<'],['lte','≤'],['is_null','está vacío'],['is_not_null','tiene valor']],
+  select:          [['eq','es'],['neq','no es']],
+  array:           [['cs','contiene'],['not_cs','no contiene']],
+};
+
+const CAMPOS_SORT = [
+  { key: 'fecha',          label: 'Fecha' },
+  { key: 'nombre',         label: 'Nombre' },
+  { key: 'cantidad',       label: 'Cantidad' },
+  { key: 'beneficio',      label: 'Beneficio' },
+  { key: 'base_imponible', label: 'Base Imponible' },
+  { key: 'fecha_factura',  label: 'Fecha Factura' },
+];
+
 const S = {
   card:    { background: '#161616', border: '1px solid #27272a', borderRadius: 12, padding: 20 },
   input:   { background: '#0d0d0d', border: '1px solid #3f3f46', borderRadius: 8, color: 'white', padding: '8px 12px', fontSize: 14, outline: 'none', width: '100%', boxSizing: 'border-box' },
@@ -73,6 +106,141 @@ function CheckLegend({ items, hidden, onToggle, style }) {
           </span>
         );
       })}
+    </div>
+  );
+}
+
+function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp }) {
+  function addCondicion() {
+    onChangeFiltros([...filtros, { id: Date.now(), campo: 'nombre', operador: 'ilike', valor: '' }]);
+  }
+  function updateCondicion(id, key, val) {
+    onChangeFiltros(filtros.map(f => {
+      if (f.id !== id) return f;
+      const updated = { ...f, [key]: val };
+      if (key === 'campo') {
+        const meta = CAMPOS_FILTRO.find(c => c.key === val);
+        updated.operador = (OPS_POR_TIPO[meta?.tipo || 'text'] || [])[0]?.[0] || 'eq';
+        updated.valor = '';
+      }
+      return updated;
+    }));
+  }
+  function removeCondicion(id) { onChangeFiltros(filtros.filter(f => f.id !== id)); }
+
+  const panelStyle = { background: '#0d0d0d', border: '1px solid #3f3f46', borderRadius: 10, padding: '14px 16px', marginBottom: 12 };
+  const btnLink = { background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13 };
+
+  return (
+    <div style={panelStyle}>
+      {filtros.length > 1 && (
+        <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <select value={op} onChange={e => onChangeOp(e.target.value)}
+            style={{ background: '#161616', border: '1px solid #0067FD', borderRadius: 6, color: '#0067FD', padding: '3px 8px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+            <option value="and">Y (AND)</option>
+            <option value="or">O (OR)</option>
+          </select>
+          <span style={{ color: '#52525b', fontSize: 12 }}>
+            {op === 'and' ? 'se deben cumplir todas las condiciones' : 'se debe cumplir al menos una condición'}
+          </span>
+        </div>
+      )}
+      {filtros.length === 0 && (
+        <p style={{ color: '#52525b', fontSize: 13, margin: '0 0 10px 0' }}>Sin filtros activos — añade una condición</p>
+      )}
+      {filtros.map((f, idx) => {
+        const meta = CAMPOS_FILTRO.find(c => c.key === f.campo) || CAMPOS_FILTRO[0];
+        const ops  = OPS_POR_TIPO[meta.tipo] || OPS_POR_TIPO.text;
+        const sinValor = ['is_null', 'is_not_null'].includes(f.operador);
+        const isSelectOp = meta.tipo === 'select' || meta.tipo === 'array';
+        return (
+          <div key={f.id} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}>
+            {idx > 0 && (
+              <span style={{ color: '#0067FD', fontSize: 11, fontWeight: 700, minWidth: 22, textAlign: 'right', flexShrink: 0 }}>
+                {op === 'and' ? 'Y' : 'O'}
+              </span>
+            )}
+            <select value={f.campo} onChange={e => updateCondicion(f.id, 'campo', e.target.value)}
+              style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 130 }}>
+              {CAMPOS_FILTRO.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+            </select>
+            <select value={f.operador} onChange={e => updateCondicion(f.id, 'operador', e.target.value)}
+              style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 118 }}>
+              {ops.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+            </select>
+            {!sinValor && (
+              isSelectOp ? (
+                <select value={f.valor} onChange={e => updateCondicion(f.id, 'valor', e.target.value)}
+                  style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 130 }}>
+                  <option value="">— elige —</option>
+                  {(meta.ops || []).map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              ) : (
+                <input
+                  type={meta.tipo === 'date' ? 'date' : (meta.tipo === 'number' || meta.tipo === 'number_nullable') ? 'number' : 'text'}
+                  value={f.valor}
+                  onChange={e => updateCondicion(f.id, 'valor', e.target.value)}
+                  placeholder="Valor"
+                  style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, width: 130 }}
+                />
+              )
+            )}
+            <button onClick={() => removeCondicion(f.id)}
+              style={{ ...btnLink, color: '#52525b', fontSize: 18, lineHeight: 1, padding: '0 4px' }}>×</button>
+          </div>
+        );
+      })}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: filtros.length > 0 ? 10 : 0 }}>
+        <button onClick={addCondicion} style={{ ...btnLink, color: '#0067FD' }}>+ Añadir condición</button>
+        {filtros.length > 0 && (
+          <button onClick={() => onChangeFiltros([])} style={{ ...btnLink, color: '#52525b', fontSize: 12 }}>Limpiar todo</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PanelOrdenar({ sorts, onChange }) {
+  const usados = new Set(sorts.map(s => s.campo));
+  function addSort() {
+    const libre = CAMPOS_SORT.find(c => !usados.has(c.key));
+    if (libre) onChange([...sorts, { campo: libre.key, dir: 'desc' }]);
+  }
+  function updateSort(idx, key, val) { onChange(sorts.map((s, i) => i === idx ? { ...s, [key]: val } : s)); }
+  function removeSort(idx) { onChange(sorts.filter((_, i) => i !== idx)); }
+
+  const panelStyle = { background: '#0d0d0d', border: '1px solid #3f3f46', borderRadius: 10, padding: '14px 16px', marginBottom: 12 };
+  const btnLink = { background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13 };
+
+  return (
+    <div style={panelStyle}>
+      {sorts.length === 0 && (
+        <p style={{ color: '#52525b', fontSize: 13, margin: '0 0 10px 0' }}>Sin ordenación — por defecto fecha más reciente</p>
+      )}
+      {sorts.map((s, idx) => (
+        <div key={idx} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
+          <select value={s.campo} onChange={e => updateSort(idx, 'campo', e.target.value)}
+            style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 140 }}>
+            {CAMPOS_SORT.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+          </select>
+          <select value={s.dir} onChange={e => updateSort(idx, 'dir', e.target.value)}
+            style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 130 }}>
+            <option value="desc">Descendente ↓</option>
+            <option value="asc">Ascendente ↑</option>
+          </select>
+          <button onClick={() => removeSort(idx)}
+            style={{ ...btnLink, color: '#52525b', fontSize: 18, lineHeight: 1, padding: '0 4px' }}>×</button>
+        </div>
+      ))}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: sorts.length > 0 ? 10 : 0 }}>
+        <button onClick={addSort} disabled={sorts.length >= CAMPOS_SORT.length}
+          style={{ ...btnLink, color: sorts.length >= CAMPOS_SORT.length ? '#3f3f46' : '#8b5cf6' }}>
+          + Añadir ordenación
+        </button>
+        {sorts.length > 0 && (
+          <button onClick={() => onChange([])} style={{ ...btnLink, color: '#52525b', fontSize: 12 }}>Restablecer</button>
+        )}
+      </div>
     </div>
   );
 }
@@ -761,9 +929,11 @@ export default function Finanzas() {
   const [loadingMovs, setLoadingMovs] = useState(true);
   const [errDash, setErrDash] = useState(null);
   const [errMovs, setErrMovs] = useState(null);
-  const [filtroTipo, setFiltroTipo] = useState('');
-  const [filtroCuenta, setFiltroCuenta] = useState('');
-  const [filtroCat, setFiltroCat] = useState('');
+  const [movFiltros, setMovFiltros]     = useState([]);
+  const [movFiltroOp, setMovFiltroOp]   = useState('and');
+  const [movSorts, setMovSorts]         = useState([]);
+  const [panelFiltro, setPanelFiltro]   = useState(false);
+  const [panelOrdenar, setPanelOrdenar] = useState(false);
   const [pagMovs, setPagMovs] = useState(1);
   const [mostrarTodos, setMostrarTodos] = useState(false);
   const [movEditando, setMovEditando] = useState(null);
@@ -834,11 +1004,14 @@ export default function Finanzas() {
     try {
       const token = await getToken();
       const params = new URLSearchParams({ desde, hasta, page });
-      if (filtroTipo) params.set('tipo', filtroTipo);
-      if (filtroCuenta) params.set('cuenta', filtroCuenta);
-      if (filtroCat) params.set('categoria', filtroCat);
       if (todos) params.set('todos', '1');
       else params.set('limit', String(limit));
+      const filtrosValidos = movFiltros.filter(f => f.campo && f.operador && (f.valor !== '' || ['is_null','is_not_null'].includes(f.operador)));
+      if (filtrosValidos.length > 0) {
+        params.set('filters', JSON.stringify(filtrosValidos.map(({ campo, operador, valor }) => ({ campo, operador, valor }))));
+        params.set('filterOp', movFiltroOp);
+      }
+      if (movSorts.length > 0) params.set('sorts', JSON.stringify(movSorts));
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -850,7 +1023,7 @@ export default function Finanzas() {
     } finally {
       setLoadingMovs(false);
     }
-  }, [desde, hasta, filtroTipo, filtroCuenta, filtroCat, movLimit]);
+  }, [desde, hasta, movFiltros, movFiltroOp, movSorts, movLimit]);
 
   useEffect(() => { cargarDashboard(); }, [cargarDashboard]);
 
@@ -1532,25 +1705,45 @@ export default function Finanzas() {
       {/* ── MOVIMIENTOS ── */}
       {tab === 'movimientos' && (
         <>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
               <DateRangePicker desde={desde} hasta={hasta} onApply={handleApplyMovimientos} />
               <button style={S.ghost} onClick={() => cargarMovimientos(pagMovs, mostrarTodos)}>↺</button>
             </div>
-            <select style={{ ...S.select, width: 'auto', minWidth: 120 }} value={filtroTipo} onChange={e => { setFiltroTipo(e.target.value); setPagMovs(1); }}>
-              <option value="">Todos los tipos</option>
-              <option value="Ingreso">Ingresos</option>
-              <option value="Gasto">Gastos</option>
-            </select>
-            <select style={{ ...S.select, width: 'auto', minWidth: 160 }} value={filtroCuenta} onChange={e => { setFiltroCuenta(e.target.value); setPagMovs(1); }}>
-              <option value="">Todas las cuentas</option>
-              {CUENTAS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
-            </select>
-            <select style={{ ...S.select, width: 'auto', minWidth: 160 }} value={filtroCat} onChange={e => { setFiltroCat(e.target.value); setPagMovs(1); }}>
-              <option value="">Todas las categorías</option>
-              {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <button
+              onClick={() => { setPanelFiltro(p => !p); setPanelOrdenar(false); }}
+              style={{ ...S.ghost, display: 'flex', alignItems: 'center', gap: 6, ...(movFiltros.length > 0 ? { borderColor: '#0067FD', color: '#0067FD' } : {}) }}>
+              ⚡ Filtros
+              {movFiltros.length > 0 && (
+                <span style={{ background: '#0067FD', color: 'white', borderRadius: 10, fontSize: 11, padding: '1px 7px', fontWeight: 700 }}>
+                  {movFiltros.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => { setPanelOrdenar(p => !p); setPanelFiltro(false); }}
+              style={{ ...S.ghost, display: 'flex', alignItems: 'center', gap: 6, ...(movSorts.length > 0 ? { borderColor: '#8b5cf6', color: '#8b5cf6' } : {}) }}>
+              ↕ Ordenar
+              {movSorts.length > 0 && (
+                <span style={{ color: '#8b5cf6', fontSize: 11, fontWeight: 600 }}>
+                  {movSorts.map(s => (CAMPOS_SORT.find(c => c.key === s.campo)?.label || s.campo) + (s.dir === 'asc' ? ' ↑' : ' ↓')).join(', ')}
+                </span>
+              )}
+            </button>
           </div>
+          {panelFiltro && (
+            <PanelFiltros
+              filtros={movFiltros} op={movFiltroOp}
+              onChangeFiltros={f => { setMovFiltros(f); setPagMovs(1); }}
+              onChangeOp={op => { setMovFiltroOp(op); setPagMovs(1); }}
+            />
+          )}
+          {panelOrdenar && (
+            <PanelOrdenar
+              sorts={movSorts}
+              onChange={s => { setMovSorts(s); setPagMovs(1); }}
+            />
+          )}
 
           <div style={S.card}>
             {loadingMovs ? (
