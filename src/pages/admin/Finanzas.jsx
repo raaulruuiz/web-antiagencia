@@ -57,7 +57,8 @@ const CAMPOS_SORT = [
   { key: 'cantidad',       label: 'Cantidad' },
   { key: 'beneficio',      label: 'Beneficio' },
   { key: 'base_imponible', label: 'Base Imponible' },
-  { key: 'fecha_factura',  label: 'Fecha Factura' },
+  { key: 'fecha_factura',    label: 'Fecha Factura' },
+  { key: 'importe_factura', label: 'Importe Factura' },
 ];
 
 const S = {
