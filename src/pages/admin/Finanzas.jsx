@@ -671,7 +671,7 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
             <input style={S.input} type="date" value={form.fecha_factura || ''} onChange={e => set('fecha_factura', e.target.value || null)} />
           </div>
           <div>
-            <label style={S.label}>Importe Factura (€)</label>
+            <label style={S.label}>Importe Factura (para corregir)</label>
             <input style={S.input} type="number" step="0.01" min="0" value={form.importe_factura ?? ''} onChange={e => set('importe_factura', e.target.value === '' ? null : e.target.value)} placeholder="—" />
           </div>
         </div>
