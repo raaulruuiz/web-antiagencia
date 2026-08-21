@@ -736,6 +736,7 @@ export default function Finanzas() {
   const [movFiltroTipo, setMovFiltroTipo] = useState('todos');
   const [movPagina, setMovPagina] = useState(1);
   const [movPorPagina, setMovPorPagina] = useState(10);
+  const [movLimit, setMovLimit] = useState(50);
   const [syncingClientes, setSyncingClientes] = useState(false);
   const [clienteSort, setClienteSort] = useState({ campo: 'beneficio', dir: 'desc' });
   const [clienteBusqueda, setClienteBusqueda] = useState('');
@@ -821,7 +822,7 @@ export default function Finanzas() {
     }
   }, [comparar, desdeComp, hastaComp]);
 
-  const cargarMovimientos = useCallback(async (page = 1, todos = false) => {
+  const cargarMovimientos = useCallback(async (page = 1, todos = false, limit = movLimit) => {
     setLoadingMovs(true);
     setErrMovs(null);
     try {
@@ -831,6 +832,7 @@ export default function Finanzas() {
       if (filtroCuenta) params.set('cuenta', filtroCuenta);
       if (filtroCat) params.set('categoria', filtroCat);
       if (todos) params.set('todos', '1');
+      else params.set('limit', String(limit));
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -842,7 +844,7 @@ export default function Finanzas() {
     } finally {
       setLoadingMovs(false);
     }
-  }, [desde, hasta, filtroTipo, filtroCuenta, filtroCat]);
+  }, [desde, hasta, filtroTipo, filtroCuenta, filtroCat, movLimit]);
 
   useEffect(() => { cargarDashboard(); }, [cargarDashboard]);
 
@@ -1554,11 +1556,18 @@ export default function Finanzas() {
                         <button style={S.ghost} disabled={pagMovs >= movimientos.pages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
                       </>
                     )}
-                    {movimientos.total > 50 && (
-                      <button style={S.ghost} onClick={() => { setMostrarTodos(t => !t); setPagMovs(1); }}>
-                        {mostrarTodos ? `Paginar (50/pág)` : `Mostrar todos (${movimientos.total})`}
-                      </button>
-                    )}
+                    <select
+                      value={mostrarTodos ? 'todos' : String(movLimit)}
+                      onChange={e => {
+                        const v = e.target.value;
+                        if (v === 'todos') { setMostrarTodos(true); setPagMovs(1); }
+                        else { const n = parseInt(v); setMovLimit(n); setMostrarTodos(false); setPagMovs(1); cargarMovimientos(1, false, n); }
+                      }}
+                      style={{ ...S.select, width: 'auto', fontSize: 13, padding: '7px 10px' }}
+                    >
+                      {[50, 100, 200].map(n => <option key={n} value={n}>{n} por página</option>)}
+                      <option value="todos">Todos ({movimientos.total})</option>
+                    </select>
                   </div>
                 </>
               );
