@@ -28,6 +28,12 @@ h1, h2, h3, h4, h5, h6 {
   --color-accent: #7000FF;
 }
 
+/* Suppress browser focus ring on buttons (mouse-only admin UI) */
+button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Utility classes */
 .text-brand { color: #0067FD; }
 .bg-brand { background-color: #0067FD; }
