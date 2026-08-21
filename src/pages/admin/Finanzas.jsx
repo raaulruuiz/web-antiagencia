@@ -40,8 +40,8 @@ const CAMPOS_FILTRO = [
   { key: 'irpf',            label: 'IRPF',            tipo: 'select',          ops: IRPF_OPTS },
   { key: 'importe_factura', label: 'Importe s/ factura', tipo: 'number_nullable' },
   { key: 'fecha_factura',   label: 'Fecha Factura',   tipo: 'date' },
-  { key: 'cliente_id',      label: 'Cliente',         tipo: 'uuid_nullable' },
-  { key: 'equipo_id',       label: 'Miembro equipo',  tipo: 'uuid_nullable' },
+  { key: 'cliente_ids',     label: 'Cliente',         tipo: 'uuid_nullable' },
+  { key: 'equipo_ids',      label: 'Miembro equipo',  tipo: 'uuid_nullable' },
 ];
 
 const OPS_POR_TIPO = {
@@ -62,8 +62,8 @@ const CAMPOS_SORT = [
   { key: 'base_imponible', label: 'Base Imponible' },
   { key: 'fecha_factura',   label: 'Fecha Factura' },
   { key: 'importe_factura', label: 'Importe Factura' },
-  { key: 'cliente_id',      label: 'Cliente' },
-  { key: 'equipo_id',       label: 'Miembro equipo' },
+  { key: 'cliente_ids',     label: 'Cliente' },
+  { key: 'equipo_ids',      label: 'Miembro equipo' },
 ];
 
 const S = {
@@ -599,7 +599,7 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
     nombre: '', fecha: new Date().toISOString().slice(0,10),
     tipo: 'Ingreso', cuenta: 'Ingresos', cantidad: '',
     iva: '21%', irpf: '0%', categorias: [],
-    cliente_id: null, equipo_id: null,
+    cliente_ids: [], equipo_ids: [],
   });
   const [loading, setLoading] = useState(false);
   const [ok, setOk] = useState(false);
@@ -707,24 +707,36 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {clientesLista.length > 0 && (
             <div>
-              <label style={S.label}>Cliente</label>
-              <select style={S.select} value={form.cliente_id || ''} onChange={e => set('cliente_id', e.target.value || null)}>
-                <option value="">— Sin cliente —</option>
-                {clientesLista.map(c => (
-                  <option key={c.id} value={c.id}>{c.nombre}{c.nombre_empresa ? ` (${c.nombre_empresa})` : ''}</option>
-                ))}
-              </select>
+              <label style={S.label}>Clientes</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                {clientesLista.map(c => {
+                  const sel = (form.cliente_ids || []).includes(c.id);
+                  return (
+                    <button key={c.id} type="button"
+                      onClick={() => set('cliente_ids', sel ? (form.cliente_ids || []).filter(id => id !== c.id) : [...(form.cliente_ids || []), c.id])}
+                      style={{ background: sel ? '#0067FD' : '#27272a', color: sel ? 'white' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>
+                      {c.nombre}{c.nombre_empresa ? ` (${c.nombre_empresa})` : ''}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
           {equipoLista.length > 0 && (
             <div>
-              <label style={S.label}>Miembro equipo</label>
-              <select style={S.select} value={form.equipo_id || ''} onChange={e => set('equipo_id', e.target.value || null)}>
-                <option value="">— Sin asignar —</option>
-                {equipoLista.map(e => (
-                  <option key={e.id} value={e.id}>{e.nombre}</option>
-                ))}
-              </select>
+              <label style={S.label}>Miembros equipo</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                {equipoLista.map(e => {
+                  const sel = (form.equipo_ids || []).includes(e.id);
+                  return (
+                    <button key={e.id} type="button"
+                      onClick={() => set('equipo_ids', sel ? (form.equipo_ids || []).filter(id => id !== e.id) : [...(form.equipo_ids || []), e.id])}
+                      style={{ background: sel ? '#0067FD' : '#27272a', color: sel ? 'white' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>
+                      {e.nombre}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -849,10 +861,8 @@ function ModalMovimiento({ m, onClose, onEditar }) {
           <Field label="IRPF retenido (yo)" value={fmt(m.irpf_retenido_yo)} />
           <Field label="Importe s/ factura" value={fmt(m.importe_factura)} />
           <Field label="Fecha Factura"   value={m.fecha_factura || '—'} />
-          {(m.cliente_nombre || m.cliente_id) && (
-            <Field label="Cliente" value={m.cliente_nombre || m.cliente_id} />
-          )}
-          <Field label="Miembro equipo" value={m.equipo_nombre || null} />
+          <Field label="Clientes" value={(m.clientes_info || []).length ? m.clientes_info.map(c => c.nombre).join(', ') : null} />
+          <Field label="Equipo" value={(m.equipo_info || []).length ? m.equipo_info.map(e => e.nombre).join(', ') : null} />
         </div>
 
         {/* Categorías */}
@@ -2002,7 +2012,7 @@ export default function Finanzas() {
               filtros={movFiltros} op={movFiltroOp}
               onChangeFiltros={f => { setMovFiltros(f); setPagMovs(1); }}
               onChangeOp={op => { setMovFiltroOp(op); setPagMovs(1); }}
-              listasAsignacion={{ cliente_id: filtroClientesLista, equipo_id: filtroEquipoLista }}
+              listasAsignacion={{ cliente_ids: filtroClientesLista, equipo_ids: filtroEquipoLista }}
             />
           )}
           {panelOrdenar && (
