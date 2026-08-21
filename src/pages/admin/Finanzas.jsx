@@ -631,7 +631,7 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
         </div>
         <div>
           <label style={S.label}>Fecha *</label>
-          <input style={S.input} type="date" value={form.fecha} onChange={e => set('fecha', e.target.value)} required />
+          <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={form.fecha} onChange={e => set('fecha', e.target.value)} required />
         </div>
         <div>
           <label style={S.label}>Tipo *</label>
@@ -668,7 +668,7 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div>
             <label style={S.label}>Fecha Factura</label>
-            <input style={S.input} type="date" value={form.fecha_factura || ''} onChange={e => set('fecha_factura', e.target.value || null)} />
+            <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={form.fecha_factura || ''} onChange={e => set('fecha_factura', e.target.value || null)} />
           </div>
           <div>
             <label style={S.label}>Importe Factura (para corregir)</label>
