@@ -59,6 +59,24 @@ function mesLabel(yyyymm) {
   return meses[parseInt(m, 10) - 1];
 }
 
+function CheckLegend({ items, hidden, onToggle, style }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 14px', ...style }}>
+      {items.map(({ key, name, color }) => {
+        const off = !!hidden[key];
+        return (
+          <span key={key} onClick={() => onToggle(key)}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', userSelect: 'none' }}>
+            <span style={{ width: 12, height: 12, borderRadius: 3, border: `2px solid ${color}`,
+              background: off ? 'transparent' : color, display: 'inline-block', flexShrink: 0 }} />
+            <span style={{ color: off ? '#52525b' : color, fontSize: 11 }}>{name}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 async function getToken() {
   const { data: { session } } = await supabase.auth.getSession();
   return session?.access_token || null;
@@ -721,6 +739,12 @@ export default function Finanzas() {
   const [syncingClientes, setSyncingClientes] = useState(false);
   const [clienteSort, setClienteSort] = useState({ campo: 'beneficio', dir: 'desc' });
   const [clienteBusqueda, setClienteBusqueda] = useState('');
+  const [evolHidden, setEvolHidden] = useState({});
+  const [catHidden, setCatHidden] = useState({});
+  const [ctaHidden, setCtaHidden] = useState({});
+  const toggleEvol = k => setEvolHidden(h => ({ ...h, [k]: !h[k] }));
+  const toggleCat  = k => setCatHidden(h  => ({ ...h, [k]: !h[k] }));
+  const toggleCta  = k => setCtaHidden(h  => ({ ...h, [k]: !h[k] }));
   const scrollEvolRef = useRef(null);
   const xAxisEvolRef  = useRef(null);
   const scrollCtaRef  = useRef(null);
@@ -1000,7 +1024,6 @@ export default function Finanzas() {
                     <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval="preserveStartEnd" tickFormatter={fmtEjeLabel} />
                     <YAxis tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip content={evolTooltip} />
-                    <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>} />
                   </>
                 );
                 // Zoom: calcular dominio Y para sincronizar eje fijo y gráfica scrollable
@@ -1029,20 +1052,20 @@ export default function Finanzas() {
                 ];
 
                 const evolBars = () => (<>
-                  <Bar dataKey="ingresos"    name="Ingresos"      fill="#22c55e" radius={[4,4,0,0]} />
-                  <Bar dataKey="gastos"      name="Gastos"        fill="#f87171" radius={[4,4,0,0]} />
-                  <Bar dataKey="beneficio"   name="Beneficio"     fill="#60a5fa" radius={[4,4,0,0]} />
-                  {dashComp && <Bar dataKey="ingresosAnt"  name="Ingresos ant."  fill="#166534" radius={[3,3,0,0]} />}
-                  {dashComp && <Bar dataKey="gastosAnt"    name="Gastos ant."    fill="#991b1b" radius={[3,3,0,0]} />}
-                  {dashComp && <Bar dataKey="beneficioAnt" name="Beneficio ant." fill="#1d4ed8" radius={[3,3,0,0]} />}
+                  <Bar dataKey="ingresos"    name="Ingresos"      fill="#22c55e" radius={[4,4,0,0]} hide={!!evolHidden['ingresos']} />
+                  <Bar dataKey="gastos"      name="Gastos"        fill="#f87171" radius={[4,4,0,0]} hide={!!evolHidden['gastos']} />
+                  <Bar dataKey="beneficio"   name="Beneficio"     fill="#60a5fa" radius={[4,4,0,0]} hide={!!evolHidden['beneficio']} />
+                  {dashComp && <Bar dataKey="ingresosAnt"  name="Ingresos ant."  fill="#166534" radius={[3,3,0,0]} hide={!!evolHidden['ingresos']} />}
+                  {dashComp && <Bar dataKey="gastosAnt"    name="Gastos ant."    fill="#991b1b" radius={[3,3,0,0]} hide={!!evolHidden['gastos']} />}
+                  {dashComp && <Bar dataKey="beneficioAnt" name="Beneficio ant." fill="#1d4ed8" radius={[3,3,0,0]} hide={!!evolHidden['beneficio']} />}
                 </>);
                 const evolLines = (<>
-                  <Line dataKey="ingresos"    name="Ingresos"      stroke="#22c55e" strokeWidth={2} dot={false} connectNulls />
-                  <Line dataKey="gastos"      name="Gastos"        stroke="#f87171" strokeWidth={2} dot={false} connectNulls />
-                  <Line dataKey="beneficio"   name="Beneficio"     stroke="#60a5fa" strokeWidth={2} dot={false} connectNulls />
-                  {dashComp && <Line dataKey="ingresosAnt"  name="Ingresos ant."  stroke="#166534" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
-                  {dashComp && <Line dataKey="gastosAnt"    name="Gastos ant."    stroke="#991b1b" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
-                  {dashComp && <Line dataKey="beneficioAnt" name="Beneficio ant." stroke="#1d4ed8" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls />}
+                  <Line dataKey="ingresos"    name="Ingresos"      stroke="#22c55e" strokeWidth={2} dot={false} connectNulls hide={!!evolHidden['ingresos']} />
+                  <Line dataKey="gastos"      name="Gastos"        stroke="#f87171" strokeWidth={2} dot={false} connectNulls hide={!!evolHidden['gastos']} />
+                  <Line dataKey="beneficio"   name="Beneficio"     stroke="#60a5fa" strokeWidth={2} dot={false} connectNulls hide={!!evolHidden['beneficio']} />
+                  {dashComp && <Line dataKey="ingresosAnt"  name="Ingresos ant."  stroke="#166534" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls hide={!!evolHidden['ingresos']} />}
+                  {dashComp && <Line dataKey="gastosAnt"    name="Gastos ant."    stroke="#991b1b" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls hide={!!evolHidden['gastos']} />}
+                  {dashComp && <Line dataKey="beneficioAnt" name="Beneficio ant." stroke="#1d4ed8" strokeWidth={1.5} strokeDasharray="5 5" dot={false} connectNulls hide={!!evolHidden['beneficio']} />}
                 </>);
 
                 // Ejes del modo zoom: XAxis fuera del chart (scroll sincronizado), sin Legend
@@ -1071,9 +1094,11 @@ export default function Finanzas() {
                       {zoomEvol > 0 ? (
                         <>
                           {/* Leyenda fuera del chart para no afectar la altura del área */}
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 14px', marginBottom: 6, paddingLeft: EVOL_Y_W + 4 }}>
-                            {evolLegendItems.map(l => <span key={l.name} style={{ color: l.color, fontSize: 11 }}>● {l.name}</span>)}
-                          </div>
+                          <CheckLegend
+                            items={[{key:'ingresos',name:'Ingresos',color:'#22c55e'},{key:'gastos',name:'Gastos',color:'#f87171'},{key:'beneficio',name:'Beneficio',color:'#60a5fa'}]}
+                            hidden={evolHidden} onToggle={toggleEvol}
+                            style={{ marginBottom: 6, paddingLeft: EVOL_Y_W + 4 }}
+                          />
                           <div style={{ display: 'flex' }}>
                             {/* Eje Y fijo: labels HTML con posición matemática exacta */}
                             <div style={{ width: EVOL_Y_W, flexShrink: 0, position: 'relative', height: ZOOM_H }}>
@@ -1112,17 +1137,24 @@ export default function Finanzas() {
                           </div>
                         </>
                       ) : (
-                        <ResponsiveContainer width="100%" height={200}>
-                          {viewEvol === 'barras' ? (
-                            <BarChart barSize={barW} data={evolData}>
-                              {evolAxes}{evolBars()}
-                            </BarChart>
-                          ) : (
-                            <LineChart data={evolData}>
-                              {evolAxes}{evolLines}
-                            </LineChart>
-                          )}
-                        </ResponsiveContainer>
+                        <>
+                          <CheckLegend
+                            items={[{key:'ingresos',name:'Ingresos',color:'#22c55e'},{key:'gastos',name:'Gastos',color:'#f87171'},{key:'beneficio',name:'Beneficio',color:'#60a5fa'}]}
+                            hidden={evolHidden} onToggle={toggleEvol}
+                            style={{ marginBottom: 8, paddingLeft: 8 }}
+                          />
+                          <ResponsiveContainer width="100%" height={200}>
+                            {viewEvol === 'barras' ? (
+                              <BarChart barSize={barW} data={evolData}>
+                                {evolAxes}{evolBars()}
+                              </BarChart>
+                            ) : (
+                              <LineChart data={evolData}>
+                                {evolAxes}{evolLines}
+                              </LineChart>
+                            )}
+                          </ResponsiveContainer>
+                        </>
                       )}
                     </div>
                   </>
@@ -1214,6 +1246,11 @@ export default function Finanzas() {
                       </div>
                     ) : (
                       <div style={{ ...S.card, padding: '16px 8px' }}>
+                        <CheckLegend
+                          items={cats.map((cat, i) => ({ key: cat, name: cat, color: ROJOS[i % ROJOS.length] }))}
+                          hidden={catHidden} onToggle={toggleCat}
+                          style={{ marginBottom: 8, paddingLeft: 8 }}
+                        />
                         <ResponsiveContainer width="100%" height={320}>
                           <LineChart data={datosEvo.map((e, i) => {
                             const c = dashComp?.evolucionPorCategoria?.datos?.[i];
@@ -1246,14 +1283,13 @@ export default function Finanzas() {
                                 );
                               }}
                             />
-                            <Legend wrapperStyle={{ fontSize: 11 }} formatter={(value, entry) => !String(value).endsWith(' ant.') ? <span style={{ color: entry.color }}>{value}</span> : null} />
                             {cats.map((cat, i) => (
                               <Line key={cat} type="monotone" dataKey={cat} name={cat}
-                                stroke={ROJOS[i % ROJOS.length]} strokeWidth={2} dot={false} connectNulls />
+                                stroke={ROJOS[i % ROJOS.length]} strokeWidth={2} dot={false} connectNulls hide={!!catHidden[cat]} />
                             ))}
                             {dashComp && cats.map((cat, i) => (
                               <Line key={cat + 'Ant'} type="monotone" dataKey={cat + 'Ant'} name={cat + ' ant.'}
-                                stroke={ROJOS[i % ROJOS.length]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" />
+                                stroke={ROJOS[i % ROJOS.length]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" hide={!!catHidden[cat]} />
                             ))}
                           </LineChart>
                         </ResponsiveContainer>
@@ -1335,7 +1371,6 @@ export default function Finanzas() {
                     <XAxis dataKey="periodo" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} interval="preserveStartEnd" tickFormatter={fmtEjeCta} />
                     <YAxis tickFormatter={fmtY} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip content={ctaTooltip} />
-                    <Legend wrapperStyle={{ fontSize: 11 }} formatter={(value, entry) => !String(value).endsWith(' ant.') ? <span style={{ color: entry.color }}>{value}</span> : null} />
                   </>
                 );
 
@@ -1385,9 +1420,11 @@ export default function Finanzas() {
                     <div style={{ ...S.card, marginBottom: 24, padding: '16px 8px' }}>
                       {zoomCuenta > 0 ? (
                         <>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 14px', marginBottom: 6, paddingLeft: CTA_Y_W + 4 }}>
-                            {ctaLegendItems.map(l => <span key={l.name} style={{ color: l.color, fontSize: 11 }}>● {l.name}</span>)}
-                          </div>
+                          <CheckLegend
+                            items={cuentas.map(c => ({ key: c, name: CUENTA_LABELS[c], color: CUENTA_COLORS[c] }))}
+                            hidden={ctaHidden} onToggle={toggleCta}
+                            style={{ marginBottom: 6, paddingLeft: CTA_Y_W + 4 }}
+                          />
                           <div style={{ display: 'flex' }}>
                             {/* Eje Y fijo: labels HTML con posición matemática exacta */}
                             <div style={{ width: CTA_Y_W, flexShrink: 0, position: 'relative', height: CTA_H }}>
@@ -1407,14 +1444,14 @@ export default function Finanzas() {
                               {viewCuenta === 'barras' ? (
                                 <BarChart width={zWidthCta} height={CTA_H} data={ctaData} barSize={zBarWCta} margin={CTA_M}>
                                   {zoomedAxesCta}
-                                  {cuentas.map(c => <Bar key={c} dataKey={c} name={CUENTA_LABELS[c]} fill={CUENTA_COLORS[c]} radius={[4,4,0,0]} />)}
-                                  {dashComp && cuentas.map(c => <Bar key={c+'Ant'} dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} fill={CUENTA_COLORS[c]} fillOpacity={0.4} radius={[3,3,0,0]} legendType="none" />)}
+                                  {cuentas.map(c => <Bar key={c} dataKey={c} name={CUENTA_LABELS[c]} fill={CUENTA_COLORS[c]} radius={[4,4,0,0]} hide={!!ctaHidden[c]} />)}
+                                  {dashComp && cuentas.map(c => <Bar key={c+'Ant'} dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} fill={CUENTA_COLORS[c]} fillOpacity={0.4} radius={[3,3,0,0]} legendType="none" hide={!!ctaHidden[c]} />)}
                                 </BarChart>
                               ) : (
                                 <LineChart width={zWidthCta} height={CTA_H} data={ctaData} margin={CTA_M}>
                                   {zoomedAxesCta}
-                                  {cuentas.map(c => <Line key={c} type="monotone" dataKey={c} name={CUENTA_LABELS[c]} stroke={CUENTA_COLORS[c]} strokeWidth={2} dot={false} connectNulls />)}
-                                  {dashComp && cuentas.map(c => <Line key={c+'Ant'} type="monotone" dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} stroke={CUENTA_COLORS[c]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" />)}
+                                  {cuentas.map(c => <Line key={c} type="monotone" dataKey={c} name={CUENTA_LABELS[c]} stroke={CUENTA_COLORS[c]} strokeWidth={2} dot={false} connectNulls hide={!!ctaHidden[c]} />)}
+                                  {dashComp && cuentas.map(c => <Line key={c+'Ant'} type="monotone" dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} stroke={CUENTA_COLORS[c]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" hide={!!ctaHidden[c]} />)}
                                 </LineChart>
                               )}
                             </div>
@@ -1430,21 +1467,28 @@ export default function Finanzas() {
                           </div>
                         </>
                       ) : (
-                        <ResponsiveContainer width="100%" height={220}>
-                          {viewCuenta === 'barras' ? (
-                            <BarChart barSize={barW} data={ctaData}>
-                              {ctaAxes}
-                              {cuentas.map(c => <Bar key={c} dataKey={c} name={CUENTA_LABELS[c]} fill={CUENTA_COLORS[c]} radius={[4,4,0,0]} />)}
-                              {dashComp && cuentas.map(c => <Bar key={c+'Ant'} dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} fill={CUENTA_COLORS[c]} fillOpacity={0.4} radius={[3,3,0,0]} legendType="none" />)}
-                            </BarChart>
-                          ) : (
-                            <LineChart data={ctaData}>
-                              {ctaAxes}
-                              {cuentas.map(c => <Line key={c} type="monotone" dataKey={c} name={CUENTA_LABELS[c]} stroke={CUENTA_COLORS[c]} strokeWidth={2} dot={false} connectNulls />)}
-                              {dashComp && cuentas.map(c => <Line key={c+'Ant'} type="monotone" dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} stroke={CUENTA_COLORS[c]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" />)}
-                            </LineChart>
-                          )}
-                        </ResponsiveContainer>
+                        <>
+                          <CheckLegend
+                            items={cuentas.map(c => ({ key: c, name: CUENTA_LABELS[c], color: CUENTA_COLORS[c] }))}
+                            hidden={ctaHidden} onToggle={toggleCta}
+                            style={{ marginBottom: 8, paddingLeft: 8 }}
+                          />
+                          <ResponsiveContainer width="100%" height={220}>
+                            {viewCuenta === 'barras' ? (
+                              <BarChart barSize={barW} data={ctaData}>
+                                {ctaAxes}
+                                {cuentas.map(c => <Bar key={c} dataKey={c} name={CUENTA_LABELS[c]} fill={CUENTA_COLORS[c]} radius={[4,4,0,0]} hide={!!ctaHidden[c]} />)}
+                                {dashComp && cuentas.map(c => <Bar key={c+'Ant'} dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} fill={CUENTA_COLORS[c]} fillOpacity={0.4} radius={[3,3,0,0]} legendType="none" hide={!!ctaHidden[c]} />)}
+                              </BarChart>
+                            ) : (
+                              <LineChart data={ctaData}>
+                                {ctaAxes}
+                                {cuentas.map(c => <Line key={c} type="monotone" dataKey={c} name={CUENTA_LABELS[c]} stroke={CUENTA_COLORS[c]} strokeWidth={2} dot={false} connectNulls hide={!!ctaHidden[c]} />)}
+                                {dashComp && cuentas.map(c => <Line key={c+'Ant'} type="monotone" dataKey={c+'Ant'} name={CUENTA_LABELS[c]+' ant.'} stroke={CUENTA_COLORS[c]} strokeWidth={1} strokeDasharray="4 4" strokeOpacity={0.5} dot={false} connectNulls legendType="none" hide={!!ctaHidden[c]} />)}
+                              </LineChart>
+                            )}
+                          </ResponsiveContainer>
+                        </>
                       )}
                     </div>
                   </>
