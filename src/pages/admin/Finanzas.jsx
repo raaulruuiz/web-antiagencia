@@ -586,9 +586,21 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
     nombre: '', fecha: new Date().toISOString().slice(0,10),
     tipo: 'Ingreso', cuenta: 'Ingresos', cantidad: '',
     iva: '21%', irpf: '0%', categorias: [],
+    cliente_id: null, equipo_id: null,
   });
   const [loading, setLoading] = useState(false);
   const [ok, setOk] = useState(false);
+  const [clientesLista, setClientesLista] = useState([]);
+  const [equipoLista, setEquipoLista] = useState([]);
+
+  useEffect(() => {
+    getToken().then(token => {
+      fetch(`${BACKEND_URL}/admin/finanzas/clientes/lista`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(d => setClientesLista(Array.isArray(d) ? d : [])).catch(() => {});
+      fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(d => setEquipoLista(Array.isArray(d) ? d : [])).catch(() => {});
+    });
+  }, []);
 
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
   function toggleCat(cat) { setForm(f => ({ ...f, categorias: f.categorias.includes(cat) ? f.categorias.filter(c => c !== cat) : [...f.categorias, cat] })); }
@@ -677,6 +689,33 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
           </div>
         </div>
       </div>
+
+      {(clientesLista.length > 0 || equipoLista.length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          {clientesLista.length > 0 && (
+            <div>
+              <label style={S.label}>Cliente</label>
+              <select style={S.select} value={form.cliente_id || ''} onChange={e => set('cliente_id', e.target.value || null)}>
+                <option value="">— Sin cliente —</option>
+                {clientesLista.map(c => (
+                  <option key={c.id} value={c.id}>{c.nombre}{c.nombre_empresa ? ` (${c.nombre_empresa})` : ''}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          {equipoLista.length > 0 && (
+            <div>
+              <label style={S.label}>Miembro equipo</label>
+              <select style={S.select} value={form.equipo_id || ''} onChange={e => set('equipo_id', e.target.value || null)}>
+                <option value="">— Sin asignar —</option>
+                {equipoLista.map(e => (
+                  <option key={e.id} value={e.id}>{e.nombre}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <label style={S.label}>Categorías</label>
@@ -797,6 +836,12 @@ function ModalMovimiento({ m, onClose, onEditar }) {
           <Field label="IRPF retenido (yo)" value={fmt(m.irpf_retenido_yo)} />
           <Field label="Importe Factura" value={fmt(m.importe_factura)} />
           <Field label="Fecha Factura"   value={m.fecha_factura || '—'} />
+          {(m.cliente_nombre || m.cliente_id) && (
+            <Field label="Cliente" value={m.cliente_nombre || m.cliente_id} />
+          )}
+          {(m.equipo_nombre || m.equipo_id) && (
+            <Field label="Miembro equipo" value={m.equipo_nombre || m.equipo_id} />
+          )}
         </div>
 
         {/* Categorías */}
