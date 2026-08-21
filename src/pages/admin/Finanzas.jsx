@@ -591,6 +591,49 @@ function DateRangePicker({ desde, hasta, onApply, showComparar, comparar, desdeC
   );
 }
 
+// ── Desplegable multiselect con checkboxes ──────────────────────
+function MultiCheckDrop({ label, opciones, seleccionados, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+  const etiqueta = seleccionados.length === 0 ? 'Ninguno'
+    : seleccionados.length === 1
+      ? (opciones.find(o => o.id === seleccionados[0])?.label || '1 seleccionado')
+      : `${seleccionados.length} seleccionados`;
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <label style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>{label}</label>
+      <button type="button" onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', background: '#27272a', border: '1px solid #3f3f46', color: seleccionados.length ? 'white' : '#71717a', borderRadius: 8, padding: '8px 12px', fontSize: 13, cursor: 'pointer', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box' }}>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{etiqueta}</span>
+        <span style={{ color: '#52525b', fontSize: 10, flexShrink: 0, marginLeft: 6 }}>{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', zIndex: 300, top: '100%', left: 0, right: 0, background: '#1c1c1e', border: '1px solid #3f3f46', borderRadius: 8, marginTop: 4, maxHeight: 220, overflowY: 'auto', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+          {opciones.map(o => {
+            const sel = seleccionados.includes(o.id);
+            return (
+              <label key={o.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #27272a', background: 'transparent' }}
+                onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={sel}
+                  onChange={() => onChange(sel ? seleccionados.filter(id => id !== o.id) : [...seleccionados, o.id])}
+                  style={{ accentColor: '#0067FD', width: 14, height: 14, flexShrink: 0 }} />
+                <span style={{ color: sel ? 'white' : '#a1a1aa', fontSize: 13 }}>{o.label}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Formulario (nuevo y edición) ────────────────────────────────
 
 function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
@@ -706,38 +749,20 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
       {(clientesLista.length > 0 || equipoLista.length > 0) && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {clientesLista.length > 0 && (
-            <div>
-              <label style={S.label}>Clientes</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                {clientesLista.map(c => {
-                  const sel = (form.cliente_ids || []).includes(c.id);
-                  return (
-                    <button key={c.id} type="button"
-                      onClick={() => set('cliente_ids', sel ? (form.cliente_ids || []).filter(id => id !== c.id) : [...(form.cliente_ids || []), c.id])}
-                      style={{ background: sel ? '#0067FD' : '#27272a', color: sel ? 'white' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>
-                      {c.nombre}{c.nombre_empresa ? ` (${c.nombre_empresa})` : ''}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <MultiCheckDrop
+              label="Clientes"
+              opciones={clientesLista.map(c => ({ id: c.id, label: c.nombre + (c.nombre_empresa ? ` (${c.nombre_empresa})` : '') }))}
+              seleccionados={form.cliente_ids || []}
+              onChange={ids => set('cliente_ids', ids)}
+            />
           )}
           {equipoLista.length > 0 && (
-            <div>
-              <label style={S.label}>Miembros equipo</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                {equipoLista.map(e => {
-                  const sel = (form.equipo_ids || []).includes(e.id);
-                  return (
-                    <button key={e.id} type="button"
-                      onClick={() => set('equipo_ids', sel ? (form.equipo_ids || []).filter(id => id !== e.id) : [...(form.equipo_ids || []), e.id])}
-                      style={{ background: sel ? '#0067FD' : '#27272a', color: sel ? 'white' : '#a1a1aa', border: 'none', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>
-                      {e.nombre}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <MultiCheckDrop
+              label="Miembros equipo"
+              opciones={equipoLista.map(e => ({ id: e.id, label: e.nombre }))}
+              seleccionados={form.equipo_ids || []}
+              onChange={ids => set('equipo_ids', ids)}
+            />
           )}
         </div>
       )}
