@@ -661,13 +661,19 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
             {IRPF_OPTS.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </div>
-        <div>
-          <label style={S.label}>Fecha Factura</label>
-          <input style={S.input} type="date" value={form.fecha_factura || ''} onChange={e => set('fecha_factura', e.target.value || null)} />
-        </div>
-        <div>
-          <label style={S.label}>Importe Factura (€)</label>
-          <input style={S.input} type="number" step="0.01" min="0" value={form.importe_factura ?? ''} onChange={e => set('importe_factura', e.target.value === '' ? null : e.target.value)} placeholder="—" />
+      </div>
+
+      <div style={{ background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, padding: '12px 14px' }}>
+        <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px 0' }}>Datos de factura (opcional)</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div>
+            <label style={S.label}>Fecha Factura</label>
+            <input style={S.input} type="date" value={form.fecha_factura || ''} onChange={e => set('fecha_factura', e.target.value || null)} />
+          </div>
+          <div>
+            <label style={S.label}>Importe Factura (€)</label>
+            <input style={S.input} type="number" step="0.01" min="0" value={form.importe_factura ?? ''} onChange={e => set('importe_factura', e.target.value === '' ? null : e.target.value)} placeholder="—" />
+          </div>
         </div>
       </div>
 
