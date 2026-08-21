@@ -40,6 +40,8 @@ const CAMPOS_FILTRO = [
   { key: 'irpf',            label: 'IRPF',            tipo: 'select',          ops: IRPF_OPTS },
   { key: 'importe_factura', label: 'Importe Factura', tipo: 'number_nullable' },
   { key: 'fecha_factura',   label: 'Fecha Factura',   tipo: 'date' },
+  { key: 'cliente_id',      label: 'Cliente',         tipo: 'uuid_nullable' },
+  { key: 'equipo_id',       label: 'Miembro equipo',  tipo: 'uuid_nullable' },
 ];
 
 const OPS_POR_TIPO = {
@@ -49,6 +51,7 @@ const OPS_POR_TIPO = {
   number_nullable: [['eq','='],['neq','≠'],['gt','>'],['gte','≥'],['lt','<'],['lte','≤'],['is_null','está vacío'],['is_not_null','no está vacío']],
   select:          [['eq','es'],['neq','no es']],
   array:           [['cs','contiene'],['not_cs','no contiene']],
+  uuid_nullable:   [['is_not_null','tiene asignado'],['is_null','no tiene asignado']],
 };
 
 const CAMPOS_SORT = [
@@ -57,8 +60,10 @@ const CAMPOS_SORT = [
   { key: 'cantidad',       label: 'Cantidad' },
   { key: 'beneficio',      label: 'Beneficio' },
   { key: 'base_imponible', label: 'Base Imponible' },
-  { key: 'fecha_factura',    label: 'Fecha Factura' },
+  { key: 'fecha_factura',   label: 'Fecha Factura' },
   { key: 'importe_factura', label: 'Importe Factura' },
+  { key: 'cliente_id',      label: 'Cliente' },
+  { key: 'equipo_id',       label: 'Miembro equipo' },
 ];
 
 const S = {
