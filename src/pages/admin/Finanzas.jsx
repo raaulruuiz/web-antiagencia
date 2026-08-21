@@ -1937,27 +1937,29 @@ export default function Finanzas() {
                       </div>
                     )}
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-                    {!mostrarTodos && movimientos.pages > 1 && (
-                      <>
-                        <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
-                        <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {movimientos.pages}</span>
-                        <button style={S.ghost} disabled={pagMovs >= movimientos.pages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
-                      </>
-                    )}
-                    <select
-                      value={mostrarTodos ? 'todos' : String(movLimit)}
-                      onChange={e => {
-                        const v = e.target.value;
-                        if (v === 'todos') { setMostrarTodos(true); setPagMovs(1); }
-                        else { const n = parseInt(v); setMovLimit(n); setMostrarTodos(false); setPagMovs(1); cargarMovimientos(1, false, n); }
-                      }}
-                      style={{ ...S.select, width: 'auto', fontSize: 13, padding: '7px 10px' }}
-                    >
-                      {[50, 100, 200].map(n => <option key={n} value={n}>{n} por página</option>)}
-                      <option value="todos">Todos ({movimientos.total})</option>
-                    </select>
-                  </div>
+                  {!movBusqueda && (
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                      {!mostrarTodos && movimientos.pages > 1 && (
+                        <>
+                          <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
+                          <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {movimientos.pages}</span>
+                          <button style={S.ghost} disabled={pagMovs >= movimientos.pages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
+                        </>
+                      )}
+                      <select
+                        value={mostrarTodos ? 'todos' : String(movLimit)}
+                        onChange={e => {
+                          const v = e.target.value;
+                          if (v === 'todos') { setMostrarTodos(true); setPagMovs(1); }
+                          else { const n = parseInt(v); setMovLimit(n); setMostrarTodos(false); setPagMovs(1); cargarMovimientos(1, false, n); }
+                        }}
+                        style={{ ...S.select, width: 'auto', fontSize: 13, padding: '7px 10px' }}
+                      >
+                        {[50, 100, 200].map(n => <option key={n} value={n}>{n} por página</option>)}
+                        <option value="todos">Todos ({movimientos.total})</option>
+                      </select>
+                    </div>
+                  )}
                 </>
               );
             })()}
