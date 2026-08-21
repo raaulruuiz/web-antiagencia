@@ -695,10 +695,12 @@ function ModalMovimiento({ m, onClose, onEditar }) {
   const esIngreso = m.tipo === 'Ingreso';
   const color = esIngreso ? '#22c55e' : '#f87171';
 
-  const Field = ({ label, value, mono }) => value == null || value === '' || value === '—' ? null : (
+  const Field = ({ label, value, mono }) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <span style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
-      <span style={{ color: mono ? '#a78bfa' : 'white', fontSize: 13, fontFamily: mono ? 'monospace' : 'inherit' }}>{value}</span>
+      <span style={{ color: (value == null || value === '' || value === '—') ? '#3f3f46' : mono ? '#a78bfa' : 'white', fontSize: 13, fontFamily: mono ? 'monospace' : 'inherit' }}>
+        {(value == null || value === '') ? '—' : value}
+      </span>
     </div>
   );
 
@@ -732,57 +734,52 @@ function ModalMovimiento({ m, onClose, onEditar }) {
           </div>
         </div>
 
-        {/* Importe principal */}
-        <div style={{ background: '#0d0d0d', borderRadius: 10, padding: '14px 16px', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* Importe principal — estructura fija siempre igual */}
+        <div style={{ background: '#0d0d0d', borderRadius: 10, padding: '14px 16px', marginBottom: 20, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
           <div>
             <p style={{ color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px 0' }}>Importe</p>
             <p style={{ color, fontSize: 22, fontWeight: 700, margin: 0 }}>{esIngreso ? '+' : '-'}{fmt(m.cantidad)}</p>
           </div>
-          {m.base_imponible != null && (
-            <div style={{ textAlign: 'right' }}>
-              <p style={{ color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px 0' }}>Base Imponible</p>
-              <p style={{ color: 'white', fontSize: 16, fontWeight: 600, margin: 0 }}>{fmt(m.base_imponible)}</p>
-            </div>
-          )}
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px 0' }}>Base Imponible</p>
+            <p style={{ color: 'white', fontSize: 16, fontWeight: 600, margin: 0 }}>{fmt(m.base_imponible)}</p>
+          </div>
           <div style={{ textAlign: 'right' }}>
             <p style={{ color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px 0' }}>Beneficio</p>
             <p style={{ color: m.beneficio >= 0 ? '#22c55e' : '#f87171', fontSize: 16, fontWeight: 600, margin: 0 }}>{fmt(m.beneficio)}</p>
           </div>
         </div>
 
-        {/* Campos en grid */}
+        {/* Campos en grid — estructura fija, siempre los mismos */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 20px', marginBottom: 20 }}>
-          <Field label="Tipo" value={m.tipo} />
-          <Field label="Cuenta" value={m.cuenta} />
-          <Field label="IVA" value={m.iva} />
-          <Field label="IVA a pagar" value={m.iva_a_pagar != null ? fmt(m.iva_a_pagar) : null} />
-          <Field label="IRPF" value={m.irpf} />
-          <Field label="IRPF a pagar" value={m.irpf_a_pagar != null ? fmt(m.irpf_a_pagar) : null} />
-          {m.irpf_retenido_yo > 0 && <Field label="IRPF retenido (yo)" value={fmt(m.irpf_retenido_yo)} />}
-          <Field label="Fecha Factura" value={m.fecha_factura} />
-          <Field label="Importe Factura" value={m.importe_factura != null ? fmt(m.importe_factura) : null} />
-          <Field label="Creado en Notion" value={m.notion_created_at ? m.notion_created_at.slice(0, 10) : null} />
+          <Field label="Tipo"            value={m.tipo} />
+          <Field label="Cuenta"          value={m.cuenta} />
+          <Field label="IVA"             value={m.iva} />
+          <Field label="IVA a pagar"     value={fmt(m.iva_a_pagar)} />
+          <Field label="IRPF"            value={m.irpf} />
+          <Field label="IRPF a pagar"    value={fmt(m.irpf_a_pagar)} />
+          <Field label="IRPF retenido (yo)" value={fmt(m.irpf_retenido_yo)} />
+          <Field label="Importe Factura" value={fmt(m.importe_factura)} />
+          <Field label="Fecha Factura"   value={m.fecha_factura || '—'} />
+          <Field label="Creado en Notion" value={m.notion_created_at ? m.notion_created_at.slice(0, 10) : '—'} />
         </div>
 
         {/* Categorías */}
-        {(m.categorias || []).length > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px 0' }}>Categorías</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {m.categorias.map(c => (
-                <span key={c} style={{ background: '#27272a', color: '#a1a1aa', fontSize: 12, padding: '3px 9px', borderRadius: 6 }}>{c}</span>
-              ))}
-            </div>
+        <div style={{ marginBottom: 16 }}>
+          <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px 0' }}>Categorías</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {(m.categorias || []).length > 0
+              ? m.categorias.map(c => <span key={c} style={{ background: '#27272a', color: '#a1a1aa', fontSize: 12, padding: '3px 9px', borderRadius: 6 }}>{c}</span>)
+              : <span style={{ color: '#52525b', fontSize: 13 }}>—</span>
+            }
           </div>
-        )}
+        </div>
 
         {/* ID Notion */}
-        {m.notion_id && (
-          <div>
-            <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0' }}>Notion ID</p>
-            <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>{m.notion_id}</span>
-          </div>
-        )}
+        <div>
+          <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0' }}>Notion ID</p>
+          <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>{m.notion_id || '—'}</span>
+        </div>
       </div>
     </div>
   );
