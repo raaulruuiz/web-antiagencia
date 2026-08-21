@@ -70,6 +70,27 @@ const S = {
   danger:  { background: 'transparent', color: '#f87171', border: '1px solid #7f1d1d', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer' },
 };
 
+// Misma lógica que calcularCampos del backend — rellena campos derivados si faltan
+function enriquecerMovimiento(m) {
+  if (!m) return m;
+  if (m.base_imponible != null && m.iva_a_pagar != null) return m; // ya completo
+  const ivaPct  = parseFloat(m.iva)  / 100 || 0;
+  const irpfPct = parseFloat(m.irpf) / 100 || 0;
+  const cantidad = m.cantidad || 0;
+  const esIngreso = m.tipo === 'Ingreso';
+  let extra;
+  if (esIngreso) {
+    const divisor = 1 + ivaPct - irpfPct;
+    const base = divisor > 0 ? Math.round(cantidad / divisor * 100) / 100 : cantidad;
+    extra = { base_imponible: base, iva_a_pagar: Math.round(base * ivaPct * 100) / 100, irpf_a_pagar: 0, irpf_retenido_yo: Math.round(base * irpfPct * 100) / 100 };
+  } else {
+    const base = irpfPct > 0 ? Math.round(cantidad / (1 - irpfPct) * 100) / 100 : cantidad;
+    const baseReal = ivaPct > 0 ? Math.round(base / (1 + ivaPct) * 100) / 100 : base;
+    extra = { base_imponible: baseReal, iva_a_pagar: ivaPct > 0 ? Math.round(-baseReal * ivaPct * 100) / 100 : 0, irpf_a_pagar: Math.round(irpfPct > 0 ? baseReal * irpfPct * 100 / 100 : 0), irpf_retenido_yo: 0 };
+  }
+  return { ...m, ...extra };
+}
+
 function fmt(n) {
   if (n == null) return '—';
   const r = Math.round(n);
@@ -789,7 +810,7 @@ function FilaMovimiento({ m, onVerDetalle }) {
   const esIngreso = m.tipo === 'Ingreso';
   return (
     <div
-      onClick={() => onVerDetalle && onVerDetalle(m)}
+      onClick={() => onVerDetalle && onVerDetalle(enriquecerMovimiento(m))}
       style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid #27272a', cursor: 'pointer' }}
     >
       <span style={{ color: esIngreso ? '#22c55e' : '#f87171', fontSize: 16, flexShrink: 0 }}>{esIngreso ? '↑' : '↓'}</span>
@@ -2035,7 +2056,7 @@ export default function Finanzas() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           {movsPag.map(m => (
-                            <div key={m.id} onClick={() => setMovDetail(m)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
+                            <div key={m.id} onClick={() => setMovDetail(enriquecerMovimiento(m))} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
                               <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
                               <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
                               {(m.categorias || []).slice(0, 2).map(cat => (
@@ -2246,7 +2267,7 @@ export default function Finanzas() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           {movsPag.map(m => (
-                            <div key={m.id} onClick={() => setMovDetail(m)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
+                            <div key={m.id} onClick={() => setMovDetail(enriquecerMovimiento(m))} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
                               <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
                               <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
                               {(m.categorias || []).slice(0, 2).map(cat => (
