@@ -661,6 +661,14 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
             {IRPF_OPTS.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </div>
+        <div>
+          <label style={S.label}>Fecha Factura</label>
+          <input style={S.input} type="date" value={form.fecha_factura || ''} onChange={e => set('fecha_factura', e.target.value || null)} />
+        </div>
+        <div>
+          <label style={S.label}>Importe Factura (€)</label>
+          <input style={S.input} type="number" step="0.01" min="0" value={form.importe_factura ?? ''} onChange={e => set('importe_factura', e.target.value === '' ? null : e.target.value)} placeholder="—" />
+        </div>
       </div>
 
       <div>
