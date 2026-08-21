@@ -788,18 +788,16 @@ function ModalMovimiento({ m, onClose, onEditar }) {
   );
 }
 
-function FilaMovimiento({ m, onEditar, onVerDetalle }) {
+function FilaMovimiento({ m, onVerDetalle }) {
   const esIngreso = m.tipo === 'Ingreso';
   return (
     <div
       onClick={() => onVerDetalle && onVerDetalle(m)}
-      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid #27272a', cursor: onVerDetalle ? 'pointer' : 'default' }}
+      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid #27272a', cursor: 'pointer' }}
     >
       <span style={{ color: esIngreso ? '#22c55e' : '#f87171', fontSize: 16, flexShrink: 0 }}>{esIngreso ? '↑' : '↓'}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div>
-          <p style={{ color: 'white', fontSize: 14, margin: 0, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.nombre}</p>
-        </div>
+        <p style={{ color: 'white', fontSize: 14, margin: 0, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.nombre}</p>
         <p style={{ color: '#52525b', fontSize: 12, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.fecha} · {m.cuenta}</p>
       </div>
       <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
@@ -813,12 +811,6 @@ function FilaMovimiento({ m, onEditar, onVerDetalle }) {
           <p style={{ color: '#52525b', fontSize: 11, margin: 0 }}>IVA {m.iva} · IRPF {m.irpf}</p>
         )}
       </div>
-      <button
-        onClick={e => { e.stopPropagation(); onEditar(m); }}
-        style={{ background: 'none', border: '1px solid #3f3f46', borderRadius: 6, color: '#71717a', padding: '4px 10px', fontSize: 12, cursor: 'pointer', flexShrink: 0 }}
-      >
-        Editar
-      </button>
     </div>
   );
 }
@@ -1253,7 +1245,7 @@ export default function Finanzas() {
         <ModalMovimiento
           m={movDetail}
           onClose={() => setMovDetail(null)}
-          onEditar={tab === 'movimientos' ? m => { setMovDetail(null); setMovEditando(m); } : null}
+          onEditar={m => { setMovDetail(null); setMovEditando(m); }}
         />
       )}
 
@@ -1908,12 +1900,12 @@ export default function Finanzas() {
                   <div style={{ display: 'grid', gridTemplateColumns: traspasos.length > 0 ? '1fr 1fr' : '1fr', gap: 24 }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Movimientos ({normales.length})</p>
-                      {normales.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} onVerDetalle={setMovDetail} />)}
+                      {normales.map(m => <FilaMovimiento key={m.id} m={m} onVerDetalle={setMovDetail} />)}
                     </div>
                     {traspasos.length > 0 && (
                       <div style={{ minWidth: 0, borderLeft: '1px solid #27272a', paddingLeft: 24 }}>
                         <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Traspasos ({traspasos.length})</p>
-                        {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} onVerDetalle={setMovDetail} />)}
+                        {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onVerDetalle={setMovDetail} />)}
                       </div>
                     )}
                   </div>
