@@ -43,10 +43,10 @@ const CAMPOS_FILTRO = [
 ];
 
 const OPS_POR_TIPO = {
-  text:            [['ilike','contiene'],['not_ilike','no contiene'],['eq','es igual a']],
+  text:            [['ilike','contiene'],['not_ilike','no contiene'],['eq','es igual a'],['is_null','está vacío'],['is_not_null','no está vacío']],
   date:            [['gte','es o después de'],['lte','es o antes de'],['gt','después de'],['lt','antes de'],['eq','es exactamente']],
   number:          [['eq','='],['neq','≠'],['gt','>'],['gte','≥'],['lt','<'],['lte','≤']],
-  number_nullable: [['eq','='],['neq','≠'],['gt','>'],['gte','≥'],['lt','<'],['lte','≤'],['is_null','está vacío'],['is_not_null','tiene valor']],
+  number_nullable: [['eq','='],['neq','≠'],['gt','>'],['gte','≥'],['lt','<'],['lte','≤'],['is_null','está vacío'],['is_not_null','no está vacío']],
   select:          [['eq','es'],['neq','no es']],
   array:           [['cs','contiene'],['not_cs','no contiene']],
 };
@@ -109,9 +109,45 @@ function CheckLegend({ items, hidden, onToggle, style }) {
   );
 }
 
+function MultiCheckboxDropdown({ opciones, valores, onChange }) {
+  const [open, setOpen] = React.useState(false);
+  const vals = Array.isArray(valores) ? valores : [];
+  const label = vals.length === 0 ? '— elige —' : vals.length === 1 ? vals[0] : `${vals.length} seleccionados`;
+  return (
+    <div style={{ position: 'relative' }}>
+      {open && <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setOpen(false)} />}
+      <button onClick={() => setOpen(p => !p)}
+        style={{ background: '#161616', border: `1px solid ${vals.length > 0 ? '#0067FD' : '#3f3f46'}`, borderRadius: 6, color: vals.length > 0 ? '#0067FD' : '#a1a1aa', padding: '5px 10px', fontSize: 12, cursor: 'pointer', minWidth: 130, textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
+        <span style={{ fontSize: 10, opacity: 0.6 }}>▾</span>
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', zIndex: 100, top: '100%', left: 0, marginTop: 4, background: '#161616', border: '1px solid #3f3f46', borderRadius: 8, minWidth: 200, maxHeight: 260, overflowY: 'auto', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+          {opciones.map(op => {
+            const checked = vals.includes(op);
+            return (
+              <label key={op} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', background: checked ? '#1a1a2e' : 'transparent' }}
+                onMouseEnter={e => { if (!checked) e.currentTarget.style.background = '#1f1f1f'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = checked ? '#1a1a2e' : 'transparent'; }}>
+                <input type="checkbox" checked={checked} onChange={e => {
+                  onChange(e.target.checked ? [...vals, op] : vals.filter(v => v !== op));
+                }} style={{ accentColor: '#0067FD', cursor: 'pointer' }} />
+                <span style={{ color: checked ? '#0067FD' : 'white', fontSize: 12 }}>{op}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp }) {
+  const defaultValor = meta => (meta?.tipo === 'select' || meta?.tipo === 'array') ? [] : '';
+
   function addCondicion() {
-    onChangeFiltros([...filtros, { id: Date.now(), campo: 'nombre', operador: 'ilike', valor: '' }]);
+    const meta = CAMPOS_FILTRO[0];
+    onChangeFiltros([...filtros, { id: Date.now(), campo: meta.key, operador: (OPS_POR_TIPO[meta.tipo] || [])[0]?.[0] || 'ilike', valor: defaultValor(meta) }]);
   }
   function updateCondicion(id, key, val) {
     onChangeFiltros(filtros.map(f => {
@@ -120,7 +156,7 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp }) {
       if (key === 'campo') {
         const meta = CAMPOS_FILTRO.find(c => c.key === val);
         updated.operador = (OPS_POR_TIPO[meta?.tipo || 'text'] || [])[0]?.[0] || 'eq';
-        updated.valor = '';
+        updated.valor = defaultValor(meta);
       }
       return updated;
     }));
@@ -151,7 +187,7 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp }) {
         const meta = CAMPOS_FILTRO.find(c => c.key === f.campo) || CAMPOS_FILTRO[0];
         const ops  = OPS_POR_TIPO[meta.tipo] || OPS_POR_TIPO.text;
         const sinValor = ['is_null', 'is_not_null'].includes(f.operador);
-        const isSelectOp = meta.tipo === 'select' || meta.tipo === 'array';
+        const isMulti = meta.tipo === 'select' || meta.tipo === 'array';
         return (
           <div key={f.id} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}>
             {idx > 0 && (
@@ -168,12 +204,12 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp }) {
               {ops.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
             </select>
             {!sinValor && (
-              isSelectOp ? (
-                <select value={f.valor} onChange={e => updateCondicion(f.id, 'valor', e.target.value)}
-                  style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 130 }}>
-                  <option value="">— elige —</option>
-                  {(meta.ops || []).map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
+              isMulti ? (
+                <MultiCheckboxDropdown
+                  opciones={meta.ops || []}
+                  valores={Array.isArray(f.valor) ? f.valor : []}
+                  onChange={v => updateCondicion(f.id, 'valor', v)}
+                />
               ) : (
                 <input
                   type={meta.tipo === 'date' ? 'date' : (meta.tipo === 'number' || meta.tipo === 'number_nullable') ? 'number' : 'text'}
@@ -1005,7 +1041,12 @@ export default function Finanzas() {
       const params = new URLSearchParams({ desde, hasta, page });
       if (todos) params.set('todos', '1');
       else params.set('limit', String(limit));
-      const filtrosValidos = movFiltros.filter(f => f.campo && f.operador && (f.valor !== '' || ['is_null','is_not_null'].includes(f.operador)));
+      const filtrosValidos = movFiltros.filter(f => {
+        if (!f.campo || !f.operador) return false;
+        if (['is_null','is_not_null'].includes(f.operador)) return true;
+        if (Array.isArray(f.valor)) return f.valor.length > 0;
+        return f.valor !== '';
+      });
       if (filtrosValidos.length > 0) {
         params.set('filters', JSON.stringify(filtrosValidos.map(({ campo, operador, valor }) => ({ campo, operador, valor }))));
         params.set('filterOp', movFiltroOp);
