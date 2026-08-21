@@ -51,7 +51,7 @@ const OPS_POR_TIPO = {
   number_nullable: [['eq','='],['neq','≠'],['gt','>'],['gte','≥'],['lt','<'],['lte','≤'],['is_null','está vacío'],['is_not_null','no está vacío']],
   select:          [['eq','es'],['neq','no es']],
   array:           [['cs','contiene'],['not_cs','no contiene']],
-  uuid_nullable:   [['is_not_null','tiene asignado'],['is_null','no tiene asignado']],
+  uuid_nullable:   [['is_not_null','tiene asignado'],['is_null','no tiene asignado'],['eq','es'],['neq','no es']],
 };
 
 const CAMPOS_SORT = [
@@ -169,7 +169,7 @@ function MultiCheckboxDropdown({ opciones, valores, onChange }) {
   );
 }
 
-function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp }) {
+function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp, listasAsignacion = {} }) {
   const defaultValor = meta => (meta?.tipo === 'select' || meta?.tipo === 'array') ? [] : '';
 
   function addCondicion() {
@@ -215,6 +215,8 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp }) {
         const ops  = OPS_POR_TIPO[meta.tipo] || OPS_POR_TIPO.text;
         const sinValor = ['is_null', 'is_not_null'].includes(f.operador);
         const isMulti = meta.tipo === 'select' || meta.tipo === 'array';
+        const isUuid  = meta.tipo === 'uuid_nullable';
+        const uuidOpciones = isUuid ? (listasAsignacion[meta.key] || []) : [];
         return (
           <div key={f.id} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}>
             {idx > 0 && (
@@ -237,6 +239,12 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp }) {
                   valores={Array.isArray(f.valor) ? f.valor : []}
                   onChange={v => updateCondicion(f.id, 'valor', v)}
                 />
+              ) : isUuid && uuidOpciones.length > 0 ? (
+                <select value={f.valor || ''} onChange={e => updateCondicion(f.id, 'valor', e.target.value)}
+                  style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 150 }}>
+                  <option value="">— Elige —</option>
+                  {uuidOpciones.map(o => <option key={o.id} value={o.id}>{o.nombre}{o.nombre_empresa ? ` (${o.nombre_empresa})` : ''}</option>)}
+                </select>
               ) : (
                 <input
                   type={meta.tipo === 'date' ? 'date' : (meta.tipo === 'number' || meta.tipo === 'number_nullable') ? 'number' : 'text'}
@@ -844,9 +852,7 @@ function ModalMovimiento({ m, onClose, onEditar }) {
           {(m.cliente_nombre || m.cliente_id) && (
             <Field label="Cliente" value={m.cliente_nombre || m.cliente_id} />
           )}
-          {(m.equipo_nombre || m.equipo_id) && (
-            <Field label="Miembro equipo" value={m.equipo_nombre || m.equipo_id} />
-          )}
+          <Field label="Miembro equipo" value={m.equipo_nombre || null} />
         </div>
 
         {/* Categorías */}
@@ -1154,6 +1160,19 @@ export default function Finanzas() {
   const [loadingComp, setLoadingComp] = useState(false);
   const [errComp, setErrComp] = useState(null);
   const [sinMovimientosMes, setSinMovimientosMes] = useState(false);
+  const [filtroClientesLista, setFiltroClientesLista] = useState([]);
+  const [filtroEquipoLista, setFiltroEquipoLista] = useState([]);
+
+  // Cargar listas para filtros (una vez al montar)
+  useEffect(() => {
+    getToken().then(token => {
+      const h = { Authorization: `Bearer ${token}` };
+      fetch(`${BACKEND_URL}/admin/finanzas/clientes/lista`, { headers: h })
+        .then(r => r.json()).then(d => setFiltroClientesLista(Array.isArray(d) ? d : [])).catch(() => {});
+      fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: h })
+        .then(r => r.json()).then(d => setFiltroEquipoLista(Array.isArray(d) ? d : [])).catch(() => {});
+    });
+  }, []);
 
   // Persistir en localStorage cuando cambian
   useEffect(() => { lsSet('fin_desde', desde); }, [desde]);
@@ -1983,6 +2002,7 @@ export default function Finanzas() {
               filtros={movFiltros} op={movFiltroOp}
               onChangeFiltros={f => { setMovFiltros(f); setPagMovs(1); }}
               onChangeOp={op => { setMovFiltroOp(op); setPagMovs(1); }}
+              listasAsignacion={{ cliente_id: filtroClientesLista, equipo_id: filtroEquipoLista }}
             />
           )}
           {panelOrdenar && (
