@@ -30,7 +30,6 @@ const TIPOS     = ['Ingreso','Gasto'];
 
 const CAMPOS_FILTRO = [
   { key: 'nombre',          label: 'Nombre',          tipo: 'text' },
-  { key: 'fecha',           label: 'Fecha',           tipo: 'date' },
   { key: 'tipo',            label: 'Tipo',            tipo: 'select',          ops: ['Ingreso','Gasto'] },
   { key: 'cuenta',          label: 'Cuenta',          tipo: 'select',          ops: CUENTAS.map(c => c.key) },
   { key: 'categorias',      label: 'Categoría',       tipo: 'array',           ops: CATEGORIAS },
