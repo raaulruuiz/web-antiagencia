@@ -38,7 +38,7 @@ const CAMPOS_FILTRO = [
   { key: 'base_imponible',  label: 'Base Imponible',  tipo: 'number' },
   { key: 'iva',             label: 'IVA',             tipo: 'select',          ops: IVA_OPTS },
   { key: 'irpf',            label: 'IRPF',            tipo: 'select',          ops: IRPF_OPTS },
-  { key: 'importe_factura', label: 'Importe Factura', tipo: 'number_nullable' },
+  { key: 'importe_factura', label: 'Importe nominal', tipo: 'number_nullable' },
   { key: 'fecha_factura',   label: 'Fecha Factura',   tipo: 'date' },
   { key: 'cliente_id',      label: 'Cliente',         tipo: 'uuid_nullable' },
   { key: 'equipo_id',       label: 'Miembro equipo',  tipo: 'uuid_nullable' },
@@ -697,7 +697,7 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
             <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={form.fecha_factura || ''} onChange={e => set('fecha_factura', e.target.value || null)} />
           </div>
           <div>
-            <label style={S.label}>Importe Factura (para corregir)</label>
+            <label style={S.label}>Importe nominal</label>
             <input style={S.input} type="number" step="0.01" min="0" value={form.importe_factura ?? ''} onChange={e => set('importe_factura', e.target.value === '' ? null : e.target.value)} placeholder="—" />
           </div>
         </div>
@@ -847,7 +847,7 @@ function ModalMovimiento({ m, onClose, onEditar }) {
           <Field label="IRPF"            value={m.irpf} />
           <Field label="IRPF a pagar"    value={fmt(m.irpf_a_pagar)} />
           <Field label="IRPF retenido (yo)" value={fmt(m.irpf_retenido_yo)} />
-          <Field label="Importe Factura" value={fmt(m.importe_factura)} />
+          <Field label="Importe nominal" value={fmt(m.importe_factura)} />
           <Field label="Fecha Factura"   value={m.fecha_factura || '—'} />
           {(m.cliente_nombre || m.cliente_id) && (
             <Field label="Cliente" value={m.cliente_nombre || m.cliente_id} />
