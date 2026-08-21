@@ -690,10 +690,111 @@ function ModalEditar({ movimiento, onGuardado, onCerrar }) {
 
 // ── Fila de movimiento ──────────────────────────────────────────
 
-function FilaMovimiento({ m, onEditar }) {
+function ModalMovimiento({ m, onClose, onEditar }) {
+  if (!m) return null;
+  const esIngreso = m.tipo === 'Ingreso';
+  const color = esIngreso ? '#22c55e' : '#f87171';
+
+  const Field = ({ label, value, mono }) => value == null || value === '' || value === '—' ? null : (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <span style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+      <span style={{ color: mono ? '#a78bfa' : 'white', fontSize: 13, fontFamily: mono ? 'monospace' : 'inherit' }}>{value}</span>
+    </div>
+  );
+
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 14, width: '100%', maxWidth: 520, maxHeight: '90vh', overflow: 'auto', padding: 24, position: 'relative' }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 20 }}>
+          <span style={{ color, fontSize: 22, flexShrink: 0, marginTop: 2 }}>{esIngreso ? '↑' : '↓'}</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ color: 'white', fontSize: 16, fontWeight: 700, margin: '0 0 4px 0', lineHeight: 1.3 }}>{m.nombre}</p>
+            <p style={{ color: '#71717a', fontSize: 13, margin: 0 }}>{m.fecha} · {m.cuenta}</p>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            {onEditar && (
+              <button
+                onClick={() => { onClose(); onEditar(m); }}
+                style={{ background: 'transparent', border: '1px solid #3f3f46', borderRadius: 6, color: '#71717a', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}
+              >Editar</button>
+            )}
+            <button
+              onClick={onClose}
+              style={{ background: 'transparent', border: 'none', color: '#52525b', fontSize: 20, cursor: 'pointer', lineHeight: 1, padding: '2px 6px' }}
+            >×</button>
+          </div>
+        </div>
+
+        {/* Importe principal */}
+        <div style={{ background: '#0d0d0d', borderRadius: 10, padding: '14px 16px', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <p style={{ color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px 0' }}>Importe</p>
+            <p style={{ color, fontSize: 22, fontWeight: 700, margin: 0 }}>{esIngreso ? '+' : '-'}{fmt(m.cantidad)}</p>
+          </div>
+          {m.base_imponible != null && (
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px 0' }}>Base Imponible</p>
+              <p style={{ color: 'white', fontSize: 16, fontWeight: 600, margin: 0 }}>{fmt(m.base_imponible)}</p>
+            </div>
+          )}
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px 0' }}>Beneficio</p>
+            <p style={{ color: m.beneficio >= 0 ? '#22c55e' : '#f87171', fontSize: 16, fontWeight: 600, margin: 0 }}>{fmt(m.beneficio)}</p>
+          </div>
+        </div>
+
+        {/* Campos en grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 20px', marginBottom: 20 }}>
+          <Field label="Tipo" value={m.tipo} />
+          <Field label="Cuenta" value={m.cuenta} />
+          <Field label="IVA" value={m.iva} />
+          <Field label="IVA a pagar" value={m.iva_a_pagar != null ? fmt(m.iva_a_pagar) : null} />
+          <Field label="IRPF" value={m.irpf} />
+          <Field label="IRPF a pagar" value={m.irpf_a_pagar != null ? fmt(m.irpf_a_pagar) : null} />
+          {m.irpf_retenido_yo > 0 && <Field label="IRPF retenido (yo)" value={fmt(m.irpf_retenido_yo)} />}
+          <Field label="Fecha Factura" value={m.fecha_factura} />
+          <Field label="Importe Factura" value={m.importe_factura != null ? fmt(m.importe_factura) : null} />
+          <Field label="Creado en Notion" value={m.notion_created_at ? m.notion_created_at.slice(0, 10) : null} />
+        </div>
+
+        {/* Categorías */}
+        {(m.categorias || []).length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px 0' }}>Categorías</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {m.categorias.map(c => (
+                <span key={c} style={{ background: '#27272a', color: '#a1a1aa', fontSize: 12, padding: '3px 9px', borderRadius: 6 }}>{c}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ID Notion */}
+        {m.notion_id && (
+          <div>
+            <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0' }}>Notion ID</p>
+            <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>{m.notion_id}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FilaMovimiento({ m, onEditar, onVerDetalle }) {
   const esIngreso = m.tipo === 'Ingreso';
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid #27272a' }}>
+    <div
+      onClick={() => onVerDetalle && onVerDetalle(m)}
+      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid #27272a', cursor: onVerDetalle ? 'pointer' : 'default' }}
+    >
       <span style={{ color: esIngreso ? '#22c55e' : '#f87171', fontSize: 16, flexShrink: 0 }}>{esIngreso ? '↑' : '↓'}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div>
@@ -712,7 +813,10 @@ function FilaMovimiento({ m, onEditar }) {
           <p style={{ color: '#52525b', fontSize: 11, margin: 0 }}>IVA {m.iva} · IRPF {m.irpf}</p>
         )}
       </div>
-      <button onClick={() => onEditar(m)} style={{ background: 'none', border: '1px solid #3f3f46', borderRadius: 6, color: '#71717a', padding: '4px 10px', fontSize: 12, cursor: 'pointer', flexShrink: 0 }}>
+      <button
+        onClick={e => { e.stopPropagation(); onEditar(m); }}
+        style={{ background: 'none', border: '1px solid #3f3f46', borderRadius: 6, color: '#71717a', padding: '4px 10px', fontSize: 12, cursor: 'pointer', flexShrink: 0 }}
+      >
         Editar
       </button>
     </div>
@@ -964,6 +1068,7 @@ export default function Finanzas() {
   const [pagMovs, setPagMovs] = useState(1);
   const [mostrarTodos, setMostrarTodos] = useState(false);
   const [movEditando, setMovEditando] = useState(null);
+  const [movDetail, setMovDetail] = useState(null);
   const [dashComp, setDashComp] = useState(null);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errComp, setErrComp] = useState(null);
@@ -1140,6 +1245,15 @@ export default function Finanzas() {
           movimiento={movEditando}
           onGuardado={() => { cargarMovimientos(pagMovs); cargarDashboard(); }}
           onCerrar={() => setMovEditando(null)}
+        />
+      )}
+
+      {/* Modal detalle */}
+      {movDetail && (
+        <ModalMovimiento
+          m={movDetail}
+          onClose={() => setMovDetail(null)}
+          onEditar={tab === 'movimientos' ? m => { setMovDetail(null); setMovEditando(m); } : null}
         />
       )}
 
@@ -1794,12 +1908,12 @@ export default function Finanzas() {
                   <div style={{ display: 'grid', gridTemplateColumns: traspasos.length > 0 ? '1fr 1fr' : '1fr', gap: 24 }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Movimientos ({normales.length})</p>
-                      {normales.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
+                      {normales.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} onVerDetalle={setMovDetail} />)}
                     </div>
                     {traspasos.length > 0 && (
                       <div style={{ minWidth: 0, borderLeft: '1px solid #27272a', paddingLeft: 24 }}>
                         <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Traspasos ({traspasos.length})</p>
-                        {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} />)}
+                        {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onEditar={setMovEditando} onVerDetalle={setMovDetail} />)}
                       </div>
                     )}
                   </div>
@@ -1932,7 +2046,7 @@ export default function Finanzas() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           {movsPag.map(m => (
-                            <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e' }}>
+                            <div key={m.id} onClick={() => setMovDetail(m)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
                               <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
                               <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
                               {(m.categorias || []).slice(0, 2).map(cat => (
@@ -2143,7 +2257,7 @@ export default function Finanzas() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           {movsPag.map(m => (
-                            <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e' }}>
+                            <div key={m.id} onClick={() => setMovDetail(m)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
                               <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
                               <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
                               {(m.categorias || []).slice(0, 2).map(cat => (
