@@ -733,6 +733,12 @@ export default function Finanzas() {
   const [clientes, setClientes] = useState([]);
   const [loadingClientes, setLoadingClientes] = useState(false);
   const [clienteAbierto, setClienteAbierto] = useState(null);
+  const [equipo, setEquipo] = useState([]);
+  const [loadingEquipo, setLoadingEquipo] = useState(false);
+  const [syncingEquipo, setSyncingEquipo] = useState(false);
+  const [equipoAbierto, setEquipoAbierto] = useState(null);
+  const [equipoBusqueda, setEquipoBusqueda] = useState('');
+  const [equipoSort, setEquipoSort] = useState({ campo: 'beneficio', dir: 'desc' });
   const [movFiltroTipo, setMovFiltroTipo] = useState('todos');
   const [movPagina, setMovPagina] = useState(1);
   const [movPorPagina, setMovPorPagina] = useState(10);
@@ -892,6 +898,27 @@ export default function Finanzas() {
 
   useEffect(() => { if (tab === 'clientes') cargarClientes(); }, [tab, cargarClientes]);
 
+  const cargarEquipo = useCallback(async () => {
+    setLoadingEquipo(true);
+    try {
+      const token = await getToken();
+      const params = new URLSearchParams();
+      if (desde) params.set('desde', desde);
+      if (hasta) params.set('hasta', hasta);
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/equipo?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await r.json();
+      setEquipo(data.equipo || []);
+    } catch (e) {
+      console.error('Error cargando equipo:', e);
+    } finally {
+      setLoadingEquipo(false);
+    }
+  }, [desde, hasta]);
+
+  useEffect(() => { if (tab === 'equipo') cargarEquipo(); }, [tab, cargarEquipo]);
+
   const tabStyle = (t) => ({
     background: tab === t ? '#27272a' : 'transparent',
     color: tab === t ? 'white' : '#71717a',
@@ -932,6 +959,7 @@ export default function Finanzas() {
         <button style={tabStyle('movimientos')} onClick={() => setTab('movimientos')}>Movimientos</button>
         <button style={tabStyle('fiscal')}      onClick={() => setTab('fiscal')}>Fiscal</button>
         <button style={tabStyle('clientes')}    onClick={() => setTab('clientes')}>Clientes</button>
+        <button style={tabStyle('equipo')}      onClick={() => setTab('equipo')}>Equipo</button>
         <button onClick={() => setTab('nuevo')}
           style={{ background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 14, cursor: 'pointer', fontWeight: 600 }}>
           + Nuevo
@@ -1797,6 +1825,204 @@ export default function Finanzas() {
                     </h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {inactivos.map(renderCliente)}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* ── EQUIPO ── */}
+      {tab === 'equipo' && (() => {
+        const getValorSortE = (e, campo) => {
+          const movs = (e.movimientos || []).filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
+          const ing  = movs.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + m.cantidad, 0);
+          const gas  = movs.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + m.cantidad, 0);
+          if (campo === 'facturacion') return ing;
+          if (campo === 'gasto') return gas;
+          return ing - gas;
+        };
+        const sortEquipo = arr => [...arr].sort((a, b) => {
+          const va = getValorSortE(a, equipoSort.campo);
+          const vb = getValorSortE(b, equipoSort.campo);
+          return equipoSort.dir === 'desc' ? vb - va : va - vb;
+        });
+        const buscarFiltroE = arr => {
+          const q = equipoBusqueda.trim().toLowerCase();
+          if (!q) return arr;
+          return arr.filter(e => e.nombre.toLowerCase().includes(q));
+        };
+
+        const nosotros   = sortEquipo(buscarFiltroE(equipo.filter(e => e.grupo === 'nosotros')));
+        const freelancers = sortEquipo(buscarFiltroE(equipo.filter(e => e.grupo === 'freelancer')));
+
+        const renderMiembro = (e) => {
+          const abierto = equipoAbierto === e.id;
+          const movsFiltered = (e.movimientos || []).filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
+          const tieneMovs = movsFiltered.length > 0;
+          const ingresos  = movsFiltered.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + m.cantidad, 0);
+          const gastos    = movsFiltered.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + m.cantidad, 0);
+          const balance   = ingresos - gastos;
+          return (
+            <div key={e.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
+              <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', gap: 12 }}>
+                <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none' }}>▶</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{e.nombre}</span>
+                  {e.email && <span style={{ color: '#71717a', fontSize: 12, marginLeft: 8 }}>{e.email}</span>}
+                </div>
+                <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
+                  <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
+                  <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
+                  <span style={{ fontSize: 13, color: balance >= 0 ? '#60a5fa' : '#fb923c', fontWeight: 600 }}>{fmt(balance)}</span>
+                </div>
+              </div>
+
+              {abierto && (
+                <div style={{ borderTop: '1px solid #27272a', padding: 16 }}>
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+                    {[
+                      { label: 'Ingresos', val: ingresos,  color: '#22c55e' },
+                      { label: 'Gastos',   val: -gastos,   color: '#f87171' },
+                      { label: 'Balance',  val: balance, color: balance >= 0 ? '#60a5fa' : '#fb923c' },
+                    ].map(({ label, val, color }) => (
+                      <div key={label} style={{ ...S.card, padding: '10px 16px', flex: 1, minWidth: 100 }}>
+                        <p style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>{label}</p>
+                        <p style={{ color, fontSize: 20, fontWeight: 700, margin: 0 }}>{fmt(val)}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {!tieneMovs ? (
+                    <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin movimientos en el periodo seleccionado.</p>
+                  ) : (() => {
+                    const movsTipo = movFiltroTipo === 'todos' ? movsFiltered : movsFiltered.filter(m => m.tipo === movFiltroTipo);
+                    const totalMovs = movsTipo.length;
+                    const paginas = movPorPagina === 'todos' ? 1 : Math.ceil(totalMovs / movPorPagina);
+                    const movsPag = movPorPagina === 'todos' ? movsTipo : movsTipo.slice((movPagina - 1) * movPorPagina, movPagina * movPorPagina);
+                    return (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                          <span style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 4 }}>Movimientos</span>
+                          {['todos', 'Ingreso', 'Gasto'].map(t => (
+                            <button key={t} onClick={() => { setMovFiltroTipo(t); setMovPagina(1); }}
+                              style={{ background: movFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: movFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
+                              {t === 'todos' ? 'Todos' : t === 'Ingreso' ? 'Ingresos' : 'Gastos'}
+                            </button>
+                          ))}
+                          <span style={{ color: '#52525b', fontSize: 11, marginLeft: 'auto' }}>{totalMovs} movimientos</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {movsPag.map(m => (
+                            <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e' }}>
+                              <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
+                              <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
+                              {(m.categorias || []).slice(0, 2).map(cat => (
+                                <span key={cat} style={{ background: '#27272a', color: '#71717a', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{cat}</span>
+                              ))}
+                              <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600, flexShrink: 0, minWidth: 70, textAlign: 'right' }}>
+                                {fmt(m.tipo === 'Ingreso' ? m.cantidad : -m.cantidad)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                          <select value={movPorPagina} onChange={e => { setMovPorPagina(e.target.value === 'todos' ? 'todos' : parseInt(e.target.value)); setMovPagina(1); }}
+                            style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 8px', fontSize: 12, cursor: 'pointer' }}>
+                            {[10, 50, 100].map(n => <option key={n} value={n}>{n} por página</option>)}
+                            <option value="todos">Todos</option>
+                          </select>
+                          {movPorPagina !== 'todos' && paginas > 1 && (
+                            <>
+                              <button onClick={() => setMovPagina(p => Math.max(1, p - 1))} disabled={movPagina === 1}
+                                style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>‹</button>
+                              <span style={{ color: '#71717a', fontSize: 12 }}>{movPagina} / {paginas}</span>
+                              <button onClick={() => setMovPagina(p => Math.min(paginas, p + 1))} disabled={movPagina === paginas}
+                                style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>›</button>
+                            </>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        return (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+              <DateRangePicker desde={desde} hasta={hasta} onApply={(d, h) => { setDesde(d); setHasta(h); }} />
+              <button
+                onClick={async () => {
+                  setSyncingEquipo(true);
+                  try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    await fetch(`${BACKEND_URL}/admin/finanzas/equipo/sync`, { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } });
+                    await cargarEquipo();
+                  } finally { setSyncingEquipo(false); }
+                }}
+                disabled={syncingEquipo}
+                style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', flexShrink: 0 }}
+              >{syncingEquipo ? 'Sincronizando…' : '↻ Sync Notion'}</button>
+
+              <input
+                type="text"
+                placeholder="Buscar persona…"
+                value={equipoBusqueda}
+                onChange={e => setEquipoBusqueda(e.target.value)}
+                style={{ background: '#18181b', border: '1px solid #3f3f46', color: 'white', borderRadius: 8, padding: '8px 12px', fontSize: 13, outline: 'none', width: 180 }}
+              />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '4px 6px' }}>
+                <span style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', paddingLeft: 4 }}>Ordenar</span>
+                {[
+                  { key: 'beneficio',   label: 'Beneficio' },
+                  { key: 'facturacion', label: 'Facturación' },
+                  { key: 'gasto',       label: 'Gasto' },
+                ].map(({ key, label }) => (
+                  <button key={key}
+                    onClick={() => setEquipoSort(s => s.campo === key ? { campo: key, dir: s.dir === 'desc' ? 'asc' : 'desc' } : { campo: key, dir: 'desc' })}
+                    style={{
+                      background: equipoSort.campo === key ? '#3f3f46' : 'transparent',
+                      border: 'none', color: equipoSort.campo === key ? 'white' : '#71717a',
+                      borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer',
+                    }}>
+                    {label}{equipoSort.campo === key ? (equipoSort.dir === 'desc' ? ' ↓' : ' ↑') : ''}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {loadingEquipo ? (
+              <p style={{ color: '#71717a', fontSize: 14 }}>Cargando equipo…</p>
+            ) : equipo.length === 0 ? (
+              <div style={{ ...S.card, padding: 24, textAlign: 'center' }}>
+                <p style={{ color: '#71717a', fontSize: 14, margin: 0 }}>No hay datos. Pulsa «↻ Sync Notion» para importar.</p>
+              </div>
+            ) : (
+              <>
+                {nosotros.length > 0 && (
+                  <div style={{ marginBottom: 24 }}>
+                    <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+                      Nosotros <span style={{ color: '#a1a1aa' }}>({nosotros.length})</span>
+                    </h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {nosotros.map(renderMiembro)}
+                    </div>
+                  </div>
+                )}
+                {freelancers.length > 0 && (
+                  <div>
+                    <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+                      Freelancer <span style={{ color: '#a1a1aa' }}>({freelancers.length})</span>
+                    </h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {freelancers.map(renderMiembro)}
                     </div>
                   </div>
                 )}
