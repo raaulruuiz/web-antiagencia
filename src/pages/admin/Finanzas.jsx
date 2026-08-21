@@ -1052,6 +1052,7 @@ export default function Finanzas() {
   const [movPagina, setMovPagina] = useState(1);
   const [movPorPagina, setMovPorPagina] = useState(10);
   const [movLimit, setMovLimit] = useState(50);
+  const [movBusqueda, setMovBusqueda] = useState('');
   const [syncingClientes, setSyncingClientes] = useState(false);
   const [clienteSort, setClienteSort] = useState({ campo: 'beneficio', dir: 'desc' });
   const [clienteBusqueda, setClienteBusqueda] = useState('');
@@ -1888,6 +1889,13 @@ export default function Finanzas() {
                 </span>
               )}
             </button>
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={movBusqueda}
+              onChange={e => { setMovBusqueda(e.target.value); setPagMovs(1); }}
+              style={{ ...S.input, width: 180, marginLeft: 'auto' }}
+            />
           </div>
           {panelFiltro && (
             <PanelFiltros
@@ -1911,8 +1919,10 @@ export default function Finanzas() {
             ) : movimientos.items.length === 0 ? (
               <p style={{ color: '#52525b', textAlign: 'center', padding: 24 }}>Sin movimientos para este periodo</p>
             ) : (() => {
-              const normales  = movimientos.items.filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
-              const traspasos = movimientos.items.filter(m =>  (m.categorias || []).includes('Traspaso Entre Cuentas'));
+              const q = movBusqueda.trim().toLowerCase();
+              const itemsFiltrados = q ? movimientos.items.filter(m => m.nombre?.toLowerCase().includes(q)) : movimientos.items;
+              const normales  = itemsFiltrados.filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
+              const traspasos = itemsFiltrados.filter(m =>  (m.categorias || []).includes('Traspaso Entre Cuentas'));
               return (
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: traspasos.length > 0 ? '1fr 1fr' : '1fr', gap: 24 }}>
