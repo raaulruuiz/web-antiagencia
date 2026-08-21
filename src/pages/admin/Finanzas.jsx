@@ -1921,8 +1921,13 @@ export default function Finanzas() {
             ) : (() => {
               const q = movBusqueda.trim().toLowerCase();
               const itemsFiltrados = q ? movimientos.items.filter(m => m.nombre?.toLowerCase().includes(q)) : movimientos.items;
-              const normales  = itemsFiltrados.filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
-              const traspasos = itemsFiltrados.filter(m =>  (m.categorias || []).includes('Traspaso Entre Cuentas'));
+
+              // Paginación: server-side cuando no hay búsqueda, client-side cuando sí
+              const totalPages = q ? Math.ceil(itemsFiltrados.length / movLimit) : movimientos.pages;
+              const pageItems  = q ? itemsFiltrados.slice((pagMovs - 1) * movLimit, pagMovs * movLimit) : itemsFiltrados;
+
+              const normales  = pageItems.filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
+              const traspasos = pageItems.filter(m =>  (m.categorias || []).includes('Traspaso Entre Cuentas'));
               return (
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: traspasos.length > 0 ? '1fr 1fr' : '1fr', gap: 24 }}>
@@ -1937,15 +1942,15 @@ export default function Finanzas() {
                       </div>
                     )}
                   </div>
-                  {!movBusqueda && (
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-                      {!mostrarTodos && movimientos.pages > 1 && (
-                        <>
-                          <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
-                          <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {movimientos.pages}</span>
-                          <button style={S.ghost} disabled={pagMovs >= movimientos.pages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
-                        </>
-                      )}
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                    {!mostrarTodos && totalPages > 1 && (
+                      <>
+                        <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
+                        <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {totalPages}</span>
+                        <button style={S.ghost} disabled={pagMovs >= totalPages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
+                      </>
+                    )}
+                    {!q && (
                       <select
                         value={mostrarTodos ? 'todos' : String(movLimit)}
                         onChange={e => {
@@ -1958,8 +1963,8 @@ export default function Finanzas() {
                         {[50, 100, 200].map(n => <option key={n} value={n}>{n} por página</option>)}
                         <option value="todos">Todos ({movimientos.total})</option>
                       </select>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </>
               );
             })()}
