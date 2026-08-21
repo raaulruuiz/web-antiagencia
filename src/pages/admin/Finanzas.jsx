@@ -678,8 +678,12 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
       });
       if (!r.ok) throw new Error(await r.text());
       setOk(true);
-      if (!esEdicion) setForm(f => ({ ...f, nombre: '', cantidad: '', categorias: [] }));
-      setTimeout(() => { setOk(false); onGuardado(); }, 1200);
+      if (esEdicion) {
+        onGuardado({ ...form, cantidad: parseFloat(form.cantidad) });
+      } else {
+        setForm(f => ({ ...f, nombre: '', cantidad: '', categorias: [] }));
+        setTimeout(() => { setOk(false); onGuardado(null); }, 1200);
+      }
     } catch (err) {
       alert('Error: ' + err.message);
     } finally {
@@ -805,7 +809,7 @@ function ModalEditar({ movimiento, onGuardado, onCerrar }) {
         </div>
         <FormularioMovimiento
           inicial={movimiento}
-          onGuardado={() => { onGuardado(); onCerrar(); }}
+          onGuardado={(data) => { onGuardado(data); onCerrar(); }}
           onCancelar={onCerrar}
         />
       </div>
@@ -1417,7 +1421,16 @@ export default function Finanzas() {
       {movEditando && (
         <ModalEditar
           movimiento={movEditando}
-          onGuardado={() => { cargarMovimientos(pagMovs); cargarDashboard(); }}
+          onGuardado={(data) => {
+            if (data && movEditando) {
+              setMovimientos(prev => ({
+                ...prev,
+                items: prev.items.map(m => m.id === movEditando.id ? { ...m, ...data } : m),
+              }));
+            }
+            cargarMovimientos(pagMovs);
+            cargarDashboard();
+          }}
           onCerrar={() => setMovEditando(null)}
         />
       )}
