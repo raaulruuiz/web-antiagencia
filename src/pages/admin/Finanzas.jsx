@@ -110,7 +110,7 @@ function CheckLegend({ items, hidden, onToggle, style }) {
 }
 
 function MultiCheckboxDropdown({ opciones, valores, onChange }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const vals = Array.isArray(valores) ? valores : [];
   const label = vals.length === 0 ? '— elige —' : vals.length === 1 ? vals[0] : `${vals.length} seleccionados`;
   return (
