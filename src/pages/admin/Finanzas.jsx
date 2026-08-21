@@ -810,7 +810,7 @@ function FilaMovimiento({ m, onVerDetalle }) {
   const esIngreso = m.tipo === 'Ingreso';
   return (
     <div
-      onClick={() => onVerDetalle && onVerDetalle(enriquecerMovimiento(m))}
+      onClick={() => onVerDetalle && onVerDetalle(m.id)}
       style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid #27272a', cursor: 'pointer' }}
     >
       <span style={{ color: esIngreso ? '#22c55e' : '#f87171', fontSize: 16, flexShrink: 0 }}>{esIngreso ? '↑' : '↓'}</span>
@@ -1092,6 +1092,17 @@ export default function Finanzas() {
   useEffect(() => { lsSet('fin_comparar', comparar); }, [comparar]);
   useEffect(() => { lsSet('fin_desdeComp', desdeComp); }, [desdeComp]);
   useEffect(() => { lsSet('fin_hastaComp', hastaComp); }, [hastaComp]);
+
+  async function abrirDetalle(id) {
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await r.json();
+      if (r.ok) setMovDetail(data);
+    } catch (e) { console.error(e); }
+  }
 
   function handleApplyDashboard(d, h, doComp, dComp, hComp) {
     setDesde(d); setHasta(h);
@@ -1933,12 +1944,12 @@ export default function Finanzas() {
                   <div style={{ display: 'grid', gridTemplateColumns: traspasos.length > 0 ? '1fr 1fr' : '1fr', gap: 24 }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Movimientos ({normales.length})</p>
-                      {normales.map(m => <FilaMovimiento key={m.id} m={m} onVerDetalle={setMovDetail} />)}
+                      {normales.map(m => <FilaMovimiento key={m.id} m={m} onVerDetalle={abrirDetalle} />)}
                     </div>
                     {traspasos.length > 0 && (
                       <div style={{ minWidth: 0, borderLeft: '1px solid #27272a', paddingLeft: 24 }}>
                         <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Traspasos ({traspasos.length})</p>
-                        {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onVerDetalle={setMovDetail} />)}
+                        {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onVerDetalle={abrirDetalle} />)}
                       </div>
                     )}
                   </div>
@@ -2073,7 +2084,7 @@ export default function Finanzas() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           {movsPag.map(m => (
-                            <div key={m.id} onClick={() => setMovDetail(enriquecerMovimiento(m))} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
+                            <div key={m.id} onClick={() => abrirDetalle(m.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
                               <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
                               <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
                               {(m.categorias || []).slice(0, 2).map(cat => (
@@ -2284,7 +2295,7 @@ export default function Finanzas() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           {movsPag.map(m => (
-                            <div key={m.id} onClick={() => setMovDetail(enriquecerMovimiento(m))} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
+                            <div key={m.id} onClick={() => abrirDetalle(m.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
                               <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
                               <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
                               {(m.categorias || []).slice(0, 2).map(cat => (
