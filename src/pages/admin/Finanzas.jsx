@@ -1564,6 +1564,9 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
   const [editNombreId, setEditNombreId] = useState(null);
   const [editNombreVal, setEditNombreVal] = useState('');
   const nombreInputRef = useRef(null);
+  const [colCalcs, setColCalcs] = useState(() => { try { const v = localStorage.getItem('fin-col-calcs'); return v ? JSON.parse(v) : {}; } catch { return {}; } });
+  const [openCalcKey, setOpenCalcKey] = useState(null);
+  const tfootRef = useRef(null);
 
   useEffect(() => {
     if (editNombreId && nombreInputRef.current) nombreInputRef.current.focus();
@@ -1574,6 +1577,75 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
       onGuardarCelda(editNombreId, 'nombre', editNombreVal.trim());
     }
     setEditNombreId(null);
+  }
+
+  useEffect(() => {
+    if (!openCalcKey) return;
+    function handler(e) { if (tfootRef.current && !tfootRef.current.contains(e.target)) setOpenCalcKey(null); }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [openCalcKey]);
+
+  function setColCalc(key, val) {
+    const next = { ...colCalcs, [key]: val };
+    setColCalcs(next);
+    try { localStorage.setItem('fin-col-calcs', JSON.stringify(next)); } catch {}
+  }
+
+  const CALC_NUMERIC_KEYS = ['cantidad','importe_factura','base_imponible','beneficio','ivaAPagar','irpfAPagar','irpf_retenido_yo'];
+  const CALC_DATE_KEYS = ['fecha','fecha_factura','created_at','updated_at'];
+  const CALC_NUMERIC_OPTS = [
+    { val:'sum', label:'Sum' }, { val:'average', label:'Average' }, { val:'median', label:'Median' },
+    { val:'min', label:'Min' }, { val:'max', label:'Max' }, { val:'range', label:'Range' },
+  ];
+  const CALC_DATE_OPTS = [
+    { val:'earliest', label:'Earliest date' }, { val:'latest', label:'Latest date' }, { val:'date_range', label:'Date range' },
+  ];
+  const CALC_COMMON_OPTS = [
+    { val:'none', label:'None' }, { val:'count_all', label:'Count all' },
+    { val:'count_values', label:'Count values' }, { val:'count_unique', label:'Count unique' },
+    { val:'count_empty', label:'Count empty' }, { val:'count_not_empty', label:'Count not empty' },
+    { val:'pct_empty', label:'% empty' }, { val:'pct_not_empty', label:'% not empty' },
+  ];
+  const CALC_SHORT = { sum:'SUM', average:'AVG', median:'MEDIAN', min:'MIN', max:'MAX', range:'RANGE', count_all:'COUNT', count_values:'COUNT', count_unique:'UNIQUE', count_empty:'EMPTY', count_not_empty:'NOT EMPTY', pct_empty:'% EMPTY', pct_not_empty:'% FILLED', earliest:'EARLIEST', latest:'LATEST', date_range:'DATE RANGE' };
+
+  function getCalcOpts(key) {
+    if (CALC_NUMERIC_KEYS.includes(key)) return [...CALC_NUMERIC_OPTS, ...CALC_COMMON_OPTS];
+    if (CALC_DATE_KEYS.includes(key)) return [...CALC_DATE_OPTS, ...CALC_COMMON_OPTS];
+    return CALC_COMMON_OPTS;
+  }
+
+  function calcVal(key, type) {
+    if (!type || type === 'none') return null;
+    const vals = items.map(m => m[key]);
+    const notEmpty = v => v != null && v !== '' && !(Array.isArray(v) && v.length === 0);
+    switch(type) {
+      case 'count_all':       return items.length;
+      case 'count_values':    return vals.filter(notEmpty).length;
+      case 'count_unique':    return new Set(vals.filter(v=>v!=null).map(v=>JSON.stringify(v))).size;
+      case 'count_empty':     return vals.filter(v=>!notEmpty(v)).length;
+      case 'count_not_empty': return vals.filter(notEmpty).length;
+      case 'pct_empty':       return items.length ? +(vals.filter(v=>!notEmpty(v)).length/items.length*100).toFixed(1) : 0;
+      case 'pct_not_empty':   return items.length ? +(vals.filter(notEmpty).length/items.length*100).toFixed(1) : 0;
+      case 'sum':     { const ns=vals.filter(v=>v!=null); return ns.reduce((a,b)=>a+b,0); }
+      case 'average': { const ns=vals.filter(v=>v!=null); return ns.length?ns.reduce((a,b)=>a+b,0)/ns.length:null; }
+      case 'median':  { const ns=vals.filter(v=>v!=null).sort((a,b)=>a-b); if(!ns.length) return null; const mid=Math.floor(ns.length/2); return ns.length%2?ns[mid]:(ns[mid-1]+ns[mid])/2; }
+      case 'min':     { const ns=vals.filter(v=>v!=null); return ns.length?Math.min(...ns):null; }
+      case 'max':     { const ns=vals.filter(v=>v!=null); return ns.length?Math.max(...ns):null; }
+      case 'range':   { const ns=vals.filter(v=>v!=null); return ns.length?Math.max(...ns)-Math.min(...ns):null; }
+      case 'earliest':   { const ds=vals.filter(v=>v).sort(); return ds.length?ds[0].slice(0,10):null; }
+      case 'latest':     { const ds=vals.filter(v=>v).sort(); return ds.length?ds[ds.length-1].slice(0,10):null; }
+      case 'date_range': { const ds=vals.filter(v=>v).sort(); if(ds.length<2) return null; return Math.round((new Date(ds[ds.length-1])-new Date(ds[0]))/864e5)+' días'; }
+      default: return null;
+    }
+  }
+
+  function fmtCalc(key, type, val) {
+    if (val == null) return null;
+    if (['pct_empty','pct_not_empty'].includes(type)) return val + '%';
+    if (['count_all','count_values','count_unique','count_empty','count_not_empty'].includes(type)) return String(val);
+    if (CALC_NUMERIC_KEYS.includes(key)) return fmt(val);
+    return String(val);
   }
 
   const COLS = [
@@ -1609,6 +1681,8 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
         .fin-tabla-row .fin-cb.checked { opacity:1; }
         .fin-tabla-row .fin-nombre-btn { opacity:0; transition:opacity 0.1s; }
         .fin-tabla-row:hover .fin-nombre-btn { opacity:1; }
+        .fin-calc-btn:hover { color: #a1a1aa !important; }
+        .fin-calc-btn:hover span { opacity: 0.8; }
       `}</style>
       <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
         <thead>
@@ -1676,6 +1750,43 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
             );
           })}
         </tbody>
+        <tfoot>
+          <tr ref={tfootRef} style={{ position:'sticky', bottom:0, zIndex:20, background:'#0d0d0d', borderTop:'2px solid #27272a' }}>
+            <td style={{ ...td, width:36, paddingRight:0, borderBottom:'none' }} />
+            {COLS.map(col => {
+              const calcType = colCalcs[col.key];
+              const result = calcType && calcType !== 'none' ? calcVal(col.key, calcType) : null;
+              const formatted = result != null ? fmtCalc(col.key, calcType, result) : null;
+              const isOpen = openCalcKey === col.key;
+              const opts = getCalcOpts(col.key);
+              return (
+                <td key={col.key} style={{ ...td, width:col.w, borderBottom:'none', position:'relative', padding:'4px 10px' }}>
+                  <button className="fin-calc-btn" onClick={() => setOpenCalcKey(isOpen ? null : col.key)}
+                    style={{ background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:600, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:4, color:'inherit' }}>
+                    {formatted ? (
+                      <>
+                        <span style={{ color:'#52525b', fontSize:10, textTransform:'uppercase', letterSpacing:'0.05em' }}>{CALC_SHORT[calcType]}</span>
+                        <span style={{ color:'#d4d4d8', fontSize:12 }}>{formatted}</span>
+                      </>
+                    ) : (
+                      <span style={{ color:'#3f3f46', fontSize:11 }}>Calculate</span>
+                    )}
+                  </button>
+                  {isOpen && (
+                    <div style={{ position:'absolute', bottom:'calc(100% + 4px)', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'4px', zIndex:100, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.7)' }}>
+                      {opts.map(opt => (
+                        <button key={opt.val} onClick={() => { setColCalc(col.key, opt.val); setOpenCalcKey(null); }}
+                          style={{ display:'block', width:'100%', textAlign:'left', background:calcType===opt.val?'#27272a':'transparent', border:'none', color:calcType===opt.val?'#fff':'#a1a1aa', fontSize:12, padding:'6px 10px', borderRadius:4, cursor:'pointer' }}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </td>
+              );
+            })}
+          </tr>
+        </tfoot>
       </table>
     </div>
   );
