@@ -833,7 +833,7 @@ function ModalEditar({ movimiento, onGuardado, onCerrar }) {
 
 // ── Fila de movimiento ──────────────────────────────────────────
 
-function ModalMovimiento({ m, onClose, onEditar }) {
+function ModalMovimiento({ m, onClose, onEditar, onEliminar }) {
   if (!m) return null;
   const esIngreso = m.tipo === 'Ingreso';
   const color = esIngreso ? '#22c55e' : '#f87171';
@@ -863,12 +863,18 @@ function ModalMovimiento({ m, onClose, onEditar }) {
             <p style={{ color: 'white', fontSize: 16, fontWeight: 700, margin: '0 0 4px 0', lineHeight: 1.3 }}>{m.nombre}</p>
             <p style={{ color: '#71717a', fontSize: 13, margin: 0 }}>{m.fecha} · {m.cuenta}</p>
           </div>
-          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
             {onEditar && (
               <button
                 onClick={() => { onClose(); onEditar(m); }}
                 style={{ background: 'transparent', border: '1px solid #3f3f46', borderRadius: 6, color: '#71717a', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}
               >Editar</button>
+            )}
+            {onEliminar && (
+              <button
+                onClick={() => { if (window.confirm(`¿Eliminar "${m.nombre}"?`)) { onClose(); onEliminar(m.id); } }}
+                style={{ background: 'transparent', border: '1px solid #7f1d1d', borderRadius: 6, color: '#f87171', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}
+              >Eliminar</button>
             )}
             <button
               onClick={onClose}
@@ -1396,6 +1402,169 @@ function NuevoMovimientoTab({ onGuardado }) {
   );
 }
 
+// ── Celda editable inline ───────────────────────────────────────
+const CUENTAS_OPTS = ['Ingresos','Impuestos','Compensación del Dueño','Gastos de Operación','Freelancers y Material','Ganancia'];
+const IVA_OPTS = ['0%','4%','10%','21%'];
+const IRPF_OPTS = ['0%','7%','15%','19%'];
+
+function CeldaEditable({ m, campo, onGuardar }) {
+  const [editando, setEditando] = useState(false);
+  const [val, setVal] = useState(m[campo]);
+  const ref = useRef(null);
+
+  useEffect(() => { setVal(m[campo]); }, [m[campo]]);
+
+  useEffect(() => {
+    if (!editando) return;
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) confirmar(); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [editando, val]);
+
+  function confirmar() {
+    if (val !== m[campo]) onGuardar(m.id, campo, val);
+    setEditando(false);
+  }
+
+  const esSelect = ['tipo','cuenta','iva','irpf'].includes(campo);
+  const esMulti = campo === 'categorias';
+
+  if (esMulti) {
+    const cats = m.categorias || [];
+    return (
+      <div ref={ref} style={{ position: 'relative' }}>
+        <div onClick={() => setEditando(o => !o)} style={{ cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: 3, minHeight: 22 }}>
+          {cats.length ? cats.slice(0,2).map(c => (
+            <span key={c} style={{ background: '#27272a', color: '#71717a', fontSize: 10, padding: '1px 5px', borderRadius: 3 }}>{c}</span>
+          )) : <span style={{ color: '#3f3f46', fontSize: 12 }}>—</span>}
+          {cats.length > 2 && <span style={{ color: '#52525b', fontSize: 10 }}>+{cats.length-2}</span>}
+        </div>
+        {editando && (
+          <div style={{ position: 'absolute', zIndex: 400, top: '100%', left: 0, background: '#1c1c1e', border: '1px solid #3f3f46', borderRadius: 8, padding: 8, minWidth: 200, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+              {CATEGORIAS.map(c => {
+                const sel = (val || []).includes(c);
+                return (
+                  <button key={c} type="button" onClick={() => setVal(prev => sel ? (prev||[]).filter(x=>x!==c) : [...(prev||[]),c])}
+                    style={{ background: sel?'#0067FD':'#27272a', color: sel?'white':'#a1a1aa', border:'none', borderRadius:4, padding:'2px 7px', fontSize:11, cursor:'pointer' }}>
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+            <button onClick={confirmar} style={{ marginTop:6, background:'#0067FD', color:'white', border:'none', borderRadius:6, padding:'4px 12px', fontSize:12, cursor:'pointer', width:'100%' }}>
+              Aplicar
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const OPTS = campo==='tipo'?['Ingreso','Gasto']:campo==='cuenta'?CUENTAS_OPTS:campo==='iva'?IVA_OPTS:IRPF_OPTS;
+
+  if (esSelect) {
+    return (
+      <div ref={ref} style={{ position: 'relative' }}>
+        {editando ? (
+          <select autoFocus value={val} onChange={e => { setVal(e.target.value); setEditando(false); onGuardar(m.id, campo, e.target.value); }}
+            onBlur={() => setEditando(false)}
+            style={{ background:'#1c1c1e', border:'1px solid #0067FD', borderRadius:4, color:'white', fontSize:12, padding:'2px 4px', cursor:'pointer' }}>
+            {OPTS.map(o => <option key={o}>{o}</option>)}
+          </select>
+        ) : (
+          <div onClick={() => { setEditando(true); setVal(m[campo]); }} style={{ cursor:'pointer' }}>
+            {campo==='tipo' ? (
+              <span style={{ background: val==='Ingreso'?'#14532d':'#450a0a', color: val==='Ingreso'?'#22c55e':'#f87171', borderRadius:4, padding:'2px 7px', fontSize:11, fontWeight:600 }}>{val}</span>
+            ) : (
+              <span style={{ color: val?'#d4d4d8':'#3f3f46', fontSize:12 }}>{val||'—'}</span>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // text / number / date
+  return editando ? (
+    <input autoFocus type={campo==='cantidad'?'number':campo==='fecha'?'date':'text'} value={val||''}
+      onChange={e => setVal(e.target.value)}
+      onBlur={confirmar}
+      onKeyDown={e => { if(e.key==='Enter') confirmar(); if(e.key==='Escape') setEditando(false); }}
+      style={{ background:'#1c1c1e', border:'1px solid #0067FD', borderRadius:4, color:'white', fontSize:12, padding:'2px 6px', width:'100%', colorScheme:'dark' }}
+    />
+  ) : (
+    <div onClick={() => { setEditando(true); setVal(m[campo]); }}
+      style={{ cursor:'pointer', color: m[campo]!=null&&m[campo]!==''?'#d4d4d8':'#3f3f46', fontSize:12, minHeight:20 }}>
+      {campo==='cantidad'
+        ? <span style={{ color: m.tipo==='Ingreso'?'#22c55e':'#f87171', fontWeight:600 }}>{m[campo]!=null ? (m.tipo==='Ingreso'?'+':'-')+Math.abs(m[campo])+'€':''}</span>
+        : (m[campo]||'—')}
+    </div>
+  );
+}
+
+// ── Tabla de movimientos ────────────────────────────────────────
+function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGuardarCelda, onVerDetalle }) {
+  const allSel = items.length > 0 && items.every(m => seleccionados.has(m.id));
+  const someSel = !allSel && items.some(m => seleccionados.has(m.id));
+  const COLS = [
+    { key:'fecha', label:'Fecha', w:95 },
+    { key:'nombre', label:'Nombre', flex:1 },
+    { key:'cantidad', label:'Cantidad', w:90 },
+    { key:'tipo', label:'Tipo', w:80 },
+    { key:'cuenta', label:'Cuenta', w:160 },
+    { key:'iva', label:'IVA', w:55 },
+    { key:'irpf', label:'IRPF', w:55 },
+    { key:'categorias', label:'Categorías', w:150 },
+  ];
+  const th = { padding:'8px 10px', color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', borderBottom:'1px solid #27272a', whiteSpace:'nowrap', textAlign:'left' };
+  const td = { padding:'6px 10px', borderBottom:'1px solid #1c1c1e', verticalAlign:'middle' };
+
+  return (
+    <div style={{ overflowX:'auto' }}>
+      <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
+        <thead>
+          <tr>
+            <th style={{ ...th, width:36, paddingRight:0 }}>
+              <input type="checkbox" checked={allSel} ref={el => { if(el) el.indeterminate=someSel; }}
+                onChange={() => onToggleAll(items, allSel)} style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+            </th>
+            {COLS.map(col => <th key={col.key} style={{ ...th, width:col.w, minWidth:col.w }}>{col.label}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {items.map(m => {
+            const sel = seleccionados.has(m.id);
+            return (
+              <tr key={m.id} style={{ background: sel?'#1e293b':'transparent' }}
+                onMouseEnter={e => { if(!sel) e.currentTarget.style.background='#1c1c1e'; }}
+                onMouseLeave={e => { e.currentTarget.style.background=sel?'#1e293b':'transparent'; }}>
+                <td style={{ ...td, width:36, paddingRight:0 }}>
+                  <input type="checkbox" checked={sel} onChange={() => onToggleSel(m.id)} style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+                </td>
+                {COLS.map(col => (
+                  <td key={col.key} style={{ ...td, width:col.w, maxWidth:col.flex?260:col.w }}>
+                    {col.key==='nombre' ? (
+                      <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                        <span onClick={() => onVerDetalle(m.id)} style={{ color:'#d4d4d8', fontSize:13, cursor:'pointer', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}
+                          onMouseEnter={e=>e.target.style.color='#0067FD'} onMouseLeave={e=>e.target.style.color='#d4d4d8'}>
+                          {m.nombre}
+                        </span>
+                      </div>
+                    ) : (
+                      <CeldaEditable m={m} campo={col.key} onGuardar={onGuardarCelda} />
+                    )}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 // ── Componente principal ────────────────────────────────────────
 
 function lsGet(key, fallback) { try { const v = localStorage.getItem(key); return v != null ? JSON.parse(v) : fallback; } catch { return fallback; } }
@@ -1427,7 +1596,6 @@ export default function Finanzas() {
   const [movFiltroTipo, setMovFiltroTipo] = useState('todos');
   const [movPagina, setMovPagina] = useState(1);
   const [movPorPagina, setMovPorPagina] = useState(10);
-  const [movLimit, setMovLimit] = useState(50);
   const [movBusqueda, setMovBusqueda] = useState('');
   const [syncingClientes, setSyncingClientes] = useState(false);
   const [clienteSort, setClienteSort] = useState({ campo: 'beneficio', dir: 'desc' });
@@ -1462,6 +1630,11 @@ export default function Finanzas() {
   const [sinMovimientosMes, setSinMovimientosMes] = useState(false);
   const [filtroClientesLista, setFiltroClientesLista] = useState([]);
   const [filtroEquipoLista, setFiltroEquipoLista] = useState([]);
+  const [vistaMovs, setVistaMovs] = useState(() => lsGet('fin_vista', 'lista'));
+  const [seleccionados, setSeleccionados] = useState(new Set());
+  const [bulkCampo, setBulkCampo] = useState(null); // campo a editar en bulk
+  const [bulkValor, setBulkValor] = useState('');
+  const [movLimit, setMovLimit] = useState(() => lsGet('fin_limit', 50));
 
   // Cargar listas para filtros (una vez al montar)
   useEffect(() => {
@@ -1490,6 +1663,73 @@ export default function Finanzas() {
       });
       const data = await r.json();
       if (r.ok) setMovDetail(data);
+    } catch (e) { console.error(e); }
+  }
+
+  async function guardarCeldaInline(id, campo, valor) {
+    const token = await getToken();
+    const body = { [campo]: campo === 'cantidad' ? parseFloat(valor) : valor };
+    await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${id}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    setMovimientos(prev => ({
+      ...prev,
+      items: prev.items.map(m => m.id === id ? { ...m, [campo]: valor } : m),
+    }));
+  }
+
+  async function eliminarBulk() {
+    if (!seleccionados.size) return;
+    if (!window.confirm(`¿Eliminar ${seleccionados.size} movimiento${seleccionados.size>1?'s':''}?`)) return;
+    const ids = [...seleccionados];
+    const token = await getToken();
+    await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/bulk-delete`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    });
+    setMovimientos(prev => ({ ...prev, items: prev.items.filter(m => !ids.includes(m.id)), total: prev.total - ids.length }));
+    setSeleccionados(new Set());
+    cargarDashboard();
+  }
+
+  async function editarBulk(campo, valor) {
+    if (!seleccionados.size || !valor) return;
+    const ids = [...seleccionados];
+    const token = await getToken();
+    await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/bulk-edit`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids, updates: { [campo]: valor } }),
+    });
+    setMovimientos(prev => ({
+      ...prev,
+      items: prev.items.map(m => ids.includes(m.id) ? { ...m, [campo]: valor } : m),
+    }));
+    setBulkCampo(null);
+    setBulkValor('');
+  }
+
+  function toggleSel(id) { setSeleccionados(prev => { const s=new Set(prev); s.has(id)?s.delete(id):s.add(id); return s; }); }
+  function toggleAll(items, allSel) {
+    setSeleccionados(prev => {
+      const s = new Set(prev);
+      if (allSel) items.forEach(m => s.delete(m.id));
+      else items.forEach(m => s.add(m.id));
+      return s;
+    });
+  }
+
+  async function eliminarMovimiento(id) {
+    try {
+      const token = await getToken();
+      await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${id}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+      });
+      setMovimientos(prev => ({ ...prev, items: prev.items.filter(m => m.id !== id), total: prev.total - 1 }));
+      cargarDashboard();
     } catch (e) { console.error(e); }
   }
 
@@ -1674,6 +1914,7 @@ export default function Finanzas() {
           m={movDetail}
           onClose={() => setMovDetail(null)}
           onEditar={m => { setMovDetail(null); setMovEditando(m); }}
+          onEliminar={id => { setMovDetail(null); eliminarMovimiento(id); }}
         />
       )}
 
@@ -2305,7 +2546,54 @@ export default function Finanzas() {
               onChange={e => { setMovBusqueda(e.target.value); setPagMovs(1); }}
               style={{ ...S.input, width: 180, marginLeft: 'auto' }}
             />
+            <div style={{ display:'flex', gap:4, background:'#1c1c1e', padding:3, borderRadius:8, flexShrink:0 }}>
+              {[['lista','☰'],['tabla','⊞']].map(([v,ic]) => (
+                <button key={v} type="button" onClick={() => { setVistaMovs(v); lsSet('fin_vista',v); setSeleccionados(new Set()); }}
+                  style={{ background:vistaMovs===v?'#27272a':'transparent', border:'none', color:vistaMovs===v?'white':'#52525b', borderRadius:6, padding:'5px 10px', fontSize:14, cursor:'pointer' }}>
+                  {ic}
+                </button>
+              ))}
+            </div>
           </div>
+          {/* Barra de acciones bulk */}
+          {seleccionados.size > 0 && (() => {
+            const BULK_CAMPOS = [
+              { key:'tipo', label:'Tipo', opts:['Ingreso','Gasto'] },
+              { key:'cuenta', label:'Cuenta', opts:CUENTAS_OPTS },
+              { key:'iva', label:'IVA', opts:IVA_OPTS },
+              { key:'irpf', label:'IRPF', opts:IRPF_OPTS },
+            ];
+            return (
+              <div style={{ background:'#1e293b', border:'1px solid #1d4ed8', borderRadius:10, padding:'10px 16px', marginBottom:10, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+                <span style={{ color:'#60a5fa', fontSize:13, fontWeight:600, flexShrink:0 }}>{seleccionados.size} seleccionado{seleccionados.size>1?'s':''}</span>
+                <button onClick={() => setSeleccionados(new Set())} style={{ background:'none', border:'none', color:'#52525b', fontSize:12, cursor:'pointer', padding:'2px 6px' }}>✕ Deseleccionar</button>
+                <div style={{ width:1, background:'#27272a', alignSelf:'stretch' }} />
+                {BULK_CAMPOS.map(({ key, label, opts }) => (
+                  <div key={key} style={{ position:'relative' }}>
+                    <button onClick={() => { setBulkCampo(c => c===key?null:key); setBulkValor(''); }}
+                      style={{ background:'#27272a', border:'1px solid #3f3f46', color:'#d4d4d8', borderRadius:6, padding:'4px 10px', fontSize:12, cursor:'pointer' }}>
+                      {label} ▾
+                    </button>
+                    {bulkCampo===key && (
+                      <div style={{ position:'absolute', zIndex:500, top:'100%', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, marginTop:4, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.5)', overflow:'hidden' }}>
+                        {opts.map(o => (
+                          <button key={o} onClick={() => editarBulk(key, o)}
+                            style={{ display:'block', width:'100%', background:'none', border:'none', color:'#d4d4d8', padding:'8px 12px', textAlign:'left', fontSize:13, cursor:'pointer' }}
+                            onMouseEnter={e=>e.currentTarget.style.background='#27272a'} onMouseLeave={e=>e.currentTarget.style.background='none'}>
+                            {o}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <button onClick={eliminarBulk}
+                  style={{ marginLeft:'auto', background:'#450a0a', border:'1px solid #7f1d1d', color:'#f87171', borderRadius:6, padding:'4px 12px', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                  🗑 Eliminar {seleccionados.size}
+                </button>
+              </div>
+            );
+          })()}
           {panelFiltro && (
             <PanelFiltros
               filtros={movFiltros} op={movFiltroOp}
@@ -2331,10 +2619,44 @@ export default function Finanzas() {
             ) : (() => {
               const q = movBusqueda.trim().toLowerCase();
               const itemsFiltrados = q ? movimientos.items.filter(m => m.nombre?.toLowerCase().includes(q)) : movimientos.items;
-
-              // Paginación: server-side cuando no hay búsqueda, client-side cuando sí
               const totalPages = q ? Math.ceil(itemsFiltrados.length / movLimit) : movimientos.pages;
               const pageItems  = q ? itemsFiltrados.slice((pagMovs - 1) * movLimit, pagMovs * movLimit) : itemsFiltrados;
+
+              const paginacion = (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                  {!mostrarTodos && totalPages > 1 && (
+                    <>
+                      <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
+                      <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {totalPages}</span>
+                      <button style={S.ghost} disabled={pagMovs >= totalPages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
+                    </>
+                  )}
+                  {!q && (
+                    <select value={mostrarTodos ? 'todos' : String(movLimit)}
+                      onChange={e => { const v=e.target.value; if(v==='todos'){setMostrarTodos(true);setPagMovs(1);}else{const n=parseInt(v);setMovLimit(n);setMostrarTodos(false);setPagMovs(1);cargarMovimientos(1,false,n);} }}
+                      style={{ ...S.select, width:'auto', fontSize:13, padding:'7px 10px' }}>
+                      {[50,100,200].map(n=><option key={n} value={n}>{n} por página</option>)}
+                      <option value="todos">Todos ({movimientos.total})</option>
+                    </select>
+                  )}
+                </div>
+              );
+
+              if (vistaMovs === 'tabla') {
+                return (
+                  <>
+                    <TablaMovimientos
+                      items={pageItems}
+                      seleccionados={seleccionados}
+                      onToggleSel={toggleSel}
+                      onToggleAll={toggleAll}
+                      onGuardarCelda={guardarCeldaInline}
+                      onVerDetalle={abrirDetalle}
+                    />
+                    {paginacion}
+                  </>
+                );
+              }
 
               const normales  = pageItems.filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
               const traspasos = pageItems.filter(m =>  (m.categorias || []).includes('Traspaso Entre Cuentas'));
@@ -2342,39 +2664,41 @@ export default function Finanzas() {
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: traspasos.length > 0 ? '1fr 1fr' : '1fr', gap: 24 }}>
                     <div style={{ minWidth: 0 }}>
-                      <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Movimientos ({normales.length})</p>
-                      {normales.map(m => <FilaMovimiento key={m.id} m={m} onVerDetalle={abrirDetalle} />)}
+                      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+                        <input type="checkbox"
+                          checked={normales.length>0&&normales.every(m=>seleccionados.has(m.id))}
+                          ref={el=>{if(el)el.indeterminate=normales.some(m=>seleccionados.has(m.id))&&!normales.every(m=>seleccionados.has(m.id));}}
+                          onChange={()=>toggleAll(normales,normales.every(m=>seleccionados.has(m.id)))}
+                          style={{accentColor:'#0067FD',cursor:'pointer'}}/>
+                        <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin:0 }}>Movimientos ({normales.length})</p>
+                      </div>
+                      {normales.map(m => (
+                        <div key={m.id} style={{ display:'flex', alignItems:'center', gap:6 }}>
+                          <input type="checkbox" checked={seleccionados.has(m.id)} onChange={()=>toggleSel(m.id)} style={{accentColor:'#0067FD',cursor:'pointer',flexShrink:0}}/>
+                          <div style={{flex:1,minWidth:0}}><FilaMovimiento m={m} onVerDetalle={abrirDetalle} /></div>
+                        </div>
+                      ))}
                     </div>
                     {traspasos.length > 0 && (
                       <div style={{ minWidth: 0, borderLeft: '1px solid #27272a', paddingLeft: 24 }}>
-                        <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Traspasos ({traspasos.length})</p>
-                        {traspasos.map(m => <FilaMovimiento key={m.id} m={m} onVerDetalle={abrirDetalle} />)}
+                        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+                          <input type="checkbox"
+                            checked={traspasos.length>0&&traspasos.every(m=>seleccionados.has(m.id))}
+                            ref={el=>{if(el)el.indeterminate=traspasos.some(m=>seleccionados.has(m.id))&&!traspasos.every(m=>seleccionados.has(m.id));}}
+                            onChange={()=>toggleAll(traspasos,traspasos.every(m=>seleccionados.has(m.id)))}
+                            style={{accentColor:'#0067FD',cursor:'pointer'}}/>
+                          <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin:0 }}>Traspasos ({traspasos.length})</p>
+                        </div>
+                        {traspasos.map(m => (
+                          <div key={m.id} style={{ display:'flex', alignItems:'center', gap:6 }}>
+                            <input type="checkbox" checked={seleccionados.has(m.id)} onChange={()=>toggleSel(m.id)} style={{accentColor:'#0067FD',cursor:'pointer',flexShrink:0}}/>
+                            <div style={{flex:1,minWidth:0}}><FilaMovimiento m={m} onVerDetalle={abrirDetalle} /></div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-                    {!mostrarTodos && totalPages > 1 && (
-                      <>
-                        <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
-                        <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {totalPages}</span>
-                        <button style={S.ghost} disabled={pagMovs >= totalPages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
-                      </>
-                    )}
-                    {!q && (
-                      <select
-                        value={mostrarTodos ? 'todos' : String(movLimit)}
-                        onChange={e => {
-                          const v = e.target.value;
-                          if (v === 'todos') { setMostrarTodos(true); setPagMovs(1); }
-                          else { const n = parseInt(v); setMovLimit(n); setMostrarTodos(false); setPagMovs(1); cargarMovimientos(1, false, n); }
-                        }}
-                        style={{ ...S.select, width: 'auto', fontSize: 13, padding: '7px 10px' }}
-                      >
-                        {[50, 100, 200].map(n => <option key={n} value={n}>{n} por página</option>)}
-                        <option value="todos">Todos ({movimientos.total})</option>
-                      </select>
-                    )}
-                  </div>
+                  {paginacion}
                 </>
               );
             })()}
