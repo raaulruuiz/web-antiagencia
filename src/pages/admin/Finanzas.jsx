@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { DayPicker } from 'react-day-picker';
 import { es } from 'date-fns/locale';
 import 'react-day-picker/dist/style.css';
@@ -1566,6 +1567,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
   const nombreInputRef = useRef(null);
   const [colCalcs, setColCalcs] = useState(() => { try { const v = localStorage.getItem('fin-col-calcs'); return v ? JSON.parse(v) : {}; } catch { return {}; } });
   const [openCalcKey, setOpenCalcKey] = useState(null);
+  const [calcDropPos, setCalcDropPos] = useState(null);
   const [colWidths, setColWidths] = useState([]);
   const tableWrapRef = useRef(null);
   const calcBarRef = useRef(null);
@@ -1584,7 +1586,10 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
 
   useEffect(() => {
     if (!openCalcKey) return;
-    function handler(e) { if (calcBarRef.current && !calcBarRef.current.contains(e.target)) setOpenCalcKey(null); }
+    function handler(e) {
+      if (e.target.closest('.fin-calc-dropdown')) return; // clic dentro del portal
+      if (calcBarRef.current && !calcBarRef.current.contains(e.target)) { setOpenCalcKey(null); setCalcDropPos(null); }
+    }
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [openCalcKey]);
@@ -1685,6 +1690,15 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
     { key:'created_at',       label:'Creado',         w:100, readonly:'date' },
     { key:'updated_at',       label:'Modificado',     w:100, readonly:'date' },
   ];
+  function calcColMinW(col) {
+    const type = colCalcs[col.key];
+    if (!type || type === 'none') return col.w || 80;
+    if (['sum','average','median','min','max','range'].includes(type)) return Math.max(col.w||0, 155);
+    if (['earliest','latest','date_range'].includes(type)) return Math.max(col.w||0, 165);
+    if (['pct_empty','pct_not_empty'].includes(type)) return Math.max(col.w||0, 115);
+    return Math.max(col.w||0, 100); // count types
+  }
+
   const th = { padding:'8px 10px', color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', borderBottom:'1px solid #27272a', whiteSpace:'nowrap', textAlign:'left' };
   const td = { padding:'6px 10px', borderBottom:'1px solid #1c1c1e', verticalAlign:'middle', whiteSpace:'nowrap' };
 
@@ -1714,7 +1728,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                     onChange={() => onToggleAll(items, allSel)} style={{ accentColor:'#0067FD', cursor:'pointer' }} />
                 )}
               </th>
-              {COLS.map(col => <th key={col.key} style={{ ...th, width:col.w, minWidth:col.w }}>{col.label}</th>)}
+              {COLS.map(col => <th key={col.key} style={{ ...th, width:col.w, minWidth:calcColMinW(col) }}>{col.label}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -1788,8 +1802,14 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
             const isOpen = openCalcKey === col.key;
             const opts = getCalcOpts(col.key);
             return (
-              <div key={col.key} style={{ width: w || col.w || 80, flexShrink:0, padding:'5px 10px', position:'relative', boxSizing:'border-box' }}>
-                <button className="fin-calc-btn" onClick={() => setOpenCalcKey(isOpen ? null : col.key)}
+              <div key={col.key} style={{ width: w || col.w || 80, flexShrink:0, padding:'5px 10px', boxSizing:'border-box' }}>
+                <button className="fin-calc-btn"
+                  onClick={e => {
+                    if (isOpen) { setOpenCalcKey(null); setCalcDropPos(null); return; }
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setCalcDropPos({ bottom: window.innerHeight - rect.top + 4, left: rect.left });
+                    setOpenCalcKey(col.key);
+                  }}
                   style={{ background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:600, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:4 }}>
                   {formatted ? (
                     <>
@@ -1800,15 +1820,16 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                     <span style={{ color:'#3f3f46', fontSize:11 }}>Calcular</span>
                   )}
                 </button>
-                {isOpen && (
-                  <div style={{ position:'absolute', bottom:'calc(100% + 4px)', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'4px', zIndex:200, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.7)' }}>
+                {isOpen && calcDropPos && createPortal(
+                  <div className="fin-calc-dropdown" style={{ position:'fixed', bottom:calcDropPos.bottom, left:calcDropPos.left, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'4px', zIndex:9999, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.7)' }}>
                     {opts.map(opt => (
-                      <button key={opt.val} onClick={() => { setColCalc(col.key, opt.val); setOpenCalcKey(null); }}
+                      <button key={opt.val} onClick={() => { setColCalc(col.key, opt.val); setOpenCalcKey(null); setCalcDropPos(null); }}
                         style={{ display:'block', width:'100%', textAlign:'left', background:calcType===opt.val?'#27272a':'transparent', border:'none', color:calcType===opt.val?'#fff':'#a1a1aa', fontSize:12, padding:'6px 10px', borderRadius:4, cursor:'pointer' }}>
                         {opt.label}
                       </button>
                     ))}
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
             );
