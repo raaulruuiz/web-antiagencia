@@ -2470,7 +2470,7 @@ export default function Finanzas() {
     }
   }, [comparar, desdeComp, hastaComp]);
 
-  const cargarMovimientos = useCallback(async (page = 1, todos = false, limit = movLimit) => {
+  const cargarMovimientos = useCallback(async (page = 1, todos = false, limit = movLimit, busqueda = '') => {
     setLoadingMovs(true);
     setErrMovs(null);
     try {
@@ -2478,6 +2478,7 @@ export default function Finanzas() {
       const params = new URLSearchParams({ desde, hasta, page });
       if (todos) params.set('todos', '1');
       else params.set('limit', String(limit));
+      if (busqueda) params.set('busqueda', busqueda);
       const filtrosValidos = movFiltros.filter(f => {
         if (!f.campo || !f.operador) return false;
         if (['is_null','is_not_null'].includes(f.operador)) return true;
@@ -2503,6 +2504,12 @@ export default function Finanzas() {
   }, [desde, hasta, movFiltros, movFiltroOp, movSorts, movLimit]);
 
   useEffect(() => { cargarDashboard(); }, [cargarDashboard]);
+
+  // Búsqueda server-side con debounce 300ms
+  useEffect(() => {
+    const t = setTimeout(() => { setPagMovs(1); cargarMovimientos(1, mostrarTodos, movLimit, movBusqueda.trim()); }, 300);
+    return () => clearTimeout(t);
+  }, [movBusqueda]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     async function checkMovimientosMesActual() {
@@ -3314,10 +3321,8 @@ export default function Finanzas() {
             ) : movimientos.items.length === 0 ? (
               <p style={{ color: '#52525b', textAlign: 'center', padding: 24 }}>Sin movimientos para este periodo</p>
             ) : (() => {
-              const q = movBusqueda.trim().toLowerCase();
-              const itemsFiltrados = q ? movimientos.items.filter(m => m.nombre?.toLowerCase().includes(q)) : movimientos.items;
-              const totalPages = q ? Math.ceil(itemsFiltrados.length / movLimit) : movimientos.pages;
-              const pageItems  = q ? itemsFiltrados.slice((pagMovs - 1) * movLimit, pagMovs * movLimit) : itemsFiltrados;
+              const totalPages = movimientos.pages;
+              const pageItems  = movimientos.items;
 
               const paginacion = (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -3328,14 +3333,12 @@ export default function Finanzas() {
                       <button style={S.ghost} disabled={pagMovs >= totalPages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
                     </>
                   )}
-                  {!q && (
-                    <select value={mostrarTodos ? 'todos' : String(movLimit)}
-                      onChange={e => { const v=e.target.value; if(v==='todos'){setMostrarTodos(true);setPagMovs(1);}else{const n=parseInt(v);setMovLimit(n);setMostrarTodos(false);setPagMovs(1);cargarMovimientos(1,false,n);} }}
-                      style={{ ...S.select, width:'auto', fontSize:13, padding:'7px 10px' }}>
-                      {[50,100,200].map(n=><option key={n} value={n}>{n} por página</option>)}
-                      <option value="todos">Todos ({movimientos.total})</option>
-                    </select>
-                  )}
+                  <select value={mostrarTodos ? 'todos' : String(movLimit)}
+                    onChange={e => { const v=e.target.value; if(v==='todos'){setMostrarTodos(true);setPagMovs(1);}else{const n=parseInt(v);setMovLimit(n);setMostrarTodos(false);setPagMovs(1);cargarMovimientos(1,false,n);} }}
+                    style={{ ...S.select, width:'auto', fontSize:13, padding:'7px 10px' }}>
+                    {[50,100,200].map(n=><option key={n} value={n}>{n} por página</option>)}
+                    <option value="todos">Todos ({movimientos.total})</option>
+                  </select>
                 </div>
               );
 
