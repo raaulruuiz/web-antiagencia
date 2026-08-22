@@ -1179,7 +1179,7 @@ function TabFiscal() {
 
 // ── Tab Nuevo: manual o desde imagen ───────────────────────────
 function NuevoMovimientoTab({ onGuardado }) {
-  const [modo, setModo] = useState('manual'); // 'manual' | 'imagen'
+  const [modo, setModo] = useState('imagen'); // 'manual' | 'imagen'
   const [imagenes, setImagenes] = useState([]);
   const [extrayendo, setExtrayendo] = useState(false);
   const [extraidos, setExtraidos] = useState(null); // null | []
@@ -1273,8 +1273,8 @@ function NuevoMovimientoTab({ onGuardado }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
         <h2 style={{ color: 'white', fontSize: 16, fontWeight: 600, margin: 0, flex: 1 }}>Nuevo movimiento</h2>
         <div style={{ display: 'flex', gap: 6, background: '#1c1c1e', padding: 4, borderRadius: 10 }}>
-          {btnTab('manual', '✏️ Manual')}
           {btnTab('imagen', '📷 Desde imagen')}
+          {btnTab('manual', '✏️ Manual')}
         </div>
       </div>
 
