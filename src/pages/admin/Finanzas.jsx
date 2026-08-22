@@ -1286,11 +1286,12 @@ function NuevoMovimientoTab({ onGuardado }) {
   async function extraer() {
     if (!imagenes.length) return;
     cancelRef.current = false;
-    const built = [];
-    setSections([]);
+    // Pre-llenar con placeholders para que el array tenga el tamaño correcto desde el principio
+    setSections(imagenes.map((_, i) => ({ previewUrl: previews[i], movimientos: [], guardados: new Set(), cuentaSec: 'Gastos de Operación', cargando: true })));
     for (let i = 0; i < imagenes.length; i++) {
       if (cancelRef.current) break;
       setExtrayendoIdx(i);
+      let seccion;
       try {
         const token = await getToken();
         const fd = new FormData();
@@ -1314,11 +1315,12 @@ function NuevoMovimientoTab({ onGuardado }) {
           fecha_factura: '', importe_factura: '',
         }));
         const cuentaSec = detectarCuentaSec(movimientos);
-        built.push({ previewUrl: previews[i], movimientos, guardados: new Set(), cuentaSec });
+        seccion = { previewUrl: previews[i], movimientos, guardados: new Set(), cuentaSec };
       } catch (err) {
-        built.push({ previewUrl: previews[i], movimientos: [], guardados: new Set(), cuentaSec: 'Gastos de Operación', error: err.message });
+        seccion = { previewUrl: previews[i], movimientos: [], guardados: new Set(), cuentaSec: 'Gastos de Operación', error: err.message };
       }
-      setSections([...built]);
+      // Actualizar solo este índice, sin tocar los demás (preserva ediciones del usuario)
+      setSections(prev => prev.map((s, j) => j === i ? seccion : s));
       if (i === 0) setPagina(0); // primera imagen lista: muestra al usuario para que empiece a revisar
     }
     setExtrayendoIdx(null);
