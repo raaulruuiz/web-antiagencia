@@ -1566,8 +1566,10 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
   const nombreInputRef = useRef(null);
   const [colCalcs, setColCalcs] = useState(() => { try { const v = localStorage.getItem('fin-col-calcs'); return v ? JSON.parse(v) : {}; } catch { return {}; } });
   const [openCalcKey, setOpenCalcKey] = useState(null);
+  const [colWidths, setColWidths] = useState([]);
   const tableWrapRef = useRef(null);
   const calcBarRef = useRef(null);
+  const theadRef = useRef(null);
 
   useEffect(() => {
     if (editNombreId && nombreInputRef.current) nombreInputRef.current.focus();
@@ -1586,6 +1588,19 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [openCalcKey]);
+
+  // Medir anchos reales de columnas del header para alinear la barra de cálculo
+  useEffect(() => {
+    function measure() {
+      if (!theadRef.current) return;
+      const ths = Array.from(theadRef.current.querySelectorAll('th'));
+      if (ths.length) setColWidths(ths.map(th => th.offsetWidth));
+    }
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (theadRef.current) ro.observe(theadRef.current);
+    return () => ro.disconnect();
+  }, []);
 
   function setColCalc(key, val) {
     const next = { ...colCalcs, [key]: val };
@@ -1651,7 +1666,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
 
   const COLS = [
     { key:'fecha',            label:'Fecha',          w:95 },
-    { key:'nombre',           label:'Nombre',         w:220 },
+    { key:'nombre',           label:'Nombre',         flex:1 },
     { key:'cantidad',         label:'Cantidad',       w:90 },
     { key:'tipo',             label:'Tipo',           w:80 },
     { key:'cuenta',           label:'Cuenta',         w:160 },
@@ -1676,12 +1691,6 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
   const haySeleccionados = items.some(m => seleccionados.has(m.id));
   // Ancho mínimo compartido entre tabla y barra de cálculo para alinear columnas
   const tblMinW = 36 + COLS.reduce((s, c) => s + (c.w || 150), 0);
-  const Colgroup = () => (
-    <colgroup>
-      <col style={{ width:36, minWidth:36 }} />
-      {COLS.map(col => <col key={col.key} style={{ width: col.flex ? undefined : col.w, minWidth: col.w || 150 }} />)}
-    </colgroup>
-  );
   return (
     <div>
       <style>{`
@@ -1696,9 +1705,8 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
       `}</style>
       <div ref={tableWrapRef} style={{ overflowX:'auto' }}
         onScroll={e => { if(calcBarRef.current) calcBarRef.current.scrollLeft = e.currentTarget.scrollLeft; }}>
-        <table style={{ width:'100%', minWidth:tblMinW, borderCollapse:'collapse', fontSize:13, tableLayout:'fixed' }}>
-          <Colgroup />
-          <thead>
+        <table style={{ width:'100%', minWidth:tblMinW, borderCollapse:'collapse', fontSize:13 }}>
+          <thead ref={theadRef}>
             <tr>
               <th style={{ ...th, width:36, paddingRight:0 }}>
                 {haySeleccionados && (
@@ -1722,7 +1730,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                       style={{ accentColor:'#0067FD', cursor:'pointer' }} />
                   </td>
                   {COLS.map(col => (
-                    <td key={col.key} style={{ ...td, width:col.w, overflow:'hidden' }}>
+                    <td key={col.key} style={{ ...td, width:col.w, maxWidth:col.flex?260:col.w, overflow:col.flex?'hidden':undefined }}>
                       {col.key==='nombre' ? (
                         editNombreId === m.id ? (
                           <input ref={nombreInputRef} value={editNombreVal}
@@ -1769,46 +1777,43 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
       <div ref={calcBarRef} className="fin-calc-bar"
         style={{ position:'sticky', bottom:0, zIndex:20, overflowX:'auto', background:'#0d0d0d', borderTop:'2px solid #27272a' }}
         onScroll={e => { if(tableWrapRef.current) tableWrapRef.current.scrollLeft = e.currentTarget.scrollLeft; }}>
-        <table style={{ width:'100%', minWidth:tblMinW, borderCollapse:'collapse', fontSize:13, tableLayout:'fixed' }}>
-          <Colgroup />
-          <tbody>
-            <tr>
-              <td style={{ width:36, padding:'5px 10px' }} />
-              {COLS.map(col => {
-                const calcType = colCalcs[col.key];
-                const result = calcType && calcType !== 'none' ? calcVal(col.key, calcType) : null;
-                const formatted = result != null ? fmtCalc(col.key, calcType, result) : null;
-                const isOpen = openCalcKey === col.key;
-                const opts = getCalcOpts(col.key);
-                return (
-                  <td key={col.key} style={{ padding:'5px 10px', position:'relative', overflow:'hidden' }}>
-                    <button className="fin-calc-btn" onClick={() => setOpenCalcKey(isOpen ? null : col.key)}
-                      style={{ background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:600, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:4 }}>
-                      {formatted ? (
-                        <>
-                          <span style={{ color:'#52525b', fontSize:10, textTransform:'uppercase', letterSpacing:'0.05em', flexShrink:0 }}>{CALC_SHORT[calcType]}</span>
-                          <span style={{ color:'#d4d4d8', fontSize:12, overflow:'hidden', textOverflow:'ellipsis' }}>{formatted}</span>
-                        </>
-                      ) : (
-                        <span style={{ color:'#3f3f46', fontSize:11 }}>Calcular</span>
-                      )}
-                    </button>
-                    {isOpen && (
-                      <div style={{ position:'absolute', bottom:'calc(100% + 4px)', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'4px', zIndex:100, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.7)' }}>
-                        {opts.map(opt => (
-                          <button key={opt.val} onClick={() => { setColCalc(col.key, opt.val); setOpenCalcKey(null); }}
-                            style={{ display:'block', width:'100%', textAlign:'left', background:calcType===opt.val?'#27272a':'transparent', border:'none', color:calcType===opt.val?'#fff':'#a1a1aa', fontSize:12, padding:'6px 10px', borderRadius:4, cursor:'pointer' }}>
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          </tbody>
-        </table>
+        <div style={{ display:'flex' }}>
+          {/* celda checkbox — mismo ancho que th[0] medido */}
+          <div style={{ width: colWidths[0] || 36, flexShrink:0 }} />
+          {COLS.map((col, i) => {
+            const w = colWidths[i + 1];
+            const calcType = colCalcs[col.key];
+            const result = calcType && calcType !== 'none' ? calcVal(col.key, calcType) : null;
+            const formatted = result != null ? fmtCalc(col.key, calcType, result) : null;
+            const isOpen = openCalcKey === col.key;
+            const opts = getCalcOpts(col.key);
+            return (
+              <div key={col.key} style={{ width: w || col.w || 80, flexShrink:0, padding:'5px 10px', position:'relative', boxSizing:'border-box' }}>
+                <button className="fin-calc-btn" onClick={() => setOpenCalcKey(isOpen ? null : col.key)}
+                  style={{ background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:600, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:4 }}>
+                  {formatted ? (
+                    <>
+                      <span style={{ color:'#52525b', fontSize:10, textTransform:'uppercase', letterSpacing:'0.05em' }}>{CALC_SHORT[calcType]}</span>
+                      <span style={{ color:'#d4d4d8', fontSize:12 }}>{formatted}</span>
+                    </>
+                  ) : (
+                    <span style={{ color:'#3f3f46', fontSize:11 }}>Calcular</span>
+                  )}
+                </button>
+                {isOpen && (
+                  <div style={{ position:'absolute', bottom:'calc(100% + 4px)', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'4px', zIndex:200, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.7)' }}>
+                    {opts.map(opt => (
+                      <button key={opt.val} onClick={() => { setColCalc(col.key, opt.val); setOpenCalcKey(null); }}
+                        style={{ display:'block', width:'100%', textAlign:'left', background:calcType===opt.val?'#27272a':'transparent', border:'none', color:calcType===opt.val?'#fff':'#a1a1aa', fontSize:12, padding:'6px 10px', borderRadius:4, cursor:'pointer' }}>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
