@@ -1213,86 +1213,146 @@ function TabFiscal() {
 
 // ── Tab Nuevo: manual o desde imagen ───────────────────────────
 function NuevoMovimientoTab({ onGuardado }) {
-  const [modo, setModo] = useState('imagen'); // 'manual' | 'imagen'
+  const [modo, setModo] = useState('imagen');
   const [imagenes, setImagenes] = useState([]);
-  const [extrayendo, setExtrayendo] = useState(false);
-  const [extraidos, setExtraidos] = useState(null); // null | []
-  const [guardandoIdx, setGuardandoIdx] = useState(null);
-  const [guardadosIdx, setGuardadosIdx] = useState(new Set());
+  const [previews, setPreviews] = useState([]);
+  const [desde, setDesde] = useState('');
+  const [hasta, setHasta] = useState('');
+  // sections: null | [{ previewUrl, movimientos: [...], guardados: Set<number>, error? }]
+  const [sections, setSections] = useState(null);
+  const [extrayendoIdx, setExtrayendoIdx] = useState(null); // which image is being processed
+  const [guardandoKey, setGuardandoKey] = useState(null); // 'si-mi'
+  const [clientesLista, setClientesLista] = useState([]);
+  const [equipoLista, setEquipoLista] = useState([]);
   const inputRef = useRef(null);
 
-  const CUENTAS = ['Ingresos','Impuestos','Compensación del Dueño','Gastos de Operación','Freelancers y Material','Ganancia'];
+  const CUENTAS_LIST = CUENTAS.map(c => c.key);
+
+  useEffect(() => {
+    getToken().then(token => {
+      fetch(`${BACKEND_URL}/admin/finanzas/clientes/lista`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(d => setClientesLista(Array.isArray(d) ? d : [])).catch(() => {});
+      fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(d => setEquipoLista(Array.isArray(d) ? d : [])).catch(() => {});
+    });
+  }, []);
 
   function onFileChange(e) {
     const files = Array.from(e.target.files);
     setImagenes(files);
-    setExtraidos(null);
+    setPreviews(files.map(f => URL.createObjectURL(f)));
+    setSections(null);
     e.target.value = '';
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    e.currentTarget.style.borderColor = '#3f3f46';
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    if (!files.length) return;
+    setImagenes(files);
+    setPreviews(files.map(f => URL.createObjectURL(f)));
+    setSections(null);
+  }
+
+  function resetear() {
+    setSections(null);
+    setImagenes([]);
+    setPreviews([]);
+    setDesde('');
+    setHasta('');
   }
 
   async function extraer() {
     if (!imagenes.length) return;
-    setExtrayendo(true);
-    setExtraidos(null);
-    try {
-      const token = await getToken();
-      const fd = new FormData();
-      imagenes.forEach(f => fd.append('imagenes', f));
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/extraer-imagen`, {
-        method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
-      });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || 'Error');
-      setExtraidos((data.movements || []).map(m => ({
-        nombre: m.name || '',
-        fecha: m.date || new Date().toISOString().slice(0,10),
-        tipo: m.type || 'Gasto',
-        cuenta: m.account || 'Gastos de Operación',
-        cantidad: String(m.amount_eur || ''),
-        iva: m.iva || '0%',
-        irpf: m.irpf || '0%',
-        categorias: [], cliente_ids: [], equipo_ids: [],
-      })));
-    } catch (err) {
-      alert('Error al extraer: ' + err.message);
-    } finally {
-      setExtrayendo(false);
+    const built = [];
+    setSections([]);
+    for (let i = 0; i < imagenes.length; i++) {
+      setExtrayendoIdx(i);
+      try {
+        const token = await getToken();
+        const fd = new FormData();
+        fd.append('imagenes', imagenes[i]);
+        if (desde) fd.append('desde', desde);
+        if (hasta) fd.append('hasta', hasta);
+        const r = await fetch(`${BACKEND_URL}/admin/finanzas/extraer-imagen`, {
+          method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error');
+        const movimientos = (data.movements || []).map(m => ({
+          nombre: m.name || '',
+          fecha: m.date || new Date().toISOString().slice(0,10),
+          tipo: m.type || 'Gasto',
+          cuenta: m.account || 'Gastos de Operación',
+          cantidad: String(m.amount_eur || ''),
+          iva: m.iva || '0%',
+          irpf: m.irpf || '0%',
+          categorias: [], cliente_ids: [], equipo_ids: [],
+          fecha_factura: '', importe_factura: '',
+        }));
+        built.push({ previewUrl: previews[i], movimientos, guardados: new Set() });
+      } catch (err) {
+        built.push({ previewUrl: previews[i], movimientos: [], guardados: new Set(), error: err.message });
+      }
+      setSections([...built]);
     }
+    setExtrayendoIdx(null);
   }
 
-  function setField(idx, key, val) {
-    setExtraidos(prev => prev.map((m, i) => i === idx ? { ...m, [key]: val } : m));
+  function setMovField(si, mi, key, val) {
+    setSections(prev => prev.map((s, i) => i !== si ? s : {
+      ...s, movimientos: s.movimientos.map((m, j) => j !== mi ? m : { ...m, [key]: val }),
+    }));
   }
 
-  function eliminar(idx) {
-    setExtraidos(prev => prev.filter((_, i) => i !== idx));
+  function eliminarMov(si, mi) {
+    setSections(prev => prev.map((s, i) => i !== si ? s : {
+      ...s, movimientos: s.movimientos.filter((_, j) => j !== mi),
+    }));
   }
 
-  async function guardarUno(idx) {
-    const m = extraidos[idx];
+  async function guardarMov(si, mi) {
+    const m = sections[si].movimientos[mi];
     if (!m.nombre || !m.cantidad) return;
-    setGuardandoIdx(idx);
+    const key = `${si}-${mi}`;
+    setGuardandoKey(key);
     try {
       const token = await getToken();
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...m, cantidad: parseFloat(m.cantidad) }),
+        body: JSON.stringify({
+          ...m, cantidad: parseFloat(m.cantidad),
+          fecha_factura: m.fecha_factura || null,
+          importe_factura: m.importe_factura ? parseFloat(m.importe_factura) : null,
+        }),
       });
       if (!r.ok) throw new Error(await r.text());
-      setGuardadosIdx(prev => new Set([...prev, idx]));
+      setSections(prev => prev.map((s, i) => i !== si ? s : {
+        ...s, guardados: new Set([...s.guardados, mi]),
+      }));
     } catch (err) {
       alert('Error: ' + err.message);
     } finally {
-      setGuardandoIdx(null);
+      setGuardandoKey(null);
     }
   }
 
   async function guardarTodos() {
-    const pendientes = extraidos.map((_, i) => i).filter(i => !guardadosIdx.has(i));
-    for (const idx of pendientes) await guardarUno(idx);
+    if (!sections) return;
+    for (let si = 0; si < sections.length; si++) {
+      for (let mi = 0; mi < sections[si].movimientos.length; mi++) {
+        if (!sections[si].guardados.has(mi)) await guardarMov(si, mi);
+      }
+    }
     onGuardado();
   }
+
+  const totalGuardados = sections ? sections.reduce((acc, s) => acc + s.guardados.size, 0) : 0;
+  const totalMovs = sections ? sections.reduce((acc, s) => acc + s.movimientos.length, 0) : 0;
+  const hayPendientes = sections && totalGuardados < totalMovs;
+  const procesando = extrayendoIdx !== null;
 
   const btnTab = (t, label) => (
     <button type="button" onClick={() => setModo(t)}
@@ -1316,13 +1376,14 @@ function NuevoMovimientoTab({ onGuardado }) {
         <FormularioMovimiento onGuardado={onGuardado} />
       )}
 
-      {modo === 'imagen' && !extraidos && (
+      {/* ── SUBIDA ── */}
+      {modo === 'imagen' && !sections && (
         <div>
           <div
             onClick={() => inputRef.current?.click()}
             onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = '#0067FD'; }}
             onDragLeave={e => { e.currentTarget.style.borderColor = '#3f3f46'; }}
-            onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor = '#3f3f46'; setImagenes(Array.from(e.dataTransfer.files)); setExtraidos(null); }}
+            onDrop={onDrop}
             style={{ border: '2px dashed #3f3f46', borderRadius: 12, padding: '40px 24px', textAlign: 'center', cursor: 'pointer', transition: 'border-color 0.2s' }}>
             <p style={{ color: '#71717a', fontSize: 32, margin: '0 0 8px' }}>📷</p>
             <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: '0 0 4px' }}>
@@ -1331,98 +1392,213 @@ function NuevoMovimientoTab({ onGuardado }) {
             <p style={{ color: '#52525b', fontSize: 12, margin: 0 }}>Capturas bancarias, tickets o facturas · JPG, PNG · Máx 10 MB cada una</p>
           </div>
           <input ref={inputRef} type="file" accept="image/*" multiple onChange={onFileChange} style={{ display: 'none' }} />
+
           {imagenes.length > 0 && (
-            <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {imagenes.map((f, i) => (
-                <span key={i} style={{ background: '#27272a', color: '#a1a1aa', fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>{f.name}</span>
-              ))}
-            </div>
+            <>
+              {/* Miniaturas */}
+              <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {previews.map((url, i) => (
+                  <img key={i} src={url} alt={imagenes[i]?.name}
+                    style={{ height: 72, width: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid #3f3f46' }} />
+                ))}
+              </div>
+
+              {/* Rango de fechas */}
+              <div style={{ marginTop: 16, padding: 14, background: '#1c1c1e', borderRadius: 10, border: '1px solid #27272a' }}>
+                <p style={{ color: '#a1a1aa', fontSize: 12, fontWeight: 600, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  Rango de fechas del extracto (opcional — ayuda a la IA a inferir el año)
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label style={S.label}>Desde</label>
+                    <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={desde} onChange={e => setDesde(e.target.value)} />
+                  </div>
+                  <div>
+                    <label style={S.label}>Hasta</label>
+                    <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={hasta} onChange={e => setHasta(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" onClick={extraer} disabled={procesando}
+                style={{ marginTop: 12, background: !procesando ? '#0067FD' : '#27272a', color: !procesando ? 'white' : '#52525b', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: !procesando ? 'pointer' : 'not-allowed', width: '100%' }}>
+                {procesando ? `⏳ Analizando imagen ${(extrayendoIdx ?? 0) + 1} de ${imagenes.length}...` : `🔍 Extraer movimientos${imagenes.length > 1 ? ` (${imagenes.length} imágenes)` : ''}`}
+              </button>
+            </>
           )}
-          <button type="button" onClick={extraer} disabled={!imagenes.length || extrayendo}
-            style={{ marginTop: 16, background: imagenes.length && !extrayendo ? '#0067FD' : '#27272a', color: imagenes.length && !extrayendo ? 'white' : '#52525b', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: imagenes.length && !extrayendo ? 'pointer' : 'not-allowed', width: '100%' }}>
-            {extrayendo ? '⏳ Analizando imagen...' : '🔍 Extraer movimientos'}
-          </button>
+          {!imagenes.length && (
+            <button type="button" disabled
+              style={{ marginTop: 16, background: '#27272a', color: '#52525b', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'not-allowed', width: '100%' }}>
+              🔍 Extraer movimientos
+            </button>
+          )}
         </div>
       )}
 
-      {modo === 'imagen' && extraidos && (
+      {/* ── EXTRAYENDO (sections parcialmente construidas) ── */}
+      {modo === 'imagen' && sections !== null && (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <span style={{ color: '#22c55e', fontSize: 13, fontWeight: 600 }}>✓ {extraidos.length} movimiento{extraidos.length !== 1 ? 's' : ''} extraído{extraidos.length !== 1 ? 's' : ''}</span>
-            <button type="button" onClick={() => { setExtraidos(null); setGuardadosIdx(new Set()); }}
+          {/* Cabecera */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            {procesando
+              ? <span style={{ color: '#facc15', fontSize: 13, fontWeight: 600 }}>⏳ Analizando imagen {(extrayendoIdx ?? 0) + 1} de {imagenes.length}...</span>
+              : <span style={{ color: '#22c55e', fontSize: 13, fontWeight: 600 }}>✓ {totalMovs} movimiento{totalMovs !== 1 ? 's' : ''} extraído{totalMovs !== 1 ? 's' : ''} de {sections.length} imagen{sections.length !== 1 ? 'es' : ''}</span>
+            }
+            <button type="button" onClick={resetear}
               style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>
               ← Nueva imagen
             </button>
-            <button type="button" onClick={guardarTodos} disabled={guardandoIdx !== null}
-              style={{ marginLeft: 'auto', background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-              Guardar todos
-            </button>
+            {!procesando && hayPendientes && (
+              <button type="button" onClick={guardarTodos} disabled={!!guardandoKey}
+                style={{ marginLeft: 'auto', background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                Guardar todos
+              </button>
+            )}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {extraidos.map((m, idx) => {
-              const guardado = guardadosIdx.has(idx);
-              return (
-                <div key={idx} style={{ background: '#1c1c1e', borderRadius: 10, padding: 14, border: `1px solid ${guardado ? '#22c55e33' : '#27272a'}`, opacity: guardado ? 0.6 : 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                    <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontWeight: 700, fontSize: 16 }}>
-                      {m.tipo === 'Ingreso' ? '+' : '-'}{m.cantidad} €
-                    </span>
-                    <span style={{ color: '#52525b', fontSize: 12, flex: 1 }}>{m.fecha}</span>
-                    {guardado
-                      ? <span style={{ color: '#22c55e', fontSize: 12 }}>✓ Guardado</span>
-                      : <>
-                          <button type="button" onClick={() => guardarUno(idx)} disabled={guardandoIdx === idx}
-                            style={{ background: '#0067FD', color: 'white', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>
-                            {guardandoIdx === idx ? '...' : 'Guardar'}
-                          </button>
-                          <button type="button" onClick={() => eliminar(idx)}
-                            style={{ background: 'none', border: 'none', color: '#52525b', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}>✕</button>
-                        </>
-                    }
-                  </div>
-                  {!guardado && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      <div style={{ gridColumn: '1/-1' }}>
-                        <label style={S.label}>Nombre</label>
-                        <input style={S.input} value={m.nombre} onChange={e => setField(idx, 'nombre', e.target.value)} />
-                      </div>
-                      <div>
-                        <label style={S.label}>Fecha</label>
-                        <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={m.fecha} onChange={e => setField(idx, 'fecha', e.target.value)} />
-                      </div>
-                      <div>
-                        <label style={S.label}>Cantidad (€)</label>
-                        <input style={S.input} type="number" step="0.01" value={m.cantidad} onChange={e => setField(idx, 'cantidad', e.target.value)} />
-                      </div>
-                      <div>
-                        <label style={S.label}>Tipo</label>
-                        <select style={S.input} value={m.tipo} onChange={e => setField(idx, 'tipo', e.target.value)}>
-                          <option>Ingreso</option><option>Gasto</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label style={S.label}>Cuenta</label>
-                        <select style={S.input} value={m.cuenta} onChange={e => setField(idx, 'cuenta', e.target.value)}>
-                          {CUENTAS.map(c => <option key={c}>{c}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label style={S.label}>IVA</label>
-                        <select style={S.input} value={m.iva} onChange={e => setField(idx, 'iva', e.target.value)}>
-                          {['0%','4%','10%','21%'].map(v => <option key={v}>{v}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label style={S.label}>IRPF</label>
-                        <select style={S.input} value={m.irpf} onChange={e => setField(idx, 'irpf', e.target.value)}>
-                          {['0%','7%','15%','19%'].map(v => <option key={v}>{v}</option>)}
-                        </select>
-                      </div>
-                    </div>
+
+          {/* Sección por imagen */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {sections.map((sec, si) => (
+              <div key={si}>
+                {/* Imagen */}
+                <div style={{ position: 'relative', marginBottom: 12 }}>
+                  {sections.length > 1 && (
+                    <p style={{ color: '#52525b', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>
+                      Imagen {si + 1} de {imagenes.length}
+                    </p>
                   )}
+                  <img src={sec.previewUrl} alt={`Imagen ${si + 1}`}
+                    style={{ width: '100%', maxHeight: 340, objectFit: 'contain', borderRadius: 10, border: '1px solid #27272a', background: '#0d0d0d' }} />
                 </div>
-              );
-            })}
+
+                {/* Error */}
+                {sec.error && (
+                  <div style={{ background: '#450a0a', border: '1px solid #991b1b', borderRadius: 8, padding: '10px 14px', color: '#f87171', fontSize: 13 }}>
+                    Error al analizar: {sec.error}
+                  </div>
+                )}
+
+                {/* Movimientos */}
+                {sec.movimientos.length === 0 && !sec.error && !procesando && (
+                  <p style={{ color: '#52525b', fontSize: 13, textAlign: 'center', padding: '16px 0' }}>Sin movimientos detectados</p>
+                )}
+                {procesando && si === extrayendoIdx && sec.movimientos.length === 0 && !sec.error && (
+                  <p style={{ color: '#71717a', fontSize: 13, textAlign: 'center', padding: '16px 0' }}>Analizando...</p>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {sec.movimientos.map((m, mi) => {
+                    const guardado = sec.guardados.has(mi);
+                    const thisKey = `${si}-${mi}`;
+                    return (
+                      <div key={mi} style={{ background: '#1c1c1e', borderRadius: 10, padding: 14, border: `1px solid ${guardado ? '#22c55e33' : '#27272a'}`, opacity: guardado ? 0.55 : 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: guardado ? 0 : 12 }}>
+                          <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontWeight: 700, fontSize: 15 }}>
+                            {m.tipo === 'Ingreso' ? '+' : '-'}{m.cantidad} €
+                          </span>
+                          <span style={{ color: '#71717a', fontSize: 12, flex: 1 }}>{m.nombre} · {m.fecha}</span>
+                          {guardado
+                            ? <span style={{ color: '#22c55e', fontSize: 12 }}>✓ Guardado</span>
+                            : <>
+                                <button type="button" onClick={() => guardarMov(si, mi)} disabled={guardandoKey === thisKey}
+                                  style={{ background: '#0067FD', color: 'white', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>
+                                  {guardandoKey === thisKey ? '...' : 'Guardar'}
+                                </button>
+                                <button type="button" onClick={() => eliminarMov(si, mi)}
+                                  style={{ background: 'none', border: 'none', color: '#52525b', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}>✕</button>
+                              </>
+                          }
+                        </div>
+                        {!guardado && (
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <div style={{ gridColumn: '1/-1' }}>
+                              <label style={S.label}>Nombre</label>
+                              <input style={S.input} value={m.nombre} onChange={e => setMovField(si, mi, 'nombre', e.target.value)} />
+                            </div>
+                            <div>
+                              <label style={S.label}>Fecha</label>
+                              <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={m.fecha} onChange={e => setMovField(si, mi, 'fecha', e.target.value)} />
+                            </div>
+                            <div>
+                              <label style={S.label}>Cantidad (€)</label>
+                              <input style={S.input} type="number" step="0.01" value={m.cantidad} onChange={e => setMovField(si, mi, 'cantidad', e.target.value)} />
+                            </div>
+                            <div>
+                              <label style={S.label}>Tipo</label>
+                              <select style={S.input} value={m.tipo} onChange={e => setMovField(si, mi, 'tipo', e.target.value)}>
+                                <option>Ingreso</option><option>Gasto</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label style={S.label}>Cuenta</label>
+                              <select style={S.input} value={m.cuenta} onChange={e => setMovField(si, mi, 'cuenta', e.target.value)}>
+                                {CUENTAS_LIST.map(c => <option key={c}>{c}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <label style={S.label}>IVA</label>
+                              <select style={S.input} value={m.iva} onChange={e => setMovField(si, mi, 'iva', e.target.value)}>
+                                {['0%','4%','10%','21%'].map(v => <option key={v}>{v}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <label style={S.label}>IRPF</label>
+                              <select style={S.input} value={m.irpf} onChange={e => setMovField(si, mi, 'irpf', e.target.value)}>
+                                {['0%','7%','15%','19%'].map(v => <option key={v}>{v}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <label style={S.label}>Fecha factura</label>
+                              <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={m.fecha_factura} onChange={e => setMovField(si, mi, 'fecha_factura', e.target.value)} />
+                            </div>
+                            <div>
+                              <label style={S.label}>Importe factura (€)</label>
+                              <input style={S.input} type="number" step="0.01" value={m.importe_factura} onChange={e => setMovField(si, mi, 'importe_factura', e.target.value)} />
+                            </div>
+                            <div style={{ gridColumn: '1/-1' }}>
+                              <label style={S.label}>Categorías</label>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+                                {CATEGORIAS.map(cat => {
+                                  const sel = m.categorias.includes(cat);
+                                  return (
+                                    <button key={cat} type="button"
+                                      onClick={() => setMovField(si, mi, 'categorias', sel ? m.categorias.filter(c => c !== cat) : [...m.categorias, cat])}
+                                      style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: 'none',
+                                        background: sel ? '#0067FD' : '#27272a', color: sel ? 'white' : '#71717a' }}>
+                                      {cat}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                            {clientesLista.length > 0 && (
+                              <div>
+                                <MultiCheckDrop
+                                  label="Clientes"
+                                  opciones={clientesLista}
+                                  seleccionados={m.cliente_ids}
+                                  onChange={val => setMovField(si, mi, 'cliente_ids', val)}
+                                />
+                              </div>
+                            )}
+                            {equipoLista.length > 0 && (
+                              <div>
+                                <MultiCheckDrop
+                                  label="Equipo"
+                                  opciones={equipoLista}
+                                  seleccionados={m.equipo_ids}
+                                  onChange={val => setMovField(si, mi, 'equipo_ids', val)}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
