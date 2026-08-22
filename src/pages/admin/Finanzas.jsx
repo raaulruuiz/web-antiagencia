@@ -1512,7 +1512,7 @@ function NuevoMovimientoTab({ onGuardado }) {
                 {/* Imagen */}
                 <div style={{ marginBottom: 14 }}>
                   <img src={sec.previewUrl} alt={`Imagen ${si + 1}`}
-                    style={{ width: '100%', maxHeight: 320, objectFit: 'contain', display: 'block', borderRadius: 10, border: '1px solid #27272a', background: '#0d0d0d' }} />
+                    style={{ width: '100%', maxHeight: 640, objectFit: 'contain', display: 'block', borderRadius: 10, border: '1px solid #27272a', background: '#0d0d0d' }} />
                 </div>
 
                 {/* Error de parsing */}
