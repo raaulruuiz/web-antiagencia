@@ -2345,6 +2345,8 @@ export default function Finanzas() {
           equipo_ids: m.equipo_ids || [], created_at: m.created_at, updated_at: m.updated_at,
         };
         setMovimientos(prev => ({ ...prev, items: prev.items.map(i => i.id === id ? fila : i) }));
+        cargarDashboard();
+        cargarEquipo();
       }
     } catch (err) {
       alert('Error al guardar: ' + err.message);
@@ -2389,6 +2391,7 @@ export default function Finanzas() {
       setBulkValor('');
       cargarMovimientos(pagMovs);
       cargarDashboard();
+      cargarEquipo();
     } catch (err) {
       alert('Error al editar en bloque: ' + err.message);
     }
