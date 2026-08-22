@@ -1405,7 +1405,7 @@ function NuevoMovimientoTab({ onGuardado }) {
 // ── Celda editable inline ───────────────────────────────────────
 const CUENTAS_OPTS = ['Ingresos','Impuestos','Compensación del Dueño','Gastos de Operación','Freelancers y Material','Ganancia'];
 
-function CeldaEditable({ m, campo, onGuardar }) {
+function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = [] }) {
   const [editando, setEditando] = useState(false);
   const [val, setVal] = useState(m[campo]);
   const ref = useRef(null);
@@ -1426,6 +1426,7 @@ function CeldaEditable({ m, campo, onGuardar }) {
 
   const esSelect = ['tipo','cuenta','iva','irpf'].includes(campo);
   const esMulti = campo === 'categorias';
+  const esMultiUuid = ['cliente_ids','equipo_ids'].includes(campo);
 
   if (esMulti) {
     const cats = m.categorias || [];
@@ -1453,6 +1454,35 @@ function CeldaEditable({ m, campo, onGuardar }) {
             <button onClick={confirmar} style={{ marginTop:6, background:'#0067FD', color:'white', border:'none', borderRadius:6, padding:'4px 12px', fontSize:12, cursor:'pointer', width:'100%' }}>
               Aplicar
             </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (esMultiUuid) {
+    const lista = campo === 'cliente_ids' ? clientesLista : equipoLista;
+    const selIds = val || [];
+    const nombres = selIds.map(id => lista.find(x => x.id === id)?.nombre || '?');
+    return (
+      <div ref={ref} style={{ position: 'relative' }}>
+        <div onClick={() => setEditando(o => !o)} style={{ cursor:'pointer', minHeight:20 }}>
+          {nombres.length ? <span style={{ color:'#d4d4d8', fontSize:12 }}>{nombres.join(', ')}</span> : <span style={{ color:'#3f3f46', fontSize:12 }}>—</span>}
+        </div>
+        {editando && (
+          <div style={{ position:'absolute', zIndex:400, top:'100%', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, minWidth:200, maxHeight:200, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
+            {lista.map(o => {
+              const sel = (val||[]).includes(o.id);
+              return (
+                <label key={o.id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', cursor:'pointer', borderBottom:'1px solid #27272a' }}
+                  onMouseEnter={e=>e.currentTarget.style.background='#27272a'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                  <input type="checkbox" checked={sel} onChange={() => setVal(prev => sel?(prev||[]).filter(id=>id!==o.id):[...(prev||[]),o.id])}
+                    style={{ accentColor:'#0067FD', flexShrink:0 }} />
+                  <span style={{ color:'#d4d4d8', fontSize:12 }}>{o.nombre}</span>
+                </label>
+              );
+            })}
+            <button onClick={confirmar} style={{ width:'100%', background:'#0067FD', color:'white', border:'none', borderRadius:'0 0 8px 8px', padding:'6px', fontSize:12, cursor:'pointer' }}>Aplicar</button>
           </div>
         )}
       </div>
@@ -1502,7 +1532,7 @@ function CeldaEditable({ m, campo, onGuardar }) {
 }
 
 // ── Tabla de movimientos ────────────────────────────────────────
-function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGuardarCelda, onVerDetalle }) {
+function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGuardarCelda, onVerDetalle, clientesLista, equipoLista }) {
   const allSel = items.length > 0 && items.every(m => seleccionados.has(m.id));
   const someSel = !allSel && items.some(m => seleccionados.has(m.id));
   const COLS = [
@@ -1514,6 +1544,10 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
     { key:'iva', label:'IVA', w:55 },
     { key:'irpf', label:'IRPF', w:55 },
     { key:'categorias', label:'Categorías', w:150 },
+    { key:'fecha_factura', label:'F. Factura', w:100 },
+    { key:'importe_factura', label:'Imp. s/Factura', w:110 },
+    { key:'cliente_ids', label:'Clientes', w:130 },
+    { key:'equipo_ids', label:'Equipo', w:120 },
   ];
   const th = { padding:'8px 10px', color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', borderBottom:'1px solid #27272a', whiteSpace:'nowrap', textAlign:'left' };
   const td = { padding:'6px 10px', borderBottom:'1px solid #1c1c1e', verticalAlign:'middle' };
@@ -1560,7 +1594,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                         </span>
                       </div>
                     ) : (
-                      <CeldaEditable m={m} campo={col.key} onGuardar={onGuardarCelda} />
+                      <CeldaEditable m={m} campo={col.key} onGuardar={onGuardarCelda} clientesLista={clientesLista} equipoLista={equipoLista} />
                     )}
                   </td>
                 ))}
@@ -2660,6 +2694,8 @@ export default function Finanzas() {
                       onToggleAll={toggleAll}
                       onGuardarCelda={guardarCeldaInline}
                       onVerDetalle={abrirDetalle}
+                      clientesLista={filtroClientesLista}
+                      equipoLista={filtroEquipoLista}
                     />
                     {paginacion}
                   </>
