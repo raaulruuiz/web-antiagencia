@@ -1518,14 +1518,22 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
   const th = { padding:'8px 10px', color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', borderBottom:'1px solid #27272a', whiteSpace:'nowrap', textAlign:'left' };
   const td = { padding:'6px 10px', borderBottom:'1px solid #1c1c1e', verticalAlign:'middle' };
 
+  const haySeleccionados = items.some(m => seleccionados.has(m.id));
   return (
     <div style={{ overflowX:'auto' }}>
+      <style>{`
+        .fin-tabla-row .fin-cb { opacity:0; transition:opacity 0.1s; }
+        .fin-tabla-row:hover .fin-cb { opacity:1; }
+        .fin-tabla-row .fin-cb.checked { opacity:1; }
+      `}</style>
       <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
         <thead>
           <tr>
             <th style={{ ...th, width:36, paddingRight:0 }}>
-              <input type="checkbox" checked={allSel} ref={el => { if(el) el.indeterminate=someSel; }}
-                onChange={() => onToggleAll(items, allSel)} style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+              {haySeleccionados && (
+                <input type="checkbox" checked={allSel} ref={el => { if(el) el.indeterminate=someSel; }}
+                  onChange={() => onToggleAll(items, allSel)} style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+              )}
             </th>
             {COLS.map(col => <th key={col.key} style={{ ...th, width:col.w, minWidth:col.w }}>{col.label}</th>)}
           </tr>
@@ -1534,11 +1542,13 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
           {items.map(m => {
             const sel = seleccionados.has(m.id);
             return (
-              <tr key={m.id} style={{ background: sel?'#1e293b':'transparent' }}
+              <tr key={m.id} className="fin-tabla-row" style={{ background: sel?'#1e293b':'transparent' }}
                 onMouseEnter={e => { if(!sel) e.currentTarget.style.background='#1c1c1e'; }}
                 onMouseLeave={e => { e.currentTarget.style.background=sel?'#1e293b':'transparent'; }}>
                 <td style={{ ...td, width:36, paddingRight:0 }}>
-                  <input type="checkbox" checked={sel} onChange={() => onToggleSel(m.id)} style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+                  <input type="checkbox" checked={sel} onChange={() => onToggleSel(m.id)}
+                    className={`fin-cb${sel?' checked':''}`}
+                    style={{ accentColor:'#0067FD', cursor:'pointer' }} />
                 </td>
                 {COLS.map(col => (
                   <td key={col.key} style={{ ...td, width:col.w, maxWidth:col.flex?260:col.w }}>
@@ -2660,39 +2670,64 @@ export default function Finanzas() {
               const traspasos = pageItems.filter(m =>  (m.categorias || []).includes('Traspaso Entre Cuentas'));
               return (
                 <>
+                  <style>{`
+                    .fila-mov-wrap { position: relative; }
+                    .fila-mov-cb { opacity: 0; transition: opacity 0.1s; }
+                    .fila-mov-wrap:hover .fila-mov-cb { opacity: 1; }
+                    .fila-mov-cb.checked { opacity: 1; }
+                    .fin-tabla-row .fin-cb { opacity: 0; transition: opacity 0.1s; }
+                    .fin-tabla-row:hover .fin-cb { opacity: 1; }
+                    .fin-tabla-row .fin-cb.checked { opacity: 1; }
+                    .fin-tabla-row th .fin-cb-all { opacity: 0; }
+                    .fin-tabla-row th:hover .fin-cb-all { opacity: 1; }
+                  `}</style>
                   <div style={{ display: 'grid', gridTemplateColumns: traspasos.length > 0 ? '1fr 1fr' : '1fr', gap: 24 }}>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
-                        <input type="checkbox"
-                          checked={normales.length>0&&normales.every(m=>seleccionados.has(m.id))}
-                          ref={el=>{if(el)el.indeterminate=normales.some(m=>seleccionados.has(m.id))&&!normales.every(m=>seleccionados.has(m.id));}}
-                          onChange={()=>toggleAll(normales,normales.every(m=>seleccionados.has(m.id)))}
-                          style={{accentColor:'#0067FD',cursor:'pointer'}}/>
+                        {seleccionados.size > 0 && (
+                          <input type="checkbox"
+                            checked={normales.length>0&&normales.every(m=>seleccionados.has(m.id))}
+                            ref={el=>{if(el)el.indeterminate=normales.some(m=>seleccionados.has(m.id))&&!normales.every(m=>seleccionados.has(m.id));}}
+                            onChange={()=>toggleAll(normales,normales.every(m=>seleccionados.has(m.id)))}
+                            style={{accentColor:'#0067FD',cursor:'pointer'}}/>
+                        )}
                         <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin:0 }}>Movimientos ({normales.length})</p>
                       </div>
-                      {normales.map(m => (
-                        <div key={m.id} style={{ display:'flex', alignItems:'center', gap:6 }}>
-                          <input type="checkbox" checked={seleccionados.has(m.id)} onChange={()=>toggleSel(m.id)} style={{accentColor:'#0067FD',cursor:'pointer',flexShrink:0}}/>
-                          <div style={{flex:1,minWidth:0}}><FilaMovimiento m={m} onVerDetalle={abrirDetalle} /></div>
-                        </div>
-                      ))}
+                      {normales.map(m => {
+                        const sel = seleccionados.has(m.id);
+                        return (
+                          <div key={m.id} className="fila-mov-wrap" style={{ display:'flex', alignItems:'center', gap:6 }}>
+                            <input type="checkbox" checked={sel} onChange={()=>toggleSel(m.id)}
+                              className={`fila-mov-cb${sel?' checked':''}`}
+                              style={{accentColor:'#0067FD',cursor:'pointer',flexShrink:0}}/>
+                            <div style={{flex:1,minWidth:0}}><FilaMovimiento m={m} onVerDetalle={abrirDetalle} /></div>
+                          </div>
+                        );
+                      })}
                     </div>
                     {traspasos.length > 0 && (
                       <div style={{ minWidth: 0, borderLeft: '1px solid #27272a', paddingLeft: 24 }}>
                         <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
-                          <input type="checkbox"
-                            checked={traspasos.length>0&&traspasos.every(m=>seleccionados.has(m.id))}
-                            ref={el=>{if(el)el.indeterminate=traspasos.some(m=>seleccionados.has(m.id))&&!traspasos.every(m=>seleccionados.has(m.id));}}
-                            onChange={()=>toggleAll(traspasos,traspasos.every(m=>seleccionados.has(m.id)))}
-                            style={{accentColor:'#0067FD',cursor:'pointer'}}/>
+                          {seleccionados.size > 0 && (
+                            <input type="checkbox"
+                              checked={traspasos.length>0&&traspasos.every(m=>seleccionados.has(m.id))}
+                              ref={el=>{if(el)el.indeterminate=traspasos.some(m=>seleccionados.has(m.id))&&!traspasos.every(m=>seleccionados.has(m.id));}}
+                              onChange={()=>toggleAll(traspasos,traspasos.every(m=>seleccionados.has(m.id)))}
+                              style={{accentColor:'#0067FD',cursor:'pointer'}}/>
+                          )}
                           <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin:0 }}>Traspasos ({traspasos.length})</p>
                         </div>
-                        {traspasos.map(m => (
-                          <div key={m.id} style={{ display:'flex', alignItems:'center', gap:6 }}>
-                            <input type="checkbox" checked={seleccionados.has(m.id)} onChange={()=>toggleSel(m.id)} style={{accentColor:'#0067FD',cursor:'pointer',flexShrink:0}}/>
-                            <div style={{flex:1,minWidth:0}}><FilaMovimiento m={m} onVerDetalle={abrirDetalle} /></div>
-                          </div>
-                        ))}
+                        {traspasos.map(m => {
+                          const sel = seleccionados.has(m.id);
+                          return (
+                            <div key={m.id} className="fila-mov-wrap" style={{ display:'flex', alignItems:'center', gap:6 }}>
+                              <input type="checkbox" checked={sel} onChange={()=>toggleSel(m.id)}
+                                className={`fila-mov-cb${sel?' checked':''}`}
+                                style={{accentColor:'#0067FD',cursor:'pointer',flexShrink:0}}/>
+                              <div style={{flex:1,minWidth:0}}><FilaMovimiento m={m} onVerDetalle={abrirDetalle} /></div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
