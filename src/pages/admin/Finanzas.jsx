@@ -1227,6 +1227,7 @@ function NuevoMovimientoTab({ onGuardado }) {
   const [equipoLista, setEquipoLista] = useState([]);
   const inputRef = useRef(null);
   const cancelRef = useRef(false);
+  const [nuevasCats, setNuevasCats] = useState({}); // { 'si-mi': texto | undefined }
 
   const CUENTAS_LIST = CUENTAS.map(c => c.key);
 
@@ -1314,7 +1315,8 @@ function NuevoMovimientoTab({ onGuardado }) {
           fecha_factura: '', importe_factura: '',
         }));
         const cuentaSec = detectarCuentaSec(movimientos);
-        seccion = { previewUrl: previews[i], movimientos, guardados: new Set(), cuentaSec };
+        const movNorm = movimientos.map(m => ({ ...m, cuenta: cuentaSec }));
+        seccion = { previewUrl: previews[i], movimientos: movNorm, guardados: new Set(), cuentaSec };
       } catch (err) {
         seccion = { previewUrl: previews[i], movimientos: [], guardados: new Set(), cuentaSec: 'Gastos de Operación', error: err.message };
       }
@@ -1337,57 +1339,57 @@ function NuevoMovimientoTab({ onGuardado }) {
     }));
   }
 
-  async function guardarMov(si, mi) {
-    const m = sections[si].movimientos[mi];
-    if (!m.nombre || !m.cantidad) return;
-    const key = `${si}-${mi}`;
-    setGuardandoKey(key);
+  // Marca un movimiento como "revisado" localmente (sin guardar en BD)
+  function marcarRevisado(si, mi) {
+    setSections(prev => prev.map((s, i) => i !== si ? s : {
+      ...s, guardados: new Set([...s.guardados, mi]),
+    }));
+  }
+
+  // Reabre un movimiento ya marcado para editarlo
+  function desmarcarRevisado(si, mi) {
+    setSections(prev => prev.map((s, i) => i !== si ? s : {
+      ...s, guardados: new Set([...s.guardados].filter(j => j !== mi)),
+    }));
+  }
+
+  // Guarda TODOS los movimientos en BD de una vez
+  async function guardarTodos() {
+    if (!sections) return;
+    setGuardandoKey('todos');
     try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...m, cantidad: parseFloat(m.cantidad),
-          fecha_factura: m.fecha_factura || null,
-          importe_factura: m.importe_factura ? parseFloat(m.importe_factura) : null,
-        }),
-      });
-      if (!r.ok) throw new Error(await r.text());
-      setSections(prev => {
-        const next = prev.map((s, i) => i !== si ? s : { ...s, guardados: new Set([...s.guardados, mi]) });
-        // Comprobar si todos los movimientos de todas las secciones están guardados
-        const todoGuardado = next.every(s => s.movimientos.length === 0 || s.guardados.size === s.movimientos.length);
-        if (todoGuardado && next.reduce((a, s) => a + s.movimientos.length, 0) > 0) {
-          // Marcar tareas "Tracking diario" en Notion
-          getToken().then(t => fetch(`${BACKEND_URL}/admin/finanzas/completar-tracking-diario`, {
-            method: 'POST', headers: { Authorization: `Bearer ${t}` },
-          }).then(r => r.json()).then(d => {
-            if (d.completadas > 0) console.log(`✅ ${d.completadas} tarea(s) "Tracking diario" marcadas en Notion`);
-          }).catch(() => {}));
+      for (let si = 0; si < sections.length; si++) {
+        for (let mi = 0; mi < sections[si].movimientos.length; mi++) {
+          const m = sections[si].movimientos[mi];
+          if (!m.nombre || !m.cantidad) continue;
+          const token = await getToken();
+          const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...m, cantidad: parseFloat(m.cantidad),
+              fecha_factura: m.fecha_factura || null,
+              importe_factura: m.importe_factura ? parseFloat(m.importe_factura) : null,
+            }),
+          });
+          if (!r.ok) throw new Error(await r.text());
         }
-        return next;
-      });
+      }
+      getToken().then(t => fetch(`${BACKEND_URL}/admin/finanzas/completar-tracking-diario`, {
+        method: 'POST', headers: { Authorization: `Bearer ${t}` },
+      }).then(r => r.json()).then(d => {
+        if (d.completadas > 0) console.log(`✅ ${d.completadas} tarea(s) "Tracking diario" marcadas en Notion`);
+      }).catch(() => {}));
+      onGuardado();
     } catch (err) {
-      alert('Error: ' + err.message);
-    } finally {
+      alert('Error al guardar: ' + err.message);
       setGuardandoKey(null);
     }
   }
 
-  async function guardarTodos() {
-    if (!sections) return;
-    for (let si = 0; si < sections.length; si++) {
-      for (let mi = 0; mi < sections[si].movimientos.length; mi++) {
-        if (!sections[si].guardados.has(mi)) await guardarMov(si, mi);
-      }
-    }
-    onGuardado();
-  }
-
-  const totalGuardados = sections ? sections.reduce((acc, s) => acc + s.guardados.size, 0) : 0;
+  const totalRevisados = sections ? sections.reduce((acc, s) => acc + s.guardados.size, 0) : 0;
   const totalMovs = sections ? sections.reduce((acc, s) => acc + s.movimientos.length, 0) : 0;
-  const hayPendientes = sections && totalGuardados < totalMovs;
+  const hayMovimientos = sections && totalMovs > 0;
   const procesando = extrayendoIdx !== null;
 
   const btnTab = (t, label) => (
@@ -1511,10 +1513,10 @@ function NuevoMovimientoTab({ onGuardado }) {
                 style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>
                 ← Nueva imagen
               </button>
-              {!procesando && hayPendientes && (
-                <button type="button" onClick={guardarTodos} disabled={!!guardandoKey}
-                  style={{ marginLeft: 'auto', background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                  Guardar todos
+              {!procesando && hayMovimientos && (
+                <button type="button" onClick={guardarTodos} disabled={guardandoKey === 'todos'}
+                  style={{ marginLeft: 'auto', background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: guardandoKey === 'todos' ? 'not-allowed' : 'pointer' }}>
+                  {guardandoKey === 'todos' ? 'Guardando...' : `Guardar todos (${totalMovs})`}
                 </button>
               )}
             </div>
@@ -1594,12 +1596,12 @@ function NuevoMovimientoTab({ onGuardado }) {
                   <p style={{ color: '#71717a', fontSize: 13, textAlign: 'center', padding: '16px 0' }}>Analizando...</p>
                 )}
 
-                {/* Botón guardar esta página */}
+                {/* Botón marcar todos de esta imagen como listos */}
                 {!procesando && hayPendientesPagina && (
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-                    <button type="button" onClick={async () => { for (let mi = 0; mi < sec.movimientos.length; mi++) { if (!sec.guardados.has(mi)) await guardarMov(si, mi); } }} disabled={!!guardandoKey}
+                    <button type="button" onClick={() => { sec.movimientos.forEach((_, mi) => { if (!sec.guardados.has(mi)) marcarRevisado(si, mi); }); }}
                       style={{ background: '#27272a', color: '#a1a1aa', border: 'none', borderRadius: 7, padding: '5px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                      Guardar imagen {si + 1}
+                      ✓ Marcar imagen {si + 1} como lista
                     </button>
                   </div>
                 )}
@@ -1609,20 +1611,22 @@ function NuevoMovimientoTab({ onGuardado }) {
                     const guardado = sec.guardados.has(mi);
                     const thisKey = `${si}-${mi}`;
                     return (
-                      <div key={mi} style={{ background: '#1c1c1e', borderRadius: 10, padding: 14, border: `1px solid ${guardado ? '#22c55e33' : '#27272a'}`, opacity: guardado ? 0.55 : 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: guardado ? 0 : 12 }}>
+                      <div key={mi} style={{ background: '#1c1c1e', borderRadius: 10, padding: 14, border: `1px solid ${guardado ? '#22c55e33' : '#27272a'}` }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: guardado ? 0 : 12,
+                          cursor: guardado ? 'pointer' : 'default' }}
+                          onClick={guardado ? () => desmarcarRevisado(si, mi) : undefined}>
                           <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontWeight: 700, fontSize: 15 }}>
                             {m.tipo === 'Ingreso' ? '+' : '-'}{m.cantidad} €
                           </span>
                           <span style={{ color: '#71717a', fontSize: 12, flex: 1 }}>{m.nombre} · {m.fecha}</span>
                           {guardado
-                            ? <span style={{ color: '#22c55e', fontSize: 12 }}>✓ Guardado</span>
+                            ? <span style={{ color: '#22c55e', fontSize: 12 }}>✓ Listo · clic para editar</span>
                             : <>
-                                <button type="button" onClick={() => guardarMov(si, mi)} disabled={guardandoKey === thisKey}
-                                  style={{ background: '#0067FD', color: 'white', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>
-                                  {guardandoKey === thisKey ? '...' : 'Guardar'}
+                                <button type="button" onClick={e => { e.stopPropagation(); marcarRevisado(si, mi); }}
+                                  style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+                                  ✓ Listo
                                 </button>
-                                <button type="button" onClick={() => eliminarMov(si, mi)}
+                                <button type="button" onClick={e => { e.stopPropagation(); eliminarMov(si, mi); }}
                                   style={{ background: 'none', border: 'none', color: '#52525b', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}>✕</button>
                               </>
                           }
@@ -1687,6 +1691,41 @@ function NuevoMovimientoTab({ onGuardado }) {
                                     </button>
                                   );
                                 })}
+                                {/* Categorías personalizadas ya añadidas */}
+                                {m.categorias.filter(c => !CATEGORIAS.includes(c)).map(cat => (
+                                  <button key={cat} type="button"
+                                    onClick={() => setMovField(si, mi, 'categorias', m.categorias.filter(c => c !== cat))}
+                                    style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: '1px solid #0067FD',
+                                      background: '#0067FD22', color: '#60a5fa' }}>
+                                    {cat} ✕
+                                  </button>
+                                ))}
+                                {/* Botón + nueva categoría */}
+                                {nuevasCats[thisKey] !== undefined
+                                  ? <input autoFocus value={nuevasCats[thisKey] || ''}
+                                      onChange={e => setNuevasCats(prev => ({ ...prev, [thisKey]: e.target.value }))}
+                                      onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                          const cat = (nuevasCats[thisKey] || '').trim();
+                                          if (cat) setMovField(si, mi, 'categorias', [...m.categorias, cat]);
+                                          setNuevasCats(prev => { const n = {...prev}; delete n[thisKey]; return n; });
+                                        }
+                                        if (e.key === 'Escape') setNuevasCats(prev => { const n = {...prev}; delete n[thisKey]; return n; });
+                                      }}
+                                      onBlur={() => {
+                                        const cat = (nuevasCats[thisKey] || '').trim();
+                                        if (cat) setMovField(si, mi, 'categorias', [...m.categorias, cat]);
+                                        setNuevasCats(prev => { const n = {...prev}; delete n[thisKey]; return n; });
+                                      }}
+                                      placeholder="Escribe y Enter"
+                                      style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, background: '#1c1c1e', border: '1px dashed #3f3f46', color: 'white', outline: 'none', width: 140 }}
+                                    />
+                                  : <button type="button"
+                                      onClick={() => setNuevasCats(prev => ({ ...prev, [thisKey]: '' }))}
+                                      style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: '1px dashed #3f3f46', background: 'none', color: '#52525b' }}>
+                                      + Nueva
+                                    </button>
+                                }
                               </div>
                             </div>
                             {clientesLista.length > 0 && (
@@ -1720,6 +1759,7 @@ const CUENTAS_OPTS = ['Ingresos','Impuestos','Compensación del Dueño','Gastos 
 function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = [] }) {
   const [editando, setEditando] = useState(false);
   const [val, setVal] = useState(m[campo]);
+  const [nuevaCat, setNuevaCat] = useState(null); // null = oculto, '' = mostrando input
   const ref = useRef(null);
 
   useEffect(() => { setVal(m[campo]); }, [m[campo]]);
@@ -1762,6 +1802,30 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
                   </button>
                 );
               })}
+              {/* Categorías personalizadas */}
+              {(val||[]).filter(c => !CATEGORIAS.includes(c)).map(c => (
+                <button key={c} type="button" onClick={() => setVal(prev => (prev||[]).filter(x=>x!==c))}
+                  style={{ background:'#0067FD22', color:'#60a5fa', border:'1px solid #0067FD', borderRadius:4, padding:'2px 7px', fontSize:11, cursor:'pointer' }}>
+                  {c} ✕
+                </button>
+              ))}
+              {/* + Nueva categoría */}
+              {nuevaCat !== null
+                ? <input autoFocus value={nuevaCat}
+                    onChange={e => setNuevaCat(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') { const c = nuevaCat.trim(); if (c) setVal(prev => [...(prev||[]), c]); setNuevaCat(null); }
+                      if (e.key === 'Escape') setNuevaCat(null);
+                    }}
+                    onBlur={() => { const c = nuevaCat.trim(); if (c) setVal(prev => [...(prev||[]), c]); setNuevaCat(null); }}
+                    placeholder="Escribe y Enter"
+                    style={{ padding:'2px 7px', borderRadius:4, fontSize:11, background:'#27272a', border:'1px dashed #3f3f46', color:'white', outline:'none', width:110 }}
+                  />
+                : <button type="button" onClick={() => setNuevaCat('')}
+                    style={{ background:'none', border:'1px dashed #3f3f46', color:'#52525b', borderRadius:4, padding:'2px 7px', fontSize:11, cursor:'pointer' }}>
+                    + Nueva
+                  </button>
+              }
             </div>
             <button onClick={confirmar} style={{ marginTop:6, background:'#0067FD', color:'white', border:'none', borderRadius:6, padding:'4px 12px', fontSize:12, cursor:'pointer', width:'100%' }}>
               Aplicar
@@ -3794,7 +3858,7 @@ export default function Finanzas() {
 
       {/* ── NUEVO ── */}
       {tab === 'nuevo' && (
-        <NuevoMovimientoTab onGuardado={() => { setTab('movimientos'); cargarMovimientos(1); cargarDashboard(); }} />
+        <NuevoMovimientoTab onGuardado={() => { setSinMovimientosMes(false); setTab('movimientos'); cargarMovimientos(1); cargarDashboard(); }} />
       )}
 
       {/* ── Confirm dialog ── */}
