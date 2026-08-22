@@ -1301,10 +1301,9 @@ function NuevoMovimientoTab({ onGuardado }) {
         built.push({ previewUrl: previews[i], movimientos: [], guardados: new Set(), error: err.message });
       }
       setSections([...built]);
-      setPagina(built.length - 1); // avanza a la página recién procesada
+      if (i === 0) setPagina(0); // primera imagen lista: muestra al usuario para que empiece a revisar
     }
     setExtrayendoIdx(null);
-    setPagina(0); // al terminar, vuelve a la primera
   }
 
   function setMovField(si, mi, key, val) {
