@@ -1651,7 +1651,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
 
   const COLS = [
     { key:'fecha',            label:'Fecha',          w:95 },
-    { key:'nombre',           label:'Nombre',         flex:1 },
+    { key:'nombre',           label:'Nombre',         w:220 },
     { key:'cantidad',         label:'Cantidad',       w:90 },
     { key:'tipo',             label:'Tipo',           w:80 },
     { key:'cuenta',           label:'Cuenta',         w:160 },
@@ -1696,7 +1696,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
       `}</style>
       <div ref={tableWrapRef} style={{ overflowX:'auto' }}
         onScroll={e => { if(calcBarRef.current) calcBarRef.current.scrollLeft = e.currentTarget.scrollLeft; }}>
-        <table style={{ width:'100%', minWidth:tblMinW, borderCollapse:'collapse', fontSize:13 }}>
+        <table style={{ width:'100%', minWidth:tblMinW, borderCollapse:'collapse', fontSize:13, tableLayout:'fixed' }}>
           <Colgroup />
           <thead>
             <tr>
@@ -1722,7 +1722,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                       style={{ accentColor:'#0067FD', cursor:'pointer' }} />
                   </td>
                   {COLS.map(col => (
-                    <td key={col.key} style={{ ...td, width:col.w, maxWidth:col.flex?260:col.w, overflow: col.flex ? 'hidden' : undefined }}>
+                    <td key={col.key} style={{ ...td, width:col.w, overflow:'hidden' }}>
                       {col.key==='nombre' ? (
                         editNombreId === m.id ? (
                           <input ref={nombreInputRef} value={editNombreVal}
@@ -1769,7 +1769,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
       <div ref={calcBarRef} className="fin-calc-bar"
         style={{ position:'sticky', bottom:0, zIndex:20, overflowX:'auto', background:'#0d0d0d', borderTop:'2px solid #27272a' }}
         onScroll={e => { if(tableWrapRef.current) tableWrapRef.current.scrollLeft = e.currentTarget.scrollLeft; }}>
-        <table style={{ width:'100%', minWidth:tblMinW, borderCollapse:'collapse', fontSize:13 }}>
+        <table style={{ width:'100%', minWidth:tblMinW, borderCollapse:'collapse', fontSize:13, tableLayout:'fixed' }}>
           <Colgroup />
           <tbody>
             <tr>
