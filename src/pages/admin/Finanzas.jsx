@@ -1674,7 +1674,9 @@ export default function Finanzas() {
   const [filtroEquipoLista, setFiltroEquipoLista] = useState([]);
   const [vistaMovs, setVistaMovs] = useState(() => lsGet('fin_vista', 'lista'));
   const [seleccionados, setSeleccionados] = useState(new Set());
-  const [bulkCampo, setBulkCampo] = useState(null); // campo a editar en bulk
+  const [selTodos, setSelTodos] = useState(false); // todos los del filtro seleccionados
+  const [cargandoTodos, setCargandoTodos] = useState(false);
+  const [bulkCampo, setBulkCampo] = useState(null);
   const [bulkValor, setBulkValor] = useState('');
   const [movLimit, setMovLimit] = useState(() => lsGet('fin_limit', 50));
 
@@ -1754,14 +1756,36 @@ export default function Finanzas() {
     setBulkValor('');
   }
 
-  function toggleSel(id) { setSeleccionados(prev => { const s=new Set(prev); s.has(id)?s.delete(id):s.add(id); return s; }); }
+  function toggleSel(id) { setSelTodos(false); setSeleccionados(prev => { const s=new Set(prev); s.has(id)?s.delete(id):s.add(id); return s; }); }
   function toggleAll(items, allSel) {
+    setSelTodos(false);
     setSeleccionados(prev => {
       const s = new Set(prev);
       if (allSel) items.forEach(m => s.delete(m.id));
       else items.forEach(m => s.add(m.id));
       return s;
     });
+  }
+
+  async function seleccionarTodosLosMovimientos() {
+    setCargandoTodos(true);
+    try {
+      const token = await getToken();
+      const params = new URLSearchParams({ limit: 99999, page: 1 });
+      if (desde) params.set('desde', desde);
+      if (hasta) params.set('hasta', hasta);
+      if (movFiltros.length) params.set('filtros', JSON.stringify(movFiltros));
+      if (movFiltroOp) params.set('filtroOp', movFiltroOp);
+      if (movSorts.length) params.set('sorts', JSON.stringify(movSorts));
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await r.json();
+      const ids = (data.items || []).map(m => m.id);
+      setSeleccionados(new Set(ids));
+      setSelTodos(true);
+    } catch (e) { console.error(e); }
+    finally { setCargandoTodos(false); }
   }
 
   async function eliminarMovimiento(id) {
@@ -2608,7 +2632,14 @@ export default function Finanzas() {
             return (
               <div style={{ background:'#1e293b', border:'1px solid #1d4ed8', borderRadius:10, padding:'10px 16px', marginBottom:10, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
                 <span style={{ color:'#60a5fa', fontSize:13, fontWeight:600, flexShrink:0 }}>{seleccionados.size} seleccionado{seleccionados.size>1?'s':''}</span>
-                <button onClick={() => setSeleccionados(new Set())} style={{ background:'none', border:'none', color:'#52525b', fontSize:12, cursor:'pointer', padding:'2px 6px' }}>✕ Deseleccionar</button>
+                <button onClick={() => { setSeleccionados(new Set()); setSelTodos(false); }} style={{ background:'none', border:'none', color:'#52525b', fontSize:12, cursor:'pointer', padding:'2px 6px' }}>✕ Deseleccionar</button>
+                {!selTodos && seleccionados.size > 0 && movimientos.total > seleccionados.size && (
+                  <button onClick={seleccionarTodosLosMovimientos} disabled={cargandoTodos}
+                    style={{ background:'none', border:'none', color:'#60a5fa', fontSize:12, cursor:'pointer', textDecoration:'underline', padding:'2px 4px' }}>
+                    {cargandoTodos ? 'Cargando…' : `Seleccionar todos (${movimientos.total})`}
+                  </button>
+                )}
+                {selTodos && <span style={{ color:'#a78bfa', fontSize:12 }}>✓ Todos los {seleccionados.size} seleccionados</span>}
                 <div style={{ width:1, background:'#27272a', alignSelf:'stretch' }} />
                 {BULK_CAMPOS.map(({ key, label, opts }) => (
                   <div key={key} style={{ position:'relative' }}>
