@@ -1515,7 +1515,7 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
 
   // text / number / date
   return editando ? (
-    <input autoFocus type={campo==='cantidad'?'number':campo==='fecha'?'date':'text'} value={val||''}
+    <input autoFocus type={campo==='cantidad'||campo==='importe_factura'?'number':campo==='fecha'||campo==='fecha_factura'?'date':'text'} value={val||''}
       onChange={e => setVal(e.target.value)}
       onBlur={confirmar}
       onKeyDown={e => { if(e.key==='Enter') confirmar(); if(e.key==='Escape') setEditando(false); }}
