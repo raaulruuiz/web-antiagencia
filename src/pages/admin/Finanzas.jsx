@@ -1535,19 +1535,39 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
 function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGuardarCelda, onVerDetalle, clientesLista, equipoLista }) {
   const allSel = items.length > 0 && items.every(m => seleccionados.has(m.id));
   const someSel = !allSel && items.some(m => seleccionados.has(m.id));
+  const [editNombreId, setEditNombreId] = useState(null);
+  const [editNombreVal, setEditNombreVal] = useState('');
+  const nombreInputRef = useRef(null);
+
+  useEffect(() => {
+    if (editNombreId && nombreInputRef.current) nombreInputRef.current.focus();
+  }, [editNombreId]);
+
+  function guardarNombre() {
+    if (editNombreVal.trim() && editNombreVal !== items.find(m => m.id === editNombreId)?.nombre) {
+      onGuardarCelda(editNombreId, 'nombre', editNombreVal.trim());
+    }
+    setEditNombreId(null);
+  }
+
   const COLS = [
-    { key:'fecha', label:'Fecha', w:95 },
-    { key:'nombre', label:'Nombre', flex:1 },
-    { key:'cantidad', label:'Cantidad', w:90 },
-    { key:'tipo', label:'Tipo', w:80 },
-    { key:'cuenta', label:'Cuenta', w:160 },
-    { key:'iva', label:'IVA', w:55 },
-    { key:'irpf', label:'IRPF', w:55 },
-    { key:'categorias', label:'Categorías', w:150 },
-    { key:'fecha_factura', label:'F. Factura', w:100 },
-    { key:'importe_factura', label:'Imp. s/Factura', w:110 },
-    { key:'cliente_ids', label:'Clientes', w:130 },
-    { key:'equipo_ids', label:'Equipo', w:120 },
+    { key:'fecha',            label:'Fecha',          w:95 },
+    { key:'nombre',           label:'Nombre',         flex:1 },
+    { key:'cantidad',         label:'Cantidad',       w:90 },
+    { key:'tipo',             label:'Tipo',           w:80 },
+    { key:'cuenta',           label:'Cuenta',         w:160 },
+    { key:'iva',              label:'IVA',            w:55 },
+    { key:'irpf',             label:'IRPF',           w:55 },
+    { key:'categorias',       label:'Categorías',     w:150 },
+    { key:'fecha_factura',    label:'F. Factura',     w:100 },
+    { key:'importe_factura',  label:'Imp. s/Factura', w:110 },
+    { key:'base_imponible',   label:'Base Impon.',    w:95,  readonly:true },
+    { key:'beneficio',        label:'Beneficio',      w:90,  readonly:true },
+    { key:'ivaAPagar',        label:'IVA a Pagar',    w:90,  readonly:true },
+    { key:'irpfAPagar',       label:'IRPF a Pagar',   w:95,  readonly:true },
+    { key:'irpf_retenido_yo', label:'IRPF Ret.',      w:80,  readonly:true },
+    { key:'cliente_ids',      label:'Clientes',       w:130 },
+    { key:'equipo_ids',       label:'Equipo',         w:120 },
   ];
   const th = { padding:'8px 10px', color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', borderBottom:'1px solid #27272a', whiteSpace:'nowrap', textAlign:'left' };
   const td = { padding:'6px 10px', borderBottom:'1px solid #1c1c1e', verticalAlign:'middle' };
@@ -1559,6 +1579,8 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
         .fin-tabla-row .fin-cb { opacity:0; transition:opacity 0.1s; }
         .fin-tabla-row:hover .fin-cb { opacity:1; }
         .fin-tabla-row .fin-cb.checked { opacity:1; }
+        .fin-tabla-row .fin-nombre-btn { opacity:0; transition:opacity 0.1s; }
+        .fin-tabla-row:hover .fin-nombre-btn { opacity:1; }
       `}</style>
       <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
         <thead>
@@ -1587,12 +1609,29 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                 {COLS.map(col => (
                   <td key={col.key} style={{ ...td, width:col.w, maxWidth:col.flex?260:col.w }}>
                     {col.key==='nombre' ? (
-                      <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                        <span onClick={() => onVerDetalle(m.id)} style={{ color:'#d4d4d8', fontSize:13, cursor:'pointer', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}
-                          onMouseEnter={e=>e.target.style.color='#0067FD'} onMouseLeave={e=>e.target.style.color='#d4d4d8'}>
-                          {m.nombre}
-                        </span>
-                      </div>
+                      editNombreId === m.id ? (
+                        <input ref={nombreInputRef} value={editNombreVal}
+                          onChange={e => setEditNombreVal(e.target.value)}
+                          onBlur={guardarNombre}
+                          onKeyDown={e => { if(e.key==='Enter') guardarNombre(); if(e.key==='Escape') setEditNombreId(null); }}
+                          style={{ background:'#27272a', border:'1px solid #0067FD', borderRadius:4, color:'white', fontSize:13, padding:'2px 6px', width:'100%', outline:'none' }} />
+                      ) : (
+                        <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+                          <span onClick={() => onVerDetalle(m.id)} style={{ color:'#d4d4d8', fontSize:13, cursor:'pointer', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}
+                            onMouseEnter={e=>e.target.style.color='#0067FD'} onMouseLeave={e=>e.target.style.color='#d4d4d8'}>
+                            {m.nombre}
+                          </span>
+                          <button className="fin-nombre-btn" onClick={e => { e.stopPropagation(); setEditNombreId(m.id); setEditNombreVal(m.nombre); }}
+                            style={{ background:'none', border:'none', cursor:'pointer', color:'#71717a', padding:'0 2px', lineHeight:1, flexShrink:0 }}
+                            title="Editar nombre">
+                            ✏️
+                          </button>
+                        </div>
+                      )
+                    ) : col.readonly ? (
+                      <span style={{ color: m[col.key] < 0 ? '#f87171' : m[col.key] > 0 ? '#4ade80' : '#52525b', fontSize:13 }}>
+                        {m[col.key] != null ? `${m[col.key] > 0 ? '+' : ''}${m[col.key]}€` : '—'}
+                      </span>
                     ) : (
                       <CeldaEditable m={m} campo={col.key} onGuardar={onGuardarCelda} clientesLista={clientesLista} equipoLista={equipoLista} />
                     )}
