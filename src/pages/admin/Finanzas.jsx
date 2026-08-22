@@ -1631,8 +1631,10 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
   const CALC_SHORT = { sum:'SUMA', average:'MEDIA', median:'MEDIANA', min:'MÍN', max:'MÁX', range:'RANGO', count_all:'TOTAL', count_values:'VALORES', count_unique:'ÚNICOS', count_empty:'VACÍOS', count_not_empty:'NO VACÍOS', pct_empty:'% VACÍOS', pct_not_empty:'% RELLENOS', earliest:'MÁS ANTIGUA', latest:'MÁS RECIENTE', date_range:'RANGO FECHAS' };
 
   function getCalcOpts(key) {
-    if (CALC_NUMERIC_KEYS.includes(key)) return [...CALC_NUMERIC_OPTS, ...CALC_COMMON_OPTS];
-    if (CALC_DATE_KEYS.includes(key)) return [...CALC_DATE_OPTS, ...CALC_COMMON_OPTS];
+    const none = CALC_COMMON_OPTS[0]; // { val:'none', label:'Ninguno' }
+    const rest = CALC_COMMON_OPTS.slice(1);
+    if (CALC_NUMERIC_KEYS.includes(key)) return [none, ...CALC_NUMERIC_OPTS, ...rest];
+    if (CALC_DATE_KEYS.includes(key)) return [none, ...CALC_DATE_OPTS, ...rest];
     return CALC_COMMON_OPTS;
   }
 
