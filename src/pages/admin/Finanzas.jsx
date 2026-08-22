@@ -722,9 +722,12 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
     }
   }
 
-  const cuentasPorTipo = form.tipo === 'Ingreso'
-    ? ['Ingresos']
-    : ['Gastos de Operación','Impuestos','Compensación del Dueño','Ganancia','Freelancers y Material'];
+  // Al crear: filtrar cuentas por tipo para sugerir la más común.
+  // Al editar: mostrar todas para no cambiar la cuenta sin querer.
+  const todasLasCuentas = CUENTAS.map(c => c.key);
+  const cuentasPorTipo = esEdicion
+    ? todasLasCuentas
+    : (form.tipo === 'Ingreso' ? ['Ingresos'] : ['Gastos de Operación','Impuestos','Compensación del Dueño','Ganancia','Freelancers y Material']);
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
