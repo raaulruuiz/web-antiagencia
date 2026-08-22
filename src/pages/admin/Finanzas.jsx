@@ -1177,6 +1177,225 @@ function TabFiscal() {
   );
 }
 
+// ── Tab Nuevo: manual o desde imagen ───────────────────────────
+function NuevoMovimientoTab({ onGuardado }) {
+  const [modo, setModo] = useState('manual'); // 'manual' | 'imagen'
+  const [imagenes, setImagenes] = useState([]);
+  const [extrayendo, setExtrayendo] = useState(false);
+  const [extraidos, setExtraidos] = useState(null); // null | []
+  const [guardandoIdx, setGuardandoIdx] = useState(null);
+  const [guardadosIdx, setGuardadosIdx] = useState(new Set());
+  const inputRef = useRef(null);
+
+  const CUENTAS = ['Ingresos','Impuestos','Compensación del Dueño','Gastos de Operación','Freelancers y Material','Ganancia'];
+
+  function onFileChange(e) {
+    const files = Array.from(e.target.files);
+    setImagenes(files);
+    setExtraidos(null);
+    e.target.value = '';
+  }
+
+  async function extraer() {
+    if (!imagenes.length) return;
+    setExtrayendo(true);
+    setExtraidos(null);
+    try {
+      const token = await getToken();
+      const fd = new FormData();
+      imagenes.forEach(f => fd.append('imagenes', f));
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/extraer-imagen`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Error');
+      setExtraidos((data.movements || []).map(m => ({
+        nombre: m.name || '',
+        fecha: m.date || new Date().toISOString().slice(0,10),
+        tipo: m.type || 'Gasto',
+        cuenta: m.account || 'Gastos de Operación',
+        cantidad: String(m.amount_eur || ''),
+        iva: m.iva || '0%',
+        irpf: m.irpf || '0%',
+        categorias: [], cliente_ids: [], equipo_ids: [],
+      })));
+    } catch (err) {
+      alert('Error al extraer: ' + err.message);
+    } finally {
+      setExtrayendo(false);
+    }
+  }
+
+  function setField(idx, key, val) {
+    setExtraidos(prev => prev.map((m, i) => i === idx ? { ...m, [key]: val } : m));
+  }
+
+  function eliminar(idx) {
+    setExtraidos(prev => prev.filter((_, i) => i !== idx));
+  }
+
+  async function guardarUno(idx) {
+    const m = extraidos[idx];
+    if (!m.nombre || !m.cantidad) return;
+    setGuardandoIdx(idx);
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...m, cantidad: parseFloat(m.cantidad) }),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      setGuardadosIdx(prev => new Set([...prev, idx]));
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      setGuardandoIdx(null);
+    }
+  }
+
+  async function guardarTodos() {
+    const pendientes = extraidos.map((_, i) => i).filter(i => !guardadosIdx.has(i));
+    for (const idx of pendientes) await guardarUno(idx);
+    onGuardado();
+  }
+
+  const btnTab = (t, label) => (
+    <button type="button" onClick={() => setModo(t)}
+      style={{ padding: '7px 18px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+        background: modo === t ? '#0067FD' : '#27272a', color: modo === t ? 'white' : '#71717a' }}>
+      {label}
+    </button>
+  );
+
+  return (
+    <div style={S.card}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+        <h2 style={{ color: 'white', fontSize: 16, fontWeight: 600, margin: 0, flex: 1 }}>Nuevo movimiento</h2>
+        <div style={{ display: 'flex', gap: 6, background: '#1c1c1e', padding: 4, borderRadius: 10 }}>
+          {btnTab('manual', '✏️ Manual')}
+          {btnTab('imagen', '📷 Desde imagen')}
+        </div>
+      </div>
+
+      {modo === 'manual' && (
+        <FormularioMovimiento onGuardado={onGuardado} />
+      )}
+
+      {modo === 'imagen' && !extraidos && (
+        <div>
+          <div
+            onClick={() => inputRef.current?.click()}
+            onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = '#0067FD'; }}
+            onDragLeave={e => { e.currentTarget.style.borderColor = '#3f3f46'; }}
+            onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor = '#3f3f46'; setImagenes(Array.from(e.dataTransfer.files)); setExtraidos(null); }}
+            style={{ border: '2px dashed #3f3f46', borderRadius: 12, padding: '40px 24px', textAlign: 'center', cursor: 'pointer', transition: 'border-color 0.2s' }}>
+            <p style={{ color: '#71717a', fontSize: 32, margin: '0 0 8px' }}>📷</p>
+            <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: '0 0 4px' }}>
+              {imagenes.length > 0 ? `${imagenes.length} imagen${imagenes.length > 1 ? 'es' : ''} seleccionada${imagenes.length > 1 ? 's' : ''}` : 'Arrastra o haz clic para subir'}
+            </p>
+            <p style={{ color: '#52525b', fontSize: 12, margin: 0 }}>Capturas bancarias, tickets o facturas · JPG, PNG · Máx 10 MB cada una</p>
+          </div>
+          <input ref={inputRef} type="file" accept="image/*" multiple onChange={onFileChange} style={{ display: 'none' }} />
+          {imagenes.length > 0 && (
+            <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {imagenes.map((f, i) => (
+                <span key={i} style={{ background: '#27272a', color: '#a1a1aa', fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>{f.name}</span>
+              ))}
+            </div>
+          )}
+          <button type="button" onClick={extraer} disabled={!imagenes.length || extrayendo}
+            style={{ marginTop: 16, background: imagenes.length && !extrayendo ? '#0067FD' : '#27272a', color: imagenes.length && !extrayendo ? 'white' : '#52525b', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: imagenes.length && !extrayendo ? 'pointer' : 'not-allowed', width: '100%' }}>
+            {extrayendo ? '⏳ Analizando imagen...' : '🔍 Extraer movimientos'}
+          </button>
+        </div>
+      )}
+
+      {modo === 'imagen' && extraidos && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <span style={{ color: '#22c55e', fontSize: 13, fontWeight: 600 }}>✓ {extraidos.length} movimiento{extraidos.length !== 1 ? 's' : ''} extraído{extraidos.length !== 1 ? 's' : ''}</span>
+            <button type="button" onClick={() => { setExtraidos(null); setGuardadosIdx(new Set()); }}
+              style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>
+              ← Nueva imagen
+            </button>
+            <button type="button" onClick={guardarTodos} disabled={guardandoIdx !== null}
+              style={{ marginLeft: 'auto', background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              Guardar todos
+            </button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {extraidos.map((m, idx) => {
+              const guardado = guardadosIdx.has(idx);
+              return (
+                <div key={idx} style={{ background: '#1c1c1e', borderRadius: 10, padding: 14, border: `1px solid ${guardado ? '#22c55e33' : '#27272a'}`, opacity: guardado ? 0.6 : 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontWeight: 700, fontSize: 16 }}>
+                      {m.tipo === 'Ingreso' ? '+' : '-'}{m.cantidad} €
+                    </span>
+                    <span style={{ color: '#52525b', fontSize: 12, flex: 1 }}>{m.fecha}</span>
+                    {guardado
+                      ? <span style={{ color: '#22c55e', fontSize: 12 }}>✓ Guardado</span>
+                      : <>
+                          <button type="button" onClick={() => guardarUno(idx)} disabled={guardandoIdx === idx}
+                            style={{ background: '#0067FD', color: 'white', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>
+                            {guardandoIdx === idx ? '...' : 'Guardar'}
+                          </button>
+                          <button type="button" onClick={() => eliminar(idx)}
+                            style={{ background: 'none', border: 'none', color: '#52525b', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}>✕</button>
+                        </>
+                    }
+                  </div>
+                  {!guardado && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <div style={{ gridColumn: '1/-1' }}>
+                        <label style={S.label}>Nombre</label>
+                        <input style={S.input} value={m.nombre} onChange={e => setField(idx, 'nombre', e.target.value)} />
+                      </div>
+                      <div>
+                        <label style={S.label}>Fecha</label>
+                        <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={m.fecha} onChange={e => setField(idx, 'fecha', e.target.value)} />
+                      </div>
+                      <div>
+                        <label style={S.label}>Cantidad (€)</label>
+                        <input style={S.input} type="number" step="0.01" value={m.cantidad} onChange={e => setField(idx, 'cantidad', e.target.value)} />
+                      </div>
+                      <div>
+                        <label style={S.label}>Tipo</label>
+                        <select style={S.input} value={m.tipo} onChange={e => setField(idx, 'tipo', e.target.value)}>
+                          <option>Ingreso</option><option>Gasto</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={S.label}>Cuenta</label>
+                        <select style={S.input} value={m.cuenta} onChange={e => setField(idx, 'cuenta', e.target.value)}>
+                          {CUENTAS.map(c => <option key={c}>{c}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={S.label}>IVA</label>
+                        <select style={S.input} value={m.iva} onChange={e => setField(idx, 'iva', e.target.value)}>
+                          {['0%','4%','10%','21%'].map(v => <option key={v}>{v}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={S.label}>IRPF</label>
+                        <select style={S.input} value={m.irpf} onChange={e => setField(idx, 'irpf', e.target.value)}>
+                          {['0%','7%','15%','19%'].map(v => <option key={v}>{v}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Componente principal ────────────────────────────────────────
 
 function lsGet(key, fallback) { try { const v = localStorage.getItem(key); return v != null ? JSON.parse(v) : fallback; } catch { return fallback; } }
@@ -2609,10 +2828,7 @@ export default function Finanzas() {
 
       {/* ── NUEVO ── */}
       {tab === 'nuevo' && (
-        <div style={S.card}>
-          <h2 style={{ color: 'white', fontSize: 16, fontWeight: 600, marginTop: 0, marginBottom: 20 }}>Nuevo movimiento</h2>
-          <FormularioMovimiento onGuardado={() => { setTab('movimientos'); cargarMovimientos(1); cargarDashboard(); }} />
-        </div>
+        <NuevoMovimientoTab onGuardado={() => { setTab('movimientos'); cargarMovimientos(1); cargarDashboard(); }} />
       )}
     </div>
   );
