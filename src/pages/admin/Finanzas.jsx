@@ -1595,19 +1595,19 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
   const CALC_NUMERIC_KEYS = ['cantidad','importe_factura','base_imponible','beneficio','ivaAPagar','irpfAPagar','irpf_retenido_yo'];
   const CALC_DATE_KEYS = ['fecha','fecha_factura','created_at','updated_at'];
   const CALC_NUMERIC_OPTS = [
-    { val:'sum', label:'Sum' }, { val:'average', label:'Average' }, { val:'median', label:'Median' },
-    { val:'min', label:'Min' }, { val:'max', label:'Max' }, { val:'range', label:'Range' },
+    { val:'sum', label:'Suma' }, { val:'average', label:'Media' }, { val:'median', label:'Mediana' },
+    { val:'min', label:'Mínimo' }, { val:'max', label:'Máximo' }, { val:'range', label:'Rango' },
   ];
   const CALC_DATE_OPTS = [
-    { val:'earliest', label:'Earliest date' }, { val:'latest', label:'Latest date' }, { val:'date_range', label:'Date range' },
+    { val:'earliest', label:'Fecha más antigua' }, { val:'latest', label:'Fecha más reciente' }, { val:'date_range', label:'Rango de fechas' },
   ];
   const CALC_COMMON_OPTS = [
-    { val:'none', label:'None' }, { val:'count_all', label:'Count all' },
-    { val:'count_values', label:'Count values' }, { val:'count_unique', label:'Count unique' },
-    { val:'count_empty', label:'Count empty' }, { val:'count_not_empty', label:'Count not empty' },
-    { val:'pct_empty', label:'% empty' }, { val:'pct_not_empty', label:'% not empty' },
+    { val:'none', label:'Ninguno' }, { val:'count_all', label:'Contar todo' },
+    { val:'count_values', label:'Contar valores' }, { val:'count_unique', label:'Contar únicos' },
+    { val:'count_empty', label:'Contar vacíos' }, { val:'count_not_empty', label:'Contar no vacíos' },
+    { val:'pct_empty', label:'% vacíos' }, { val:'pct_not_empty', label:'% rellenos' },
   ];
-  const CALC_SHORT = { sum:'SUM', average:'AVG', median:'MEDIAN', min:'MIN', max:'MAX', range:'RANGE', count_all:'COUNT', count_values:'COUNT', count_unique:'UNIQUE', count_empty:'EMPTY', count_not_empty:'NOT EMPTY', pct_empty:'% EMPTY', pct_not_empty:'% FILLED', earliest:'EARLIEST', latest:'LATEST', date_range:'DATE RANGE' };
+  const CALC_SHORT = { sum:'SUMA', average:'MEDIA', median:'MEDIANA', min:'MÍN', max:'MÁX', range:'RANGO', count_all:'TOTAL', count_values:'VALORES', count_unique:'ÚNICOS', count_empty:'VACÍOS', count_not_empty:'NO VACÍOS', pct_empty:'% VACÍOS', pct_not_empty:'% RELLENOS', earliest:'MÁS ANTIGUA', latest:'MÁS RECIENTE', date_range:'RANGO FECHAS' };
 
   function getCalcOpts(key) {
     if (CALC_NUMERIC_KEYS.includes(key)) return [...CALC_NUMERIC_OPTS, ...CALC_COMMON_OPTS];
@@ -1769,7 +1769,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                         <span style={{ color:'#d4d4d8', fontSize:12 }}>{formatted}</span>
                       </>
                     ) : (
-                      <span style={{ color:'#3f3f46', fontSize:11 }}>Calculate</span>
+                      <span style={{ color:'#3f3f46', fontSize:11 }}>Calcular</span>
                     )}
                   </button>
                   {isOpen && (
