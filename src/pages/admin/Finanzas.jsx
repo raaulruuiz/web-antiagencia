@@ -1382,6 +1382,23 @@ function NuevoMovimientoTab({ onGuardado }) {
       {/* ── SUBIDA ── */}
       {modo === 'imagen' && !sections && (
         <div>
+          {/* Rango de fechas — siempre visible y obligatorio */}
+          <div style={{ marginBottom: 16, padding: 14, background: '#1c1c1e', borderRadius: 10, border: `1px solid ${(!desde || !hasta) ? '#3f3f46' : '#22c55e33'}` }}>
+            <p style={{ color: '#a1a1aa', fontSize: 12, fontWeight: 600, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Rango de fechas del extracto
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div>
+                <label style={S.label}>Desde *</label>
+                <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={desde} onChange={e => setDesde(e.target.value)} />
+              </div>
+              <div>
+                <label style={S.label}>Hasta *</label>
+                <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={hasta} onChange={e => setHasta(e.target.value)} />
+              </div>
+            </div>
+          </div>
+
           <div
             onClick={() => inputRef.current?.click()}
             onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = '#0067FD'; }}
@@ -1397,54 +1414,40 @@ function NuevoMovimientoTab({ onGuardado }) {
           <input ref={inputRef} type="file" accept="image/*" multiple onChange={onFileChange} style={{ display: 'none' }} />
 
           {imagenes.length > 0 && (
-            <>
-              {/* Miniaturas con botón eliminar */}
-              <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {previews.map((url, i) => (
-                  <div key={i} style={{ position: 'relative' }}>
-                    <img src={url} alt={imagenes[i]?.name}
-                      style={{ height: 72, width: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid #3f3f46', display: 'block' }} />
-                    <button type="button"
-                      onClick={() => {
-                        setImagenes(prev => prev.filter((_, j) => j !== i));
-                        setPreviews(prev => prev.filter((_, j) => j !== i));
-                      }}
-                      style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#27272a', border: '1px solid #52525b', color: '#a1a1aa', fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, lineHeight: 1 }}>
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Rango de fechas */}
-              <div style={{ marginTop: 16, padding: 14, background: '#1c1c1e', borderRadius: 10, border: '1px solid #27272a' }}>
-                <p style={{ color: '#a1a1aa', fontSize: 12, fontWeight: 600, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  Rango de fechas del extracto (opcional — ayuda a la IA a inferir el año)
-                </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <div>
-                    <label style={S.label}>Desde</label>
-                    <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={desde} onChange={e => setDesde(e.target.value)} />
-                  </div>
-                  <div>
-                    <label style={S.label}>Hasta</label>
-                    <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={hasta} onChange={e => setHasta(e.target.value)} />
-                  </div>
+            <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {previews.map((url, i) => (
+                <div key={i} style={{ position: 'relative' }}>
+                  <img src={url} alt={imagenes[i]?.name}
+                    style={{ height: 72, width: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid #3f3f46', display: 'block' }} />
+                  <button type="button"
+                    onClick={() => {
+                      setImagenes(prev => prev.filter((_, j) => j !== i));
+                      setPreviews(prev => prev.filter((_, j) => j !== i));
+                    }}
+                    style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#27272a', border: '1px solid #52525b', color: '#a1a1aa', fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, lineHeight: 1 }}>
+                    ✕
+                  </button>
                 </div>
-              </div>
+              ))}
+            </div>
+          )}
 
-              <button type="button" onClick={extraer} disabled={procesando}
-                style={{ marginTop: 12, background: !procesando ? '#0067FD' : '#27272a', color: !procesando ? 'white' : '#52525b', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: !procesando ? 'pointer' : 'not-allowed', width: '100%' }}>
-                {procesando ? `⏳ Analizando imagen ${(extrayendoIdx ?? 0) + 1} de ${imagenes.length}...` : `🔍 Extraer movimientos${imagenes.length > 1 ? ` (${imagenes.length} imágenes)` : ''}`}
+          {(() => {
+            const listo = imagenes.length > 0 && desde && hasta && !procesando;
+            const motivo = !desde || !hasta ? 'Rellena el rango de fechas' : !imagenes.length ? 'Sube al menos una imagen' : null;
+            return (
+              <button type="button" onClick={listo ? extraer : undefined} disabled={!listo}
+                title={motivo || ''}
+                style={{ marginTop: 12, background: listo ? '#0067FD' : '#27272a', color: listo ? 'white' : '#52525b', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: listo ? 'pointer' : 'not-allowed', width: '100%' }}>
+                {procesando
+                  ? `⏳ Analizando imagen ${(extrayendoIdx ?? 0) + 1} de ${imagenes.length}...`
+                  : motivo
+                    ? `🔍 Extraer movimientos — ${motivo}`
+                    : `🔍 Extraer movimientos${imagenes.length > 1 ? ` (${imagenes.length} imágenes)` : ''}`
+                }
               </button>
-            </>
-          )}
-          {!imagenes.length && (
-            <button type="button" disabled
-              style={{ marginTop: 16, background: '#27272a', color: '#52525b', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'not-allowed', width: '100%' }}>
-              🔍 Extraer movimientos
-            </button>
-          )}
+            );
+          })()}
         </div>
       )}
 
