@@ -853,7 +853,7 @@ function ModalEditar({ movimiento, onGuardado, onCerrar }) {
 
 // ── Fila de movimiento ──────────────────────────────────────────
 
-function ModalMovimiento({ m, onClose, onEditar, onEliminar }) {
+function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm }) {
   if (!m) return null;
   const esIngreso = m.tipo === 'Ingreso';
   const color = esIngreso ? '#22c55e' : '#f87171';
@@ -892,7 +892,7 @@ function ModalMovimiento({ m, onClose, onEditar, onEliminar }) {
             )}
             {onEliminar && (
               <button
-                onClick={() => { if (window.confirm(`¿Eliminar "${m.nombre}"?`)) { onClose(); onEliminar(m.id); } }}
+                onClick={() => { onClose(); onConfirm({ texto: `¿Eliminar "${m.nombre}"?`, onOk: () => onEliminar(m.id) }); }}
                 style={{ background: 'transparent', border: '1px solid #7f1d1d', borderRadius: 6, color: '#f87171', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}
               >Eliminar</button>
             )}
@@ -1231,9 +1231,9 @@ function NuevoMovimientoTab({ onGuardado }) {
   useEffect(() => {
     getToken().then(token => {
       fetch(`${BACKEND_URL}/admin/finanzas/clientes/lista`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.json()).then(d => setClientesLista(Array.isArray(d) ? d : [])).catch(() => {});
+        .then(r => r.json()).then(d => setClientesLista(Array.isArray(d) ? d.map(c => ({ id: c.id, label: c.nombre + (c.nombre_empresa ? ` (${c.nombre_empresa})` : '') })) : [])).catch(() => {});
       fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.json()).then(d => setEquipoLista(Array.isArray(d) ? d : [])).catch(() => {});
+        .then(r => r.json()).then(d => setEquipoLista(Array.isArray(d) ? d.map(e => ({ id: e.id, label: e.nombre })) : [])).catch(() => {});
     });
   }, []);
 
@@ -1369,10 +1369,12 @@ function NuevoMovimientoTab({ onGuardado }) {
     <div style={S.card}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
         <h2 style={{ color: 'white', fontSize: 16, fontWeight: 600, margin: 0, flex: 1 }}>Nuevo movimiento</h2>
-        <div style={{ display: 'flex', gap: 6, background: '#1c1c1e', padding: 4, borderRadius: 10 }}>
-          {btnTab('imagen', '📷 Desde imagen')}
-          {btnTab('manual', '✏️ Manual')}
-        </div>
+        {!sections && (
+          <div style={{ display: 'flex', gap: 6, background: '#1c1c1e', padding: 4, borderRadius: 10 }}>
+            {btnTab('imagen', '📷 Desde imagen')}
+            {btnTab('manual', '✏️ Manual')}
+          </div>
+        )}
       </div>
 
       {modo === 'manual' && (
@@ -1484,7 +1486,7 @@ function NuevoMovimientoTab({ onGuardado }) {
                     </p>
                   )}
                   <img src={sec.previewUrl} alt={`Imagen ${si + 1}`}
-                    style={{ width: '100%', maxHeight: 340, objectFit: 'contain', borderRadius: 10, border: '1px solid #27272a', background: '#0d0d0d' }} />
+                    style={{ width: '100%', maxHeight: 520, objectFit: 'contain', borderRadius: 10, border: '1px solid #27272a', background: '#0d0d0d' }} />
                 </div>
 
                 {/* Error */}
@@ -2109,6 +2111,7 @@ export default function Finanzas() {
   const [bulkCampo, setBulkCampo] = useState(null);
   const [bulkValor, setBulkValor] = useState('');
   const [movLimit, setMovLimit] = useState(() => lsGet('fin_limit', 50));
+  const [confirmDialog, setConfirmDialog] = useState(null); // { texto, onOk }
 
   // Cargar listas para filtros (una vez al montar)
   useEffect(() => {
@@ -2170,17 +2173,21 @@ export default function Finanzas() {
 
   async function eliminarBulk() {
     if (!seleccionados.size) return;
-    if (!window.confirm(`¿Eliminar ${seleccionados.size} movimiento${seleccionados.size>1?'s':''}?`)) return;
-    const ids = [...seleccionados];
-    const token = await getToken();
-    await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/bulk-delete`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids }),
+    setConfirmDialog({
+      texto: `¿Eliminar ${seleccionados.size} movimiento${seleccionados.size>1?'s':''}?`,
+      onOk: async () => {
+        const ids = [...seleccionados];
+        const token = await getToken();
+        await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/bulk-delete`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids }),
+        });
+        setMovimientos(prev => ({ ...prev, items: prev.items.filter(m => !ids.includes(m.id)), total: prev.total - ids.length }));
+        setSeleccionados(new Set());
+        cargarDashboard();
+      },
     });
-    setMovimientos(prev => ({ ...prev, items: prev.items.filter(m => !ids.includes(m.id)), total: prev.total - ids.length }));
-    setSeleccionados(new Set());
-    cargarDashboard();
   }
 
   async function editarBulk(campo, valor) {
@@ -2425,6 +2432,7 @@ export default function Finanzas() {
           onClose={() => setMovDetail(null)}
           onEditar={m => { setMovDetail(null); setMovEditando(m); }}
           onEliminar={id => { setMovDetail(null); eliminarMovimiento(id); }}
+          onConfirm={setConfirmDialog}
         />
       )}
 
@@ -3697,6 +3705,27 @@ export default function Finanzas() {
       {/* ── NUEVO ── */}
       {tab === 'nuevo' && (
         <NuevoMovimientoTab onGuardado={() => { setTab('movimientos'); cargarMovimientos(1); cargarDashboard(); }} />
+      )}
+
+      {/* ── Confirm dialog ── */}
+      {confirmDialog && (
+        <div onClick={() => setConfirmDialog(null)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ background: '#1c1c1e', border: '1px solid #3f3f46', borderRadius: 14, padding: '24px 28px', width: '100%', maxWidth: 380, textAlign: 'center' }}>
+            <p style={{ color: 'white', fontSize: 15, fontWeight: 600, margin: '0 0 20px' }}>{confirmDialog.texto}</p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button onClick={() => setConfirmDialog(null)}
+                style={{ padding: '8px 22px', borderRadius: 8, border: '1px solid #3f3f46', background: 'none', color: '#a1a1aa', fontSize: 14, cursor: 'pointer', fontWeight: 500 }}>
+                Cancelar
+              </button>
+              <button onClick={() => { confirmDialog.onOk(); setConfirmDialog(null); }}
+                style={{ padding: '8px 22px', borderRadius: 8, border: 'none', background: '#dc2626', color: 'white', fontSize: 14, cursor: 'pointer', fontWeight: 600 }}>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
