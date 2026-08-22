@@ -708,9 +708,10 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
         body: JSON.stringify({ ...form, cantidad: parseFloat(form.cantidad) }),
       });
       if (!r.ok) throw new Error(await r.text());
+      const json = await r.json();
       setOk(true);
       if (esEdicion) {
-        onGuardado({ ...form, cantidad: parseFloat(form.cantidad) });
+        onGuardado(json.movimiento || { ...form, cantidad: parseFloat(form.cantidad) });
       } else {
         setForm(f => ({ ...f, nombre: '', cantidad: '', categorias: [] }));
         setTimeout(() => { setOk(false); onGuardado(null); }, 1200);
@@ -1762,7 +1763,7 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
   const [nuevaCat, setNuevaCat] = useState(null); // null = oculto, '' = mostrando input
   const ref = useRef(null);
 
-  useEffect(() => { setVal(m[campo]); }, [m[campo]]);
+  useEffect(() => { if (!editando) setVal(m[campo]); }, [m[campo], editando]);
 
   useEffect(() => {
     if (!editando) return;
@@ -2298,30 +2299,35 @@ export default function Finanzas() {
   }
 
   async function guardarCeldaInline(id, campo, valor) {
-    const token = await getToken();
-    const body = { [campo]: campo === 'cantidad' ? parseFloat(valor) : valor };
-    const res = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${id}`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    const json = await res.json();
-    const m = json.movimiento;
-    if (m) {
-      // Actualiza la fila completa con todos los campos calculados
-      const fila = {
-        id: m.id, notion_id: m.notion_id, nombre: m.nombre, fecha: m.fecha,
-        tipo: m.tipo, cuenta: m.cuenta, cantidad: m.cantidad, iva: m.iva, irpf: m.irpf,
-        ivaAPagar: m.iva_a_pagar, irpfAPagar: m.irpf_a_pagar, beneficio: m.beneficio,
-        categorias: m.categorias || [], fecha_factura: m.fecha_factura || null,
-        importe_factura: m.importe_factura ?? null, base_imponible: m.base_imponible ?? null,
-        irpf_retenido_yo: m.irpf_retenido_yo ?? null, cliente_ids: m.cliente_ids || [],
-        equipo_ids: m.equipo_ids || [], created_at: m.created_at, updated_at: m.updated_at,
-      };
-      setMovimientos(prev => ({ ...prev, items: prev.items.map(i => i.id === id ? fila : i) }));
-    } else {
-      // Fallback: solo actualiza el campo editado
-      setMovimientos(prev => ({ ...prev, items: prev.items.map(i => i.id === id ? { ...i, [campo]: valor } : i) }));
+    try {
+      const token = await getToken();
+      const body = { [campo]: campo === 'cantidad' ? parseFloat(valor) : valor };
+      const res = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${id}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Error ${res.status}`);
+      }
+      const json = await res.json();
+      const m = json.movimiento;
+      if (m) {
+        const fila = {
+          id: m.id, notion_id: m.notion_id, nombre: m.nombre, fecha: m.fecha,
+          tipo: m.tipo, cuenta: m.cuenta, cantidad: m.cantidad, iva: m.iva, irpf: m.irpf,
+          ivaAPagar: m.iva_a_pagar, irpfAPagar: m.irpf_a_pagar, beneficio: m.beneficio,
+          categorias: m.categorias || [], fecha_factura: m.fecha_factura || null,
+          importe_factura: m.importe_factura ?? null, base_imponible: m.base_imponible ?? null,
+          irpf_retenido_yo: m.irpf_retenido_yo ?? null, cliente_ids: m.cliente_ids || [],
+          equipo_ids: m.equipo_ids || [], created_at: m.created_at, updated_at: m.updated_at,
+        };
+        setMovimientos(prev => ({ ...prev, items: prev.items.map(i => i.id === id ? fila : i) }));
+      }
+    } catch (err) {
+      alert('Error al guardar: ' + err.message);
+      cargarMovimientos(pagMovs);
     }
   }
 
@@ -2347,18 +2353,24 @@ export default function Finanzas() {
   async function editarBulk(campo, valor) {
     if (!seleccionados.size || !valor) return;
     const ids = [...seleccionados];
-    const token = await getToken();
-    await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/bulk-edit`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids, updates: { [campo]: valor } }),
-    });
-    setMovimientos(prev => ({
-      ...prev,
-      items: prev.items.map(m => ids.includes(m.id) ? { ...m, [campo]: valor } : m),
-    }));
-    setBulkCampo(null);
-    setBulkValor('');
+    try {
+      const token = await getToken();
+      const res = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/bulk-edit`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, updates: { [campo]: valor } }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Error ${res.status}`);
+      }
+      setBulkCampo(null);
+      setBulkValor('');
+      cargarMovimientos(pagMovs);
+      cargarDashboard();
+    } catch (err) {
+      alert('Error al editar en bloque: ' + err.message);
+    }
   }
 
   function toggleSel(id) { setSelTodos(false); setSeleccionados(prev => { const s=new Set(prev); s.has(id)?s.delete(id):s.add(id); return s; }); }
@@ -2396,12 +2408,18 @@ export default function Finanzas() {
   async function eliminarMovimiento(id) {
     try {
       const token = await getToken();
-      await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${id}`, {
+      const res = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${id}`, {
         method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Error ${res.status}`);
+      }
       setMovimientos(prev => ({ ...prev, items: prev.items.filter(m => m.id !== id), total: prev.total - 1 }));
       cargarDashboard();
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      alert('Error al eliminar: ' + e.message);
+    }
   }
 
   function handleApplyDashboard(d, h, doComp, dComp, hComp) {
