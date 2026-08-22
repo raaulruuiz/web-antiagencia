@@ -962,7 +962,7 @@ function ModalMovimiento({ m, onClose, onEditar, onEliminar }) {
           <div>
             <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0' }}>Creado</p>
             <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>
-              {m.notion_created_at ? m.notion_created_at.slice(0, 10) : '—'}
+              {m.created_at ? m.created_at.slice(0, 10) : '—'}
             </span>
           </div>
           <div>
@@ -1578,7 +1578,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
     { key:'ivaAPagar',        label:'IVA a Pagar',    w:90,  readonly:true },
     { key:'irpfAPagar',       label:'IRPF a Pagar',   w:95,  readonly:true },
     { key:'irpf_retenido_yo',  label:'IRPF Ret.',      w:80,  readonly:true },
-    { key:'notion_created_at', label:'Creado',     w:100, readonly:'date' },
+    { key:'created_at', label:'Creado',     w:100, readonly:'date' },
     { key:'updated_at',        label:'Modificado', w:100, readonly:'date' },
     { key:'cliente_ids',       label:'Clientes',      w:130 },
     { key:'equipo_ids',       label:'Equipo',         w:120 },
