@@ -1286,8 +1286,7 @@ function NuevoMovimientoTab({ onGuardado }) {
   async function extraer() {
     if (!imagenes.length) return;
     cancelRef.current = false;
-    // Pre-llenar con placeholders para que el array tenga el tamaño correcto desde el principio
-    setSections(imagenes.map((_, i) => ({ previewUrl: previews[i], movimientos: [], guardados: new Set(), cuentaSec: 'Gastos de Operación', cargando: true })));
+    setSections([]);
     for (let i = 0; i < imagenes.length; i++) {
       if (cancelRef.current) break;
       setExtrayendoIdx(i);
@@ -1319,8 +1318,8 @@ function NuevoMovimientoTab({ onGuardado }) {
       } catch (err) {
         seccion = { previewUrl: previews[i], movimientos: [], guardados: new Set(), cuentaSec: 'Gastos de Operación', error: err.message };
       }
-      // Actualizar solo este índice, sin tocar los demás (preserva ediciones del usuario)
-      setSections(prev => prev.map((s, j) => j === i ? seccion : s));
+      // Añadir la sección al final (sin tocar las anteriores — preserva ediciones del usuario)
+      setSections(prev => [...prev, seccion]);
       if (i === 0) setPagina(0); // primera imagen lista: muestra al usuario para que empiece a revisar
     }
     setExtrayendoIdx(null);
