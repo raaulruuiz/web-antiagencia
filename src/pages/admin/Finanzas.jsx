@@ -2284,6 +2284,8 @@ export default function Finanzas() {
   const [cargandoTodos, setCargandoTodos] = useState(false);
   const [bulkCampo, setBulkCampo] = useState(null);
   const [bulkValor, setBulkValor] = useState('');
+  const [bulkValorMulti, setBulkValorMulti] = useState([]); // para cliente_ids / equipo_ids
+  const [bulkFiltroLista, setBulkFiltroLista] = useState('');
   const [movLimit, setMovLimit] = useState(() => lsGet('fin_limit', 50));
   const [confirmDialog, setConfirmDialog] = useState(null); // { texto, onOk }
 
@@ -3274,11 +3276,14 @@ export default function Finanzas() {
           {/* Barra de acciones bulk */}
           {seleccionados.size > 0 && (() => {
             const BULK_CAMPOS = [
-              { key:'tipo', label:'Tipo', opts:['Ingreso','Gasto'] },
-              { key:'cuenta', label:'Cuenta', opts:CUENTAS_OPTS },
-              { key:'iva', label:'IVA', opts:IVA_OPTS },
-              { key:'irpf', label:'IRPF', opts:IRPF_OPTS },
+              { key:'tipo',        label:'Tipo',     opts:['Ingreso','Gasto'] },
+              { key:'cuenta',      label:'Cuenta',   opts:CUENTAS_OPTS },
+              { key:'iva',         label:'IVA',      opts:IVA_OPTS },
+              { key:'irpf',        label:'IRPF',     opts:IRPF_OPTS },
+              { key:'cliente_ids', label:'Clientes', multi:true, lista:filtroClientesLista },
+              { key:'equipo_ids',  label:'Equipo',   multi:true, lista:filtroEquipoLista },
             ];
+            const closeBulk = () => { setBulkCampo(null); setBulkValor(''); setBulkValorMulti([]); setBulkFiltroLista(''); };
             return (
               <div style={{ background:'#1e293b', border:'1px solid #1d4ed8', borderRadius:10, padding:'10px 16px', marginBottom:10, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
                 <span style={{ color:'#60a5fa', fontSize:13, fontWeight:600, flexShrink:0 }}>{seleccionados.size} seleccionado{seleccionados.size>1?'s':''}</span>
@@ -3291,21 +3296,49 @@ export default function Finanzas() {
                 )}
                 {selTodos && <span style={{ color:'#a78bfa', fontSize:12 }}>✓ Todos los {seleccionados.size} seleccionados</span>}
                 <div style={{ width:1, background:'#27272a', alignSelf:'stretch' }} />
-                {BULK_CAMPOS.map(({ key, label, opts }) => (
+                {BULK_CAMPOS.map(({ key, label, opts, multi, lista }) => (
                   <div key={key} style={{ position:'relative' }}>
-                    <button onClick={() => { setBulkCampo(c => c===key?null:key); setBulkValor(''); }}
+                    <button onClick={() => { const open = bulkCampo !== key; closeBulk(); if (open) setBulkCampo(key); }}
                       style={{ background:'#27272a', border:'1px solid #3f3f46', color:'#d4d4d8', borderRadius:6, padding:'4px 10px', fontSize:12, cursor:'pointer' }}>
                       {label} ▾
                     </button>
-                    {bulkCampo===key && (
+                    {bulkCampo===key && !multi && (
                       <div style={{ position:'absolute', zIndex:500, top:'100%', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, marginTop:4, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.5)', overflow:'hidden' }}>
                         {opts.map(o => (
-                          <button key={o} onClick={() => editarBulk(key, o)}
+                          <button key={o} onClick={() => { editarBulk(key, o); closeBulk(); }}
                             style={{ display:'block', width:'100%', background:'none', border:'none', color:'#d4d4d8', padding:'8px 12px', textAlign:'left', fontSize:13, cursor:'pointer' }}
                             onMouseEnter={e=>e.currentTarget.style.background='#27272a'} onMouseLeave={e=>e.currentTarget.style.background='none'}>
                             {o}
                           </button>
                         ))}
+                      </div>
+                    )}
+                    {bulkCampo===key && multi && (
+                      <div style={{ position:'absolute', zIndex:500, top:'100%', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, marginTop:4, minWidth:220, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
+                        <div style={{ padding:'6px 8px', borderBottom:'1px solid #27272a' }}>
+                          <input autoFocus value={bulkFiltroLista} onChange={e => setBulkFiltroLista(e.target.value)}
+                            placeholder="Buscar..." onClick={e => e.stopPropagation()}
+                            style={{ width:'100%', background:'#27272a', border:'1px solid #3f3f46', borderRadius:4, color:'white', fontSize:12, padding:'4px 8px', outline:'none', boxSizing:'border-box' }} />
+                        </div>
+                        <div style={{ maxHeight:180, overflowY:'auto' }}>
+                          {(bulkFiltroLista.trim() ? lista.filter(o => o.nombre.toLowerCase().includes(bulkFiltroLista.toLowerCase())) : lista).map(o => {
+                            const sel = bulkValorMulti.includes(o.id);
+                            return (
+                              <label key={o.id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', cursor:'pointer', borderBottom:'1px solid #27272a' }}
+                                onMouseEnter={e=>e.currentTarget.style.background='#27272a'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                                <input type="checkbox" checked={sel}
+                                  onChange={() => setBulkValorMulti(prev => sel ? prev.filter(id=>id!==o.id) : [...prev, o.id])}
+                                  style={{ accentColor:'#0067FD', flexShrink:0 }} />
+                                <span style={{ color:'#d4d4d8', fontSize:12 }}>{o.nombre}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                        <button onClick={() => { if (bulkValorMulti.length) { editarBulk(key, bulkValorMulti); closeBulk(); } }}
+                          disabled={bulkValorMulti.length === 0}
+                          style={{ width:'100%', background: bulkValorMulti.length ? '#0067FD' : '#27272a', color:'white', border:'none', borderRadius:'0 0 8px 8px', padding:'6px', fontSize:12, cursor: bulkValorMulti.length ? 'pointer' : 'default' }}>
+                          Aplicar {bulkValorMulti.length > 0 ? `(${bulkValorMulti.length})` : ''}
+                        </button>
                       </div>
                     )}
                   </div>
