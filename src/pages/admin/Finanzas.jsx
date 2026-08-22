@@ -1358,11 +1358,11 @@ function NuevoMovimientoTab({ onGuardado }) {
     if (!sections) return;
     setGuardandoKey('todos');
     try {
+      const token = await getToken();
       for (let si = 0; si < sections.length; si++) {
         for (let mi = 0; mi < sections[si].movimientos.length; mi++) {
           const m = sections[si].movimientos[mi];
           if (!m.nombre || !m.cantidad) continue;
-          const token = await getToken();
           const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -1375,11 +1375,11 @@ function NuevoMovimientoTab({ onGuardado }) {
           if (!r.ok) throw new Error(await r.text());
         }
       }
-      getToken().then(t => fetch(`${BACKEND_URL}/admin/finanzas/completar-tracking-diario`, {
-        method: 'POST', headers: { Authorization: `Bearer ${t}` },
+      fetch(`${BACKEND_URL}/admin/finanzas/completar-tracking-diario`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` },
       }).then(r => r.json()).then(d => {
         if (d.completadas > 0) console.log(`✅ ${d.completadas} tarea(s) "Tracking diario" marcadas en Notion`);
-      }).catch(() => {}));
+      }).catch(() => {});
       onGuardado();
     } catch (err) {
       alert('Error al guardar: ' + err.message);
@@ -1599,7 +1599,7 @@ function NuevoMovimientoTab({ onGuardado }) {
                 {/* Botón marcar todos de esta imagen como listos */}
                 {!procesando && hayPendientesPagina && (
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-                    <button type="button" onClick={() => { sec.movimientos.forEach((_, mi) => { if (!sec.guardados.has(mi)) marcarRevisado(si, mi); }); }}
+                    <button type="button" onClick={() => setSections(prev => prev.map((s, i) => i !== si ? s : { ...s, guardados: new Set(s.movimientos.map((_, mi) => mi)) }))}
                       style={{ background: '#27272a', color: '#a1a1aa', border: 'none', borderRadius: 7, padding: '5px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
                       ✓ Marcar imagen {si + 1} como lista
                     </button>
