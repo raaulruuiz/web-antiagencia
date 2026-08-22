@@ -1220,6 +1220,7 @@ function NuevoMovimientoTab({ onGuardado }) {
   const [hasta, setHasta] = useState('');
   // sections: null | [{ previewUrl, movimientos: [...], guardados: Set<number>, error? }]
   const [sections, setSections] = useState(null);
+  const [pagina, setPagina] = useState(0); // página actual en el modo de revisión
   const [extrayendoIdx, setExtrayendoIdx] = useState(null); // which image is being processed
   const [guardandoKey, setGuardandoKey] = useState(null); // 'si-mi'
   const [clientesLista, setClientesLista] = useState([]);
@@ -1260,6 +1261,7 @@ function NuevoMovimientoTab({ onGuardado }) {
 
   function resetear() {
     setSections(null);
+    setPagina(0);
     setImagenes([]);
     setPreviews([]);
     setDesde('');
@@ -1299,8 +1301,10 @@ function NuevoMovimientoTab({ onGuardado }) {
         built.push({ previewUrl: previews[i], movimientos: [], guardados: new Set(), error: err.message });
       }
       setSections([...built]);
+      setPagina(built.length - 1); // avanza a la página recién procesada
     }
     setExtrayendoIdx(null);
+    setPagina(0); // al terminar, vuelve a la primera
   }
 
   function setMovField(si, mi, key, val) {
@@ -1453,57 +1457,86 @@ function NuevoMovimientoTab({ onGuardado }) {
         </div>
       )}
 
-      {/* ── EXTRAYENDO (sections parcialmente construidas) ── */}
-      {modo === 'imagen' && sections !== null && (
-        <div>
-          {/* Cabecera */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            {procesando
-              ? <span style={{ color: '#facc15', fontSize: 13, fontWeight: 600 }}>⏳ Analizando imagen {(extrayendoIdx ?? 0) + 1} de {imagenes.length}...</span>
-              : <span style={{ color: '#22c55e', fontSize: 13, fontWeight: 600 }}>✓ {totalMovs} movimiento{totalMovs !== 1 ? 's' : ''} extraído{totalMovs !== 1 ? 's' : ''} de {sections.length} imagen{sections.length !== 1 ? 'es' : ''}</span>
-            }
-            <button type="button" onClick={resetear}
-              style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>
-              ← Nueva imagen
-            </button>
-            {!procesando && hayPendientes && (
-              <button type="button" onClick={guardarTodos} disabled={!!guardandoKey}
-                style={{ marginLeft: 'auto', background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                Guardar todos
+      {/* ── RESULTADOS (paginado por imagen) ── */}
+      {modo === 'imagen' && sections !== null && (() => {
+        const si = pagina;
+        const sec = sections[si];
+        const guardadosPagina = sec ? sec.guardados.size : 0;
+        const movsPagina = sec ? sec.movimientos.length : 0;
+        const hayPendientesPagina = sec && guardadosPagina < movsPagina;
+        return (
+          <div>
+            {/* Cabecera */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+              {procesando
+                ? <span style={{ color: '#facc15', fontSize: 13, fontWeight: 600 }}>⏳ Analizando imagen {(extrayendoIdx ?? 0) + 1} de {imagenes.length}...</span>
+                : <span style={{ color: '#22c55e', fontSize: 13, fontWeight: 600 }}>✓ {totalMovs} movimiento{totalMovs !== 1 ? 's' : ''} de {sections.length} imagen{sections.length !== 1 ? 'es' : ''}</span>
+              }
+              <button type="button" onClick={resetear}
+                style={{ background: 'none', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>
+                ← Nueva imagen
               </button>
-            )}
-          </div>
+              {!procesando && hayPendientes && (
+                <button type="button" onClick={guardarTodos} disabled={!!guardandoKey}
+                  style={{ marginLeft: 'auto', background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                  Guardar todos
+                </button>
+              )}
+            </div>
 
-          {/* Sección por imagen */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {sections.map((sec, si) => (
-              <div key={si}>
+            {/* Paginación */}
+            {sections.length > 1 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                <button type="button" onClick={() => setPagina(p => Math.max(0, p - 1))} disabled={si === 0}
+                  style={{ padding: '5px 12px', borderRadius: 7, border: '1px solid #3f3f46', background: 'none', color: si === 0 ? '#3f3f46' : '#a1a1aa', cursor: si === 0 ? 'default' : 'pointer', fontSize: 13 }}>
+                  ‹
+                </button>
+                {sections.map((_, i) => (
+                  <button key={i} type="button" onClick={() => setPagina(i)}
+                    style={{ padding: '5px 11px', borderRadius: 7, border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      background: i === si ? '#0067FD' : '#27272a',
+                      color: i === si ? 'white' : sections[i] ? (sections[i].guardados.size === sections[i].movimientos.length && sections[i].movimientos.length > 0 ? '#22c55e' : '#a1a1aa') : '#52525b',
+                    }}>
+                    {i + 1}{sections[i] && sections[i].guardados.size > 0 && sections[i].guardados.size === sections[i].movimientos.length ? ' ✓' : ''}
+                  </button>
+                ))}
+                <button type="button" onClick={() => setPagina(p => Math.min(sections.length - 1, p + 1))} disabled={si === sections.length - 1}
+                  style={{ padding: '5px 12px', borderRadius: 7, border: '1px solid #3f3f46', background: 'none', color: si === sections.length - 1 ? '#3f3f46' : '#a1a1aa', cursor: si === sections.length - 1 ? 'default' : 'pointer', fontSize: 13 }}>
+                  ›
+                </button>
+              </div>
+            )}
+
+            {sec && (
+              <div>
                 {/* Imagen */}
-                <div style={{ position: 'relative', marginBottom: 12 }}>
-                  {sections.length > 1 && (
-                    <p style={{ color: '#52525b', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>
-                      Imagen {si + 1} de {imagenes.length}
-                    </p>
-                  )}
-                  <div style={{ height: 420, overflowY: 'auto', borderRadius: 10, border: '1px solid #27272a', background: '#0d0d0d' }}>
-                    <img src={sec.previewUrl} alt={`Imagen ${si + 1}`}
-                      style={{ width: '100%', height: 'auto', display: 'block' }} />
-                  </div>
+                <div style={{ marginBottom: 14 }}>
+                  <img src={sec.previewUrl} alt={`Imagen ${si + 1}`}
+                    style={{ width: '100%', maxHeight: 320, objectFit: 'contain', display: 'block', borderRadius: 10, border: '1px solid #27272a', background: '#0d0d0d' }} />
                 </div>
 
-                {/* Error */}
+                {/* Error de parsing */}
                 {sec.error && (
-                  <div style={{ background: '#450a0a', border: '1px solid #991b1b', borderRadius: 8, padding: '10px 14px', color: '#f87171', fontSize: 13 }}>
-                    Error al analizar: {sec.error}
+                  <div style={{ background: '#450a0a', border: '1px solid #991b1b', borderRadius: 8, padding: '10px 14px', color: '#f87171', fontSize: 13, marginBottom: 10 }}>
+                    No se pudieron extraer movimientos de esta imagen
                   </div>
                 )}
 
-                {/* Movimientos */}
                 {sec.movimientos.length === 0 && !sec.error && !procesando && (
                   <p style={{ color: '#52525b', fontSize: 13, textAlign: 'center', padding: '16px 0' }}>Sin movimientos detectados</p>
                 )}
                 {procesando && si === extrayendoIdx && sec.movimientos.length === 0 && !sec.error && (
                   <p style={{ color: '#71717a', fontSize: 13, textAlign: 'center', padding: '16px 0' }}>Analizando...</p>
+                )}
+
+                {/* Botón guardar esta página */}
+                {!procesando && hayPendientesPagina && (
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+                    <button type="button" onClick={async () => { for (let mi = 0; mi < sec.movimientos.length; mi++) { if (!sec.guardados.has(mi)) await guardarMov(si, mi); } }} disabled={!!guardandoKey}
+                      style={{ background: '#27272a', color: '#a1a1aa', border: 'none', borderRadius: 7, padding: '5px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                      Guardar imagen {si + 1}
+                    </button>
+                  </div>
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -1593,22 +1626,12 @@ function NuevoMovimientoTab({ onGuardado }) {
                             </div>
                             {clientesLista.length > 0 && (
                               <div>
-                                <MultiCheckDrop
-                                  label="Clientes"
-                                  opciones={clientesLista}
-                                  seleccionados={m.cliente_ids}
-                                  onChange={val => setMovField(si, mi, 'cliente_ids', val)}
-                                />
+                                <MultiCheckDrop label="Clientes" opciones={clientesLista} seleccionados={m.cliente_ids} onChange={val => setMovField(si, mi, 'cliente_ids', val)} />
                               </div>
                             )}
                             {equipoLista.length > 0 && (
                               <div>
-                                <MultiCheckDrop
-                                  label="Equipo"
-                                  opciones={equipoLista}
-                                  seleccionados={m.equipo_ids}
-                                  onChange={val => setMovField(si, mi, 'equipo_ids', val)}
-                                />
+                                <MultiCheckDrop label="Equipo" opciones={equipoLista} seleccionados={m.equipo_ids} onChange={val => setMovField(si, mi, 'equipo_ids', val)} />
                               </div>
                             )}
                           </div>
@@ -1618,10 +1641,10 @@ function NuevoMovimientoTab({ onGuardado }) {
                   })}
                 </div>
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
