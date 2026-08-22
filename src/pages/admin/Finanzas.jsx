@@ -40,8 +40,9 @@ const CAMPOS_FILTRO = [
   { key: 'irpf',            label: 'IRPF',            tipo: 'select',          ops: IRPF_OPTS },
   { key: 'importe_factura',   label: 'Importe s/ factura',  tipo: 'number_nullable' },
   { key: 'fecha_factura',     label: 'Fecha Factura',       tipo: 'date' },
-  { key: 'notion_created_at', label: 'Creado en Notion',    tipo: 'date' },
-  { key: 'cliente_ids',       label: 'Cliente',             tipo: 'uuid_nullable' },
+  { key: 'notion_created_at', label: 'Creado',    tipo: 'date' },
+  { key: 'updated_at',        label: 'Modificado', tipo: 'date' },
+  { key: 'cliente_ids',       label: 'Cliente',    tipo: 'uuid_nullable' },
   { key: 'equipo_ids',        label: 'Miembro equipo',      tipo: 'uuid_nullable' },
 ];
 
@@ -63,7 +64,8 @@ const CAMPOS_SORT = [
   { key: 'base_imponible', label: 'Base Imponible' },
   { key: 'fecha_factura',     label: 'Fecha Factura' },
   { key: 'importe_factura',   label: 'Importe Factura' },
-  { key: 'notion_created_at', label: 'Creado en Notion' },
+  { key: 'notion_created_at', label: 'Creado' },
+  { key: 'updated_at',        label: 'Modificado' },
   { key: 'cliente_ids',       label: 'Cliente' },
   { key: 'equipo_ids',        label: 'Miembro equipo' },
 ];
@@ -955,11 +957,19 @@ function ModalMovimiento({ m, onClose, onEditar, onEliminar }) {
           </div>
         </div>
 
-        {/* Metadatos Notion — zona dim */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* Metadatos — zona dim */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0' }}>Creado en Notion</p>
-            <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>{m.notion_created_at ? m.notion_created_at.slice(0, 10) : '—'}</span>
+            <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0' }}>Creado</p>
+            <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>
+              {m.notion_created_at ? m.notion_created_at.slice(0, 10) : '—'}
+            </span>
+          </div>
+          <div>
+            <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0' }}>Modificado</p>
+            <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>
+              {m.updated_at ? m.updated_at.slice(0, 10) : '—'}
+            </span>
           </div>
           <div>
             <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0' }}>Notion ID</p>
@@ -1567,8 +1577,10 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
     { key:'beneficio',        label:'Beneficio',      w:90,  readonly:true },
     { key:'ivaAPagar',        label:'IVA a Pagar',    w:90,  readonly:true },
     { key:'irpfAPagar',       label:'IRPF a Pagar',   w:95,  readonly:true },
-    { key:'irpf_retenido_yo', label:'IRPF Ret.',      w:80,  readonly:true },
-    { key:'cliente_ids',      label:'Clientes',       w:130 },
+    { key:'irpf_retenido_yo',  label:'IRPF Ret.',      w:80,  readonly:true },
+    { key:'notion_created_at', label:'Creado',     w:100, readonly:'date' },
+    { key:'updated_at',        label:'Modificado', w:100, readonly:'date' },
+    { key:'cliente_ids',       label:'Clientes',      w:130 },
     { key:'equipo_ids',       label:'Equipo',         w:120 },
   ];
   const th = { padding:'8px 10px', color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', borderBottom:'1px solid #27272a', whiteSpace:'nowrap', textAlign:'left' };
@@ -1630,6 +1642,10 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                           </button>
                         </div>
                       )
+                    ) : col.readonly === 'date' ? (
+                      <span style={{ color:'#71717a', fontSize:12, fontFamily:'monospace' }}>
+                        {m[col.key] ? m[col.key].slice(0,10) : '—'}
+                      </span>
                     ) : col.readonly ? (
                       <span style={{ color: m[col.key] < 0 ? '#f87171' : m[col.key] > 0 ? '#4ade80' : '#52525b', fontSize:13 }}>
                         {m[col.key] != null ? `${m[col.key] > 0 ? '+' : ''}${m[col.key]}€` : '—'}
