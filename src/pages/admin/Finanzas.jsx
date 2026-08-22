@@ -1566,7 +1566,8 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
   const nombreInputRef = useRef(null);
   const [colCalcs, setColCalcs] = useState(() => { try { const v = localStorage.getItem('fin-col-calcs'); return v ? JSON.parse(v) : {}; } catch { return {}; } });
   const [openCalcKey, setOpenCalcKey] = useState(null);
-  const tfootRef = useRef(null);
+  const tableWrapRef = useRef(null);
+  const calcBarRef = useRef(null);
 
   useEffect(() => {
     if (editNombreId && nombreInputRef.current) nombreInputRef.current.focus();
@@ -1581,7 +1582,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
 
   useEffect(() => {
     if (!openCalcKey) return;
-    function handler(e) { if (tfootRef.current && !tfootRef.current.contains(e.target)) setOpenCalcKey(null); }
+    function handler(e) { if (calcBarRef.current && !calcBarRef.current.contains(e.target)) setOpenCalcKey(null); }
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [openCalcKey]);
@@ -1674,120 +1675,127 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
 
   const haySeleccionados = items.some(m => seleccionados.has(m.id));
   return (
-    <div style={{ overflowX:'auto' }}>
+    <div>
       <style>{`
         .fin-tabla-row .fin-cb { opacity:0; transition:opacity 0.1s; }
         .fin-tabla-row:hover .fin-cb { opacity:1; }
         .fin-tabla-row .fin-cb.checked { opacity:1; }
         .fin-tabla-row .fin-nombre-btn { opacity:0; transition:opacity 0.1s; }
         .fin-tabla-row:hover .fin-nombre-btn { opacity:1; }
-        .fin-calc-btn:hover { color: #a1a1aa !important; }
-        .fin-calc-btn:hover span { opacity: 0.8; }
+        .fin-calc-btn:hover span { opacity:0.7; }
+        .fin-calc-bar::-webkit-scrollbar { display:none; }
+        .fin-calc-bar { scrollbar-width:none; }
       `}</style>
-      <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
-        <thead>
-          <tr>
-            <th style={{ ...th, width:36, paddingRight:0 }}>
-              {haySeleccionados && (
-                <input type="checkbox" checked={allSel} ref={el => { if(el) el.indeterminate=someSel; }}
-                  onChange={() => onToggleAll(items, allSel)} style={{ accentColor:'#0067FD', cursor:'pointer' }} />
-              )}
-            </th>
-            {COLS.map(col => <th key={col.key} style={{ ...th, width:col.w, minWidth:col.w }}>{col.label}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map(m => {
-            const sel = seleccionados.has(m.id);
-            return (
-              <tr key={m.id} className="fin-tabla-row" style={{ background: sel?'#1e293b':'transparent' }}
-                onMouseEnter={e => { if(!sel) e.currentTarget.style.background='#1c1c1e'; }}
-                onMouseLeave={e => { e.currentTarget.style.background=sel?'#1e293b':'transparent'; }}>
-                <td style={{ ...td, width:36, paddingRight:0 }}>
-                  <input type="checkbox" checked={sel} onChange={() => onToggleSel(m.id)}
-                    className={`fin-cb${sel?' checked':''}`}
-                    style={{ accentColor:'#0067FD', cursor:'pointer' }} />
-                </td>
-                {COLS.map(col => (
-                  <td key={col.key} style={{ ...td, width:col.w, maxWidth:col.flex?260:col.w, overflow: col.flex ? 'hidden' : undefined }}>
-                    {col.key==='nombre' ? (
-                      editNombreId === m.id ? (
-                        <input ref={nombreInputRef} value={editNombreVal}
-                          onChange={e => setEditNombreVal(e.target.value)}
-                          onBlur={guardarNombre}
-                          onKeyDown={e => { if(e.key==='Enter') guardarNombre(); if(e.key==='Escape') setEditNombreId(null); }}
-                          style={{ background:'#27272a', border:'1px solid #0067FD', borderRadius:4, color:'white', fontSize:13, padding:'2px 6px', width:'100%', outline:'none' }} />
-                      ) : (
-                        <div style={{ display:'flex', alignItems:'center', gap:4 }}>
-                          <span onClick={() => onVerDetalle(m.id)} style={{ color:'#d4d4d8', fontSize:13, cursor:'pointer', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}
-                            onMouseEnter={e=>e.target.style.color='#0067FD'} onMouseLeave={e=>e.target.style.color='#d4d4d8'}>
-                            {m.nombre}
-                          </span>
-                          <button className="fin-nombre-btn" onClick={e => { e.stopPropagation(); setEditNombreId(m.id); setEditNombreVal(m.nombre); }}
-                            style={{ background:'none', border:'none', cursor:'pointer', color:'#71717a', padding:'0 2px', lineHeight:1, flexShrink:0, display:'flex', alignItems:'center' }}
-                            title="Editar nombre">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                          </button>
-                        </div>
-                      )
-                    ) : col.readonly === 'date' ? (
-                      <span style={{ color:'#71717a', fontSize:12, fontFamily:'monospace' }}>
-                        {m[col.key] ? m[col.key].slice(0,10) : '—'}
-                      </span>
-                    ) : col.readonly ? (
-                      <span style={{ color: m[col.key] < 0 ? '#f87171' : m[col.key] > 0 ? '#4ade80' : '#52525b', fontSize:13 }}>
-                        {m[col.key] != null ? (m[col.key] > 0 ? '+' : '') + fmt(m[col.key]) : '—'}
-                      </span>
-                    ) : (
-                      <CeldaEditable m={m} campo={col.key} onGuardar={onGuardarCelda} clientesLista={clientesLista} equipoLista={equipoLista} />
-                    )}
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
-        </tbody>
-        <tfoot>
-          <tr ref={tfootRef} style={{ position:'sticky', bottom:0, zIndex:20, background:'#0d0d0d', borderTop:'2px solid #27272a' }}>
-            <td style={{ ...td, width:36, paddingRight:0, borderBottom:'none' }} />
-            {COLS.map(col => {
-              const calcType = colCalcs[col.key];
-              const result = calcType && calcType !== 'none' ? calcVal(col.key, calcType) : null;
-              const formatted = result != null ? fmtCalc(col.key, calcType, result) : null;
-              const isOpen = openCalcKey === col.key;
-              const opts = getCalcOpts(col.key);
+      <div ref={tableWrapRef} style={{ overflowX:'auto' }}
+        onScroll={e => { if(calcBarRef.current) calcBarRef.current.scrollLeft = e.currentTarget.scrollLeft; }}>
+        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
+          <thead>
+            <tr>
+              <th style={{ ...th, width:36, paddingRight:0 }}>
+                {haySeleccionados && (
+                  <input type="checkbox" checked={allSel} ref={el => { if(el) el.indeterminate=someSel; }}
+                    onChange={() => onToggleAll(items, allSel)} style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+                )}
+              </th>
+              {COLS.map(col => <th key={col.key} style={{ ...th, width:col.w, minWidth:col.w }}>{col.label}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {items.map(m => {
+              const sel = seleccionados.has(m.id);
               return (
-                <td key={col.key} style={{ ...td, width:col.w, borderBottom:'none', position:'relative', padding:'4px 10px' }}>
-                  <button className="fin-calc-btn" onClick={() => setOpenCalcKey(isOpen ? null : col.key)}
-                    style={{ background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:600, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:4, color:'inherit' }}>
-                    {formatted ? (
-                      <>
-                        <span style={{ color:'#52525b', fontSize:10, textTransform:'uppercase', letterSpacing:'0.05em' }}>{CALC_SHORT[calcType]}</span>
-                        <span style={{ color:'#d4d4d8', fontSize:12 }}>{formatted}</span>
-                      </>
-                    ) : (
-                      <span style={{ color:'#3f3f46', fontSize:11 }}>Calcular</span>
-                    )}
-                  </button>
-                  {isOpen && (
-                    <div style={{ position:'absolute', bottom:'calc(100% + 4px)', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'4px', zIndex:100, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.7)' }}>
-                      {opts.map(opt => (
-                        <button key={opt.val} onClick={() => { setColCalc(col.key, opt.val); setOpenCalcKey(null); }}
-                          style={{ display:'block', width:'100%', textAlign:'left', background:calcType===opt.val?'#27272a':'transparent', border:'none', color:calcType===opt.val?'#fff':'#a1a1aa', fontSize:12, padding:'6px 10px', borderRadius:4, cursor:'pointer' }}>
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </td>
+                <tr key={m.id} className="fin-tabla-row" style={{ background: sel?'#1e293b':'transparent' }}
+                  onMouseEnter={e => { if(!sel) e.currentTarget.style.background='#1c1c1e'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background=sel?'#1e293b':'transparent'; }}>
+                  <td style={{ ...td, width:36, paddingRight:0 }}>
+                    <input type="checkbox" checked={sel} onChange={() => onToggleSel(m.id)}
+                      className={`fin-cb${sel?' checked':''}`}
+                      style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+                  </td>
+                  {COLS.map(col => (
+                    <td key={col.key} style={{ ...td, width:col.w, maxWidth:col.flex?260:col.w, overflow: col.flex ? 'hidden' : undefined }}>
+                      {col.key==='nombre' ? (
+                        editNombreId === m.id ? (
+                          <input ref={nombreInputRef} value={editNombreVal}
+                            onChange={e => setEditNombreVal(e.target.value)}
+                            onBlur={guardarNombre}
+                            onKeyDown={e => { if(e.key==='Enter') guardarNombre(); if(e.key==='Escape') setEditNombreId(null); }}
+                            style={{ background:'#27272a', border:'1px solid #0067FD', borderRadius:4, color:'white', fontSize:13, padding:'2px 6px', width:'100%', outline:'none' }} />
+                        ) : (
+                          <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+                            <span onClick={() => onVerDetalle(m.id)} style={{ color:'#d4d4d8', fontSize:13, cursor:'pointer', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}
+                              onMouseEnter={e=>e.target.style.color='#0067FD'} onMouseLeave={e=>e.target.style.color='#d4d4d8'}>
+                              {m.nombre}
+                            </span>
+                            <button className="fin-nombre-btn" onClick={e => { e.stopPropagation(); setEditNombreId(m.id); setEditNombreVal(m.nombre); }}
+                              style={{ background:'none', border:'none', cursor:'pointer', color:'#71717a', padding:'0 2px', lineHeight:1, flexShrink:0, display:'flex', alignItems:'center' }}
+                              title="Editar nombre">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                              </svg>
+                            </button>
+                          </div>
+                        )
+                      ) : col.readonly === 'date' ? (
+                        <span style={{ color:'#71717a', fontSize:12, fontFamily:'monospace' }}>
+                          {m[col.key] ? m[col.key].slice(0,10) : '—'}
+                        </span>
+                      ) : col.readonly ? (
+                        <span style={{ color: m[col.key] < 0 ? '#f87171' : m[col.key] > 0 ? '#4ade80' : '#52525b', fontSize:13 }}>
+                          {m[col.key] != null ? (m[col.key] > 0 ? '+' : '') + fmt(m[col.key]) : '—'}
+                        </span>
+                      ) : (
+                        <CeldaEditable m={m} campo={col.key} onGuardar={onGuardarCelda} clientesLista={clientesLista} equipoLista={equipoLista} />
+                      )}
+                    </td>
+                  ))}
+                </tr>
               );
             })}
-          </tr>
-        </tfoot>
-      </table>
+          </tbody>
+        </table>
+      </div>
+      {/* Barra de cálculo — fuera del overflow-x para que position:sticky funcione respecto al viewport */}
+      <div ref={calcBarRef} className="fin-calc-bar"
+        style={{ position:'sticky', bottom:0, zIndex:20, overflowX:'auto', background:'#0d0d0d', borderTop:'2px solid #27272a' }}
+        onScroll={e => { if(tableWrapRef.current) tableWrapRef.current.scrollLeft = e.currentTarget.scrollLeft; }}>
+        <div style={{ display:'flex', minWidth:'max-content' }}>
+          <div style={{ width:36, flexShrink:0 }} />
+          {COLS.map(col => {
+            const calcType = colCalcs[col.key];
+            const result = calcType && calcType !== 'none' ? calcVal(col.key, calcType) : null;
+            const formatted = result != null ? fmtCalc(col.key, calcType, result) : null;
+            const isOpen = openCalcKey === col.key;
+            const opts = getCalcOpts(col.key);
+            return (
+              <div key={col.key} style={{ width:col.flex?undefined:col.w, minWidth:col.w||80, flex:col.flex||undefined, flexShrink:0, padding:'5px 10px', position:'relative' }}>
+                <button className="fin-calc-btn" onClick={() => setOpenCalcKey(isOpen ? null : col.key)}
+                  style={{ background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:600, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:4 }}>
+                  {formatted ? (
+                    <>
+                      <span style={{ color:'#52525b', fontSize:10, textTransform:'uppercase', letterSpacing:'0.05em' }}>{CALC_SHORT[calcType]}</span>
+                      <span style={{ color:'#d4d4d8', fontSize:12 }}>{formatted}</span>
+                    </>
+                  ) : (
+                    <span style={{ color:'#3f3f46', fontSize:11 }}>Calcular</span>
+                  )}
+                </button>
+                {isOpen && (
+                  <div style={{ position:'absolute', bottom:'calc(100% + 4px)', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'4px', zIndex:100, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.7)' }}>
+                    {opts.map(opt => (
+                      <button key={opt.val} onClick={() => { setColCalc(col.key, opt.val); setOpenCalcKey(null); }}
+                        style={{ display:'block', width:'100%', textAlign:'left', background:calcType===opt.val?'#27272a':'transparent', border:'none', color:calcType===opt.val?'#fff':'#a1a1aa', fontSize:12, padding:'6px 10px', borderRadius:4, cursor:'pointer' }}>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
