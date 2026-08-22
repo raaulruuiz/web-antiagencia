@@ -3285,7 +3285,7 @@ export default function Finanzas() {
             ];
             const closeBulk = () => { setBulkCampo(null); setBulkValor(''); setBulkValorMulti([]); setBulkFiltroLista(''); };
             return (
-              <div style={{ background:'#1e293b', border:'1px solid #1d4ed8', borderRadius:10, padding:'10px 16px', marginBottom:10, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+              <div style={{ background:'#1e293b', border:'1px solid #1d4ed8', borderRadius:10, padding:'10px 16px', marginBottom:10, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap', position:'sticky', top:0, zIndex:200 }}>
                 <span style={{ color:'#60a5fa', fontSize:13, fontWeight:600, flexShrink:0 }}>{seleccionados.size} seleccionado{seleccionados.size>1?'s':''}</span>
                 <button onClick={() => { setSeleccionados(new Set()); setSelTodos(false); }} style={{ background:'none', border:'none', color:'#52525b', fontSize:12, cursor:'pointer', padding:'2px 6px' }}>✕ Deseleccionar</button>
                 {!selTodos && seleccionados.size > 0 && movimientos.total > seleccionados.size && (
