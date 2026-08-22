@@ -115,8 +115,9 @@ function enriquecerMovimiento(m) {
 
 function fmt(n) {
   if (n == null) return '—';
-  const abs = Math.abs(n).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return (n < 0 ? '-' : '') + abs + ' €';
+  const [int, dec] = Math.abs(n).toFixed(2).split('.');
+  const intFmt = int.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return (n < 0 ? '-' : '') + intFmt + ',' + dec + ' €';
 }
 
 function fmtY(v) {
