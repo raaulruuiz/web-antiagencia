@@ -739,7 +739,7 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
         </div>
         <div>
           <label style={S.label}>Tipo *</label>
-          <select style={S.select} value={form.tipo} onChange={e => { set('tipo', e.target.value); set('cuenta', e.target.value === 'Ingreso' ? 'Ingresos' : 'Gastos de Operación'); }}>
+          <select style={S.select} value={form.tipo} onChange={e => { set('tipo', e.target.value); if (!esEdicion) set('cuenta', e.target.value === 'Ingreso' ? 'Ingresos' : 'Gastos de Operación'); }}>
             {TIPOS.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
@@ -1948,15 +1948,29 @@ export default function Finanzas() {
   async function guardarCeldaInline(id, campo, valor) {
     const token = await getToken();
     const body = { [campo]: campo === 'cantidad' ? parseFloat(valor) : valor };
-    await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${id}`, {
+    const res = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${id}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    setMovimientos(prev => ({
-      ...prev,
-      items: prev.items.map(m => m.id === id ? { ...m, [campo]: valor } : m),
-    }));
+    const json = await res.json();
+    const m = json.movimiento;
+    if (m) {
+      // Actualiza la fila completa con todos los campos calculados
+      const fila = {
+        id: m.id, notion_id: m.notion_id, nombre: m.nombre, fecha: m.fecha,
+        tipo: m.tipo, cuenta: m.cuenta, cantidad: m.cantidad, iva: m.iva, irpf: m.irpf,
+        ivaAPagar: m.iva_a_pagar, irpfAPagar: m.irpf_a_pagar, beneficio: m.beneficio,
+        categorias: m.categorias || [], fecha_factura: m.fecha_factura || null,
+        importe_factura: m.importe_factura ?? null, base_imponible: m.base_imponible ?? null,
+        irpf_retenido_yo: m.irpf_retenido_yo ?? null, cliente_ids: m.cliente_ids || [],
+        equipo_ids: m.equipo_ids || [], created_at: m.created_at, updated_at: m.updated_at,
+      };
+      setMovimientos(prev => ({ ...prev, items: prev.items.map(i => i.id === id ? fila : i) }));
+    } else {
+      // Fallback: solo actualiza el campo editado
+      setMovimientos(prev => ({ ...prev, items: prev.items.map(i => i.id === id ? { ...i, [campo]: valor } : i) }));
+    }
   }
 
   async function eliminarBulk() {
