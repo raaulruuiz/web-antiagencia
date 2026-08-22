@@ -1239,8 +1239,10 @@ function NuevoMovimientoTab({ onGuardado }) {
 
   function onFileChange(e) {
     const files = Array.from(e.target.files);
-    setImagenes(files);
-    setPreviews(files.map(f => URL.createObjectURL(f)));
+    if (!files.length) return;
+    const newPreviews = files.map(f => URL.createObjectURL(f));
+    setImagenes(prev => [...prev, ...files]);
+    setPreviews(prev => [...prev, ...newPreviews]);
     setSections(null);
     e.target.value = '';
   }
@@ -1250,8 +1252,9 @@ function NuevoMovimientoTab({ onGuardado }) {
     e.currentTarget.style.borderColor = '#3f3f46';
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
     if (!files.length) return;
-    setImagenes(files);
-    setPreviews(files.map(f => URL.createObjectURL(f)));
+    const newPreviews = files.map(f => URL.createObjectURL(f));
+    setImagenes(prev => [...prev, ...files]);
+    setPreviews(prev => [...prev, ...newPreviews]);
     setSections(null);
   }
 
@@ -1395,11 +1398,21 @@ function NuevoMovimientoTab({ onGuardado }) {
 
           {imagenes.length > 0 && (
             <>
-              {/* Miniaturas */}
+              {/* Miniaturas con botón eliminar */}
               <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {previews.map((url, i) => (
-                  <img key={i} src={url} alt={imagenes[i]?.name}
-                    style={{ height: 72, width: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid #3f3f46' }} />
+                  <div key={i} style={{ position: 'relative' }}>
+                    <img src={url} alt={imagenes[i]?.name}
+                      style={{ height: 72, width: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid #3f3f46', display: 'block' }} />
+                    <button type="button"
+                      onClick={() => {
+                        setImagenes(prev => prev.filter((_, j) => j !== i));
+                        setPreviews(prev => prev.filter((_, j) => j !== i));
+                      }}
+                      style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#27272a', border: '1px solid #52525b', color: '#a1a1aa', fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, lineHeight: 1 }}>
+                      ✕
+                    </button>
+                  </div>
                 ))}
               </div>
 
