@@ -1521,27 +1521,46 @@ function NuevoMovimientoTab({ onGuardado }) {
             </div>
 
             {/* Paginación */}
-            {sections.length > 1 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <button type="button" onClick={() => setPagina(p => Math.max(0, p - 1))} disabled={si === 0}
-                  style={{ padding: '5px 12px', borderRadius: 7, border: '1px solid #3f3f46', background: 'none', color: si === 0 ? '#3f3f46' : '#a1a1aa', cursor: si === 0 ? 'default' : 'pointer', fontSize: 13 }}>
-                  ‹
-                </button>
-                {sections.map((_, i) => (
+            {sections.length > 1 && (() => {
+              const total = sections.length;
+              const btnPag = (i) => {
+                const guardadoTodo = sections[i] && sections[i].guardados.size === sections[i].movimientos.length && sections[i].movimientos.length > 0;
+                return (
                   <button key={i} type="button" onClick={() => setPagina(i)}
-                    style={{ padding: '5px 11px', borderRadius: 7, border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                    style={{ padding: '5px 11px', borderRadius: 7, border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer', flexShrink: 0,
                       background: i === si ? '#0067FD' : '#27272a',
-                      color: i === si ? 'white' : sections[i] ? (sections[i].guardados.size === sections[i].movimientos.length && sections[i].movimientos.length > 0 ? '#22c55e' : '#a1a1aa') : '#52525b',
+                      color: i === si ? 'white' : sections[i] ? (guardadoTodo ? '#22c55e' : '#a1a1aa') : '#52525b',
                     }}>
-                    {i + 1}{sections[i] && sections[i].guardados.size > 0 && sections[i].guardados.size === sections[i].movimientos.length ? ' ✓' : ''}
+                    {i + 1}{guardadoTodo ? ' ✓' : ''}
                   </button>
-                ))}
-                <button type="button" onClick={() => setPagina(p => Math.min(sections.length - 1, p + 1))} disabled={si === sections.length - 1}
-                  style={{ padding: '5px 12px', borderRadius: 7, border: '1px solid #3f3f46', background: 'none', color: si === sections.length - 1 ? '#3f3f46' : '#a1a1aa', cursor: si === sections.length - 1 ? 'default' : 'pointer', fontSize: 13 }}>
-                  ›
-                </button>
-              </div>
-            )}
+                );
+              };
+              // Ventana deslizante: siempre mostrar 1, ..., [si-2..si+2], ..., total
+              const window = 2;
+              const indices = new Set([0, total - 1]);
+              for (let k = Math.max(0, si - window); k <= Math.min(total - 1, si + window); k++) indices.add(k);
+              const sorted = [...indices].sort((a, b) => a - b);
+              const items = [];
+              sorted.forEach((idx, pos) => {
+                if (pos > 0 && idx - sorted[pos - 1] > 1) {
+                  items.push(<span key={`dots-${idx}`} style={{ color: '#52525b', fontSize: 12, padding: '0 2px' }}>…</span>);
+                }
+                items.push(btnPag(idx));
+              });
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16, flexWrap: 'nowrap' }}>
+                  <button type="button" onClick={() => setPagina(p => Math.max(0, p - 1))} disabled={si === 0}
+                    style={{ padding: '5px 12px', borderRadius: 7, border: '1px solid #3f3f46', background: 'none', color: si === 0 ? '#3f3f46' : '#a1a1aa', cursor: si === 0 ? 'default' : 'pointer', fontSize: 13, flexShrink: 0 }}>
+                    ‹
+                  </button>
+                  {items}
+                  <button type="button" onClick={() => setPagina(p => Math.min(total - 1, p + 1))} disabled={si === total - 1}
+                    style={{ padding: '5px 12px', borderRadius: 7, border: '1px solid #3f3f46', background: 'none', color: si === total - 1 ? '#3f3f46' : '#a1a1aa', cursor: si === total - 1 ? 'default' : 'pointer', fontSize: 13, flexShrink: 0 }}>
+                    ›
+                  </button>
+                </div>
+              );
+            })()}
 
             {sec && (
               <div>
