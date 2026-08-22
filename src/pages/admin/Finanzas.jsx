@@ -38,10 +38,11 @@ const CAMPOS_FILTRO = [
   { key: 'base_imponible',  label: 'Base Imponible',  tipo: 'number' },
   { key: 'iva',             label: 'IVA',             tipo: 'select',          ops: IVA_OPTS },
   { key: 'irpf',            label: 'IRPF',            tipo: 'select',          ops: IRPF_OPTS },
-  { key: 'importe_factura', label: 'Importe s/ factura', tipo: 'number_nullable' },
-  { key: 'fecha_factura',   label: 'Fecha Factura',   tipo: 'date' },
-  { key: 'cliente_ids',     label: 'Cliente',         tipo: 'uuid_nullable' },
-  { key: 'equipo_ids',      label: 'Miembro equipo',  tipo: 'uuid_nullable' },
+  { key: 'importe_factura',   label: 'Importe s/ factura',  tipo: 'number_nullable' },
+  { key: 'fecha_factura',     label: 'Fecha Factura',       tipo: 'date' },
+  { key: 'notion_created_at', label: 'Creado en Notion',    tipo: 'date' },
+  { key: 'cliente_ids',       label: 'Cliente',             tipo: 'uuid_nullable' },
+  { key: 'equipo_ids',        label: 'Miembro equipo',      tipo: 'uuid_nullable' },
 ];
 
 const OPS_POR_TIPO = {
@@ -60,10 +61,11 @@ const CAMPOS_SORT = [
   { key: 'cantidad',       label: 'Cantidad' },
   { key: 'beneficio',      label: 'Beneficio' },
   { key: 'base_imponible', label: 'Base Imponible' },
-  { key: 'fecha_factura',   label: 'Fecha Factura' },
-  { key: 'importe_factura', label: 'Importe Factura' },
-  { key: 'cliente_ids',     label: 'Cliente' },
-  { key: 'equipo_ids',      label: 'Miembro equipo' },
+  { key: 'fecha_factura',     label: 'Fecha Factura' },
+  { key: 'importe_factura',   label: 'Importe Factura' },
+  { key: 'notion_created_at', label: 'Creado en Notion' },
+  { key: 'cliente_ids',       label: 'Cliente' },
+  { key: 'equipo_ids',        label: 'Miembro equipo' },
 ];
 
 const S = {
