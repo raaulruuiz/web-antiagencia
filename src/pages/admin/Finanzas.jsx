@@ -1761,6 +1761,7 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
   const [editando, setEditando] = useState(false);
   const [val, setVal] = useState(m[campo]);
   const [nuevaCat, setNuevaCat] = useState(null); // null = oculto, '' = mostrando input
+  const [filtroLista, setFiltroLista] = useState('');
   const ref = useRef(null);
 
   useEffect(() => { if (!editando) setVal(m[campo]); }, [m[campo], editando]);
@@ -1841,24 +1842,42 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
     const lista = campo === 'cliente_ids' ? clientesLista : equipoLista;
     const selIds = val || [];
     const nombres = selIds.map(id => lista.find(x => x.id === id)?.nombre || '?');
+    const listaFiltrada = filtroLista.trim()
+      ? lista.filter(o => o.nombre.toLowerCase().includes(filtroLista.toLowerCase()))
+      : lista;
     return (
       <div ref={ref} style={{ position: 'relative' }}>
-        <div onClick={() => setEditando(o => !o)} style={{ cursor:'pointer', minHeight:20 }}>
+        <div onClick={() => { setEditando(o => !o); setFiltroLista(''); }} style={{ cursor:'pointer', minHeight:20 }}>
           {nombres.length ? <span style={{ color:'#d4d4d8', fontSize:12 }}>{nombres.join(', ')}</span> : <span style={{ color:'#3f3f46', fontSize:12 }}>—</span>}
         </div>
         {editando && (
-          <div style={{ position:'absolute', zIndex:400, top:'100%', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, minWidth:200, maxHeight:200, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
-            {lista.map(o => {
-              const sel = (val||[]).includes(o.id);
-              return (
-                <label key={o.id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', cursor:'pointer', borderBottom:'1px solid #27272a' }}
-                  onMouseEnter={e=>e.currentTarget.style.background='#27272a'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-                  <input type="checkbox" checked={sel} onChange={() => setVal(prev => sel?(prev||[]).filter(id=>id!==o.id):[...(prev||[]),o.id])}
-                    style={{ accentColor:'#0067FD', flexShrink:0 }} />
-                  <span style={{ color:'#d4d4d8', fontSize:12 }}>{o.nombre}</span>
-                </label>
-              );
-            })}
+          <div style={{ position:'absolute', zIndex:400, top:'100%', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, minWidth:200, boxShadow:'0 8px 24px rgba(0,0,0,0.5)' }}>
+            <div style={{ padding:'6px 8px', borderBottom:'1px solid #27272a' }}>
+              <input
+                autoFocus
+                value={filtroLista}
+                onChange={e => setFiltroLista(e.target.value)}
+                placeholder="Buscar..."
+                onClick={e => e.stopPropagation()}
+                style={{ width:'100%', background:'#27272a', border:'1px solid #3f3f46', borderRadius:4, color:'white', fontSize:12, padding:'4px 8px', outline:'none', boxSizing:'border-box' }}
+              />
+            </div>
+            <div style={{ maxHeight:180, overflowY:'auto' }}>
+              {listaFiltrada.map(o => {
+                const sel = (val||[]).includes(o.id);
+                return (
+                  <label key={o.id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', cursor:'pointer', borderBottom:'1px solid #27272a' }}
+                    onMouseEnter={e=>e.currentTarget.style.background='#27272a'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                    <input type="checkbox" checked={sel} onChange={() => setVal(prev => sel?(prev||[]).filter(id=>id!==o.id):[...(prev||[]),o.id])}
+                      style={{ accentColor:'#0067FD', flexShrink:0 }} />
+                    <span style={{ color:'#d4d4d8', fontSize:12 }}>{o.nombre}</span>
+                  </label>
+                );
+              })}
+              {listaFiltrada.length === 0 && (
+                <p style={{ color:'#52525b', fontSize:12, padding:'8px 10px', margin:0 }}>Sin resultados</p>
+              )}
+            </div>
             <button onClick={confirmar} style={{ width:'100%', background:'#0067FD', color:'white', border:'none', borderRadius:'0 0 8px 8px', padding:'6px', fontSize:12, cursor:'pointer' }}>Aplicar</button>
           </div>
         )}
