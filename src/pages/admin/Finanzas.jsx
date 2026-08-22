@@ -1404,8 +1404,6 @@ function NuevoMovimientoTab({ onGuardado }) {
 
 // ── Celda editable inline ───────────────────────────────────────
 const CUENTAS_OPTS = ['Ingresos','Impuestos','Compensación del Dueño','Gastos de Operación','Freelancers y Material','Ganancia'];
-const IVA_OPTS = ['0%','4%','10%','21%'];
-const IRPF_OPTS = ['0%','7%','15%','19%'];
 
 function CeldaEditable({ m, campo, onGuardar }) {
   const [editando, setEditando] = useState(false);
