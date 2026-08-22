@@ -1597,7 +1597,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
     { key:'updated_at',       label:'Modificado',     w:100, readonly:'date' },
   ];
   const th = { padding:'8px 10px', color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', borderBottom:'1px solid #27272a', whiteSpace:'nowrap', textAlign:'left' };
-  const td = { padding:'6px 10px', borderBottom:'1px solid #1c1c1e', verticalAlign:'middle' };
+  const td = { padding:'6px 10px', borderBottom:'1px solid #1c1c1e', verticalAlign:'middle', whiteSpace:'nowrap' };
 
   const haySeleccionados = items.some(m => seleccionados.has(m.id));
   return (
@@ -1634,7 +1634,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                     style={{ accentColor:'#0067FD', cursor:'pointer' }} />
                 </td>
                 {COLS.map(col => (
-                  <td key={col.key} style={{ ...td, width:col.w, maxWidth:col.flex?260:col.w }}>
+                  <td key={col.key} style={{ ...td, width:col.w, maxWidth:col.flex?260:col.w, overflow: col.flex ? 'hidden' : undefined }}>
                     {col.key==='nombre' ? (
                       editNombreId === m.id ? (
                         <input ref={nombreInputRef} value={editNombreVal}
