@@ -1335,9 +1335,20 @@ function NuevoMovimientoTab({ onGuardado }) {
         }),
       });
       if (!r.ok) throw new Error(await r.text());
-      setSections(prev => prev.map((s, i) => i !== si ? s : {
-        ...s, guardados: new Set([...s.guardados, mi]),
-      }));
+      setSections(prev => {
+        const next = prev.map((s, i) => i !== si ? s : { ...s, guardados: new Set([...s.guardados, mi]) });
+        // Comprobar si todos los movimientos de todas las secciones están guardados
+        const todoGuardado = next.every(s => s.movimientos.length === 0 || s.guardados.size === s.movimientos.length);
+        if (todoGuardado && next.reduce((a, s) => a + s.movimientos.length, 0) > 0) {
+          // Marcar tareas "Tracking diario" en Notion
+          getToken().then(t => fetch(`${BACKEND_URL}/admin/finanzas/completar-tracking-diario`, {
+            method: 'POST', headers: { Authorization: `Bearer ${t}` },
+          }).then(r => r.json()).then(d => {
+            if (d.completadas > 0) console.log(`✅ ${d.completadas} tarea(s) "Tracking diario" marcadas en Notion`);
+          }).catch(() => {}));
+        }
+        return next;
+      });
     } catch (err) {
       alert('Error: ' + err.message);
     } finally {
