@@ -70,6 +70,18 @@ const CAMPOS_SORT = [
   { key: 'equipo_ids',        label: 'Miembro equipo' },
 ];
 
+// Formatea número con separador de miles en locale español: 2308.04 → "2.308,04"
+function fmtN(n, decimals = 2) {
+  if (n == null || n === '') return '—';
+  return Number(n).toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+function fmtEur(n, showSign = false) {
+  if (n == null) return '—';
+  const formatted = fmtN(Math.abs(n));
+  const sign = n > 0 ? (showSign ? '+' : '') : n < 0 ? '-' : '';
+  return `${sign}${formatted}€`;
+}
+
 const S = {
   card:    { background: '#161616', border: '1px solid #27272a', borderRadius: 12, padding: 20 },
   input:   { background: '#0d0d0d', border: '1px solid #3f3f46', borderRadius: 8, color: 'white', padding: '8px 12px', fontSize: 14, outline: 'none', width: '100%', boxSizing: 'border-box' },
@@ -103,9 +115,8 @@ function enriquecerMovimiento(m) {
 
 function fmt(n) {
   if (n == null) return '—';
-  const r = Math.round(n);
-  const abs = String(Math.abs(r)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return (r < 0 ? '-' : '') + abs + ' €';
+  const abs = Math.abs(n).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (n < 0 ? '-' : '') + abs + ' €';
 }
 
 function fmtY(v) {
@@ -1537,7 +1548,9 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
     <div onClick={() => { setEditando(true); setVal(m[campo]); }}
       style={{ cursor:'pointer', color: m[campo]!=null&&m[campo]!==''?'#d4d4d8':'#3f3f46', fontSize:12, minHeight:20 }}>
       {campo==='cantidad'
-        ? <span style={{ color: m.tipo==='Ingreso'?'#22c55e':'#f87171', fontWeight:600 }}>{m[campo]!=null ? (m.tipo==='Ingreso'?'+':'-')+Math.abs(m[campo])+'€':''}</span>
+        ? <span style={{ color: m.tipo==='Ingreso'?'#22c55e':'#f87171', fontWeight:600 }}>{m[campo]!=null ? (m.tipo==='Ingreso'?'+':'-')+fmt(Math.abs(m[campo])):''}</span>
+        : campo==='importe_factura'
+        ? (m[campo]!=null ? fmt(m[campo]) : '—')
         : (m[campo]||'—')}
     </div>
   );
@@ -1571,17 +1584,17 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
     { key:'iva',              label:'IVA',            w:55 },
     { key:'irpf',             label:'IRPF',           w:55 },
     { key:'categorias',       label:'Categorías',     w:150 },
+    { key:'cliente_ids',      label:'Clientes',       w:130 },
+    { key:'equipo_ids',       label:'Equipo',         w:120 },
     { key:'fecha_factura',    label:'F. Factura',     w:100 },
     { key:'importe_factura',  label:'Imp. s/Factura', w:110 },
     { key:'base_imponible',   label:'Base Impon.',    w:95,  readonly:true },
     { key:'beneficio',        label:'Beneficio',      w:90,  readonly:true },
     { key:'ivaAPagar',        label:'IVA a Pagar',    w:90,  readonly:true },
     { key:'irpfAPagar',       label:'IRPF a Pagar',   w:95,  readonly:true },
-    { key:'irpf_retenido_yo',  label:'IRPF Ret.',      w:80,  readonly:true },
-    { key:'created_at', label:'Creado',     w:100, readonly:'date' },
-    { key:'updated_at',        label:'Modificado', w:100, readonly:'date' },
-    { key:'cliente_ids',       label:'Clientes',      w:130 },
-    { key:'equipo_ids',       label:'Equipo',         w:120 },
+    { key:'irpf_retenido_yo', label:'IRPF Ret.',      w:80,  readonly:true },
+    { key:'created_at',       label:'Creado',         w:100, readonly:'date' },
+    { key:'updated_at',       label:'Modificado',     w:100, readonly:'date' },
   ];
   const th = { padding:'8px 10px', color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', borderBottom:'1px solid #27272a', whiteSpace:'nowrap', textAlign:'left' };
   const td = { padding:'6px 10px', borderBottom:'1px solid #1c1c1e', verticalAlign:'middle' };
@@ -1636,9 +1649,12 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                             {m.nombre}
                           </span>
                           <button className="fin-nombre-btn" onClick={e => { e.stopPropagation(); setEditNombreId(m.id); setEditNombreVal(m.nombre); }}
-                            style={{ background:'none', border:'none', cursor:'pointer', color:'#71717a', padding:'0 2px', lineHeight:1, flexShrink:0 }}
+                            style={{ background:'none', border:'none', cursor:'pointer', color:'#71717a', padding:'0 2px', lineHeight:1, flexShrink:0, display:'flex', alignItems:'center' }}
                             title="Editar nombre">
-                            ✏️
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
                           </button>
                         </div>
                       )
@@ -1648,7 +1664,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                       </span>
                     ) : col.readonly ? (
                       <span style={{ color: m[col.key] < 0 ? '#f87171' : m[col.key] > 0 ? '#4ade80' : '#52525b', fontSize:13 }}>
-                        {m[col.key] != null ? `${m[col.key] > 0 ? '+' : ''}${m[col.key]}€` : '—'}
+                        {m[col.key] != null ? (m[col.key] > 0 ? '+' : '') + fmt(m[col.key]) : '—'}
                       </span>
                     ) : (
                       <CeldaEditable m={m} campo={col.key} onGuardar={onGuardarCelda} clientesLista={clientesLista} equipoLista={equipoLista} />
