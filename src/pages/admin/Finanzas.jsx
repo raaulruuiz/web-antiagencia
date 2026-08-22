@@ -1226,8 +1226,23 @@ function NuevoMovimientoTab({ onGuardado }) {
   const [clientesLista, setClientesLista] = useState([]);
   const [equipoLista, setEquipoLista] = useState([]);
   const inputRef = useRef(null);
+  const cancelRef = useRef(false);
 
   const CUENTAS_LIST = CUENTAS.map(c => c.key);
+
+  function detectarCuentaSec(movimientos) {
+    if (!movimientos.length) return 'Gastos de Operación';
+    const freq = {};
+    movimientos.forEach(m => { freq[m.cuenta] = (freq[m.cuenta] || 0) + 1; });
+    return Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
+  }
+
+  function setCuentaSec(si, cuenta) {
+    setSections(prev => prev.map((s, i) => i !== si ? s : {
+      ...s, cuentaSec: cuenta,
+      movimientos: s.movimientos.map(m => ({ ...m, cuenta })),
+    }));
+  }
 
   useEffect(() => {
     getToken().then(token => {
@@ -1270,9 +1285,11 @@ function NuevoMovimientoTab({ onGuardado }) {
 
   async function extraer() {
     if (!imagenes.length) return;
+    cancelRef.current = false;
     const built = [];
     setSections([]);
     for (let i = 0; i < imagenes.length; i++) {
+      if (cancelRef.current) break;
       setExtrayendoIdx(i);
       try {
         const token = await getToken();
@@ -1296,9 +1313,10 @@ function NuevoMovimientoTab({ onGuardado }) {
           categorias: [], cliente_ids: [], equipo_ids: [],
           fecha_factura: '', importe_factura: '',
         }));
-        built.push({ previewUrl: previews[i], movimientos, guardados: new Set() });
+        const cuentaSec = detectarCuentaSec(movimientos);
+        built.push({ previewUrl: previews[i], movimientos, guardados: new Set(), cuentaSec });
       } catch (err) {
-        built.push({ previewUrl: previews[i], movimientos: [], guardados: new Set(), error: err.message });
+        built.push({ previewUrl: previews[i], movimientos: [], guardados: new Set(), cuentaSec: 'Gastos de Operación', error: err.message });
       }
       setSections([...built]);
       if (i === 0) setPagina(0); // primera imagen lista: muestra al usuario para que empiece a revisar
@@ -1479,7 +1497,13 @@ function NuevoMovimientoTab({ onGuardado }) {
             {/* Cabecera */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
               {procesando
-                ? <span style={{ color: '#facc15', fontSize: 13, fontWeight: 600 }}>⏳ Analizando imagen {(extrayendoIdx ?? 0) + 1} de {imagenes.length}...</span>
+                ? <>
+                    <span style={{ color: '#facc15', fontSize: 13, fontWeight: 600 }}>⏳ Analizando imagen {(extrayendoIdx ?? 0) + 1} de {imagenes.length}...</span>
+                    <button type="button" onClick={() => { cancelRef.current = true; setExtrayendoIdx(null); }}
+                      style={{ background: 'none', border: '1px solid #ef4444', color: '#ef4444', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
+                      Cancelar
+                    </button>
+                  </>
                 : <span style={{ color: '#22c55e', fontSize: 13, fontWeight: 600 }}>✓ {totalMovs} movimiento{totalMovs !== 1 ? 's' : ''} de {sections.length} imagen{sections.length !== 1 ? 'es' : ''}</span>
               }
               <button type="button" onClick={resetear}
@@ -1524,6 +1548,17 @@ function NuevoMovimientoTab({ onGuardado }) {
                   <img src={sec.previewUrl} alt={`Imagen ${si + 1}`}
                     style={{ width: '100%', maxHeight: 640, objectFit: 'contain', display: 'block', borderRadius: 10, border: '1px solid #27272a', background: '#0d0d0d' }} />
                 </div>
+
+                {/* Selector de cuenta a nivel de sección */}
+                {sec.movimientos.length > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginBottom: 14, padding: '10px 14px', background: '#1c1c1e', borderRadius: 10, border: '1px solid #27272a' }}>
+                    <span style={{ color: '#a1a1aa', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Cuenta de esta imagen</span>
+                    <select value={sec.cuentaSec || ''} onChange={e => setCuentaSec(si, e.target.value)}
+                      style={{ ...S.input, maxWidth: 260, margin: 0 }}>
+                      {CUENTAS_LIST.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                )}
 
                 {/* Error de parsing */}
                 {sec.error && (
@@ -1595,7 +1630,7 @@ function NuevoMovimientoTab({ onGuardado }) {
                             <div>
                               <label style={S.label}>Cuenta</label>
                               <select style={S.input} value={m.cuenta} onChange={e => setMovField(si, mi, 'cuenta', e.target.value)}>
-                                {CUENTAS_LIST.map(c => <option key={c}>{c}</option>)}
+                                {CUENTAS_LIST.map(c => <option key={c} value={c}>{c}</option>)}
                               </select>
                             </div>
                             <div>
