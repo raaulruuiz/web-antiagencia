@@ -1674,6 +1674,14 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
   const td = { padding:'6px 10px', borderBottom:'1px solid #1c1c1e', verticalAlign:'middle', whiteSpace:'nowrap' };
 
   const haySeleccionados = items.some(m => seleccionados.has(m.id));
+  // Ancho mínimo compartido entre tabla y barra de cálculo para alinear columnas
+  const tblMinW = 36 + COLS.reduce((s, c) => s + (c.w || 150), 0);
+  const Colgroup = () => (
+    <colgroup>
+      <col style={{ width:36, minWidth:36 }} />
+      {COLS.map(col => <col key={col.key} style={{ width: col.flex ? undefined : col.w, minWidth: col.w || 150 }} />)}
+    </colgroup>
+  );
   return (
     <div>
       <style>{`
@@ -1688,7 +1696,8 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
       `}</style>
       <div ref={tableWrapRef} style={{ overflowX:'auto' }}
         onScroll={e => { if(calcBarRef.current) calcBarRef.current.scrollLeft = e.currentTarget.scrollLeft; }}>
-        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
+        <table style={{ width:'100%', minWidth:tblMinW, borderCollapse:'collapse', fontSize:13 }}>
+          <Colgroup />
           <thead>
             <tr>
               <th style={{ ...th, width:36, paddingRight:0 }}>
@@ -1760,41 +1769,46 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
       <div ref={calcBarRef} className="fin-calc-bar"
         style={{ position:'sticky', bottom:0, zIndex:20, overflowX:'auto', background:'#0d0d0d', borderTop:'2px solid #27272a' }}
         onScroll={e => { if(tableWrapRef.current) tableWrapRef.current.scrollLeft = e.currentTarget.scrollLeft; }}>
-        <div style={{ display:'flex', minWidth:'max-content' }}>
-          <div style={{ width:36, flexShrink:0 }} />
-          {COLS.map(col => {
-            const calcType = colCalcs[col.key];
-            const result = calcType && calcType !== 'none' ? calcVal(col.key, calcType) : null;
-            const formatted = result != null ? fmtCalc(col.key, calcType, result) : null;
-            const isOpen = openCalcKey === col.key;
-            const opts = getCalcOpts(col.key);
-            return (
-              <div key={col.key} style={{ width:col.flex?undefined:col.w, minWidth:col.w||80, flex:col.flex||undefined, flexShrink:0, padding:'5px 10px', position:'relative' }}>
-                <button className="fin-calc-btn" onClick={() => setOpenCalcKey(isOpen ? null : col.key)}
-                  style={{ background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:600, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:4 }}>
-                  {formatted ? (
-                    <>
-                      <span style={{ color:'#52525b', fontSize:10, textTransform:'uppercase', letterSpacing:'0.05em' }}>{CALC_SHORT[calcType]}</span>
-                      <span style={{ color:'#d4d4d8', fontSize:12 }}>{formatted}</span>
-                    </>
-                  ) : (
-                    <span style={{ color:'#3f3f46', fontSize:11 }}>Calcular</span>
-                  )}
-                </button>
-                {isOpen && (
-                  <div style={{ position:'absolute', bottom:'calc(100% + 4px)', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'4px', zIndex:100, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.7)' }}>
-                    {opts.map(opt => (
-                      <button key={opt.val} onClick={() => { setColCalc(col.key, opt.val); setOpenCalcKey(null); }}
-                        style={{ display:'block', width:'100%', textAlign:'left', background:calcType===opt.val?'#27272a':'transparent', border:'none', color:calcType===opt.val?'#fff':'#a1a1aa', fontSize:12, padding:'6px 10px', borderRadius:4, cursor:'pointer' }}>
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <table style={{ width:'100%', minWidth:tblMinW, borderCollapse:'collapse', fontSize:13 }}>
+          <Colgroup />
+          <tbody>
+            <tr>
+              <td style={{ width:36, padding:'5px 10px' }} />
+              {COLS.map(col => {
+                const calcType = colCalcs[col.key];
+                const result = calcType && calcType !== 'none' ? calcVal(col.key, calcType) : null;
+                const formatted = result != null ? fmtCalc(col.key, calcType, result) : null;
+                const isOpen = openCalcKey === col.key;
+                const opts = getCalcOpts(col.key);
+                return (
+                  <td key={col.key} style={{ padding:'5px 10px', position:'relative', overflow:'hidden' }}>
+                    <button className="fin-calc-btn" onClick={() => setOpenCalcKey(isOpen ? null : col.key)}
+                      style={{ background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:600, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:4 }}>
+                      {formatted ? (
+                        <>
+                          <span style={{ color:'#52525b', fontSize:10, textTransform:'uppercase', letterSpacing:'0.05em', flexShrink:0 }}>{CALC_SHORT[calcType]}</span>
+                          <span style={{ color:'#d4d4d8', fontSize:12, overflow:'hidden', textOverflow:'ellipsis' }}>{formatted}</span>
+                        </>
+                      ) : (
+                        <span style={{ color:'#3f3f46', fontSize:11 }}>Calcular</span>
+                      )}
+                    </button>
+                    {isOpen && (
+                      <div style={{ position:'absolute', bottom:'calc(100% + 4px)', left:0, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'4px', zIndex:100, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.7)' }}>
+                        {opts.map(opt => (
+                          <button key={opt.val} onClick={() => { setColCalc(col.key, opt.val); setOpenCalcKey(null); }}
+                            style={{ display:'block', width:'100%', textAlign:'left', background:calcType===opt.val?'#27272a':'transparent', border:'none', color:calcType===opt.val?'#fff':'#a1a1aa', fontSize:12, padding:'6px 10px', borderRadius:4, cursor:'pointer' }}>
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );
