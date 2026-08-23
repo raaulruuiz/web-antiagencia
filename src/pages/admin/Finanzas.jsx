@@ -1090,23 +1090,24 @@ function TabFiscal() {
   const [anioComp, setAnioComp] = useState(null);
   const [datosComp, setDatosComp] = useState(null);
   const [loadingComp, setLoadingComp] = useState(false);
+  // Facturas
+  const [trimestreAbierto, setTrimestreAbierto] = useState(null); // 0-3
+  const [facturasPorTrimestre, setFacturasPorTrimestre] = useState({}); // { "anio-q": [] }
+  const [pendientes, setPendientes] = useState([]); // facturas extraídas pendientes de guardar
+  const [extrayendo, setExtrayendo] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+  const fileInputRef = useRef(null);
+  const [tipoActivo, setTipoActivo] = useState(null); // 'ingreso' | 'gasto'
 
   const cargar = useCallback(async () => {
-    setLoading(true);
-    setErr(null);
+    setLoading(true); setErr(null);
     try {
       const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/fiscal?anio=${anio}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/fiscal?anio=${anio}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await r.json();
       if (!r.ok) { setErr(data.error || `Error ${r.status}`); return; }
       setDatos(data);
-    } catch (e) {
-      setErr(e.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (e) { setErr(e.message); } finally { setLoading(false); }
   }, [anio]);
 
   const cargarComp = useCallback(async () => {
@@ -1114,18 +1115,75 @@ function TabFiscal() {
     setLoadingComp(true);
     try {
       const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/fiscal?anio=${anioComp}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/fiscal?anio=${anioComp}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await r.json();
       if (r.ok) setDatosComp(data);
-    } catch { /* silencioso */ } finally {
-      setLoadingComp(false);
-    }
+    } catch { } finally { setLoadingComp(false); }
   }, [comparar, anioComp]);
 
   useEffect(() => { cargar(); }, [cargar]);
   useEffect(() => { cargarComp(); }, [cargarComp]);
+
+  async function cargarFacturasTrimestre(q) {
+    const key = `${anio}-${q}`;
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas?anio=${anio}&trimestre=${q}`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await r.json();
+      if (r.ok) setFacturasPorTrimestre(prev => ({ ...prev, [key]: data }));
+    } catch { }
+  }
+
+  function toggleTrimestre(i) {
+    const q = i + 1;
+    if (trimestreAbierto === i) { setTrimestreAbierto(null); setPendientes([]); }
+    else { setTrimestreAbierto(i); setPendientes([]); cargarFacturasTrimestre(q); }
+  }
+
+  async function handleFiles(files, tipo) {
+    if (!files.length) return;
+    setExtrayendo(true);
+    try {
+      const token = await getToken();
+      const fd = new FormData();
+      Array.from(files).forEach(f => fd.append('files', f));
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/extraer`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
+      });
+      if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || `Error ${r.status}`); }
+      const data = await r.json();
+      const nuevas = (data.facturas || []).map(f => ({ ...f, tipo, anio, trimestre: trimestreAbierto + 1 }));
+      setPendientes(prev => [...prev, ...nuevas]);
+    } catch (e) { alert('Error extrayendo: ' + e.message); }
+    finally { setExtrayendo(false); }
+  }
+
+  async function guardarPendientes() {
+    if (!pendientes.length) return;
+    setGuardando(true);
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ facturas: pendientes }),
+      });
+      if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || `Error ${r.status}`); }
+      setPendientes([]);
+      cargarFacturasTrimestre(trimestreAbierto + 1);
+    } catch (e) { alert('Error guardando: ' + e.message); }
+    finally { setGuardando(false); }
+  }
+
+  async function eliminarFactura(id) {
+    try {
+      const token = await getToken();
+      await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      const q = trimestreAbierto + 1;
+      const key = `${anio}-${q}`;
+      setFacturasPorTrimestre(prev => ({ ...prev, [key]: (prev[key] || []).filter(f => f.id !== id) }));
+    } catch (e) { alert('Error: ' + e.message); }
+  }
 
   const anios = [new Date().getFullYear(), new Date().getFullYear() - 1, new Date().getFullYear() - 2];
 
@@ -1136,12 +1194,29 @@ function TabFiscal() {
   const { trimestres, anual } = datos;
   const ca = datosComp?.anual;
 
+  const FacturaRow = ({ f, onDelete }) => (
+    <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', borderBottom:'1px solid #27272a', fontSize:12, flexWrap:'wrap' }}>
+      <span style={{ color:'#52525b', fontSize:11, minWidth:16 }}>📄</span>
+      <span style={{ flex:1, color:'#a1a1aa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100 }}>{f.archivo_nombre || '—'}</span>
+      <span style={{ background: f.tipo==='ingreso' ? '#052e16' : '#1a0a0a', color: f.tipo==='ingreso' ? '#22c55e' : '#f87171', border: `1px solid ${f.tipo==='ingreso'?'#166534':'#7f1d1d'}`, borderRadius:4, padding:'1px 7px', fontSize:11, flexShrink:0 }}>
+        {f.tipo === 'ingreso' ? 'Venta' : 'Compra'}
+      </span>
+      <span style={{ color:'#71717a', minWidth:88, flexShrink:0 }}>{f.fecha_factura || '—'}</span>
+      <span style={{ color:'#d4d4d8', minWidth:60, flexShrink:0 }}>Nº {f.numero_factura || '—'}</span>
+      <span style={{ color:'#71717a', minWidth:90, flexShrink:0 }}>{f.nif_cif || '—'}</span>
+      <span style={{ color:'white', fontWeight:600, minWidth:75, textAlign:'right', flexShrink:0 }}>{f.importe != null ? fmt(f.importe)+' €' : '—'}</span>
+      <span style={{ color:'#f59e0b', minWidth:65, textAlign:'right', flexShrink:0 }}>IVA {f.impuesto != null ? fmt(f.impuesto)+' €' : '—'}</span>
+      {onDelete && <button onClick={onDelete} style={{ background:'none', border:'none', color:'#52525b', cursor:'pointer', fontSize:14, padding:'0 2px', flexShrink:0 }}>✕</button>}
+      {!onDelete && f.id && <button onClick={() => eliminarFactura(f.id)} style={{ background:'none', border:'none', color:'#3f3f46', cursor:'pointer', fontSize:12, padding:'0 2px', flexShrink:0 }}>🗑</button>}
+    </div>
+  );
+
   return (
     <div>
-      {/* Selector año + comparar */}
+      {/* Selector año */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         {anios.map(a => (
-          <button key={a} onClick={() => setAnio(a)}
+          <button key={a} onClick={() => { setAnio(a); setTrimestreAbierto(null); setPendientes([]); setFacturasPorTrimestre({}); }}
             style={{ background: anio === a ? '#0067FD' : '#27272a', color: 'white', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 13, cursor: 'pointer' }}>
             {a}
           </button>
@@ -1172,22 +1247,31 @@ function TabFiscal() {
         <MetricCard label="IRPF retenido"   value={fmt(anual.irpfRetenido)}   color="#8b5cf6" compValue={ca ? ca.irpfRetenido : null} />
       </div>
 
-      {/* Detalle por trimestre */}
+      {/* Por trimestre */}
       <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Por trimestre</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
         {trimestres.map((t, i) => {
           const tc = datosComp?.trimestres?.[i];
+          const abierto = trimestreAbierto === i;
+          const key = `${anio}-${i+1}`;
+          const facturasGuardadas = facturasPorTrimestre[key] || [];
           return (
             <div key={i} style={S.card}>
-              <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: '0 0 12px' }}>
-                {t.label}{tc ? <span style={{ color: '#52525b', fontWeight: 400, fontSize: 12, marginLeft: 8 }}>vs {anioComp}</span> : null}
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
-                <FiscalMetric label="Facturación"      value={t.facturacion}    color="#22c55e" comp={tc ? tc.facturacion : null} />
-                <FiscalMetric label="IVA repercutido"  value={t.ivaRepercutido} color="#f59e0b" comp={tc ? tc.ivaRepercutido : null} />
-                <FiscalMetric label="IVA soportado"    value={t.ivaSoportado}   color="#f59e0b" comp={tc ? tc.ivaSoportado : null} />
-                <FiscalMetric label="IVA a pagar (303)" value={t.ivaAPagar}    color={t.ivaAPagar > 0 ? '#f59e0b' : '#22c55e'} comp={tc ? tc.ivaAPagar : null} />
-                <FiscalMetric label="IRPF retenido (130)" value={t.irpfRetenido} color="#8b5cf6" comp={tc ? tc.irpfRetenido : null} />
+              {/* Cabecera trimestre — clickable */}
+              <div onClick={() => toggleTrimestre(i)} style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer', marginBottom: abierto ? 12 : 0 }}>
+                <span style={{ color:'#52525b', fontSize:11, transition:'transform 0.2s', display:'inline-block', transform: abierto ? 'rotate(90deg)' : 'none' }}>▶</span>
+                <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: 0, flex:1 }}>
+                  {t.label}{tc ? <span style={{ color: '#52525b', fontWeight: 400, fontSize: 12, marginLeft: 8 }}>vs {anioComp}</span> : null}
+                </p>
+              </div>
+
+              {/* Métricas fiscales */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: abierto ? 16 : 0 }}>
+                <FiscalMetric label="Facturación"         value={t.facturacion}    color="#22c55e" comp={tc ? tc.facturacion : null} />
+                <FiscalMetric label="IVA repercutido"     value={t.ivaRepercutido} color="#f59e0b" comp={tc ? tc.ivaRepercutido : null} />
+                <FiscalMetric label="IVA soportado"       value={t.ivaSoportado}   color="#f59e0b" comp={tc ? tc.ivaSoportado : null} />
+                <FiscalMetric label="IVA a pagar (303)"   value={t.ivaAPagar}      color={t.ivaAPagar > 0 ? '#f59e0b' : '#22c55e'} comp={tc ? tc.ivaAPagar : null} />
+                <FiscalMetric label="IRPF retenido (130)" value={t.irpfRetenido}   color="#8b5cf6" comp={tc ? tc.irpfRetenido : null} />
               </div>
 
               {/* IRPF por cliente */}
@@ -1202,6 +1286,60 @@ function TabFiscal() {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Sección facturas (solo si abierto) */}
+              {abierto && (
+                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #27272a' }}>
+                  {/* Input file oculto */}
+                  <input ref={fileInputRef} type="file" multiple accept="image/*,application/pdf" style={{ display:'none' }}
+                    onChange={e => { handleFiles(e.target.files, tipoActivo); e.target.value = ''; }} />
+
+                  {/* Botones añadir */}
+                  <div style={{ display:'flex', gap:8, marginBottom:12 }}>
+                    <button onClick={() => { setTipoActivo('ingreso'); fileInputRef.current?.click(); }}
+                      disabled={extrayendo}
+                      style={{ background:'#052e16', border:'1px solid #166534', color:'#22c55e', borderRadius:8, padding:'7px 14px', fontSize:13, cursor:'pointer', fontWeight:600 }}>
+                      ＋ Ingresos
+                    </button>
+                    <button onClick={() => { setTipoActivo('gasto'); fileInputRef.current?.click(); }}
+                      disabled={extrayendo}
+                      style={{ background:'#1a0a0a', border:'1px solid #7f1d1d', color:'#f87171', borderRadius:8, padding:'7px 14px', fontSize:13, cursor:'pointer', fontWeight:600 }}>
+                      ＋ Gastos
+                    </button>
+                    {extrayendo && <span style={{ color:'#71717a', fontSize:13, alignSelf:'center' }}>Extrayendo…</span>}
+                  </div>
+
+                  {/* Facturas pendientes de guardar */}
+                  {pendientes.length > 0 && (
+                    <div style={{ background:'#0d0d0d', border:'1px solid #3f3f46', borderRadius:8, marginBottom:12, overflow:'hidden' }}>
+                      <div style={{ padding:'8px 10px', borderBottom:'1px solid #27272a', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                        <span style={{ color:'#a78bfa', fontSize:12, fontWeight:600 }}>Pendientes de guardar ({pendientes.length})</span>
+                        <button onClick={guardarPendientes} disabled={guardando}
+                          style={{ background:'#0067FD', color:'white', border:'none', borderRadius:6, padding:'4px 14px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
+                          {guardando ? 'Guardando…' : `Guardar ${pendientes.length}`}
+                        </button>
+                      </div>
+                      {pendientes.map((f, pi) => (
+                        <FacturaRow key={pi} f={f} onDelete={() => setPendientes(prev => prev.filter((_,j) => j !== pi))} />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Facturas ya guardadas */}
+                  {facturasGuardadas.length > 0 && (
+                    <div style={{ background:'#0d0d0d', border:'1px solid #3f3f46', borderRadius:8, overflow:'hidden' }}>
+                      <div style={{ padding:'8px 10px', borderBottom:'1px solid #27272a' }}>
+                        <span style={{ color:'#71717a', fontSize:12, fontWeight:600 }}>Guardadas ({facturasGuardadas.length})</span>
+                      </div>
+                      {facturasGuardadas.map(f => <FacturaRow key={f.id} f={f} />)}
+                    </div>
+                  )}
+
+                  {pendientes.length === 0 && facturasGuardadas.length === 0 && !extrayendo && (
+                    <p style={{ color:'#3f3f46', fontSize:13, margin:0 }}>Sin facturas. Usa los botones para subir PDFs o imágenes.</p>
+                  )}
                 </div>
               )}
             </div>
