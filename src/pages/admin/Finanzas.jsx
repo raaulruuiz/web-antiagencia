@@ -1094,7 +1094,7 @@ function TabFiscal() {
   const [trimestreAbierto, setTrimestreAbierto] = useState(null); // 0-3
   const [facturasPorTrimestre, setFacturasPorTrimestre] = useState({}); // { "anio-q": [] }
   const [pendientes, setPendientes] = useState([]); // facturas extraídas pendientes de guardar
-  const [extrayendo, setExtrayendo] = useState(false);
+  const [extrayendo, setExtrayendo] = useState(false); // solo para deshabilitar el botón que está en uso
   const [guardando, setGuardando] = useState(false);
   const fileInputRef = useRef(null);
   const [tipoActivo, setTipoActivo] = useState(null); // 'ingreso' | 'gasto'
@@ -1161,34 +1161,50 @@ function TabFiscal() {
 
   async function handleFiles(files, tipo) {
     if (!files.length) return;
+    const fileArr = Array.from(files);
+    const token = await getToken();
+
+    // Añadir placeholders "procesando" inmediatamente para cada archivo
+    const placeholders = fileArr.map(f => ({ _id: Math.random().toString(36).slice(2), archivo_nombre: f.name, tipo, anio, trimestre: trimestreAbierto + 1, _procesando: true }));
+    setPendientes(prev => [...prev, ...placeholders]);
     setExtrayendo(true);
-    try {
-      const token = await getToken();
-      const fd = new FormData();
-      Array.from(files).forEach(f => fd.append('files', f));
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/extraer`, {
-        method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
-      });
-      if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || `Error ${r.status}`); }
-      const data = await r.json();
-      const nuevas = (data.facturas || []).map(f => ({ ...f, tipo, anio, trimestre: trimestreAbierto + 1 }));
-      setPendientes(prev => [...prev, ...nuevas]);
-    } catch (e) { alert('Error extrayendo: ' + e.message); }
-    finally { setExtrayendo(false); }
+
+    // Procesar cada archivo en paralelo
+    await Promise.all(fileArr.map(async (file, idx) => {
+      const placeholderId = placeholders[idx]._id;
+      try {
+        const fd = new FormData();
+        fd.append('files', file);
+        const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/extraer`, {
+          method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
+        });
+        if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || `Error ${r.status}`); }
+        const data = await r.json();
+        const extraida = data.facturas?.[0] || {};
+        setPendientes(prev => prev.map(p => p._id === placeholderId ? { ...extraida, _id: placeholderId, tipo, anio, trimestre: trimestreAbierto + 1, _procesando: false } : p));
+      } catch (e) {
+        setPendientes(prev => prev.map(p => p._id === placeholderId ? { ...p, _procesando: false, _error: e.message } : p));
+      }
+    }));
+
+    setExtrayendo(false);
   }
 
   async function guardarPendientes() {
-    if (!pendientes.length) return;
+    const listas = pendientes.filter(p => !p._procesando && !p._error);
+    if (!listas.length) return;
     setGuardando(true);
     try {
       const token = await getToken();
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ facturas: pendientes }),
+        body: JSON.stringify({ facturas: listas }),
       });
       if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || `Error ${r.status}`); }
-      setPendientes([]);
+      // Quitar solo los guardados, dejar pendientes con error o aún procesando
+      const idsGuardados = new Set(listas.map(p => p._id));
+      setPendientes(prev => prev.filter(p => !idsGuardados.has(p._id)));
       cargarFacturasTrimestre(trimestreAbierto + 1);
     } catch (e) { alert('Error guardando: ' + e.message); }
     finally { setGuardando(false); }
@@ -1213,27 +1229,51 @@ function TabFiscal() {
   const { trimestres, anual } = datos;
   const ca = datosComp?.anual;
 
-  const FacturaRow = ({ f, onDelete, selectable }) => (
-    <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', borderBottom:'1px solid #27272a', fontSize:12, flexWrap:'wrap', background: selectable && selFacturas.has(f.id) ? '#1a1a2e' : 'transparent' }}>
-      {selectable && (
-        <input type="checkbox" checked={selFacturas.has(f.id)} onChange={e => {
-          setSelFacturas(prev => { const s = new Set(prev); e.target.checked ? s.add(f.id) : s.delete(f.id); return s; });
-        }} style={{ accentColor:'#0067FD', cursor:'pointer', flexShrink:0 }} />
-      )}
-      <span style={{ color:'#52525b', fontSize:11, minWidth:16 }}>📄</span>
-      <span style={{ flex:1, color:'#a1a1aa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100 }}>{f.archivo_nombre || '—'}</span>
-      <span style={{ background: f.tipo==='ingreso' ? '#052e16' : '#1a0a0a', color: f.tipo==='ingreso' ? '#22c55e' : '#f87171', border: `1px solid ${f.tipo==='ingreso'?'#166534':'#7f1d1d'}`, borderRadius:4, padding:'1px 7px', fontSize:11, flexShrink:0 }}>
-        {f.tipo === 'ingreso' ? 'Venta' : 'Compra'}
-      </span>
-      <span style={{ color:'#71717a', minWidth:88, flexShrink:0 }}>{f.fecha_factura || '—'}</span>
-      <span style={{ color:'#d4d4d8', minWidth:60, flexShrink:0 }}>Nº {f.numero_factura || '—'}</span>
-      <span style={{ color:'#71717a', minWidth:90, flexShrink:0 }}>{f.nif_cif || '—'}</span>
-      <span style={{ color:'white', fontWeight:600, minWidth:75, textAlign:'right', flexShrink:0 }}>{f.importe != null ? fmt(f.importe)+' €' : '—'}</span>
-      <span style={{ color:'#f59e0b', minWidth:65, textAlign:'right', flexShrink:0 }}>IVA {f.impuesto != null ? fmt(f.impuesto)+' €' : '—'}</span>
-      {onDelete && <button onClick={onDelete} style={{ background:'none', border:'none', color:'#52525b', cursor:'pointer', fontSize:14, padding:'0 2px', flexShrink:0 }}>✕</button>}
-      {!onDelete && f.id && <button onClick={() => eliminarFactura(f.id)} style={{ background:'none', border:'none', color:'#3f3f46', cursor:'pointer', fontSize:12, padding:'0 2px', flexShrink:0 }}>🗑</button>}
-    </div>
-  );
+  const FacturaRow = ({ f, onDelete, selectable }) => {
+    if (f._procesando) return (
+      <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 10px', borderBottom:'1px solid #27272a', fontSize:12 }}>
+        <span style={{ color:'#52525b', fontSize:11 }}>📄</span>
+        <span style={{ flex:1, color:'#71717a', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.archivo_nombre}</span>
+        <span style={{ color:'#f59e0b', fontSize:11, display:'flex', alignItems:'center', gap:5, flexShrink:0 }}>
+          <span style={{ display:'inline-block', width:10, height:10, borderRadius:'50%', border:'2px solid #f59e0b', borderTopColor:'transparent', animation:'spin 0.8s linear infinite' }} />
+          Extrayendo…
+        </span>
+        {onDelete && <button onClick={onDelete} style={{ background:'none', border:'none', color:'#52525b', cursor:'pointer', fontSize:14, padding:'0 2px', flexShrink:0 }}>✕</button>}
+      </div>
+    );
+    if (f._error) return (
+      <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 10px', borderBottom:'1px solid #27272a', fontSize:12 }}>
+        <span style={{ color:'#f87171', fontSize:11 }}>⚠️</span>
+        <span style={{ flex:1, color:'#71717a', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.archivo_nombre}</span>
+        <span style={{ color:'#f87171', fontSize:11, flexShrink:0 }}>{f._error}</span>
+        {onDelete && <button onClick={onDelete} style={{ background:'none', border:'none', color:'#52525b', cursor:'pointer', fontSize:14, padding:'0 2px', flexShrink:0 }}>✕</button>}
+      </div>
+    );
+    return (
+      <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', borderBottom:'1px solid #27272a', fontSize:12, flexWrap:'wrap', background: selectable && selFacturas.has(f.id) ? '#1a1a2e' : 'transparent' }}>
+        {selectable && (
+          <input type="checkbox" checked={selFacturas.has(f.id)} onChange={e => {
+            setSelFacturas(prev => { const s = new Set(prev); e.target.checked ? s.add(f.id) : s.delete(f.id); return s; });
+          }} style={{ accentColor:'#0067FD', cursor:'pointer', flexShrink:0 }} />
+        )}
+        <span style={{ color:'#52525b', fontSize:11, minWidth:16 }}>📄</span>
+        {f.archivo_url
+          ? <a href={f.archivo_url} target="_blank" rel="noreferrer" style={{ flex:1, color:'#60a5fa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100, textDecoration:'none' }} title="Abrir documento">{f.archivo_nombre || '—'}</a>
+          : <span style={{ flex:1, color:'#a1a1aa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100 }}>{f.archivo_nombre || '—'}</span>
+        }
+        <span style={{ background: f.tipo==='ingreso' ? '#052e16' : '#1a0a0a', color: f.tipo==='ingreso' ? '#22c55e' : '#f87171', border: `1px solid ${f.tipo==='ingreso'?'#166534':'#7f1d1d'}`, borderRadius:4, padding:'1px 7px', fontSize:11, flexShrink:0 }}>
+          {f.tipo === 'ingreso' ? 'Venta' : 'Compra'}
+        </span>
+        <span style={{ color:'#71717a', minWidth:88, flexShrink:0 }}>{f.fecha_factura || '—'}</span>
+        <span style={{ color:'#d4d4d8', minWidth:60, flexShrink:0 }}>Nº {f.numero_factura || '—'}</span>
+        <span style={{ color:'#71717a', minWidth:90, flexShrink:0 }}>{f.nif_cif || '—'}</span>
+        <span style={{ color:'white', fontWeight:600, minWidth:75, textAlign:'right', flexShrink:0 }}>{f.importe != null ? fmt(f.importe)+' €' : '—'}</span>
+        <span style={{ color:'#f59e0b', minWidth:65, textAlign:'right', flexShrink:0 }}>IVA {f.impuesto != null ? fmt(f.impuesto)+' €' : '—'}</span>
+        {onDelete && <button onClick={onDelete} style={{ background:'none', border:'none', color:'#52525b', cursor:'pointer', fontSize:14, padding:'0 2px', flexShrink:0 }}>✕</button>}
+        {!onDelete && f.id && <button onClick={() => eliminarFactura(f.id)} style={{ background:'none', border:'none', color:'#3f3f46', cursor:'pointer', fontSize:12, padding:'0 2px', flexShrink:0 }}>🗑</button>}
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -1347,11 +1387,15 @@ function TabFiscal() {
                   {pendientes.length > 0 && (
                     <div style={{ background:'#0d0d0d', border:'1px solid #3f3f46', borderRadius:8, marginBottom:12, overflow:'hidden' }}>
                       <div style={{ padding:'8px 10px', borderBottom:'1px solid #27272a', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                        <span style={{ color:'#a78bfa', fontSize:12, fontWeight:600 }}>Pendientes de guardar ({pendientes.length})</span>
-                        <button onClick={guardarPendientes} disabled={guardando}
-                          style={{ background:'#0067FD', color:'white', border:'none', borderRadius:6, padding:'4px 14px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
-                          {guardando ? 'Guardando…' : `Guardar ${pendientes.length}`}
-                        </button>
+                        {(() => { const listos = pendientes.filter(p => !p._procesando && !p._error).length; const proc = pendientes.filter(p => p._procesando).length; return (<>
+                          <span style={{ color:'#a78bfa', fontSize:12, fontWeight:600, flex:1 }}>
+                            {proc > 0 ? `Procesando ${proc}…` : ''}{proc > 0 && listos > 0 ? ' · ' : ''}{listos > 0 ? `${listos} listo${listos > 1 ? 's' : ''}` : ''}
+                          </span>
+                          {listos > 0 && <button onClick={guardarPendientes} disabled={guardando}
+                            style={{ background:'#0067FD', color:'white', border:'none', borderRadius:6, padding:'4px 14px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
+                            {guardando ? 'Guardando…' : `Guardar ${listos}`}
+                          </button>}
+                        </>); })()}
                       </div>
                       {pendientes.map((f, pi) => (
                         <FacturaRow key={pi} f={f} onDelete={() => setPendientes(prev => prev.filter((_,j) => j !== pi))} />

@@ -34,6 +34,8 @@ button:focus-visible {
   box-shadow: none !important;
 }
 
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* Utility classes */
 .text-brand { color: #0067FD; }
 .bg-brand { background-color: #0067FD; }
