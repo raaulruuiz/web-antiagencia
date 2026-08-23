@@ -1419,6 +1419,59 @@ function TabFiscal() {
                     );
                   })()}
 
+                  {/* Modelos de Hacienda (calculados desde facturas subidas) */}
+                  {facturasGuardadas.length > 0 && (() => {
+                    const ing = facturasGuardadas.filter(f => f.tipo === 'ingreso');
+                    const gas = facturasGuardadas.filter(f => f.tipo === 'gasto');
+                    // Mod.303
+                    const ivaRep = ing.reduce((s, f) => s + (f.impuesto || 0), 0);
+                    const ivaSop = gas.reduce((s, f) => s + Math.abs(f.impuesto || 0), 0);
+                    const mod303 = ivaRep - ivaSop;
+                    // Mod.111 — IRPF retenido EN gastos (lo que el usuario retiene al pagar freelancers)
+                    const irpf111 = gas.filter(f => (f.irpf || 0) > 0).reduce((s, f) => s + (f.irpf || 0), 0);
+                    // Mod.130 — Estimación 20% beneficio neto (estimación directa)
+                    const ingBase = ing.reduce((s, f) => s + (f.importe || 0), 0);
+                    const gasBase = gas.reduce((s, f) => s + Math.abs(f.importe || 0), 0);
+                    const mod130 = Math.max(0, (ingBase - gasBase) * 0.20);
+                    // Mod.349 — Intracomunitarias: gastos con NIF de país EU y sin IVA
+                    const euRe = /^(IE|FR|DE|IT|NL|BE|PT|AT|FI|SE|DK|PL|CZ|RO|HU|SK|SI|HR|BG|EE|LV|LT|LU|MT|CY|EL|GR)/i;
+                    const intracom = gas.filter(f => f.nif_cif && euRe.test(f.nif_cif) && !(f.impuesto > 0));
+                    const base349 = intracom.reduce((s, f) => s + Math.abs(f.importe || 0), 0);
+
+                    const ModCard = ({ num, titulo, desc, valor, valorLabel, info }) => (
+                      <div style={{ background:'#0d0d0d', border:'1px solid #27272a', borderRadius:8, padding:'10px 14px', flex:'1 1 180px', minWidth:160 }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}>
+                          <span style={{ background:'#1a1a1a', border:'1px solid #3f3f46', borderRadius:4, color:'#a1a1aa', fontSize:10, fontWeight:700, padding:'1px 6px' }}>Mod.{num}</span>
+                          <span style={{ color:'#52525b', fontSize:10 }}>{titulo}</span>
+                        </div>
+                        <p style={{ color:'#71717a', fontSize:10, margin:'0 0 6px' }}>{desc}</p>
+                        {info
+                          ? <span style={{ color:'#52525b', fontSize:12, fontWeight:600 }}>Informativo</span>
+                          : <span style={{ color: valor > 0 ? '#f87171' : valor < 0 ? '#22c55e' : '#52525b', fontSize:16, fontWeight:700 }}>
+                              {valor > 0 ? '' : valor < 0 ? '−' : ''}{fmt(Math.abs(valor))} €
+                              {valorLabel && <span style={{ color:'#52525b', fontSize:10, fontWeight:400, marginLeft:4 }}>{valorLabel}</span>}
+                            </span>
+                        }
+                        {num === '349' && base349 > 0 && (
+                          <p style={{ color:'#71717a', fontSize:10, margin:'4px 0 0' }}>Base: {fmt(base349)} € ({intracom.length} ops.)</p>
+                        )}
+                      </div>
+                    );
+
+                    return (
+                      <div style={{ marginBottom:14 }}>
+                        <p style={{ color:'#52525b', fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', margin:'0 0 8px' }}>Modelos de Hacienda (según facturas)</p>
+                        <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
+                          <ModCard num="303" titulo="IVA trimestral" desc={`IVA rep. ${fmt(ivaRep)}€ − IVA sop. ${fmt(ivaSop)}€`} valor={mod303} valorLabel={mod303 > 0 ? 'a pagar' : mod303 < 0 ? 'a compensar' : ''} />
+                          <ModCard num="111" titulo="Retenc. IRPF" desc="IRPF retenido al pagar a terceros" valor={irpf111} valorLabel={irpf111 > 0 ? 'a ingresar' : ''} info={irpf111 === 0} />
+                          <ModCard num="130" titulo="IRPF fraccionado" desc={`20% s/ beneficio ${fmt(ingBase - gasBase)}€ (est.)`} valor={mod130} valorLabel="estimado" info={mod130 === 0} />
+                          <ModCard num="349" titulo="Intracomunitarias" desc="Servicios EU sin IVA (Google, Meta…)" valor={0} info={base349 === 0} />
+                          {base349 > 0 && <ModCard num="349" titulo="Intracomunitarias" desc={`${intracom.length} operaciones EU`} valor={base349} valorLabel="base declarable" />}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {/* Input file oculto */}
                   <input ref={fileInputRef} type="file" multiple accept="image/*,application/pdf" style={{ display:'none' }}
                     onChange={e => { handleFiles(e.target.files, tipoActivo); e.target.value = ''; }} />
