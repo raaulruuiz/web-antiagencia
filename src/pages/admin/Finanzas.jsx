@@ -1391,10 +1391,16 @@ function TabFiscal() {
                           <span style={{ color:'#a78bfa', fontSize:12, fontWeight:600, flex:1 }}>
                             {proc > 0 ? `Procesando ${proc}…` : ''}{proc > 0 && listos > 0 ? ' · ' : ''}{listos > 0 ? `${listos} listo${listos > 1 ? 's' : ''}` : ''}
                           </span>
-                          {listos > 0 && <button onClick={guardarPendientes} disabled={guardando}
-                            style={{ background:'#0067FD', color:'white', border:'none', borderRadius:6, padding:'4px 14px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
-                            {guardando ? 'Guardando…' : `Guardar ${listos}`}
-                          </button>}
+                          <div style={{ display:'flex', gap:6 }}>
+                            <button onClick={() => setPendientes([])} disabled={guardando}
+                              style={{ background:'transparent', color:'#71717a', border:'1px solid #3f3f46', borderRadius:6, padding:'4px 12px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
+                              Cancelar
+                            </button>
+                            {listos > 0 && <button onClick={guardarPendientes} disabled={guardando}
+                              style={{ background:'#0067FD', color:'white', border:'none', borderRadius:6, padding:'4px 14px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
+                              {guardando ? 'Guardando…' : `Guardar ${listos}`}
+                            </button>}
+                          </div>
                         </>); })()}
                       </div>
                       {pendientes.map((f, pi) => (
