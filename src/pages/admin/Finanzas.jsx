@@ -1249,12 +1249,15 @@ function TabFiscal() {
         {onDelete && <button onClick={onDelete} style={{ background:'none', border:'none', color:'#52525b', cursor:'pointer', fontSize:14, padding:'0 2px', flexShrink:0 }}>✕</button>}
       </div>
     );
+    const [hovered, setHovered] = useState(false);
+    const checked = selectable && selFacturas.has(f.id);
     return (
-      <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', borderBottom:'1px solid #27272a', fontSize:12, flexWrap:'wrap', background: selectable && selFacturas.has(f.id) ? '#1a1a2e' : 'transparent' }}>
+      <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+        style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', borderBottom:'1px solid #27272a', fontSize:12, flexWrap:'wrap', background: checked ? '#1a1a2e' : 'transparent' }}>
         {selectable && (
-          <input type="checkbox" checked={selFacturas.has(f.id)} onChange={e => {
+          <input type="checkbox" checked={checked} onChange={e => {
             setSelFacturas(prev => { const s = new Set(prev); e.target.checked ? s.add(f.id) : s.delete(f.id); return s; });
-          }} style={{ accentColor:'#0067FD', cursor:'pointer', flexShrink:0 }} />
+          }} style={{ accentColor:'#0067FD', cursor:'pointer', flexShrink:0, opacity: hovered || checked ? 1 : 0, transition:'opacity 0.15s' }} />
         )}
         <span style={{ color:'#52525b', fontSize:11, minWidth:16 }}>📄</span>
         {f.archivo_url
@@ -1422,7 +1425,7 @@ function TabFiscal() {
                               return s;
                             });
                           }}
-                          style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+                          style={{ accentColor:'#0067FD', cursor:'pointer', opacity: selFacturas.size > 0 ? 1 : 0.3, transition:'opacity 0.15s' }} />
                         <span style={{ color:'#71717a', fontSize:12, fontWeight:600, flex:1 }}>Guardadas ({facturasGuardadas.length})</span>
                         {selFacturas.size > 0 && (
                           <button onClick={eliminarFacturasBulk} disabled={eliminandoBulk}
