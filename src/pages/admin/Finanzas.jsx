@@ -1366,40 +1366,55 @@ function TabFiscal() {
               {/* Sección facturas (solo si abierto) */}
               {abierto && (
                 <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #27272a' }}>
-                  {/* Comparativa DB vs Facturas */}
+                  {/* Comparativa DB vs Con Factura DB vs Facturas subidas */}
                   {facturasGuardadas.length > 0 && (() => {
-                    const fIngresos = facturasGuardadas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + (f.importe || 0), 0);
-                    const fGastos   = facturasGuardadas.filter(f => f.tipo === 'gasto').reduce((s, f)   => s + Math.abs(f.importe || 0), 0);
-                    const fBenef    = fIngresos - fGastos;
-                    const dbIngresos = t.facturacion;
-                    const dbGastos   = t.totalGastos;
-                    const dbBenef    = dbIngresos - dbGastos;
-                    const diffColor = v => v === 0 ? '#52525b' : v > 0 ? '#22c55e' : '#f87171';
-                    const diffLabel = v => v === 0 ? '±0' : (v > 0 ? '+' : '') + fmt(v) + ' €';
+                    // Facturas subidas
+                    const fIng  = facturasGuardadas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + (f.importe || 0), 0);
+                    const fGas  = facturasGuardadas.filter(f => f.tipo === 'gasto').reduce((s, f)   => s + Math.abs(f.importe || 0), 0);
+                    const fIvaR = facturasGuardadas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + (f.impuesto || 0), 0);
+                    const fIvaS = facturasGuardadas.filter(f => f.tipo === 'gasto').reduce((s, f)   => s + Math.abs(f.impuesto || 0), 0);
+                    // DB total
+                    const dbIng = t.facturacion; const dbGas = t.totalGastos;
+                    const dbIvaR = t.ivaRepercutido; const dbIvaS = t.ivaSoportado;
+                    // DB con factura (viene del backend)
+                    const cf = t.conFactura || {};
+                    const cfIng = cf.facturacion || 0; const cfGas = cf.totalGastos || 0;
+                    const cfIvaR = cf.ivaRepercutido || 0; const cfIvaS = cf.ivaSoportado || 0;
+
+                    const dc = v => v === 0 ? '#52525b' : v > 0 ? '#22c55e' : '#f87171';
+                    const dl = v => v === 0 ? '±0' : (v > 0 ? '+' : '') + fmt(v) + ' €';
+                    const Col = ({v, color}) => <span style={{ color: color || '#d4d4d8', fontWeight:600 }}>{fmt(v)} €</span>;
+                    const DCol = ({v}) => <span style={{ color: dc(v), fontWeight:700, fontSize:11 }}>{dl(v)}</span>;
+                    const cols = ['Ingresos','IVA rep.','Gastos','IVA sop.'];
                     return (
-                      <div style={{ background:'#0d0d0d', border:'1px solid #27272a', borderRadius:8, padding:'10px 14px', marginBottom:14 }}>
-                        <p style={{ color:'#52525b', fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', margin:'0 0 8px' }}>Conciliación facturas vs movimientos</p>
-                        <div style={{ display:'grid', gridTemplateColumns:'auto 1fr 1fr 1fr', gap:'4px 16px', fontSize:12, alignItems:'center' }}>
-                          <span />
-                          <span style={{ color:'#52525b', fontSize:10, fontWeight:600 }}>Ingresos</span>
-                          <span style={{ color:'#52525b', fontSize:10, fontWeight:600 }}>Gastos</span>
-                          <span style={{ color:'#52525b', fontSize:10, fontWeight:600 }}>Beneficio</span>
-
-                          <span style={{ color:'#71717a', fontSize:11 }}>Movimientos</span>
-                          <span style={{ color:'#22c55e', fontWeight:600 }}>{fmt(dbIngresos)} €</span>
-                          <span style={{ color:'#f87171', fontWeight:600 }}>{fmt(dbGastos)} €</span>
-                          <span style={{ color: dbBenef >= 0 ? '#10b981' : '#f87171', fontWeight:600 }}>{fmt(dbBenef)} €</span>
-
-                          <span style={{ color:'#71717a', fontSize:11 }}>Facturas</span>
-                          <span style={{ color:'#22c55e', fontWeight:600 }}>{fmt(fIngresos)} €</span>
-                          <span style={{ color:'#f87171', fontWeight:600 }}>{fmt(fGastos)} €</span>
-                          <span style={{ color: fBenef >= 0 ? '#10b981' : '#f87171', fontWeight:600 }}>{fmt(fBenef)} €</span>
-
-                          <span style={{ color:'#52525b', fontSize:11 }}>Diferencia</span>
-                          <span style={{ color: diffColor(fIngresos - dbIngresos), fontWeight:700 }}>{diffLabel(fIngresos - dbIngresos)}</span>
-                          <span style={{ color: diffColor(fGastos - dbGastos),     fontWeight:700 }}>{diffLabel(fGastos - dbGastos)}</span>
-                          <span style={{ color: diffColor(fBenef - dbBenef),       fontWeight:700 }}>{diffLabel(fBenef - dbBenef)}</span>
-                        </div>
+                      <div style={{ background:'#0d0d0d', border:'1px solid #27272a', borderRadius:8, padding:'10px 14px', marginBottom:14, overflowX:'auto' }}>
+                        <p style={{ color:'#52525b', fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', margin:'0 0 10px' }}>Conciliación facturas vs movimientos</p>
+                        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
+                          <thead>
+                            <tr>
+                              <th style={{ color:'#52525b', fontWeight:600, fontSize:10, textAlign:'left', paddingRight:16, paddingBottom:6, whiteSpace:'nowrap' }}></th>
+                              {cols.map(c => <th key={c} style={{ color:'#52525b', fontWeight:600, fontSize:10, textAlign:'right', paddingRight:12, paddingBottom:6, whiteSpace:'nowrap' }}>{c}</th>)}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {[
+                              { label:'Total movimientos', vals:[dbIng, dbIvaR, dbGas, dbIvaS], colors:['#22c55e','#f59e0b','#f87171','#f59e0b'] },
+                              { label:'Con factura (DB)',  vals:[cfIng, cfIvaR, cfGas, cfIvaS], colors:['#22c55e','#f59e0b','#f87171','#f59e0b'] },
+                              { label:'Facturas subidas',  vals:[fIng,  fIvaR,  fGas,  fIvaS],  colors:['#22c55e','#f59e0b','#f87171','#f59e0b'] },
+                              { label:'Diferencia (sub−DB fact)', diff: true,
+                                vals:[fIng-cfIng, fIvaR-cfIvaR, fGas-cfGas, fIvaS-cfIvaS] },
+                            ].map(({ label, vals, colors, diff }) => (
+                              <tr key={label} style={{ borderTop:'1px solid #1f1f1f' }}>
+                                <td style={{ color: diff ? '#52525b' : '#71717a', fontSize:11, paddingRight:16, paddingTop:5, paddingBottom:5, whiteSpace:'nowrap' }}>{label}</td>
+                                {vals.map((v, vi) => (
+                                  <td key={vi} style={{ textAlign:'right', paddingRight:12, paddingTop:5, paddingBottom:5 }}>
+                                    {diff ? <DCol v={v} /> : <Col v={v} color={colors[vi]} />}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
                     );
                   })()}
