@@ -1496,28 +1496,45 @@ function TabFiscal() {
                 <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #27272a' }}>
                   {/* Comparativa DB vs Con Factura DB vs Facturas subidas */}
                   {facturasGuardadas.length > 0 && (() => {
-                    // Facturas subidas
+                    // Facturas subidas (año actual)
                     const fIng  = facturasGuardadas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + (f.importe || 0), 0);
                     const fGas  = facturasGuardadas.filter(f => f.tipo === 'gasto').reduce((s, f)   => s + Math.abs(f.importe || 0), 0);
                     const fIvaR = facturasGuardadas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + (f.impuesto || 0), 0);
                     const fIvaS = facturasGuardadas.filter(f => f.tipo === 'gasto').reduce((s, f)   => s + Math.abs(f.impuesto || 0), 0);
-                    // DB total
+                    // DB total (año actual)
                     const dbIng = t.facturacion; const dbGas = t.totalGastos;
                     const dbIvaR = t.ivaRepercutido; const dbIvaS = t.ivaSoportado;
-                    // DB con factura (viene del backend)
+                    // DB con factura (año actual)
                     const cf = t.conFactura || {};
                     const cfIng = cf.facturacion || 0; const cfGas = cf.totalGastos || 0;
                     const cfIvaR = cf.ivaRepercutido || 0; const cfIvaS = cf.ivaSoportado || 0;
+                    // Comparativa (año anterior — solo DB)
+                    const cfc = tc?.conFactura || {};
 
                     const dc = v => v === 0 ? '#52525b' : v > 0 ? '#22c55e' : '#f87171';
-                    const dl = v => v === 0 ? '±0' : (v > 0 ? '+' : '') + fmt(v) + ' €';
-                    const Col = ({v, color}) => <span style={{ color: color || '#d4d4d8', fontWeight:600 }}>{fmt(v)} €</span>;
+                    const dl = v => v === 0 ? '±0' : (v > 0 ? '+' : '') + fmt(v);
+                    const Col = ({ v, color, comp }) => (
+                      <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:1 }}>
+                        <span style={{ color: color || '#d4d4d8', fontWeight:600 }}>{fmt(v)}</span>
+                        {comp != null && <span style={{ color:'#3f3f46', fontSize:10 }}>ant. {fmt(comp)}</span>}
+                      </div>
+                    );
                     const DCol = ({v}) => <span style={{ color: dc(v), fontWeight:700, fontSize:11 }}>{dl(v)}</span>;
                     const cols = ['Ingresos','IVA rep.','Gastos','IVA sop.'];
+                    const rows = [
+                      { label:'Total movimientos', vals:[dbIng, dbIvaR, dbGas, dbIvaS], colors:['#22c55e','#f59e0b','#f87171','#f59e0b'],
+                        comps: tc ? [tc.facturacion, tc.ivaRepercutido, tc.totalGastos, tc.ivaSoportado] : null },
+                      { label:'Con factura (DB)',  vals:[cfIng, cfIvaR, cfGas, cfIvaS], colors:['#22c55e','#f59e0b','#f87171','#f59e0b'],
+                        comps: tc ? [cfc.facturacion||0, cfc.ivaRepercutido||0, cfc.totalGastos||0, cfc.ivaSoportado||0] : null },
+                      { label:'Facturas subidas',  vals:[fIng, fIvaR, fGas, fIvaS], colors:['#22c55e','#f59e0b','#f87171','#f59e0b'], comps: null },
+                      { label:'Diferencia (sub−DB fact)', diff: true, vals:[fIng-cfIng, fIvaR-cfIvaR, fGas-cfGas, fIvaS-cfIvaS], comps: null },
+                    ];
                     return (
                       <div style={{ background:'#0d0d0d', border:'1px solid #27272a', borderRadius:8, padding:'10px 14px', marginBottom:14, overflowX:'auto' }}>
                         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
-                          <p style={{ color:'#52525b', fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', margin:0 }}>Conciliación facturas vs movimientos</p>
+                          <p style={{ color:'#52525b', fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', margin:0 }}>
+                            Conciliación facturas vs movimientos{tc ? <span style={{ color:'#3f3f46', fontWeight:400 }}> — ant. {anioComp}</span> : null}
+                          </p>
                           <button onClick={detectarErrores} disabled={detectando}
                             style={{ background:'#1a0a0a', border:'1px solid #7f1d1d', color:'#f87171', borderRadius:6, padding:'2px 10px', fontSize:10, cursor: detectando ? 'not-allowed' : 'pointer', fontWeight:600, opacity: detectando ? 0.7 : 1, flexShrink:0 }}>
                             {detectando ? 'Analizando…' : '⚠ Detectar errores'}
@@ -1531,18 +1548,12 @@ function TabFiscal() {
                             </tr>
                           </thead>
                           <tbody>
-                            {[
-                              { label:'Total movimientos', vals:[dbIng, dbIvaR, dbGas, dbIvaS], colors:['#22c55e','#f59e0b','#f87171','#f59e0b'] },
-                              { label:'Con factura (DB)',  vals:[cfIng, cfIvaR, cfGas, cfIvaS], colors:['#22c55e','#f59e0b','#f87171','#f59e0b'] },
-                              { label:'Facturas subidas',  vals:[fIng,  fIvaR,  fGas,  fIvaS],  colors:['#22c55e','#f59e0b','#f87171','#f59e0b'] },
-                              { label:'Diferencia (sub−DB fact)', diff: true,
-                                vals:[fIng-cfIng, fIvaR-cfIvaR, fGas-cfGas, fIvaS-cfIvaS] },
-                            ].map(({ label, vals, colors, diff }) => (
+                            {rows.map(({ label, vals, colors, diff, comps }) => (
                               <tr key={label} style={{ borderTop:'1px solid #1f1f1f' }}>
-                                <td style={{ color: diff ? '#52525b' : '#71717a', fontSize:11, paddingRight:16, paddingTop:5, paddingBottom:5, whiteSpace:'nowrap' }}>{label}</td>
+                                <td style={{ color: diff ? '#52525b' : '#71717a', fontSize:11, paddingRight:16, paddingTop:5, paddingBottom:5, whiteSpace:'nowrap', verticalAlign:'top' }}>{label}</td>
                                 {vals.map((v, vi) => (
-                                  <td key={vi} style={{ textAlign:'right', paddingRight:12, paddingTop:5, paddingBottom:5 }}>
-                                    {diff ? <DCol v={v} /> : <Col v={v} color={colors[vi]} />}
+                                  <td key={vi} style={{ textAlign:'right', paddingRight:12, paddingTop:5, paddingBottom:5, verticalAlign:'top' }}>
+                                    {diff ? <DCol v={v} /> : <Col v={v} color={colors[vi]} comp={comps?.[vi]} />}
                                   </td>
                                 ))}
                               </tr>
@@ -1572,7 +1583,12 @@ function TabFiscal() {
                     const intracom = gas.filter(f => f.nif_cif && euRe.test(f.nif_cif) && !(f.impuesto > 0));
                     const base349 = intracom.reduce((s, f) => s + Math.abs(f.importe || 0), 0);
 
-                    const ModCard = ({ num, titulo, desc, valor, valorLabel, info }) => (
+                    // Comparativa modelos desde DB del año anterior
+                    const tcMod303 = tc ? tc.ivaAPagar : null;
+                    const tcMod111 = tc ? tc.irpfRetenido : null;
+                    const tcMod130 = tc ? Math.max(0, (tc.facturacion - tc.totalGastos) * 0.20) : null;
+
+                    const ModCard = ({ num, titulo, desc, valor, valorLabel, info, comp, compLabel }) => (
                       <div style={{ background:'#0d0d0d', border:'1px solid #27272a', borderRadius:8, padding:'10px 14px', flex:'1 1 180px', minWidth:160 }}>
                         <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}>
                           <span style={{ background:'#1a1a1a', border:'1px solid #3f3f46', borderRadius:4, color:'#a1a1aa', fontSize:10, fontWeight:700, padding:'1px 6px' }}>Mod.{num}</span>
@@ -1581,24 +1597,36 @@ function TabFiscal() {
                         <p style={{ color:'#71717a', fontSize:10, margin:'0 0 6px' }}>{desc}</p>
                         {info
                           ? <span style={{ color:'#52525b', fontSize:12, fontWeight:600 }}>Informativo</span>
-                          : <span style={{ color: valor > 0 ? '#f87171' : valor < 0 ? '#22c55e' : '#52525b', fontSize:16, fontWeight:700 }}>
-                              {valor > 0 ? '' : valor < 0 ? '−' : ''}{fmt(Math.abs(valor))} €
-                              {valorLabel && <span style={{ color:'#52525b', fontSize:10, fontWeight:400, marginLeft:4 }}>{valorLabel}</span>}
-                            </span>
+                          : <>
+                              <span style={{ color: valor > 0 ? '#f87171' : valor < 0 ? '#22c55e' : '#52525b', fontSize:16, fontWeight:700 }}>
+                                {valor > 0 ? '' : valor < 0 ? '−' : ''}{fmt(Math.abs(valor))}
+                                {valorLabel && <span style={{ color:'#52525b', fontSize:10, fontWeight:400, marginLeft:4 }}>{valorLabel}</span>}
+                              </span>
+                              {comp != null && (
+                                <p style={{ color:'#3f3f46', fontSize:10, margin:'4px 0 0' }}>
+                                  ant. {fmt(Math.abs(comp))}{compLabel ? ` ${compLabel}` : ''}
+                                  {comp !== 0 && valor !== 0 && <span style={{ color: valor < comp ? '#22c55e' : '#f87171', marginLeft:4 }}>
+                                    ({valor < comp ? '↓' : '↑'}{Math.round(Math.abs((valor - comp) / comp) * 100)}%)
+                                  </span>}
+                                </p>
+                              )}
+                            </>
                         }
                         {num === '349' && base349 > 0 && (
-                          <p style={{ color:'#71717a', fontSize:10, margin:'4px 0 0' }}>Base: {fmt(base349)} € ({intracom.length} ops.)</p>
+                          <p style={{ color:'#71717a', fontSize:10, margin:'4px 0 0' }}>Base: {fmt(base349)} ({intracom.length} ops.)</p>
                         )}
                       </div>
                     );
 
                     return (
                       <div style={{ marginBottom:14 }}>
-                        <p style={{ color:'#52525b', fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', margin:'0 0 8px' }}>Modelos de Hacienda (según facturas)</p>
+                        <p style={{ color:'#52525b', fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', margin:'0 0 8px' }}>
+                          Modelos de Hacienda (según facturas){tc ? <span style={{ color:'#3f3f46', fontWeight:400 }}> — ant. {anioComp} desde DB</span> : null}
+                        </p>
                         <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-                          <ModCard num="303" titulo="IVA trimestral" desc={`IVA rep. ${fmt(ivaRep)}€ − IVA sop. ${fmt(ivaSop)}€`} valor={mod303} valorLabel={mod303 > 0 ? 'a pagar' : mod303 < 0 ? 'a compensar' : ''} />
-                          <ModCard num="111" titulo="Retenc. IRPF" desc="IRPF retenido al pagar a terceros" valor={irpf111} valorLabel={irpf111 > 0 ? 'a ingresar' : ''} info={irpf111 === 0} />
-                          <ModCard num="130" titulo="IRPF fraccionado" desc={`20% s/ beneficio ${fmt(ingBase - gasBase)}€ (est.)`} valor={mod130} valorLabel="estimado" info={mod130 === 0} />
+                          <ModCard num="303" titulo="IVA trimestral" desc={`IVA rep. ${fmt(ivaRep)} − IVA sop. ${fmt(ivaSop)}`} valor={mod303} valorLabel={mod303 > 0 ? 'a pagar' : mod303 < 0 ? 'a compensar' : ''} comp={tcMod303} compLabel={tcMod303 > 0 ? 'a pagar' : tcMod303 < 0 ? 'a compensar' : ''} />
+                          <ModCard num="111" titulo="Retenc. IRPF" desc="IRPF retenido al pagar a terceros" valor={irpf111} valorLabel={irpf111 > 0 ? 'a ingresar' : ''} info={irpf111 === 0} comp={tcMod111} />
+                          <ModCard num="130" titulo="IRPF fraccionado" desc={`20% s/ beneficio ${fmt(ingBase - gasBase)} (est.)`} valor={mod130} valorLabel="estimado" info={mod130 === 0} comp={tcMod130} compLabel="estimado" />
                           <ModCard num="349" titulo="Intracomunitarias" desc="Servicios EU sin IVA (Google, Meta…)" valor={0} info={base349 === 0} />
                           {base349 > 0 && <ModCard num="349" titulo="Intracomunitarias" desc={`${intracom.length} operaciones EU`} valor={base349} valorLabel="base declarable" />}
                         </div>
