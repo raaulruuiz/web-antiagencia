@@ -1253,37 +1253,32 @@ function TabFiscal() {
         const facImporte = Math.abs(fac.importe || 0);
         const facTipo = fac.tipo; // 'ingreso' | 'gasto'
 
-        // 1º intento: match por importe_factura registrado en DB (tolerancia 0.5€)
+        // Match por importe_factura en DB (tolerancia 0.5€), luego por cantidad como fallback
+        // Solo contra movimientos que ya tienen datos de factura en DB para evitar falsos positivos
         let candidatos = movs
           .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.importe_factura != null)
-          .map(m => ({ m, diff: Math.abs(Math.abs(m.importe_factura) - facImporte), porCantidad: false }))
+          .map(m => ({ m, diff: Math.abs(Math.abs(m.importe_factura) - facImporte) }))
           .filter(c => c.diff <= 0.5)
           .sort((a, b) => a.diff - b.diff);
 
-        // 2º intento: match por cantidad pagada (el campo siempre existe, incluso sin datos de factura)
+        // 2º intento: por cantidad, pero solo contra movimientos que tienen fecha_factura
+        // (el usuario metió la fecha pero olvidó el importe)
         if (!candidatos.length) {
           candidatos = movs
-            .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo)
-            .map(m => ({ m, diff: Math.abs(Math.abs(m.cantidad) - facImporte), porCantidad: true }))
+            .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.fecha_factura != null && m.importe_factura == null)
+            .map(m => ({ m, diff: Math.abs(Math.abs(m.cantidad) - facImporte) }))
             .filter(c => c.diff <= 0.5)
             .sort((a, b) => a.diff - b.diff);
         }
 
         if (!candidatos.length) {
           conflictos.push({ tipo: 'sin_movimiento', factura: fac, severidad: 'warning',
-            desc: `No se encontró ningún movimiento en DB con importe ~${fmt(facImporte)}€ (${facTipo})` });
+            desc: `Factura de ${fmt(facImporte)}€ sin movimiento en DB que tenga datos de factura asociados. Puede que el movimiento exista pero le falte rellenar "importe factura" o "fecha factura".` });
           continue;
         }
 
-        const { m, porCantidad } = candidatos[0];
+        const { m } = candidatos[0];
         movsUsados.add(m.id);
-
-        // Si el match fue por cantidad y el movimiento NO tiene campos de factura → falta rellenarlos
-        if (porCantidad && m.importe_factura == null && m.fecha_factura == null) {
-          conflictos.push({ tipo: 'sin_datos_factura_db', movimiento: m, factura: fac, severidad: 'warning',
-            desc: `El movimiento coincide en importe (${fmt(Math.abs(m.cantidad))}€) pero no tiene fecha ni importe de factura registrados en DB` });
-          // Continuamos con los demás checks igualmente
-        }
 
         // Conflicto: desfase de fecha
         if (fac.fecha_factura && m.fecha) {
@@ -1736,9 +1731,8 @@ function TabFiscal() {
                   const sevBg    = c.severidad === 'error' ? '#1a0505' : c.severidad === 'warning' ? '#1a1200' : '#050d1a';
                   const sevLabel = c.severidad === 'error' ? 'Error' : c.severidad === 'warning' ? 'Aviso' : 'Info';
                   const tipoLabel = {
-                    sin_movimiento: 'Sin movimiento en DB',
+                    sin_movimiento: 'Sin movimiento en DB con datos de factura',
                     sin_factura_subida: 'Sin factura subida',
-                    sin_datos_factura_db: 'Faltan datos de factura en DB',
                     desfase_fecha: 'Desfase de fecha',
                     iva_faltante_db: 'IVA no registrado en DB',
                     iva_en_db_sin_factura: 'IVA en DB sin IVA en factura',
