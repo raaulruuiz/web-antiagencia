@@ -1101,6 +1101,7 @@ function TabFiscal() {
   const [dragOver, setDragOver] = useState(null); // 'ingreso' | 'gasto' | null
   const [selFacturas, setSelFacturas] = useState(new Set()); // ids seleccionados para bulk delete
   const [eliminandoBulk, setEliminandoBulk] = useState(false);
+  const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre } | null
 
   const cargar = useCallback(async () => {
     setLoading(true); setErr(null);
@@ -1261,7 +1262,7 @@ function TabFiscal() {
         )}
         <span style={{ color:'#52525b', fontSize:11, minWidth:16 }}>📄</span>
         {f.archivo_url
-          ? <a href={f.archivo_url} target="_blank" rel="noreferrer" style={{ flex:1, color:'#60a5fa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100, textDecoration:'none' }} title="Abrir documento">{f.archivo_nombre || '—'}</a>
+          ? <button onClick={() => setFacturaViewer({ url: f.archivo_url, nombre: f.archivo_nombre })} style={{ flex:1, background:'none', border:'none', padding:0, color:'#60a5fa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100, textAlign:'left', cursor:'pointer', fontSize:12 }} title="Ver documento">{f.archivo_nombre || '—'}</button>
           : <span style={{ flex:1, color:'#a1a1aa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100 }}>{f.archivo_nombre || '—'}</span>
         }
         <span style={{ background: f.tipo==='ingreso' ? '#052e16' : '#1a0a0a', color: f.tipo==='ingreso' ? '#22c55e' : '#f87171', border: `1px solid ${f.tipo==='ingreso'?'#166534':'#7f1d1d'}`, borderRadius:4, padding:'1px 7px', fontSize:11, flexShrink:0 }}>
@@ -1447,6 +1448,28 @@ function TabFiscal() {
           );
         })}
       </div>
+
+      {/* Viewer modal */}
+      {facturaViewer && createPortal(
+        <div onClick={() => setFacturaViewer(null)}
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:9999, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24 }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width:'100%', maxWidth:900, height:'90vh', background:'#1a1a1a', borderRadius:12, border:'1px solid #3f3f46', display:'flex', flexDirection:'column', overflow:'hidden' }}>
+            {/* Header */}
+            <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
+              <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
+              <a href={facturaViewer.url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:12, textDecoration:'none', flexShrink:0 }}>↗ Abrir en nueva pestaña</a>
+              <button onClick={() => setFacturaViewer(null)} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
+            </div>
+            {/* Contenido */}
+            {/\.(jpg|jpeg|png|gif|webp)$/i.test(facturaViewer.nombre)
+              ? <img src={facturaViewer.url} alt={facturaViewer.nombre} style={{ flex:1, objectFit:'contain', width:'100%', height:'100%' }} />
+              : <iframe src={facturaViewer.url} title={facturaViewer.nombre} style={{ flex:1, width:'100%', border:'none' }} />
+            }
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
