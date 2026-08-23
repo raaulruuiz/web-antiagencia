@@ -1098,6 +1098,7 @@ function TabFiscal() {
   const [guardando, setGuardando] = useState(false);
   const fileInputRef = useRef(null);
   const [tipoActivo, setTipoActivo] = useState(null); // 'ingreso' | 'gasto'
+  const [dragOver, setDragOver] = useState(null); // 'ingreso' | 'gasto' | null
   const [selFacturas, setSelFacturas] = useState(new Set()); // ids seleccionados para bulk delete
   const [eliminandoBulk, setEliminandoBulk] = useState(false);
 
@@ -1322,19 +1323,24 @@ function TabFiscal() {
                   <input ref={fileInputRef} type="file" multiple accept="image/*,application/pdf" style={{ display:'none' }}
                     onChange={e => { handleFiles(e.target.files, tipoActivo); e.target.value = ''; }} />
 
-                  {/* Botones añadir */}
-                  <div style={{ display:'flex', gap:8, marginBottom:12 }}>
-                    <button onClick={() => { setTipoActivo('ingreso'); fileInputRef.current?.click(); }}
-                      disabled={extrayendo}
-                      style={{ background:'#052e16', border:'1px solid #166534', color:'#22c55e', borderRadius:8, padding:'7px 14px', fontSize:13, cursor:'pointer', fontWeight:600 }}>
-                      ＋ Ingresos
-                    </button>
-                    <button onClick={() => { setTipoActivo('gasto'); fileInputRef.current?.click(); }}
-                      disabled={extrayendo}
-                      style={{ background:'#1a0a0a', border:'1px solid #7f1d1d', color:'#f87171', borderRadius:8, padding:'7px 14px', fontSize:13, cursor:'pointer', fontWeight:600 }}>
-                      ＋ Gastos
-                    </button>
-                    {extrayendo && <span style={{ color:'#71717a', fontSize:13, alignSelf:'center' }}>Extrayendo…</span>}
+                  {/* Zonas de drop */}
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12 }}>
+                    {[
+                      { tipo:'ingreso', label:'＋ Ingresos', bg:'#052e16', border:'#166534', color:'#22c55e', bgHover:'#0a3f20' },
+                      { tipo:'gasto',   label:'＋ Gastos',   bg:'#1a0a0a', border:'#7f1d1d', color:'#f87171', bgHover:'#2a0f0f' },
+                    ].map(({ tipo, label, bg, border, color, bgHover }) => (
+                      <div key={tipo}
+                        onClick={() => { if (!extrayendo) { setTipoActivo(tipo); fileInputRef.current?.click(); } }}
+                        onDragOver={e => { e.preventDefault(); setDragOver(tipo); }}
+                        onDragLeave={() => setDragOver(null)}
+                        onDrop={e => { e.preventDefault(); setDragOver(null); if (!extrayendo) handleFiles(e.dataTransfer.files, tipo); }}
+                        style={{ background: dragOver === tipo ? bgHover : bg, border: `2px dashed ${dragOver === tipo ? color : border}`, color, borderRadius:10, padding:'18px 14px', fontSize:13, cursor: extrayendo ? 'not-allowed' : 'pointer', fontWeight:600, textAlign:'center', transition:'all 0.15s', opacity: extrayendo ? 0.6 : 1 }}>
+                        {extrayendo && tipoActivo === tipo ? 'Extrayendo…' : label}
+                        <div style={{ fontSize:11, fontWeight:400, color: dragOver === tipo ? color : '#52525b', marginTop:4 }}>
+                          {dragOver === tipo ? 'Suelta aquí' : 'Haz clic o arrastra PDFs / imágenes'}
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   {/* Facturas pendientes de guardar */}
