@@ -1266,6 +1266,25 @@ function TabFiscal({ onAbrirMovimiento }) {
       const normTipo = t => (t || '').toLowerCase().includes('ingreso') ? 'ingreso' : 'gasto';
       const mesNom = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
+      // Tokeniza un texto: minúsculas, sin acentos, sin puntuación, palabras de ≥3 chars
+      const tokens = s => (s || '').toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/).filter(w => w.length >= 3);
+
+      // Penalización por nombre: si la factura tiene nombre_entidad y el movimiento tiene nombre,
+      // compara tokens. 0 tokens en común → penalización de 8€ (descarta matches imposibles).
+      // Penalización parcial proporcional al % de tokens sin match.
+      const nombrePenalty = (facNombre, movNombre) => {
+        if (!facNombre || !movNombre) return 0; // sin info, sin penalización
+        const tF = tokens(facNombre);
+        const tM = tokens(movNombre);
+        if (!tF.length) return 0;
+        const matches = tF.filter(w => tM.some(wm => wm.includes(w) || w.includes(wm)));
+        const ratio = matches.length / tF.length;
+        return (1 - ratio) * 8; // 0% match → +8€, 100% match → +0€
+      };
+
       // Para cada factura subida, buscar el movimiento DB más parecido
       // NOTA: fac.importe es la BASE (sin IVA). El movimiento tiene base_imponible y cantidad (total con IVA).
       for (const fac of facturasGuardadas) {
@@ -1299,7 +1318,7 @@ function TabFiscal({ onAbrirMovimiento }) {
               Math.abs(Math.abs(m.importe_factura) - facBase),
               Math.abs(Math.abs(m.importe_factura) - facTotal)
             );
-            return { m, diff, score: diff + fechaPenalty(m) };
+            return { m, diff, score: diff + fechaPenalty(m) + nombrePenalty(fac.nombre_entidad, m.nombre) };
           })
           .filter(c => c.diff <= 1)
           .sort((a, b) => a.score - b.score);
@@ -1310,7 +1329,7 @@ function TabFiscal({ onAbrirMovimiento }) {
             .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.fecha_factura != null && m.importe_factura == null)
             .map(m => {
               const diff = importeDiff(m);
-              return { m, diff, score: diff + fechaPenalty(m) };
+              return { m, diff, score: diff + fechaPenalty(m) + nombrePenalty(fac.nombre_entidad, m.nombre) };
             })
             .filter(c => c.diff <= 1)
             .sort((a, b) => a.score - b.score);
