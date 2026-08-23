@@ -1916,7 +1916,7 @@ function TabFiscal({ onAbrirMovimiento }) {
             <div style={{ flex:'0 0 380px', background:'#161616', overflowY:'auto', display:'flex', flexDirection:'column' }}>
               <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
                 <span style={{ color:'#a1a1aa', fontSize:12, fontWeight:600, flex:1 }}>Movimiento DB</span>
-                <button onClick={() => { setErrMovDetail(errSplitView.movimiento); }}
+                <button onClick={() => { setErrMovEditar(errSplitView.movimiento); setErrSplitView(null); }}
                   style={{ background:'transparent', border:'1px solid #3f3f46', color:'#71717a', borderRadius:6, padding:'2px 10px', fontSize:11, cursor:'pointer' }}>Editar</button>
               </div>
               {(() => {
