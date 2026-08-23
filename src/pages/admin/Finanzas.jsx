@@ -1921,17 +1921,19 @@ function TabFiscal() {
                     </div>
                     <div style={{ background:'#0d0d0d', borderRadius:10, padding:'12px 14px', display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
                       <div><p style={{ color:'#71717a', fontSize:10, fontWeight:600, textTransform:'uppercase', margin:'0 0 3px' }}>Importe</p>
-                        <p style={{ color:col, fontSize:20, fontWeight:700, margin:0 }}>{esIngreso?'+':'-'}{fmt(m.cantidad)}€</p></div>
+                        <p style={{ color:col, fontSize:20, fontWeight:700, margin:0 }}>{esIngreso?'+':'-'}{fmt(m.cantidad)}</p></div>
                       <div><p style={{ color:'#71717a', fontSize:10, fontWeight:600, textTransform:'uppercase', margin:'0 0 3px' }}>IVA</p>
-                        <p style={{ color:'#f59e0b', fontSize:16, fontWeight:600, margin:0 }}>{fmt(Math.abs(m.iva_a_pagar||0))}€</p></div>
+                        <p style={{ color:'#f59e0b', fontSize:16, fontWeight:600, margin:0 }}>{fmt(Math.abs(m.iva_a_pagar||0))}</p></div>
                       <div><p style={{ color:'#71717a', fontSize:10, fontWeight:600, textTransform:'uppercase', margin:'0 0 3px' }}>Base</p>
-                        <p style={{ color:'white', fontSize:16, fontWeight:600, margin:0 }}>{fmt(m.base_imponible||0)}€</p></div>
+                        <p style={{ color:'white', fontSize:16, fontWeight:600, margin:0 }}>{fmt(m.base_imponible||0)}</p></div>
                     </div>
                     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
                       <Field label="Fecha movimiento" value={m.fecha} />
                       <Field label="Tipo" value={m.tipo} />
+                      <Field label="IVA" value={m.iva || '—'} />
+                      <Field label="IRPF" value={m.irpf || '—'} />
                       <Field label="Fecha factura (DB)" value={m.fecha_factura} />
-                      <Field label="Importe factura (DB)" value={m.importe_factura != null ? fmt(Math.abs(m.importe_factura))+'€' : null} />
+                      <Field label="Importe factura (DB)" value={m.importe_factura != null ? fmt(Math.abs(m.importe_factura)) : null} />
                     </div>
                   </div>
                 );
