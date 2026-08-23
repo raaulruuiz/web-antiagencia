@@ -1081,7 +1081,7 @@ function FiscalMetric({ label, value, color, comp }) {
   );
 }
 
-function TabFiscal() {
+function TabFiscal({ onAbrirMovimiento }) {
   const [anio, setAnio] = useState(new Date().getFullYear());
   const [datos, setDatos] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1114,6 +1114,21 @@ function TabFiscal() {
   const [errFiltro, setErrFiltro] = useState('todos'); // 'todos' | 'error' | 'warning' | 'info'
   const [errSplitView, setErrSplitView] = useState(null); // { movimiento, factura } | null
   const [modDetalle, setModDetalle] = useState(null); // { num, titulo, desc, valor, valorLabel, secciones } | null
+
+  // Abre un movimiento desde el contexto de errores con datos completos + actualiza URL
+  async function abrirMovEnErrores(mov) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('mov', mov.id);
+    window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/${mov.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await r.json();
+      setErrMovDetail(r.ok ? data : mov);
+    } catch { setErrMovDetail(mov); }
+  }
 
   const cargar = useCallback(async () => {
     setLoading(true); setErr(null);
@@ -1830,7 +1845,7 @@ function TabFiscal() {
                         <p style={{ color:'#71717a', fontSize:11, margin:'0 0 8px', lineHeight:1.5 }}>{c.desc}</p>
                         <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
                           {c.movimiento && (
-                            <button onClick={() => setErrMovDetail(c.movimiento)}
+                            <button onClick={() => abrirMovEnErrores(c.movimiento)}
                               style={{ background:'#18181b', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:260, overflow:'hidden' }}>
                               <span style={{ flexShrink:0 }}>📋</span>
                               <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.movimiento.nombre}</span>
@@ -1866,7 +1881,7 @@ function TabFiscal() {
       {errMovDetail && createPortal(
         <ModalMovimiento
           m={errMovDetail}
-          onClose={() => setErrMovDetail(null)}
+          onClose={() => { setErrMovDetail(null); const p = new URLSearchParams(window.location.search); p.delete('mov'); window.history.replaceState({}, '', p.toString() ? `${window.location.pathname}?${p}` : window.location.pathname); }}
           onEditar={m => { setErrMovDetail(null); setErrMovEditar(m); }}
           onEliminar={null}
           onConfirm={() => {}}
@@ -3155,6 +3170,24 @@ export default function Finanzas() {
     } catch (e) { console.error(e); }
   }
 
+  // URL sync: ?mov=ID ↔ movDetail (igual que Notion con &p=ID)
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('mov');
+    if (id) abrirDetalle(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (movDetail) {
+      params.set('mov', movDetail.id);
+    } else {
+      params.delete('mov');
+    }
+    const qs = params.toString();
+    window.history.replaceState({}, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
+  }, [movDetail]);
+
   async function guardarCeldaInline(id, campo, valor) {
     try {
       const token = await getToken();
@@ -4325,7 +4358,7 @@ export default function Finanzas() {
       )}
 
       {/* ── FISCAL ── */}
-      {tab === 'fiscal' && <TabFiscal />}
+      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} />}
 
       {/* ── CLIENTES ── */}
       {tab === 'clientes' && (() => {
