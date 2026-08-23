@@ -1102,6 +1102,8 @@ function TabFiscal() {
   const [selFacturas, setSelFacturas] = useState(new Set()); // ids seleccionados para bulk delete
   const [eliminandoBulk, setEliminandoBulk] = useState(false);
   const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre } | null
+  const [facturaFiltro, setFacturaFiltro] = useState('todos'); // 'todos' | 'ingreso' | 'gasto'
+  const [facturaOrden, setFacturaOrden] = useState('fecha_desc'); // 'fecha_desc' | 'fecha_asc' | 'importe_desc' | 'importe_asc'
 
   const cargar = useCallback(async () => {
     setLoading(true); setErr(null);
@@ -1414,20 +1416,50 @@ function TabFiscal() {
                   )}
 
                   {/* Facturas ya guardadas */}
-                  {facturasGuardadas.length > 0 && (
+                  {facturasGuardadas.length > 0 && (() => {
+                    const filtradas = facturasGuardadas
+                      .filter(f => facturaFiltro === 'todos' || f.tipo === facturaFiltro)
+                      .sort((a, b) => {
+                        if (facturaOrden === 'fecha_desc') return (b.fecha_factura || '').localeCompare(a.fecha_factura || '');
+                        if (facturaOrden === 'fecha_asc')  return (a.fecha_factura || '').localeCompare(b.fecha_factura || '');
+                        if (facturaOrden === 'importe_desc') return (b.importe || 0) - (a.importe || 0);
+                        if (facturaOrden === 'importe_asc')  return (a.importe || 0) - (b.importe || 0);
+                        return 0;
+                      });
+                    return (
                     <div style={{ background:'#0d0d0d', border:'1px solid #3f3f46', borderRadius:8, overflow:'hidden' }}>
-                      <div style={{ padding:'8px 10px', borderBottom:'1px solid #27272a', display:'flex', alignItems:'center', gap:10 }}>
+                      {/* Header con controles */}
+                      <div style={{ padding:'8px 10px', borderBottom:'1px solid #27272a', display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
                         <input type="checkbox"
-                          checked={facturasGuardadas.length > 0 && facturasGuardadas.every(f => selFacturas.has(f.id))}
+                          checked={filtradas.length > 0 && filtradas.every(f => selFacturas.has(f.id))}
                           onChange={e => {
                             setSelFacturas(prev => {
                               const s = new Set(prev);
-                              facturasGuardadas.forEach(f => e.target.checked ? s.add(f.id) : s.delete(f.id));
+                              filtradas.forEach(f => e.target.checked ? s.add(f.id) : s.delete(f.id));
                               return s;
                             });
                           }}
                           style={{ accentColor:'#0067FD', cursor:'pointer', opacity: selFacturas.size > 0 ? 1 : 0.3, transition:'opacity 0.15s' }} />
-                        <span style={{ color:'#71717a', fontSize:12, fontWeight:600, flex:1 }}>Guardadas ({facturasGuardadas.length})</span>
+                        <span style={{ color:'#71717a', fontSize:12, fontWeight:600 }}>
+                          Guardadas ({filtradas.length}{filtradas.length !== facturasGuardadas.length ? `/${facturasGuardadas.length}` : ''})
+                        </span>
+                        {/* Filtro tipo */}
+                        <div style={{ display:'flex', gap:4, marginLeft:'auto' }}>
+                          {[['todos','Todos'],['ingreso','Ingresos'],['gasto','Gastos']].map(([v,l]) => (
+                            <button key={v} onClick={() => setFacturaFiltro(v)}
+                              style={{ background: facturaFiltro===v ? (v==='ingreso'?'#052e16':v==='gasto'?'#1a0a0a':'#27272a') : 'transparent', color: facturaFiltro===v ? (v==='ingreso'?'#22c55e':v==='gasto'?'#f87171':'white') : '#52525b', border: `1px solid ${facturaFiltro===v?(v==='ingreso'?'#166534':v==='gasto'?'#7f1d1d':'#3f3f46'):'transparent'}`, borderRadius:6, padding:'2px 10px', fontSize:11, cursor:'pointer', fontWeight:600 }}>
+                              {l}
+                            </button>
+                          ))}
+                        </div>
+                        {/* Ordenación */}
+                        <select value={facturaOrden} onChange={e => setFacturaOrden(e.target.value)}
+                          style={{ background:'#18181b', color:'#a1a1aa', border:'1px solid #3f3f46', borderRadius:6, padding:'2px 6px', fontSize:11, cursor:'pointer' }}>
+                          <option value="fecha_desc">Fecha ↓</option>
+                          <option value="fecha_asc">Fecha ↑</option>
+                          <option value="importe_desc">Importe ↓</option>
+                          <option value="importe_asc">Importe ↑</option>
+                        </select>
                         {selFacturas.size > 0 && (
                           <button onClick={eliminarFacturasBulk} disabled={eliminandoBulk}
                             style={{ background:'#7f1d1d', border:'1px solid #991b1b', color:'#f87171', borderRadius:6, padding:'3px 12px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
@@ -1435,9 +1467,10 @@ function TabFiscal() {
                           </button>
                         )}
                       </div>
-                      {facturasGuardadas.map(f => <FacturaRow key={f.id} f={f} selectable />)}
+                      {filtradas.map(f => <FacturaRow key={f.id} f={f} selectable />)}
                     </div>
-                  )}
+                    );
+                  })()}
 
                   {pendientes.length === 0 && facturasGuardadas.length === 0 && !extrayendo && (
                     <p style={{ color:'#3f3f46', fontSize:13, margin:0 }}>Sin facturas. Usa los botones para subir PDFs o imágenes.</p>
