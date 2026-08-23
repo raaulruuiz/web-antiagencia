@@ -1274,31 +1274,46 @@ function TabFiscal({ onAbrirMovimiento }) {
         const facTotal = facBase + facIva;
         const facTipo  = fac.tipo;
 
-        // Función de distancia: mínimo entre comparar base con base_imponible y total con cantidad
-        const distancia = m => Math.min(
-          Math.abs(Math.abs(m.base_imponible || 0) - facBase),   // base vs base
-          Math.abs(Math.abs(m.cantidad || 0) - facTotal),         // total vs total
-          Math.abs(Math.abs(m.base_imponible || 0) - facTotal),   // por si acaso
-          Math.abs(Math.abs(m.cantidad || 0) - facBase)           // total vs base (sin IVA)
+        // Distancia de importes: mínimo entre 4 combinaciones base/total
+        const importeDiff = m => Math.min(
+          Math.abs(Math.abs(m.base_imponible || 0) - facBase),
+          Math.abs(Math.abs(m.cantidad || 0) - facTotal),
+          Math.abs(Math.abs(m.base_imponible || 0) - facTotal),
+          Math.abs(Math.abs(m.cantidad || 0) - facBase)
         );
+
+        // Penalización por distancia de fecha: 0.1 € por día de diferencia entre
+        // la fecha de la factura (doc) y la fecha del movimiento.
+        // Permite desempatar cuando dos movimientos tienen el mismo importe (ej: dos suscripciones SaaS).
+        const fechaPenalty = m => {
+          if (!fac.fecha_factura || !m.fecha) return 0;
+          const dias = Math.abs(new Date(fac.fecha_factura) - new Date(m.fecha)) / 86400000;
+          return dias * 0.1;
+        };
 
         // 1º: movimientos con importe_factura explícito
         let candidatos = movs
           .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.importe_factura != null)
-          .map(m => ({ m, diff: Math.min(
-            Math.abs(Math.abs(m.importe_factura) - facBase),
-            Math.abs(Math.abs(m.importe_factura) - facTotal)
-          )}))
+          .map(m => {
+            const diff = Math.min(
+              Math.abs(Math.abs(m.importe_factura) - facBase),
+              Math.abs(Math.abs(m.importe_factura) - facTotal)
+            );
+            return { m, diff, score: diff + fechaPenalty(m) };
+          })
           .filter(c => c.diff <= 1)
-          .sort((a, b) => a.diff - b.diff);
+          .sort((a, b) => a.score - b.score);
 
         // 2º: movimientos con fecha_factura pero sin importe_factura — comparar por base/total
         if (!candidatos.length) {
           candidatos = movs
             .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.fecha_factura != null && m.importe_factura == null)
-            .map(m => ({ m, diff: distancia(m) }))
+            .map(m => {
+              const diff = importeDiff(m);
+              return { m, diff, score: diff + fechaPenalty(m) };
+            })
             .filter(c => c.diff <= 1)
-            .sort((a, b) => a.diff - b.diff);
+            .sort((a, b) => a.score - b.score);
         }
 
         if (!candidatos.length) {
