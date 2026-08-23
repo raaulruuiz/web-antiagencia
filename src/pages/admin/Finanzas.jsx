@@ -834,9 +834,9 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
 
 // ── Modal de edición ────────────────────────────────────────────
 
-function ModalEditar({ movimiento, onGuardado, onCerrar }) {
+function ModalEditar({ movimiento, onGuardado, onCerrar, zIndex = 1000 }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px 12px', overflowY: 'auto' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px 12px', overflowY: 'auto' }}>
       <div style={{ ...S.card, width: '100%', maxWidth: 700, position: 'relative' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={{ color: 'white', fontSize: 16, fontWeight: 600, margin: 0 }}>Editar movimiento</h2>
@@ -977,6 +977,10 @@ function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm, zIndex =
         {/* Metadatos — zona dim */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
           <div>
+            <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0' }}>ID</p>
+            <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>{m.id || '—'}</span>
+          </div>
+          <div>
             <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0' }}>Creado</p>
             <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>
               {m.created_at ? m.created_at.slice(0, 10) : '—'}
@@ -987,10 +991,6 @@ function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm, zIndex =
             <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>
               {m.updated_at ? m.updated_at.slice(0, 10) : '—'}
             </span>
-          </div>
-          <div>
-            <p style={{ color: '#3f3f46', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0' }}>Notion ID</p>
-            <span style={{ color: '#3f3f46', fontSize: 11, fontFamily: 'monospace' }}>{m.notion_id || '—'}</span>
           </div>
         </div>
       </div>
@@ -1894,6 +1894,7 @@ function TabFiscal({ onAbrirMovimiento }) {
       {errMovEditar && createPortal(
         <ModalEditar
           movimiento={errMovEditar}
+          zIndex={9200}
           onGuardado={(data) => {
             setErroresData(prev => prev.map(c =>
               c.movimiento?.id === errMovEditar.id ? { ...c, movimiento: { ...c.movimiento, ...data } } : c
@@ -2913,6 +2914,8 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
     { key:'irpf_retenido_yo', label:'IRPF Ret.',      w:80,  readonly:true },
     { key:'created_at',       label:'Creado',         w:100, readonly:'date' },
     { key:'updated_at',       label:'Modificado',     w:100, readonly:'date' },
+    { key:'id',               label:'ID',             w:290, readonly:'text' },
+    { key:'notion_id',        label:'Notion ID',      w:290, readonly:'text' },
   ];
   function calcColMinW(col) {
     const type = colCalcs[col.key];
@@ -2995,6 +2998,10 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                       ) : col.readonly === 'date' ? (
                         <span style={{ color:'#71717a', fontSize:12, fontFamily:'monospace' }}>
                           {m[col.key] ? m[col.key].slice(0,10) : '—'}
+                        </span>
+                      ) : col.readonly === 'text' ? (
+                        <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace' }}>
+                          {m[col.key] || '—'}
                         </span>
                       ) : col.readonly ? (
                         <span style={{ color: m[col.key] < 0 ? '#f87171' : m[col.key] > 0 ? '#4ade80' : '#52525b', fontSize:13 }}>
