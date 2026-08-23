@@ -1241,6 +1241,7 @@ function TabFiscal() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10, marginBottom: 24 }}>
         <MetricCard label="Facturación"     value={fmt(anual.facturacion)}    color="#22c55e" compValue={ca ? ca.facturacion : null} />
         <MetricCard label="Gastos totales"  value={fmt(anual.totalGastos)}    color="#f87171" compValue={ca ? ca.totalGastos : null} />
+        {(() => { const b = anual.facturacion - anual.totalGastos; const bc = ca ? ca.facturacion - ca.totalGastos : null; return <MetricCard label="Beneficio" value={fmt(b)} color={b >= 0 ? '#10b981' : '#f87171'} compValue={bc} />; })()}
         <MetricCard label="IVA repercutido" value={fmt(anual.ivaRepercutido)} color="#f59e0b" compValue={ca ? ca.ivaRepercutido : null} />
         <MetricCard label="IVA soportado"   value={fmt(anual.ivaSoportado)}   color="#f59e0b" compValue={ca ? ca.ivaSoportado : null} />
         <MetricCard label="IVA a pagar"     value={fmt(anual.ivaAPagar)}      color={anual.ivaAPagar > 0 ? '#f59e0b' : '#22c55e'} compValue={ca ? ca.ivaAPagar : null} />
@@ -1267,11 +1268,13 @@ function TabFiscal() {
 
               {/* Métricas fiscales */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: abierto ? 16 : 0 }}>
-                <FiscalMetric label="Facturación"         value={t.facturacion}    color="#22c55e" comp={tc ? tc.facturacion : null} />
-                <FiscalMetric label="IVA repercutido"     value={t.ivaRepercutido} color="#f59e0b" comp={tc ? tc.ivaRepercutido : null} />
-                <FiscalMetric label="IVA soportado"       value={t.ivaSoportado}   color="#f59e0b" comp={tc ? tc.ivaSoportado : null} />
-                <FiscalMetric label="IVA a pagar (303)"   value={t.ivaAPagar}      color={t.ivaAPagar > 0 ? '#f59e0b' : '#22c55e'} comp={tc ? tc.ivaAPagar : null} />
-                <FiscalMetric label="IRPF retenido (130)" value={t.irpfRetenido}   color="#8b5cf6" comp={tc ? tc.irpfRetenido : null} />
+                <FiscalMetric label="Facturación"         value={t.facturacion}                    color="#22c55e" comp={tc ? tc.facturacion : null} />
+                <FiscalMetric label="Gastos"              value={t.totalGastos}                    color="#f87171" comp={tc ? tc.totalGastos : null} />
+                <FiscalMetric label="Beneficio"           value={t.facturacion - t.totalGastos}    color={(t.facturacion - t.totalGastos) >= 0 ? '#10b981' : '#f87171'} comp={tc ? tc.facturacion - tc.totalGastos : null} />
+                <FiscalMetric label="IVA repercutido"     value={t.ivaRepercutido}                 color="#f59e0b" comp={tc ? tc.ivaRepercutido : null} />
+                <FiscalMetric label="IVA soportado"       value={t.ivaSoportado}                   color="#f59e0b" comp={tc ? tc.ivaSoportado : null} />
+                <FiscalMetric label="IVA a pagar (303)"   value={t.ivaAPagar}                      color={t.ivaAPagar > 0 ? '#f59e0b' : '#22c55e'} comp={tc ? tc.ivaAPagar : null} />
+                <FiscalMetric label="IRPF retenido (130)" value={t.irpfRetenido}                   color="#8b5cf6" comp={tc ? tc.irpfRetenido : null} />
               </div>
 
               {/* IRPF por cliente */}
