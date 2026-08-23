@@ -1104,6 +1104,7 @@ function TabFiscal() {
   const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre } | null
   const [facturaFiltro, setFacturaFiltro] = useState('todos'); // 'todos' | 'ingreso' | 'gasto'
   const [facturaOrden, setFacturaOrden] = useState('fecha_desc'); // 'fecha_desc' | 'fecha_asc' | 'importe_desc' | 'importe_asc'
+  const [subirAbierto, setSubirAbierto] = useState(false); // mostrar zonas de drop
 
   const cargar = useCallback(async () => {
     setLoading(true); setErr(null);
@@ -1142,8 +1143,8 @@ function TabFiscal() {
 
   function toggleTrimestre(i) {
     const q = i + 1;
-    if (trimestreAbierto === i) { setTrimestreAbierto(null); setPendientes([]); setSelFacturas(new Set()); }
-    else { setTrimestreAbierto(i); setPendientes([]); setSelFacturas(new Set()); cargarFacturasTrimestre(q); }
+    if (trimestreAbierto === i) { setTrimestreAbierto(null); setPendientes([]); setSelFacturas(new Set()); setSubirAbierto(false); }
+    else { setTrimestreAbierto(i); setPendientes([]); setSelFacturas(new Set()); setSubirAbierto(false); cargarFacturasTrimestre(q); }
   }
 
   async function eliminarFacturasBulk() {
@@ -1365,29 +1366,75 @@ function TabFiscal() {
               {/* Sección facturas (solo si abierto) */}
               {abierto && (
                 <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #27272a' }}>
+                  {/* Comparativa DB vs Facturas */}
+                  {facturasGuardadas.length > 0 && (() => {
+                    const fIngresos = facturasGuardadas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + (f.importe || 0), 0);
+                    const fGastos   = facturasGuardadas.filter(f => f.tipo === 'gasto').reduce((s, f)   => s + Math.abs(f.importe || 0), 0);
+                    const fBenef    = fIngresos - fGastos;
+                    const dbIngresos = t.facturacion;
+                    const dbGastos   = t.totalGastos;
+                    const dbBenef    = dbIngresos - dbGastos;
+                    const diffColor = v => v === 0 ? '#52525b' : v > 0 ? '#22c55e' : '#f87171';
+                    const diffLabel = v => v === 0 ? '±0' : (v > 0 ? '+' : '') + fmt(v) + ' €';
+                    return (
+                      <div style={{ background:'#0d0d0d', border:'1px solid #27272a', borderRadius:8, padding:'10px 14px', marginBottom:14 }}>
+                        <p style={{ color:'#52525b', fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', margin:'0 0 8px' }}>Conciliación facturas vs movimientos</p>
+                        <div style={{ display:'grid', gridTemplateColumns:'auto 1fr 1fr 1fr', gap:'4px 16px', fontSize:12, alignItems:'center' }}>
+                          <span />
+                          <span style={{ color:'#52525b', fontSize:10, fontWeight:600 }}>Ingresos</span>
+                          <span style={{ color:'#52525b', fontSize:10, fontWeight:600 }}>Gastos</span>
+                          <span style={{ color:'#52525b', fontSize:10, fontWeight:600 }}>Beneficio</span>
+
+                          <span style={{ color:'#71717a', fontSize:11 }}>Movimientos</span>
+                          <span style={{ color:'#22c55e', fontWeight:600 }}>{fmt(dbIngresos)} €</span>
+                          <span style={{ color:'#f87171', fontWeight:600 }}>{fmt(dbGastos)} €</span>
+                          <span style={{ color: dbBenef >= 0 ? '#10b981' : '#f87171', fontWeight:600 }}>{fmt(dbBenef)} €</span>
+
+                          <span style={{ color:'#71717a', fontSize:11 }}>Facturas</span>
+                          <span style={{ color:'#22c55e', fontWeight:600 }}>{fmt(fIngresos)} €</span>
+                          <span style={{ color:'#f87171', fontWeight:600 }}>{fmt(fGastos)} €</span>
+                          <span style={{ color: fBenef >= 0 ? '#10b981' : '#f87171', fontWeight:600 }}>{fmt(fBenef)} €</span>
+
+                          <span style={{ color:'#52525b', fontSize:11 }}>Diferencia</span>
+                          <span style={{ color: diffColor(fIngresos - dbIngresos), fontWeight:700 }}>{diffLabel(fIngresos - dbIngresos)}</span>
+                          <span style={{ color: diffColor(fGastos - dbGastos),     fontWeight:700 }}>{diffLabel(fGastos - dbGastos)}</span>
+                          <span style={{ color: diffColor(fBenef - dbBenef),       fontWeight:700 }}>{diffLabel(fBenef - dbBenef)}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {/* Input file oculto */}
                   <input ref={fileInputRef} type="file" multiple accept="image/*,application/pdf" style={{ display:'none' }}
                     onChange={e => { handleFiles(e.target.files, tipoActivo); e.target.value = ''; }} />
 
-                  {/* Zonas de drop */}
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12 }}>
-                    {[
-                      { tipo:'ingreso', label:'＋ Ingresos', bg:'#052e16', border:'#166534', color:'#22c55e', bgHover:'#0a3f20' },
-                      { tipo:'gasto',   label:'＋ Gastos',   bg:'#1a0a0a', border:'#7f1d1d', color:'#f87171', bgHover:'#2a0f0f' },
-                    ].map(({ tipo, label, bg, border, color, bgHover }) => (
-                      <div key={tipo}
-                        onClick={() => { if (!extrayendo) { setTipoActivo(tipo); fileInputRef.current?.click(); } }}
-                        onDragOver={e => { e.preventDefault(); setDragOver(tipo); }}
-                        onDragLeave={() => setDragOver(null)}
-                        onDrop={e => { e.preventDefault(); setDragOver(null); if (!extrayendo) handleFiles(e.dataTransfer.files, tipo); }}
-                        style={{ background: dragOver === tipo ? bgHover : bg, border: `2px dashed ${dragOver === tipo ? color : border}`, color, borderRadius:10, padding:'18px 14px', fontSize:13, cursor: extrayendo ? 'not-allowed' : 'pointer', fontWeight:600, textAlign:'center', transition:'all 0.15s', opacity: extrayendo ? 0.6 : 1 }}>
-                        {extrayendo && tipoActivo === tipo ? 'Extrayendo…' : label}
-                        <div style={{ fontSize:11, fontWeight:400, color: dragOver === tipo ? color : '#52525b', marginTop:4 }}>
-                          {dragOver === tipo ? 'Suelta aquí' : 'Haz clic o arrastra PDFs / imágenes'}
+                  {/* Botón + Añadir / zonas de drop */}
+                  {!subirAbierto
+                    ? <button onClick={() => setSubirAbierto(true)} style={{ background:'#18181b', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:8, padding:'8px 18px', fontSize:13, cursor:'pointer', fontWeight:600, marginBottom:12 }}>＋ Añadir facturas</button>
+                    : (
+                      <div style={{ marginBottom:12 }}>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:6 }}>
+                          {[
+                            { tipo:'ingreso', label:'＋ Ingresos', bg:'#052e16', border:'#166534', color:'#22c55e', bgHover:'#0a3f20' },
+                            { tipo:'gasto',   label:'＋ Gastos',   bg:'#1a0a0a', border:'#7f1d1d', color:'#f87171', bgHover:'#2a0f0f' },
+                          ].map(({ tipo, label, bg, border, color, bgHover }) => (
+                            <div key={tipo}
+                              onClick={() => { if (!extrayendo) { setTipoActivo(tipo); fileInputRef.current?.click(); } }}
+                              onDragOver={e => { e.preventDefault(); setDragOver(tipo); }}
+                              onDragLeave={() => setDragOver(null)}
+                              onDrop={e => { e.preventDefault(); setDragOver(null); if (!extrayendo) handleFiles(e.dataTransfer.files, tipo); }}
+                              style={{ background: dragOver === tipo ? bgHover : bg, border: `2px dashed ${dragOver === tipo ? color : border}`, color, borderRadius:10, padding:'18px 14px', fontSize:13, cursor: extrayendo ? 'not-allowed' : 'pointer', fontWeight:600, textAlign:'center', transition:'all 0.15s', opacity: extrayendo ? 0.6 : 1 }}>
+                              {extrayendo && tipoActivo === tipo ? 'Extrayendo…' : label}
+                              <div style={{ fontSize:11, fontWeight:400, color: dragOver === tipo ? color : '#52525b', marginTop:4 }}>
+                                {dragOver === tipo ? 'Suelta aquí' : 'Haz clic o arrastra PDFs / imágenes'}
+                              </div>
+                            </div>
+                          ))}
                         </div>
+                        <button onClick={() => setSubirAbierto(false)} style={{ background:'none', border:'none', color:'#52525b', fontSize:11, cursor:'pointer', padding:0 }}>Ocultar</button>
                       </div>
-                    ))}
-                  </div>
+                    )
+                  }
 
                   {/* Facturas pendientes de guardar */}
                   {pendientes.length > 0 && (
