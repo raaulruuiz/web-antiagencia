@@ -854,7 +854,7 @@ function ModalEditar({ movimiento, onGuardado, onCerrar }) {
 
 // ── Fila de movimiento ──────────────────────────────────────────
 
-function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm }) {
+function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm, zIndex = 1000 }) {
   if (!m) return null;
   const esIngreso = m.tipo === 'Ingreso';
   const color = esIngreso ? '#22c55e' : '#f87171';
@@ -871,7 +871,7 @@ function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm }) {
   return (
     <div
       onClick={onClose}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
     >
       <div
         onClick={e => e.stopPropagation()}
@@ -1109,8 +1109,10 @@ function TabFiscal() {
   const [erroresModal, setErroresModal] = useState(false);
   const [erroresData, setErroresData] = useState([]);
   const [detectando, setDetectando] = useState(false);
-  const [errMovDetail, setErrMovDetail] = useState(null); // movimiento para ModalMovimiento dentro del modal de errores
-  const [errMovEditar, setErrMovEditar] = useState(null); // movimiento para ModalEditar
+  const [errMovDetail, setErrMovDetail] = useState(null);
+  const [errMovEditar, setErrMovEditar] = useState(null);
+  const [errFiltro, setErrFiltro] = useState('todos'); // 'todos' | 'error' | 'warning' | 'info'
+  const [errSplitView, setErrSplitView] = useState(null); // { movimiento, factura } | null
 
   const cargar = useCallback(async () => {
     setLoading(true); setErr(null);
@@ -1249,76 +1251,98 @@ function TabFiscal() {
       const mesNom = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
       // Para cada factura subida, buscar el movimiento DB más parecido
+      // NOTA: fac.importe es la BASE (sin IVA). El movimiento tiene base_imponible y cantidad (total con IVA).
       for (const fac of facturasGuardadas) {
-        const facImporte = Math.abs(fac.importe || 0);
-        const facTipo = fac.tipo; // 'ingreso' | 'gasto'
+        const facBase  = Math.abs(fac.importe || 0);
+        const facIva   = Math.abs(fac.impuesto || 0);
+        const facTotal = facBase + facIva;
+        const facTipo  = fac.tipo;
 
-        // Match por importe_factura en DB (tolerancia 0.5€), luego por cantidad como fallback
-        // Solo contra movimientos que ya tienen datos de factura en DB para evitar falsos positivos
+        // Función de distancia: mínimo entre comparar base con base_imponible y total con cantidad
+        const distancia = m => Math.min(
+          Math.abs(Math.abs(m.base_imponible || 0) - facBase),   // base vs base
+          Math.abs(Math.abs(m.cantidad || 0) - facTotal),         // total vs total
+          Math.abs(Math.abs(m.base_imponible || 0) - facTotal),   // por si acaso
+          Math.abs(Math.abs(m.cantidad || 0) - facBase)           // total vs base (sin IVA)
+        );
+
+        // 1º: movimientos con importe_factura explícito
         let candidatos = movs
           .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.importe_factura != null)
-          .map(m => ({ m, diff: Math.abs(Math.abs(m.importe_factura) - facImporte) }))
-          .filter(c => c.diff <= 0.5)
+          .map(m => ({ m, diff: Math.min(
+            Math.abs(Math.abs(m.importe_factura) - facBase),
+            Math.abs(Math.abs(m.importe_factura) - facTotal)
+          )}))
+          .filter(c => c.diff <= 1)
           .sort((a, b) => a.diff - b.diff);
 
-        // 2º intento: por cantidad, pero solo contra movimientos que tienen fecha_factura
-        // (el usuario metió la fecha pero olvidó el importe)
+        // 2º: movimientos con fecha_factura pero sin importe_factura — comparar por base/total
         if (!candidatos.length) {
           candidatos = movs
             .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.fecha_factura != null && m.importe_factura == null)
-            .map(m => ({ m, diff: Math.abs(Math.abs(m.cantidad) - facImporte) }))
-            .filter(c => c.diff <= 0.5)
+            .map(m => ({ m, diff: distancia(m) }))
+            .filter(c => c.diff <= 1)
             .sort((a, b) => a.diff - b.diff);
         }
 
         if (!candidatos.length) {
           conflictos.push({ tipo: 'sin_movimiento', factura: fac, severidad: 'warning',
-            desc: `Factura de ${fmt(facImporte)}€ sin movimiento en DB que tenga datos de factura asociados. Puede que el movimiento exista pero le falte rellenar "importe factura" o "fecha factura".` });
+            desc: `Factura de ${fmt(facBase)} sin movimiento en DB que tenga datos de factura asociados. Puede que el movimiento exista pero le falte rellenar "importe factura" o "fecha factura".` });
           continue;
         }
 
         const { m } = candidatos[0];
         movsUsados.add(m.id);
 
-        // Conflicto: desfase de fecha
-        if (fac.fecha_factura && m.fecha) {
+        // Movimiento fuera del trimestre actual (cross-trimestre detectado via buffer ±35 días)
+        if (m._fuera_trimestre) {
+          const [mY, mM] = m.fecha.split('-').map(Number);
+          conflictos.push({ tipo: 'cross_trimestre', movimiento: m, factura: fac, severidad: 'error',
+            desc: `El movimiento está en ${mesNom[mM-1]}-${mY}, fuera de este trimestre — la factura fue emitida en este período pero el cobro/pago cayó en otro trimestre` });
+        }
+
+        // Conflicto: desfase de fecha entre fecha_factura del doc y fecha del movimiento
+        if (!m._fuera_trimestre && fac.fecha_factura && m.fecha) {
           const [fY, fM] = fac.fecha_factura.split('-').map(Number);
           const [mY, mM] = m.fecha.split('-').map(Number);
           if (fY !== mY || fM !== mM) {
-            const fTrim = Math.ceil(fM / 3); const mTrim = Math.ceil(mM / 3);
-            const sev = (fY !== mY || fTrim !== mTrim) ? 'error' : 'warning';
-            conflictos.push({ tipo: 'desfase_fecha', movimiento: m, factura: fac, severidad: sev,
-              desc: `Factura emitida en ${mesNom[fM-1]}-${fY} pero el movimiento está registrado en ${mesNom[mM-1]}-${mY}${sev==='error' ? ' (distinto trimestre)' : ''}` });
+            conflictos.push({ tipo: 'desfase_fecha', movimiento: m, factura: fac, severidad: 'warning',
+              desc: `Factura emitida en ${mesNom[fM-1]}-${fY} pero el movimiento está registrado en ${mesNom[mM-1]}-${mY}` });
           }
         }
 
-        // Conflicto: IVA en factura pero no en DB
-        const facIva = Math.abs(fac.impuesto || 0);
+        // Conflicto: desfase entre fecha_factura guardada en DB y fecha del documento subido
+        if (fac.fecha_factura && m.fecha_factura && fac.fecha_factura !== m.fecha_factura) {
+          conflictos.push({ tipo: 'fecha_factura_distinta', movimiento: m, factura: fac, severidad: 'warning',
+            desc: `Fecha en el documento: ${fac.fecha_factura} vs fecha de factura en DB: ${m.fecha_factura}` });
+        }
+
+        // Conflicto: IVA
         const movIva = Math.abs(m.iva_a_pagar || 0);
         if (facIva > 0 && movIva === 0) {
           conflictos.push({ tipo: 'iva_faltante_db', movimiento: m, factura: fac, severidad: 'error',
-            desc: `La factura refleja ${fmt(facIva)}€ de IVA pero el movimiento no tiene IVA registrado` });
+            desc: `La factura refleja ${fmt(facIva)} de IVA pero el movimiento no tiene IVA registrado` });
         } else if (facIva === 0 && movIva > 0) {
           conflictos.push({ tipo: 'iva_en_db_sin_factura', movimiento: m, factura: fac, severidad: 'warning',
-            desc: `El movimiento tiene ${fmt(movIva)}€ de IVA en DB pero la factura subida no muestra IVA` });
+            desc: `El movimiento tiene ${fmt(movIva)} de IVA en DB pero la factura subida no muestra IVA` });
         } else if (facIva > 0 && movIva > 0 && Math.abs(facIva - movIva) > 1) {
           conflictos.push({ tipo: 'iva_diferente', movimiento: m, factura: fac, severidad: 'error',
-            desc: `IVA en factura: ${fmt(facIva)}€ vs IVA en DB: ${fmt(movIva)}€ (diferencia ${fmt(Math.abs(facIva - movIva))}€)` });
+            desc: `IVA en factura: ${fmt(facIva)} vs IVA en DB: ${fmt(movIva)} (diferencia ${fmt(Math.abs(facIva - movIva))})` });
         }
 
-        // Conflicto: importe pagado ≠ importe factura (pagos parciales o error)
-        const movCantidad = Math.abs(m.cantidad || 0);
-        if (Math.abs(movCantidad - facImporte) > 1) {
+        // Conflicto: total pagado ≠ total factura (base + IVA)
+        const movTotal = Math.abs(m.cantidad || 0);
+        if (facTotal > 0 && Math.abs(movTotal - facTotal) > 1) {
           conflictos.push({ tipo: 'importe_distinto', movimiento: m, factura: fac, severidad: 'warning',
-            desc: `Importe cobrado/pagado (DB): ${fmt(movCantidad)}€ vs base de la factura: ${fmt(facImporte)}€` });
+            desc: `Total cobrado/pagado: ${fmt(movTotal)} vs total factura (base+IVA): ${fmt(facTotal)}` });
         }
       }
 
-      // Movimientos que YA TENÍAN datos de factura en DB pero no matchearon con ninguna subida
+      // Movimientos con datos de factura en DB que no matchearon con ninguna factura subida
       for (const m of movs) {
         if (!movsUsados.has(m.id) && (m.importe_factura != null || m.fecha_factura != null)) {
           conflictos.push({ tipo: 'sin_factura_subida', movimiento: m, severidad: 'info',
-            desc: `Tiene ${m.importe_factura != null ? `importe_factura: ${fmt(Math.abs(m.importe_factura))}€` : ''}${m.fecha_factura ? ` fecha: ${m.fecha_factura}` : ''} en DB pero ninguna factura subida coincide` });
+            desc: `Tiene ${m.importe_factura != null ? `importe_factura: ${fmt(Math.abs(m.importe_factura))}` : ''}${m.fecha_factura ? ` fecha: ${m.fecha_factura}` : ''} en DB pero ninguna factura subida coincide` });
         }
       }
 
@@ -1709,74 +1733,93 @@ function TabFiscal() {
 
       {/* Modal Detectar Errores */}
       {erroresModal && createPortal(
-        <div onClick={() => { setErroresModal(false); setErrMovDetail(null); setErrMovEditar(null); }}
+        <div onClick={() => { setErroresModal(false); setErrMovDetail(null); setErrMovEditar(null); setErrFiltro('todos'); }}
           style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:9000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 16px', overflowY:'auto' }}>
           <div onClick={e => e.stopPropagation()}
-            style={{ width:'100%', maxWidth:720, background:'#161616', border:'1px solid #3f3f46', borderRadius:14, overflow:'hidden' }}>
+            style={{ width:'100%', maxWidth:740, background:'#161616', border:'1px solid #3f3f46', borderRadius:14, overflow:'hidden' }}>
             {/* Header */}
-            <div style={{ display:'flex', alignItems:'center', gap:10, padding:'14px 18px', borderBottom:'1px solid #27272a', background:'#111' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 18px', borderBottom:'1px solid #27272a', background:'#111', flexWrap:'wrap' }}>
               <span style={{ color:'#f87171', fontSize:14 }}>⚠</span>
-              <span style={{ color:'white', fontWeight:700, fontSize:14, flex:1 }}>Análisis de conflictos</span>
-              <span style={{ color:'#52525b', fontSize:12 }}>
-                {erroresData.filter(c => c.severidad==='error').length} errores · {erroresData.filter(c => c.severidad==='warning').length} avisos · {erroresData.filter(c => c.severidad==='info').length} info
-              </span>
-              <button onClick={() => { setErroresModal(false); setErrMovDetail(null); setErrMovEditar(null); }}
-                style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'2px 6px' }}>✕</button>
+              <span style={{ color:'white', fontWeight:700, fontSize:14 }}>Análisis de conflictos</span>
+              {/* Filtros */}
+              <div style={{ display:'flex', gap:4, marginLeft:8 }}>
+                {[
+                  ['todos', 'Todos', '#71717a', '#27272a'],
+                  ['error', `${erroresData.filter(c=>c.severidad==='error').length} errores`, '#f87171', '#1a0505'],
+                  ['warning', `${erroresData.filter(c=>c.severidad==='warning').length} avisos`, '#fbbf24', '#1a1200'],
+                  ['info', `${erroresData.filter(c=>c.severidad==='info').length} info`, '#60a5fa', '#050d1a'],
+                ].map(([v, l, col, bg]) => (
+                  <button key={v} onClick={() => setErrFiltro(v)}
+                    style={{ background: errFiltro===v ? bg : 'transparent', border:`1px solid ${errFiltro===v ? col : '#3f3f46'}`, color: errFiltro===v ? col : '#52525b', borderRadius:6, padding:'2px 9px', fontSize:10, cursor:'pointer', fontWeight:600 }}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => { setErroresModal(false); setErrMovDetail(null); setErrMovEditar(null); setErrFiltro('todos'); }}
+                style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'2px 6px', marginLeft:'auto' }}>✕</button>
             </div>
 
-            {erroresData.length === 0
-              ? <div style={{ padding:32, textAlign:'center', color:'#22c55e', fontWeight:600 }}>✓ No se detectaron conflictos</div>
-              : erroresData.map((c, ci) => {
-                  const sevColor = c.severidad === 'error' ? '#f87171' : c.severidad === 'warning' ? '#fbbf24' : '#60a5fa';
-                  const sevBg    = c.severidad === 'error' ? '#1a0505' : c.severidad === 'warning' ? '#1a1200' : '#050d1a';
-                  const sevLabel = c.severidad === 'error' ? 'Error' : c.severidad === 'warning' ? 'Aviso' : 'Info';
-                  const tipoLabel = {
-                    sin_movimiento: 'Sin movimiento en DB con datos de factura',
-                    sin_factura_subida: 'Sin factura subida',
-                    desfase_fecha: 'Desfase de fecha',
-                    iva_faltante_db: 'IVA no registrado en DB',
-                    iva_en_db_sin_factura: 'IVA en DB sin IVA en factura',
-                    iva_diferente: 'IVA diferente',
-                    importe_distinto: 'Importe cobrado ≠ base factura',
-                  }[c.tipo] || c.tipo;
-                  return (
-                    <div key={ci} style={{ borderBottom:'1px solid #1f1f1f', padding:'12px 18px', background: ci % 2 === 0 ? 'transparent' : '#0a0a0a' }}>
-                      <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
-                        <span style={{ background: sevBg, border:`1px solid ${sevColor}`, color: sevColor, fontSize:9, fontWeight:700, borderRadius:4, padding:'2px 6px', whiteSpace:'nowrap', flexShrink:0, marginTop:1 }}>{sevLabel}</span>
-                        <div style={{ flex:1, minWidth:0 }}>
-                          <p style={{ color:'white', fontWeight:600, fontSize:12, margin:'0 0 2px' }}>{tipoLabel}</p>
-                          <p style={{ color:'#71717a', fontSize:11, margin:'0 0 8px', lineHeight:1.5 }}>{c.desc}</p>
-                          <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
-                            {c.movimiento && (
-                              <button onClick={() => setErrMovDetail(c.movimiento)}
-                                style={{ background:'#18181b', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:300, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                                <span>📋</span>
-                                <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.movimiento.nombre}</span>
-                                <span style={{ color: c.movimiento.tipo?.toLowerCase().includes('ingreso') ? '#22c55e' : '#f87171', fontWeight:700, flexShrink:0 }}>{fmt(Math.abs(c.movimiento.cantidad))}€</span>
-                              </button>
-                            )}
-                            {c.factura && c.factura.archivo_url && (
-                              <button onClick={() => setFacturaViewer({ url: c.factura.archivo_url, nombre: c.factura.archivo_nombre })}
-                                style={{ background:'#050d1a', border:'1px solid #1d4ed8', color:'#60a5fa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:300, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                                <span>📄</span>
-                                <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.factura.archivo_nombre}</span>
-                              </button>
-                            )}
-                          </div>
+            {(() => {
+              const tipoLabel = {
+                sin_movimiento:        'Sin movimiento en DB con datos de factura',
+                sin_factura_subida:    'Sin factura subida',
+                cross_trimestre:       'Cobro/pago en trimestre diferente al de la factura',
+                desfase_fecha:         'Desfase de fecha (mismo trimestre)',
+                fecha_factura_distinta:'Fecha de factura diferente (doc vs DB)',
+                iva_faltante_db:       'IVA no registrado en DB',
+                iva_en_db_sin_factura: 'IVA en DB sin IVA en factura',
+                iva_diferente:         'IVA diferente',
+                importe_distinto:      'Importe total ≠ total factura',
+              };
+              const filtrados = errFiltro === 'todos' ? erroresData : erroresData.filter(c => c.severidad === errFiltro);
+              if (!filtrados.length) return <div style={{ padding:32, textAlign:'center', color:'#22c55e', fontWeight:600 }}>✓ Sin conflictos en este filtro</div>;
+              return filtrados.map((c, ci) => {
+                const sevColor = c.severidad === 'error' ? '#f87171' : c.severidad === 'warning' ? '#fbbf24' : '#60a5fa';
+                const sevBg    = c.severidad === 'error' ? '#1a0505' : c.severidad === 'warning' ? '#1a1200' : '#050d1a';
+                const sevLabel = c.severidad === 'error' ? 'Error' : c.severidad === 'warning' ? 'Aviso' : 'Info';
+                const tienePar = c.movimiento && c.factura?.archivo_url;
+                return (
+                  <div key={ci} style={{ borderBottom:'1px solid #1f1f1f', padding:'12px 18px', background: ci % 2 === 0 ? 'transparent' : '#0a0a0a' }}>
+                    <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+                      <span style={{ background: sevBg, border:`1px solid ${sevColor}`, color: sevColor, fontSize:9, fontWeight:700, borderRadius:4, padding:'2px 6px', whiteSpace:'nowrap', flexShrink:0, marginTop:1 }}>{sevLabel}</span>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <p style={{ color:'white', fontWeight:600, fontSize:12, margin:'0 0 2px' }}>{tipoLabel[c.tipo] || c.tipo}</p>
+                        <p style={{ color:'#71717a', fontSize:11, margin:'0 0 8px', lineHeight:1.5 }}>{c.desc}</p>
+                        <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
+                          {c.movimiento && (
+                            <button onClick={() => setErrMovDetail(c.movimiento)}
+                              style={{ background:'#18181b', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:260, overflow:'hidden' }}>
+                              <span style={{ flexShrink:0 }}>📋</span>
+                              <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.movimiento.nombre}</span>
+                              <span style={{ color: c.movimiento.tipo?.toLowerCase().includes('ingreso') ? '#22c55e' : '#f87171', fontWeight:700, flexShrink:0 }}>{fmt(Math.abs(c.movimiento.cantidad))}€</span>
+                            </button>
+                          )}
+                          {c.factura?.archivo_url && (
+                            <button onClick={() => setFacturaViewer({ url: c.factura.archivo_url, nombre: c.factura.archivo_nombre })}
+                              style={{ background:'#050d1a', border:'1px solid #1d4ed8', color:'#60a5fa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:260, overflow:'hidden' }}>
+                              <span style={{ flexShrink:0 }}>📄</span>
+                              <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.factura.archivo_nombre}</span>
+                            </button>
+                          )}
+                          {tienePar && (
+                            <button onClick={() => setErrSplitView({ movimiento: c.movimiento, factura: c.factura })}
+                              style={{ background:'#0d0d0d', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
+                              ⬡ Ver ambos
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
-                  );
-                })
-            }
+                  </div>
+                );
+              });
+            })()}
           </div>
-
-          {/* Movimiento detalle y editar se renderizan en portales propios más abajo */}
         </div>,
         document.body
       )}
 
-      {/* Movimiento detalle desde errores */}
+      {/* Movimiento detalle desde errores — zIndex por encima del modal errores */}
       {errMovDetail && createPortal(
         <ModalMovimiento
           m={errMovDetail}
@@ -1784,6 +1827,7 @@ function TabFiscal() {
           onEditar={m => { setErrMovDetail(null); setErrMovEditar(m); }}
           onEliminar={null}
           onConfirm={() => {}}
+          zIndex={9100}
         />,
         document.body
       )}
@@ -1800,6 +1844,72 @@ function TabFiscal() {
           }}
           onCerrar={() => setErrMovEditar(null)}
         />,
+        document.body
+      )}
+
+      {/* Split view: movimiento (izq) + factura (der) */}
+      {errSplitView && createPortal(
+        <div onClick={() => setErrSplitView(null)}
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.92)', zIndex:9200, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width:'100%', maxWidth:1200, height:'90vh', display:'flex', gap:0, borderRadius:14, overflow:'hidden', border:'1px solid #3f3f46' }}>
+            {/* Izq: detalle movimiento */}
+            <div style={{ flex:'0 0 380px', background:'#161616', overflowY:'auto', display:'flex', flexDirection:'column' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
+                <span style={{ color:'#a1a1aa', fontSize:12, fontWeight:600, flex:1 }}>Movimiento DB</span>
+                <button onClick={() => { setErrMovDetail(errSplitView.movimiento); }}
+                  style={{ background:'transparent', border:'1px solid #3f3f46', color:'#71717a', borderRadius:6, padding:'2px 10px', fontSize:11, cursor:'pointer' }}>Editar</button>
+              </div>
+              {(() => {
+                const m = errSplitView.movimiento;
+                const esIngreso = (m.tipo||'').toLowerCase().includes('ingreso');
+                const col = esIngreso ? '#22c55e' : '#f87171';
+                const Field = ({ label, value }) => (
+                  <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+                    <span style={{ color:'#52525b', fontSize:10, fontWeight:600, textTransform:'uppercase' }}>{label}</span>
+                    <span style={{ color: value ? 'white' : '#3f3f46', fontSize:13 }}>{value || '—'}</span>
+                  </div>
+                );
+                return (
+                  <div style={{ padding:16, display:'flex', flexDirection:'column', gap:14, flex:1 }}>
+                    <div>
+                      <p style={{ color:'white', fontWeight:700, fontSize:15, margin:'0 0 4px' }}>{m.nombre}</p>
+                      <p style={{ color:'#71717a', fontSize:12, margin:0 }}>{m.fecha} · {m.cuenta}</p>
+                    </div>
+                    <div style={{ background:'#0d0d0d', borderRadius:10, padding:'12px 14px', display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
+                      <div><p style={{ color:'#71717a', fontSize:10, fontWeight:600, textTransform:'uppercase', margin:'0 0 3px' }}>Importe</p>
+                        <p style={{ color:col, fontSize:20, fontWeight:700, margin:0 }}>{esIngreso?'+':'-'}{fmt(m.cantidad)}€</p></div>
+                      <div><p style={{ color:'#71717a', fontSize:10, fontWeight:600, textTransform:'uppercase', margin:'0 0 3px' }}>IVA</p>
+                        <p style={{ color:'#f59e0b', fontSize:16, fontWeight:600, margin:0 }}>{fmt(Math.abs(m.iva_a_pagar||0))}€</p></div>
+                      <div><p style={{ color:'#71717a', fontSize:10, fontWeight:600, textTransform:'uppercase', margin:'0 0 3px' }}>Base</p>
+                        <p style={{ color:'white', fontSize:16, fontWeight:600, margin:0 }}>{fmt(m.base_imponible||0)}€</p></div>
+                    </div>
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                      <Field label="Fecha movimiento" value={m.fecha} />
+                      <Field label="Tipo" value={m.tipo} />
+                      <Field label="Fecha factura (DB)" value={m.fecha_factura} />
+                      <Field label="Importe factura (DB)" value={m.importe_factura != null ? fmt(Math.abs(m.importe_factura))+'€' : null} />
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+            {/* Separador */}
+            <div style={{ width:1, background:'#27272a', flexShrink:0 }} />
+            {/* Der: factura */}
+            <div style={{ flex:1, background:'#111', display:'flex', flexDirection:'column', minWidth:0 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
+                <span style={{ color:'#60a5fa', fontSize:12, fontWeight:600, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{errSplitView.factura.archivo_nombre}</span>
+                <a href={errSplitView.factura.archivo_url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:11, textDecoration:'none', flexShrink:0 }}>↗</a>
+                <button onClick={() => setErrSplitView(null)} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:16, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
+              </div>
+              {/\.(jpg|jpeg|png|gif|webp)$/i.test(errSplitView.factura.archivo_nombre)
+                ? <img src={errSplitView.factura.archivo_url} alt="" style={{ flex:1, objectFit:'contain', width:'100%', height:'100%' }} />
+                : <iframe src={errSplitView.factura.archivo_url} title="factura" style={{ flex:1, width:'100%', border:'none' }} />
+              }
+            </div>
+          </div>
+        </div>,
         document.body
       )}
 
