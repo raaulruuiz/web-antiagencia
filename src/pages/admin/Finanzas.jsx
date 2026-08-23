@@ -1245,7 +1245,6 @@ function TabFiscal() {
 
       const conflictos = [];
       const movsUsados = new Set();
-      const factsUsadas = new Set();
       const normTipo = t => (t || '').toLowerCase().includes('ingreso') ? 'ingreso' : 'gasto';
       const mesNom = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
@@ -1254,18 +1253,18 @@ function TabFiscal() {
         const facImporte = Math.abs(fac.importe || 0);
         const facTipo = fac.tipo; // 'ingreso' | 'gasto'
 
-        // Intentar match por importe_factura registrado en DB (tolerancia 0.5€)
+        // 1º intento: match por importe_factura registrado en DB (tolerancia 0.5€)
         let candidatos = movs
           .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.importe_factura != null)
-          .map(m => ({ m, diff: Math.abs(Math.abs(m.importe_factura) - facImporte) }))
+          .map(m => ({ m, diff: Math.abs(Math.abs(m.importe_factura) - facImporte), porCantidad: false }))
           .filter(c => c.diff <= 0.5)
           .sort((a, b) => a.diff - b.diff);
 
-        // Si no hay match, intentar por cantidad pagada
+        // 2º intento: match por cantidad pagada (el campo siempre existe, incluso sin datos de factura)
         if (!candidatos.length) {
           candidatos = movs
             .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo)
-            .map(m => ({ m, diff: Math.abs(Math.abs(m.cantidad) - facImporte) }))
+            .map(m => ({ m, diff: Math.abs(Math.abs(m.cantidad) - facImporte), porCantidad: true }))
             .filter(c => c.diff <= 0.5)
             .sort((a, b) => a.diff - b.diff);
         }
@@ -1273,13 +1272,18 @@ function TabFiscal() {
         if (!candidatos.length) {
           conflictos.push({ tipo: 'sin_movimiento', factura: fac, severidad: 'warning',
             desc: `No se encontró ningún movimiento en DB con importe ~${fmt(facImporte)}€ (${facTipo})` });
-          factsUsadas.add(fac.id);
           continue;
         }
 
-        const { m } = candidatos[0];
+        const { m, porCantidad } = candidatos[0];
         movsUsados.add(m.id);
-        factsUsadas.add(fac.id);
+
+        // Si el match fue por cantidad y el movimiento NO tiene campos de factura → falta rellenarlos
+        if (porCantidad && m.importe_factura == null && m.fecha_factura == null) {
+          conflictos.push({ tipo: 'sin_datos_factura_db', movimiento: m, factura: fac, severidad: 'warning',
+            desc: `El movimiento coincide en importe (${fmt(Math.abs(m.cantidad))}€) pero no tiene fecha ni importe de factura registrados en DB` });
+          // Continuamos con los demás checks igualmente
+        }
 
         // Conflicto: desfase de fecha
         if (fac.fecha_factura && m.fecha) {
@@ -1315,11 +1319,11 @@ function TabFiscal() {
         }
       }
 
-      // Movimientos DB con datos de factura sin match
+      // Movimientos que YA TENÍAN datos de factura en DB pero no matchearon con ninguna subida
       for (const m of movs) {
-        if (!movsUsados.has(m.id)) {
+        if (!movsUsados.has(m.id) && (m.importe_factura != null || m.fecha_factura != null)) {
           conflictos.push({ tipo: 'sin_factura_subida', movimiento: m, severidad: 'info',
-            desc: `El movimiento tiene ${m.importe_factura != null ? `importe_factura: ${fmt(Math.abs(m.importe_factura))}€` : ''}${m.fecha_factura ? ` fecha: ${m.fecha_factura}` : ''} pero no hay factura subida que coincida` });
+            desc: `Tiene ${m.importe_factura != null ? `importe_factura: ${fmt(Math.abs(m.importe_factura))}€` : ''}${m.fecha_factura ? ` fecha: ${m.fecha_factura}` : ''} en DB pero ninguna factura subida coincide` });
         }
       }
 
@@ -1734,6 +1738,7 @@ function TabFiscal() {
                   const tipoLabel = {
                     sin_movimiento: 'Sin movimiento en DB',
                     sin_factura_subida: 'Sin factura subida',
+                    sin_datos_factura_db: 'Faltan datos de factura en DB',
                     desfase_fecha: 'Desfase de fecha',
                     iva_faltante_db: 'IVA no registrado en DB',
                     iva_en_db_sin_factura: 'IVA en DB sin IVA en factura',
