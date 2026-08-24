@@ -3110,16 +3110,19 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
 function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setSavingContacto }) {
   const esEdicion = !!datos?.id;
   const esCliente = tipo === 'cliente';
+  const esEquipo = tipo === 'equipo';
+  const esProveedor = tipo === 'proveedor';
+  const tipoLabel = esCliente ? 'cliente' : esEquipo ? 'miembro de equipo' : 'proveedor';
   const [form, setForm] = useState({
-    nombre:        datos?.nombre        || '',
+    nombre:         datos?.nombre         || '',
     nombre_empresa: datos?.nombre_empresa || '',
-    email:         datos?.email         || '',
-    nif_cif:       datos?.nif_cif       || '',
-    direccion:     datos?.direccion     || '',
-    notas:         datos?.notas         || '',
-    alias:         (datos?.alias || []).join(', '),
-    activo:        datos?.activo !== false,
-    fijo:          !!datos?.fijo,
+    email:          datos?.email          || '',
+    nif_cif:        datos?.nif_cif        || '',
+    direccion:      datos?.direccion      || '',
+    notas:          datos?.notas          || '',
+    alias:          (datos?.alias || []).join(', '),
+    activo:         datos?.activo !== false,
+    fijo:           !!datos?.fijo,
   });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -3130,10 +3133,9 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
     try {
       const token = await getToken();
       const aliasArr = form.alias.split(',').map(s => s.trim()).filter(Boolean);
-      const body = esCliente
-        ? { nombre: form.nombre, nombre_empresa: form.nombre_empresa || null, email: form.email || null, nif_cif: form.nif_cif || null, direccion: form.direccion || null, notas: form.notas || null, alias: aliasArr, activo: form.activo }
-        : { nombre: form.nombre, email: form.email || null, notas: form.notas || null, alias: aliasArr, fijo: form.fijo };
-      const ruta = tipo === 'cliente' ? 'clientes' : 'equipo';
+      const base = { nombre: form.nombre, nombre_empresa: form.nombre_empresa || null, email: form.email || null, nif_cif: form.nif_cif || null, direccion: form.direccion || null, notas: form.notas || null, alias: aliasArr };
+      const body = esCliente ? { ...base, activo: form.activo } : esEquipo ? { ...base, fijo: form.fijo } : base;
+      const ruta = esCliente ? 'clientes' : esEquipo ? 'equipo' : 'proveedores';
       const url = esEdicion
         ? `${BACKEND_URL}/admin/finanzas/${ruta}/${datos.id}`
         : `${BACKEND_URL}/admin/finanzas/${ruta}`;
@@ -3151,31 +3153,27 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
 
   return (
     <div onClick={onCerrar} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#1c1c1e', border: '1px solid #3f3f46', borderRadius: 14, padding: '24px 28px', width: '100%', maxWidth: 480 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#1c1c1e', border: '1px solid #3f3f46', borderRadius: 14, padding: '24px 28px', width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto' }}>
         <h3 style={{ color: 'white', fontSize: 16, fontWeight: 700, margin: '0 0 20px' }}>
-          {esEdicion ? 'Editar' : 'Nuevo'} {esCliente ? 'cliente' : 'miembro de equipo'}
+          {esEdicion ? 'Editar' : 'Nuevo'} {tipoLabel}
         </h3>
         <form onSubmit={handleGuardar} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
             <label style={S.label}>Nombre *</label>
             <input value={form.nombre} onChange={e => set('nombre', e.target.value)} required style={S.input} placeholder="Nombre" />
           </div>
-          {esCliente && (
-            <>
-              <div>
-                <label style={S.label}>Empresa</label>
-                <input value={form.nombre_empresa} onChange={e => set('nombre_empresa', e.target.value)} style={S.input} placeholder="Nombre de empresa" />
-              </div>
-              <div>
-                <label style={S.label}>NIF / CIF</label>
-                <input value={form.nif_cif} onChange={e => set('nif_cif', e.target.value)} style={S.input} placeholder="A12345678" />
-              </div>
-              <div>
-                <label style={S.label}>Dirección</label>
-                <input value={form.direccion} onChange={e => set('direccion', e.target.value)} style={S.input} placeholder="Dirección fiscal" />
-              </div>
-            </>
-          )}
+          <div>
+            <label style={S.label}>Empresa</label>
+            <input value={form.nombre_empresa} onChange={e => set('nombre_empresa', e.target.value)} style={S.input} placeholder="Nombre de empresa" />
+          </div>
+          <div>
+            <label style={S.label}>NIF / CIF</label>
+            <input value={form.nif_cif} onChange={e => set('nif_cif', e.target.value)} style={S.input} placeholder="A12345678" />
+          </div>
+          <div>
+            <label style={S.label}>Dirección</label>
+            <input value={form.direccion} onChange={e => set('direccion', e.target.value)} style={S.input} placeholder="Dirección fiscal" />
+          </div>
           <div>
             <label style={S.label}>Email</label>
             <input type="email" value={form.email} onChange={e => set('email', e.target.value)} style={S.input} placeholder="email@ejemplo.com" />
@@ -3189,13 +3187,16 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
             <label style={S.label}>Notas</label>
             <input value={form.notas} onChange={e => set('notas', e.target.value)} style={S.input} placeholder="Notas internas" />
           </div>
-          {esEdicion && (
+          {esEdicion && esCliente && (
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#a1a1aa', fontSize: 13, cursor: 'pointer' }}>
-              <input type="checkbox"
-                checked={esCliente ? form.activo : form.fijo}
-                onChange={e => set(esCliente ? 'activo' : 'fijo', e.target.checked)}
-                style={{ accentColor: '#0067FD' }} />
-              {esCliente ? 'Activo' : 'Fijo'}
+              <input type="checkbox" checked={form.activo} onChange={e => set('activo', e.target.checked)} style={{ accentColor: '#0067FD' }} />
+              Activo
+            </label>
+          )}
+          {esEdicion && esEquipo && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#a1a1aa', fontSize: 13, cursor: 'pointer' }}>
+              <input type="checkbox" checked={form.fijo} onChange={e => set('fijo', e.target.checked)} style={{ accentColor: '#0067FD' }} />
+              Fijo
             </label>
           )}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
@@ -3245,6 +3246,11 @@ export default function Finanzas() {
   const [clienteBusqueda, setClienteBusqueda] = useState('');
   // Modal contacto (cliente / equipo)
   const [modalContacto, setModalContacto] = useState(null); // null | { tipo: 'cliente'|'equipo', datos: {} | null }
+  const [proveedores, setProveedores] = useState([]);
+  const [loadingProveedores, setLoadingProveedores] = useState(false);
+  const [proveedorAbierto, setProveedorAbierto] = useState(null);
+  const [proveedorBusqueda, setProveedorBusqueda] = useState('');
+  const [proveedorSort, setProveedorSort] = useState({ campo: 'gasto', dir: 'desc' });
   const [savingContacto, setSavingContacto] = useState(false);
   const [evolHidden, setEvolHidden] = useState({});
   const [catHidden, setCatHidden] = useState({});
@@ -3616,6 +3622,43 @@ export default function Finanzas() {
 
   useEffect(() => { if (tab === 'equipo') cargarEquipo(); }, [tab, cargarEquipo]);
 
+  const cargarProveedores = useCallback(async () => {
+    setLoadingProveedores(true);
+    try {
+      const token = await getToken();
+      const params = new URLSearchParams();
+      if (desde) params.set('desde', desde);
+      if (hasta) params.set('hasta', hasta);
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/proveedores?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await r.json();
+      setProveedores(data.proveedores || []);
+    } catch (e) {
+      console.error('Error cargando proveedores:', e);
+    } finally {
+      setLoadingProveedores(false);
+    }
+  }, [desde, hasta]);
+
+  useEffect(() => { if (tab === 'proveedores') cargarProveedores(); }, [tab, cargarProveedores]);
+
+  async function eliminarContacto(id, tipo) {
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/contactos/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
+      if (tipo === 'cliente') setClientes(prev => prev.filter(c => c.id !== id));
+      else if (tipo === 'equipo') setEquipo(prev => prev.filter(e => e.id !== id));
+      else setProveedores(prev => prev.filter(p => p.id !== id));
+    } catch (err) {
+      alert('Error eliminando: ' + err.message);
+    }
+  }
+
   const tabStyle = (t) => ({
     background: tab === t ? '#27272a' : 'transparent',
     color: tab === t ? 'white' : '#71717a',
@@ -3677,6 +3720,7 @@ export default function Finanzas() {
         <button style={tabStyle('fiscal')}      onClick={() => setTab('fiscal')}>Fiscal</button>
         <button style={tabStyle('clientes')}    onClick={() => setTab('clientes')}>Clientes</button>
         <button style={tabStyle('equipo')}      onClick={() => setTab('equipo')}>Equipo</button>
+        <button style={tabStyle('proveedores')} onClick={() => setTab('proveedores')}>Proveedores</button>
         <button onClick={() => setTab('nuevo')}
           style={{ background: '#0067FD', color: 'white', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 14, cursor: 'pointer', fontWeight: 600 }}>
           + Nuevo
@@ -4563,6 +4607,10 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Editar
                 </button>
+                <button onClick={e => { e.stopPropagation(); setConfirmDialog({ texto: `¿Eliminar cliente "${c.nombre}"?`, onOk: () => eliminarContacto(c.id, 'cliente') }); }}
+                  style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
+                  Eliminar
+                </button>
                 <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
@@ -4786,6 +4834,10 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Editar
                 </button>
+                <button onClick={ev => { ev.stopPropagation(); setConfirmDialog({ texto: `¿Eliminar "${e.nombre}" del equipo?`, onOk: () => eliminarContacto(e.id, 'equipo') }); }}
+                  style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
+                  Eliminar
+                </button>
                 <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
@@ -4944,6 +4996,198 @@ export default function Finanzas() {
         );
       })()}
 
+      {/* ── PROVEEDORES ── */}
+      {tab === 'proveedores' && (() => {
+        const getValorSortP = (p, campo) => {
+          const movs = (p.movimientos || []).filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
+          const ing  = movs.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + m.cantidad, 0);
+          const gas  = movs.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + m.cantidad, 0);
+          if (campo === 'facturacion') return ing;
+          if (campo === 'gasto') return gas;
+          return ing - gas;
+        };
+        const sortProveedores = arr => [...arr].sort((a, b) => {
+          const va = getValorSortP(a, proveedorSort.campo);
+          const vb = getValorSortP(b, proveedorSort.campo);
+          return proveedorSort.dir === 'desc' ? vb - va : va - vb;
+        });
+        const buscarFiltroP = arr => {
+          const q = proveedorBusqueda.trim().toLowerCase();
+          if (!q) return arr;
+          return arr.filter(p =>
+            p.nombre.toLowerCase().includes(q) ||
+            (p.nombre_empresa || '').toLowerCase().includes(q)
+          );
+        };
+
+        const lista = sortProveedores(buscarFiltroP(proveedores));
+
+        const renderProveedor = (p) => {
+          const abierto = proveedorAbierto === p.id;
+          const movsFiltered = (p.movimientos || []).filter(m => !(m.categorias || []).includes('Traspaso Entre Cuentas'));
+          const tieneMovs = movsFiltered.length > 0;
+          const cantidadPro = m => m.cantidad / Math.max(m.proveedor_ids?.length || 1, 1);
+          const ingresos  = movsFiltered.filter(m => m.tipo === 'Ingreso').reduce((s, m) => s + cantidadPro(m), 0);
+          const gastos    = movsFiltered.filter(m => m.tipo === 'Gasto').reduce((s, m) => s + cantidadPro(m), 0);
+          const balance   = ingresos - gastos;
+          return (
+            <div key={p.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
+                <span onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                  style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
+                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                  style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
+                  <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{p.nombre}</span>
+                  {p.nombre_empresa && p.nombre_empresa !== p.nombre && (
+                    <span style={{ color: '#71717a', fontSize: 12, marginLeft: 8 }}>{p.nombre_empresa}</span>
+                  )}
+                </div>
+                <button onClick={ev => { ev.stopPropagation(); setModalContacto({ tipo: 'proveedor', datos: p }); }}
+                  style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
+                  Editar
+                </button>
+                <button onClick={ev => { ev.stopPropagation(); setConfirmDialog({ texto: `¿Eliminar proveedor "${p.nombre}"?`, onOk: () => eliminarContacto(p.id, 'proveedor') }); }}
+                  style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
+                  Eliminar
+                </button>
+                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                  style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
+                  <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
+                  <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
+                  <span style={{ fontSize: 13, color: balance >= 0 ? '#60a5fa' : '#fb923c', fontWeight: 600 }}>{fmt(balance)}</span>
+                </div>
+              </div>
+
+              {abierto && (
+                <div style={{ borderTop: '1px solid #27272a', padding: 16 }}>
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+                    {[
+                      { label: 'Ingresos', val: ingresos,  color: '#22c55e' },
+                      { label: 'Gastos',   val: -gastos,   color: '#f87171' },
+                      { label: 'Balance',  val: balance, color: balance >= 0 ? '#60a5fa' : '#fb923c' },
+                    ].map(({ label, val, color }) => (
+                      <div key={label} style={{ ...S.card, padding: '10px 16px', flex: 1, minWidth: 100 }}>
+                        <p style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>{label}</p>
+                        <p style={{ color, fontSize: 20, fontWeight: 700, margin: 0 }}>{fmt(val)}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {(p.nif_cif || p.email) && (
+                    <div style={{ display: 'flex', gap: 16, marginBottom: 14, flexWrap: 'wrap' }}>
+                      {p.nif_cif && <span style={{ color: '#71717a', fontSize: 12 }}>NIF: <span style={{ color: '#a1a1aa' }}>{p.nif_cif}</span></span>}
+                      {p.email   && <span style={{ color: '#71717a', fontSize: 12 }}>Email: <span style={{ color: '#a1a1aa' }}>{p.email}</span></span>}
+                    </div>
+                  )}
+                  {!tieneMovs ? (
+                    <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin movimientos en el periodo seleccionado.</p>
+                  ) : (() => {
+                    const movsTipo = movFiltroTipo === 'todos' ? movsFiltered : movsFiltered.filter(m => m.tipo === movFiltroTipo);
+                    const totalMovs = movsTipo.length;
+                    const paginas = movPorPagina === 'todos' ? 1 : Math.ceil(totalMovs / movPorPagina);
+                    const movsPag = movPorPagina === 'todos' ? movsTipo : movsTipo.slice((movPagina - 1) * movPorPagina, movPagina * movPorPagina);
+                    return (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                          <span style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 4 }}>Movimientos</span>
+                          {['todos', 'Ingreso', 'Gasto'].map(t => (
+                            <button key={t} onClick={() => { setMovFiltroTipo(t); setMovPagina(1); }}
+                              style={{ background: movFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: movFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
+                              {t === 'todos' ? 'Todos' : t === 'Ingreso' ? 'Ingresos' : 'Gastos'}
+                            </button>
+                          ))}
+                          <span style={{ color: '#52525b', fontSize: 11, marginLeft: 'auto' }}>{totalMovs} movimientos</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {movsPag.map(m => (
+                            <div key={m.id} onClick={() => abrirDetalle(m.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: 'pointer' }}>
+                              <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{m.fecha}</span>
+                              <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nombre}</span>
+                              {(m.categorias || []).slice(0, 2).map(cat => (
+                                <span key={cat} style={{ background: '#27272a', color: '#71717a', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{cat}</span>
+                              ))}
+                              <span style={{ color: m.tipo === 'Ingreso' ? '#22c55e' : '#f87171', fontSize: 13, fontWeight: 600, flexShrink: 0, minWidth: 70, textAlign: 'right' }}>
+                                {fmt(m.tipo === 'Ingreso' ? m.cantidad : -m.cantidad)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                          <select value={movPorPagina} onChange={e => { setMovPorPagina(e.target.value === 'todos' ? 'todos' : parseInt(e.target.value)); setMovPagina(1); }}
+                            style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 8px', fontSize: 12, cursor: 'pointer' }}>
+                            {[10, 50, 100].map(n => <option key={n} value={n}>{n} por página</option>)}
+                            <option value="todos">Todos</option>
+                          </select>
+                          {movPorPagina !== 'todos' && paginas > 1 && (
+                            <>
+                              <button onClick={() => setMovPagina(prev => Math.max(1, prev - 1))} disabled={movPagina === 1}
+                                style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>‹</button>
+                              <span style={{ color: '#71717a', fontSize: 12 }}>{movPagina} / {paginas}</span>
+                              <button onClick={() => setMovPagina(prev => Math.min(paginas, prev + 1))} disabled={movPagina === paginas}
+                                style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>›</button>
+                            </>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        return (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+              <DateRangePicker desde={desde} hasta={hasta} onApply={(d, h) => { setDesde(d); setHasta(h); }} />
+              <button
+                onClick={() => setModalContacto({ tipo: 'proveedor', datos: null })}
+                style={{ background: '#0067FD', border: 'none', color: 'white', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', flexShrink: 0, fontWeight: 600 }}
+              >＋ Nuevo proveedor</button>
+
+              <input
+                type="text"
+                placeholder="Buscar proveedor…"
+                value={proveedorBusqueda}
+                onChange={e => setProveedorBusqueda(e.target.value)}
+                style={{ background: '#18181b', border: '1px solid #3f3f46', color: 'white', borderRadius: 8, padding: '8px 12px', fontSize: 13, outline: 'none', width: 180 }}
+              />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, padding: '4px 6px' }}>
+                <span style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', paddingLeft: 4 }}>Ordenar</span>
+                {[
+                  { key: 'beneficio',   label: 'Beneficio' },
+                  { key: 'facturacion', label: 'Facturación' },
+                  { key: 'gasto',       label: 'Gasto' },
+                ].map(({ key, label }) => (
+                  <button key={key}
+                    onClick={() => setProveedorSort(s => s.campo === key ? { campo: key, dir: s.dir === 'desc' ? 'asc' : 'desc' } : { campo: key, dir: 'desc' })}
+                    style={{
+                      background: proveedorSort.campo === key ? '#3f3f46' : 'transparent',
+                      border: 'none', color: proveedorSort.campo === key ? 'white' : '#71717a',
+                      borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer',
+                    }}>
+                    {label}{proveedorSort.campo === key ? (proveedorSort.dir === 'desc' ? ' ↓' : ' ↑') : ''}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {loadingProveedores ? (
+              <p style={{ color: '#71717a', fontSize: 14 }}>Cargando proveedores…</p>
+            ) : proveedores.length === 0 ? (
+              <div style={{ ...S.card, padding: 24, textAlign: 'center' }}>
+                <p style={{ color: '#71717a', fontSize: 14, margin: 0 }}>No hay proveedores. Pulsa «＋ Nuevo proveedor» para añadir.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {lista.map(renderProveedor)}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* ── NUEVO ── */}
       {tab === 'nuevo' && (
         <NuevoMovimientoTab onGuardado={() => { setSinMovimientosMes(false); setTab('movimientos'); cargarMovimientos(1); cargarDashboard(); }} />
@@ -4956,7 +5200,8 @@ export default function Finanzas() {
         onGuardado={() => {
           setModalContacto(null);
           if (modalContacto.tipo === 'cliente') cargarClientes();
-          else cargarEquipo();
+          else if (modalContacto.tipo === 'equipo') cargarEquipo();
+          else cargarProveedores();
         }}
         onCerrar={() => setModalContacto(null)}
         savingContacto={savingContacto}
