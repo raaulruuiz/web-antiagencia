@@ -1101,7 +1101,7 @@ function TabFiscal({ onAbrirMovimiento }) {
   const [dragOver, setDragOver] = useState(null); // 'ingreso' | 'gasto' | null
   const [selFacturas, setSelFacturas] = useState(new Set()); // ids seleccionados para bulk delete
   const [eliminandoBulk, setEliminandoBulk] = useState(false);
-  const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre } | null
+  const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre, id?, data? } | null
   const [facturaFiltro, setFacturaFiltro] = useState('todos'); // 'todos' | 'ingreso' | 'gasto'
   const [facturaOrden, setFacturaOrden] = useState('fecha_desc'); // 'fecha_desc' | 'fecha_asc' | 'importe_desc' | 'importe_asc'
   const [subirAbierto, setSubirAbierto] = useState(false); // mostrar zonas de drop
@@ -1464,7 +1464,7 @@ function TabFiscal({ onAbrirMovimiento }) {
         )}
         <span style={{ color: f._warning ? '#f59e0b' : '#52525b', fontSize:11, minWidth:16 }} title={f._warning || undefined}>{f._warning ? '⚠️' : '📄'}</span>
         {f.archivo_url
-          ? <button onClick={() => setFacturaViewer({ url: f.archivo_url, nombre: f.archivo_nombre })} style={{ flex:1, background:'none', border:'none', padding:0, color: f._warning ? '#fbbf24' : '#60a5fa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100, textAlign:'left', cursor:'pointer', fontSize:12 }} title={f._warning || 'Ver documento'}>{f.archivo_nombre || '—'}</button>
+          ? <button onClick={() => setFacturaViewer({ url: f.archivo_url, nombre: f.archivo_nombre, id: f.id, data: f })} style={{ flex:1, background:'none', border:'none', padding:0, color: f._warning ? '#fbbf24' : '#60a5fa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100, textAlign:'left', cursor:'pointer', fontSize:12 }} title={f._warning || 'Ver documento'}>{f.archivo_nombre || '—'}</button>
           : <span style={{ flex:1, color: f._warning ? '#fbbf24' : '#a1a1aa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100 }} title={f._warning || undefined}>{f.archivo_nombre || '—'}</span>
         }
         <span style={{ background: f.tipo==='ingreso' ? '#052e16' : '#1a0a0a', color: f.tipo==='ingreso' ? '#22c55e' : '#f87171', border: `1px solid ${f.tipo==='ingreso'?'#166534':'#7f1d1d'}`, borderRadius:4, padding:'1px 7px', fontSize:11, flexShrink:0 }}>
@@ -1908,7 +1908,7 @@ function TabFiscal({ onAbrirMovimiento }) {
                             </button>
                           )}
                           {c.factura?.archivo_url && (
-                            <button onClick={() => setFacturaViewer({ url: c.factura.archivo_url, nombre: c.factura.archivo_nombre })}
+                            <button onClick={() => setFacturaViewer({ url: c.factura.archivo_url, nombre: c.factura.archivo_nombre, id: c.factura.id, data: c.factura })}
                               style={{ background:'#050d1a', border:'1px solid #1d4ed8', color:'#60a5fa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:260, overflow:'hidden' }}>
                               <span style={{ flexShrink:0 }}>📄</span>
                               <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.factura.archivo_nombre}</span>
@@ -2034,13 +2034,35 @@ function TabFiscal({ onAbrirMovimiento }) {
         <div onClick={() => setFacturaViewer(null)}
           style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:9999, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24 }}>
           <div onClick={e => e.stopPropagation()}
-            style={{ width:'100%', maxWidth:900, height:'90vh', background:'#1a1a1a', borderRadius:12, border:'1px solid #3f3f46', display:'flex', flexDirection:'column', overflow:'hidden' }}>
+            style={{ width:'100%', maxWidth:960, height:'92vh', background:'#1a1a1a', borderRadius:12, border:'1px solid #3f3f46', display:'flex', flexDirection:'column', overflow:'hidden' }}>
             {/* Header */}
             <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
               <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
+              {facturaViewer.id && <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace', flexShrink:0 }}>{facturaViewer.id.slice(0,8)}…</span>}
               <a href={facturaViewer.url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:12, textDecoration:'none', flexShrink:0 }}>↗ Abrir en nueva pestaña</a>
               <button onClick={() => setFacturaViewer(null)} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
             </div>
+            {/* Metadata */}
+            {facturaViewer.data && (() => {
+              const fv = facturaViewer.data;
+              const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
+              const findC = id => ctodos.find(c => c.id === id)?.nombre || id?.slice(0,8) || '—';
+              const pill = (txt, color) => <span style={{ background: color+'22', color, border:`1px solid ${color}44`, borderRadius:4, padding:'1px 7px', fontSize:11, fontWeight:600, flexShrink:0 }}>{txt}</span>;
+              return (
+                <div style={{ display:'flex', gap:20, padding:'10px 16px', borderBottom:'1px solid #27272a', flexShrink:0, flexWrap:'wrap', alignItems:'center' }}>
+                  {fv.tipo && pill(fv.tipo === 'ingreso' ? 'Venta' : 'Compra', fv.tipo === 'ingreso' ? '#4ade80' : '#f87171')}
+                  {fv.fecha_factura && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Fecha</span> {fv.fecha_factura}</span>}
+                  {fv.numero_factura && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Nº</span> {fv.numero_factura}</span>}
+                  {fv.nombre_entidad && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Entidad</span> {fv.nombre_entidad}</span>}
+                  {fv.nif_cif && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>NIF</span> {fv.nif_cif}</span>}
+                  {fv.importe != null && <span style={{ color:'#e4e4e7', fontSize:13, fontWeight:600 }}>{fv.importe?.toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>}
+                  {fv.impuesto != null && fv.impuesto > 0 && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>IVA</span> {fv.impuesto?.toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>}
+                  {fv.factura_proveedor_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Proveedor</span> {findC(fv.factura_proveedor_id)}</span>}
+                  {fv.factura_cliente_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Cliente</span> {findC(fv.factura_cliente_id)}</span>}
+                  {fv.anio && <span style={{ color:'#52525b', fontSize:12 }}>Q{fv.trimestre} {fv.anio}</span>}
+                </div>
+              );
+            })()}
             {/* Contenido */}
             {/\.(jpg|jpeg|png|gif|webp)$/i.test(facturaViewer.nombre)
               ? <img src={facturaViewer.url} alt={facturaViewer.nombre} style={{ flex:1, objectFit:'contain', width:'100%', height:'100%' }} />
@@ -2088,7 +2110,7 @@ function TabFiscal({ onAbrirMovimiento }) {
                         {/* Doc clicable */}
                         <div style={{ flex:'0 0 20px' }}>
                           {f.archivo_url
-                            ? <button onClick={() => setFacturaViewer({ url: f.archivo_url, nombre: f.archivo_nombre })}
+                            ? <button onClick={() => setFacturaViewer({ url: f.archivo_url, nombre: f.archivo_nombre, id: f.id, data: f })}
                                 style={{ background:'none', border:'none', padding:0, cursor:'pointer', color:'#60a5fa', fontSize:14, lineHeight:1 }} title="Ver documento">📄</button>
                             : <span style={{ color:'#3f3f46', fontSize:14 }}>—</span>
                           }
@@ -3282,6 +3304,16 @@ export default function Finanzas() {
   const [modalNuevosContactos, setModalNuevosContactos] = useState(null); // null | array
   const [contactosTodos, setContactosTodos] = useState([]);
   const [confirmandoContactos, setConfirmandoContactos] = useState(false);
+  // Tab Documentos (main)
+  const [docTabDesde, setDocTabDesde] = useState(() => lsGet('fin_doc_desde', '2023-01-01'));
+  const [docTabHasta, setDocTabHasta] = useState(() => lsGet('fin_doc_hasta', new Date().toISOString().slice(0,10)));
+  const [documentosList, setDocumentosList] = useState([]);
+  const [loadingDocumentos, setLoadingDocumentos] = useState(false);
+  const [docTabBusqueda, setDocTabBusqueda] = useState('');
+  const [docTabTipo, setDocTabTipo] = useState('todos');
+  const [docTabSort, setDocTabSort] = useState({ campo: 'fecha_factura', dir: 'desc' });
+  const [docTabEditando, setDocTabEditando] = useState(null); // { id, campo, valor }
+  const [docTabContactos, setDocTabContactos] = useState([]);
   const [evolHidden, setEvolHidden] = useState({});
   const [catHidden, setCatHidden] = useState({});
   const [ctaHidden, setCtaHidden] = useState({});
@@ -3370,6 +3402,65 @@ export default function Finanzas() {
     const qs = params.toString();
     window.history.replaceState({}, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
   }, [movDetail]);
+
+  // URL sync: ?doc=ID ↔ facturaViewer
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('doc');
+    if (id) {
+      getToken().then(token => {
+        fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+          .then(r => r.json())
+          .then(data => { if (data?.id) setFacturaViewer({ url: data.archivo_url, nombre: data.archivo_nombre || 'Documento', id: data.id, data }); })
+          .catch(() => {});
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (facturaViewer?.id) {
+      params.set('doc', facturaViewer.id);
+    } else {
+      params.delete('doc');
+    }
+    const qs = params.toString();
+    window.history.replaceState({}, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
+  }, [facturaViewer]);
+
+  async function cargarDocumentos(d, h) {
+    const desde = d || docTabDesde;
+    const hasta = h || docTabHasta;
+    setLoadingDocumentos(true);
+    try {
+      const token = await getToken();
+      const params = new URLSearchParams();
+      if (desde) params.set('desde', desde);
+      if (hasta) params.set('hasta', hasta);
+      const [rDocs, rCtodos] = await Promise.all([
+        fetch(`${BACKEND_URL}/admin/finanzas/facturas?${params}`, { headers: { Authorization: `Bearer ${token}` } }),
+        docTabContactos.length ? Promise.resolve(null) :
+          fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      if (rDocs.ok) setDocumentosList(await rDocs.json());
+      if (rCtodos && rCtodos.ok) setDocTabContactos(await rCtodos.json());
+    } catch(e) {}
+    finally { setLoadingDocumentos(false); }
+  }
+
+  async function guardarCeldaDoc(id, campo, valor) {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [campo]: valor }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(()=>({}))).error || 'Error');
+      const updated = await res.json();
+      setDocumentosList(prev => prev.map(d => d.id === id ? updated : d));
+    } catch(e) { console.error(e); }
+  }
 
   async function guardarCeldaInline(id, campo, valor) {
     try {
@@ -3747,6 +3838,7 @@ export default function Finanzas() {
       <div style={{ display: 'flex', gap: 4, marginBottom: 20, flexWrap: 'wrap' }}>
         <button style={tabStyle('dashboard')}   onClick={() => setTab('dashboard')}>Dashboard</button>
         <button style={tabStyle('movimientos')} onClick={() => setTab('movimientos')}>Movimientos</button>
+        <button style={tabStyle('documentos')}  onClick={() => { setTab('documentos'); if (!documentosList.length) cargarDocumentos(); }}>Documentos</button>
         <button style={tabStyle('fiscal')}      onClick={() => setTab('fiscal')}>Fiscal</button>
         <button style={tabStyle('clientes')}    onClick={() => setTab('clientes')}>Clientes</button>
         <button style={tabStyle('equipo')}      onClick={() => setTab('equipo')}>Equipo</button>
@@ -4578,6 +4670,156 @@ export default function Finanzas() {
         </>
       )}
 
+      {/* ── DOCUMENTOS ── */}
+      {tab === 'documentos' && (() => {
+        const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
+        const findC = id => ctodos.find(c => c.id === id)?.nombre || '—';
+
+        const COLS_DOCS = [
+          { key: 'fecha_factura',        label: 'Fecha',        w: 110 },
+          { key: 'numero_factura',       label: 'Nº Factura',   w: 140 },
+          { key: 'nombre_entidad',       label: 'Entidad',      flex: 1 },
+          { key: 'tipo',                 label: 'Tipo',         w: 80 },
+          { key: 'importe',              label: 'Importe',      w: 100 },
+          { key: 'impuesto',             label: 'IVA',          w: 90 },
+          { key: 'irpf',                 label: 'IRPF',         w: 70 },
+          { key: 'nif_cif',              label: 'NIF/CIF',      w: 120 },
+          { key: 'factura_proveedor_id', label: 'Proveedor',    w: 160, readonly: true },
+          { key: 'factura_cliente_id',   label: 'Cliente',      w: 160, readonly: true },
+          { key: 'anio',                 label: 'Año',          w: 60 },
+          { key: 'trimestre',            label: 'Q',            w: 40 },
+          { key: 'archivo_nombre',       label: 'Archivo',      w: 140 },
+          { key: 'id',                   label: 'ID',           w: 290, readonly: true },
+        ];
+
+        let docs = [...documentosList];
+        if (docTabTipo !== 'todos') docs = docs.filter(d => d.tipo === docTabTipo);
+        if (docTabBusqueda.trim()) {
+          const q = docTabBusqueda.toLowerCase();
+          docs = docs.filter(d =>
+            (d.nombre_entidad || '').toLowerCase().includes(q) ||
+            (d.numero_factura || '').toLowerCase().includes(q) ||
+            (d.archivo_nombre || '').toLowerCase().includes(q) ||
+            (d.nif_cif || '').toLowerCase().includes(q)
+          );
+        }
+        docs = docs.sort((a, b) => {
+          const va = a[docTabSort.campo] ?? '';
+          const vb = b[docTabSort.campo] ?? '';
+          return docTabSort.dir === 'asc' ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+        });
+
+        const sortBtn = (campo, label) => (
+          <button onClick={() => setDocTabSort(s => ({ campo, dir: s.campo === campo && s.dir === 'asc' ? 'desc' : 'asc' }))}
+            style={{ background: docTabSort.campo === campo ? '#27272a' : 'transparent', border: '1px solid #3f3f46', color: docTabSort.campo === campo ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
+            {label} {docTabSort.campo === campo ? (docTabSort.dir === 'asc' ? '↑' : '↓') : ''}
+          </button>
+        );
+
+        return (
+          <>
+            {/* Toolbar */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              <DateRangePicker desde={docTabDesde} hasta={docTabHasta} onApply={(d, h) => { setDocTabDesde(d); setDocTabHasta(h); lsSet('fin_doc_desde', d); lsSet('fin_doc_hasta', h); cargarDocumentos(d, h); }} />
+              <button style={S.ghost} onClick={() => cargarDocumentos()}>↺</button>
+              {['todos', 'ingreso', 'gasto'].map(t => (
+                <button key={t} onClick={() => setDocTabTipo(t)}
+                  style={{ background: docTabTipo === t ? '#27272a' : 'transparent', border: '1px solid #3f3f46', color: docTabTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
+                  {t === 'todos' ? 'Todos' : t === 'ingreso' ? 'Ventas' : 'Compras'}
+                </button>
+              ))}
+              <span style={{ color: '#52525b', fontSize: 11 }}>Ordenar:</span>
+              {sortBtn('fecha_factura', 'Fecha')}
+              {sortBtn('importe', 'Importe')}
+              {sortBtn('nombre_entidad', 'Entidad')}
+              <input type="text" placeholder="Buscar…" value={docTabBusqueda} onChange={e => setDocTabBusqueda(e.target.value)}
+                style={{ ...S.input, width: 180, marginLeft: 'auto' }} />
+            </div>
+            <p style={{ color: '#52525b', fontSize: 12, marginBottom: 8 }}>{docs.length} documento{docs.length !== 1 ? 's' : ''}</p>
+
+            {loadingDocumentos ? (
+              <p style={{ color: '#52525b' }}>Cargando…</p>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ borderCollapse: 'collapse', minWidth: COLS_DOCS.reduce((a,c) => a + (c.w || 160), 0), width: '100%', fontSize: 12 }}>
+                  <thead>
+                    <tr>
+                      {COLS_DOCS.map(col => (
+                        <th key={col.key} style={{ width: col.w, minWidth: col.w, color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '6px 8px', borderBottom: '1px solid #27272a', textAlign: 'left', whiteSpace: 'nowrap', background: '#0f0f0f', position: 'sticky', top: 0, zIndex: 1 }}>
+                          {col.label}
+                        </th>
+                      ))}
+                      <th style={{ width: 40, background: '#0f0f0f', position: 'sticky', top: 0, zIndex: 1, borderBottom: '1px solid #27272a' }} />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {docs.map(doc => (
+                      <tr key={doc.id} style={{ borderBottom: '1px solid #1c1c1e' }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#18181b'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        {COLS_DOCS.map(col => {
+                          const val = doc[col.key];
+                          const isEditing = docTabEditando?.id === doc.id && docTabEditando?.campo === col.key;
+
+                          if (col.key === 'tipo') return (
+                            <td key={col.key} style={{ padding: '6px 8px', whiteSpace: 'nowrap' }}>
+                              <span style={{ background: val === 'ingreso' ? '#14532d' : '#450a0a', color: val === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>
+                                {val === 'ingreso' ? 'Venta' : 'Compra'}
+                              </span>
+                            </td>
+                          );
+
+                          if (col.key === 'factura_proveedor_id' || col.key === 'factura_cliente_id') return (
+                            <td key={col.key} style={{ padding: '6px 8px', color: '#a1a1aa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: col.w }}>
+                              {findC(val)}
+                            </td>
+                          );
+
+                          if (col.key === 'id') return (
+                            <td key={col.key} style={{ padding: '6px 8px', color: '#52525b', fontFamily: 'monospace', fontSize: 10, whiteSpace: 'nowrap' }}>{val || '—'}</td>
+                          );
+
+                          if (col.readonly) return (
+                            <td key={col.key} style={{ padding: '6px 8px', color: '#a1a1aa', whiteSpace: 'nowrap' }}>{val ?? '—'}</td>
+                          );
+
+                          return (
+                            <td key={col.key} style={{ padding: '2px 4px', maxWidth: col.w || col.flex ? undefined : col.w }}>
+                              {isEditing ? (
+                                <input autoFocus value={docTabEditando.valor}
+                                  onChange={e => setDocTabEditando(prev => ({ ...prev, valor: e.target.value }))}
+                                  onBlur={() => { guardarCeldaDoc(doc.id, col.key, docTabEditando.valor); setDocTabEditando(null); }}
+                                  onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') setDocTabEditando(null); }}
+                                  style={{ width: '100%', background: '#1c1c1e', border: '1px solid #0067FD', color: 'white', borderRadius: 4, padding: '3px 6px', fontSize: 12, outline: 'none', boxSizing: 'border-box' }} />
+                              ) : (
+                                <div onClick={() => setDocTabEditando({ id: doc.id, campo: col.key, valor: val ?? '' })}
+                                  style={{ padding: '4px 6px', color: val ? '#d4d4d8' : '#3f3f46', cursor: 'text', borderRadius: 4, minHeight: 24, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                  onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                  {col.key === 'importe' || col.key === 'impuesto' || col.key === 'irpf'
+                                    ? (val != null ? `${parseFloat(val).toLocaleString('es-ES', { minimumFractionDigits: 2 })} €` : '—')
+                                    : (val ?? '—')}
+                                </div>
+                              )}
+                            </td>
+                          );
+                        })}
+                        <td style={{ padding: '4px 6px', textAlign: 'center' }}>
+                          {doc.archivo_url && (
+                            <button onClick={() => setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
+                              style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: 14, padding: 0 }} title="Ver PDF">📄</button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        );
+      })()}
+
       {/* ── FISCAL ── */}
       {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} />}
 
@@ -4756,7 +4998,7 @@ export default function Finanzas() {
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                             {docsFiltered.map(doc => (
-                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento' })}
+                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
                                 style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
                                 <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
                                 <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
@@ -5019,7 +5261,7 @@ export default function Finanzas() {
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                             {docsFiltered.map(doc => (
-                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento' })}
+                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
                                 style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
                                 <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
                                 <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
@@ -5273,7 +5515,7 @@ export default function Finanzas() {
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                             {docsFiltered.map(doc => (
-                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento' })}
+                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
                                 style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
                                 <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
                                 <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
