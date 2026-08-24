@@ -4934,7 +4934,7 @@ export default function Finanzas() {
                               }
 
                               if (col.editable) return (
-                                <td key={col.key} style={{ width:col.w, padding:'2px 6px', verticalAlign:'middle' }}>
+                                <td key={col.key} style={{ width:col.w, maxWidth:col.w, padding:'2px 6px', verticalAlign:'middle', overflow:'hidden' }}>
                                   {isEditing ? (
                                     <input autoFocus value={docTabEditando.valor}
                                       onChange={e => setDocTabEditando(prev=>({...prev, valor:e.target.value}))}
@@ -4943,7 +4943,7 @@ export default function Finanzas() {
                                       style={{ width:'100%', background:'#1c1c1e', border:'1px solid #0067FD', color:'white', borderRadius:4, padding:'3px 6px', fontSize:12, outline:'none', boxSizing:'border-box' }} />
                                   ) : (
                                     <div onClick={() => setDocTabEditando({ id:doc.id, campo:col.key, valor:val??'' })}
-                                      style={{ padding:'3px 4px', color:val?'#d4d4d8':'#3f3f46', cursor:'text', borderRadius:4, minHeight:22, overflow:'hidden', textOverflow:'ellipsis', background:hov?'#27272a':'transparent' }}
+                                      style={{ padding:'3px 4px', color:val?'#d4d4d8':'#3f3f46', cursor:'text', borderRadius:4, minHeight:22, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', background:hov?'#27272a':'transparent' }}
                                       onMouseEnter={e=>e.currentTarget.style.background='#27272a'}
                                       onMouseLeave={e=>e.currentTarget.style.background=hov?'#27272a':'transparent'}>
                                       {val||'—'}
