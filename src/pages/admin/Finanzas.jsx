@@ -3310,6 +3310,8 @@ export default function Finanzas() {
   const [docOpenCalcKey, setDocOpenCalcKey] = useState(null);
   const [docCalcDropPos, setDocCalcDropPos] = useState(null);
   const [docEliminandoBulk, setDocEliminandoBulk] = useState(false);
+  const [docBulkProveedor, setDocBulkProveedor] = useState('');
+  const [docBulkCliente, setDocBulkCliente] = useState('');
   const [docHoveredRow, setDocHoveredRow] = useState(null);
   const [evolHidden, setEvolHidden] = useState({});
   const [catHidden, setCatHidden] = useState({});
@@ -3496,6 +3498,19 @@ export default function Finanzas() {
       setDocSeleccionados(new Set());
     } catch(e) { console.error(e); }
     finally { setDocEliminandoBulk(false); }
+  }
+
+  async function editarDocsBulkContacto(campo, contactId) {
+    if (!contactId) return;
+    const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
+    const ids = [...docSeleccionados];
+    await Promise.all(ids.map(id => {
+      const doc = documentosList.find(d => d.id === id);
+      const extra = doc ? contactFiscalUpdates(contactId, ctodos, doc.tipo, campo) : {};
+      return guardarCeldaDoc(id, { [campo]: contactId, ...extra });
+    }));
+    if (campo === 'factura_proveedor_id') setDocBulkProveedor('');
+    else setDocBulkCliente('');
   }
 
   async function guardarCeldaInline(id, campo, valor) {
@@ -4858,6 +4873,32 @@ export default function Finanzas() {
                     Seleccionar todos ({docs.length})
                   </button>
                 )}
+                {/* Bulk proveedor */}
+                <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+                  <span style={{ color:'#71717a', fontSize:12 }}>Proveedor:</span>
+                  <select value={docBulkProveedor} onChange={e => setDocBulkProveedor(e.target.value)}
+                    style={{ background:'#27272a', border:'1px solid #3f3f46', borderRadius:6, color:'white', padding:'3px 6px', fontSize:12, outline:'none' }}>
+                    <option value="">— elegir —</option>
+                    {(docTabContactos.length ? docTabContactos : contactosTodos).map(c => <option key={c.id} value={c.id}>{c.nombre_empresa||c.nombre}</option>)}
+                  </select>
+                  {docBulkProveedor && (
+                    <button onClick={() => editarDocsBulkContacto('factura_proveedor_id', docBulkProveedor)}
+                      style={{ background:'#0067FD', border:'none', borderRadius:6, color:'white', padding:'3px 10px', fontSize:12, cursor:'pointer', fontWeight:600 }}>Aplicar</button>
+                  )}
+                </div>
+                {/* Bulk cliente */}
+                <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+                  <span style={{ color:'#71717a', fontSize:12 }}>Cliente:</span>
+                  <select value={docBulkCliente} onChange={e => setDocBulkCliente(e.target.value)}
+                    style={{ background:'#27272a', border:'1px solid #3f3f46', borderRadius:6, color:'white', padding:'3px 6px', fontSize:12, outline:'none' }}>
+                    <option value="">— elegir —</option>
+                    {(docTabContactos.length ? docTabContactos : contactosTodos).map(c => <option key={c.id} value={c.id}>{c.nombre_empresa||c.nombre}</option>)}
+                  </select>
+                  {docBulkCliente && (
+                    <button onClick={() => editarDocsBulkContacto('factura_cliente_id', docBulkCliente)}
+                      style={{ background:'#0067FD', border:'none', borderRadius:6, color:'white', padding:'3px 10px', fontSize:12, cursor:'pointer', fontWeight:600 }}>Aplicar</button>
+                  )}
+                </div>
                 <button onClick={eliminarDocsBulk} disabled={docEliminandoBulk}
                   style={{ background:'#450a0a', border:'1px solid #7f1d1d', color:'#f87171', borderRadius:6, padding:'4px 12px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
                   {docEliminandoBulk?'Eliminando…':`🗑 Eliminar ${docSeleccionados.size}`}
