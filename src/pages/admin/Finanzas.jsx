@@ -1081,7 +1081,7 @@ function FiscalMetric({ label, value, color, comp }) {
   );
 }
 
-function TabFiscal({ onAbrirMovimiento }) {
+function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
   const [anio, setAnio] = useState(new Date().getFullYear());
   const [datos, setDatos] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1101,7 +1101,7 @@ function TabFiscal({ onAbrirMovimiento }) {
   const [dragOver, setDragOver] = useState(null); // 'ingreso' | 'gasto' | null
   const [selFacturas, setSelFacturas] = useState(new Set()); // ids seleccionados para bulk delete
   const [eliminandoBulk, setEliminandoBulk] = useState(false);
-  const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre, id?, data? } | null
+  // facturaViewer is passed as prop from Finanzas
   const [facturaFiltro, setFacturaFiltro] = useState('todos'); // 'todos' | 'ingreso' | 'gasto'
   const [facturaOrden, setFacturaOrden] = useState('fecha_desc'); // 'fecha_desc' | 'fecha_asc' | 'importe_desc' | 'importe_asc'
   const [subirAbierto, setSubirAbierto] = useState(false); // mostrar zonas de drop
@@ -2024,50 +2024,6 @@ function TabFiscal({ onAbrirMovimiento }) {
                 : <iframe src={errSplitView.factura.archivo_url} title="factura" style={{ flex:1, width:'100%', border:'none' }} />
               }
             </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Viewer modal */}
-      {facturaViewer && createPortal(
-        <div onClick={() => setFacturaViewer(null)}
-          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:9999, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24 }}>
-          <div onClick={e => e.stopPropagation()}
-            style={{ width:'100%', maxWidth:960, height:'92vh', background:'#1a1a1a', borderRadius:12, border:'1px solid #3f3f46', display:'flex', flexDirection:'column', overflow:'hidden' }}>
-            {/* Header */}
-            <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
-              <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
-              {facturaViewer.id && <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace', flexShrink:0 }}>{facturaViewer.id.slice(0,8)}…</span>}
-              <a href={facturaViewer.url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:12, textDecoration:'none', flexShrink:0 }}>↗ Abrir en nueva pestaña</a>
-              <button onClick={() => setFacturaViewer(null)} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
-            </div>
-            {/* Metadata */}
-            {facturaViewer.data && (() => {
-              const fv = facturaViewer.data;
-              const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
-              const findC = id => ctodos.find(c => c.id === id)?.nombre || id?.slice(0,8) || '—';
-              const pill = (txt, color) => <span style={{ background: color+'22', color, border:`1px solid ${color}44`, borderRadius:4, padding:'1px 7px', fontSize:11, fontWeight:600, flexShrink:0 }}>{txt}</span>;
-              return (
-                <div style={{ display:'flex', gap:20, padding:'10px 16px', borderBottom:'1px solid #27272a', flexShrink:0, flexWrap:'wrap', alignItems:'center' }}>
-                  {fv.tipo && pill(fv.tipo === 'ingreso' ? 'Venta' : 'Compra', fv.tipo === 'ingreso' ? '#4ade80' : '#f87171')}
-                  {fv.fecha_factura && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Fecha</span> {fv.fecha_factura}</span>}
-                  {fv.numero_factura && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Nº</span> {fv.numero_factura}</span>}
-                  {fv.nombre_entidad && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Entidad</span> {fv.nombre_entidad}</span>}
-                  {fv.nif_cif && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>NIF</span> {fv.nif_cif}</span>}
-                  {fv.importe != null && <span style={{ color:'#e4e4e7', fontSize:13, fontWeight:600 }}>{fv.importe?.toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>}
-                  {fv.impuesto != null && fv.impuesto > 0 && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>IVA</span> {fv.impuesto?.toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>}
-                  {fv.factura_proveedor_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Proveedor</span> {findC(fv.factura_proveedor_id)}</span>}
-                  {fv.factura_cliente_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Cliente</span> {findC(fv.factura_cliente_id)}</span>}
-                  {fv.anio && <span style={{ color:'#52525b', fontSize:12 }}>Q{fv.trimestre} {fv.anio}</span>}
-                </div>
-              );
-            })()}
-            {/* Contenido */}
-            {/\.(jpg|jpeg|png|gif|webp)$/i.test(facturaViewer.nombre)
-              ? <img src={facturaViewer.url} alt={facturaViewer.nombre} style={{ flex:1, objectFit:'contain', width:'100%', height:'100%' }} />
-              : <iframe src={facturaViewer.url} title={facturaViewer.nombre} style={{ flex:1, width:'100%', border:'none' }} />
-            }
           </div>
         </div>,
         document.body
@@ -3338,6 +3294,7 @@ export default function Finanzas() {
   const [mostrarTodos, setMostrarTodos] = useState(false);
   const [movEditando, setMovEditando] = useState(null);
   const [movDetail, setMovDetail] = useState(null);
+  const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre, id?, data? } | null
   const [dashComp, setDashComp] = useState(null);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errComp, setErrComp] = useState(null);
@@ -4821,7 +4778,7 @@ export default function Finanzas() {
       })()}
 
       {/* ── FISCAL ── */}
-      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} />}
+      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewer={facturaViewer} setFacturaViewer={setFacturaViewer} />}
 
       {/* ── CLIENTES ── */}
       {tab === 'clientes' && (() => {
@@ -5752,6 +5709,50 @@ export default function Finanzas() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Viewer modal documentos/facturas */}
+      {facturaViewer && createPortal(
+        <div onClick={() => setFacturaViewer(null)}
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:9999, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24 }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width:'100%', maxWidth:960, height:'92vh', background:'#1a1a1a', borderRadius:12, border:'1px solid #3f3f46', display:'flex', flexDirection:'column', overflow:'hidden' }}>
+            {/* Header */}
+            <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
+              <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
+              {facturaViewer.id && <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace', flexShrink:0 }}>{facturaViewer.id.slice(0,8)}…</span>}
+              <a href={facturaViewer.url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:12, textDecoration:'none', flexShrink:0 }}>↗ Abrir en nueva pestaña</a>
+              <button onClick={() => setFacturaViewer(null)} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
+            </div>
+            {/* Metadata */}
+            {facturaViewer.data && (() => {
+              const fv = facturaViewer.data;
+              const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
+              const findC = id => ctodos.find(c => c.id === id)?.nombre || id?.slice(0,8) || '—';
+              const pill = (txt, color) => <span style={{ background: color+'22', color, border:`1px solid ${color}44`, borderRadius:4, padding:'1px 7px', fontSize:11, fontWeight:600, flexShrink:0 }}>{txt}</span>;
+              return (
+                <div style={{ display:'flex', gap:20, padding:'10px 16px', borderBottom:'1px solid #27272a', flexShrink:0, flexWrap:'wrap', alignItems:'center' }}>
+                  {fv.tipo && pill(fv.tipo === 'ingreso' ? 'Venta' : 'Compra', fv.tipo === 'ingreso' ? '#4ade80' : '#f87171')}
+                  {fv.fecha_factura && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Fecha</span> {fv.fecha_factura}</span>}
+                  {fv.numero_factura && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Nº</span> {fv.numero_factura}</span>}
+                  {fv.nombre_entidad && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Entidad</span> {fv.nombre_entidad}</span>}
+                  {fv.nif_cif && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>NIF</span> {fv.nif_cif}</span>}
+                  {fv.importe != null && <span style={{ color:'#e4e4e7', fontSize:13, fontWeight:600 }}>{fv.importe?.toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>}
+                  {fv.impuesto != null && fv.impuesto > 0 && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>IVA</span> {fv.impuesto?.toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>}
+                  {fv.factura_proveedor_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Proveedor</span> {findC(fv.factura_proveedor_id)}</span>}
+                  {fv.factura_cliente_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Cliente</span> {findC(fv.factura_cliente_id)}</span>}
+                  {fv.anio && <span style={{ color:'#52525b', fontSize:12 }}>Q{fv.trimestre} {fv.anio}</span>}
+                </div>
+              );
+            })()}
+            {/* Contenido */}
+            {/\.(jpg|jpeg|png|gif|webp)$/i.test(facturaViewer.nombre)
+              ? <img src={facturaViewer.url} alt={facturaViewer.nombre} style={{ flex:1, objectFit:'contain', width:'100%', height:'100%' }} />
+              : <iframe src={facturaViewer.url} title={facturaViewer.nombre} style={{ flex:1, width:'100%', border:'none' }} />
+            }
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
