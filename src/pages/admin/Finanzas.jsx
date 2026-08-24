@@ -4921,13 +4921,13 @@ export default function Finanzas() {
                               );
 
                               if (['importe','impuesto','irpf'].includes(col.key)) {
-                                const num = val != null ? parseFloat(val) : null;
-                                const isZero = num != null && Math.abs(num) < 0.005;
+                                const num = parseFloat(val ?? 0);
+                                const isZero = Math.abs(num) < 0.005;
                                 const isVenta = doc.tipo === 'ingreso';
                                 const isCompra = doc.tipo === 'gasto';
                                 const numColor = isZero ? '#71717a' : isVenta ? '#4ade80' : isCompra ? '#f87171' : '#d4d4d8';
                                 const sign = isZero ? '' : isVenta ? '+' : isCompra ? '-' : '';
-                                const display = num != null ? `${sign}${Math.abs(num).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €` : '—';
+                                const display = `${sign}${Math.abs(num).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €`;
                                 return (
                                   <td key={col.key} style={{ ...tdBase, width:col.w, color:numColor, textAlign:'right' }}>
                                     {display}
