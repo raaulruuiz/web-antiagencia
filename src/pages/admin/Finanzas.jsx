@@ -3267,6 +3267,8 @@ export default function Finanzas() {
   const [movFiltroTipo, setMovFiltroTipo] = useState('todos');
   const [movPagina, setMovPagina] = useState(1);
   const [movPorPagina, setMovPorPagina] = useState(10);
+  const [docContactoPagina, setDocContactoPagina] = useState(1);
+  const [docContactoPorPagina, setDocContactoPorPagina] = useState(10);
   const [movBusqueda, setMovBusqueda] = useState('');
   const [clienteSort, setClienteSort] = useState({ campo: 'beneficio', dir: 'desc' });
   const [clienteBusqueda, setClienteBusqueda] = useState('');
@@ -5159,9 +5161,9 @@ export default function Finanzas() {
           return (
             <div key={c.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
-                <span onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <span onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
-                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{c.nombre}</span>
                   {c.nombre_empresa && c.nombre_empresa !== c.nombre && (
@@ -5176,7 +5178,7 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Eliminar
                 </button>
-                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
@@ -5277,7 +5279,7 @@ export default function Finanzas() {
                       <>
                         <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                           {['todos', 'gasto', 'ingreso'].map(t => (
-                            <button key={t} onClick={() => setDocFiltroTipo(t)}
+                            <button key={t} onClick={() => { setDocFiltroTipo(t); setDocContactoPagina(1); }}
                               style={{ background: docFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: docFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
                               {t === 'todos' ? 'Todos' : t === 'gasto' ? 'Compras' : 'Ventas'}
                             </button>
@@ -5286,22 +5288,45 @@ export default function Finanzas() {
                         </div>
                         {docsFiltered.length === 0 ? (
                           <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin documentos asignados.</p>
-                        ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            {docsFiltered.map(doc => (
-                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
-                                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
-                                <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
-                                <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
-                                <span style={{ background: doc.tipo === 'ingreso' ? '#14532d' : '#450a0a', color: doc.tipo === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
-                                  {doc.tipo === 'ingreso' ? 'Venta' : 'Compra'}
-                                </span>
-                                {doc.importe != null && <span style={{ color: '#a1a1aa', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>{fmt(doc.importe)}</span>}
-                                {doc.archivo_url && <span style={{ color: '#60a5fa', fontSize: 12, flexShrink: 0 }}>📄</span>}
+                        ) : (() => {
+                          const totalDocs = docsFiltered.length;
+                          const paginasDoc = docContactoPorPagina === 'todos' ? 1 : Math.ceil(totalDocs / docContactoPorPagina);
+                          const docsPag = docContactoPorPagina === 'todos' ? docsFiltered : docsFiltered.slice((docContactoPagina - 1) * docContactoPorPagina, docContactoPagina * docContactoPorPagina);
+                          return (
+                            <>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                {docsPag.map(doc => (
+                                  <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
+                                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
+                                    <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
+                                    <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
+                                    <span style={{ background: doc.tipo === 'ingreso' ? '#14532d' : '#450a0a', color: doc.tipo === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
+                                      {doc.tipo === 'ingreso' ? 'Venta' : 'Compra'}
+                                    </span>
+                                    {doc.importe != null && <span style={{ color: '#a1a1aa', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>{fmt(doc.importe)}</span>}
+                                    {doc.archivo_url && <span style={{ color: '#60a5fa', fontSize: 12, flexShrink: 0 }}>📄</span>}
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        )}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                                <select value={docContactoPorPagina} onChange={e => { setDocContactoPorPagina(e.target.value === 'todos' ? 'todos' : parseInt(e.target.value)); setDocContactoPagina(1); }}
+                                  style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 8px', fontSize: 12, cursor: 'pointer' }}>
+                                  {[10, 50, 100].map(n => <option key={n} value={n}>{n} por página</option>)}
+                                  <option value="todos">Todos</option>
+                                </select>
+                                {docContactoPorPagina !== 'todos' && paginasDoc > 1 && (
+                                  <>
+                                    <button onClick={() => setDocContactoPagina(p => Math.max(1, p - 1))} disabled={docContactoPagina === 1}
+                                      style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>‹</button>
+                                    <span style={{ color: '#71717a', fontSize: 12 }}>{docContactoPagina} / {paginasDoc}</span>
+                                    <button onClick={() => setDocContactoPagina(p => Math.min(paginasDoc, p + 1))} disabled={docContactoPagina === paginasDoc}
+                                      style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>›</button>
+                                  </>
+                                )}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </>
                     );
                   })()}
@@ -5429,9 +5454,9 @@ export default function Finanzas() {
           return (
             <div key={e.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
-                <span onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <span onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
-                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{e.nombre}</span>
                   {e.email && <span style={{ color: '#71717a', fontSize: 12, marginLeft: 8 }}>{e.email}</span>}
@@ -5444,7 +5469,7 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Eliminar
                 </button>
-                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
@@ -5538,7 +5563,7 @@ export default function Finanzas() {
                       <>
                         <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                           {['todos', 'gasto', 'ingreso'].map(t => (
-                            <button key={t} onClick={() => setDocFiltroTipo(t)}
+                            <button key={t} onClick={() => { setDocFiltroTipo(t); setDocContactoPagina(1); }}
                               style={{ background: docFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: docFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
                               {t === 'todos' ? 'Todos' : t === 'gasto' ? 'Compras' : 'Ventas'}
                             </button>
@@ -5547,22 +5572,45 @@ export default function Finanzas() {
                         </div>
                         {docsFiltered.length === 0 ? (
                           <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin documentos asignados.</p>
-                        ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            {docsFiltered.map(doc => (
-                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
-                                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
-                                <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
-                                <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
-                                <span style={{ background: doc.tipo === 'ingreso' ? '#14532d' : '#450a0a', color: doc.tipo === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
-                                  {doc.tipo === 'ingreso' ? 'Venta' : 'Compra'}
-                                </span>
-                                {doc.importe != null && <span style={{ color: '#a1a1aa', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>{fmt(doc.importe)}</span>}
-                                {doc.archivo_url && <span style={{ color: '#60a5fa', fontSize: 12, flexShrink: 0 }}>📄</span>}
+                        ) : (() => {
+                          const totalDocs = docsFiltered.length;
+                          const paginasDoc = docContactoPorPagina === 'todos' ? 1 : Math.ceil(totalDocs / docContactoPorPagina);
+                          const docsPag = docContactoPorPagina === 'todos' ? docsFiltered : docsFiltered.slice((docContactoPagina - 1) * docContactoPorPagina, docContactoPagina * docContactoPorPagina);
+                          return (
+                            <>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                {docsPag.map(doc => (
+                                  <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
+                                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
+                                    <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
+                                    <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
+                                    <span style={{ background: doc.tipo === 'ingreso' ? '#14532d' : '#450a0a', color: doc.tipo === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
+                                      {doc.tipo === 'ingreso' ? 'Venta' : 'Compra'}
+                                    </span>
+                                    {doc.importe != null && <span style={{ color: '#a1a1aa', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>{fmt(doc.importe)}</span>}
+                                    {doc.archivo_url && <span style={{ color: '#60a5fa', fontSize: 12, flexShrink: 0 }}>📄</span>}
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        )}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                                <select value={docContactoPorPagina} onChange={e => { setDocContactoPorPagina(e.target.value === 'todos' ? 'todos' : parseInt(e.target.value)); setDocContactoPagina(1); }}
+                                  style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 8px', fontSize: 12, cursor: 'pointer' }}>
+                                  {[10, 50, 100].map(n => <option key={n} value={n}>{n} por página</option>)}
+                                  <option value="todos">Todos</option>
+                                </select>
+                                {docContactoPorPagina !== 'todos' && paginasDoc > 1 && (
+                                  <>
+                                    <button onClick={() => setDocContactoPagina(p => Math.max(1, p - 1))} disabled={docContactoPagina === 1}
+                                      style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>‹</button>
+                                    <span style={{ color: '#71717a', fontSize: 12 }}>{docContactoPagina} / {paginasDoc}</span>
+                                    <button onClick={() => setDocContactoPagina(p => Math.min(paginasDoc, p + 1))} disabled={docContactoPagina === paginasDoc}
+                                      style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>›</button>
+                                  </>
+                                )}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </>
                     );
                   })()}
@@ -5680,9 +5728,9 @@ export default function Finanzas() {
           return (
             <div key={p.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
-                <span onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <span onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
-                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{p.nombre}</span>
                   {p.nombre_empresa && p.nombre_empresa !== p.nombre && (
@@ -5697,7 +5745,7 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Eliminar
                 </button>
-                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
@@ -5790,7 +5838,7 @@ export default function Finanzas() {
                       <>
                         <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                           {['todos', 'gasto', 'ingreso'].map(t => (
-                            <button key={t} onClick={() => setDocFiltroTipo(t)}
+                            <button key={t} onClick={() => { setDocFiltroTipo(t); setDocContactoPagina(1); }}
                               style={{ background: docFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: docFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
                               {t === 'todos' ? 'Todos' : t === 'gasto' ? 'Compras' : 'Ventas'}
                             </button>
@@ -5799,22 +5847,45 @@ export default function Finanzas() {
                         </div>
                         {docsFiltered.length === 0 ? (
                           <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin documentos asignados.</p>
-                        ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            {docsFiltered.map(doc => (
-                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
-                                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
-                                <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
-                                <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
-                                <span style={{ background: doc.tipo === 'ingreso' ? '#14532d' : '#450a0a', color: doc.tipo === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
-                                  {doc.tipo === 'ingreso' ? 'Venta' : 'Compra'}
-                                </span>
-                                {doc.importe != null && <span style={{ color: '#a1a1aa', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>{fmt(doc.importe)}</span>}
-                                {doc.archivo_url && <span style={{ color: '#60a5fa', fontSize: 12, flexShrink: 0 }}>📄</span>}
+                        ) : (() => {
+                          const totalDocs = docsFiltered.length;
+                          const paginasDoc = docContactoPorPagina === 'todos' ? 1 : Math.ceil(totalDocs / docContactoPorPagina);
+                          const docsPag = docContactoPorPagina === 'todos' ? docsFiltered : docsFiltered.slice((docContactoPagina - 1) * docContactoPorPagina, docContactoPagina * docContactoPorPagina);
+                          return (
+                            <>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                {docsPag.map(doc => (
+                                  <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
+                                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
+                                    <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
+                                    <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
+                                    <span style={{ background: doc.tipo === 'ingreso' ? '#14532d' : '#450a0a', color: doc.tipo === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
+                                      {doc.tipo === 'ingreso' ? 'Venta' : 'Compra'}
+                                    </span>
+                                    {doc.importe != null && <span style={{ color: '#a1a1aa', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>{fmt(doc.importe)}</span>}
+                                    {doc.archivo_url && <span style={{ color: '#60a5fa', fontSize: 12, flexShrink: 0 }}>📄</span>}
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        )}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                                <select value={docContactoPorPagina} onChange={e => { setDocContactoPorPagina(e.target.value === 'todos' ? 'todos' : parseInt(e.target.value)); setDocContactoPagina(1); }}
+                                  style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 8px', fontSize: 12, cursor: 'pointer' }}>
+                                  {[10, 50, 100].map(n => <option key={n} value={n}>{n} por página</option>)}
+                                  <option value="todos">Todos</option>
+                                </select>
+                                {docContactoPorPagina !== 'todos' && paginasDoc > 1 && (
+                                  <>
+                                    <button onClick={() => setDocContactoPagina(p => Math.max(1, p - 1))} disabled={docContactoPagina === 1}
+                                      style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>‹</button>
+                                    <span style={{ color: '#71717a', fontSize: 12 }}>{docContactoPagina} / {paginasDoc}</span>
+                                    <button onClick={() => setDocContactoPagina(p => Math.min(paginasDoc, p + 1))} disabled={docContactoPagina === paginasDoc}
+                                      style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>›</button>
+                                  </>
+                                )}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </>
                     );
                   })()}
