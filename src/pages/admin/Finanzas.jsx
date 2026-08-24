@@ -75,7 +75,7 @@ const CAMPOS_FILTRO_DOCS = [
   { key: 'fecha_factura',  label: 'Fecha',       tipo: 'date' },
   { key: 'numero_factura', label: 'Nº Factura',  tipo: 'text' },
   { key: 'nombre_entidad', label: 'Entidad',     tipo: 'text' },
-  { key: 'tipo',           label: 'Tipo',        tipo: 'select', ops: ['ingreso','gasto'] },
+  { key: 'tipo',           label: 'Tipo',        tipo: 'select', ops: ['Venta','Compra'] },
   { key: 'importe',        label: 'Importe',     tipo: 'number' },
   { key: 'impuesto',       label: 'IVA',         tipo: 'number' },
   { key: 'irpf',           label: 'IRPF',        tipo: 'number' },
@@ -295,7 +295,7 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp, listasAsignaci
                   value={f.valor}
                   onChange={e => updateCondicion(f.id, 'valor', e.target.value)}
                   placeholder="Valor"
-                  style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, width: 130 }}
+                  style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, width: 130, colorScheme: 'dark' }}
                 />
               )
             )}
@@ -4712,7 +4712,7 @@ export default function Finanzas() {
           { key: 'factura_cliente_id',   label: 'Cliente',    w: 150 },
           { key: 'anio',                 label: 'Año',        w: 55  },
           { key: 'trimestre',            label: 'Q',          w: 42  },
-          { key: 'archivo_nombre',       label: 'Archivo',    w: 155, editable: true },
+          { key: 'archivo_nombre',       label: 'Archivo',    w: 220, editable: true },
           { key: 'id',                   label: 'ID',         w: 280 },
         ];
 
@@ -4732,7 +4732,18 @@ export default function Finanzas() {
           docs = docs.filter(doc => {
             const check = f => {
               const v = String(doc[f.campo] ?? '');
-              const fv = String(f.valor ?? '');
+              // Map display labels to DB values for tipo field (select with array value)
+              const mapTipo = lbl => lbl === 'Venta' ? 'ingreso' : lbl === 'Compra' ? 'gasto' : lbl;
+              const mappedVals = f.campo === 'tipo' && Array.isArray(f.valor)
+                ? f.valor.map(mapTipo)
+                : null;
+              const rawFv = String(f.valor ?? '');
+              const fv = f.campo === 'tipo' ? mapTipo(rawFv) : rawFv;
+              // For select with multiple values, check membership
+              if (mappedVals && mappedVals.length > 0) {
+                if (f.operador === 'eq') return mappedVals.includes(v);
+                if (f.operador === 'neq') return !mappedVals.includes(v);
+              }
               switch(f.operador) {
                 case 'ilike': return v.toLowerCase().includes(fv.toLowerCase());
                 case 'not_ilike': return !v.toLowerCase().includes(fv.toLowerCase());
@@ -4796,7 +4807,7 @@ export default function Finanzas() {
         };
 
         const thStyle = { color:'#71717a', fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em', padding:'6px 10px', borderBottom:'1px solid #27272a', textAlign:'left', whiteSpace:'nowrap', background:'#0f0f0f', position:'sticky', top:0, zIndex:1 };
-        const tdBase = { padding:'5px 10px', fontSize:12, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#a1a1aa' };
+        const tdBase = { padding:'5px 10px', fontSize:12, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#d4d4d8' };
 
         return (
           <>
@@ -4804,12 +4815,6 @@ export default function Finanzas() {
             <div style={{ display:'flex', gap:8, marginBottom:10, flexWrap:'wrap', alignItems:'center' }}>
               <DateRangePicker desde={docTabDesde} hasta={docTabHasta} onApply={(d,h) => { setDocTabDesde(d); setDocTabHasta(h); lsSet('fin_doc_desde',d); lsSet('fin_doc_hasta',h); cargarDocumentos(d,h); }} />
               <button style={S.ghost} onClick={() => cargarDocumentos()}>↺</button>
-              {['todos','ingreso','gasto'].map(t => (
-                <button key={t} onClick={() => { setDocTabTipo(t); setDocPagina(1); }}
-                  style={{ background:docTabTipo===t?'#27272a':'transparent', border:'1px solid #3f3f46', color:docTabTipo===t?'white':'#71717a', borderRadius:6, padding:'3px 10px', fontSize:12, cursor:'pointer' }}>
-                  {t==='todos'?'Todos':t==='ingreso'?'Ventas':'Compras'}
-                </button>
-              ))}
               <button onMouseDown={e=>e.preventDefault()} onClick={() => { setDocPanelFiltro(p=>!p); setDocPanelOrdenar(false); }}
                 style={{ ...S.ghost, outline:'none', display:'flex', alignItems:'center', gap:6, ...(docFiltros.length>0?{borderColor:'#0067FD',color:'#0067FD'}:{}) }}>
                 ⚡ Filtros
@@ -4829,8 +4834,14 @@ export default function Finanzas() {
 
             {/* Bulk bar */}
             {docSeleccionados.size>0 && (
-              <div style={{ background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'8px 14px', marginBottom:10, display:'flex', alignItems:'center', gap:12, flexWrap:'wrap' }}>
+              <div style={{ position:'sticky', top:0, zIndex:10, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'8px 14px', marginBottom:10, display:'flex', alignItems:'center', gap:12, flexWrap:'wrap' }}>
                 <span style={{ color:'#d4d4d8', fontSize:13 }}>{docSeleccionados.size} seleccionado{docSeleccionados.size!==1?'s':''}</span>
+                {docSeleccionados.size < docs.length && (
+                  <button onClick={() => setDocSeleccionados(new Set(docs.map(d=>d.id)))}
+                    style={{ background:'none', border:'none', color:'#60a5fa', fontSize:12, cursor:'pointer', textDecoration:'underline', padding:0 }}>
+                    Seleccionar todos ({docs.length})
+                  </button>
+                )}
                 <button onClick={eliminarDocsBulk} disabled={docEliminandoBulk}
                   style={{ background:'#450a0a', border:'1px solid #7f1d1d', color:'#f87171', borderRadius:6, padding:'4px 12px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
                   {docEliminandoBulk?'Eliminando…':`🗑 Eliminar ${docSeleccionados.size}`}
@@ -4905,11 +4916,17 @@ export default function Finanzas() {
                                 <td key="id" style={{ ...tdBase, width:col.w, fontFamily:'monospace', fontSize:10, color:'#52525b' }}>{val||'—'}</td>
                               );
 
-                              if (['importe','impuesto','irpf'].includes(col.key)) return (
-                                <td key={col.key} style={{ ...tdBase, width:col.w, color:'#d4d4d8' }}>
-                                  {val!=null ? `${parseFloat(val).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €` : '—'}
-                                </td>
-                              );
+                              if (['importe','impuesto','irpf'].includes(col.key)) {
+                                const isVenta = doc.tipo === 'ingreso';
+                                const isCompra = doc.tipo === 'gasto';
+                                const numColor = isVenta ? '#4ade80' : isCompra ? '#f87171' : '#d4d4d8';
+                                const sign = isVenta ? '+' : isCompra ? '-' : '';
+                                return (
+                                  <td key={col.key} style={{ ...tdBase, width:col.w, color:numColor, textAlign:'right' }}>
+                                    {val!=null ? `${sign}${parseFloat(val).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €` : '—'}
+                                  </td>
+                                );
+                              }
 
                               if (col.editable) return (
                                 <td key={col.key} style={{ width:col.w, padding:'2px 6px', verticalAlign:'middle' }}>
