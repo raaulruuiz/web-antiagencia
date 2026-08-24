@@ -5998,7 +5998,7 @@ export default function Finanzas() {
                   <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
                   {facturaViewer.id && (
                     <button onClick={() => { setViewerNombreDraft(facturaViewer.nombre || ''); setViewerEditandoNombre(true); }}
-                      style={{ background:'none', border:'none', color:'#52525b', cursor:'pointer', fontSize:13, padding:'0 4px', flexShrink:0 }} title="Editar nombre">✏️</button>
+                      style={{ background:'transparent', border:'1px solid #3f3f46', borderRadius:6, color:'#71717a', padding:'5px 12px', fontSize:12, cursor:'pointer', flexShrink:0 }}>Editar</button>
                   )}
                 </>
               )}
