@@ -3336,8 +3336,8 @@ export default function Finanzas() {
   const [movEditando, setMovEditando] = useState(null);
   const [movDetail, setMovDetail] = useState(null);
   const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre, id?, data? } | null
-  const [viewerEditandoNombre, setViewerEditandoNombre] = useState(false);
-  const [viewerNombreDraft, setViewerNombreDraft] = useState('');
+  const [viewerEditando, setViewerEditando] = useState(false);
+  const [viewerDraft, setViewerDraft] = useState({});
   const [dashComp, setDashComp] = useState(null);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errComp, setErrComp] = useState(null);
@@ -3448,18 +3448,29 @@ export default function Finanzas() {
     finally { setLoadingDocumentos(false); }
   }
 
-  async function guardarCeldaDoc(id, campo, valor) {
+  async function guardarCeldaDoc(id, updates) {
     try {
       const token = await getToken();
       const res = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [campo]: valor }),
+        body: JSON.stringify(updates),
       });
       if (!res.ok) throw new Error((await res.json().catch(()=>({}))).error || 'Error');
       const updated = await res.json();
       setDocumentosList(prev => prev.map(d => d.id === id ? updated : d));
+      return updated;
     } catch(e) { console.error(e); }
+  }
+
+  // Calcula campos fiscales derivados al cambiar proveedor/cliente
+  function contactFiscalUpdates(contactId, contacts, docTipo, campo) {
+    const isExternal = (docTipo === 'gasto' && campo === 'factura_proveedor_id') ||
+                       (docTipo === 'ingreso' && campo === 'factura_cliente_id');
+    if (!isExternal || !contactId) return {};
+    const c = contacts.find(x => x.id === contactId);
+    if (!c) return {};
+    return { nombre_entidad: c.nombre_empresa || c.nombre || '', nif_cif: c.nif_cif || '' };
   }
 
   function toggleDocSel(id) {
@@ -4915,7 +4926,29 @@ export default function Finanzas() {
                               );
 
                               if (col.key==='factura_proveedor_id'||col.key==='factura_cliente_id') return (
-                                <td key={col.key} style={{ ...tdBase, width:col.w }}>{findC(val)}</td>
+                                <td key={col.key} style={{ width:col.w, maxWidth:col.w, padding:'2px 6px', verticalAlign:'middle', overflow:'hidden' }}>
+                                  {isEditing ? (
+                                    <select autoFocus value={docTabEditando.valor||''}
+                                      onChange={e => setDocTabEditando(prev=>({...prev, valor:e.target.value}))}
+                                      onBlur={async () => {
+                                        const newId = docTabEditando.valor;
+                                        const extra = contactFiscalUpdates(newId, ctodos, doc.tipo, col.key);
+                                        await guardarCeldaDoc(doc.id, { [col.key]: newId||null, ...extra });
+                                        setDocTabEditando(null);
+                                      }}
+                                      style={{ width:'100%', background:'#1c1c1e', border:'1px solid #0067FD', color:'white', borderRadius:4, padding:'3px 4px', fontSize:12, outline:'none' }}>
+                                      <option value="">— ninguno —</option>
+                                      {ctodos.map(c => <option key={c.id} value={c.id}>{c.nombre_empresa||c.nombre}</option>)}
+                                    </select>
+                                  ) : (
+                                    <div onClick={() => setDocTabEditando({ id:doc.id, campo:col.key, valor:val||'' })}
+                                      style={{ padding:'3px 4px', color:val?'#d4d4d8':'#3f3f46', cursor:'pointer', borderRadius:4, minHeight:22, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', background:hov?'#27272a':'transparent' }}
+                                      onMouseEnter={e=>e.currentTarget.style.background='#27272a'}
+                                      onMouseLeave={e=>e.currentTarget.style.background=hov?'#27272a':'transparent'}>
+                                      {findC(val)}
+                                    </div>
+                                  )}
+                                </td>
                               );
 
                               if (col.key==='id') return (
@@ -4942,7 +4975,7 @@ export default function Finanzas() {
                                   {isEditing ? (
                                     <input autoFocus value={docTabEditando.valor}
                                       onChange={e => setDocTabEditando(prev=>({...prev, valor:e.target.value}))}
-                                      onBlur={() => { guardarCeldaDoc(doc.id, col.key, docTabEditando.valor); setDocTabEditando(null); }}
+                                      onBlur={() => { guardarCeldaDoc(doc.id, { [col.key]: docTabEditando.valor }); setDocTabEditando(null); }}
                                       onKeyDown={e => { if(e.key==='Enter') e.target.blur(); if(e.key==='Escape') setDocTabEditando(null); }}
                                       style={{ width:'100%', background:'#1c1c1e', border:'1px solid #0067FD', color:'white', borderRadius:4, padding:'3px 6px', fontSize:12, outline:'none', boxSizing:'border-box' }} />
                                   ) : (
@@ -5976,35 +6009,14 @@ export default function Finanzas() {
             style={{ width:'100%', maxWidth:960, height:'92vh', background:'#1a1a1a', borderRadius:12, border:'1px solid #3f3f46', display:'flex', flexDirection:'column', overflow:'hidden' }}>
             {/* Header */}
             <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
-              {viewerEditandoNombre && facturaViewer.id ? (
-                <input autoFocus value={viewerNombreDraft}
-                  onChange={e => setViewerNombreDraft(e.target.value)}
-                  onKeyDown={async e => {
-                    if (e.key === 'Enter') {
-                      await guardarCeldaDoc(facturaViewer.id, 'archivo_nombre', viewerNombreDraft);
-                      setFacturaViewer(prev => ({ ...prev, nombre: viewerNombreDraft }));
-                      setViewerEditandoNombre(false);
-                    }
-                    if (e.key === 'Escape') setViewerEditandoNombre(false);
-                  }}
-                  onBlur={async () => {
-                    await guardarCeldaDoc(facturaViewer.id, 'archivo_nombre', viewerNombreDraft);
-                    setFacturaViewer(prev => ({ ...prev, nombre: viewerNombreDraft }));
-                    setViewerEditandoNombre(false);
-                  }}
-                  style={{ flex:1, background:'#27272a', border:'1px solid #0067FD', borderRadius:6, color:'white', padding:'4px 8px', fontSize:13, outline:'none' }} />
-              ) : (
-                <>
-                  <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
-                  {facturaViewer.id && (
-                    <button onClick={() => { setViewerNombreDraft(facturaViewer.nombre || ''); setViewerEditandoNombre(true); }}
-                      style={{ background:'transparent', border:'1px solid #3f3f46', borderRadius:6, color:'#71717a', padding:'5px 12px', fontSize:12, cursor:'pointer', flexShrink:0 }}>Editar</button>
-                  )}
-                </>
+              <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
+              {facturaViewer.id && <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace', flexShrink:0 }}>{facturaViewer.id.slice(0,8)}…</span>}
+              {facturaViewer.id && !viewerEditando && (
+                <button onClick={() => setViewerEditando(true) || setViewerDraft({ archivo_nombre: facturaViewer.nombre||'', factura_proveedor_id: facturaViewer.data?.factura_proveedor_id||'', factura_cliente_id: facturaViewer.data?.factura_cliente_id||'' })}
+                  style={{ background:'transparent', border:'1px solid #3f3f46', borderRadius:6, color:'#71717a', padding:'5px 12px', fontSize:12, cursor:'pointer', flexShrink:0 }}>Editar</button>
               )}
-              {facturaViewer.id && !viewerEditandoNombre && <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace', flexShrink:0 }}>{facturaViewer.id.slice(0,8)}…</span>}
               <a href={facturaViewer.url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:12, textDecoration:'none', flexShrink:0 }}>↗ Abrir en nueva pestaña</a>
-              <button onClick={() => { setFacturaViewer(null); setViewerEditandoNombre(false); }} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
+              <button onClick={() => { setFacturaViewer(null); setViewerEditando(false); }} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
             </div>
             {/* Metadata */}
             {facturaViewer.data && (() => {
@@ -6024,6 +6036,58 @@ export default function Finanzas() {
                   {fv.factura_proveedor_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Proveedor</span> {findC(fv.factura_proveedor_id)}</span>}
                   {fv.factura_cliente_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Cliente</span> {findC(fv.factura_cliente_id)}</span>}
                   {fv.anio && <span style={{ color:'#52525b', fontSize:12 }}>Q{fv.trimestre} {fv.anio}</span>}
+                </div>
+              );
+            })()}
+            {/* Panel edición */}
+            {viewerEditando && facturaViewer.id && (() => {
+              const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
+              const fv = facturaViewer.data || {};
+              const selStyle = { background:'#27272a', border:'1px solid #3f3f46', borderRadius:6, color:'white', padding:'5px 8px', fontSize:12, outline:'none', flex:1 };
+              const lblStyle = { color:'#52525b', fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em' };
+              const handleContactChange = (campo, newId) => {
+                const extra = contactFiscalUpdates(newId, ctodos, fv.tipo, campo);
+                setViewerDraft(prev => ({ ...prev, [campo]: newId, ...extra }));
+              };
+              const handleSave = async () => {
+                const updated = await guardarCeldaDoc(facturaViewer.id, viewerDraft);
+                if (updated) setFacturaViewer(prev => ({ ...prev, nombre: viewerDraft.archivo_nombre, data: updated }));
+                setViewerEditando(false);
+              };
+              return (
+                <div style={{ padding:'12px 16px', borderBottom:'1px solid #27272a', background:'#111', flexShrink:0, display:'flex', flexDirection:'column', gap:10 }}>
+                  <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'flex-end' }}>
+                    <div style={{ display:'flex', flexDirection:'column', gap:4, flex:'2 1 200px' }}>
+                      <span style={lblStyle}>Nombre archivo</span>
+                      <input value={viewerDraft.archivo_nombre||''} onChange={e => setViewerDraft(prev=>({...prev, archivo_nombre:e.target.value}))}
+                        style={{ ...selStyle }} />
+                    </div>
+                    <div style={{ display:'flex', flexDirection:'column', gap:4, flex:'1 1 160px' }}>
+                      <span style={lblStyle}>Proveedor</span>
+                      <select value={viewerDraft.factura_proveedor_id||''} onChange={e => handleContactChange('factura_proveedor_id', e.target.value)} style={selStyle}>
+                        <option value="">— ninguno —</option>
+                        {ctodos.map(c => <option key={c.id} value={c.id}>{c.nombre_empresa||c.nombre}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ display:'flex', flexDirection:'column', gap:4, flex:'1 1 160px' }}>
+                      <span style={lblStyle}>Cliente</span>
+                      <select value={viewerDraft.factura_cliente_id||''} onChange={e => handleContactChange('factura_cliente_id', e.target.value)} style={selStyle}>
+                        <option value="">— ninguno —</option>
+                        {ctodos.map(c => <option key={c.id} value={c.id}>{c.nombre_empresa||c.nombre}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  {(viewerDraft.nombre_entidad || viewerDraft.nif_cif) && (
+                    <div style={{ display:'flex', gap:16, alignItems:'center' }}>
+                      <span style={{ color:'#52525b', fontSize:11 }}>Se actualizará →</span>
+                      {viewerDraft.nombre_entidad && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Entidad</span> {viewerDraft.nombre_entidad}</span>}
+                      {viewerDraft.nif_cif && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>NIF</span> {viewerDraft.nif_cif}</span>}
+                    </div>
+                  )}
+                  <div style={{ display:'flex', gap:8 }}>
+                    <button onClick={handleSave} style={{ background:'#0067FD', border:'none', borderRadius:6, color:'white', padding:'6px 16px', fontSize:12, fontWeight:600, cursor:'pointer' }}>Guardar</button>
+                    <button onClick={() => setViewerEditando(false)} style={{ background:'transparent', border:'1px solid #3f3f46', borderRadius:6, color:'#71717a', padding:'6px 14px', fontSize:12, cursor:'pointer' }}>Cancelar</button>
+                  </div>
                 </div>
               );
             })()}
