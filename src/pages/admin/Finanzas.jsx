@@ -1230,12 +1230,33 @@ function TabFiscal({ onAbrirMovimiento }) {
         body: JSON.stringify({ facturas: listas }),
       });
       if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || `Error ${r.status}`); }
+      const data = await r.json();
       // Quitar solo los guardados, dejar pendientes con error o aún procesando
       const idsGuardados = new Set(listas.map(p => p._id));
       setPendientes(prev => prev.filter(p => !idsGuardados.has(p._id)));
       cargarFacturasTrimestre(trimestreAbierto + 1);
+      // Si hay contactos nuevos sin asignar, mostrar modal
+      if (data.nuevos_pendientes?.length) {
+        const token2 = await getToken();
+        const rc = await fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token2}` } });
+        if (rc.ok) setContactosTodos(await rc.json());
+        setModalNuevosContactos(data.nuevos_pendientes.map(p => ({
+          ...p, _nombre: '', _nombre_empresa: p.nombre_entidad || '', _asignarA: null, _ignorar: false,
+        })));
+      }
     } catch (e) { alert('Error guardando: ' + e.message); }
     finally { setGuardando(false); }
+  }
+
+  async function cargarDocsContacto(contactoId) {
+    setLoadingDocs(true);
+    setDocsContacto([]);
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas?contacto_id=${contactoId}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (r.ok) setDocsContacto(await r.json());
+    } catch(e) {}
+    finally { setLoadingDocs(false); }
   }
 
   async function eliminarFactura(id) {
@@ -3252,6 +3273,15 @@ export default function Finanzas() {
   const [proveedorBusqueda, setProveedorBusqueda] = useState('');
   const [proveedorSort, setProveedorSort] = useState({ campo: 'gasto', dir: 'desc' });
   const [savingContacto, setSavingContacto] = useState(false);
+  // Tabs internas en filas expandibles (Movimientos / Documentos)
+  const [contactoTabInner, setContactoTabInner] = useState('movimientos');
+  const [docsContacto, setDocsContacto] = useState([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [docFiltroTipo, setDocFiltroTipo] = useState('todos');
+  // Modal nuevos contactos detectados al guardar facturas
+  const [modalNuevosContactos, setModalNuevosContactos] = useState(null); // null | array
+  const [contactosTodos, setContactosTodos] = useState([]);
+  const [confirmandoContactos, setConfirmandoContactos] = useState(false);
   const [evolHidden, setEvolHidden] = useState({});
   const [catHidden, setCatHidden] = useState({});
   const [ctaHidden, setCtaHidden] = useState({});
@@ -4594,9 +4624,9 @@ export default function Finanzas() {
           return (
             <div key={c.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
-                <span onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                <span onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
-                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{c.nombre}</span>
                   {c.nombre_empresa && c.nombre_empresa !== c.nombre && (
@@ -4611,7 +4641,7 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Eliminar
                 </button>
-                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
@@ -4639,7 +4669,15 @@ export default function Finanzas() {
                       {c.email   && <span style={{ color: '#71717a', fontSize: 12 }}>Email: <span style={{ color: '#a1a1aa' }}>{c.email}</span></span>}
                     </div>
                   )}
-                  {!tieneMovs ? (
+                  <div style={{ display: 'flex', gap: 0, marginBottom: 14, borderBottom: '1px solid #27272a' }}>
+                    {[['movimientos', 'Movimientos'], ['documentos', 'Documentos']].map(([t, label]) => (
+                      <button key={t} onClick={() => { setContactoTabInner(t); setDocFiltroTipo('todos'); if (t === 'documentos') cargarDocsContacto(c.id); }}
+                        style={{ background: 'none', border: 'none', borderBottom: contactoTabInner === t ? '2px solid #60a5fa' : '2px solid transparent', color: contactoTabInner === t ? '#60a5fa' : '#71717a', padding: '6px 14px 8px', fontSize: 13, cursor: 'pointer', fontWeight: contactoTabInner === t ? 600 : 400 }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {contactoTabInner === 'movimientos' && (!tieneMovs ? (
                     <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin movimientos en el periodo seleccionado.</p>
                   ) : (() => {
                     const movsTipo = movFiltroTipo === 'todos' ? movsFiltered : movsFiltered.filter(m => m.tipo === movFiltroTipo);
@@ -4696,6 +4734,42 @@ export default function Finanzas() {
                             </>
                           )}
                         </div>
+                      </>
+                    );
+                  })())}
+                  {contactoTabInner === 'documentos' && (() => {
+                    const docsFiltered = docsContacto.filter(d => docFiltroTipo === 'todos' || d.tipo === docFiltroTipo);
+                    return (
+                      <>
+                        <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                          {['todos', 'gasto', 'ingreso'].map(t => (
+                            <button key={t} onClick={() => setDocFiltroTipo(t)}
+                              style={{ background: docFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: docFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
+                              {t === 'todos' ? 'Todos' : t === 'gasto' ? 'Compras' : 'Ventas'}
+                            </button>
+                          ))}
+                          <span style={{ color: '#52525b', fontSize: 11, marginLeft: 'auto' }}>{docsFiltered.length} documento{docsFiltered.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        {loadingDocs ? (
+                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Cargando...</p>
+                        ) : docsFiltered.length === 0 ? (
+                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin documentos asignados.</p>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {docsFiltered.map(doc => (
+                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento' })}
+                                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
+                                <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
+                                <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
+                                <span style={{ background: doc.tipo === 'ingreso' ? '#14532d' : '#450a0a', color: doc.tipo === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
+                                  {doc.tipo === 'ingreso' ? 'Venta' : 'Compra'}
+                                </span>
+                                {doc.importe != null && <span style={{ color: '#a1a1aa', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>{fmt(doc.importe)}</span>}
+                                {doc.archivo_url && <span style={{ color: '#60a5fa', fontSize: 12, flexShrink: 0 }}>📄</span>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </>
                     );
                   })()}
@@ -4823,9 +4897,9 @@ export default function Finanzas() {
           return (
             <div key={e.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
-                <span onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                <span onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
-                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{e.nombre}</span>
                   {e.email && <span style={{ color: '#71717a', fontSize: 12, marginLeft: 8 }}>{e.email}</span>}
@@ -4838,7 +4912,7 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Eliminar
                 </button>
-                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
@@ -4860,7 +4934,15 @@ export default function Finanzas() {
                       </div>
                     ))}
                   </div>
-                  {!tieneMovs ? (
+                  <div style={{ display: 'flex', gap: 0, marginBottom: 14, borderBottom: '1px solid #27272a' }}>
+                    {[['movimientos', 'Movimientos'], ['documentos', 'Documentos']].map(([t, label]) => (
+                      <button key={t} onClick={() => { setContactoTabInner(t); setDocFiltroTipo('todos'); if (t === 'documentos') cargarDocsContacto(e.id); }}
+                        style={{ background: 'none', border: 'none', borderBottom: contactoTabInner === t ? '2px solid #60a5fa' : '2px solid transparent', color: contactoTabInner === t ? '#60a5fa' : '#71717a', padding: '6px 14px 8px', fontSize: 13, cursor: 'pointer', fontWeight: contactoTabInner === t ? 600 : 400 }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {contactoTabInner === 'movimientos' && (!tieneMovs ? (
                     <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin movimientos en el periodo seleccionado.</p>
                   ) : (() => {
                     const movsTipo = movFiltroTipo === 'todos' ? movsFiltered : movsFiltered.filter(m => m.tipo === movFiltroTipo);
@@ -4916,6 +4998,42 @@ export default function Finanzas() {
                             </>
                           )}
                         </div>
+                      </>
+                    );
+                  })())}
+                  {contactoTabInner === 'documentos' && (() => {
+                    const docsFiltered = docsContacto.filter(d => docFiltroTipo === 'todos' || d.tipo === docFiltroTipo);
+                    return (
+                      <>
+                        <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                          {['todos', 'gasto', 'ingreso'].map(t => (
+                            <button key={t} onClick={() => setDocFiltroTipo(t)}
+                              style={{ background: docFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: docFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
+                              {t === 'todos' ? 'Todos' : t === 'gasto' ? 'Compras' : 'Ventas'}
+                            </button>
+                          ))}
+                          <span style={{ color: '#52525b', fontSize: 11, marginLeft: 'auto' }}>{docsFiltered.length} documento{docsFiltered.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        {loadingDocs ? (
+                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Cargando...</p>
+                        ) : docsFiltered.length === 0 ? (
+                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin documentos asignados.</p>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {docsFiltered.map(doc => (
+                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento' })}
+                                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
+                                <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
+                                <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
+                                <span style={{ background: doc.tipo === 'ingreso' ? '#14532d' : '#450a0a', color: doc.tipo === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
+                                  {doc.tipo === 'ingreso' ? 'Venta' : 'Compra'}
+                                </span>
+                                {doc.importe != null && <span style={{ color: '#a1a1aa', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>{fmt(doc.importe)}</span>}
+                                {doc.archivo_url && <span style={{ color: '#60a5fa', fontSize: 12, flexShrink: 0 }}>📄</span>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </>
                     );
                   })()}
@@ -5033,9 +5151,9 @@ export default function Finanzas() {
           return (
             <div key={p.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
-                <span onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                <span onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
-                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{p.nombre}</span>
                   {p.nombre_empresa && p.nombre_empresa !== p.nombre && (
@@ -5050,7 +5168,7 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Eliminar
                 </button>
-                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
@@ -5078,7 +5196,15 @@ export default function Finanzas() {
                       {p.email   && <span style={{ color: '#71717a', fontSize: 12 }}>Email: <span style={{ color: '#a1a1aa' }}>{p.email}</span></span>}
                     </div>
                   )}
-                  {!tieneMovs ? (
+                  <div style={{ display: 'flex', gap: 0, marginBottom: 14, borderBottom: '1px solid #27272a' }}>
+                    {[['movimientos', 'Movimientos'], ['documentos', 'Documentos']].map(([t, label]) => (
+                      <button key={t} onClick={() => { setContactoTabInner(t); setDocFiltroTipo('todos'); if (t === 'documentos') cargarDocsContacto(p.id); }}
+                        style={{ background: 'none', border: 'none', borderBottom: contactoTabInner === t ? '2px solid #60a5fa' : '2px solid transparent', color: contactoTabInner === t ? '#60a5fa' : '#71717a', padding: '6px 14px 8px', fontSize: 13, cursor: 'pointer', fontWeight: contactoTabInner === t ? 600 : 400 }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {contactoTabInner === 'movimientos' && (!tieneMovs ? (
                     <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin movimientos en el periodo seleccionado.</p>
                   ) : (() => {
                     const movsTipo = movFiltroTipo === 'todos' ? movsFiltered : movsFiltered.filter(m => m.tipo === movFiltroTipo);
@@ -5127,6 +5253,42 @@ export default function Finanzas() {
                             </>
                           )}
                         </div>
+                      </>
+                    );
+                  })())}
+                  {contactoTabInner === 'documentos' && (() => {
+                    const docsFiltered = docsContacto.filter(d => docFiltroTipo === 'todos' || d.tipo === docFiltroTipo);
+                    return (
+                      <>
+                        <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                          {['todos', 'gasto', 'ingreso'].map(t => (
+                            <button key={t} onClick={() => setDocFiltroTipo(t)}
+                              style={{ background: docFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: docFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
+                              {t === 'todos' ? 'Todos' : t === 'gasto' ? 'Compras' : 'Ventas'}
+                            </button>
+                          ))}
+                          <span style={{ color: '#52525b', fontSize: 11, marginLeft: 'auto' }}>{docsFiltered.length} documento{docsFiltered.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        {loadingDocs ? (
+                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Cargando...</p>
+                        ) : docsFiltered.length === 0 ? (
+                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin documentos asignados.</p>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {docsFiltered.map(doc => (
+                              <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento' })}
+                                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
+                                <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
+                                <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
+                                <span style={{ background: doc.tipo === 'ingreso' ? '#14532d' : '#450a0a', color: doc.tipo === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
+                                  {doc.tipo === 'ingreso' ? 'Venta' : 'Compra'}
+                                </span>
+                                {doc.importe != null && <span style={{ color: '#a1a1aa', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>{fmt(doc.importe)}</span>}
+                                {doc.archivo_url && <span style={{ color: '#60a5fa', fontSize: 12, flexShrink: 0 }}>📄</span>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </>
                     );
                   })()}
@@ -5207,6 +5369,130 @@ export default function Finanzas() {
         savingContacto={savingContacto}
         setSavingContacto={setSavingContacto}
       />}
+
+      {/* ── Modal Nuevos Contactos detectados al guardar facturas ── */}
+      {modalNuevosContactos && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.75)', zIndex:9100, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+          onClick={() => setModalNuevosContactos(null)}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ background:'#18181b', border:'1px solid #3f3f46', borderRadius:14, width:'100%', maxWidth:720, maxHeight:'88vh', display:'flex', flexDirection:'column', overflow:'hidden' }}>
+            {/* Header */}
+            <div style={{ padding:'18px 22px 14px', borderBottom:'1px solid #27272a', display:'flex', alignItems:'center', gap:10 }}>
+              <span style={{ color:'#fbbf24', fontSize:18 }}>⚠️</span>
+              <div style={{ flex:1 }}>
+                <p style={{ margin:0, fontWeight:700, color:'#f4f4f5', fontSize:15 }}>Contactos nuevos detectados</p>
+                <p style={{ margin:0, color:'#71717a', fontSize:12 }}>Se han guardado las facturas. Estos contactos no estaban en tu lista. Revísalos antes de confirmar.</p>
+              </div>
+              <button onClick={() => setModalNuevosContactos(null)} style={{ background:'none', border:'none', color:'#52525b', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
+            </div>
+            {/* Body */}
+            <div style={{ overflowY:'auto', flex:1, padding:'14px 22px', display:'flex', flexDirection:'column', gap:12 }}>
+              {modalNuevosContactos.map((item, idx) => {
+                const update = patch => setModalNuevosContactos(prev => prev.map((it, i) => i === idx ? { ...it, ...patch } : it));
+                const contactosFiltrados = item._busqueda
+                  ? contactosTodos.filter(c => c.nombre?.toLowerCase().includes(item._busqueda.toLowerCase()) || c.nombre_empresa?.toLowerCase().includes(item._busqueda.toLowerCase()))
+                  : [];
+                return (
+                  <div key={idx} style={{ background: item._ignorar ? '#111' : '#1c1c1e', border:`1px solid ${item._ignorar ? '#27272a' : '#3f3f46'}`, borderRadius:10, padding:'14px 16px', opacity: item._ignorar ? 0.4 : 1 }}>
+                    <div style={{ display:'flex', alignItems:'flex-start', gap:10, marginBottom:10 }}>
+                      <div style={{ flex:1 }}>
+                        <p style={{ margin:'0 0 2px', color:'#f4f4f5', fontWeight:600, fontSize:14 }}>{item.nombre_entidad}</p>
+                        <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+                          {item.nif_cif && <span style={{ color:'#71717a', fontSize:12 }}>NIF: <span style={{ color:'#a1a1aa' }}>{item.nif_cif}</span></span>}
+                          <span style={{ color:'#71717a', fontSize:12 }}>Tipo: <span style={{ color: item.tipo === 'ingreso' ? '#22c55e' : '#f87171' }}>{item.tipo === 'ingreso' ? 'Ingreso' : 'Gasto'}</span></span>
+                          <span style={{ color:'#71717a', fontSize:12 }}>{item.factura_ids?.length} factura{item.factura_ids?.length !== 1 ? 's' : ''}</span>
+                          {item.archivo_url && <a href={item.archivo_url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:12 }} onClick={e => e.stopPropagation()}>📄 Ver PDF</a>}
+                        </div>
+                      </div>
+                      <button onClick={() => update({ _ignorar: !item._ignorar })}
+                        style={{ background: item._ignorar ? '#27272a' : '#7f1d1d', border:'1px solid #3f3f46', color: item._ignorar ? '#71717a' : '#f87171', borderRadius:6, padding:'4px 10px', fontSize:12, cursor:'pointer', flexShrink:0 }}>
+                        {item._ignorar ? 'Restaurar' : '✕ Quitar'}
+                      </button>
+                    </div>
+                    {!item._ignorar && (
+                      <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                          <div>
+                            <label style={{ color:'#71717a', fontSize:11, display:'block', marginBottom:3 }}>Nombre (alias)</label>
+                            <input value={item._nombre} onChange={e => update({ _nombre: e.target.value })} placeholder={item.nombre_entidad}
+                              style={{ width:'100%', background:'#27272a', border:'1px solid #3f3f46', color:'#f4f4f5', borderRadius:6, padding:'6px 10px', fontSize:13, boxSizing:'border-box' }} />
+                          </div>
+                          <div>
+                            <label style={{ color:'#71717a', fontSize:11, display:'block', marginBottom:3 }}>Nombre empresa</label>
+                            <input value={item._nombre_empresa} onChange={e => update({ _nombre_empresa: e.target.value })}
+                              style={{ width:'100%', background:'#27272a', border:'1px solid #3f3f46', color:'#f4f4f5', borderRadius:6, padding:'6px 10px', fontSize:13, boxSizing:'border-box' }} />
+                          </div>
+                        </div>
+                        {item.direccion && <p style={{ margin:0, color:'#71717a', fontSize:12 }}>Dir: <span style={{ color:'#a1a1aa' }}>{item.direccion}</span></p>}
+                        {item.email     && <p style={{ margin:0, color:'#71717a', fontSize:12 }}>Email: <span style={{ color:'#a1a1aa' }}>{item.email}</span></p>}
+                        {/* Asignar a existente */}
+                        <div style={{ position:'relative' }}>
+                          <label style={{ color:'#71717a', fontSize:11, display:'block', marginBottom:3 }}>Asignar a contacto existente (opcional)</label>
+                          {item._asignarA ? (
+                            <div style={{ display:'flex', alignItems:'center', gap:8, background:'#27272a', border:'1px solid #3f3f46', borderRadius:6, padding:'6px 10px' }}>
+                              <span style={{ flex:1, color:'#f4f4f5', fontSize:13 }}>{item._asignarA.nombre}</span>
+                              <button onClick={() => update({ _asignarA: null, _busqueda: '' })} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:12 }}>✕</button>
+                            </div>
+                          ) : (
+                            <>
+                              <input value={item._busqueda || ''} onChange={e => update({ _busqueda: e.target.value })} placeholder="Buscar contacto..."
+                                style={{ width:'100%', background:'#27272a', border:'1px solid #3f3f46', color:'#f4f4f5', borderRadius:6, padding:'6px 10px', fontSize:13, boxSizing:'border-box' }} />
+                              {contactosFiltrados.length > 0 && (
+                                <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#27272a', border:'1px solid #3f3f46', borderRadius:6, zIndex:10, maxHeight:160, overflowY:'auto', marginTop:2 }}>
+                                  {contactosFiltrados.slice(0,8).map(c => (
+                                    <div key={c.id} onClick={() => update({ _asignarA: c, _busqueda: '' })}
+                                      style={{ padding:'8px 12px', cursor:'pointer', borderBottom:'1px solid #3f3f46', color:'#f4f4f5', fontSize:13, display:'flex', alignItems:'center', gap:8 }}>
+                                      <span style={{ flex:1 }}>{c.nombre}</span>
+                                      <span style={{ color:'#52525b', fontSize:11 }}>{(c.roles||[]).join(', ')}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {/* Footer */}
+            <div style={{ padding:'14px 22px', borderTop:'1px solid #27272a', display:'flex', alignItems:'center', justifyContent:'flex-end', gap:10 }}>
+              <button onClick={() => setModalNuevosContactos(null)}
+                style={{ background:'none', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:8, padding:'8px 18px', fontSize:13, cursor:'pointer' }}>Cancelar</button>
+              <button disabled={confirmandoContactos} onClick={async () => {
+                setConfirmandoContactos(true);
+                try {
+                  const token = await getToken();
+                  const items = modalNuevosContactos.map(item => ({
+                    accion:        item._ignorar ? 'ignorar' : item._asignarA ? 'asignar' : 'crear',
+                    factura_ids:   item.factura_ids,
+                    nombre:        item._nombre || item.nombre_entidad,
+                    nombre_empresa: item._nombre_empresa || null,
+                    nif_cif:       item.nif_cif    || null,
+                    direccion:     item.direccion  || null,
+                    email:         item.email      || null,
+                    contacto_id:   item._asignarA?.id || null,
+                    nombre_entidad: item.nombre_entidad,
+                  }));
+                  const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/confirmar-contactos`, {
+                    method:'POST', headers:{ Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
+                    body: JSON.stringify({ items }),
+                  });
+                  if (!r.ok) throw new Error('Error al confirmar');
+                  setModalNuevosContactos(null);
+                  cargarProveedores();
+                } catch(e) { alert(e.message); }
+                finally { setConfirmandoContactos(false); }
+              }}
+                style={{ background:'#0067FD', border:'none', color:'white', borderRadius:8, padding:'8px 22px', fontSize:13, fontWeight:600, cursor:'pointer', opacity: confirmandoContactos ? 0.6 : 1 }}>
+                {confirmandoContactos ? 'Guardando...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Confirm dialog ── */}
       {confirmDialog && (
