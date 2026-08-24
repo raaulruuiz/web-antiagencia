@@ -3336,6 +3336,8 @@ export default function Finanzas() {
   const [movEditando, setMovEditando] = useState(null);
   const [movDetail, setMovDetail] = useState(null);
   const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre, id?, data? } | null
+  const [viewerEditandoNombre, setViewerEditandoNombre] = useState(false);
+  const [viewerNombreDraft, setViewerNombreDraft] = useState('');
   const [dashComp, setDashComp] = useState(null);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errComp, setErrComp] = useState(null);
@@ -5974,10 +5976,35 @@ export default function Finanzas() {
             style={{ width:'100%', maxWidth:960, height:'92vh', background:'#1a1a1a', borderRadius:12, border:'1px solid #3f3f46', display:'flex', flexDirection:'column', overflow:'hidden' }}>
             {/* Header */}
             <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
-              <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
-              {facturaViewer.id && <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace', flexShrink:0 }}>{facturaViewer.id.slice(0,8)}…</span>}
+              {viewerEditandoNombre && facturaViewer.id ? (
+                <input autoFocus value={viewerNombreDraft}
+                  onChange={e => setViewerNombreDraft(e.target.value)}
+                  onKeyDown={async e => {
+                    if (e.key === 'Enter') {
+                      await guardarCeldaDoc(facturaViewer.id, 'archivo_nombre', viewerNombreDraft);
+                      setFacturaViewer(prev => ({ ...prev, nombre: viewerNombreDraft }));
+                      setViewerEditandoNombre(false);
+                    }
+                    if (e.key === 'Escape') setViewerEditandoNombre(false);
+                  }}
+                  onBlur={async () => {
+                    await guardarCeldaDoc(facturaViewer.id, 'archivo_nombre', viewerNombreDraft);
+                    setFacturaViewer(prev => ({ ...prev, nombre: viewerNombreDraft }));
+                    setViewerEditandoNombre(false);
+                  }}
+                  style={{ flex:1, background:'#27272a', border:'1px solid #0067FD', borderRadius:6, color:'white', padding:'4px 8px', fontSize:13, outline:'none' }} />
+              ) : (
+                <>
+                  <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
+                  {facturaViewer.id && (
+                    <button onClick={() => { setViewerNombreDraft(facturaViewer.nombre || ''); setViewerEditandoNombre(true); }}
+                      style={{ background:'none', border:'none', color:'#52525b', cursor:'pointer', fontSize:13, padding:'0 4px', flexShrink:0 }} title="Editar nombre">✏️</button>
+                  )}
+                </>
+              )}
+              {facturaViewer.id && !viewerEditandoNombre && <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace', flexShrink:0 }}>{facturaViewer.id.slice(0,8)}…</span>}
               <a href={facturaViewer.url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:12, textDecoration:'none', flexShrink:0 }}>↗ Abrir en nueva pestaña</a>
-              <button onClick={() => setFacturaViewer(null)} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
+              <button onClick={() => { setFacturaViewer(null); setViewerEditandoNombre(false); }} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
             </div>
             {/* Metadata */}
             {facturaViewer.data && (() => {
