@@ -4687,8 +4687,7 @@ export default function Finanzas() {
                     return (
                       <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
-                          <span style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 4 }}>Movimientos</span>
-                          {['todos', 'Ingreso', 'Gasto'].map(t => (
+{['todos', 'Ingreso', 'Gasto'].map(t => (
                             <button key={t} onClick={() => { setMovFiltroTipo(t); setMovPagina(1); }}
                               style={{ background: movFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: movFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
                               {t === 'todos' ? 'Todos' : t === 'Ingreso' ? 'Ingresos' : 'Gastos'}
@@ -4952,8 +4951,7 @@ export default function Finanzas() {
                     return (
                       <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
-                          <span style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 4 }}>Movimientos</span>
-                          {['todos', 'Ingreso', 'Gasto'].map(t => (
+{['todos', 'Ingreso', 'Gasto'].map(t => (
                             <button key={t} onClick={() => { setMovFiltroTipo(t); setMovPagina(1); }}
                               style={{ background: movFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: movFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
                               {t === 'todos' ? 'Todos' : t === 'Ingreso' ? 'Ingresos' : 'Gastos'}
@@ -5214,8 +5212,7 @@ export default function Finanzas() {
                     return (
                       <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
-                          <span style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 4 }}>Movimientos</span>
-                          {['todos', 'Ingreso', 'Gasto'].map(t => (
+{['todos', 'Ingreso', 'Gasto'].map(t => (
                             <button key={t} onClick={() => { setMovFiltroTipo(t); setMovPagina(1); }}
                               style={{ background: movFiltroTipo === t ? '#3f3f46' : 'transparent', border: '1px solid #3f3f46', color: movFiltroTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
                               {t === 'todos' ? 'Todos' : t === 'Ingreso' ? 'Ingresos' : 'Gastos'}
