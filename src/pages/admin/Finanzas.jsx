@@ -4808,7 +4808,7 @@ export default function Finanzas() {
           return ['importe','impuesto','irpf'].includes(key) ? [...base,{val:'sum',label:'Suma'},{val:'average',label:'Media'},{val:'min',label:'Mínimo'},{val:'max',label:'Máximo'}] : base;
         };
 
-        const thStyle = { color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', padding:'8px 10px', borderBottom:'1px solid #27272a', textAlign:'left', whiteSpace:'nowrap', background:'#0f0f0f', position:'sticky', top:0, zIndex:1 };
+        const thStyle = { color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', padding:'8px 10px', borderBottom:'1px solid #27272a', textAlign:'left', whiteSpace:'nowrap' };
         const tdBase = { padding:'6px 10px', fontSize:13, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#d4d4d8' };
 
         return (
@@ -4854,8 +4854,6 @@ export default function Finanzas() {
                 </button>
               </div>
             )}
-
-            <p style={{ color:'#52525b', fontSize:12, marginBottom:8 }}>{totalDocs} documento{totalDocs!==1?'s':''}</p>
 
             {loadingDocumentos ? (
               <p style={{ color:'#52525b' }}>Cargando…</p>
