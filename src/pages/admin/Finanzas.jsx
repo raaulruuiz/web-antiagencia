@@ -71,6 +71,33 @@ const CAMPOS_SORT = [
   { key: 'equipo_ids',        label: 'Miembro equipo' },
 ];
 
+const CAMPOS_FILTRO_DOCS = [
+  { key: 'fecha_factura',  label: 'Fecha',       tipo: 'date' },
+  { key: 'numero_factura', label: 'Nº Factura',  tipo: 'text' },
+  { key: 'nombre_entidad', label: 'Entidad',     tipo: 'text' },
+  { key: 'tipo',           label: 'Tipo',        tipo: 'select', ops: ['ingreso','gasto'] },
+  { key: 'importe',        label: 'Importe',     tipo: 'number' },
+  { key: 'impuesto',       label: 'IVA',         tipo: 'number' },
+  { key: 'irpf',           label: 'IRPF',        tipo: 'number' },
+  { key: 'nif_cif',        label: 'NIF/CIF',     tipo: 'text' },
+  { key: 'anio',           label: 'Año',         tipo: 'number' },
+  { key: 'trimestre',      label: 'Trimestre',   tipo: 'number' },
+  { key: 'archivo_nombre', label: 'Archivo',     tipo: 'text' },
+];
+
+const CAMPOS_SORT_DOCS = [
+  { key: 'fecha_factura',  label: 'Fecha' },
+  { key: 'numero_factura', label: 'Nº Factura' },
+  { key: 'nombre_entidad', label: 'Entidad' },
+  { key: 'tipo',           label: 'Tipo' },
+  { key: 'importe',        label: 'Importe' },
+  { key: 'impuesto',       label: 'IVA' },
+  { key: 'irpf',           label: 'IRPF' },
+  { key: 'anio',           label: 'Año' },
+  { key: 'trimestre',      label: 'Trimestre' },
+  { key: 'archivo_nombre', label: 'Archivo' },
+];
+
 // Formatea número con separador de miles en locale español: 2308.04 → "2.308,04"
 function fmtN(n, decimals = 2) {
   if (n == null || n === '') return '—';
@@ -186,11 +213,11 @@ function MultiCheckboxDropdown({ opciones, valores, onChange }) {
   );
 }
 
-function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp, listasAsignacion = {} }) {
+function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp, listasAsignacion = {}, campos = CAMPOS_FILTRO }) {
   const defaultValor = meta => (meta?.tipo === 'select' || meta?.tipo === 'array') ? [] : '';
 
   function addCondicion() {
-    const meta = CAMPOS_FILTRO[0];
+    const meta = campos[0];
     onChangeFiltros([...filtros, { id: Date.now(), campo: meta.key, operador: (OPS_POR_TIPO[meta.tipo] || [])[0]?.[0] || 'ilike', valor: defaultValor(meta) }]);
   }
   function updateCondicion(id, key, val) {
@@ -198,7 +225,7 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp, listasAsignaci
       if (f.id !== id) return f;
       const updated = { ...f, [key]: val };
       if (key === 'campo') {
-        const meta = CAMPOS_FILTRO.find(c => c.key === val);
+        const meta = campos.find(c => c.key === val);
         updated.operador = (OPS_POR_TIPO[meta?.tipo || 'text'] || [])[0]?.[0] || 'eq';
         updated.valor = defaultValor(meta);
       }
@@ -228,7 +255,7 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp, listasAsignaci
         <p style={{ color: '#52525b', fontSize: 13, margin: '0 0 10px 0' }}>Sin filtros activos — añade una condición</p>
       )}
       {filtros.map((f, idx) => {
-        const meta = CAMPOS_FILTRO.find(c => c.key === f.campo) || CAMPOS_FILTRO[0];
+        const meta = campos.find(c => c.key === f.campo) || campos[0];
         const ops  = OPS_POR_TIPO[meta.tipo] || OPS_POR_TIPO.text;
         const sinValor = ['is_null', 'is_not_null'].includes(f.operador);
         const isMulti = meta.tipo === 'select' || meta.tipo === 'array';
@@ -243,7 +270,7 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp, listasAsignaci
             )}
             <select value={f.campo} onChange={e => updateCondicion(f.id, 'campo', e.target.value)}
               style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 130 }}>
-              {CAMPOS_FILTRO.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+              {campos.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
             <select value={f.operador} onChange={e => updateCondicion(f.id, 'operador', e.target.value)}
               style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 118 }}>
@@ -287,10 +314,10 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp, listasAsignaci
   );
 }
 
-function PanelOrdenar({ sorts, onChange }) {
+function PanelOrdenar({ sorts, onChange, campos = CAMPOS_SORT }) {
   const usados = new Set(sorts.map(s => s.campo));
   function addSort() {
-    const libre = CAMPOS_SORT.find(c => !usados.has(c.key));
+    const libre = campos.find(c => !usados.has(c.key));
     if (libre) onChange([...sorts, { campo: libre.key, dir: 'desc' }]);
   }
   function updateSort(idx, key, val) { onChange(sorts.map((s, i) => i === idx ? { ...s, [key]: val } : s)); }
@@ -308,7 +335,7 @@ function PanelOrdenar({ sorts, onChange }) {
         <div key={idx} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
           <select value={s.campo} onChange={e => updateSort(idx, 'campo', e.target.value)}
             style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 140 }}>
-            {CAMPOS_SORT.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+            {campos.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
           </select>
           <select value={s.dir} onChange={e => updateSort(idx, 'dir', e.target.value)}
             style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 130 }}>
@@ -320,8 +347,8 @@ function PanelOrdenar({ sorts, onChange }) {
         </div>
       ))}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: sorts.length > 0 ? 10 : 0 }}>
-        <button onClick={addSort} disabled={sorts.length >= CAMPOS_SORT.length}
-          style={{ ...btnLink, color: sorts.length >= CAMPOS_SORT.length ? '#3f3f46' : '#8b5cf6' }}>
+        <button onClick={addSort} disabled={sorts.length >= campos.length}
+          style={{ ...btnLink, color: sorts.length >= campos.length ? '#3f3f46' : '#8b5cf6' }}>
           + Añadir ordenación
         </button>
         {sorts.length > 0 && (
@@ -3270,6 +3297,20 @@ export default function Finanzas() {
   const [docTabSort, setDocTabSort] = useState({ campo: 'fecha_factura', dir: 'desc' });
   const [docTabEditando, setDocTabEditando] = useState(null); // { id, campo, valor }
   const [docTabContactos, setDocTabContactos] = useState([]);
+  const [docFiltros, setDocFiltros] = useState([]);
+  const [docFiltroOp, setDocFiltroOp] = useState('and');
+  const [docSorts, setDocSorts] = useState([]);
+  const [docPanelFiltro, setDocPanelFiltro] = useState(false);
+  const [docPanelOrdenar, setDocPanelOrdenar] = useState(false);
+  const [docSeleccionados, setDocSeleccionados] = useState(new Set());
+  const [docPagina, setDocPagina] = useState(1);
+  const [docLimit, setDocLimit] = useState(50);
+  const [docMostrarTodos, setDocMostrarTodos] = useState(false);
+  const [docColCalcs, setDocColCalcs] = useState({});
+  const [docOpenCalcKey, setDocOpenCalcKey] = useState(null);
+  const [docCalcDropPos, setDocCalcDropPos] = useState(null);
+  const [docEliminandoBulk, setDocEliminandoBulk] = useState(false);
+  const [docHoveredRow, setDocHoveredRow] = useState(null);
   const [evolHidden, setEvolHidden] = useState({});
   const [catHidden, setCatHidden] = useState({});
   const [ctaHidden, setCtaHidden] = useState({});
@@ -3417,6 +3458,31 @@ export default function Finanzas() {
       const updated = await res.json();
       setDocumentosList(prev => prev.map(d => d.id === id ? updated : d));
     } catch(e) { console.error(e); }
+  }
+
+  function toggleDocSel(id) {
+    setDocSeleccionados(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+  }
+  function toggleDocAll(items, allSel) {
+    setDocSeleccionados(prev => {
+      const s = new Set(prev);
+      if (allSel) items.forEach(d => s.delete(d.id));
+      else items.forEach(d => s.add(d.id));
+      return s;
+    });
+  }
+  async function eliminarDocsBulk() {
+    setDocEliminandoBulk(true);
+    try {
+      const token = await getToken();
+      const ids = [...docSeleccionados];
+      await Promise.all(ids.map(id => fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+      })));
+      setDocumentosList(prev => prev.filter(d => !docSeleccionados.has(d.id)));
+      setDocSeleccionados(new Set());
+    } catch(e) { console.error(e); }
+    finally { setDocEliminandoBulk(false); }
   }
 
   async function guardarCeldaInline(id, campo, valor) {
@@ -4633,144 +4699,309 @@ export default function Finanzas() {
         const findC = id => ctodos.find(c => c.id === id)?.nombre || '—';
 
         const COLS_DOCS = [
-          { key: 'fecha_factura',        label: 'Fecha',        w: 110 },
-          { key: 'numero_factura',       label: 'Nº Factura',   w: 140 },
-          { key: 'nombre_entidad',       label: 'Entidad',      flex: 1 },
-          { key: 'tipo',                 label: 'Tipo',         w: 80 },
-          { key: 'importe',              label: 'Importe',      w: 100 },
-          { key: 'impuesto',             label: 'IVA',          w: 90 },
-          { key: 'irpf',                 label: 'IRPF',         w: 70 },
-          { key: 'nif_cif',              label: 'NIF/CIF',      w: 120 },
-          { key: 'factura_proveedor_id', label: 'Proveedor',    w: 160, readonly: true },
-          { key: 'factura_cliente_id',   label: 'Cliente',      w: 160, readonly: true },
-          { key: 'anio',                 label: 'Año',          w: 60 },
-          { key: 'trimestre',            label: 'Q',            w: 40 },
-          { key: 'archivo_nombre',       label: 'Archivo',      w: 140 },
-          { key: 'id',                   label: 'ID',           w: 290, readonly: true },
+          { key: 'pdf',                  label: '',           w: 32  },
+          { key: 'fecha_factura',        label: 'Fecha',      w: 110 },
+          { key: 'numero_factura',       label: 'Nº Factura', w: 145 },
+          { key: 'nombre_entidad',       label: 'Entidad',    w: 200 },
+          { key: 'tipo',                 label: 'Tipo',       w: 80  },
+          { key: 'importe',              label: 'Importe',    w: 100, num: true },
+          { key: 'impuesto',             label: 'IVA',        w: 90,  num: true },
+          { key: 'irpf',                 label: 'IRPF',       w: 70,  num: true },
+          { key: 'nif_cif',              label: 'NIF/CIF',    w: 120 },
+          { key: 'factura_proveedor_id', label: 'Proveedor',  w: 150 },
+          { key: 'factura_cliente_id',   label: 'Cliente',    w: 150 },
+          { key: 'anio',                 label: 'Año',        w: 55  },
+          { key: 'trimestre',            label: 'Q',          w: 42  },
+          { key: 'archivo_nombre',       label: 'Archivo',    w: 155, editable: true },
+          { key: 'id',                   label: 'ID',         w: 280 },
         ];
 
+        // Filtering
         let docs = [...documentosList];
         if (docTabTipo !== 'todos') docs = docs.filter(d => d.tipo === docTabTipo);
         if (docTabBusqueda.trim()) {
           const q = docTabBusqueda.toLowerCase();
           docs = docs.filter(d =>
-            (d.nombre_entidad || '').toLowerCase().includes(q) ||
-            (d.numero_factura || '').toLowerCase().includes(q) ||
-            (d.archivo_nombre || '').toLowerCase().includes(q) ||
-            (d.nif_cif || '').toLowerCase().includes(q)
+            (d.nombre_entidad||'').toLowerCase().includes(q) ||
+            (d.numero_factura||'').toLowerCase().includes(q) ||
+            (d.archivo_nombre||'').toLowerCase().includes(q) ||
+            (d.nif_cif||'').toLowerCase().includes(q)
           );
         }
-        docs = docs.sort((a, b) => {
-          const va = a[docTabSort.campo] ?? '';
-          const vb = b[docTabSort.campo] ?? '';
-          return docTabSort.dir === 'asc' ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
-        });
+        if (docFiltros.length) {
+          docs = docs.filter(doc => {
+            const check = f => {
+              const v = String(doc[f.campo] ?? '');
+              const fv = String(f.valor ?? '');
+              switch(f.operador) {
+                case 'ilike': return v.toLowerCase().includes(fv.toLowerCase());
+                case 'not_ilike': return !v.toLowerCase().includes(fv.toLowerCase());
+                case 'eq': return v === fv;
+                case 'neq': return v !== fv;
+                case 'gt': return parseFloat(v) > parseFloat(fv);
+                case 'gte': return parseFloat(v) >= parseFloat(fv);
+                case 'lt': return parseFloat(v) < parseFloat(fv);
+                case 'lte': return parseFloat(v) <= parseFloat(fv);
+                case 'is_null': return doc[f.campo]==null || doc[f.campo]==='';
+                case 'is_not_null': return doc[f.campo]!=null && doc[f.campo]!=='';
+                default: return true;
+              }
+            };
+            return docFiltroOp === 'and' ? docFiltros.every(check) : docFiltros.some(check);
+          });
+        }
+        if (docSorts.length) {
+          docs = [...docs].sort((a,b) => {
+            for (const s of docSorts) {
+              const va = a[s.campo]??'', vb = b[s.campo]??'';
+              if (va===vb) continue;
+              return (va>vb?1:-1)*(s.dir==='asc'?1:-1);
+            }
+            return 0;
+          });
+        } else {
+          docs = [...docs].sort((a,b) => ((b.fecha_factura||'')>(a.fecha_factura||'')?1:-1));
+        }
 
-        const sortBtn = (campo, label) => (
-          <button onClick={() => setDocTabSort(s => ({ campo, dir: s.campo === campo && s.dir === 'asc' ? 'desc' : 'asc' }))}
-            style={{ background: docTabSort.campo === campo ? '#27272a' : 'transparent', border: '1px solid #3f3f46', color: docTabSort.campo === campo ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
-            {label} {docTabSort.campo === campo ? (docTabSort.dir === 'asc' ? '↑' : '↓') : ''}
-          </button>
-        );
+        const totalDocs = docs.length;
+        const totalPages = Math.max(1, Math.ceil(totalDocs / (docMostrarTodos ? totalDocs||1 : docLimit)));
+        const safePag = Math.min(docPagina, totalPages);
+        const docsPage = docMostrarTodos ? docs : docs.slice((safePag-1)*docLimit, safePag*docLimit);
+        const docAllSel = docsPage.length>0 && docsPage.every(d => docSeleccionados.has(d.id));
+        const docSomeSel = docsPage.some(d => docSeleccionados.has(d.id)) && !docAllSel;
+
+        // Calc helpers
+        const calcDocVal = (key, type) => {
+          switch(type) {
+            case 'sum': { const vs=docs.map(d=>parseFloat(d[key])).filter(v=>!isNaN(v)); return vs.reduce((a,b)=>a+b,0); }
+            case 'average': { const vs=docs.map(d=>parseFloat(d[key])).filter(v=>!isNaN(v)); return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null; }
+            case 'min': { const vs=docs.map(d=>parseFloat(d[key])).filter(v=>!isNaN(v)); return vs.length?Math.min(...vs):null; }
+            case 'max': { const vs=docs.map(d=>parseFloat(d[key])).filter(v=>!isNaN(v)); return vs.length?Math.max(...vs):null; }
+            case 'count_all': return docs.length;
+            case 'count_values': return docs.filter(d=>d[key]!=null&&d[key]!=='').length;
+            case 'count_unique': return new Set(docs.map(d=>d[key]).filter(v=>v!=null&&v!=='')).size;
+            case 'count_empty': return docs.filter(d=>d[key]==null||d[key]==='').length;
+            default: return null;
+          }
+        };
+        const fmtDocCalc = (key, type, val) => {
+          if (val==null) return '—';
+          if (['count_all','count_values','count_unique','count_empty'].includes(type)) return String(Math.round(val));
+          return ['importe','impuesto','irpf'].includes(key) ? `${val.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €` : String(val);
+        };
+        const CALC_SHORT_D = { sum:'∑', average:'Ø', min:'↓', max:'↑', count_all:'#', count_values:'#v', count_unique:'#u', count_empty:'∅' };
+        const getCalcOpts = key => {
+          const base = [{val:'none',label:'Ninguno'},{val:'count_all',label:'Contar todo'},{val:'count_values',label:'Contar valores'},{val:'count_unique',label:'Contar únicos'},{val:'count_empty',label:'Contar vacíos'}];
+          return ['importe','impuesto','irpf'].includes(key) ? [...base,{val:'sum',label:'Suma'},{val:'average',label:'Media'},{val:'min',label:'Mínimo'},{val:'max',label:'Máximo'}] : base;
+        };
+
+        const thStyle = { color:'#71717a', fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em', padding:'6px 10px', borderBottom:'1px solid #27272a', textAlign:'left', whiteSpace:'nowrap', background:'#0f0f0f', position:'sticky', top:0, zIndex:1 };
+        const tdBase = { padding:'5px 10px', fontSize:12, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#a1a1aa' };
 
         return (
           <>
             {/* Toolbar */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-              <DateRangePicker desde={docTabDesde} hasta={docTabHasta} onApply={(d, h) => { setDocTabDesde(d); setDocTabHasta(h); lsSet('fin_doc_desde', d); lsSet('fin_doc_hasta', h); cargarDocumentos(d, h); }} />
+            <div style={{ display:'flex', gap:8, marginBottom:10, flexWrap:'wrap', alignItems:'center' }}>
+              <DateRangePicker desde={docTabDesde} hasta={docTabHasta} onApply={(d,h) => { setDocTabDesde(d); setDocTabHasta(h); lsSet('fin_doc_desde',d); lsSet('fin_doc_hasta',h); cargarDocumentos(d,h); }} />
               <button style={S.ghost} onClick={() => cargarDocumentos()}>↺</button>
-              {['todos', 'ingreso', 'gasto'].map(t => (
-                <button key={t} onClick={() => setDocTabTipo(t)}
-                  style={{ background: docTabTipo === t ? '#27272a' : 'transparent', border: '1px solid #3f3f46', color: docTabTipo === t ? 'white' : '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>
-                  {t === 'todos' ? 'Todos' : t === 'ingreso' ? 'Ventas' : 'Compras'}
+              {['todos','ingreso','gasto'].map(t => (
+                <button key={t} onClick={() => { setDocTabTipo(t); setDocPagina(1); }}
+                  style={{ background:docTabTipo===t?'#27272a':'transparent', border:'1px solid #3f3f46', color:docTabTipo===t?'white':'#71717a', borderRadius:6, padding:'3px 10px', fontSize:12, cursor:'pointer' }}>
+                  {t==='todos'?'Todos':t==='ingreso'?'Ventas':'Compras'}
                 </button>
               ))}
-              <span style={{ color: '#52525b', fontSize: 11 }}>Ordenar:</span>
-              {sortBtn('fecha_factura', 'Fecha')}
-              {sortBtn('importe', 'Importe')}
-              {sortBtn('nombre_entidad', 'Entidad')}
-              <input type="text" placeholder="Buscar…" value={docTabBusqueda} onChange={e => setDocTabBusqueda(e.target.value)}
-                style={{ ...S.input, width: 180, marginLeft: 'auto' }} />
+              <button onMouseDown={e=>e.preventDefault()} onClick={() => { setDocPanelFiltro(p=>!p); setDocPanelOrdenar(false); }}
+                style={{ ...S.ghost, outline:'none', display:'flex', alignItems:'center', gap:6, ...(docFiltros.length>0?{borderColor:'#0067FD',color:'#0067FD'}:{}) }}>
+                ⚡ Filtros
+                {docFiltros.length>0 && <span style={{ background:'#0067FD', color:'white', borderRadius:10, fontSize:11, padding:'1px 7px', fontWeight:700 }}>{docFiltros.length}</span>}
+              </button>
+              <button onMouseDown={e=>e.preventDefault()} onClick={() => { setDocPanelOrdenar(p=>!p); setDocPanelFiltro(false); }}
+                style={{ ...S.ghost, outline:'none', display:'flex', alignItems:'center', gap:6, ...(docSorts.length>0?{borderColor:'#8b5cf6',color:'#8b5cf6'}:{}) }}>
+                ↕ Ordenar
+                {docSorts.length>0 && <span style={{ color:'#8b5cf6', fontSize:11, fontWeight:600 }}>{docSorts.map(s=>(CAMPOS_SORT_DOCS.find(c=>c.key===s.campo)?.label||s.campo)+(s.dir==='asc'?' ↑':' ↓')).join(', ')}</span>}
+              </button>
+              <input type="text" placeholder="Buscar..." value={docTabBusqueda} onChange={e => { setDocTabBusqueda(e.target.value); setDocPagina(1); }}
+                style={{ ...S.input, width:180, marginLeft:'auto' }} />
             </div>
-            <p style={{ color: '#52525b', fontSize: 12, marginBottom: 8 }}>{docs.length} documento{docs.length !== 1 ? 's' : ''}</p>
+
+            {docPanelFiltro && <PanelFiltros filtros={docFiltros} op={docFiltroOp} onChangeFiltros={f=>{setDocFiltros(f);setDocPagina(1);}} onChangeOp={op=>{setDocFiltroOp(op);setDocPagina(1);}} campos={CAMPOS_FILTRO_DOCS} />}
+            {docPanelOrdenar && <PanelOrdenar sorts={docSorts} onChange={s=>{setDocSorts(s);setDocPagina(1);}} campos={CAMPOS_SORT_DOCS} />}
+
+            {/* Bulk bar */}
+            {docSeleccionados.size>0 && (
+              <div style={{ background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'8px 14px', marginBottom:10, display:'flex', alignItems:'center', gap:12, flexWrap:'wrap' }}>
+                <span style={{ color:'#d4d4d8', fontSize:13 }}>{docSeleccionados.size} seleccionado{docSeleccionados.size!==1?'s':''}</span>
+                <button onClick={eliminarDocsBulk} disabled={docEliminandoBulk}
+                  style={{ background:'#450a0a', border:'1px solid #7f1d1d', color:'#f87171', borderRadius:6, padding:'4px 12px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
+                  {docEliminandoBulk?'Eliminando…':`🗑 Eliminar ${docSeleccionados.size}`}
+                </button>
+                <button onClick={() => setDocSeleccionados(new Set())}
+                  style={{ background:'none', border:'none', color:'#52525b', fontSize:12, cursor:'pointer', marginLeft:'auto' }}>
+                  Cancelar selección
+                </button>
+              </div>
+            )}
+
+            <p style={{ color:'#52525b', fontSize:12, marginBottom:8 }}>{totalDocs} documento{totalDocs!==1?'s':''}</p>
 
             {loadingDocumentos ? (
-              <p style={{ color: '#52525b' }}>Cargando…</p>
+              <p style={{ color:'#52525b' }}>Cargando…</p>
             ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ borderCollapse: 'collapse', minWidth: COLS_DOCS.reduce((a,c) => a + (c.w || 160), 0), width: '100%', fontSize: 12 }}>
-                  <thead>
-                    <tr>
-                      {COLS_DOCS.map(col => (
-                        <th key={col.key} style={{ width: col.w, minWidth: col.w, color: '#71717a', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '6px 8px', borderBottom: '1px solid #27272a', textAlign: 'left', whiteSpace: 'nowrap', background: '#0f0f0f', position: 'sticky', top: 0, zIndex: 1 }}>
-                          {col.label}
+              <div style={S.card}>
+                <div style={{ overflowX:'auto' }}>
+                  <table style={{ borderCollapse:'collapse', tableLayout:'fixed', width:'100%', fontSize:12, minWidth:COLS_DOCS.reduce((a,c)=>a+c.w,0)+40 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ ...thStyle, width:36, minWidth:36, padding:'6px 8px' }}>
+                          <input type="checkbox" checked={docAllSel}
+                            ref={el=>{ if(el) el.indeterminate=docSomeSel; }}
+                            onChange={() => toggleDocAll(docsPage, docAllSel)}
+                            style={{ accentColor:'#0067FD', cursor:'pointer' }} />
                         </th>
-                      ))}
-                      <th style={{ width: 40, background: '#0f0f0f', position: 'sticky', top: 0, zIndex: 1, borderBottom: '1px solid #27272a' }} />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {docs.map(doc => (
-                      <tr key={doc.id} style={{ borderBottom: '1px solid #1c1c1e' }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#18181b'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                        {COLS_DOCS.map(col => {
-                          const val = doc[col.key];
-                          const isEditing = docTabEditando?.id === doc.id && docTabEditando?.campo === col.key;
-
-                          if (col.key === 'tipo') return (
-                            <td key={col.key} style={{ padding: '6px 8px', whiteSpace: 'nowrap' }}>
-                              <span style={{ background: val === 'ingreso' ? '#14532d' : '#450a0a', color: val === 'ingreso' ? '#4ade80' : '#f87171', fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>
-                                {val === 'ingreso' ? 'Venta' : 'Compra'}
-                              </span>
-                            </td>
-                          );
-
-                          if (col.key === 'factura_proveedor_id' || col.key === 'factura_cliente_id') return (
-                            <td key={col.key} style={{ padding: '6px 8px', color: '#a1a1aa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: col.w }}>
-                              {findC(val)}
-                            </td>
-                          );
-
-                          if (col.key === 'id') return (
-                            <td key={col.key} style={{ padding: '6px 8px', color: '#52525b', fontFamily: 'monospace', fontSize: 10, whiteSpace: 'nowrap' }}>{val || '—'}</td>
-                          );
-
-                          if (col.readonly) return (
-                            <td key={col.key} style={{ padding: '6px 8px', color: '#a1a1aa', whiteSpace: 'nowrap' }}>{val ?? '—'}</td>
-                          );
-
-                          return (
-                            <td key={col.key} style={{ padding: '2px 4px', maxWidth: col.w || col.flex ? undefined : col.w }}>
-                              {isEditing ? (
-                                <input autoFocus value={docTabEditando.valor}
-                                  onChange={e => setDocTabEditando(prev => ({ ...prev, valor: e.target.value }))}
-                                  onBlur={() => { guardarCeldaDoc(doc.id, col.key, docTabEditando.valor); setDocTabEditando(null); }}
-                                  onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') setDocTabEditando(null); }}
-                                  style={{ width: '100%', background: '#1c1c1e', border: '1px solid #0067FD', color: 'white', borderRadius: 4, padding: '3px 6px', fontSize: 12, outline: 'none', boxSizing: 'border-box' }} />
-                              ) : (
-                                <div onClick={() => setDocTabEditando({ id: doc.id, campo: col.key, valor: val ?? '' })}
-                                  style={{ padding: '4px 6px', color: val ? '#d4d4d8' : '#3f3f46', cursor: 'text', borderRadius: 4, minHeight: 24, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                                  onMouseEnter={e => e.currentTarget.style.background = '#27272a'}
-                                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                  {col.key === 'importe' || col.key === 'impuesto' || col.key === 'irpf'
-                                    ? (val != null ? `${parseFloat(val).toLocaleString('es-ES', { minimumFractionDigits: 2 })} €` : '—')
-                                    : (val ?? '—')}
-                                </div>
-                              )}
-                            </td>
-                          );
-                        })}
-                        <td style={{ padding: '4px 6px', textAlign: 'center' }}>
-                          {doc.archivo_url && (
-                            <button onClick={() => setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
-                              style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: 14, padding: 0 }} title="Ver PDF">📄</button>
-                          )}
-                        </td>
+                        {COLS_DOCS.map(col => (
+                          <th key={col.key} style={{ ...thStyle, width:col.w, minWidth:col.w }}>{col.label}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {docsPage.map(doc => {
+                        const sel = docSeleccionados.has(doc.id);
+                        const hov = docHoveredRow === doc.id;
+                        const showCb = sel || docSeleccionados.size>0 || hov;
+                        return (
+                          <tr key={doc.id}
+                            onMouseEnter={() => setDocHoveredRow(doc.id)}
+                            onMouseLeave={() => setDocHoveredRow(null)}
+                            style={{ borderBottom:'1px solid #1c1c1e', background:sel?'#1e293b':hov?'#18181b':'transparent' }}>
+                            <td style={{ width:36, padding:'4px 8px', verticalAlign:'middle' }}>
+                              {showCb
+                                ? <input type="checkbox" checked={sel} onChange={() => toggleDocSel(doc.id)} style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+                                : <span style={{ display:'inline-block', width:16 }} />}
+                            </td>
+                            {COLS_DOCS.map(col => {
+                              const val = doc[col.key];
+                              const isEditing = docTabEditando?.id===doc.id && docTabEditando?.campo===col.key;
+
+                              if (col.key === 'pdf') return (
+                                <td key="pdf" style={{ width:32, padding:'4px 6px', textAlign:'center', verticalAlign:'middle' }}>
+                                  {doc.archivo_url
+                                    ? <button onClick={() => setFacturaViewer({ url:doc.archivo_url, nombre:doc.archivo_nombre||'Documento', id:doc.id, data:doc })}
+                                        style={{ background:'none', border:'none', color:'#60a5fa', cursor:'pointer', fontSize:14, padding:0 }} title="Ver PDF">📄</button>
+                                    : <span style={{ color:'#3f3f46' }}>—</span>}
+                                </td>
+                              );
+
+                              if (col.key === 'tipo') return (
+                                <td key="tipo" style={{ ...tdBase, width:col.w }}>
+                                  {val ? <span style={{ background:val==='ingreso'?'#14532d':'#450a0a', color:val==='ingreso'?'#4ade80':'#f87171', fontSize:10, padding:'2px 6px', borderRadius:4, fontWeight:600 }}>{val==='ingreso'?'Venta':'Compra'}</span> : '—'}
+                                </td>
+                              );
+
+                              if (col.key==='factura_proveedor_id'||col.key==='factura_cliente_id') return (
+                                <td key={col.key} style={{ ...tdBase, width:col.w }}>{findC(val)}</td>
+                              );
+
+                              if (col.key==='id') return (
+                                <td key="id" style={{ ...tdBase, width:col.w, fontFamily:'monospace', fontSize:10, color:'#52525b' }}>{val||'—'}</td>
+                              );
+
+                              if (['importe','impuesto','irpf'].includes(col.key)) return (
+                                <td key={col.key} style={{ ...tdBase, width:col.w, color:'#d4d4d8' }}>
+                                  {val!=null ? `${parseFloat(val).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €` : '—'}
+                                </td>
+                              );
+
+                              if (col.editable) return (
+                                <td key={col.key} style={{ width:col.w, padding:'2px 6px', verticalAlign:'middle' }}>
+                                  {isEditing ? (
+                                    <input autoFocus value={docTabEditando.valor}
+                                      onChange={e => setDocTabEditando(prev=>({...prev, valor:e.target.value}))}
+                                      onBlur={() => { guardarCeldaDoc(doc.id, col.key, docTabEditando.valor); setDocTabEditando(null); }}
+                                      onKeyDown={e => { if(e.key==='Enter') e.target.blur(); if(e.key==='Escape') setDocTabEditando(null); }}
+                                      style={{ width:'100%', background:'#1c1c1e', border:'1px solid #0067FD', color:'white', borderRadius:4, padding:'3px 6px', fontSize:12, outline:'none', boxSizing:'border-box' }} />
+                                  ) : (
+                                    <div onClick={() => setDocTabEditando({ id:doc.id, campo:col.key, valor:val??'' })}
+                                      style={{ padding:'3px 4px', color:val?'#d4d4d8':'#3f3f46', cursor:'text', borderRadius:4, minHeight:22, overflow:'hidden', textOverflow:'ellipsis', background:hov?'#27272a':'transparent' }}
+                                      onMouseEnter={e=>e.currentTarget.style.background='#27272a'}
+                                      onMouseLeave={e=>e.currentTarget.style.background=hov?'#27272a':'transparent'}>
+                                      {val||'—'}
+                                    </div>
+                                  )}
+                                </td>
+                              );
+
+                              return (
+                                <td key={col.key} style={{ ...tdBase, width:col.w }}>{val??'—'}</td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Calc bar */}
+                <div style={{ position:'sticky', bottom:0, background:'#0d0d0d', borderTop:'2px solid #27272a', overflowX:'auto' }}>
+                  <div style={{ display:'flex', alignItems:'center' }}>
+                    <div style={{ width:36, flexShrink:0 }} />
+                    {COLS_DOCS.map(col => {
+                      const calcType = docColCalcs[col.key];
+                      const result = calcType && calcType!=='none' ? calcDocVal(col.key, calcType) : null;
+                      const formatted = result!=null ? fmtDocCalc(col.key, calcType, result) : null;
+                      const isOpen = docOpenCalcKey===col.key;
+                      const canCalc = col.key!=='pdf' && col.key!=='tipo';
+                      return (
+                        <div key={col.key} style={{ width:col.w, flexShrink:0, padding:'4px 10px', boxSizing:'border-box' }}>
+                          {canCalc ? (
+                            <button onClick={e => {
+                                if (isOpen) { setDocOpenCalcKey(null); setDocCalcDropPos(null); return; }
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setDocCalcDropPos({ bottom:window.innerHeight-rect.top+4, left:rect.left });
+                                setDocOpenCalcKey(col.key);
+                              }}
+                              style={{ background:'none', border:'none', cursor:'pointer', padding:0, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:4 }}>
+                              {formatted ? (
+                                <>
+                                  <span style={{ color:'#52525b', fontSize:10, textTransform:'uppercase' }}>{CALC_SHORT_D[calcType]}</span>
+                                  <span style={{ color:'#d4d4d8', fontSize:12 }}>{formatted}</span>
+                                </>
+                              ) : <span style={{ color:'#3f3f46', fontSize:11 }}>Calcular</span>}
+                            </button>
+                          ) : <span />}
+                          {isOpen && docCalcDropPos && createPortal(
+                            <div style={{ position:'fixed', bottom:docCalcDropPos.bottom, left:docCalcDropPos.left, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:4, zIndex:9999, minWidth:160, boxShadow:'0 8px 24px rgba(0,0,0,0.7)' }}>
+                              {getCalcOpts(col.key).map(opt => (
+                                <button key={opt.val} onClick={() => { setDocColCalcs(prev=>({...prev,[col.key]:opt.val})); setDocOpenCalcKey(null); setDocCalcDropPos(null); }}
+                                  style={{ display:'block', width:'100%', textAlign:'left', background:calcType===opt.val?'#27272a':'transparent', border:'none', color:calcType===opt.val?'#fff':'#a1a1aa', fontSize:12, padding:'6px 10px', borderRadius:4, cursor:'pointer' }}>
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>,
+                            document.body
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Paginación */}
+                <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:16, flexWrap:'wrap', alignItems:'center' }}>
+                  {!docMostrarTodos && totalPages>1 && (
+                    <>
+                      <button style={S.ghost} disabled={safePag<=1} onClick={() => setDocPagina(p=>p-1)}>← Anterior</button>
+                      <span style={{ color:'#71717a', fontSize:13, padding:'8px 0' }}>{safePag} / {totalPages}</span>
+                      <button style={S.ghost} disabled={safePag>=totalPages} onClick={() => setDocPagina(p=>p+1)}>Siguiente →</button>
+                    </>
+                  )}
+                  <select value={docMostrarTodos?'todos':String(docLimit)}
+                    onChange={e => { const v=e.target.value; if(v==='todos'){setDocMostrarTodos(true);setDocPagina(1);}else{setDocLimit(parseInt(v));setDocMostrarTodos(false);setDocPagina(1);} }}
+                    style={{ ...S.select, width:'auto', fontSize:13, padding:'7px 10px' }}>
+                    {[50,100,200].map(n=><option key={n} value={n}>{n} por página</option>)}
+                    <option value="todos">Todos ({totalDocs})</option>
+                  </select>
+                </div>
               </div>
             )}
           </>
