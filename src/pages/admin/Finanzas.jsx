@@ -3133,9 +3133,10 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
       const body = esCliente
         ? { nombre: form.nombre, nombre_empresa: form.nombre_empresa || null, email: form.email || null, nif_cif: form.nif_cif || null, direccion: form.direccion || null, notas: form.notas || null, alias: aliasArr, activo: form.activo }
         : { nombre: form.nombre, email: form.email || null, grupo: form.grupo || null, notas: form.notas || null, alias: aliasArr, activo: form.activo };
+      const ruta = tipo === 'cliente' ? 'clientes' : 'equipo';
       const url = esEdicion
-        ? `${BACKEND_URL}/admin/finanzas/${tipo}/${datos.id}`
-        : `${BACKEND_URL}/admin/finanzas/${tipo}`;
+        ? `${BACKEND_URL}/admin/finanzas/${ruta}/${datos.id}`
+        : `${BACKEND_URL}/admin/finanzas/${ruta}`;
       const method = esEdicion ? 'PUT' : 'POST';
       const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
       const data = await r.json();
