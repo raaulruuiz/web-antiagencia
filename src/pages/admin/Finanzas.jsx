@@ -4808,8 +4808,8 @@ export default function Finanzas() {
           return ['importe','impuesto','irpf'].includes(key) ? [...base,{val:'sum',label:'Suma'},{val:'average',label:'Media'},{val:'min',label:'Mínimo'},{val:'max',label:'Máximo'}] : base;
         };
 
-        const thStyle = { color:'#71717a', fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em', padding:'6px 10px', borderBottom:'1px solid #27272a', textAlign:'left', whiteSpace:'nowrap', background:'#0f0f0f', position:'sticky', top:0, zIndex:1 };
-        const tdBase = { padding:'5px 10px', fontSize:12, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#d4d4d8' };
+        const thStyle = { color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', padding:'8px 10px', borderBottom:'1px solid #27272a', textAlign:'left', whiteSpace:'nowrap', background:'#0f0f0f', position:'sticky', top:0, zIndex:1 };
+        const tdBase = { padding:'6px 10px', fontSize:13, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#d4d4d8' };
 
         return (
           <>
@@ -4862,17 +4862,19 @@ export default function Finanzas() {
             ) : (
               <div style={S.card}>
                 <div style={{ overflowX:'auto' }}>
-                  <table style={{ borderCollapse:'collapse', tableLayout:'fixed', width:'100%', fontSize:12, minWidth:COLS_DOCS.reduce((a,c)=>a+c.w,0)+40 }}>
+                  <table style={{ borderCollapse:'collapse', tableLayout:'fixed', width:'100%', fontSize:13, minWidth:COLS_DOCS.reduce((a,c)=>a+c.w,0)+40 }}>
                     <thead>
                       <tr>
-                        <th style={{ ...thStyle, width:36, minWidth:36, padding:'6px 8px' }}>
-                          <input type="checkbox" checked={docAllSel}
-                            ref={el=>{ if(el) el.indeterminate=docSomeSel; }}
-                            onChange={() => toggleDocAll(docsPage, docAllSel)}
-                            style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+                        <th style={{ ...thStyle, width:36, minWidth:36, padding:'8px 0 8px 10px' }}>
+                          {docSeleccionados.size > 0 && (
+                            <input type="checkbox" checked={docAllSel}
+                              ref={el=>{ if(el) el.indeterminate=docSomeSel; }}
+                              onChange={() => toggleDocAll(docsPage, docAllSel)}
+                              style={{ accentColor:'#0067FD', cursor:'pointer' }} />
+                          )}
                         </th>
                         {COLS_DOCS.map(col => (
-                          <th key={col.key} style={{ ...thStyle, width:col.w, minWidth:col.w }}>{col.label}</th>
+                          <th key={col.key} style={{ ...thStyle, width:col.w, minWidth:col.w, ...(col.key==='pdf' ? {padding:'8px 4px 8px 0'} : {}) }}>{col.label}</th>
                         ))}
                       </tr>
                     </thead>
@@ -4886,7 +4888,7 @@ export default function Finanzas() {
                             onMouseEnter={() => setDocHoveredRow(doc.id)}
                             onMouseLeave={() => setDocHoveredRow(null)}
                             style={{ borderBottom:'1px solid #1c1c1e', background:sel?'#1e293b':hov?'#18181b':'transparent' }}>
-                            <td style={{ width:36, padding:'4px 8px', verticalAlign:'middle' }}>
+                            <td style={{ width:36, padding:'6px 0 6px 10px', verticalAlign:'middle' }}>
                               {showCb
                                 ? <input type="checkbox" checked={sel} onChange={() => toggleDocSel(doc.id)} style={{ accentColor:'#0067FD', cursor:'pointer' }} />
                                 : <span style={{ display:'inline-block', width:16 }} />}
@@ -4896,7 +4898,7 @@ export default function Finanzas() {
                               const isEditing = docTabEditando?.id===doc.id && docTabEditando?.campo===col.key;
 
                               if (col.key === 'pdf') return (
-                                <td key="pdf" style={{ width:32, padding:'4px 6px', textAlign:'center', verticalAlign:'middle' }}>
+                                <td key="pdf" style={{ width:32, padding:'6px 4px 6px 0', textAlign:'center', verticalAlign:'middle' }}>
                                   {doc.archivo_url
                                     ? <button onClick={() => setFacturaViewer({ url:doc.archivo_url, nombre:doc.archivo_nombre||'Documento', id:doc.id, data:doc })}
                                         style={{ background:'none', border:'none', color:'#60a5fa', cursor:'pointer', fontSize:14, padding:0 }} title="Ver PDF">📄</button>
