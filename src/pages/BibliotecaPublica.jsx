@@ -987,6 +987,15 @@ export default function BibliotecaPublica() {
                         <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Contenido exclusivo</span>
                       </div>
                     </div>
+                    {item.puntuacion != null && (() => {
+                      const s = item.puntuacion;
+                      const col = s < 5 ? '#ef4444' : s < 7.5 ? '#f97316' : '#22c55e';
+                      return (
+                        <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.82)', borderRadius: 8, padding: '6px 10px', backdropFilter: 'blur(4px)', pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 46 }}>
+                          <span style={{ fontSize: 17, fontWeight: 800, color: col, lineHeight: 1 }}>{s}</span>
+                        </div>
+                      );
+                    })()}
                   </div>
                   <BibliotecaCardMeta item={item} allTags={allTags} allSectors={allSectors} blurred />
                 </div>
