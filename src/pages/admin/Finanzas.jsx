@@ -3105,6 +3105,116 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
   );
 }
 
+// ── Modal para crear / editar contacto (cliente o equipo) ───────
+
+function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setSavingContacto }) {
+  const esEdicion = !!datos?.id;
+  const esCliente = tipo === 'cliente';
+  const [form, setForm] = useState({
+    nombre:        datos?.nombre        || '',
+    nombre_empresa: datos?.nombre_empresa || '',
+    email:         datos?.email         || '',
+    nif_cif:       datos?.nif_cif       || '',
+    direccion:     datos?.direccion     || '',
+    notas:         datos?.notas         || '',
+    alias:         (datos?.alias || []).join(', '),
+    grupo:         datos?.grupo         || 'freelancer',
+    activo:        datos?.activo !== false,
+  });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  async function handleGuardar(e) {
+    e.preventDefault();
+    if (!form.nombre.trim()) return;
+    setSavingContacto(true);
+    try {
+      const token = await getToken();
+      const aliasArr = form.alias.split(',').map(s => s.trim()).filter(Boolean);
+      const body = esCliente
+        ? { nombre: form.nombre, nombre_empresa: form.nombre_empresa || null, email: form.email || null, nif_cif: form.nif_cif || null, direccion: form.direccion || null, notas: form.notas || null, alias: aliasArr, activo: form.activo }
+        : { nombre: form.nombre, email: form.email || null, grupo: form.grupo || null, notas: form.notas || null, alias: aliasArr, activo: form.activo };
+      const url = esEdicion
+        ? `${BACKEND_URL}/admin/finanzas/${tipo}/${datos.id}`
+        : `${BACKEND_URL}/admin/finanzas/${tipo}`;
+      const method = esEdicion ? 'PUT' : 'POST';
+      const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `Error ${r.status}`);
+      onGuardado();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      setSavingContacto(false);
+    }
+  }
+
+  return (
+    <div onClick={onCerrar} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#1c1c1e', border: '1px solid #3f3f46', borderRadius: 14, padding: '24px 28px', width: '100%', maxWidth: 480 }}>
+        <h3 style={{ color: 'white', fontSize: 16, fontWeight: 700, margin: '0 0 20px' }}>
+          {esEdicion ? 'Editar' : 'Nuevo'} {esCliente ? 'cliente' : 'miembro de equipo'}
+        </h3>
+        <form onSubmit={handleGuardar} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <label style={S.label}>Nombre *</label>
+            <input value={form.nombre} onChange={e => set('nombre', e.target.value)} required style={S.input} placeholder="Nombre" />
+          </div>
+          {esCliente && (
+            <>
+              <div>
+                <label style={S.label}>Empresa</label>
+                <input value={form.nombre_empresa} onChange={e => set('nombre_empresa', e.target.value)} style={S.input} placeholder="Nombre de empresa" />
+              </div>
+              <div>
+                <label style={S.label}>NIF / CIF</label>
+                <input value={form.nif_cif} onChange={e => set('nif_cif', e.target.value)} style={S.input} placeholder="A12345678" />
+              </div>
+              <div>
+                <label style={S.label}>Dirección</label>
+                <input value={form.direccion} onChange={e => set('direccion', e.target.value)} style={S.input} placeholder="Dirección fiscal" />
+              </div>
+            </>
+          )}
+          {!esCliente && (
+            <div>
+              <label style={S.label}>Grupo</label>
+              <select value={form.grupo} onChange={e => set('grupo', e.target.value)} style={S.select}>
+                <option value="nosotros">Nosotros</option>
+                <option value="freelancer">Freelancer</option>
+              </select>
+            </div>
+          )}
+          <div>
+            <label style={S.label}>Email</label>
+            <input type="email" value={form.email} onChange={e => set('email', e.target.value)} style={S.input} placeholder="email@ejemplo.com" />
+          </div>
+          <div>
+            <label style={S.label}>Alias (separados por coma)</label>
+            <input value={form.alias} onChange={e => set('alias', e.target.value)} style={S.input} placeholder="alias1, alias2, ..." />
+            <p style={{ color: '#52525b', fontSize: 11, margin: '4px 0 0' }}>Nombres alternativos para matching de facturas</p>
+          </div>
+          <div>
+            <label style={S.label}>Notas</label>
+            <input value={form.notas} onChange={e => set('notas', e.target.value)} style={S.input} placeholder="Notas internas" />
+          </div>
+          {esEdicion && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#a1a1aa', fontSize: 13, cursor: 'pointer' }}>
+              <input type="checkbox" checked={form.activo} onChange={e => set('activo', e.target.checked)} style={{ accentColor: '#0067FD' }} />
+              Activo
+            </label>
+          )}
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
+            <button type="button" onClick={onCerrar} style={S.ghost}>Cancelar</button>
+            <button type="submit" disabled={savingContacto} style={{ ...S.primary, opacity: savingContacto ? 0.6 : 1 }}>
+              {savingContacto ? 'Guardando…' : esEdicion ? 'Guardar cambios' : 'Crear'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ── Componente principal ────────────────────────────────────────
 
 function lsGet(key, fallback) { try { const v = localStorage.getItem(key); return v != null ? JSON.parse(v) : fallback; } catch { return fallback; } }
@@ -3129,7 +3239,6 @@ export default function Finanzas() {
   const [clienteAbierto, setClienteAbierto] = useState(null);
   const [equipo, setEquipo] = useState([]);
   const [loadingEquipo, setLoadingEquipo] = useState(false);
-  const [syncingEquipo, setSyncingEquipo] = useState(false);
   const [equipoAbierto, setEquipoAbierto] = useState(null);
   const [equipoBusqueda, setEquipoBusqueda] = useState('');
   const [equipoSort, setEquipoSort] = useState({ campo: 'beneficio', dir: 'asc' });
@@ -3137,9 +3246,11 @@ export default function Finanzas() {
   const [movPagina, setMovPagina] = useState(1);
   const [movPorPagina, setMovPorPagina] = useState(10);
   const [movBusqueda, setMovBusqueda] = useState('');
-  const [syncingClientes, setSyncingClientes] = useState(false);
   const [clienteSort, setClienteSort] = useState({ campo: 'beneficio', dir: 'desc' });
   const [clienteBusqueda, setClienteBusqueda] = useState('');
+  // Modal contacto (cliente / equipo)
+  const [modalContacto, setModalContacto] = useState(null); // null | { tipo: 'cliente'|'equipo', datos: {} | null }
+  const [savingContacto, setSavingContacto] = useState(false);
   const [evolHidden, setEvolHidden] = useState({});
   const [catHidden, setCatHidden] = useState({});
   const [ctaHidden, setCtaHidden] = useState({});
@@ -4443,16 +4554,22 @@ export default function Finanzas() {
           const balance   = ingresos - gastos;
           return (
             <div key={c.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
-              <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
-                style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', gap: 12 }}>
-                <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none' }}>▶</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
+                <span onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                  style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
+                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                  style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{c.nombre}</span>
                   {c.nombre_empresa && c.nombre_empresa !== c.nombre && (
                     <span style={{ color: '#71717a', fontSize: 12, marginLeft: 8 }}>{c.nombre_empresa}</span>
                   )}
                 </div>
-                <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
+                <button onClick={e => { e.stopPropagation(); setModalContacto({ tipo: 'cliente', datos: c }); }}
+                  style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
+                  Editar
+                </button>
+                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                  style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
                   <span style={{ fontSize: 13, color: balance >= 0 ? '#60a5fa' : '#fb923c', fontWeight: 600 }}>{fmt(balance)}</span>
@@ -4550,17 +4667,9 @@ export default function Finanzas() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
               <DateRangePicker desde={desde} hasta={hasta} onApply={(d, h) => { setDesde(d); setHasta(h); }} />
               <button
-                onClick={async () => {
-                  setSyncingClientes(true);
-                  try {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    await fetch(`${BACKEND_URL}/admin/finanzas/clientes/sync`, { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } });
-                    await cargarClientes();
-                  } finally { setSyncingClientes(false); }
-                }}
-                disabled={syncingClientes}
-                style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', flexShrink: 0 }}
-              >{syncingClientes ? 'Sincronizando…' : '↻ Sync Notion'}</button>
+                onClick={() => setModalContacto({ tipo: 'cliente', datos: null })}
+                style={{ background: '#0067FD', border: 'none', color: 'white', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', flexShrink: 0, fontWeight: 600 }}
+              >＋ Nuevo cliente</button>
 
               {/* Buscador */}
               <input
@@ -4596,7 +4705,7 @@ export default function Finanzas() {
               <p style={{ color: '#71717a', fontSize: 14 }}>Cargando clientes…</p>
             ) : clientes.length === 0 ? (
               <div style={{ ...S.card, padding: 24, textAlign: 'center' }}>
-                <p style={{ color: '#71717a', fontSize: 14, margin: 0 }}>No hay clientes. Pulsa «↻ Sync Notion» para importarlos.</p>
+                <p style={{ color: '#71717a', fontSize: 14, margin: 0 }}>No hay clientes. Pulsa «＋ Nuevo cliente» para añadir.</p>
               </div>
             ) : (
               <>
@@ -4670,14 +4779,20 @@ export default function Finanzas() {
           const balance   = ingresos - gastos;
           return (
             <div key={e.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
-              <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
-                style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', gap: 12 }}>
-                <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none' }}>▶</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
+                <span onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                  style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
+                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                  style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{e.nombre}</span>
                   {e.email && <span style={{ color: '#71717a', fontSize: 12, marginLeft: 8 }}>{e.email}</span>}
                 </div>
-                <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
+                <button onClick={ev => { ev.stopPropagation(); setModalContacto({ tipo: 'equipo', datos: e }); }}
+                  style={{ background: 'transparent', border: '1px solid #3f3f46', color: '#71717a', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
+                  Editar
+                </button>
+                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); }}
+                  style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
                   <span style={{ fontSize: 13, color: balance >= 0 ? '#60a5fa' : '#fb923c', fontWeight: 600 }}>{fmt(balance)}</span>
@@ -4768,17 +4883,9 @@ export default function Finanzas() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
               <DateRangePicker desde={desde} hasta={hasta} onApply={(d, h) => { setDesde(d); setHasta(h); }} />
               <button
-                onClick={async () => {
-                  setSyncingEquipo(true);
-                  try {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    await fetch(`${BACKEND_URL}/admin/finanzas/equipo/sync`, { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } });
-                    await cargarEquipo();
-                  } finally { setSyncingEquipo(false); }
-                }}
-                disabled={syncingEquipo}
-                style={{ background: '#27272a', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', flexShrink: 0 }}
-              >{syncingEquipo ? 'Sincronizando…' : '↻ Sync Notion'}</button>
+                onClick={() => setModalContacto({ tipo: 'equipo', datos: null })}
+                style={{ background: '#0067FD', border: 'none', color: 'white', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', flexShrink: 0, fontWeight: 600 }}
+              >＋ Nuevo miembro</button>
 
               <input
                 type="text"
@@ -4812,7 +4919,7 @@ export default function Finanzas() {
               <p style={{ color: '#71717a', fontSize: 14 }}>Cargando equipo…</p>
             ) : equipo.length === 0 ? (
               <div style={{ ...S.card, padding: 24, textAlign: 'center' }}>
-                <p style={{ color: '#71717a', fontSize: 14, margin: 0 }}>No hay datos. Pulsa «↻ Sync Notion» para importar.</p>
+                <p style={{ color: '#71717a', fontSize: 14, margin: 0 }}>No hay datos. Pulsa «＋ Nuevo miembro» para añadir.</p>
               </div>
             ) : (
               <>
@@ -4846,6 +4953,20 @@ export default function Finanzas() {
       {tab === 'nuevo' && (
         <NuevoMovimientoTab onGuardado={() => { setSinMovimientosMes(false); setTab('movimientos'); cargarMovimientos(1); cargarDashboard(); }} />
       )}
+
+      {/* ── Modal contacto (cliente / equipo) ── */}
+      {modalContacto && <ModalContacto
+        tipo={modalContacto.tipo}
+        datos={modalContacto.datos}
+        onGuardado={() => {
+          setModalContacto(null);
+          if (modalContacto.tipo === 'cliente') cargarClientes();
+          else cargarEquipo();
+        }}
+        onCerrar={() => setModalContacto(null)}
+        savingContacto={savingContacto}
+        setSavingContacto={setSavingContacto}
+      />}
 
       {/* ── Confirm dialog ── */}
       {confirmDialog && (
