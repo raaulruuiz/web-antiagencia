@@ -3132,7 +3132,7 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
       const aliasArr = form.alias.split(',').map(s => s.trim()).filter(Boolean);
       const body = esCliente
         ? { nombre: form.nombre, nombre_empresa: form.nombre_empresa || null, email: form.email || null, nif_cif: form.nif_cif || null, direccion: form.direccion || null, notas: form.notas || null, alias: aliasArr, activo: form.activo }
-        : { nombre: form.nombre, email: form.email || null, grupo: form.grupo || null, notas: form.notas || null, alias: aliasArr, activo: form.activo };
+        : { nombre: form.nombre, email: form.email || null, notas: form.notas || null, alias: aliasArr, activo: form.activo };
       const ruta = tipo === 'cliente' ? 'clientes' : 'equipo';
       const url = esEdicion
         ? `${BACKEND_URL}/admin/finanzas/${ruta}/${datos.id}`
@@ -3176,15 +3176,6 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
               </div>
             </>
           )}
-          {!esCliente && (
-            <div>
-              <label style={S.label}>Grupo</label>
-              <select value={form.grupo} onChange={e => set('grupo', e.target.value)} style={S.select}>
-                <option value="nosotros">Nosotros</option>
-                <option value="freelancer">Freelancer</option>
-              </select>
-            </div>
-          )}
           <div>
             <label style={S.label}>Email</label>
             <input type="email" value={form.email} onChange={e => set('email', e.target.value)} style={S.input} placeholder="email@ejemplo.com" />
@@ -3201,7 +3192,7 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
           {esEdicion && (
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#a1a1aa', fontSize: 13, cursor: 'pointer' }}>
               <input type="checkbox" checked={form.activo} onChange={e => set('activo', e.target.checked)} style={{ accentColor: '#0067FD' }} />
-              Activo
+              {esCliente ? 'Activo' : 'Fijo'}
             </label>
           )}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
@@ -4767,8 +4758,8 @@ export default function Finanzas() {
           return arr.filter(e => e.nombre.toLowerCase().includes(q));
         };
 
-        const nosotros   = sortEquipo(buscarFiltroE(equipo.filter(e => e.grupo === 'nosotros')));
-        const freelancers = sortEquipo(buscarFiltroE(equipo.filter(e => e.grupo === 'freelancer')));
+        const nosotros   = sortEquipo(buscarFiltroE(equipo.filter(e => e.activo)));
+        const freelancers = sortEquipo(buscarFiltroE(equipo.filter(e => !e.activo)));
 
         const renderMiembro = (e) => {
           const abierto = equipoAbierto === e.id;
@@ -4927,7 +4918,7 @@ export default function Finanzas() {
                 {nosotros.length > 0 && (
                   <div style={{ marginBottom: 24 }}>
                     <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-                      Nosotros <span style={{ color: '#a1a1aa' }}>({nosotros.length})</span>
+                      Fijo <span style={{ color: '#a1a1aa' }}>({nosotros.length})</span>
                     </h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {nosotros.map(renderMiembro)}
@@ -4937,7 +4928,7 @@ export default function Finanzas() {
                 {freelancers.length > 0 && (
                   <div>
                     <h2 style={{ color: '#71717a', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-                      Freelancer <span style={{ color: '#a1a1aa' }}>({freelancers.length})</span>
+                      Freelance <span style={{ color: '#a1a1aa' }}>({freelancers.length})</span>
                     </h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {freelancers.map(renderMiembro)}
