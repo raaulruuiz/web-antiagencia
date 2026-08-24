@@ -3118,8 +3118,8 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
     direccion:     datos?.direccion     || '',
     notas:         datos?.notas         || '',
     alias:         (datos?.alias || []).join(', '),
-    grupo:         datos?.grupo         || 'freelancer',
     activo:        datos?.activo !== false,
+    fijo:          !!datos?.fijo,
   });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -3132,7 +3132,7 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
       const aliasArr = form.alias.split(',').map(s => s.trim()).filter(Boolean);
       const body = esCliente
         ? { nombre: form.nombre, nombre_empresa: form.nombre_empresa || null, email: form.email || null, nif_cif: form.nif_cif || null, direccion: form.direccion || null, notas: form.notas || null, alias: aliasArr, activo: form.activo }
-        : { nombre: form.nombre, email: form.email || null, notas: form.notas || null, alias: aliasArr, activo: form.activo };
+        : { nombre: form.nombre, email: form.email || null, notas: form.notas || null, alias: aliasArr, fijo: form.fijo };
       const ruta = tipo === 'cliente' ? 'clientes' : 'equipo';
       const url = esEdicion
         ? `${BACKEND_URL}/admin/finanzas/${ruta}/${datos.id}`
@@ -3191,7 +3191,10 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
           </div>
           {esEdicion && (
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#a1a1aa', fontSize: 13, cursor: 'pointer' }}>
-              <input type="checkbox" checked={form.activo} onChange={e => set('activo', e.target.checked)} style={{ accentColor: '#0067FD' }} />
+              <input type="checkbox"
+                checked={esCliente ? form.activo : form.fijo}
+                onChange={e => set(esCliente ? 'activo' : 'fijo', e.target.checked)}
+                style={{ accentColor: '#0067FD' }} />
               {esCliente ? 'Activo' : 'Fijo'}
             </label>
           )}
@@ -4758,8 +4761,8 @@ export default function Finanzas() {
           return arr.filter(e => e.nombre.toLowerCase().includes(q));
         };
 
-        const nosotros   = sortEquipo(buscarFiltroE(equipo.filter(e => e.activo)));
-        const freelancers = sortEquipo(buscarFiltroE(equipo.filter(e => !e.activo)));
+        const nosotros   = sortEquipo(buscarFiltroE(equipo.filter(e => e.fijo)));
+        const freelancers = sortEquipo(buscarFiltroE(equipo.filter(e => !e.fijo)));
 
         const renderMiembro = (e) => {
           const abierto = equipoAbierto === e.id;
