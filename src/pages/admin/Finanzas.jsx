@@ -5206,7 +5206,7 @@ export default function Finanzas() {
                   )}
                   <div style={{ display: 'flex', gap: 0, marginBottom: 14, borderBottom: '1px solid #27272a' }}>
                     {[['movimientos', 'Movimientos'], ['documentos', 'Documentos']].map(([t, label]) => (
-                      <button key={t} onClick={() => { setContactoTabInner(t); setDocFiltroTipo('todos'); if (t === 'documentos') cargarDocsContacto(c.id); }}
+                      <button key={t} onClick={() => { setContactoTabInner(t); setDocFiltroTipo('todos'); }}
                         style={{ background: 'none', border: 'none', borderBottom: contactoTabInner === t ? '2px solid #60a5fa' : '2px solid transparent', color: contactoTabInner === t ? '#60a5fa' : '#71717a', padding: '6px 14px 8px', fontSize: 13, cursor: 'pointer', fontWeight: contactoTabInner === t ? 600 : 400 }}>
                         {label}
                       </button>
@@ -5272,7 +5272,7 @@ export default function Finanzas() {
                     );
                   })())}
                   {contactoTabInner === 'documentos' && (() => {
-                    const docsFiltered = docsContacto.filter(d => docFiltroTipo === 'todos' || d.tipo === docFiltroTipo);
+                    const docsFiltered = (c.facturas || []).filter(d => docFiltroTipo === 'todos' || d.tipo === docFiltroTipo);
                     return (
                       <>
                         <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -5284,9 +5284,7 @@ export default function Finanzas() {
                           ))}
                           <span style={{ color: '#52525b', fontSize: 11, marginLeft: 'auto' }}>{docsFiltered.length} documento{docsFiltered.length !== 1 ? 's' : ''}</span>
                         </div>
-                        {loadingDocs ? (
-                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Cargando...</p>
-                        ) : docsFiltered.length === 0 ? (
+                        {docsFiltered.length === 0 ? (
                           <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin documentos asignados.</p>
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -5470,7 +5468,7 @@ export default function Finanzas() {
                   </div>
                   <div style={{ display: 'flex', gap: 0, marginBottom: 14, borderBottom: '1px solid #27272a' }}>
                     {[['movimientos', 'Movimientos'], ['documentos', 'Documentos']].map(([t, label]) => (
-                      <button key={t} onClick={() => { setContactoTabInner(t); setDocFiltroTipo('todos'); if (t === 'documentos') cargarDocsContacto(e.id); }}
+                      <button key={t} onClick={() => { setContactoTabInner(t); setDocFiltroTipo('todos'); }}
                         style={{ background: 'none', border: 'none', borderBottom: contactoTabInner === t ? '2px solid #60a5fa' : '2px solid transparent', color: contactoTabInner === t ? '#60a5fa' : '#71717a', padding: '6px 14px 8px', fontSize: 13, cursor: 'pointer', fontWeight: contactoTabInner === t ? 600 : 400 }}>
                         {label}
                       </button>
@@ -5535,7 +5533,7 @@ export default function Finanzas() {
                     );
                   })())}
                   {contactoTabInner === 'documentos' && (() => {
-                    const docsFiltered = docsContacto.filter(d => docFiltroTipo === 'todos' || d.tipo === docFiltroTipo);
+                    const docsFiltered = (e.facturas || []).filter(d => docFiltroTipo === 'todos' || d.tipo === docFiltroTipo);
                     return (
                       <>
                         <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -5547,9 +5545,7 @@ export default function Finanzas() {
                           ))}
                           <span style={{ color: '#52525b', fontSize: 11, marginLeft: 'auto' }}>{docsFiltered.length} documento{docsFiltered.length !== 1 ? 's' : ''}</span>
                         </div>
-                        {loadingDocs ? (
-                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Cargando...</p>
-                        ) : docsFiltered.length === 0 ? (
+                        {docsFiltered.length === 0 ? (
                           <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin documentos asignados.</p>
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -5731,7 +5727,7 @@ export default function Finanzas() {
                   )}
                   <div style={{ display: 'flex', gap: 0, marginBottom: 14, borderBottom: '1px solid #27272a' }}>
                     {[['movimientos', 'Movimientos'], ['documentos', 'Documentos']].map(([t, label]) => (
-                      <button key={t} onClick={() => { setContactoTabInner(t); setDocFiltroTipo('todos'); if (t === 'documentos') cargarDocsContacto(p.id); }}
+                      <button key={t} onClick={() => { setContactoTabInner(t); setDocFiltroTipo('todos'); }}
                         style={{ background: 'none', border: 'none', borderBottom: contactoTabInner === t ? '2px solid #60a5fa' : '2px solid transparent', color: contactoTabInner === t ? '#60a5fa' : '#71717a', padding: '6px 14px 8px', fontSize: 13, cursor: 'pointer', fontWeight: contactoTabInner === t ? 600 : 400 }}>
                         {label}
                       </button>
@@ -5789,7 +5785,7 @@ export default function Finanzas() {
                     );
                   })())}
                   {contactoTabInner === 'documentos' && (() => {
-                    const docsFiltered = docsContacto.filter(d => docFiltroTipo === 'todos' || d.tipo === docFiltroTipo);
+                    const docsFiltered = (p.facturas || []).filter(d => docFiltroTipo === 'todos' || d.tipo === docFiltroTipo);
                     return (
                       <>
                         <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -5801,9 +5797,7 @@ export default function Finanzas() {
                           ))}
                           <span style={{ color: '#52525b', fontSize: 11, marginLeft: 'auto' }}>{docsFiltered.length} documento{docsFiltered.length !== 1 ? 's' : ''}</span>
                         </div>
-                        {loadingDocs ? (
-                          <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Cargando...</p>
-                        ) : docsFiltered.length === 0 ? (
+                        {docsFiltered.length === 0 ? (
                           <p style={{ color: '#52525b', fontSize: 13, margin: 0 }}>Sin documentos asignados.</p>
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
