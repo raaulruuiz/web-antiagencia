@@ -9,6 +9,54 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 
+function SearchableSelect({ value, onChange, options, placeholder = '— elegir —', style = {}, onClose }) {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState('');
+  const ref = useRef(null);
+  const inputRef = useRef(null);
+  const selected = options.find(o => o.id === value);
+  const filtered = options.filter(o =>
+    !q || o.nombre.toLowerCase().includes(q.toLowerCase())
+  );
+  useEffect(() => {
+    if (!open) return;
+    function handle(e) { if (ref.current && !ref.current.contains(e.target)) { setOpen(false); setQ(''); if (onClose) onClose(); } }
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [open, onClose]);
+  return (
+    <div ref={ref} style={{ position: 'relative', ...style }}>
+      <div onClick={() => { setOpen(o => !o); setTimeout(() => inputRef.current?.focus(), 0); }}
+        style={{ background: '#27272a', border: '1px solid #3f3f46', borderRadius: 6, color: selected ? 'white' : '#52525b', padding: '4px 8px', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minHeight: 26, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4, ...style }}>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{selected ? selected.nombre : placeholder}</span>
+        <span style={{ flexShrink: 0, fontSize: 10, color: '#52525b' }}>▾</span>
+      </div>
+      {open && (
+        <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 9999, background: '#1c1c1e', border: '1px solid #3f3f46', borderRadius: 6, minWidth: 200, width: 'max-content', maxWidth: 320, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+          <input ref={inputRef} value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar..." autoFocus
+            onKeyDown={e => { if (e.key === 'Escape') { setOpen(false); setQ(''); if (onClose) onClose(); } }}
+            style={{ width: '100%', background: '#27272a', border: 'none', borderBottom: '1px solid #3f3f46', color: 'white', padding: '7px 10px', outline: 'none', fontSize: 12, boxSizing: 'border-box', borderRadius: '6px 6px 0 0' }} />
+          <div style={{ maxHeight: 220, overflowY: 'auto' }}>
+            <div onMouseDown={e => e.preventDefault()} onClick={() => { onChange(''); setOpen(false); setQ(''); }}
+              style={{ padding: '6px 10px', color: '#52525b', cursor: 'pointer', fontSize: 12 }}
+              onMouseEnter={e => e.currentTarget.style.background = '#27272a'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+              {placeholder}
+            </div>
+            {filtered.map(o => (
+              <div key={o.id} onMouseDown={e => e.preventDefault()} onClick={() => { onChange(o.id); setOpen(false); setQ(''); }}
+                style={{ padding: '6px 10px', color: o.id === value ? '#60a5fa' : '#d4d4d8', cursor: 'pointer', fontSize: 12, background: 'transparent' }}
+                onMouseEnter={e => e.currentTarget.style.background = '#27272a'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                {o.nombre}
+              </div>
+            ))}
+            {filtered.length === 0 && <div style={{ padding: '6px 10px', color: '#52525b', fontSize: 12 }}>Sin resultados</div>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const CUENTAS = [
   { key: 'Ingresos',               label: 'Ingresos',            color: '#22c55e' },
   { key: 'Impuestos',              label: 'Impuestos',           color: '#f59e0b' },
@@ -4878,11 +4926,9 @@ export default function Finanzas() {
                 {/* Bulk proveedor */}
                 <div style={{ display:'flex', alignItems:'center', gap:4 }}>
                   <span style={{ color:'#71717a', fontSize:12 }}>Proveedor:</span>
-                  <select value={docBulkProveedor} onChange={e => setDocBulkProveedor(e.target.value)}
-                    style={{ background:'#27272a', border:'1px solid #3f3f46', borderRadius:6, color:'white', padding:'3px 6px', fontSize:12, outline:'none' }}>
-                    <option value="">— elegir —</option>
-                    {(docTabContactos.length ? docTabContactos : contactosTodos).map(c => <option key={c.id} value={c.id}>{c.nombre_empresa||c.nombre}</option>)}
-                  </select>
+                  <SearchableSelect value={docBulkProveedor} onChange={v => setDocBulkProveedor(v)}
+                    options={docTabContactos.length ? docTabContactos : contactosTodos}
+                    placeholder="— elegir —" />
                   {docBulkProveedor && (
                     <button onClick={() => editarDocsBulkContacto('factura_proveedor_id', docBulkProveedor)}
                       style={{ background:'#0067FD', border:'none', borderRadius:6, color:'white', padding:'3px 10px', fontSize:12, cursor:'pointer', fontWeight:600 }}>Aplicar</button>
@@ -4891,11 +4937,9 @@ export default function Finanzas() {
                 {/* Bulk cliente */}
                 <div style={{ display:'flex', alignItems:'center', gap:4 }}>
                   <span style={{ color:'#71717a', fontSize:12 }}>Cliente:</span>
-                  <select value={docBulkCliente} onChange={e => setDocBulkCliente(e.target.value)}
-                    style={{ background:'#27272a', border:'1px solid #3f3f46', borderRadius:6, color:'white', padding:'3px 6px', fontSize:12, outline:'none' }}>
-                    <option value="">— elegir —</option>
-                    {(docTabContactos.length ? docTabContactos : contactosTodos).map(c => <option key={c.id} value={c.id}>{c.nombre_empresa||c.nombre}</option>)}
-                  </select>
+                  <SearchableSelect value={docBulkCliente} onChange={v => setDocBulkCliente(v)}
+                    options={docTabContactos.length ? docTabContactos : contactosTodos}
+                    placeholder="— elegir —" />
                   {docBulkCliente && (
                     <button onClick={() => editarDocsBulkContacto('factura_cliente_id', docBulkCliente)}
                       style={{ background:'#0067FD', border:'none', borderRadius:6, color:'white', padding:'3px 10px', fontSize:12, cursor:'pointer', fontWeight:600 }}>Aplicar</button>
@@ -4970,18 +5014,16 @@ export default function Finanzas() {
                               if (col.key==='factura_proveedor_id'||col.key==='factura_cliente_id') return (
                                 <td key={col.key} style={{ width:col.w, maxWidth:col.w, padding:'2px 6px', verticalAlign:'middle', overflow:'hidden' }}>
                                   {isEditing ? (
-                                    <select autoFocus value={docTabEditando.valor||''}
-                                      onChange={e => setDocTabEditando(prev=>({...prev, valor:e.target.value}))}
-                                      onBlur={async () => {
-                                        const newId = docTabEditando.valor;
+                                    <SearchableSelect value={docTabEditando.valor||''}
+                                      options={ctodos}
+                                      placeholder="— ninguno —"
+                                      style={{ width: '100%' }}
+                                      onClose={() => setDocTabEditando(null)}
+                                      onChange={async newId => {
                                         const extra = contactFiscalUpdates(newId, ctodos, doc.tipo, col.key);
                                         await guardarCeldaDoc(doc.id, { [col.key]: newId||null, ...extra });
                                         setDocTabEditando(null);
-                                      }}
-                                      style={{ width:'100%', background:'#1c1c1e', border:'1px solid #0067FD', color:'white', borderRadius:4, padding:'3px 4px', fontSize:12, outline:'none' }}>
-                                      <option value="">— ninguno —</option>
-                                      {ctodos.map(c => <option key={c.id} value={c.id}>{c.nombre_empresa||c.nombre}</option>)}
-                                    </select>
+                                      }} />
                                   ) : (
                                     <div onClick={() => setDocTabEditando({ id:doc.id, campo:col.key, valor:val||'' })}
                                       style={{ padding:'3px 4px', color:val?'#d4d4d8':'#3f3f46', cursor:'pointer', borderRadius:4, minHeight:22, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', background:hov?'#27272a':'transparent' }}
@@ -6175,17 +6217,15 @@ export default function Finanzas() {
                     </div>
                     <div style={{ display:'flex', flexDirection:'column', gap:4, flex:'1 1 160px' }}>
                       <span style={lblStyle}>Proveedor</span>
-                      <select value={viewerDraft.factura_proveedor_id||''} onChange={e => handleContactChange('factura_proveedor_id', e.target.value)} style={selStyle}>
-                        <option value="">— ninguno —</option>
-                        {ctodos.map(c => <option key={c.id} value={c.id}>{c.nombre_empresa||c.nombre}</option>)}
-                      </select>
+                      <SearchableSelect value={viewerDraft.factura_proveedor_id||''}
+                        onChange={v => handleContactChange('factura_proveedor_id', v)}
+                        options={ctodos} placeholder="— ninguno —" style={{ flex: 1 }} />
                     </div>
                     <div style={{ display:'flex', flexDirection:'column', gap:4, flex:'1 1 160px' }}>
                       <span style={lblStyle}>Cliente</span>
-                      <select value={viewerDraft.factura_cliente_id||''} onChange={e => handleContactChange('factura_cliente_id', e.target.value)} style={selStyle}>
-                        <option value="">— ninguno —</option>
-                        {ctodos.map(c => <option key={c.id} value={c.id}>{c.nombre_empresa||c.nombre}</option>)}
-                      </select>
+                      <SearchableSelect value={viewerDraft.factura_cliente_id||''}
+                        onChange={v => handleContactChange('factura_cliente_id', v)}
+                        options={ctodos} placeholder="— ninguno —" style={{ flex: 1 }} />
                     </div>
                   </div>
                   {(viewerDraft.nombre_entidad || viewerDraft.nif_cif) && (
