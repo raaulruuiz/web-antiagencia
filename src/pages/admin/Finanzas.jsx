@@ -4744,15 +4744,17 @@ export default function Finanzas() {
                 if (f.operador === 'eq') return mappedVals.includes(v);
                 if (f.operador === 'neq') return !mappedVals.includes(v);
               }
+              // Use numeric comparison when both values are valid numbers; otherwise string (handles ISO dates)
+              const cmp = (a, b) => { const na = Number(a), nb = Number(b); return (!isNaN(na) && !isNaN(nb)) ? na - nb : a < b ? -1 : a > b ? 1 : 0; };
               switch(f.operador) {
                 case 'ilike': return v.toLowerCase().includes(fv.toLowerCase());
                 case 'not_ilike': return !v.toLowerCase().includes(fv.toLowerCase());
                 case 'eq': return v === fv;
                 case 'neq': return v !== fv;
-                case 'gt': return parseFloat(v) > parseFloat(fv);
-                case 'gte': return parseFloat(v) >= parseFloat(fv);
-                case 'lt': return parseFloat(v) < parseFloat(fv);
-                case 'lte': return parseFloat(v) <= parseFloat(fv);
+                case 'gt': return cmp(v, fv) > 0;
+                case 'gte': return cmp(v, fv) >= 0;
+                case 'lt': return cmp(v, fv) < 0;
+                case 'lte': return cmp(v, fv) <= 0;
                 case 'is_null': return doc[f.campo]==null || doc[f.campo]==='';
                 case 'is_not_null': return doc[f.campo]!=null && doc[f.campo]!=='';
                 default: return true;
