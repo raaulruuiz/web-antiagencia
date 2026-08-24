@@ -3719,6 +3719,8 @@ export default function Finanzas() {
     checkMovimientosMesActual();
   }, [dashboard]);
   useEffect(() => { if (tab === 'movimientos') cargarMovimientos(pagMovs, mostrarTodos); }, [tab, pagMovs, mostrarTodos, cargarMovimientos]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (tab === 'documentos') cargarDocumentos(); }, [tab]);
   useEffect(() => {
     if (comparar && desdeComp && hastaComp) cargarDashboardComp();
     else setDashComp(null);
