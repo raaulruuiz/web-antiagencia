@@ -136,17 +136,19 @@ const CAMPOS_SORT = [
 ];
 
 const CAMPOS_FILTRO_DOCS = [
-  { key: 'fecha_factura',  label: 'Fecha',       tipo: 'date' },
-  { key: 'numero_factura', label: 'Nº Factura',  tipo: 'text' },
-  { key: 'nombre_entidad', label: 'Entidad',     tipo: 'text' },
-  { key: 'tipo',           label: 'Tipo',        tipo: 'select', ops: ['Venta','Compra'] },
-  { key: 'importe',        label: 'Importe',     tipo: 'number' },
-  { key: 'impuesto',       label: 'IVA',         tipo: 'number' },
-  { key: 'irpf',           label: 'IRPF',        tipo: 'number' },
-  { key: 'nif_cif',        label: 'NIF/CIF',     tipo: 'text' },
-  { key: 'anio',           label: 'Año',         tipo: 'number' },
-  { key: 'trimestre',      label: 'Trimestre',   tipo: 'number' },
-  { key: 'archivo_nombre', label: 'Archivo',     tipo: 'text' },
+  { key: 'fecha_factura',        label: 'Fecha',       tipo: 'date' },
+  { key: 'numero_factura',       label: 'Nº Factura',  tipo: 'text' },
+  { key: 'nombre_entidad',       label: 'Entidad',     tipo: 'text' },
+  { key: 'tipo',                 label: 'Tipo',        tipo: 'select', ops: ['Venta','Compra'] },
+  { key: 'factura_proveedor_id', label: 'Proveedor',   tipo: 'uuid_nullable' },
+  { key: 'factura_cliente_id',   label: 'Cliente',     tipo: 'uuid_nullable' },
+  { key: 'importe',              label: 'Importe',     tipo: 'number' },
+  { key: 'impuesto',             label: 'IVA',         tipo: 'number' },
+  { key: 'irpf',                 label: 'IRPF',        tipo: 'number' },
+  { key: 'nif_cif',              label: 'NIF/CIF',     tipo: 'text' },
+  { key: 'anio',                 label: 'Año',         tipo: 'number' },
+  { key: 'trimestre',            label: 'Trimestre',   tipo: 'number' },
+  { key: 'archivo_nombre',       label: 'Archivo',     tipo: 'text' },
 ];
 
 const CAMPOS_SORT_DOCS = [
@@ -348,11 +350,13 @@ function PanelFiltros({ filtros, op, onChangeFiltros, onChangeOp, listasAsignaci
                   onChange={v => updateCondicion(f.id, 'valor', v)}
                 />
               ) : isUuid && uuidOpciones.length > 0 ? (
-                <select value={f.valor || ''} onChange={e => updateCondicion(f.id, 'valor', e.target.value)}
-                  style={{ background: '#161616', border: '1px solid #3f3f46', borderRadius: 6, color: 'white', padding: '5px 8px', fontSize: 12, minWidth: 150 }}>
-                  <option value="">— Elige —</option>
-                  {uuidOpciones.map(o => <option key={o.id} value={o.id}>{o.nombre}{o.nombre_empresa ? ` (${o.nombre_empresa})` : ''}</option>)}
-                </select>
+                <SearchableSelect
+                  value={f.valor || ''}
+                  onChange={v => updateCondicion(f.id, 'valor', v)}
+                  options={uuidOpciones}
+                  placeholder="— Elige —"
+                  style={{ minWidth: 180 }}
+                />
               ) : (
                 <input
                   type={meta.tipo === 'date' ? 'date' : (meta.tipo === 'number' || meta.tipo === 'number_nullable') ? 'number' : 'text'}
@@ -4950,7 +4954,7 @@ export default function Finanzas() {
                 style={{ ...S.input, width:180, marginLeft:'auto' }} />
             </div>
 
-            {docPanelFiltro && <PanelFiltros filtros={docFiltros} op={docFiltroOp} onChangeFiltros={f=>{setDocFiltros(f);setDocPagina(1);}} onChangeOp={op=>{setDocFiltroOp(op);setDocPagina(1);}} campos={CAMPOS_FILTRO_DOCS} />}
+            {docPanelFiltro && <PanelFiltros filtros={docFiltros} op={docFiltroOp} onChangeFiltros={f=>{setDocFiltros(f);setDocPagina(1);}} onChangeOp={op=>{setDocFiltroOp(op);setDocPagina(1);}} campos={CAMPOS_FILTRO_DOCS} listasAsignacion={{ factura_proveedor_id: docTabContactos, factura_cliente_id: docTabContactos }} />}
             {docPanelOrdenar && <PanelOrdenar sorts={docSorts} onChange={s=>{setDocSorts(s);setDocPagina(1);}} campos={CAMPOS_SORT_DOCS} />}
 
             {/* Bulk bar */}
