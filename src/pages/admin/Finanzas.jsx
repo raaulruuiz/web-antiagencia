@@ -6294,9 +6294,11 @@ export default function Finanzas() {
                 if (payload.importe  !== '') payload.importe  = payload.importe  != null ? parseFloat(payload.importe)  : null;
                 if (payload.impuesto !== '') payload.impuesto = payload.impuesto != null ? parseFloat(payload.impuesto) : null;
                 if (payload.irpf     !== '') payload.irpf     = payload.irpf     != null ? parseFloat(payload.irpf)     : null;
+                const contactoCambiado = payload.factura_proveedor_id !== fv.factura_proveedor_id || payload.factura_cliente_id !== fv.factura_cliente_id;
                 const updated = await guardarCeldaDoc(facturaViewer.id, payload);
                 if (updated) setFacturaViewer(prev => ({ ...prev, nombre: viewerDraft.archivo_nombre, data: updated }));
                 setViewerEditando(false);
+                if (contactoCambiado) { cargarProveedores(); cargarClientes(); cargarEquipo(); }
               };
               return (
                 <div style={{ padding:'12px 16px', borderBottom:'1px solid #27272a', background:'#111', flexShrink:0, display:'flex', flexDirection:'column', gap:10 }}>
