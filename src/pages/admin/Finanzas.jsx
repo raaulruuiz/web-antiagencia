@@ -3411,6 +3411,7 @@ export default function Finanzas() {
   const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre, id?, data? } | null
   const [viewerEditando, setViewerEditando] = useState(false);
   const [viewerDraft, setViewerDraft] = useState({});
+  useEffect(() => { setViewerEditando(false); setViewerDraft({}); }, [facturaViewer?.id]);
   const [dashComp, setDashComp] = useState(null);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errComp, setErrComp] = useState(null);
