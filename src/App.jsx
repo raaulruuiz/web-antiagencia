@@ -36,6 +36,11 @@ function BlogPostPage() {
   const { slug } = useParams();
   return <BlogPost slug={slug} />;
 }
+import PodcastPost from './pages/PodcastPost';
+function PodcastPostPage() {
+  const { slug } = useParams();
+  return <PodcastPost slug={slug} />;
+}
 import ProhibidoEstacionarse from './pages/ProhibidoEstacionarse';
 import PixelLayout from './Layout';
 import LoomLogin from './pages/LoomLogin';
@@ -222,6 +227,8 @@ const AuthenticatedApp = () => {
       <Route path="/blog" element={<Navigate to="/blog-email-marketing" replace />} />
       <Route path="/blog/*" element={<Navigate to="/blog-email-marketing" replace />} />
       <Route path="/podcasts" element={<Podcasts />} />
+      <Route path="/podcasts/page/:page" element={<Podcasts />} />
+      <Route path="/podcasts/:slug" element={<PodcastPostPage />} />
       <Route path="/podcast" element={<Navigate to="/podcasts" replace />} />
       <Route path="*" element={<DynamicPage />} />
     </Routes>
