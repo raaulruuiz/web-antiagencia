@@ -1337,6 +1337,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
         if (rc.ok) setContactosTodos(await rc.json());
         setModalNuevosContactos(data.nuevos_pendientes.map(p => ({
           ...p, _nombre: '', _nombre_empresa: p.nombre_entidad || '', _asignarA: null, _ignorar: false,
+          _nif_cif: p.nif_cif || '', _direccion: p.direccion || '', _email: p.email || '', _roles: ['proveedor'],
         })));
       }
     } catch (e) { alert('Error guardando: ' + e.message); }
@@ -3538,6 +3539,7 @@ export default function Finanzas() {
         }
         setModalNuevosContactos([...grupos.values()].map(g => ({
           ...g, _nombre: '', _nombre_empresa: g.nombre_entidad || '', _asignarA: null, _ignorar: false,
+          _nif_cif: g.nif_cif || '', _direccion: '', _email: '', _roles: ['proveedor'],
         })));
       }
     } catch(e) {}
@@ -6105,9 +6107,38 @@ export default function Finanzas() {
                             <input value={item._nombre_empresa} onChange={e => update({ _nombre_empresa: e.target.value })}
                               style={{ width:'100%', background:'#27272a', border:'1px solid #3f3f46', color:'#f4f4f5', borderRadius:6, padding:'6px 10px', fontSize:13, boxSizing:'border-box' }} />
                           </div>
+                          <div>
+                            <label style={{ color:'#71717a', fontSize:11, display:'block', marginBottom:3 }}>NIF / CIF / VAT</label>
+                            <input value={item._nif_cif||''} onChange={e => update({ _nif_cif: e.target.value })} placeholder="—"
+                              style={{ width:'100%', background:'#27272a', border:'1px solid #3f3f46', color:'#f4f4f5', borderRadius:6, padding:'6px 10px', fontSize:13, boxSizing:'border-box' }} />
+                          </div>
+                          <div>
+                            <label style={{ color:'#71717a', fontSize:11, display:'block', marginBottom:3 }}>Email</label>
+                            <input value={item._email||''} onChange={e => update({ _email: e.target.value })} placeholder="—"
+                              style={{ width:'100%', background:'#27272a', border:'1px solid #3f3f46', color:'#f4f4f5', borderRadius:6, padding:'6px 10px', fontSize:13, boxSizing:'border-box' }} />
+                          </div>
                         </div>
-                        {item.direccion && <p style={{ margin:0, color:'#71717a', fontSize:12 }}>Dir: <span style={{ color:'#a1a1aa' }}>{item.direccion}</span></p>}
-                        {item.email     && <p style={{ margin:0, color:'#71717a', fontSize:12 }}>Email: <span style={{ color:'#a1a1aa' }}>{item.email}</span></p>}
+                        <div>
+                          <label style={{ color:'#71717a', fontSize:11, display:'block', marginBottom:3 }}>Dirección</label>
+                          <input value={item._direccion||''} onChange={e => update({ _direccion: e.target.value })} placeholder="—"
+                            style={{ width:'100%', background:'#27272a', border:'1px solid #3f3f46', color:'#f4f4f5', borderRadius:6, padding:'6px 10px', fontSize:13, boxSizing:'border-box' }} />
+                        </div>
+                        <div>
+                          <label style={{ color:'#71717a', fontSize:11, display:'block', marginBottom:3 }}>Tipo de contacto</label>
+                          <div style={{ display:'flex', gap:8 }}>
+                            {[['proveedor','Proveedor'],['equipo','Freelance'],['cliente','Cliente']].map(([rol, label]) => {
+                              const active = (item._roles||['proveedor']).includes(rol);
+                              return (
+                                <button key={rol} onClick={() => {
+                                  const cur = item._roles||['proveedor'];
+                                  update({ _roles: active && cur.length > 1 ? cur.filter(r=>r!==rol) : active ? cur : [...cur, rol] });
+                                }} style={{ background: active ? '#0067FD' : '#27272a', border:`1px solid ${active ? '#0067FD' : '#3f3f46'}`, color: active ? 'white' : '#71717a', borderRadius:6, padding:'4px 12px', fontSize:12, cursor:'pointer' }}>
+                                  {label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
                         {/* Asignar a existente */}
                         <div style={{ position:'relative' }}>
                           <label style={{ color:'#71717a', fontSize:11, display:'block', marginBottom:3 }}>Asignar a contacto existente (opcional)</label>
@@ -6153,9 +6184,10 @@ export default function Finanzas() {
                     factura_ids:   item.factura_ids,
                     nombre:        item._nombre || item.nombre_entidad,
                     nombre_empresa: item._nombre_empresa || null,
-                    nif_cif:       item.nif_cif    || null,
-                    direccion:     item.direccion  || null,
-                    email:         item.email      || null,
+                    nif_cif:       item._nif_cif   || item.nif_cif   || null,
+                    direccion:     item._direccion || item.direccion  || null,
+                    email:         item._email     || item.email      || null,
+                    roles:         item._roles     || ['proveedor'],
                     contacto_id:   item._asignarA?.id || null,
                     nombre_entidad: item.nombre_entidad,
                     tipo:          item.tipo || 'gasto',
