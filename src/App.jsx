@@ -29,6 +29,7 @@ import GraciasJorgeCoronado from './pages/GraciasJorgeCoronado';
 import CapsuleDigital from './pages/CapsuleDigital';
 import HablemosDeEmprender from './pages/HablemosDeEmprender';
 import BlogEmailMarketing from './pages/BlogEmailMarketing';
+import Podcasts from './pages/Podcasts';
 import AgenciaShopifyGranada from './pages/AgenciaShopifyGranada';
 import BlogPost from './pages/BlogPost';
 function BlogPostPage() {
@@ -218,6 +219,10 @@ const AuthenticatedApp = () => {
       <Route path="/blog-email-marketing" element={<BlogEmailMarketing />} />
       <Route path="/blog-email-marketing/page/:page" element={<BlogEmailMarketing />} />
       <Route path="/blog-email-marketing/:slug" element={<BlogPostPage />} />
+      <Route path="/blog" element={<Navigate to="/blog-email-marketing" replace />} />
+      <Route path="/blog/*" element={<Navigate to="/blog-email-marketing" replace />} />
+      <Route path="/podcasts" element={<Podcasts />} />
+      <Route path="/podcast" element={<Navigate to="/podcasts" replace />} />
       <Route path="*" element={<DynamicPage />} />
     </Routes>
     <CookieBanner />
