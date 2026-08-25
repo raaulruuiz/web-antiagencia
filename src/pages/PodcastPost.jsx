@@ -140,7 +140,14 @@ export default function PodcastPost({ slug }) {
                 <span className="text-gray-400 mx-2">·</span>
               </>
             )}
-            <span className="text-gray-500 text-base">Por {podcast.host_nombre}</span>
+            <span className="text-gray-500 text-base">Por </span>
+            {podcast.host_url ? (
+              <a href={podcast.host_url} target="_blank" rel="noopener noreferrer" className="text-base" style={{ color: "#7000FF" }}>
+                {podcast.host_nombre}
+              </a>
+            ) : (
+              <span className="text-base" style={{ color: "#7000FF" }}>{podcast.host_nombre}</span>
+            )}
           </p>
 
           {/* YouTube embed */}

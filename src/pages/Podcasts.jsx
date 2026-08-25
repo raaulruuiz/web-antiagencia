@@ -111,7 +111,14 @@ export default function Podcasts() {
                         <span className="text-gray-400 mx-1">·</span>
                       </>
                     )}
-                    <span className="text-gray-500">Por {podcast.host_nombre}</span>
+                    <span className="text-gray-500">Por </span>
+                    {podcast.host_url ? (
+                      <a href={podcast.host_url} target="_blank" rel="noopener noreferrer" style={{ color: "#7000FF" }}>
+                        {podcast.host_nombre}
+                      </a>
+                    ) : (
+                      <span style={{ color: "#7000FF" }}>{podcast.host_nombre}</span>
+                    )}
                   </p>
 
                   {/* Excerpt */}
