@@ -1392,20 +1392,17 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
       // Contactos disponibles para el matching
       const ctodosMatch = docTabContactos.length ? docTabContactos : contactosTodos;
 
-      // Nombres canónicos de una factura: contacto vinculado (nombre + alias) como fuente de verdad.
-      // Solo usa nombre_entidad como último recurso si no hay contacto vinculado.
+      // Nombres canónicos de una factura: siempre del contacto vinculado (nombre + alias).
+      // Si no hay contacto vinculado, devuelve [] — se trata como error de datos.
       const facNombres = fac => {
         const contactoId = fac.tipo === 'gasto' ? fac.factura_proveedor_id : fac.factura_cliente_id;
         const contacto = contactoId ? ctodosMatch.find(c => c.id === contactoId) : null;
-        if (contacto) {
-          const nombres = [];
-          if (contacto.nombre) nombres.push(contacto.nombre);
-          if (contacto.nombre_empresa) nombres.push(contacto.nombre_empresa);
-          if (Array.isArray(contacto.alias)) nombres.push(...contacto.alias.filter(Boolean));
-          return nombres;
-        }
-        // Sin contacto vinculado: fallback al nombre_entidad guardado en la factura
-        return fac.nombre_entidad ? [fac.nombre_entidad] : [];
+        if (!contacto) return [];
+        const nombres = [];
+        if (contacto.nombre) nombres.push(contacto.nombre);
+        if (contacto.nombre_empresa) nombres.push(contacto.nombre_empresa);
+        if (Array.isArray(contacto.alias)) nombres.push(...contacto.alias.filter(Boolean));
+        return nombres;
       };
 
       // Penalización: usa TODOS los nombres candidatos de la factura, devuelve la menor penalización
@@ -1443,6 +1440,14 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
         const facIva   = Math.abs(fac.impuesto || 0);
         const facTotal = facBase + facIva;
         const facTipo  = fac.tipo;
+
+        // Error: factura sin contacto vinculado (siempre debe tener proveedor o cliente)
+        const contactoReqId = facTipo === 'gasto' ? fac.factura_proveedor_id : fac.factura_cliente_id;
+        if (!contactoReqId) {
+          conflictos.push({ tipo: 'sin_contacto', factura: fac, severidad: 'error',
+            desc: `Factura de ${fmt(facBase)} sin ${facTipo === 'gasto' ? 'proveedor' : 'cliente'} vinculado. Asigna el contacto en la pestaña Documentos.` });
+          continue;
+        }
 
         // Distancia de importes: mínimo entre 4 combinaciones base/total
         const importeDiff = m => Math.min(
@@ -2014,6 +2019,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
 
             {(() => {
               const tipoLabel = {
+                sin_contacto:          'Factura sin proveedor/cliente vinculado',
                 sin_movimiento:        'Sin movimiento en DB con datos de factura',
                 sin_factura_subida:    'Sin factura subida',
                 cross_trimestre:       'Cobro/pago en trimestre diferente al de la factura',
