@@ -585,13 +585,99 @@ function PuntuacionBlockView({ block }) {
   );
 }
 
+function AudioPlayer({ url, color = '#f43f5e' }) {
+  const audioRef = React.useRef(null);
+  const [playing, setPlaying] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
+  const [currentTime, setCurrentTime] = React.useState(0);
+  const [duration, setDuration] = React.useState(0);
+  const [speed, setSpeed] = React.useState(1);
+
+  const toggle = () => {
+    const a = audioRef.current;
+    if (!a) return;
+    if (playing) { a.pause(); setPlaying(false); }
+    else { a.play(); setPlaying(true); }
+  };
+
+  const setSpeedVal = (s) => {
+    setSpeed(s);
+    if (audioRef.current) audioRef.current.playbackRate = s;
+  };
+
+  const fmt = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  const handleSeek = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    if (audioRef.current && duration) {
+      audioRef.current.currentTime = ratio * duration;
+      setProgress(ratio);
+      setCurrentTime(ratio * duration);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <audio ref={audioRef} src={url} preload="metadata"
+        onLoadedMetadata={e => setDuration(e.target.duration)}
+        onTimeUpdate={e => { const a = e.target; setCurrentTime(a.currentTime); setProgress(a.duration ? a.currentTime / a.duration : 0); }}
+        onEnded={() => setPlaying(false)} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button onClick={toggle}
+          style={{ width: 40, height: 40, borderRadius: '50%', background: color, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          {playing
+            ? <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            : <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
+          }
+        </button>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div onClick={handleSeek} style={{ height: 4, background: 'var(--t-border)', borderRadius: 99, cursor: 'pointer', position: 'relative' }}>
+            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${progress * 100}%`, background: color, borderRadius: 99 }} />
+            <div style={{ position: 'absolute', top: '50%', left: `${progress * 100}%`, transform: 'translate(-50%, -50%)', width: 12, height: 12, borderRadius: '50%', background: color, boxShadow: '0 0 0 2px var(--t-bg)' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--t-text-subtle)' }}>
+            <span>{fmt(currentTime)}</span>
+            <span>{duration ? fmt(duration) : '--:--'}</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
+          {[1, 1.5, 2].map(s => (
+            <button key={s} onClick={() => setSpeedVal(s)}
+              style={{ background: speed === s ? color : 'transparent', border: `1px solid ${speed === s ? color : 'var(--t-border)'}`, borderRadius: 5, padding: '2px 6px', fontSize: 10, color: speed === s ? 'white' : 'var(--t-text-subtle)', cursor: 'pointer', fontWeight: speed === s ? 700 : 400 }}>
+              {s === 1 ? '1x' : `${s}x`}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AudioBlockView({ block, hideTitle }) {
+  return (
+    <div>
+      {!hideTitle && block.titulo && <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t-text)', marginBottom: 4 }}>{block.titulo}</div>}
+      {!hideTitle && block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginBottom: 12 }}>{block.subtitulo}</div>}
+      {block.audio_url
+        ? <AudioPlayer url={block.audio_url} color={block.color || '#f43f5e'} />
+        : <div style={{ fontSize: 13, color: 'var(--t-text-muted)' }}>Sin audio</div>
+      }
+    </div>
+  );
+}
+
 function BlockView({ block, onPreview, theme, isMobile, item, isPro }) {
   const wrapStyle = { border: `1px solid ${theme === 'light' ? '#d4d4d8' : '#27272a'}`, borderRadius: 12, padding: '20px 24px', background: 'var(--t-surface3)' };
 
-  // Determine visibility: explicit false = hidden; undefined defaults: correccion=hidden, others=visible
+  // Determine visibility: explicit false = hidden; undefined defaults: correccion+audio=hidden, others=visible
   const isVisible = block.visible !== undefined
     ? block.visible !== false
-    : block.type !== 'correccion';
+    : block.type !== 'correccion' && block.type !== 'audio';
 
   // Puntuacion is always public
   if (block.type === 'puntuacion') return <div style={wrapStyle}><PuntuacionBlockView block={block} /></div>;
@@ -606,6 +692,7 @@ function BlockView({ block, onPreview, theme, isMobile, item, isPro }) {
       case 'imagen':           content = <ImagenBlockView block={block} onPreview={() => {}} hideTitle />; break;
       case 'imagen_texto':     content = <ImagenTextoBlockView block={block} onPreview={() => {}} hideTitle isMobile={isMobile} />; break;
       case 'correccion':       content = <CorreccionBlockView block={block} onPreview={() => {}} hideTitle />; break;
+      case 'audio':            content = <AudioBlockView block={block} hideTitle />; break;
       case 'asunto_adelanto':  content = <AsuntoAdelantoBlockView block={block} item={item} hideTitle isMobile={isMobile} />; break;
       case 'transcribir':      content = <TranscribirBlockView block={block} hideTitle />; break;
       default: content = null;
@@ -633,6 +720,7 @@ function BlockView({ block, onPreview, theme, isMobile, item, isPro }) {
     case 'imagen':          return <div style={wrapStyle}><ImagenBlockView block={block} onPreview={onPreview} /></div>;
     case 'imagen_texto':    return <div style={wrapStyle}><ImagenTextoBlockView block={block} onPreview={onPreview} isMobile={isMobile} /></div>;
     case 'correccion':      return <div style={wrapStyle}><CorreccionBlockView block={block} onPreview={onPreview} /></div>;
+    case 'audio':           return <div style={wrapStyle}><AudioBlockView block={block} /></div>;
     case 'asunto_adelanto': return <div style={wrapStyle}><AsuntoAdelantoBlockView block={block} item={item} isMobile={isMobile} /></div>;
     case 'transcribir':     return <div style={wrapStyle}><TranscribirBlockView block={block} /></div>;
     case 'columnas':        return <div style={wrapStyle}><ColumnasBlockView block={block} onPreview={onPreview} theme={theme} isMobile={isMobile} item={item} /></div>;

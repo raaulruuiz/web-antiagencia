@@ -188,6 +188,14 @@ const IconStar = () => (
   </svg>
 );
 
+const IconAudio = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 18V5l12-2v13"/>
+    <circle cx="6" cy="18" r="3"/>
+    <circle cx="18" cy="16" r="3"/>
+  </svg>
+);
+
 const CATEGORIAS = [
   { value: 'email', label: 'Email',            icon: <IconEmail /> },
   { value: 'ficha', label: 'Ficha de Producto', icon: <IconFicha /> },
@@ -228,6 +236,7 @@ const ALL_BLOCK_META = [
   { type: 'asunto_adelanto', label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> },
   { type: 'correccion',      label: 'Corrección',          icon: <IconCorrection /> },
   { type: 'puntuacion',      label: 'Puntuación',          icon: <IconStar /> },
+  { type: 'audio',           label: 'Audio',               icon: <IconAudio /> },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -936,7 +945,7 @@ function SocialIcon({ network, color = 'currentColor', size = 24 }) {
 }
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
-const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#e879f9', audio: '#6366f1' };
+const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#e879f9', audio: '#f43f5e' };
 const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas', puntuacion: 'Puntuación', audio: 'Audio' };
 
 const PLANTILLA_TYPES = {
@@ -1950,16 +1959,6 @@ function EBCanvas({ blocks, onChange, onUpload, onCrop, libImages, nested = fals
 }
 
 // ── Library image cell (con checkbox GLOBAL en hover) ────────────────────────
-function IconAudio() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 18V5l12-2v13"/>
-      <circle cx="6" cy="18" r="3"/>
-      <circle cx="18" cy="16" r="3"/>
-    </svg>
-  );
-}
-
 function AudioPlayer({ url, color = '#6366f1' }) {
   const audioRef = React.useRef(null);
   const [playing, setPlaying] = React.useState(false);
@@ -2074,6 +2073,118 @@ function LibImgCell({ libImg, alreadyAdded, isSource, color, onSelect, onToggleG
         </div>
       )}
     </div>
+  );
+}
+
+// ── AudioRecorderWidget (module-level to avoid React hook rules violation) ────
+function AudioRecorderWidget({ draft, update, id }) {
+  const [recState, setRecState] = React.useState(draft.audio_url ? 'uploaded' : 'idle');
+  const [blob, setBlob] = React.useState(null);
+  const [blobUrl, setBlobUrl] = React.useState(null);
+  const [elapsed, setElapsed] = React.useState(0);
+  const mrRef = React.useRef(null);
+  const timerRef = React.useRef(null);
+  const chunksRef = React.useRef([]);
+  const [uploading, setUploading] = React.useState(false);
+
+  const startRec = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunksRef.current = [];
+      const mr = new MediaRecorder(stream);
+      mrRef.current = mr;
+      mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mr.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        const b = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const url = URL.createObjectURL(b);
+        setBlob(b); setBlobUrl(url); setRecState('previewing');
+      };
+      mr.start();
+      setRecState('recording');
+      setElapsed(0);
+      timerRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
+    } catch { alert('No se pudo acceder al micrófono'); }
+  };
+
+  const stopRec = () => {
+    clearInterval(timerRef.current);
+    mrRef.current?.stop();
+  };
+
+  const discard = () => {
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+    setBlob(null); setBlobUrl(null); setRecState('idle'); setElapsed(0);
+  };
+
+  const uploadBlob = async () => {
+    if (!blob) return;
+    setUploading(true);
+    try {
+      const token = await getToken();
+      const form = new FormData();
+      form.append('file', blob, `audio_${Date.now()}.webm`);
+      const res = await fetch(`${API_BASE}/biblioteca/${id}/blocks/upload`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form,
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const { url } = await res.json();
+      update('audio_url', url);
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+      setBlob(null); setBlobUrl(null); setRecState('uploaded');
+    } catch (e) { alert('Error al subir audio: ' + e.message); }
+    finally { setUploading(false); }
+  };
+
+  const removeAudio = () => { update('audio_url', null); setRecState('idle'); };
+  const fmt = s => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+
+  if (recState === 'uploaded' && draft.audio_url) return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <AudioPlayer url={draft.audio_url} color={draft.color || BLOCK_COLORS.audio} />
+      <button onClick={removeAudio}
+        style={{ background: 'transparent', border: '1px solid var(--t-border)', borderRadius: 7, padding: '7px 12px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer' }}>
+        Eliminar y grabar nuevo
+      </button>
+    </div>
+  );
+
+  if (recState === 'previewing' && blobUrl) return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <AudioPlayer url={blobUrl} color={draft.color || BLOCK_COLORS.audio} />
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={uploadBlob} disabled={uploading}
+          style={{ flex: 1, background: BLOCK_COLORS.audio, border: 'none', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: 'white', cursor: uploading ? 'not-allowed' : 'pointer', fontWeight: 600 }}>
+          {uploading ? 'Subiendo…' : 'Usar este audio'}
+        </button>
+        <button onClick={discard} disabled={uploading}
+          style={{ flex: 1, background: 'transparent', border: '1px solid var(--t-border)', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer' }}>
+          Descartar y repetir
+        </button>
+      </div>
+    </div>
+  );
+
+  if (recState === 'recording') return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '16px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 1s infinite' }} />
+        <span style={{ fontSize: 13, color: 'var(--t-text-muted)' }}>Grabando</span>
+        <span style={{ fontFamily: 'monospace', fontSize: 13, color: 'var(--t-text)' }}>{fmt(elapsed)}</span>
+      </div>
+      <button onClick={stopRec}
+        style={{ background: '#ef4444', border: 'none', borderRadius: 999, padding: '9px 24px', fontSize: 13, color: 'white', cursor: 'pointer', fontWeight: 600 }}>
+        Detener
+      </button>
+    </div>
+  );
+
+  return (
+    <button onClick={startRec}
+      style={{ width: '100%', background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 8, padding: '14px', fontSize: 13, color: 'var(--t-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      Grabar audio
+    </button>
   );
 }
 
@@ -2826,133 +2937,18 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         )}
 
         {/* Audio block editor */}
-        {draft.type === 'audio' && (() => {
-          const AudioRecorder = () => {
-            const [recState, setRecState] = React.useState(draft.audio_url ? 'uploaded' : 'idle'); // idle | recording | previewing | uploaded
-            const [blob, setBlob] = React.useState(null);
-            const [blobUrl, setBlobUrl] = React.useState(null);
-            const [elapsed, setElapsed] = React.useState(0);
-            const mrRef = React.useRef(null);
-            const timerRef = React.useRef(null);
-            const chunksRef = React.useRef([]);
-            const [uploading, setUploading] = React.useState(false);
-
-            const startRec = async () => {
-              try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                chunksRef.current = [];
-                const mr = new MediaRecorder(stream);
-                mrRef.current = mr;
-                mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-                mr.onstop = () => {
-                  stream.getTracks().forEach(t => t.stop());
-                  const b = new Blob(chunksRef.current, { type: 'audio/webm' });
-                  const url = URL.createObjectURL(b);
-                  setBlob(b); setBlobUrl(url); setRecState('previewing');
-                };
-                mr.start();
-                setRecState('recording');
-                setElapsed(0);
-                timerRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
-              } catch { alert('No se pudo acceder al micrófono'); }
-            };
-
-            const stopRec = () => {
-              clearInterval(timerRef.current);
-              mrRef.current?.stop();
-            };
-
-            const discard = () => {
-              if (blobUrl) URL.revokeObjectURL(blobUrl);
-              setBlob(null); setBlobUrl(null); setRecState('idle'); setElapsed(0);
-            };
-
-            const uploadBlob = async () => {
-              if (!blob) return;
-              setUploading(true);
-              try {
-                const token = await getToken();
-                const form = new FormData();
-                form.append('file', blob, `audio_${Date.now()}.webm`);
-                const res = await fetch(`${API_BASE}/biblioteca/${id}/blocks/upload`, {
-                  method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form,
-                });
-                if (!res.ok) throw new Error(await res.text());
-                const { url } = await res.json();
-                update('audio_url', url);
-                if (blobUrl) URL.revokeObjectURL(blobUrl);
-                setBlob(null); setBlobUrl(null); setRecState('uploaded');
-              } catch (e) { alert('Error al subir audio: ' + e.message); }
-              finally { setUploading(false); }
-            };
-
-            const removeAudio = () => { update('audio_url', null); setRecState('idle'); };
-
-            const fmt = s => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-
-            if (recState === 'uploaded' && draft.audio_url) return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <AudioPlayer url={draft.audio_url} color={draft.color || BLOCK_COLORS.audio} />
-                <button onClick={removeAudio}
-                  style={{ background: 'transparent', border: '1px solid var(--t-border)', borderRadius: 7, padding: '7px 12px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer' }}>
-                  Eliminar y grabar nuevo
-                </button>
-              </div>
-            );
-
-            if (recState === 'previewing' && blobUrl) return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <AudioPlayer url={blobUrl} color={draft.color || BLOCK_COLORS.audio} />
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={uploadBlob} disabled={uploading}
-                    style={{ flex: 1, background: '#6366f1', border: 'none', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: 'white', cursor: uploading ? 'not-allowed' : 'pointer', fontWeight: 600 }}>
-                    {uploading ? 'Subiendo…' : 'Usar este audio'}
-                  </button>
-                  <button onClick={discard} disabled={uploading}
-                    style={{ flex: 1, background: 'transparent', border: '1px solid var(--t-border)', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer' }}>
-                    Descartar y repetir
-                  </button>
-                </div>
-              </div>
-            );
-
-            if (recState === 'recording') return (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '16px 0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 1s infinite' }} />
-                  <span style={{ fontSize: 13, color: 'var(--t-text-muted)' }}>Grabando</span>
-                  <span style={{ fontFamily: 'monospace', fontSize: 13, color: 'var(--t-text)' }}>{fmt(elapsed)}</span>
-                </div>
-                <button onClick={stopRec}
-                  style={{ background: '#ef4444', border: 'none', borderRadius: 999, padding: '9px 24px', fontSize: 13, color: 'white', cursor: 'pointer', fontWeight: 600 }}>
-                  Detener
-                </button>
-              </div>
-            );
-
-            // idle
-            return (
-              <button onClick={startRec}
-                style={{ width: '100%', background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 8, padding: '14px', fontSize: 13, color: 'var(--t-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                Grabar audio
-              </button>
-            );
-          };
-
-          return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div>
-                <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Color</label>
-                <InlineColorPicker value={draft.color || ''} onChange={v => update('color', v)} />
-              </div>
-              <div>
-                <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Audio</label>
-                <AudioRecorder />
-              </div>
+        {draft.type === 'audio' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Color</label>
+              <InlineColorPicker value={draft.color || ''} onChange={v => update('color', v)} />
             </div>
-          );
-        })()}
+            <div>
+              <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Audio</label>
+              <AudioRecorderWidget draft={draft} update={update} id={itemId} />
+            </div>
+          </div>
+        )}
 
         {draft.type === 'transcribir' && (() => {
           const imgs = draft.images || [];
