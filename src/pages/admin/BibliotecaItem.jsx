@@ -1894,8 +1894,50 @@ function EBCanvas({ blocks, onChange, onUpload, onCrop, libImages, nested = fals
   );
 }
 
+// ── Library image cell (con checkbox GLOBAL en hover) ────────────────────────
+function LibImgCell({ libImg, alreadyAdded, isSource, color, onSelect, onToggleGlobal }) {
+  const [hov, setHov] = useState(false);
+  const isGlobal = !!libImg.isGlobal;
+  const mainBorder = libImg.isMain && !alreadyAdded ? `2px solid ${color}` : null;
+  return (
+    <div style={{ position: 'relative' }}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}>
+      <img src={libImg.url} alt=""
+        onClick={() => { if (!alreadyAdded) onSelect(libImg.url); }}
+        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 5,
+          cursor: alreadyAdded ? 'default' : 'pointer',
+          border: alreadyAdded ? '2px solid #22c55e' : mainBorder || '2px solid transparent',
+          opacity: alreadyAdded ? 0.5 : 1 }}
+        onMouseEnter={e => { setHov(true); if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
+        onMouseLeave={e => { setHov(false); if (!alreadyAdded) e.currentTarget.style.border = mainBorder || '2px solid transparent'; }} />
+      {alreadyAdded && (
+        <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <IconCheck />
+        </div>
+      )}
+      {libImg.isMain && !alreadyAdded && (
+        <div style={{ position: 'absolute', bottom: 2, left: 2, background: color, borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>MAIN</div>
+      )}
+      {isGlobal && (
+        <div style={{ position: 'absolute', bottom: 2, right: 2, background: '#7c3aed', borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>GLOBAL</div>
+      )}
+      {/* Checkbox GLOBAL: solo en imágenes de este item (isSource), visible en hover */}
+      {isSource && !libImg.isMain && (hov || isGlobal) && onToggleGlobal && (
+        <div style={{ position: 'absolute', top: 3, left: 3 }}
+          onClick={e => { e.stopPropagation(); onToggleGlobal(libImg.url, !isGlobal); }}>
+          <div style={{ width: 15, height: 15, borderRadius: 3, border: '2px solid white', boxShadow: '0 1px 3px rgba(0,0,0,0.6)',
+            background: isGlobal ? '#7c3aed' : 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            {isGlobal && <svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7.5 8,1.5" fill="none" stroke="white" strokeWidth="1.8"/></svg>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Block: editor modal ───────────────────────────────────────────────────────
-function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages, categoria, allBlocks = [] }) {
+function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages, categoria, allBlocks = [], itemId, onToggleGlobalImage }) {
   const [draft, setDraft] = useState(() => {
     const d = { ...block };
     // Migrate old enlaces structure to new links structure
@@ -2150,20 +2192,16 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                   <button onClick={() => setShowLibrary(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 5 }}>
-                  {libraryImages.map((libImg, i) => {
-                    const alreadyAdded = (draft.images || []).some(existing => existing.url === libImg.url);
-                    const mainBorder = libImg.isMain && !alreadyAdded ? `2px solid ${c}` : null;
-                    return (
-                      <div key={i} style={{ position: 'relative' }}>
-                        <img src={libImg.url} alt="" onClick={() => { if (!alreadyAdded) addImage(libImg.url); }}
-                          style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 5, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : mainBorder || '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
-                          onMouseEnter={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
-                          onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = mainBorder || '2px solid transparent'; }} />
-                        {alreadyAdded && <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconCheck /></div>}
-                        {libImg.isMain && !alreadyAdded && <div style={{ position: 'absolute', bottom: 2, left: 2, background: c, borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>MAIN</div>}
-                      </div>
-                    );
-                  })}
+                  {libraryImages.map((libImg, i) => (
+                    <LibImgCell key={i}
+                      libImg={libImg}
+                      alreadyAdded={(draft.images || []).some(e => e.url === libImg.url)}
+                      isSource={!libImg.sourceItemId || libImg.sourceItemId === itemId}
+                      color={c}
+                      onSelect={url => addImage(url)}
+                      onToggleGlobal={onToggleGlobalImage}
+                    />
+                  ))}
                 </div>
               </div>
             )}
@@ -2260,20 +2298,16 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                         <button onClick={() => setShowLibrary(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
-                        {libraryImages.map((libImg, i) => {
-                          const alreadyAdded = (draft.links?.[linkIdx]?.images || []).some(existing => existing.url === libImg.url);
-                          const mainBorder = libImg.isMain && !alreadyAdded ? `2px solid ${c}` : null;
-                          return (
-                            <div key={i} style={{ position: 'relative' }}>
-                              <img src={libImg.url} alt="" onClick={() => { if (!alreadyAdded) addLinkImage(linkIdx, libImg.url); }}
-                                style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : mainBorder || '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
-                                onMouseEnter={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
-                                onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = mainBorder || '2px solid transparent'; }} />
-                              {alreadyAdded && <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconCheck /></div>}
-                              {libImg.isMain && !alreadyAdded && <div style={{ position: 'absolute', bottom: 2, left: 2, background: c, borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>MAIN</div>}
-                            </div>
-                          );
-                        })}
+                        {libraryImages.map((libImg, i) => (
+                          <LibImgCell key={i}
+                            libImg={libImg}
+                            alreadyAdded={(draft.links?.[linkIdx]?.images || []).some(e => e.url === libImg.url)}
+                            isSource={!libImg.sourceItemId || libImg.sourceItemId === itemId}
+                            color={c}
+                            onSelect={url => addLinkImage(linkIdx, url)}
+                            onToggleGlobal={onToggleGlobalImage}
+                          />
+                        ))}
                       </div>
                     </div>
                   )}
@@ -2390,13 +2424,14 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                             {libraryImages?.length > 0 ? (
                               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: 4 }}>
                                 {libraryImages.map((libImg, i) => (
-                                  <div key={i} style={{ position: 'relative' }}>
-                                    <img src={libImg.url} alt="" onClick={() => { setItemImage(itemIdx, libImg.url); setShowLibrary(null); }}
-                                      style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: 'pointer', border: libImg.isMain ? `2px solid ${c}` : '2px solid transparent', display: 'block' }}
-                                      onMouseEnter={e => e.currentTarget.style.border = '2px solid #3b82f6'}
-                                      onMouseLeave={e => e.currentTarget.style.border = libImg.isMain ? `2px solid ${c}` : '2px solid transparent'} />
-                                    {libImg.isMain && <div style={{ position: 'absolute', bottom: 2, left: 2, background: c, borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>MAIN</div>}
-                                  </div>
+                                  <LibImgCell key={i}
+                                    libImg={libImg}
+                                    alreadyAdded={false}
+                                    isSource={!libImg.sourceItemId || libImg.sourceItemId === itemId}
+                                    color={c}
+                                    onSelect={url => { setItemImage(itemIdx, url); setShowLibrary(null); }}
+                                    onToggleGlobal={onToggleGlobalImage}
+                                  />
                                 ))}
                               </div>
                             ) : (
@@ -2677,20 +2712,16 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                       <button onClick={() => setShowLibrary(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 5 }}>
-                      {libraryImages.map((libImg, i) => {
-                        const alreadyAdded = imgs.some(existing => existing.url === libImg.url);
-                        const mainBorder = libImg.isMain && !alreadyAdded ? `2px solid ${c}` : null;
-                        return (
-                          <div key={i} style={{ position: 'relative' }}>
-                            <img src={libImg.url} alt="" onClick={() => { if (!alreadyAdded) addImage(libImg.url); }}
-                              style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 4, cursor: alreadyAdded ? 'default' : 'pointer', border: alreadyAdded ? '2px solid #22c55e' : mainBorder || '2px solid transparent', opacity: alreadyAdded ? 0.5 : 1 }}
-                              onMouseEnter={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
-                              onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = mainBorder || '2px solid transparent'; }} />
-                            {alreadyAdded && <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconCheck /></div>}
-                            {libImg.isMain && !alreadyAdded && <div style={{ position: 'absolute', bottom: 2, left: 2, background: c, borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>MAIN</div>}
-                          </div>
-                        );
-                      })}
+                      {libraryImages.map((libImg, i) => (
+                        <LibImgCell key={i}
+                          libImg={libImg}
+                          alreadyAdded={imgs.some(e => e.url === libImg.url)}
+                          isSource={!libImg.sourceItemId || libImg.sourceItemId === itemId}
+                          color={c}
+                          onSelect={url => addImage(url)}
+                          onToggleGlobal={onToggleGlobalImage}
+                        />
+                      ))}
                     </div>
                   </div>
                 )}
@@ -3381,6 +3412,21 @@ export default function BibliotecaItem() {
     return url;
   }, [id]);
 
+  const toggleGlobalImage = useCallback(async (url, makeGlobal) => {
+    const token = await getToken();
+    if (!token) return;
+    const res = await fetch(`${API_BASE}/biblioteca/${id}/images/toggle-global`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, global: makeGlobal }),
+    });
+    const data = await res.json();
+    if (data.library) {
+      blocksLibraryRef.current = data.library;
+      setBlocksLibrary(data.library);
+    }
+  }, [id]);
+
   const cropFromEmail = useCallback(() => {
     return new Promise((resolve, reject) => {
       cropForModalResolveRef.current = { resolve, reject };
@@ -3519,6 +3565,8 @@ export default function BibliotecaItem() {
           libraryImages={libraryImages}
           categoria={categoria}
           allBlocks={blocksData}
+          itemId={id}
+          onToggleGlobalImage={toggleGlobalImage}
         />
       ) : null; })()}
       {showCropForModal && item && <CropOverlay imageUrl={item.url} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
