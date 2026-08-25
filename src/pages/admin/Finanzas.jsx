@@ -6413,7 +6413,7 @@ export default function Finanzas() {
                   </div>
                   <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'flex-end' }}>
                     <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
-                      <span style={lblStyle}>Importe (€)</span>
+                      <span style={lblStyle}>Base Impon. (€)</span>
                       <input type="number" step="0.01" value={viewerDraft.importe??''} onChange={e => setViewerDraft(prev=>({...prev, importe:e.target.value}))}
                         style={{ ...selStyle, width:110 }} />
                     </div>
