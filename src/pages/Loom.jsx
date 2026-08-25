@@ -3,6 +3,7 @@ import { BACKEND_URL } from '@/lib/config';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
+import InstallExtensionButton from '@/components/InstallExtensionButton';
 
 async function getToken() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -1210,6 +1211,13 @@ export default function Loom() {
               </div>
             </div>
 
+          </div>
+        )}
+
+        {/* Install extension link */}
+        {status === 'idle' && (
+          <div className="flex justify-center">
+            <InstallExtensionButton />
           </div>
         )}
 

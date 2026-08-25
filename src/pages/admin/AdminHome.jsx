@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAdmin } from './AdminLayout';
+import InstallExtensionButton from '@/components/InstallExtensionButton';
 
 const ALL_NAV = [
   { to: '/admin/automatizaciones', label: 'Automatizaciones', icon: '⚡', page: 'automatizaciones', desc: 'Revisa el estado de las automatizaciones activas' },
@@ -26,7 +27,11 @@ export default function AdminHome() {
   return (
     <div className="p-6 md:p-10 max-w-4xl">
       <h1 className="text-white text-2xl font-semibold mb-1">¿Qué quieres hacer hoy?</h1>
-      <p className="text-zinc-500 text-sm mb-8">Elige una sección para empezar.</p>
+      <p className="text-zinc-500 text-sm mb-6">Elige una sección para empezar.</p>
+
+      <div className="mb-8">
+        <InstallExtensionButton />
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {visible.map(({ to, label, icon, desc }) => (
