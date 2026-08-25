@@ -4833,7 +4833,7 @@ export default function Finanzas() {
           { key: 'tipo',                 label: 'Tipo',       w: 80  },
           { key: 'importe',              label: 'Importe',    w: 100, num: true },
           { key: 'impuesto',             label: 'IVA',        w: 90,  num: true },
-          { key: 'irpf',                 label: 'IRPF',       w: 70,  num: true },
+          { key: 'irpf',                 label: 'IRPF',       w: 95,  num: true },
           { key: 'nif_cif',              label: 'NIF/CIF',    w: 120 },
           { key: 'factura_proveedor_id', label: 'Proveedor',  w: 150 },
           { key: 'factura_cliente_id',   label: 'Cliente',    w: 150 },
@@ -5095,8 +5095,15 @@ export default function Finanzas() {
                                 const sign = isZero ? '' : isVenta ? '+' : isCompra ? '-' : '';
                                 const display = `${sign}${Math.abs(num).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €`;
                                 return (
-                                  <td key={col.key} style={{ ...tdBase, width:col.w, color:numColor, textAlign:'right' }}>
-                                    {display}
+                                  <td key={col.key} style={{ ...tdBase, width:col.w, color:numColor, textAlign:'right', cursor:'pointer' }}
+                                    onClick={() => setDocTabEditando({ id:doc.id, campo:col.key, valor:String(val??'') })}>
+                                    {isEditing
+                                      ? <input autoFocus type="number" step="0.01"
+                                          defaultValue={val??''}
+                                          onBlur={async e => { await guardarCeldaDoc(doc.id, { [col.key]: e.target.value==='' ? null : parseFloat(e.target.value) }); setDocTabEditando(null); }}
+                                          onKeyDown={e => { if (e.key==='Enter') e.target.blur(); if (e.key==='Escape') setDocTabEditando(null); }}
+                                          style={{ width:'100%', background:'#27272a', border:'1px solid #3f3f46', color:'white', borderRadius:4, padding:'2px 4px', fontSize:11, textAlign:'right', outline:'none' }} />
+                                      : display}
                                   </td>
                                 );
                               }
@@ -6244,7 +6251,7 @@ export default function Finanzas() {
               <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
               {facturaViewer.id && <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace', flexShrink:0 }}>{facturaViewer.id.slice(0,8)}…</span>}
               {facturaViewer.id && !viewerEditando && (
-                <button onClick={() => setViewerEditando(true) || setViewerDraft({ archivo_nombre: facturaViewer.nombre||'', factura_proveedor_id: facturaViewer.data?.factura_proveedor_id||'', factura_cliente_id: facturaViewer.data?.factura_cliente_id||'' })}
+                <button onClick={() => setViewerEditando(true) || setViewerDraft({ archivo_nombre: facturaViewer.nombre||'', factura_proveedor_id: facturaViewer.data?.factura_proveedor_id||'', factura_cliente_id: facturaViewer.data?.factura_cliente_id||'', importe: facturaViewer.data?.importe??'', impuesto: facturaViewer.data?.impuesto??'', irpf: facturaViewer.data?.irpf??'' })}
                   style={{ background:'transparent', border:'1px solid #3f3f46', borderRadius:6, color:'#71717a', padding:'5px 12px', fontSize:12, cursor:'pointer', flexShrink:0 }}>Editar</button>
               )}
               <a href={facturaViewer.url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:12, textDecoration:'none', flexShrink:0 }}>↗ Abrir en nueva pestaña</a>
@@ -6263,8 +6270,9 @@ export default function Finanzas() {
                   {fv.numero_factura && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Nº</span> {fv.numero_factura}</span>}
                   {fv.nombre_entidad && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Entidad</span> {fv.nombre_entidad}</span>}
                   {fv.nif_cif && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>NIF</span> {fv.nif_cif}</span>}
-                  {fv.importe != null && <span style={{ color:'#e4e4e7', fontSize:13, fontWeight:600 }}>{fv.importe?.toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>}
-                  {fv.impuesto != null && fv.impuesto > 0 && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>IVA</span> {fv.impuesto?.toLocaleString('es-ES', {minimumFractionDigits:2})} €</span>}
+                  {fv.importe != null && (() => { const n=parseFloat(fv.importe); const isV=fv.tipo==='ingreso'; const c=n===0?'#71717a':isV?'#4ade80':'#f87171'; const s=n===0?'':(isV?'+':'-'); return <span style={{ color:c, fontSize:13, fontWeight:700 }}>{s}{Math.abs(n).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>; })()}
+                  {fv.impuesto != null && fv.impuesto !== 0 && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>IVA</span> {parseFloat(fv.impuesto).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
+                  {fv.irpf != null && fv.irpf !== 0 && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>IRPF</span> {parseFloat(fv.irpf).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
                   {fv.factura_proveedor_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Proveedor</span> {findC(fv.factura_proveedor_id)}</span>}
                   {fv.factura_cliente_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Cliente</span> {findC(fv.factura_cliente_id)}</span>}
                   {fv.trimestre && <span style={{ color:'#52525b', fontSize:12 }}>Q{fv.trimestre}/{fv.anio}</span>}
@@ -6282,7 +6290,11 @@ export default function Finanzas() {
                 setViewerDraft(prev => ({ ...prev, [campo]: newId, ...extra }));
               };
               const handleSave = async () => {
-                const updated = await guardarCeldaDoc(facturaViewer.id, viewerDraft);
+                const payload = { ...viewerDraft };
+                if (payload.importe  !== '') payload.importe  = payload.importe  != null ? parseFloat(payload.importe)  : null;
+                if (payload.impuesto !== '') payload.impuesto = payload.impuesto != null ? parseFloat(payload.impuesto) : null;
+                if (payload.irpf     !== '') payload.irpf     = payload.irpf     != null ? parseFloat(payload.irpf)     : null;
+                const updated = await guardarCeldaDoc(facturaViewer.id, payload);
                 if (updated) setFacturaViewer(prev => ({ ...prev, nombre: viewerDraft.archivo_nombre, data: updated }));
                 setViewerEditando(false);
               };
@@ -6305,6 +6317,23 @@ export default function Finanzas() {
                       <SearchableSelect value={viewerDraft.factura_cliente_id||''}
                         onChange={v => handleContactChange('factura_cliente_id', v)}
                         options={ctodos} placeholder="— ninguno —" style={{ flex: 1 }} />
+                    </div>
+                  </div>
+                  <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'flex-end' }}>
+                    <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                      <span style={lblStyle}>Importe (€)</span>
+                      <input type="number" step="0.01" value={viewerDraft.importe??''} onChange={e => setViewerDraft(prev=>({...prev, importe:e.target.value}))}
+                        style={{ ...selStyle, width:110 }} />
+                    </div>
+                    <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                      <span style={lblStyle}>IVA (€)</span>
+                      <input type="number" step="0.01" value={viewerDraft.impuesto??''} onChange={e => setViewerDraft(prev=>({...prev, impuesto:e.target.value}))}
+                        style={{ ...selStyle, width:90 }} />
+                    </div>
+                    <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                      <span style={lblStyle}>IRPF (€)</span>
+                      <input type="number" step="0.01" value={viewerDraft.irpf??''} onChange={e => setViewerDraft(prev=>({...prev, irpf:e.target.value}))}
+                        style={{ ...selStyle, width:90 }} />
                     </div>
                   </div>
                   {(viewerDraft.nombre_entidad || viewerDraft.nif_cif) && (
