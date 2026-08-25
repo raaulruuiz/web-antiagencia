@@ -914,6 +914,27 @@ function BlockDivider({ onAdd }) {
   );
 }
 
+// ── Social networks ───────────────────────────────────────────────────────────
+const SOCIAL_NETWORKS = [
+  { id: 'instagram', label: 'Instagram', color: '#E1306C' },
+  { id: 'facebook',  label: 'Facebook',  color: '#1877F2' },
+  { id: 'x',         label: 'X',         color: '#000000' },
+  { id: 'pinterest', label: 'Pinterest', color: '#E60023' },
+  { id: 'youtube',   label: 'YouTube',   color: '#FF0000' },
+  { id: 'tiktok',    label: 'TikTok',    color: '#010101' },
+];
+
+function SocialIcon({ network, color = 'currentColor', size = 24 }) {
+  const c = color; const s = size;
+  if (network === 'instagram') return <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke={c} strokeWidth="2"/><circle cx="12" cy="12" r="5" stroke={c} strokeWidth="2"/><circle cx="17.5" cy="6.5" r="1.2" fill={c}/></svg>;
+  if (network === 'facebook')  return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>;
+  if (network === 'x')         return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>;
+  if (network === 'pinterest')  return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>;
+  if (network === 'youtube')   return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>;
+  if (network === 'tiktok')    return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.5a8.26 8.26 0 0 0 4.83 1.56V6.59a4.85 4.85 0 0 1-1.06-.1z"/></svg>;
+  return null;
+}
+
 // ── Block: selector panel ─────────────────────────────────────────────────────
 const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#e879f9' };
 const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas', puntuacion: 'Puntuación' };
@@ -1231,11 +1252,18 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 block.links_layout === 'grid' ? (
                   <div key={li} style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
                     {(link.images || []).map((img, i) => (
-                      <PreviewImg key={i} src={img.url}
-                        imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
-                        wrapperStyle={{ width: '100%' }}
-                        href={link.url || undefined}
-                        onPreview={setLightbox} />
+                      img.isSocial ? (
+                        <a key={i} href={link.url || undefined} target="_blank" rel="noopener noreferrer"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', aspectRatio: '1', borderRadius: 9, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', textDecoration: 'none' }}>
+                          <SocialIcon network={img.network} color={img.color} size={40} />
+                        </a>
+                      ) : (
+                        <PreviewImg key={i} src={img.url}
+                          imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                          wrapperStyle={{ width: '100%' }}
+                          href={link.url || undefined}
+                          onPreview={setLightbox} />
+                      )
                     ))}
                     {link.url && (
                       <a href={link.url} target="_blank" rel="noopener noreferrer"
@@ -1250,11 +1278,18 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                   /* Fila: imágenes en horizontal dentro del link item */
                   <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
                     {(link.images || []).map((img, i) => (
-                      <PreviewImg key={i} src={img.url}
-                        imgStyle={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
-                        wrapperStyle={{ flexShrink: 0 }}
-                        href={link.url || undefined}
-                        onPreview={setLightbox} />
+                      img.isSocial ? (
+                        <a key={i} href={link.url || undefined} target="_blank" rel="noopener noreferrer"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 9, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', textDecoration: 'none', flexShrink: 0 }}>
+                          <SocialIcon network={img.network} color={img.color} size={36} />
+                        </a>
+                      ) : (
+                        <PreviewImg key={i} src={img.url}
+                          imgStyle={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                          wrapperStyle={{ flexShrink: 0 }}
+                          href={link.url || undefined}
+                          onPreview={setLightbox} />
+                      )
                     ))}
                     {link.url && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
@@ -1272,11 +1307,18 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                   /* Columna: imágenes apiladas verticalmente dentro del link item */
                   <div key={li} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {(link.images || []).map((img, i) => (
-                      <PreviewImg key={i} src={img.url}
-                        imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
-                        wrapperStyle={{ flexShrink: 0 }}
-                        href={link.url || undefined}
-                        onPreview={setLightbox} />
+                      img.isSocial ? (
+                        <a key={i} href={link.url || undefined} target="_blank" rel="noopener noreferrer"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 9, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', textDecoration: 'none', flexShrink: 0 }}>
+                          <SocialIcon network={img.network} color={img.color} size={36} />
+                        </a>
+                      ) : (
+                        <PreviewImg key={i} src={img.url}
+                          imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                          wrapperStyle={{ flexShrink: 0 }}
+                          href={link.url || undefined}
+                          onPreview={setLightbox} />
+                      )
                     ))}
                     {link.url && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1909,8 +1951,8 @@ function LibImgCell({ libImg, alreadyAdded, isSource, color, onSelect, onToggleG
           cursor: alreadyAdded ? 'default' : 'pointer',
           border: alreadyAdded ? '2px solid #22c55e' : mainBorder || '2px solid transparent',
           opacity: alreadyAdded ? 0.5 : 1 }}
-        onMouseEnter={e => { setHov(true); if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
-        onMouseLeave={e => { setHov(false); if (!alreadyAdded) e.currentTarget.style.border = mainBorder || '2px solid transparent'; }} />
+        onMouseEnter={e => { if (!alreadyAdded) e.currentTarget.style.border = '2px solid #3b82f6'; }}
+        onMouseLeave={e => { if (!alreadyAdded) e.currentTarget.style.border = mainBorder || '2px solid transparent'; }} />
       {alreadyAdded && (
         <div style={{ position: 'absolute', top: 2, right: 2, background: '#22c55e', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <IconCheck />
@@ -1955,6 +1997,8 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [uploadingItem, setUploadingItem] = useState(null); // itemIdx
   const [urlErrors, setUrlErrors] = useState({});
   const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number) | 'it-{idx}'
+  const [showSocialPicker, setShowSocialPicker] = useState(null); // null | linkIdx
+  const [socialDraft, setSocialDraft] = useState({ network: 'instagram', color: '#E1306C' });
   const [transcribing, setTranscribing] = useState(false);
   const fileInputRef = useRef(null);
   const transcribeFileInputRef = useRef(null);
@@ -1986,6 +2030,11 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     });
     setUrlErrors(e => { const n = { ...e }; delete n[linkIdx]; return n; });
   };
+  const addLinkSocial = (linkIdx, network, color) => setDraft(d => {
+    const links = [...(d.links || [])];
+    links[linkIdx] = { ...links[linkIdx], images: [...(links[linkIdx].images || []), { isSocial: true, network, color }] };
+    return { ...d, links };
+  });
   const addLink = () => setDraft(d => ({ ...d, links: [...(d.links || []), { images: [], url: '' }] }));
   const removeLink = (linkIdx) => setDraft(d => ({ ...d, links: (d.links || []).filter((_, i) => i !== linkIdx) }));
 
@@ -2283,11 +2332,46 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                     <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                       {(link.images || []).map((img, imgIdx) => (
                         <div key={imgIdx} style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
-                          <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 5, border: '1px solid var(--t-border)', display: 'block' }} />
+                          {img.isSocial ? (
+                            <div style={{ width: '100%', height: '100%', borderRadius: 5, border: '1px solid var(--t-border)', background: 'var(--t-surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <SocialIcon network={img.network} color={img.color} size={36} />
+                            </div>
+                          ) : (
+                            <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 5, border: '1px solid var(--t-border)', display: 'block' }} />
+                          )}
                           <button onClick={() => removeLinkImage(linkIdx, imgIdx)}
                             style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 12, lineHeight: 1 }}>×</button>
                         </div>
                       ))}
+                    </div>
+                  )}
+                  {/* Social picker for this link */}
+                  {showSocialPicker === linkIdx && (
+                    <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Red social</div>
+                        <button onClick={() => setShowSocialPicker(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5 }}>
+                        {SOCIAL_NETWORKS.map(sn => {
+                          const active = socialDraft.network === sn.id;
+                          return (
+                            <button key={sn.id} onClick={() => setSocialDraft(d => ({ ...d, network: sn.id, color: sn.color }))}
+                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 6, border: `1px solid ${active ? '#6366f1' : 'var(--t-border)'}`, background: active ? 'var(--t-surface2)' : 'transparent', cursor: 'pointer', fontSize: 11, color: active ? '#a5b4fc' : 'var(--t-text-muted)', fontWeight: active ? 600 : 400 }}>
+                              <SocialIcon network={sn.id} color={active ? socialDraft.color : 'var(--t-text-subtle)'} size={16} />
+                              {sn.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 11, color: 'var(--t-text-subtle)' }}>Color</span>
+                        <InlineColorPicker value={socialDraft.color} onChange={color => setSocialDraft(d => ({ ...d, color }))} />
+                      </div>
+                      <button onClick={() => { addLinkSocial(linkIdx, socialDraft.network, socialDraft.color); setShowSocialPicker(null); }}
+                        style={{ background: '#6366f1', border: 'none', borderRadius: 6, padding: '7px 12px', fontSize: 12, color: 'white', cursor: 'pointer', fontWeight: 600 }}>
+                        Añadir icono
+                      </button>
                     </div>
                   )}
                   {/* Library picker for this link */}
@@ -2335,6 +2419,12 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                         Seleccionar
                       </button>
                     )}
+                    <button onClick={() => { setShowSocialPicker(showSocialPicker === linkIdx ? null : linkIdx); setShowLibrary(null); }}
+                      style={{ flex: 1, background: showSocialPicker === linkIdx ? 'var(--t-surface2)' : 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: 'pointer', minWidth: 80 }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--t-border-muted)'}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
+                      Social
+                    </button>
                     <input ref={linkFileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
                       onChange={async e => {
                         const files = Array.from(e.target.files || []);
