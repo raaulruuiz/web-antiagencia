@@ -1400,12 +1400,14 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
         const ratio = matches.length / tF.length;
         return (1 - ratio) * 8;
       };
-      // Descarte duro: si ambos tienen tokens y no hay NINGUNO en común → match imposible
+      // Descarte duro: si ambos lados tienen ≥2 tokens y no comparten NINGUNO → match imposible.
+      // Requiere ≥2 tokens en cada lado para evitar falsos negativos con nombres cortos
+      // (ej: "Claude" en DB vs "Anthropic" en factura, o "ChatGPT" vs "OpenAI").
       const nombreIncompatible = (facNombre, movNombre) => {
         if (!facNombre || !movNombre) return false;
         const tF = tokens(facNombre);
         const tM = tokens(movNombre);
-        if (!tF.length || !tM.length) return false;
+        if (tF.length < 2 || tM.length < 2) return false; // no suficiente contexto → no descartar
         return !tF.some(w => tM.some(wm => wm.includes(w) || w.includes(wm)));
       };
 
@@ -1448,6 +1450,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
           .sort((a, b) => a.score - b.score);
 
         // 2º: movimientos con fecha_factura pero sin importe_factura — comparar por base/total
+        // Umbral 2.5€ para absorber diferencias de conversión de divisa (ej: USD→EUR)
         if (!candidatos.length) {
           candidatos = movs
             .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.fecha_factura != null && m.importe_factura == null && !nombreIncompatible(fac.nombre_entidad, m.nombre))
@@ -1455,7 +1458,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
               const diff = importeDiff(m);
               return { m, diff, score: diff + fechaPenalty(m) + nombrePenalty(fac.nombre_entidad, m.nombre) };
             })
-            .filter(c => c.diff <= 1)
+            .filter(c => c.diff <= 2.5)
             .sort((a, b) => a.score - b.score);
         }
 
