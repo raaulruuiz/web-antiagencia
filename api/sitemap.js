@@ -6,6 +6,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_cB3mpag9moVvhekQG6GBWw_ogz_nb9M';
 const STATIC_URLS = [
   { loc: 'https://antiagencia.es/', changefreq: 'weekly', priority: '1.0' },
   { loc: 'https://antiagencia.es/blog-email-marketing', changefreq: 'weekly', priority: '0.9' },
+  { loc: 'https://antiagencia.es/podcasts', changefreq: 'weekly', priority: '0.9' },
   { loc: 'https://antiagencia.es/agencia-shopify-granada', changefreq: 'monthly', priority: '0.8' },
   { loc: 'https://antiagencia.es/trabajaconnosotros', changefreq: 'monthly', priority: '0.8' },
   { loc: 'https://antiagencia.es/anti-biblioteca', changefreq: 'weekly', priority: '0.8' },
@@ -14,11 +15,11 @@ const STATIC_URLS = [
   { loc: 'https://antiagencia.es/Contacto', changefreq: 'monthly', priority: '0.6' },
 ];
 
-function fetchPosts() {
+function fetchFromSupabase(path) {
   return new Promise((resolve) => {
     const options = {
       hostname: SUPABASE_HOST,
-      path: '/rest/v1/blog_posts?select=slug,published_at&published=eq.true&order=published_at.desc',
+      path,
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
@@ -35,7 +36,10 @@ function fetchPosts() {
 }
 
 export default async function handler(req, res) {
-  const posts = await fetchPosts();
+  const [posts, podcasts] = await Promise.all([
+    fetchFromSupabase('/rest/v1/blog_posts?select=slug,published_at&published=eq.true&order=published_at.desc'),
+    fetchFromSupabase('/rest/v1/podcasts?select=slug,published_at&published=eq.true&order=published_at.desc'),
+  ]);
 
   const blogUrls = (Array.isArray(posts) ? posts : []).map((p) => ({
     loc: `https://antiagencia.es/blog-email-marketing/${p.slug}`,
@@ -44,7 +48,14 @@ export default async function handler(req, res) {
     priority: '0.7',
   }));
 
-  const allUrls = [...STATIC_URLS, ...blogUrls];
+  const podcastUrls = (Array.isArray(podcasts) ? podcasts : []).map((p) => ({
+    loc: `https://antiagencia.es/podcasts/${p.slug}`,
+    lastmod: new Date(p.published_at).toISOString().slice(0, 10),
+    changefreq: 'monthly',
+    priority: '0.7',
+  }));
+
+  const allUrls = [...STATIC_URLS, ...blogUrls, ...podcastUrls];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
