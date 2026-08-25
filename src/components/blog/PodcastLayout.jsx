@@ -9,13 +9,22 @@ export default function PodcastLayout({ children }) {
         <Link to="/" style={{ color: "#0067FD" }} className="text-lg font-bold leading-snug line-clamp-2 flex-1 min-w-0">
           Raúl Ruiz — Antiagencia
         </Link>
-        <Link
-          to="/podcasts"
-          className="text-sm uppercase tracking-wide whitespace-nowrap flex-shrink-0"
-          style={{ color: "#7000FF" }}
-        >
-          Podcasts de Raúl Ruiz
-        </Link>
+        <nav className="flex items-center gap-6 flex-shrink-0">
+          <Link
+            to="/blog-email-marketing"
+            className="text-sm uppercase tracking-wide whitespace-nowrap"
+            style={{ color: "#7000FF" }}
+          >
+            Anti-Blog
+          </Link>
+          <Link
+            to="/podcasts"
+            className="text-sm uppercase tracking-wide whitespace-nowrap"
+            style={{ color: "#7000FF" }}
+          >
+            Podcasts de Raúl Ruiz
+          </Link>
+        </nav>
       </header>
 
       {/* Contenido */}
