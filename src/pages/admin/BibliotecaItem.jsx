@@ -1505,10 +1505,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         <div style={{ padding: '14px' }}>
           <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, marginBottom: block.subtitulo || block.audio_url ? 8 : 0 }}>{block.titulo || 'Audio'}</div>
           {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginBottom: 10 }}>{block.subtitulo}</div>}
-          {block.audio_url
-            ? <AudioPlayer url={block.audio_url} color={block.color || BLOCK_COLORS.audio} />
-            : <div style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin audio grabado</div>
-          }
+          {block.audio_url && <AudioPlayer url={block.audio_url} color={block.color || BLOCK_COLORS.audio} />}
         </div>
       )}
 
@@ -1960,12 +1957,12 @@ function EBCanvas({ blocks, onChange, onUpload, onCrop, libImages, nested = fals
 
 // ── Library image cell (con checkbox GLOBAL en hover) ────────────────────────
 function AudioPlayer({ url, color = '#6366f1' }) {
-  const audioRef = React.useRef(null);
-  const [playing, setPlaying] = React.useState(false);
-  const [progress, setProgress] = React.useState(0);
-  const [currentTime, setCurrentTime] = React.useState(0);
-  const [duration, setDuration] = React.useState(0);
-  const [speed, setSpeed] = React.useState(1);
+  const audioRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [speed, setSpeed] = useState(1);
 
   const toggle = () => {
     const a = audioRef.current;
@@ -2078,14 +2075,14 @@ function LibImgCell({ libImg, alreadyAdded, isSource, color, onSelect, onToggleG
 
 // ── AudioRecorderWidget (module-level to avoid React hook rules violation) ────
 function AudioRecorderWidget({ draft, update, id }) {
-  const [recState, setRecState] = React.useState(draft.audio_url ? 'uploaded' : 'idle');
-  const [blob, setBlob] = React.useState(null);
-  const [blobUrl, setBlobUrl] = React.useState(null);
-  const [elapsed, setElapsed] = React.useState(0);
-  const mrRef = React.useRef(null);
-  const timerRef = React.useRef(null);
-  const chunksRef = React.useRef([]);
-  const [uploading, setUploading] = React.useState(false);
+  const [recState, setRecState] = useState(draft.audio_url ? 'uploaded' : 'idle');
+  const [blob, setBlob] = useState(null);
+  const [blobUrl, setBlobUrl] = useState(null);
+  const [elapsed, setElapsed] = useState(0);
+  const mrRef = useRef(null);
+  const timerRef = useRef(null);
+  const chunksRef = useRef([]);
+  const [uploading, setUploading] = useState(false);
 
   const startRec = async () => {
     try {
