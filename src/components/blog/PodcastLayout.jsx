@@ -6,7 +6,7 @@ export default function PodcastLayout({ children }) {
     <div className="min-h-screen bg-white flex flex-col" style={{ fontFamily: "'Georgia', serif" }}>
       {/* Header */}
       <header className="px-4 md:px-36 py-5 w-full">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between md:gap-4">
           <Link to="/" style={{ color: "#0067FD" }} className="text-lg font-bold leading-snug whitespace-nowrap">
             Raúl Ruiz — Antiagencia
           </Link>
