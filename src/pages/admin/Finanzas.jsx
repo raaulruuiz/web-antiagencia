@@ -3494,8 +3494,32 @@ export default function Finanzas() {
         docTabContactos.length ? Promise.resolve(null) :
           fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
-      if (rDocs.ok) setDocumentosList(await rDocs.json());
+      let docs = [];
+      if (rDocs.ok) { docs = await rDocs.json(); setDocumentosList(docs); }
       if (rCtodos && rCtodos.ok) setDocTabContactos(await rCtodos.json());
+
+      // Detectar facturas huérfanas (sin proveedor/cliente asignado)
+      const huerfanas = docs.filter(f =>
+        (f.tipo === 'gasto' && !f.factura_proveedor_id) ||
+        (f.tipo === 'ingreso' && !f.factura_cliente_id)
+      );
+      if (huerfanas.length > 0) {
+        if (!contactosTodos.length) {
+          const token2 = await getToken();
+          const rc = await fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token2}` } });
+          if (rc.ok) setContactosTodos(await rc.json());
+        }
+        // Agrupar por nombre_entidad+tipo
+        const grupos = new Map();
+        for (const f of huerfanas) {
+          const key = `${f.tipo}||${f.nombre_entidad || ''}`;
+          if (!grupos.has(key)) grupos.set(key, { nombre_entidad: f.nombre_entidad || '', nif_cif: f.nif_cif || null, tipo: f.tipo, factura_ids: [], archivo_url: f.archivo_url || null });
+          grupos.get(key).factura_ids.push(f.id);
+        }
+        setModalNuevosContactos([...grupos.values()].map(g => ({
+          ...g, _nombre: '', _nombre_empresa: g.nombre_entidad || '', _asignarA: null, _ignorar: false,
+        })));
+      }
     } catch(e) {}
     finally { setLoadingDocumentos(false); }
   }
@@ -6114,6 +6138,7 @@ export default function Finanzas() {
                     email:         item.email      || null,
                     contacto_id:   item._asignarA?.id || null,
                     nombre_entidad: item.nombre_entidad,
+                    tipo:          item.tipo || 'gasto',
                   }));
                   const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/confirmar-contactos`, {
                     method:'POST', headers:{ Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
@@ -6122,6 +6147,7 @@ export default function Finanzas() {
                   if (!r.ok) throw new Error('Error al confirmar');
                   setModalNuevosContactos(null);
                   cargarProveedores();
+                  if (tab === 'documentos') cargarDocumentos();
                 } catch(e) { alert(e.message); }
                 finally { setConfirmandoContactos(false); }
               }}
