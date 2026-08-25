@@ -1389,21 +1389,23 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
         .replace(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/).filter(w => w.length >= 3);
 
-      // Contactos disponibles para enriquecer el matching con nombre+alias del proveedor/cliente vinculado
+      // Contactos disponibles para el matching
       const ctodosMatch = docTabContactos.length ? docTabContactos : contactosTodos;
 
-      // Dado un fac, devuelve todos los nombres candidatos: nombre_entidad del PDF + nombre y alias del contacto vinculado
+      // Nombres canónicos de una factura: contacto vinculado (nombre + alias) como fuente de verdad.
+      // Solo usa nombre_entidad como último recurso si no hay contacto vinculado.
       const facNombres = fac => {
-        const nombres = [];
-        if (fac.nombre_entidad) nombres.push(fac.nombre_entidad);
         const contactoId = fac.tipo === 'gasto' ? fac.factura_proveedor_id : fac.factura_cliente_id;
         const contacto = contactoId ? ctodosMatch.find(c => c.id === contactoId) : null;
         if (contacto) {
+          const nombres = [];
           if (contacto.nombre) nombres.push(contacto.nombre);
           if (contacto.nombre_empresa) nombres.push(contacto.nombre_empresa);
           if (Array.isArray(contacto.alias)) nombres.push(...contacto.alias.filter(Boolean));
+          return nombres;
         }
-        return nombres;
+        // Sin contacto vinculado: fallback al nombre_entidad guardado en la factura
+        return fac.nombre_entidad ? [fac.nombre_entidad] : [];
       };
 
       // Penalización: usa TODOS los nombres candidatos de la factura, devuelve la menor penalización
