@@ -1389,26 +1389,49 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
         .replace(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/).filter(w => w.length >= 3);
 
-      // Penalización por nombre: si la factura tiene nombre_entidad y el movimiento tiene nombre,
-      // compara tokens. Penalización parcial proporcional al % de tokens sin match.
-      const nombrePenalty = (facNombre, movNombre) => {
-        if (!facNombre || !movNombre) return 0;
-        const tF = tokens(facNombre);
-        const tM = tokens(movNombre);
-        if (!tF.length) return 0;
-        const matches = tF.filter(w => tM.some(wm => wm.includes(w) || w.includes(wm)));
-        const ratio = matches.length / tF.length;
-        return (1 - ratio) * 8;
+      // Contactos disponibles para enriquecer el matching con nombre+alias del proveedor/cliente vinculado
+      const ctodosMatch = docTabContactos.length ? docTabContactos : contactosTodos;
+
+      // Dado un fac, devuelve todos los nombres candidatos: nombre_entidad del PDF + nombre y alias del contacto vinculado
+      const facNombres = fac => {
+        const nombres = [];
+        if (fac.nombre_entidad) nombres.push(fac.nombre_entidad);
+        const contactoId = fac.tipo === 'gasto' ? fac.factura_proveedor_id : fac.factura_cliente_id;
+        const contacto = contactoId ? ctodosMatch.find(c => c.id === contactoId) : null;
+        if (contacto) {
+          if (contacto.nombre) nombres.push(contacto.nombre);
+          if (contacto.nombre_empresa) nombres.push(contacto.nombre_empresa);
+          if (Array.isArray(contacto.alias)) nombres.push(...contacto.alias.filter(Boolean));
+        }
+        return nombres;
       };
-      // Descarte duro: si ambos lados tienen ≥2 tokens y no comparten NINGUNO → match imposible.
-      // Requiere ≥2 tokens en cada lado para evitar falsos negativos con nombres cortos
-      // (ej: "Claude" en DB vs "Anthropic" en factura, o "ChatGPT" vs "OpenAI").
-      const nombreIncompatible = (facNombre, movNombre) => {
-        if (!facNombre || !movNombre) return false;
-        const tF = tokens(facNombre);
+
+      // Penalización: usa TODOS los nombres candidatos de la factura, devuelve la menor penalización
+      const nombrePenaltyFac = (fac, movNombre) => {
+        const nombres = facNombres(fac);
+        if (!nombres.length || !movNombre) return 0;
         const tM = tokens(movNombre);
-        if (tF.length < 2 || tM.length < 2) return false; // no suficiente contexto → no descartar
-        return !tF.some(w => tM.some(wm => wm.includes(w) || w.includes(wm)));
+        return Math.min(...nombres.map(n => {
+          const tF = tokens(n);
+          if (!tF.length) return 0;
+          const matches = tF.filter(w => tM.some(wm => wm.includes(w) || w.includes(wm)));
+          return (1 - matches.length / tF.length) * 8;
+        }));
+      };
+
+      // Descarte duro: solo si TODOS los nombres candidatos de la factura son incompatibles con el movimiento
+      // (ambos lados ≥2 tokens y sin tokens en común)
+      const nombreIncompatible = (fac, movNombre) => {
+        const nombres = facNombres(fac);
+        if (!nombres.length || !movNombre) return false;
+        const tM = tokens(movNombre);
+        if (!tM.length) return false;
+        // Compatible si ALGÚN nombre candidato tiene tokens en común con el movimiento
+        return !nombres.some(n => {
+          const tF = tokens(n);
+          if (tF.length < 2 || tM.length < 2) return true; // no suficiente contexto → no descartar
+          return tF.some(w => tM.some(wm => wm.includes(w) || w.includes(wm)));
+        });
       };
 
       // Para cada factura subida, buscar el movimiento DB más parecido
@@ -1438,13 +1461,13 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
 
         // 1º: movimientos con importe_factura explícito
         let candidatos = movs
-          .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.importe_factura != null && !nombreIncompatible(fac.nombre_entidad, m.nombre))
+          .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.importe_factura != null && !nombreIncompatible(fac, m.nombre))
           .map(m => {
             const diff = Math.min(
               Math.abs(Math.abs(m.importe_factura) - facBase),
               Math.abs(Math.abs(m.importe_factura) - facTotal)
             );
-            return { m, diff, score: diff + fechaPenalty(m) + nombrePenalty(fac.nombre_entidad, m.nombre) };
+            return { m, diff, score: diff + fechaPenalty(m) + nombrePenaltyFac(fac, m.nombre) };
           })
           .filter(c => c.diff <= 1)
           .sort((a, b) => a.score - b.score);
@@ -1453,10 +1476,10 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
         // Umbral 2.5€ para absorber diferencias de conversión de divisa (ej: USD→EUR)
         if (!candidatos.length) {
           candidatos = movs
-            .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.fecha_factura != null && m.importe_factura == null && !nombreIncompatible(fac.nombre_entidad, m.nombre))
+            .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.fecha_factura != null && m.importe_factura == null && !nombreIncompatible(fac, m.nombre))
             .map(m => {
               const diff = importeDiff(m);
-              return { m, diff, score: diff + fechaPenalty(m) + nombrePenalty(fac.nombre_entidad, m.nombre) };
+              return { m, diff, score: diff + fechaPenalty(m) + nombrePenaltyFac(fac, m.nombre) };
             })
             .filter(c => c.diff <= 2.5)
             .sort((a, b) => a.score - b.score);
