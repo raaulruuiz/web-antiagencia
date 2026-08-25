@@ -4831,7 +4831,8 @@ export default function Finanzas() {
           { key: 'numero_factura',       label: 'Nº Factura', w: 145 },
           { key: 'nombre_entidad',       label: 'Entidad',    w: 200 },
           { key: 'tipo',                 label: 'Tipo',       w: 80  },
-          { key: 'importe',              label: 'Importe',    w: 100, num: true },
+          { key: 'importe_total',          label: 'Importe',    w: 105, num: true, computed: true },
+          { key: 'importe',              label: 'Base Impon.',w: 100, num: true },
           { key: 'impuesto',             label: 'IVA',        w: 90,  num: true },
           { key: 'irpf',                 label: 'IRPF',       w: 95,  num: true },
           { key: 'nif_cif',              label: 'NIF/CIF',    w: 120 },
@@ -4910,12 +4911,15 @@ export default function Finanzas() {
         const docSomeSel = docsPage.some(d => docSeleccionados.has(d.id)) && !docAllSel;
 
         // Calc helpers
+        const getDocVal = (d, key) => key === 'importe_total'
+          ? (parseFloat(d.importe)||0)+(parseFloat(d.impuesto)||0)+(parseFloat(d.irpf)||0)
+          : parseFloat(d[key]);
         const calcDocVal = (key, type) => {
           switch(type) {
-            case 'sum': { const vs=docs.map(d=>parseFloat(d[key])).filter(v=>!isNaN(v)); return vs.reduce((a,b)=>a+b,0); }
-            case 'average': { const vs=docs.map(d=>parseFloat(d[key])).filter(v=>!isNaN(v)); return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null; }
-            case 'min': { const vs=docs.map(d=>parseFloat(d[key])).filter(v=>!isNaN(v)); return vs.length?Math.min(...vs):null; }
-            case 'max': { const vs=docs.map(d=>parseFloat(d[key])).filter(v=>!isNaN(v)); return vs.length?Math.max(...vs):null; }
+            case 'sum': { const vs=docs.map(d=>getDocVal(d,key)).filter(v=>!isNaN(v)); return vs.reduce((a,b)=>a+b,0); }
+            case 'average': { const vs=docs.map(d=>getDocVal(d,key)).filter(v=>!isNaN(v)); return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null; }
+            case 'min': { const vs=docs.map(d=>getDocVal(d,key)).filter(v=>!isNaN(v)); return vs.length?Math.min(...vs):null; }
+            case 'max': { const vs=docs.map(d=>getDocVal(d,key)).filter(v=>!isNaN(v)); return vs.length?Math.max(...vs):null; }
             case 'count_all': return docs.length;
             case 'count_values': return docs.filter(d=>d[key]!=null&&d[key]!=='').length;
             case 'count_unique': return new Set(docs.map(d=>d[key]).filter(v=>v!=null&&v!=='')).size;
@@ -4926,12 +4930,12 @@ export default function Finanzas() {
         const fmtDocCalc = (key, type, val) => {
           if (val==null) return '—';
           if (['count_all','count_values','count_unique','count_empty'].includes(type)) return String(Math.round(val));
-          return ['importe','impuesto','irpf'].includes(key) ? `${val.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €` : String(val);
+          return ['importe','impuesto','irpf','importe_total'].includes(key) ? `${val.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €` : String(val);
         };
         const CALC_SHORT_D = { sum:'∑', average:'Ø', min:'↓', max:'↑', count_all:'#', count_values:'#v', count_unique:'#u', count_empty:'∅' };
         const getCalcOpts = key => {
           const base = [{val:'none',label:'Ninguno'},{val:'count_all',label:'Contar todo'},{val:'count_values',label:'Contar valores'},{val:'count_unique',label:'Contar únicos'},{val:'count_empty',label:'Contar vacíos'}];
-          return ['importe','impuesto','irpf'].includes(key) ? [...base,{val:'sum',label:'Suma'},{val:'average',label:'Media'},{val:'min',label:'Mínimo'},{val:'max',label:'Máximo'}] : base;
+          return ['importe','impuesto','irpf','importe_total'].includes(key) ? [...base,{val:'sum',label:'Suma'},{val:'average',label:'Media'},{val:'min',label:'Mínimo'},{val:'max',label:'Máximo'}] : base;
         };
 
         const thStyle = { color:'#52525b', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', padding:'8px 10px', borderBottom:'1px solid #27272a', textAlign:'left', whiteSpace:'nowrap' };
@@ -5085,6 +5089,19 @@ export default function Finanzas() {
                               if (col.key==='id') return (
                                 <td key="id" style={{ ...tdBase, width:col.w, fontFamily:'monospace', fontSize:10, color:'#52525b' }}>{val||'—'}</td>
                               );
+
+                              if (col.key === 'importe_total') {
+                                const total = (parseFloat(doc.importe??0)||0) + (parseFloat(doc.impuesto??0)||0) + (parseFloat(doc.irpf??0)||0);
+                                const isZero = Math.abs(total) < 0.005;
+                                const isVenta = doc.tipo === 'ingreso';
+                                const isCompra = doc.tipo === 'gasto';
+                                const numColor = isZero ? '#71717a' : isVenta ? '#4ade80' : isCompra ? '#f87171' : '#d4d4d8';
+                                const sign = isZero ? '' : isVenta ? '+' : isCompra ? '-' : '';
+                                const display = `${sign}${Math.abs(total).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €`;
+                                return (
+                                  <td key="importe_total" style={{ ...tdBase, width:col.w, color:numColor, textAlign:'right', fontWeight:600 }}>{display}</td>
+                                );
+                              }
 
                               if (['importe','impuesto','irpf'].includes(col.key)) {
                                 const num = parseFloat(val ?? 0);
@@ -6270,7 +6287,7 @@ export default function Finanzas() {
                   {fv.numero_factura && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Nº</span> {fv.numero_factura}</span>}
                   {fv.nombre_entidad && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Entidad</span> {fv.nombre_entidad}</span>}
                   {fv.nif_cif && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>NIF</span> {fv.nif_cif}</span>}
-                  {fv.importe != null && (() => { const n=parseFloat(fv.importe); const isV=fv.tipo==='ingreso'; const c=n===0?'#71717a':isV?'#4ade80':'#f87171'; const s=n===0?'':(isV?'+':'-'); return <span style={{ color:c, fontSize:13, fontWeight:700 }}>{s}{Math.abs(n).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>; })()}
+                  {fv.importe != null && (() => { const base=parseFloat(fv.importe)||0; const total=base+(parseFloat(fv.impuesto)||0)+(parseFloat(fv.irpf)||0); const isV=fv.tipo==='ingreso'; const colBase=Math.abs(base)<0.005?'#71717a':isV?'#4ade80':'#f87171'; const colTot=Math.abs(total)<0.005?'#71717a':isV?'#4ade80':'#f87171'; const signBase=Math.abs(base)<0.005?'':(isV?'+':'-'); const signTot=Math.abs(total)<0.005?'':(isV?'+':'-'); return (<><span style={{ color:colBase, fontSize:12 }}><span style={{ color:'#52525b' }}>Base </span>{signBase}{Math.abs(base).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span><span style={{ color:colTot, fontSize:13, fontWeight:700 }}><span style={{ color:'#52525b', fontWeight:400, fontSize:11, marginRight:2 }}>Importe</span>{signTot}{Math.abs(total).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span></>); })()}
                   {fv.impuesto != null && fv.impuesto !== 0 && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>IVA</span> {parseFloat(fv.impuesto).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
                   {fv.irpf != null && fv.irpf !== 0 && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>IRPF</span> {parseFloat(fv.irpf).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
                   {fv.factura_proveedor_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Proveedor</span> {findC(fv.factura_proveedor_id)}</span>}
