@@ -1390,16 +1390,23 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
         .split(/\s+/).filter(w => w.length >= 3);
 
       // Penalización por nombre: si la factura tiene nombre_entidad y el movimiento tiene nombre,
-      // compara tokens. 0 tokens en común → penalización de 8€ (descarta matches imposibles).
-      // Penalización parcial proporcional al % de tokens sin match.
+      // compara tokens. Penalización parcial proporcional al % de tokens sin match.
       const nombrePenalty = (facNombre, movNombre) => {
-        if (!facNombre || !movNombre) return 0; // sin info, sin penalización
+        if (!facNombre || !movNombre) return 0;
         const tF = tokens(facNombre);
         const tM = tokens(movNombre);
         if (!tF.length) return 0;
         const matches = tF.filter(w => tM.some(wm => wm.includes(w) || w.includes(wm)));
         const ratio = matches.length / tF.length;
-        return (1 - ratio) * 8; // 0% match → +8€, 100% match → +0€
+        return (1 - ratio) * 8;
+      };
+      // Descarte duro: si ambos tienen tokens y no hay NINGUNO en común → match imposible
+      const nombreIncompatible = (facNombre, movNombre) => {
+        if (!facNombre || !movNombre) return false;
+        const tF = tokens(facNombre);
+        const tM = tokens(movNombre);
+        if (!tF.length || !tM.length) return false;
+        return !tF.some(w => tM.some(wm => wm.includes(w) || w.includes(wm)));
       };
 
       // Para cada factura subida, buscar el movimiento DB más parecido
@@ -1429,7 +1436,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
 
         // 1º: movimientos con importe_factura explícito
         let candidatos = movs
-          .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.importe_factura != null)
+          .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.importe_factura != null && !nombreIncompatible(fac.nombre_entidad, m.nombre))
           .map(m => {
             const diff = Math.min(
               Math.abs(Math.abs(m.importe_factura) - facBase),
@@ -1443,7 +1450,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
         // 2º: movimientos con fecha_factura pero sin importe_factura — comparar por base/total
         if (!candidatos.length) {
           candidatos = movs
-            .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.fecha_factura != null && m.importe_factura == null)
+            .filter(m => !movsUsados.has(m.id) && normTipo(m.tipo) === facTipo && m.fecha_factura != null && m.importe_factura == null && !nombreIncompatible(fac.nombre_entidad, m.nombre))
             .map(m => {
               const diff = importeDiff(m);
               return { m, diff, score: diff + fechaPenalty(m) + nombrePenalty(fac.nombre_entidad, m.nombre) };
@@ -1479,9 +1486,18 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
         }
 
         // Conflicto: desfase entre fecha_factura guardada en DB y fecha del documento subido
+        // Para gastos: es normal que el doc tenga fecha posterior al movimiento (ciclo de facturación).
+        // Solo alertar si la diferencia es > 5 días O si el doc es anterior a la DB.
         if (fac.fecha_factura && m.fecha_factura && fac.fecha_factura !== m.fecha_factura) {
-          conflictos.push({ tipo: 'fecha_factura_distinta', movimiento: m, factura: fac, severidad: 'warning',
-            desc: `Fecha en el documento: ${fac.fecha_factura} vs fecha de factura en DB: ${m.fecha_factura}` });
+          const docDate = new Date(fac.fecha_factura);
+          const dbDate  = new Date(m.fecha_factura);
+          const diffDias = (docDate - dbDate) / 86400000; // positivo = doc más reciente
+          const esGasto = facTipo === 'gasto';
+          const esCasoNormal = esGasto && diffDias > 0 && diffDias <= 5; // doc posterior ≤5 días en compra → OK
+          if (!esCasoNormal) {
+            conflictos.push({ tipo: 'fecha_factura_distinta', movimiento: m, factura: fac, severidad: 'warning',
+              desc: `Fecha en el documento: ${fac.fecha_factura} vs fecha de factura en DB: ${m.fecha_factura}` });
+          }
         }
 
         // Conflicto: IVA
@@ -2112,9 +2128,32 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
             <div style={{ flex:1, background:'#111', display:'flex', flexDirection:'column', minWidth:0 }}>
               <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
                 <span style={{ color:'#60a5fa', fontSize:12, fontWeight:600, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{errSplitView.factura.archivo_nombre}</span>
+                <button onClick={() => { setFacturaViewer({ url: errSplitView.factura.archivo_url, nombre: errSplitView.factura.archivo_nombre, id: errSplitView.factura.id, data: errSplitView.factura }); setErrSplitView(null); }}
+                  style={{ background:'transparent', border:'1px solid #3f3f46', color:'#71717a', borderRadius:6, padding:'2px 10px', fontSize:11, cursor:'pointer', flexShrink:0 }}>Editar</button>
                 <a href={errSplitView.factura.archivo_url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:11, textDecoration:'none', flexShrink:0 }}>↗</a>
                 <button onClick={() => setErrSplitView(null)} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:16, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
               </div>
+              {/* Metadata del documento */}
+              {(() => {
+                const fac = errSplitView.factura;
+                const esGasto = fac.tipo === 'gasto';
+                const base = parseFloat(fac.importe||0)||0;
+                const total = base+(parseFloat(fac.impuesto)||0)+(parseFloat(fac.irpf)||0);
+                const colNum = esGasto ? '#f87171' : '#4ade80';
+                return (
+                  <div style={{ display:'flex', gap:16, padding:'8px 14px', borderBottom:'1px solid #1f1f1f', flexShrink:0, flexWrap:'wrap', alignItems:'center', background:'#0d0d0d' }}>
+                    {fac.tipo && <span style={{ background: esGasto?'#f8717122':'#4ade8022', color: esGasto?'#f87171':'#4ade80', border:`1px solid ${esGasto?'#f8717144':'#4ade8044'}`, borderRadius:4, padding:'1px 7px', fontSize:11, fontWeight:600 }}>{esGasto?'Compra':'Venta'}</span>}
+                    {total !== 0 && <span style={{ color:colNum, fontSize:13, fontWeight:700 }}>{esGasto?'-':'+'}{Math.abs(total).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
+                    {base !== 0 && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>Base </span>{Math.abs(base).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
+                    {fac.impuesto != null && fac.impuesto !== 0 && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>IVA </span>{parseFloat(fac.impuesto).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
+                    {fac.irpf != null && fac.irpf !== 0 && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>IRPF </span>{parseFloat(fac.irpf).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
+                    {fac.fecha_factura && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>Fecha </span>{fac.fecha_factura}</span>}
+                    {fac.numero_factura && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>Nº </span>{fac.numero_factura}</span>}
+                    {fac.nombre_entidad && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>Entidad </span>{fac.nombre_entidad}</span>}
+                    {fac.nif_cif && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>NIF </span>{fac.nif_cif}</span>}
+                  </div>
+                );
+              })()}
               {/\.(jpg|jpeg|png|gif|webp)$/i.test(errSplitView.factura.archivo_nombre)
                 ? <img src={errSplitView.factura.archivo_url} alt="" style={{ flex:1, objectFit:'contain', width:'100%', height:'100%' }} />
                 : <iframe src={errSplitView.factura.archivo_url} title="factura" style={{ flex:1, width:'100%', border:'none' }} />
