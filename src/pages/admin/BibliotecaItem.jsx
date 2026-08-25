@@ -936,11 +936,11 @@ function SocialIcon({ network, color = 'currentColor', size = 24 }) {
 }
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
-const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#e879f9' };
-const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas', puntuacion: 'Puntuación' };
+const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#e879f9', audio: '#6366f1' };
+const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas', puntuacion: 'Puntuación', audio: 'Audio' };
 
 const PLANTILLA_TYPES = {
-  completo: ['puntuacion', 'imagen', 'enlaces', 'transcribir', 'asunto_adelanto', 'imagen_texto', 'correccion'],
+  completo: ['puntuacion', 'audio', 'imagen', 'enlaces', 'transcribir', 'asunto_adelanto', 'imagen_texto', 'correccion'],
   simple:   ['puntuacion', 'asunto_adelanto', 'imagen_texto', 'correccion'],
 };
 
@@ -964,7 +964,7 @@ function makeTemplateBlocks(plantilla) {
     email_blocks: [],
     texto: '',
     nota: '',
-    visible: type !== 'correccion',
+    visible: type !== 'correccion' && type !== 'audio',
     ...(type === 'puntuacion' ? { autocalcular: true } : {}),
   }));
 }
@@ -994,6 +994,7 @@ function BlockSelector({ onSelect, hasCorreccion, hasPuntuacion, onClose, catego
   ];
   const correccionBt  = { type: 'correccion',  label: 'Corrección',  icon: <IconCorrection /> };
   const puntuacionBt  = { type: 'puntuacion',  label: 'Puntuación',  icon: <IconStar /> };
+  const audioBt       = { type: 'audio',        label: 'Audio',       icon: <IconAudio /> };
   const isOdd = gridTypes.length % 2 !== 0;
   const gridItems = isOdd ? gridTypes.slice(0, -1) : gridTypes;
   const midFullWidth = isOdd ? gridTypes[gridTypes.length - 1] : null;
@@ -1034,6 +1035,7 @@ function BlockSelector({ onSelect, hasCorreccion, hasPuntuacion, onClose, catego
         })}
       </div>
       {midFullWidth && renderFullWidthBtn(midFullWidth)}
+      {renderFullWidthBtn(audioBt)}
       {renderFullWidthBtn(correccionBt)}
     </div>
   );
@@ -1490,6 +1492,17 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         </div>
       )}
 
+      {block.type === 'audio' && (
+        <div style={{ padding: '14px' }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, marginBottom: block.subtitulo || block.audio_url ? 8 : 0 }}>{block.titulo || 'Audio'}</div>
+          {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginBottom: 10 }}>{block.subtitulo}</div>}
+          {block.audio_url
+            ? <AudioPlayer url={block.audio_url} color={block.color || BLOCK_COLORS.audio} />
+            : <div style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin audio grabado</div>
+          }
+        </div>
+      )}
+
       {block.type === 'transcribir' && (
         <div style={{ padding: '14px' }}>
           <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, marginBottom: block.subtitulo || block.texto ? 8 : 0 }}>{block.titulo || 'Transcripción'}</div>
@@ -1937,6 +1950,92 @@ function EBCanvas({ blocks, onChange, onUpload, onCrop, libImages, nested = fals
 }
 
 // ── Library image cell (con checkbox GLOBAL en hover) ────────────────────────
+function IconAudio() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18V5l12-2v13"/>
+      <circle cx="6" cy="18" r="3"/>
+      <circle cx="18" cy="16" r="3"/>
+    </svg>
+  );
+}
+
+function AudioPlayer({ url, color = '#6366f1' }) {
+  const audioRef = React.useRef(null);
+  const [playing, setPlaying] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
+  const [currentTime, setCurrentTime] = React.useState(0);
+  const [duration, setDuration] = React.useState(0);
+  const [speed, setSpeed] = React.useState(1);
+
+  const toggle = () => {
+    const a = audioRef.current;
+    if (!a) return;
+    if (playing) { a.pause(); setPlaying(false); }
+    else { a.play(); setPlaying(true); }
+  };
+
+  const setSpeedVal = (s) => {
+    setSpeed(s);
+    if (audioRef.current) audioRef.current.playbackRate = s;
+  };
+
+  const fmt = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  const handleSeek = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    if (audioRef.current && duration) {
+      audioRef.current.currentTime = ratio * duration;
+      setProgress(ratio);
+      setCurrentTime(ratio * duration);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <audio ref={audioRef} src={url} preload="metadata"
+        onLoadedMetadata={e => setDuration(e.target.duration)}
+        onTimeUpdate={e => { const a = e.target; setCurrentTime(a.currentTime); setProgress(a.duration ? a.currentTime / a.duration : 0); }}
+        onEnded={() => setPlaying(false)} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Play/pause button */}
+        <button onClick={toggle}
+          style={{ width: 40, height: 40, borderRadius: '50%', background: color, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          {playing
+            ? <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            : <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
+          }
+        </button>
+        {/* Progress bar */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div onClick={handleSeek} style={{ height: 4, background: 'var(--t-border)', borderRadius: 99, cursor: 'pointer', position: 'relative' }}>
+            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${progress * 100}%`, background: color, borderRadius: 99 }} />
+            <div style={{ position: 'absolute', top: '50%', left: `${progress * 100}%`, transform: 'translate(-50%, -50%)', width: 12, height: 12, borderRadius: '50%', background: color, boxShadow: '0 0 0 2px var(--t-bg)' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--t-text-subtle)' }}>
+            <span>{fmt(currentTime)}</span>
+            <span>{duration ? fmt(duration) : '--:--'}</span>
+          </div>
+        </div>
+        {/* Speed controls */}
+        <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
+          {[1, 1.5, 2].map(s => (
+            <button key={s} onClick={() => setSpeedVal(s)}
+              style={{ background: speed === s ? color : 'transparent', border: `1px solid ${speed === s ? color : 'var(--t-border)'}`, borderRadius: 5, padding: '2px 6px', fontSize: 10, color: speed === s ? 'white' : 'var(--t-text-subtle)', cursor: 'pointer', fontWeight: speed === s ? 700 : 400 }}>
+              {s === 1 ? '1x' : `${s}x`}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LibImgCell({ libImg, alreadyAdded, isSource, color, onSelect, onToggleGlobal }) {
   const [hov, setHov] = useState(false);
   const isGlobal = !!libImg.isGlobal;
@@ -2726,6 +2825,135 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           </div>
         )}
 
+        {/* Audio block editor */}
+        {draft.type === 'audio' && (() => {
+          const AudioRecorder = () => {
+            const [recState, setRecState] = React.useState(draft.audio_url ? 'uploaded' : 'idle'); // idle | recording | previewing | uploaded
+            const [blob, setBlob] = React.useState(null);
+            const [blobUrl, setBlobUrl] = React.useState(null);
+            const [elapsed, setElapsed] = React.useState(0);
+            const mrRef = React.useRef(null);
+            const timerRef = React.useRef(null);
+            const chunksRef = React.useRef([]);
+            const [uploading, setUploading] = React.useState(false);
+
+            const startRec = async () => {
+              try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                chunksRef.current = [];
+                const mr = new MediaRecorder(stream);
+                mrRef.current = mr;
+                mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+                mr.onstop = () => {
+                  stream.getTracks().forEach(t => t.stop());
+                  const b = new Blob(chunksRef.current, { type: 'audio/webm' });
+                  const url = URL.createObjectURL(b);
+                  setBlob(b); setBlobUrl(url); setRecState('previewing');
+                };
+                mr.start();
+                setRecState('recording');
+                setElapsed(0);
+                timerRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
+              } catch { alert('No se pudo acceder al micrófono'); }
+            };
+
+            const stopRec = () => {
+              clearInterval(timerRef.current);
+              mrRef.current?.stop();
+            };
+
+            const discard = () => {
+              if (blobUrl) URL.revokeObjectURL(blobUrl);
+              setBlob(null); setBlobUrl(null); setRecState('idle'); setElapsed(0);
+            };
+
+            const uploadBlob = async () => {
+              if (!blob) return;
+              setUploading(true);
+              try {
+                const token = await getToken();
+                const form = new FormData();
+                form.append('file', blob, `audio_${Date.now()}.webm`);
+                const res = await fetch(`${API_BASE}/biblioteca/${id}/blocks/upload`, {
+                  method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form,
+                });
+                if (!res.ok) throw new Error(await res.text());
+                const { url } = await res.json();
+                update('audio_url', url);
+                if (blobUrl) URL.revokeObjectURL(blobUrl);
+                setBlob(null); setBlobUrl(null); setRecState('uploaded');
+              } catch (e) { alert('Error al subir audio: ' + e.message); }
+              finally { setUploading(false); }
+            };
+
+            const removeAudio = () => { update('audio_url', null); setRecState('idle'); };
+
+            const fmt = s => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+
+            if (recState === 'uploaded' && draft.audio_url) return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <AudioPlayer url={draft.audio_url} color={draft.color || BLOCK_COLORS.audio} />
+                <button onClick={removeAudio}
+                  style={{ background: 'transparent', border: '1px solid var(--t-border)', borderRadius: 7, padding: '7px 12px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer' }}>
+                  Eliminar y grabar nuevo
+                </button>
+              </div>
+            );
+
+            if (recState === 'previewing' && blobUrl) return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <AudioPlayer url={blobUrl} color={draft.color || BLOCK_COLORS.audio} />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={uploadBlob} disabled={uploading}
+                    style={{ flex: 1, background: '#6366f1', border: 'none', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: 'white', cursor: uploading ? 'not-allowed' : 'pointer', fontWeight: 600 }}>
+                    {uploading ? 'Subiendo…' : 'Usar este audio'}
+                  </button>
+                  <button onClick={discard} disabled={uploading}
+                    style={{ flex: 1, background: 'transparent', border: '1px solid var(--t-border)', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer' }}>
+                    Descartar y repetir
+                  </button>
+                </div>
+              </div>
+            );
+
+            if (recState === 'recording') return (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '16px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 1s infinite' }} />
+                  <span style={{ fontSize: 13, color: 'var(--t-text-muted)' }}>Grabando</span>
+                  <span style={{ fontFamily: 'monospace', fontSize: 13, color: 'var(--t-text)' }}>{fmt(elapsed)}</span>
+                </div>
+                <button onClick={stopRec}
+                  style={{ background: '#ef4444', border: 'none', borderRadius: 999, padding: '9px 24px', fontSize: 13, color: 'white', cursor: 'pointer', fontWeight: 600 }}>
+                  Detener
+                </button>
+              </div>
+            );
+
+            // idle
+            return (
+              <button onClick={startRec}
+                style={{ width: '100%', background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 8, padding: '14px', fontSize: 13, color: 'var(--t-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                Grabar audio
+              </button>
+            );
+          };
+
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Color</label>
+                <InlineColorPicker value={draft.color || ''} onChange={v => update('color', v)} />
+              </div>
+              <div>
+                <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Audio</label>
+                <AudioRecorder />
+              </div>
+            </div>
+          );
+        })()}
+
         {draft.type === 'transcribir' && (() => {
           const imgs = draft.images || [];
           const doneImgs = imgs.filter(i => i.transcribed);
@@ -3366,7 +3594,7 @@ export default function BibliotecaItem() {
       email_blocks: [],
       texto: '',
       nota: '',
-      visible: type !== 'correccion',
+      visible: type !== 'correccion' && type !== 'audio',
       ...(type === 'columnas' ? { num_columnas: 2, columns: [[], []] } : {}),
     };
     setBlocksData(prev => {
