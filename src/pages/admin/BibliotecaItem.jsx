@@ -2937,12 +2937,12 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         {draft.type === 'audio' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div>
-              <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Color</label>
-              <InlineColorPicker value={draft.color || ''} onChange={v => update('color', v)} />
-            </div>
-            <div>
               <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Audio</label>
               <AudioRecorderWidget draft={draft} update={update} id={itemId} />
+            </div>
+            <div>
+              <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Color</label>
+              <InlineColorPicker value={draft.color || ''} onChange={v => update('color', v)} />
             </div>
           </div>
         )}
