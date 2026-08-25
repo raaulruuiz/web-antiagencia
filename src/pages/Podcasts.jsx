@@ -100,20 +100,18 @@ export default function Podcasts() {
                   {/* Programa + Host */}
                   <p className="text-sm mb-4">
                     {podcast.programa_nombre && (
-                      <span className="text-gray-500 mr-2">{podcast.programa_nombre} ·</span>
+                      <>
+                        {podcast.host_url ? (
+                          <a href={podcast.host_url} target="_blank" rel="noopener noreferrer" style={{ color: "#7000FF" }}>
+                            {podcast.programa_nombre}
+                          </a>
+                        ) : (
+                          <span style={{ color: "#7000FF" }}>{podcast.programa_nombre}</span>
+                        )}
+                        <span className="text-gray-400 mx-1">·</span>
+                      </>
                     )}
-                    {podcast.host_url ? (
-                      <a
-                        href={podcast.host_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "#7000FF" }}
-                      >
-                        Por {podcast.host_nombre}
-                      </a>
-                    ) : (
-                      <span style={{ color: "#7000FF" }}>Por {podcast.host_nombre}</span>
-                    )}
+                    <span className="text-gray-500">Por {podcast.host_nombre}</span>
                   </p>
 
                   {/* Excerpt */}
