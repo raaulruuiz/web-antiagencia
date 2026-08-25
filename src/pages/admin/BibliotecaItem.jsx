@@ -2074,15 +2074,13 @@ function LibImgCell({ libImg, alreadyAdded, isSource, color, onSelect, onToggleG
 }
 
 // ── AudioRecorderWidget (module-level to avoid React hook rules violation) ────
-function AudioRecorderWidget({ draft, update, id }) {
+function AudioRecorderWidget({ draft, update, id, pendingBlobRef }) {
   const [recState, setRecState] = useState(draft.audio_url ? 'uploaded' : 'idle');
-  const [blob, setBlob] = useState(null);
   const [blobUrl, setBlobUrl] = useState(null);
   const [elapsed, setElapsed] = useState(0);
   const mrRef = useRef(null);
   const timerRef = useRef(null);
   const chunksRef = useRef([]);
-  const [uploading, setUploading] = useState(false);
 
   const startRec = async () => {
     try {
@@ -2095,7 +2093,8 @@ function AudioRecorderWidget({ draft, update, id }) {
         stream.getTracks().forEach(t => t.stop());
         const b = new Blob(chunksRef.current, { type: 'audio/webm' });
         const url = URL.createObjectURL(b);
-        setBlob(b); setBlobUrl(url); setRecState('previewing');
+        if (pendingBlobRef) pendingBlobRef.current = b;
+        setBlobUrl(url); setRecState('previewing');
       };
       mr.start();
       setRecState('recording');
@@ -2111,26 +2110,8 @@ function AudioRecorderWidget({ draft, update, id }) {
 
   const discard = () => {
     if (blobUrl) URL.revokeObjectURL(blobUrl);
-    setBlob(null); setBlobUrl(null); setRecState('idle'); setElapsed(0);
-  };
-
-  const uploadBlob = async () => {
-    if (!blob) return;
-    setUploading(true);
-    try {
-      const token = await getToken();
-      const form = new FormData();
-      form.append('file', blob, `audio_${Date.now()}.webm`);
-      const res = await fetch(`${API_BASE}/biblioteca/${id}/blocks/upload`, {
-        method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form,
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const { url } = await res.json();
-      update('audio_url', url);
-      if (blobUrl) URL.revokeObjectURL(blobUrl);
-      setBlob(null); setBlobUrl(null); setRecState('uploaded');
-    } catch (e) { alert('Error al subir audio: ' + e.message); }
-    finally { setUploading(false); }
+    if (pendingBlobRef) pendingBlobRef.current = null;
+    setBlobUrl(null); setRecState('idle'); setElapsed(0);
   };
 
   const removeAudio = () => { update('audio_url', null); setRecState('idle'); };
@@ -2141,7 +2122,7 @@ function AudioRecorderWidget({ draft, update, id }) {
       <AudioPlayer url={draft.audio_url} color={draft.color || BLOCK_COLORS.audio} />
       <button onClick={removeAudio}
         style={{ background: 'transparent', border: '1px solid var(--t-border)', borderRadius: 7, padding: '7px 12px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer' }}>
-        Eliminar y grabar nuevo
+        Descartar y grabar nuevo
       </button>
     </div>
   );
@@ -2149,16 +2130,10 @@ function AudioRecorderWidget({ draft, update, id }) {
   if (recState === 'previewing' && blobUrl) return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <AudioPlayer url={blobUrl} color={draft.color || BLOCK_COLORS.audio} />
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button onClick={uploadBlob} disabled={uploading}
-          style={{ flex: 1, background: BLOCK_COLORS.audio, border: 'none', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: 'white', cursor: uploading ? 'not-allowed' : 'pointer', fontWeight: 600 }}>
-          {uploading ? 'Subiendo…' : 'Usar este audio'}
-        </button>
-        <button onClick={discard} disabled={uploading}
-          style={{ flex: 1, background: 'transparent', border: '1px solid var(--t-border)', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer' }}>
-          Descartar y repetir
-        </button>
-      </div>
+      <button onClick={discard}
+        style={{ width: '100%', background: 'transparent', border: '1px solid var(--t-border)', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer' }}>
+        Descartar y repetir
+      </button>
     </div>
   );
 
@@ -2211,6 +2186,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const transcribeFileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
   const itemFileInputRefs = useRef({});
+  const pendingAudioBlobRef = useRef(null);
 
   const update = (field, val) => setDraft(d => ({ ...d, [field]: val }));
 
@@ -2312,7 +2288,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     } catch { return false; }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (draft.type === 'enlaces') {
       const errors = {};
       (draft.links || []).forEach((link, i) => {
@@ -2320,7 +2296,22 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
       });
       if (Object.keys(errors).length > 0) { setUrlErrors(errors); return; }
     }
-    onSave(draft);
+    let finalDraft = draft;
+    if (draft.type === 'audio' && pendingAudioBlobRef.current) {
+      try {
+        const token = await getToken();
+        const form = new FormData();
+        form.append('file', pendingAudioBlobRef.current, `audio_${Date.now()}.webm`);
+        const res = await fetch(`${API_BASE}/biblioteca/${itemId}/blocks/upload`, {
+          method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form,
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const { url } = await res.json();
+        finalDraft = { ...draft, audio_url: url };
+        pendingAudioBlobRef.current = null;
+      } catch (e) { alert('Error al subir audio: ' + e.message); return; }
+    }
+    onSave(finalDraft);
     onClose();
   };
 
@@ -2938,7 +2929,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div>
               <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Audio</label>
-              <AudioRecorderWidget draft={draft} update={update} id={itemId} />
+              <AudioRecorderWidget draft={draft} update={update} id={itemId} pendingBlobRef={pendingAudioBlobRef} />
             </div>
             <div>
               <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Color</label>
