@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import ReactMarkdown from "react-markdown";
 import { supabase } from "@/lib/supabaseClient";
 import PodcastLayout from "@/components/blog/PodcastLayout";
 import MailerLiteForm from "@/components/MailerLiteForm";
@@ -105,21 +106,6 @@ export default function PodcastPost({ slug }) {
 
   const youtubeId = getYouTubeId(podcast.youtube_url);
 
-  // Parse transcripcion line by line, preserving gap size
-  const paragraphGroups = (() => {
-    const content = podcast.transcripcion || "";
-    const groups = [];
-    const parts = content.split(/(\n+)/);
-    for (let i = 0; i < parts.length; i += 2) {
-      const text = parts[i].trim();
-      const gap = parts[i + 1] || '';
-      if (!text) continue;
-      const gapSize = gap.length >= 3 ? 'xl' : gap.length >= 2 ? 'lg' : 'sm';
-      groups.push({ text, gapSize });
-    }
-    return groups;
-  })();
-
   const plataformas = Array.isArray(podcast.plataformas) ? podcast.plataformas : [];
 
   return (
@@ -140,8 +126,11 @@ export default function PodcastPost({ slug }) {
             {podcast.titulo}
           </h1>
 
-          {/* Host */}
+          {/* Programa + Host */}
           <p className="text-lg mb-6">
+            {podcast.programa_nombre && (
+              <span className="text-gray-500 mr-2">{podcast.programa_nombre} · </span>
+            )}
             {podcast.host_url ? (
               <a
                 href={podcast.host_url}
@@ -217,16 +206,25 @@ export default function PodcastPost({ slug }) {
           )}
 
           {/* Transcripción */}
-          {paragraphGroups.length > 0 && (
-            <div className="text-gray-800 leading-relaxed text-lg mt-8">
-              {paragraphGroups.map(({ text, gapSize }, i) => {
-                const mb = gapSize === 'xl' ? 'mb-12' : gapSize === 'lg' ? 'mb-8' : 'mb-3';
-                return (
-                  <p key={i} className={mb}>
-                    {text}
-                  </p>
-                );
-              })}
+          {podcast.transcripcion && (
+            <div className="mt-12 pt-8 border-t border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">Transcripción</h2>
+              <p className="text-sm text-gray-400 mb-8">
+                Esto no lo he escrito yo, está transcrito directamente. Puede haber faltas.
+              </p>
+              <ReactMarkdown
+                components={{
+                  h1: ({ children }) => <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">{children}</h3>,
+                  h2: ({ children }) => <h4 className="text-lg font-bold text-gray-900 mt-6 mb-3">{children}</h4>,
+                  h3: ({ children }) => <h5 className="font-bold text-gray-900 mt-4 mb-2">{children}</h5>,
+                  p: ({ children }) => <p className="text-gray-800 leading-relaxed mb-6 text-base">{children}</p>,
+                  strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                  em: ({ children }) => <em className="italic text-gray-600">{children}</em>,
+                  hr: () => <hr className="my-8 border-gray-200" />,
+                }}
+              >
+                {podcast.transcripcion}
+              </ReactMarkdown>
             </div>
           )}
         </article>

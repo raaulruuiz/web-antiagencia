@@ -22,7 +22,7 @@ export default function Podcasts() {
 
     supabase
       .from("podcasts")
-      .select("slug, titulo, host_nombre, host_url, miniatura_url, excerpt, published_at", { count: "exact" })
+      .select("slug, titulo, host_nombre, host_url, miniatura_url, excerpt, published_at, programa_nombre", { count: "exact" })
       .eq("published", true)
       .order("published_at", { ascending: false })
       .range(from, to)
@@ -80,12 +80,12 @@ export default function Podcasts() {
                 <article className="py-8">
                   {/* Miniatura */}
                   {podcast.miniatura_url && (
-                    <Link to={`/podcasts/${podcast.slug}`} className="block mb-4 overflow-hidden rounded">
+                    <Link to={`/podcasts/${podcast.slug}`} className="block mb-4">
                       <img
                         src={podcast.miniatura_url}
                         alt={podcast.titulo}
-                        className="w-full object-cover"
-                        style={{ height: "160px" }}
+                        className="object-contain rounded"
+                        style={{ maxHeight: "220px", width: "auto", maxWidth: "100%" }}
                       />
                     </Link>
                   )}
@@ -97,8 +97,11 @@ export default function Podcasts() {
                     </Link>
                   </h2>
 
-                  {/* Host */}
+                  {/* Programa + Host */}
                   <p className="text-sm mb-4">
+                    {podcast.programa_nombre && (
+                      <span className="text-gray-500 mr-2">{podcast.programa_nombre} ·</span>
+                    )}
                     {podcast.host_url ? (
                       <a
                         href={podcast.host_url}
