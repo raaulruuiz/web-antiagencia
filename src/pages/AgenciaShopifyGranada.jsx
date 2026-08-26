@@ -16,6 +16,7 @@ export default function AgenciaShopifyGranada() {
     <Helmet>
       <title>Agencia Shopify Granada - Antiagencia</title>
       <meta name="description" content="Agencia Shopify en Granada. Migramos tu tienda a Shopify, gestionamos tu email marketing y escalamos tu ecommerce. Somos mi novia y yo." />
+      <link rel="canonical" href="https://antiagencia.es/agencia-shopify-granada" />
     </Helmet>
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex-1 flex justify-center px-4 py-12 md:py-20">

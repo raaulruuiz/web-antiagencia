@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
 function AnnouncementBar() {
@@ -90,6 +91,12 @@ export default function ComoTrabajamos() {
   }, []);
 
   return (
+    <>
+    <Helmet>
+      <title>Cómo trabajamos — Antiagencia</title>
+      <meta name="description" content="Descubre cómo trabaja Antiagencia. Email marketing para ecommerce que factura +5.000€/mes. Sin agencias, sin humo." />
+      <link rel="canonical" href="https://antiagencia.es/ComoTrabajamos" />
+    </Helmet>
     <div className="min-h-screen bg-[#121212] text-white flex flex-col">
       {/* Barra de anuncio */}
       <AnnouncementBar />
@@ -153,5 +160,6 @@ export default function ComoTrabajamos() {
 
       {showCalendly && <CalendlyPopup onClose={() => setShowCalendly(false)} />}
     </div>
+    </>
   );
 }

@@ -56,12 +56,14 @@ export default function BlogEmailMarketing() {
           name="description"
           content="Los emails que mando a mi lista, publicados tal cual. Email marketing sin filtros."
         />
-        {page > 1 && (
-          <link
-            rel="canonical"
-            href={`https://antiagencia.es/blog-email-marketing/page/${page}`}
-          />
-        )}
+        <link
+          rel="canonical"
+          href={
+            page > 1
+              ? `https://antiagencia.es/blog-email-marketing/page/${page}`
+              : "https://antiagencia.es/blog-email-marketing"
+          }
+        />
       </Helmet>
 
       <BlogLayout>

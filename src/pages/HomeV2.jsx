@@ -16,6 +16,7 @@ export default function HomeV2() {
     <Helmet>
       <title>Antiagencia - Hago email marketing</title>
       <meta name="description" content="Agencia o freelance de email marketing para ecommerce, como prefieras llamarlo. Somos mi novia y yo. Escribimos tus emails y lo hacemos muy bien." />
+      <link rel="canonical" href="https://antiagencia.es/" />
     </Helmet>
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex-1 flex justify-center px-4 py-12 md:py-20">

@@ -89,6 +89,7 @@ export default function BlogPost({ slug }) {
       <Helmet>
         <title>{post.subject} — Anti-Blog Raúl Ruiz</title>
         <meta name="description" content={post.excerpt || post.subject} />
+        <link rel="canonical" href={`https://antiagencia.es/blog-email-marketing/${slug}`} />
       </Helmet>
 
       <BlogLayout>

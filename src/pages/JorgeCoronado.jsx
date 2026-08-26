@@ -44,6 +44,7 @@ export default function JorgeCoronado() {
     <Helmet>
       <title>Jorge Coronado × Antiagencia — Email marketing para ecommerce</title>
       <meta name="description" content="Colaboración especial con Jorge Coronado. Todo lo que necesitas saber sobre email marketing para escalar tu tienda online." />
+      <link rel="canonical" href="https://antiagencia.es/jorge-coronado" />
     </Helmet>
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex-1 flex justify-center px-4 py-12 md:py-20">

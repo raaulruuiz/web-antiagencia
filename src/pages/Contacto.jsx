@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
 export default function Contacto() {
@@ -13,6 +14,12 @@ export default function Contacto() {
   }, []);
 
   return (
+    <>
+    <Helmet>
+      <title>Contacto — Antiagencia</title>
+      <meta name="description" content="Habla con Raúl Ruiz de Antiagencia. Agenda una llamada o escríbenos para saber si podemos ayudarte con tu email marketing." />
+      <link rel="canonical" href="https://antiagencia.es/Contacto" />
+    </Helmet>
     <div className="min-h-screen bg-[#121212] text-white flex flex-col">
       <div className="flex-1 flex flex-col items-center px-4 pt-28 pb-12">
 
@@ -40,5 +47,6 @@ export default function Contacto() {
 
       <FooterMinimal />
     </div>
+    </>
   );
 }
