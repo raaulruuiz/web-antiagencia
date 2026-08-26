@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { useEffect, useState, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -275,6 +276,11 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
                     imgStyle={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
                 )
               ))}
+              {(link.images || []).length === 0 && link.html && (
+                <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} />
+                </a>
+              )}
               {link.url && (
                 <a href={link.url} target="_blank" rel="noopener noreferrer"
                   style={{ fontSize: 11, color: '#3b82f6', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
@@ -300,6 +306,11 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
                       imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                   )
                 ))}
+                {(link.images || []).length === 0 && link.html && (
+                  <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flexShrink: 0 }}>
+                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} />
+                  </a>
+                )}
                 {link.url && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
                     <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
@@ -327,6 +338,11 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
                       imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                   )
                 ))}
+                {(link.images || []).length === 0 && link.html && (
+                  <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} />
+                  </a>
+                )}
                 {link.url && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>

@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
@@ -1359,6 +1360,11 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                           onPreview={setLightbox} />
                       )
                     ))}
+                    {(link.images || []).length === 0 && link.html && (
+                      <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} style={{ pointerEvents: 'none', padding: '6px 0' }} />
+                      </a>
+                    )}
                     {link.url && (
                       <a href={link.url} target="_blank" rel="noopener noreferrer"
                         style={{ fontSize: 11, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
@@ -1385,6 +1391,11 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                           onPreview={setLightbox} />
                       )
                     ))}
+                    {(link.images || []).length === 0 && link.html && (
+                      <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flexShrink: 0 }}>
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} style={{ pointerEvents: 'none' }} />
+                      </a>
+                    )}
                     {link.url && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
                         <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
@@ -1414,6 +1425,11 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                           onPreview={setLightbox} />
                       )
                     ))}
+                    {(link.images || []).length === 0 && link.html && (
+                      <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} style={{ pointerEvents: 'none' }} />
+                      </a>
+                    )}
                     {link.url && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
@@ -2469,10 +2485,11 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     }
 
     if (draft.type === 'enlaces') {
-      const links = [];
+      const urlMap = new Map(); // cleanHref → { images: [], html: null }
       doc.querySelectorAll('a').forEach(a => {
         const href = a.getAttribute('href');
-        if (!href || href === '#' || href.startsWith('mailto:')) return;
+        if (!href || href === '#' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+        const cleanHref = cleanUrl(href);
         const imgs = [...a.querySelectorAll('img')].filter(img => {
           const src = img.getAttribute('src') || '';
           if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
@@ -2481,12 +2498,25 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           return w > 5 && h > 5;
         });
         if (imgs.length) {
-          const cleanHref = cleanUrl(href);
+          if (!urlMap.has(cleanHref)) urlMap.set(cleanHref, { images: [], html: null });
           imgs.forEach(img => {
-            links.push({ images: [{ url: img.getAttribute('src') }], url: cleanHref });
+            const entry = urlMap.get(cleanHref);
+            const src = img.getAttribute('src');
+            if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src });
           });
+        } else {
+          const text = a.textContent.trim();
+          if (!text || text.length < 2) return;
+          if (urlMap.has(cleanHref)) return;
+          const aStyle = a.getAttribute('style') || '';
+          const innerHtml = a.innerHTML.trim();
+          const html = aStyle ? `<div style="${aStyle}">${innerHtml}</div>` : innerHtml;
+          urlMap.set(cleanHref, { images: [], html });
         }
       });
+      const links = [...urlMap.entries()]
+        .map(([url, data]) => ({ images: data.images, html: data.html || null, url }))
+        .filter(l => l.images.length > 0 || l.html);
       if (links.length) setDraft(d => ({ ...d, links }));
     }
 
@@ -2754,33 +2784,15 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                       ))}
                     </div>
                   )}
-                  {/* Social picker for this link */}
-                  {showSocialPicker === linkIdx && (
-                    <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {/* HTML preview (auto-filled from email) */}
+                  {link.html && (link.images || []).length === 0 && (
+                    <div style={{ border: '1px solid var(--t-border)', borderRadius: 6, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Red social</div>
-                        <button onClick={() => setShowSocialPicker(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
+                        <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>HTML del email</span>
+                        <button onClick={() => setDraft(d => { const links = [...(d.links || [])]; links[linkIdx] = { ...links[linkIdx], html: null }; return { ...d, links }; })}
+                          style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '2px 6px' }}>× Quitar</button>
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5 }}>
-                        {SOCIAL_NETWORKS.map(sn => {
-                          const active = socialDraft.network === sn.id;
-                          return (
-                            <button key={sn.id} onClick={() => setSocialDraft(d => ({ ...d, network: sn.id, color: sn.color }))}
-                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 6, border: `1px solid ${active ? '#6366f1' : 'var(--t-border)'}`, background: active ? 'var(--t-surface2)' : 'transparent', cursor: 'pointer', fontSize: 11, color: active ? '#a5b4fc' : 'var(--t-text-muted)', fontWeight: active ? 600 : 400 }}>
-                              <SocialIcon network={sn.id} color={active ? socialDraft.color : 'var(--t-text-subtle)'} size={16} />
-                              {sn.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 11, color: 'var(--t-text-subtle)' }}>Color</span>
-                        <InlineColorPicker value={socialDraft.color} onChange={color => setSocialDraft(d => ({ ...d, color }))} />
-                      </div>
-                      <button onClick={() => { addLinkSocial(linkIdx, socialDraft.network, socialDraft.color); setShowSocialPicker(null); }}
-                        style={{ background: '#6366f1', border: 'none', borderRadius: 6, padding: '7px 12px', fontSize: 12, color: 'white', cursor: 'pointer', fontWeight: 600 }}>
-                        Añadir icono
-                      </button>
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} style={{ pointerEvents: 'none', fontSize: 12 }} />
                     </div>
                   )}
                   {/* Library picker for this link */}
@@ -2829,12 +2841,6 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                         Seleccionar
                       </button>
                     )}
-                    <button onClick={() => { setShowSocialPicker(showSocialPicker === linkIdx ? null : linkIdx); setShowLibrary(null); }}
-                      style={{ flex: 1, background: showSocialPicker === linkIdx ? 'var(--t-surface2)' : 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: 'pointer', minWidth: 80 }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--t-border-muted)'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
-                      Social
-                    </button>
                     <input ref={linkFileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
                       onChange={async e => {
                         const files = Array.from(e.target.files || []);
