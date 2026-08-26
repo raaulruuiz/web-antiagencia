@@ -444,10 +444,9 @@ export default function BibliotecaPublica() {
       const m = i.marca || '(sin marca)';
       if (marcaMap[m]) marcaMap[m].allEmailItems.push(i);
     });
-    const marcas = Object.entries(marcaMap).map(([name, { scored, allEmailItems }]) => {
+    const marcas = Object.entries(marcaMap).map(([name, { scored }]) => {
       const avg = scored.reduce((s, i) => s + i.puntuacion, 0) / scored.length;
-      const blurred = !isPro && allEmailItems.every(i => i.publico === false);
-      return { name, count: scored.length, avg, blurred };
+      return { name, count: scored.length, avg };
     }).sort((a, b) => a.avg - b.avg);
     const marcasSuspensas = marcas.filter(m => m.avg < 5);
     const cadaZMarcas = marcasSuspensas.length > 0 ? parseFloat(((marcasSuspensas.length / marcas.length) * 10).toFixed(2)) : null;
@@ -567,7 +566,7 @@ export default function BibliotecaPublica() {
                 {theme === 'dark' ? '☀️' : '🌙'}
               </button>
               {statsData && (
-                <button onClick={() => setShowStats(s => !s)} title="Estadísticas"
+                <button onClick={() => isPro ? setShowStats(s => !s) : setShowProModal(true)} title="Estadísticas"
                   style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 5, background: showStats ? '#1a1a1a' : 'transparent' }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 </button>
@@ -752,7 +751,7 @@ export default function BibliotecaPublica() {
             {showStatsModal && (
               <>
                 <div onClick={() => setShowStatsModal(false)} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.6)' }} />
-                <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 201, background: 'var(--t-surface, #111)', border: '1px solid #27272a', borderRadius: 12, padding: '24px', width: 'min(560px, 92vw)', maxHeight: '85vh', overflowY: 'auto' }}>
+                <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 201, background: 'var(--t-surface, #111)', border: '1px solid #27272a', borderRadius: 12, padding: '24px', width: 'min(560px, 92vw)', maxHeight: '85vh', overflowY: 'auto', overflowX: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--t-text)' }}>Análisis por marca</span>
                     <button onClick={() => setShowStatsModal(false)} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>✕</button>
@@ -783,11 +782,11 @@ export default function BibliotecaPublica() {
                     return (
                       <div style={{ marginBottom: 18 }}>
                         <span style={{ fontSize: 10, color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Distribución por cuartil</span>
-                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: 6 }}>
+                        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
                           {quartiles.map(q => {
                             const qAvg = q.marks.length > 0 ? q.marks.reduce((s, m) => s + m.avg, 0) / q.marks.length : null;
                             return (
-                            <div key={q.label} style={{ background: q.bg, border: `1px solid ${q.color}33`, borderRadius: 8, padding: '8px 10px' }}>
+                            <div key={q.label} style={{ background: q.bg, border: `1px solid ${q.color}33`, borderRadius: 8, padding: '8px 10px', minWidth: 110, flex: '1 0 110px' }}>
                               <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 2 }}>
                                 <span style={{ fontSize: 11, fontWeight: 700, color: q.color }}>{q.label}</span>
                                 <span style={{ fontSize: 9, color: '#52525b' }}>{q.range}</span>
@@ -796,7 +795,7 @@ export default function BibliotecaPublica() {
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                                 {q.marks.length === 0 && <span style={{ fontSize: 10, color: '#3f3f46', fontStyle: 'italic' }}>—</span>}
                                 {q.marks.map(m => (
-                                  <div key={m.name} style={{ display: 'flex', alignItems: 'center', gap: 5, filter: m.blurred ? 'blur(4px)' : 'none', userSelect: m.blurred ? 'none' : 'auto' }}>
+                                  <div key={m.name} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: q.color, flexShrink: 0, display: 'inline-block' }} />
                                     <span style={{ fontSize: 10, color: 'var(--t-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</span>
                                     <span style={{ fontSize: 10, fontWeight: 700, color: q.color, marginLeft: 'auto', flexShrink: 0 }}>{m.avg.toFixed(1)}</span>
@@ -935,7 +934,7 @@ export default function BibliotecaPublica() {
                       {statsData.marcas.map(m => {
                         const col = m.avg < 5 ? '#ef4444' : m.avg < 7.5 ? '#f97316' : '#22c55e';
                         return (
-                          <tr key={m.name} style={{ borderBottom: '1px solid #1f1f23', filter: m.blurred ? 'blur(5px)' : 'none', userSelect: m.blurred ? 'none' : 'auto' }}>
+                          <tr key={m.name} style={{ borderBottom: '1px solid #1f1f23' }}>
                             <td style={{ padding: '8px 8px', color: 'var(--t-text)' }}>{m.name}</td>
                             <td style={{ padding: '8px 8px', textAlign: 'center', color: '#71717a' }}>{m.count}</td>
                             <td style={{ padding: '8px 8px', textAlign: 'center', fontWeight: 700, color: col }}>{m.avg.toFixed(1)}</td>
