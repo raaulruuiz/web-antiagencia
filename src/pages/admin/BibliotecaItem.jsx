@@ -223,6 +223,16 @@ const RESIZE_HANDLES = [
   { id: 'w',  style: { top: '50%', left: -5, transform: 'translateY(-50%)', cursor: 'w-resize' } },
 ];
 
+const UNIQUE_BLOCK_TYPES = ['puntuacion', 'audio', 'asunto_adelanto', 'correccion', 'transcribir'];
+const MERGE_FIELDS = [
+  { field: 'marca',        label: 'Marca' },
+  { field: 'asunto',       label: 'Asunto' },
+  { field: 'adelanto',     label: 'Adelanto' },
+  { field: 'enviado_el',   label: 'Enviado el día' },
+  { field: 'categoria',    label: 'Categoría' },
+  { field: 'subcategoria', label: 'Subcategoría' },
+];
+
 // ── Block types ───────────────────────────────────────────────────────────────
 const BLOCK_TYPES = [
   { type: 'enlaces',      label: 'Enlace',          icon: <IconChain /> },
@@ -3297,6 +3307,17 @@ export default function BibliotecaItem() {
   const [itemUrl, setItemUrl]     = useState(null);
   const [fechaAnalisis, setFechaAnalisis] = useState(null);
 
+  // ── Merge state ──────────────────────────────────────────────────────────
+  const [showMerge, setShowMerge]               = useState(false);
+  const [mergeItems, setMergeItems]             = useState([]);
+  const [mergeLoading, setMergeLoading]         = useState(false);
+  const [mergeSameMarca, setMergeSameMarca]     = useState(true);
+  const [mergeTarget, setMergeTarget]           = useState(null);
+  const [mergeConflicts, setMergeConflicts]     = useState([]);
+  const [mergeChoices, setMergeChoices]         = useState({});
+  const [mergeStep, setMergeStep]               = useState('select');
+  const [merging, setMerging]                   = useState(false);
+
   // ── Blocks state ─────────────────────────────────────────────────────────
   const [blocksData, setBlocksData]             = useState([]);
   const [blocksLibrary, setBlocksLibrary]       = useState([]);
@@ -3525,6 +3546,112 @@ export default function BibliotecaItem() {
       });
     } catch (_) {}
     navigate('/admin/biblioteca');
+  };
+
+  const openMerge = async () => {
+    setMergeStep('select');
+    setMergeTarget(null);
+    setMergeConflicts([]);
+    setMergeChoices({});
+    setMergeLoading(true);
+    setShowMerge(true);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_BASE}/biblioteca`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      // Solo emails, excluir el item actual
+      setMergeItems((data || []).filter(i => i.categoria === 'email' && i.id !== id));
+    } catch (_) {}
+    setMergeLoading(false);
+  };
+
+  const selectMergeTarget = (targetItem) => {
+    setMergeTarget(targetItem);
+    // Detectar conflictos: campos escalares donde ambos tienen valor y difieren
+    const conflicts = [];
+    for (const { field, label } of MERGE_FIELDS) {
+      const sourceVal = item?.[field] ?? null;
+      const targetVal = targetItem?.[field] ?? null;
+      if (sourceVal && targetVal && String(sourceVal) !== String(targetVal)) {
+        conflicts.push({ field, label, sourceVal, targetVal });
+      }
+    }
+    // Inicializar choices: por defecto prevalece el target
+    const choices = {};
+    for (const c of conflicts) choices[c.field] = 'target';
+    setMergeConflicts(conflicts);
+    setMergeChoices(choices);
+    setMergeStep('conflicts'); // va directo a conflicts (si hay 0 sigue, si hay >0 muestra)
+  };
+
+  const executeMerge = async () => {
+    if (!mergeTarget) return;
+    setMerging(true);
+    try {
+      const token = await getToken();
+
+      // Construir propiedades finales del target: para cada campo con conflicto, aplicar choice
+      const finalProps = {};
+      for (const { field } of MERGE_FIELDS) {
+        const sourceVal = item?.[field] ?? null;
+        const targetVal = mergeTarget?.[field] ?? null;
+        if (sourceVal && targetVal && String(sourceVal) !== String(targetVal)) {
+          // Hay conflicto → usar choice
+          finalProps[field] = mergeChoices[field] === 'source' ? sourceVal : targetVal;
+        }
+        // Si no hay conflicto, el target ya tiene su valor y no lo tocamos
+      }
+
+      // Fusionar sector y tags (union)
+      const sourceSector = item?.sector || [];
+      const targetSector = mergeTarget?.sector || [];
+      const mergedSector = [...new Set([...targetSector, ...sourceSector])];
+
+      const sourceTags = item?.tags || [];
+      const targetTags = mergeTarget?.tags || [];
+      const mergedTags = [...new Set([...targetTags, ...sourceTags])];
+
+      // Fusionar bloques: target primero, luego source (sin duplicar únicos)
+      const targetBlocks = mergeTarget?.blocks_data?.blocks || [];
+      const sourceBlocks = blocksData || [];
+      const targetUniqueTypes = new Set(targetBlocks.filter(b => UNIQUE_BLOCK_TYPES.includes(b.type)).map(b => b.type));
+      const blocksToAdd = sourceBlocks.filter(b => {
+        if (UNIQUE_BLOCK_TYPES.includes(b.type)) return !targetUniqueTypes.has(b.type);
+        return true;
+      });
+      const mergedBlocks = [...targetBlocks, ...blocksToAdd];
+
+      // Library: fusionar
+      const targetLib = mergeTarget?.blocks_data?.library || [];
+      const sourceLib = blocksLibraryRef.current || [];
+      const libIds = new Set(targetLib.map(l => l.id));
+      const mergedLib = [...targetLib, ...sourceLib.filter(l => !libIds.has(l.id))];
+
+      // PATCH target
+      await fetch(`${API_BASE}/biblioteca/${mergeTarget.id}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...finalProps,
+          sector: mergedSector,
+          tags: mergedTags,
+          blocks_data: { blocks: mergedBlocks, library: mergedLib },
+        }),
+      });
+
+      // DELETE source (item actual)
+      await fetch(`${API_BASE}/biblioteca`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [id] }),
+      });
+
+      // Navegar al target
+      navigate(`/admin/biblioteca/${mergeTarget.id}`);
+    } catch (e) {
+      alert('Error al combinar: ' + e.message);
+      setMerging(false);
+    }
   };
 
   // ── Tags handlers ────────────────────────────────────────────────────────
@@ -3976,6 +4103,13 @@ export default function BibliotecaItem() {
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
           {item?.publico === false ? <IconEyeOff /> : <IconEye />}
           {item?.publico === false ? 'Oculto' : 'Visible'}
+        </button>
+        <button onClick={openMerge}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, borderRadius: 6, padding: '3px 8px', cursor: 'pointer', color: '#a78bfa', background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.25)' }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 7H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3"/><polyline points="16 2 12 6 8 2"/><line x1="12" y1="6" x2="12" y2="16"/></svg>
+          Combinar
         </button>
         {(saving || blocksSaving) && <span className="text-xs text-zinc-600">Guardando…</span>}
         {!autopublish && hasPendingItem && (
@@ -4462,6 +4596,104 @@ export default function BibliotecaItem() {
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.color = 'var(--t-text-subtle)'; }}>
               <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> Añadir bloque
             </button>
+          </div>
+        </div>
+      )}
+
+      {showMerge && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={e => { if (e.target === e.currentTarget) setShowMerge(false); }}>
+          <div style={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 16, width: '100%', maxWidth: 600, maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {/* Header */}
+            <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #27272a', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#f4f4f5' }}>
+                  {mergeStep === 'select' ? 'Combinar con…' : 'Resolver conflictos'}
+                </div>
+                {mergeStep === 'select' && <div style={{ fontSize: 12, color: '#71717a', marginTop: 2 }}>El email actual se eliminará y sus bloques se añadirán al seleccionado.</div>}
+              </div>
+              <button onClick={() => setShowMerge(false)} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: 20, lineHeight: 1, padding: 4 }}>×</button>
+            </div>
+
+            {mergeStep === 'select' && (
+              <>
+                {/* Filter */}
+                <div style={{ padding: '12px 24px', borderBottom: '1px solid #27272a', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13, color: '#a1a1aa' }}>
+                    <input type="checkbox" checked={mergeSameMarca} onChange={e => setMergeSameMarca(e.target.checked)} style={{ accentColor: '#a78bfa' }} />
+                    Solo misma marca {item?.marca ? `(${item.marca})` : ''}
+                  </label>
+                </div>
+                {/* List */}
+                <div style={{ overflowY: 'auto', flex: 1 }}>
+                  {mergeLoading && <div style={{ padding: 24, color: '#71717a', fontSize: 13 }}>Cargando…</div>}
+                  {!mergeLoading && (() => {
+                    const filtered = mergeItems.filter(i => !mergeSameMarca || i.marca === item?.marca);
+                    if (!filtered.length) return <div style={{ padding: 24, color: '#71717a', fontSize: 13 }}>No hay emails disponibles.</div>;
+                    return filtered.map(i => (
+                      <div key={i.id} onClick={() => selectMergeTarget(i)}
+                        style={{ padding: '12px 24px', borderBottom: '1px solid #27272a', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12, transition: 'background 0.1s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: '#e4e4e7', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{i.marca || '—'}</div>
+                          <div style={{ fontSize: 12, color: '#a1a1aa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{i.asunto || '—'}</div>
+                        </div>
+                        <div style={{ fontSize: 11, color: '#52525b', flexShrink: 0 }}>{i.enviado_el || ''}</div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52525b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </>
+            )}
+
+            {mergeStep === 'conflicts' && mergeTarget && (
+              <div style={{ overflowY: 'auto', flex: 1, padding: '20px 24px' }}>
+                {mergeConflicts.length === 0 ? (
+                  <div style={{ color: '#71717a', fontSize: 13, marginBottom: 20 }}>No hay conflictos en las propiedades. Se añadirán los bloques del email actual al objetivo.</div>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 13, color: '#71717a', marginBottom: 16 }}>Hay diferencias en estas propiedades. Elige cuál prevalece:</div>
+                    {mergeConflicts.map(({ field, label, sourceVal, targetVal }) => (
+                      <div key={field} style={{ marginBottom: 20 }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{label}</div>
+                        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', marginBottom: 8 }}>
+                          <input type="radio" name={field} value="source" checked={mergeChoices[field] === 'source'} onChange={() => setMergeChoices(prev => ({ ...prev, [field]: 'source' }))} style={{ marginTop: 2, accentColor: '#a78bfa' }} />
+                          <div>
+                            <div style={{ fontSize: 11, color: '#71717a', marginBottom: 2 }}>Este email (origen)</div>
+                            <div style={{ fontSize: 13, color: '#e4e4e7' }}>{String(sourceVal)}</div>
+                          </div>
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer' }}>
+                          <input type="radio" name={field} value="target" checked={mergeChoices[field] === 'target'} onChange={() => setMergeChoices(prev => ({ ...prev, [field]: 'target' }))} style={{ marginTop: 2, accentColor: '#a78bfa' }} />
+                          <div>
+                            <div style={{ fontSize: 11, color: '#71717a', marginBottom: 2 }}>Email objetivo</div>
+                            <div style={{ fontSize: 13, color: '#e4e4e7' }}>{String(targetVal)}</div>
+                          </div>
+                        </label>
+                      </div>
+                    ))}
+                  </>
+                )}
+                <div style={{ fontSize: 13, color: '#52525b', background: '#27272a', borderRadius: 8, padding: '10px 14px' }}>
+                  <strong style={{ color: '#71717a' }}>Bloques:</strong> Los bloques de este email se añadirán a continuación de los del objetivo. Los bloques únicos (puntuación, audio, transcripción, asunto/adelanto, corrección) no se duplicarán.
+                </div>
+              </div>
+            )}
+
+            {/* Footer */}
+            {mergeStep === 'conflicts' && (
+              <div style={{ padding: '16px 24px', borderTop: '1px solid #27272a', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button onClick={() => setMergeStep('select')} style={{ fontSize: 13, background: 'transparent', border: '1px solid #3f3f46', color: '#a1a1aa', borderRadius: 8, padding: '8px 16px', cursor: 'pointer' }}>
+                  Atrás
+                </button>
+                <button onClick={executeMerge} disabled={merging}
+                  style={{ fontSize: 13, fontWeight: 600, background: '#7c3aed', border: 'none', color: '#fff', borderRadius: 8, padding: '8px 20px', cursor: merging ? 'not-allowed' : 'pointer', opacity: merging ? 0.6 : 1 }}>
+                  {merging ? 'Combinando…' : 'Combinar y eliminar origen'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
