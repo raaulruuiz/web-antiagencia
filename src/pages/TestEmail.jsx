@@ -7,7 +7,7 @@ function buildIframeHtml(html_body, gmail_styles) {
   // Estilos base: reset estándar de emails
   const baseRules = [
     'body { margin: 0 !important; padding: 0 !important; }',
-    'img { display: block; border: 0; outline: none; text-decoration: none; }',
+    'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
     'table { border-collapse: collapse !important; }',
   ];
 
