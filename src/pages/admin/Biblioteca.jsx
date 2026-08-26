@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import BibliotecaCardMeta from '@/components/BibliotecaCardMeta';
 import { useTheme } from '@/lib/ThemeContext';
+import EmailIframe from '@/components/EmailIframe';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
@@ -1231,7 +1232,9 @@ export default function Biblioteca() {
               <div key={item.id} className="group relative cursor-pointer"
                 onClick={() => { if (selecting) { toggleSelect(item.id); return; } navigate(`/admin/biblioteca/${item.id}`); }}>
                 <div className="bg-zinc-900 rounded-lg overflow-hidden border transition-colors relative" style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', borderColor: isSelected ? '#fff' : item.publico === false ? '#f97316' : 'var(--t-border)', borderWidth: item.publico === false ? 2 : 1 }}>
-                  <img src={item.url} alt={item.filename} className="w-full h-full object-cover" style={{ objectPosition: item.categoria === 'email' ? 'top' : 'center' }} loading="lazy" />
+                  {item.email_html
+                    ? <div style={{ width: '100%', height: '100%' }}><EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={false} style={{ pointerEvents: 'none' }} /></div>
+                    : <img src={item.url} alt={item.filename} className="w-full h-full object-cover" style={{ objectPosition: item.categoria === 'email' ? 'top' : 'center' }} loading="lazy" />}
 
                   {/* Score badge */}
                   {item.puntuacion != null && (() => {

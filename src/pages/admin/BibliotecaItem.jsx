@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useTheme } from '@/lib/ThemeContext';
+import EmailIframe from '@/components/EmailIframe';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
@@ -3283,6 +3284,8 @@ export default function BibliotecaItem() {
   const [obFechaAnalisis, setObFechaAnalisis] = useState('');
   const [obMarcaError, setObMarcaError] = useState('');
   const [obUrlError, setObUrlError] = useState('');
+  const [importEmail, setImportEmail] = useState(false);
+  const [lastEmail, setLastEmail] = useState(null);
 
   // ── Display state ────────────────────────────────────────────────────────
   const [categoria, setCategoria] = useState(null);
@@ -3379,6 +3382,23 @@ export default function BibliotecaItem() {
     setItemTags((item.tags || []).map(id => allTags.find(t => t.id === id)).filter(Boolean));
   }, [item, allTags]);
 
+  useEffect(() => {
+    if (!importEmail || !lastEmail || obStep !== 'campos') return;
+    if (lastEmail.asunto) setObAsunto(lastEmail.asunto);
+    if (lastEmail.fecha_email) setObEnviadoEl(lastEmail.fecha_email.slice(0, 10));
+    if (lastEmail.html_body) {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(lastEmail.html_body, 'text/html');
+        const hidden = doc.body.querySelectorAll('[style*="display:none"],[style*="display: none"],[style*="max-height:0"],[style*="max-height: 0"],[style*="overflow:hidden"],[style*="mso-hide"]');
+        for (const el of hidden) {
+          const text = el.textContent.trim().replace(/\s+/g, ' ');
+          if (text.length > 5) { setObAdelanto(text); break; }
+        }
+      } catch (_) {}
+    }
+  }, [importEmail, lastEmail, obStep]);
+
   const patch = useCallback(async (updates) => {
     const token = await getToken();
     if (!token) return;
@@ -3439,6 +3459,7 @@ export default function BibliotecaItem() {
       fecha_analisis: obCategoria === 'ficha' ? (obFechaAnalisis || null) : null,
       tags: obTags,
       blocks_data: { blocks: makeTemplateBlocks(obPlantilla), library: blocksLibraryRef.current },
+      ...(importEmail && lastEmail ? { email_html: lastEmail.html_body, email_gmail_styles: lastEmail.gmail_styles } : {}),
     };
     setSaving(true);
     try {
@@ -3977,7 +3998,9 @@ export default function BibliotecaItem() {
           onMouseEnter={() => setImageHover(true)}
           onMouseLeave={() => setImageHover(false)}>
           <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden' }}>
-            <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />
+            {item.email_html
+              ? <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={true} />
+              : <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />}
           </div>
           {imageHover && (
             <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
@@ -4110,6 +4133,31 @@ export default function BibliotecaItem() {
                     </div>
                   </div>
 
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 12, color: 'var(--t-text-muted)' }}>
+                    <input type="checkbox" checked={importEmail} onChange={async e => {
+                      const checked = e.target.checked;
+                      setImportEmail(checked);
+                      if (checked && !lastEmail) {
+                        try {
+                          const res = await fetch('https://wphvmyqsxicyoifrlevt.supabase.co/rest/v1/emails_capturados?order=capturado_at.desc&limit=1&select=*', {
+                            headers: {
+                              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHZteXFzeGljeW9pZnJsZXZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTI5NzY5NiwiZXhwIjoyMDkwODczNjk2fQ.RNcpcR9civTNd9WTiciNr5_Wb0NTIeRdzA2aCix05mA',
+                              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHZteXFzeGljeW9pZnJsZXZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTI5NzY5NiwiZXhwIjoyMDkwODczNjk2fQ.RNcpcR9civTNd9WTiciNr5_Wb0NTIeRdzA2aCix05mA',
+                            },
+                          });
+                          const data = await res.json();
+                          if (data[0]) setLastEmail(data[0]);
+                        } catch (_) {}
+                      }
+                    }} style={{ accentColor: '#6366f1' }} />
+                    Importar desde email capturado
+                  </label>
+                  {importEmail && lastEmail && (
+                    <div style={{ fontSize: 11, color: '#a5b4fc', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 6, padding: '6px 10px' }}>
+                      Email de <strong>{lastEmail.remitente_nombre}</strong> capturado el {lastEmail.capturado_at ? new Date(lastEmail.capturado_at).toLocaleDateString('es-ES') : '—'}
+                    </div>
+                  )}
+
                   <button
                     onClick={() => setObStep(obCategoria === 'email' ? 'subcategoria' : 'campos')}
                     disabled={obSector.length === 0}
@@ -4169,6 +4217,7 @@ export default function BibliotecaItem() {
                       )}
                     </div>
                     {obMarcaError && <span style={{ fontSize: 11, color: '#f87171' }}>{obMarcaError}</span>}
+                    {importEmail && lastEmail && <span style={{ fontSize: 11, color: 'var(--t-text-subtle)', fontStyle: 'italic' }}>Email de: {lastEmail.remitente_nombre}</span>}
                   </div>
 
                   {obCategoria === 'email' && (

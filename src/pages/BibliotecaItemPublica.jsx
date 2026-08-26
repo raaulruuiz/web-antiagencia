@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import MailerLitePopup from '@/components/MailerLitePopup';
+import EmailIframe from '@/components/EmailIframe';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 const SESSION_KEY = 'biblioteca_acceso_email';
@@ -857,7 +858,9 @@ export default function BibliotecaItemPublica() {
             onMouseEnter={() => setImageHover(true)}
             onMouseLeave={() => setImageHover(false)}>
             <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid var(--t-border)' }}>
-              <img src={item.url} alt={item.filename} loading="lazy" style={{ width: '100%', display: 'block' }} />
+              {item.email_html
+                ? <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={true} />
+                : <img src={item.url} alt={item.filename} loading="lazy" style={{ width: '100%', display: 'block' }} />}
             </div>
             {(imageHover || isMobile) && (
               <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>

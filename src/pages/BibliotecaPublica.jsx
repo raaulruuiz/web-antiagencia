@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import BibliotecaCardMeta from '@/components/BibliotecaCardMeta';
 import { useTheme } from '@/lib/ThemeContext';
 import MailerLitePopup from '@/components/MailerLitePopup';
+import EmailIframe from '@/components/EmailIframe';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 const SESSION_KEY = 'biblioteca_acceso_email';
@@ -1012,9 +1013,11 @@ export default function BibliotecaPublica() {
                       const badge = e.currentTarget.querySelector('[data-score-badge]');
                       if (badge) badge.style.transform = 'translateX(0)';
                     }}>
-                    {item.url
-                      ? <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block' }} loading="lazy" />
-                      : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(160deg, #1e1b2e 0%, #2a1f3d 25%, #1a2640 50%, #2d1b3d 75%, #1e1b2e 100%)' }} />
+                    {item.email_html
+                      ? <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={false} style={{ pointerEvents: 'none', width: '100%', height: '100%' }} />
+                      : item.url
+                        ? <img src={item.url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block' }} loading="lazy" />
+                        : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(160deg, #1e1b2e 0%, #2a1f3d 25%, #1a2640 50%, #2d1b3d 75%, #1e1b2e 100%)' }} />
                     }
                     {item.puntuacion != null && (() => {
                       const s = item.puntuacion;
