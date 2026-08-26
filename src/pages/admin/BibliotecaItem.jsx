@@ -2034,7 +2034,7 @@ function AudioPlayer({ url, color = '#6366f1' }) {
   );
 }
 
-function LibImgCell({ libImg, alreadyAdded, isSource, color, onSelect, onToggleGlobal }) {
+function LibImgCell({ libImg, alreadyAdded, isSource, color, onSelect, onToggleGlobal, onRemove }) {
   const [hov, setHov] = useState(false);
   const isGlobal = !!libImg.isGlobal;
   const mainBorder = libImg.isMain && !alreadyAdded ? `2px solid ${color}` : null;
@@ -2061,13 +2061,26 @@ function LibImgCell({ libImg, alreadyAdded, isSource, color, onSelect, onToggleG
       {isGlobal && (
         <div style={{ position: 'absolute', bottom: 2, right: 2, background: '#7c3aed', borderRadius: 3, fontSize: 8, color: 'white', padding: '1px 4px', fontWeight: 700, lineHeight: 1.4 }}>GLOBAL</div>
       )}
-      {/* Checkbox GLOBAL: solo en imágenes de este item (isSource), visible en hover */}
-      {isSource && !libImg.isMain && (hov || isGlobal) && onToggleGlobal && (
+      {/* Checkbox GLOBAL: en source → toggle global; en no-source → quitar del bloque actual */}
+      {!libImg.isMain && isGlobal && (hov || isGlobal) && (
         <div style={{ position: 'absolute', top: 3, left: 3 }}
-          onClick={e => { e.stopPropagation(); onToggleGlobal(libImg.url, !isGlobal); }}>
+          onClick={e => {
+            e.stopPropagation();
+            if (isSource && onToggleGlobal) { onToggleGlobal(libImg.url, !isGlobal); }
+            else if (!isSource && onRemove) { onRemove(libImg.url); }
+          }}>
           <div style={{ width: 15, height: 15, borderRadius: 3, border: '2px solid white', boxShadow: '0 1px 3px rgba(0,0,0,0.6)',
-            background: isGlobal ? '#7c3aed' : 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {isGlobal && <svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7.5 8,1.5" fill="none" stroke="white" strokeWidth="1.8"/></svg>}
+            background: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7.5 8,1.5" fill="none" stroke="white" strokeWidth="1.8"/></svg>
+          </div>
+        </div>
+      )}
+      {/* Checkbox para no-globales en source: mostrar en hover para poder marcar como global */}
+      {isSource && !libImg.isMain && !isGlobal && hov && onToggleGlobal && (
+        <div style={{ position: 'absolute', top: 3, left: 3 }}
+          onClick={e => { e.stopPropagation(); onToggleGlobal(libImg.url, true); }}>
+          <div style={{ width: 15, height: 15, borderRadius: 3, border: '2px solid white', boxShadow: '0 1px 3px rgba(0,0,0,0.6)',
+            background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
           </div>
         </div>
       )}
@@ -2466,6 +2479,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                       color={c}
                       onSelect={url => addImage(url)}
                       onToggleGlobal={onToggleGlobalImage}
+                      onRemove={url => setDraft(d => ({ ...d, images: (d.images || []).filter(i => i.url !== url) }))}
                     />
                   ))}
                 </div>
@@ -2612,6 +2626,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                             color={c}
                             onSelect={url => addLinkImage(linkIdx, url)}
                             onToggleGlobal={onToggleGlobalImage}
+                            onRemove={url => { const idx = (draft.links?.[linkIdx]?.images || []).findIndex(i => i.url === url); if (idx !== -1) removeLinkImage(linkIdx, idx); }}
                           />
                         ))}
                       </div>
@@ -3051,6 +3066,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                           color={c}
                           onSelect={url => addImage(url)}
                           onToggleGlobal={onToggleGlobalImage}
+                          onRemove={url => setDraft(d => ({ ...d, images: (d.images || []).filter(i => i.url !== url) }))}
                         />
                       ))}
                     </div>
