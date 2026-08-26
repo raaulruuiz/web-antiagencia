@@ -31,7 +31,6 @@ import HablemosDeEmprender from './pages/HablemosDeEmprender';
 import BlogEmailMarketing from './pages/BlogEmailMarketing';
 import Podcasts from './pages/Podcasts';
 import AgenciaShopifyGranada from './pages/AgenciaShopifyGranada';
-import TestEmail from './pages/TestEmail';
 import BlogPost from './pages/BlogPost';
 function BlogPostPage() {
   const { slug } = useParams();
@@ -270,7 +269,6 @@ function App() {
             <Route path="/anti-biblioteca" element={<BibliotecaPublica />} />
             <Route path="/anti-biblioteca/:id" element={<BibliotecaItemPublica />} />
             <Route path="/admin/copywriting-popup" element={<CopywritingPopup />} />
-            <Route path="/admin/testemail" element={<TestEmail />} />
             <Route path="/loom" element={<Loom />} />
             <Route path="*" element={<AuthenticatedApp />} />
           </Routes>
