@@ -1067,13 +1067,11 @@ function calcularPuntuacion(blocks) {
 }
 
 function BlockSelector({ onSelect, hasCorreccion, hasPuntuacion, onClose, categoria }) {
-  const gridTypes = [
-    ...BLOCK_TYPES,
-    ...(categoria === 'email' ? [{ type: 'asunto_adelanto', label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> }] : []),
-  ];
+  const gridTypes = [...BLOCK_TYPES];
   const correccionBt  = { type: 'correccion',  label: 'Corrección',  icon: <IconCorrection /> };
   const puntuacionBt  = { type: 'puntuacion',  label: 'Puntuación',  icon: <IconStar /> };
   const audioBt       = { type: 'audio',        label: 'Audio',       icon: <IconAudio /> };
+  const asuntoBt      = { type: 'asunto_adelanto', label: 'Asunto y/o Adelanto', icon: <IconAsuntoAdelanto /> };
   const isOdd = gridTypes.length % 2 !== 0;
   const gridItems = isOdd ? gridTypes.slice(0, -1) : gridTypes;
   const midFullWidth = isOdd ? gridTypes[gridTypes.length - 1] : null;
@@ -1114,7 +1112,22 @@ function BlockSelector({ onSelect, hasCorreccion, hasPuntuacion, onClose, catego
         })}
       </div>
       {midFullWidth && renderFullWidthBtn(midFullWidth)}
-      {renderFullWidthBtn(audioBt)}
+      {categoria === 'email' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          {[asuntoBt, audioBt].map(bt => {
+            const c = BLOCK_COLORS[bt.type];
+            return (
+              <button key={bt.type} onClick={() => onSelect(bt.type)}
+                style={{ height: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid var(--t-border-mid)', borderRadius: 12, background: 'transparent', color: 'var(--t-text-muted)', cursor: 'pointer', transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = c; e.currentTarget.style.color = c; e.currentTarget.style.background = c + '11'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}>
+                <span style={{ color: 'inherit' }}>{bt.icon}</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'inherit', textAlign: 'center', lineHeight: 1.3 }}>{bt.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
       {renderFullWidthBtn(correccionBt)}
     </div>
   );
