@@ -1118,7 +1118,7 @@ function BlockSelector({ onSelect, hasCorreccion, hasPuntuacion, onClose, catego
             const c = BLOCK_COLORS[bt.type];
             return (
               <button key={bt.type} onClick={() => onSelect(bt.type)}
-                style={{ height: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid var(--t-border-mid)', borderRadius: 12, background: 'transparent', color: 'var(--t-text-muted)', cursor: 'pointer', transition: 'all 0.15s' }}
+                style={{ height: 130, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid var(--t-border-mid)', borderRadius: 12, background: 'transparent', color: 'var(--t-text-muted)', cursor: 'pointer', transition: 'all 0.15s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = c; e.currentTarget.style.color = c; e.currentTarget.style.background = c + '11'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--t-border-mid)'; e.currentTarget.style.color = 'var(--t-text-muted)'; e.currentTarget.style.background = 'transparent'; }}>
                 <span style={{ color: 'inherit' }}>{bt.icon}</span>
