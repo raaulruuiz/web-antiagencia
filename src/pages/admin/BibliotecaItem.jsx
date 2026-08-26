@@ -1,6 +1,6 @@
 import DOMPurify from 'dompurify';
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useTheme } from '@/lib/ThemeContext';
 import EmailIframe from '@/components/EmailIframe';
@@ -3462,6 +3462,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 export default function BibliotecaItem() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { theme, toggle } = useTheme();
   const [item, setItem]     = useState(null);
   const [loading, setLoading] = useState(true);
@@ -3495,7 +3496,7 @@ export default function BibliotecaItem() {
   const [obFechaAnalisis, setObFechaAnalisis] = useState('');
   const [obMarcaError, setObMarcaError] = useState('');
   const [obUrlError, setObUrlError] = useState('');
-  const [importEmail, setImportEmail] = useState(false);
+  const [importEmail, setImportEmail] = useState(searchParams.get('fromEmail') === '1');
   const [lastEmail, setLastEmail] = useState(null);
 
   // ── Display state ────────────────────────────────────────────────────────
@@ -3603,6 +3604,17 @@ export default function BibliotecaItem() {
     if (!item || !allTags.length) return;
     setItemTags((item.tags || []).map(id => allTags.find(t => t.id === id)).filter(Boolean));
   }, [item, allTags]);
+
+  // Auto-load email when item created from extension capture
+  useEffect(() => {
+    if (searchParams.get('fromEmail') !== '1' || lastEmail) return;
+    fetch('https://wphvmyqsxicyoifrlevt.supabase.co/rest/v1/emails_capturados?order=capturado_at.desc&limit=1&select=*', {
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHZteXFzeGljeW9pZnJsZXZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTI5NzY5NiwiZXhwIjoyMDkwODczNjk2fQ.RNcpcR9civTNd9WTiciNr5_Wb0NTIeRdzA2aCix05mA',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHZteXFzeGljeW9pZnJsZXZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTI5NzY5NiwiZXhwIjoyMDkwODczNjk2fQ.RNcpcR9civTNd9WTiciNr5_Wb0NTIeRdzA2aCix05mA',
+      },
+    }).then(r => r.json()).then(data => { if (data[0]) setLastEmail(data[0]); }).catch(() => {});
+  }, [searchParams]); // eslint-disable-line
 
   useEffect(() => {
     if (!importEmail || !lastEmail || obStep !== 'campos') return;
