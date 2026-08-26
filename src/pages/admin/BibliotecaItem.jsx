@@ -2195,6 +2195,11 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   // Global images (for non-enlaces types)
   const addImage = (url) => setDraft(d => ({ ...d, images: [...(d.images || []), { url }] }));
   const removeImage = (idx) => setDraft(d => ({ ...d, images: (d.images || []).filter((_, i) => i !== idx) }));
+  const reorderImage = (from, to) => setDraft(d => {
+    const imgs = [...(d.images || [])];
+    imgs.splice(to, 0, imgs.splice(from, 1)[0]);
+    return { ...d, images: imgs };
+  });
 
   // Per-link image management (for enlaces)
   const addLinkImage = (linkIdx, url) => setDraft(d => {
@@ -2205,6 +2210,13 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const removeLinkImage = (linkIdx, imgIdx) => setDraft(d => {
     const links = [...(d.links || [])];
     links[linkIdx] = { ...links[linkIdx], images: (links[linkIdx].images || []).filter((_, i) => i !== imgIdx) };
+    return { ...d, links };
+  });
+  const reorderLinkImage = (linkIdx, from, to) => setDraft(d => {
+    const links = [...(d.links || [])];
+    const imgs = [...(links[linkIdx].images || [])];
+    imgs.splice(to, 0, imgs.splice(from, 1)[0]);
+    links[linkIdx] = { ...links[linkIdx], images: imgs };
     return { ...d, links };
   });
   const updateLinkUrl = (linkIdx, url) => {
@@ -2425,8 +2437,13 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             {(draft.images || []).length > 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6, marginBottom: 8 }}>
                 {(draft.images || []).map((img, idx) => (
-                  <div key={idx} style={{ position: 'relative', aspectRatio: '1' }}>
-                    <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, display: 'block' }} />
+                  <div key={idx} draggable
+                    onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('imgIdx', String(idx)); }}
+                    onDragOver={e => { e.preventDefault(); e.currentTarget.style.outline = '2px solid #6366f1'; }}
+                    onDragLeave={e => { e.currentTarget.style.outline = ''; }}
+                    onDrop={e => { e.preventDefault(); e.currentTarget.style.outline = ''; const from = parseInt(e.dataTransfer.getData('imgIdx'), 10); if (from !== idx) reorderImage(from, idx); }}
+                    style={{ position: 'relative', aspectRatio: '1', cursor: 'grab' }}>
+                    <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, display: 'block', pointerEvents: 'none' }} />
                     <button onClick={() => removeImage(idx)}
                       style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 13, lineHeight: 1 }}>×</button>
                   </div>
@@ -2531,13 +2548,18 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                   {(link.images || []).length > 0 && (
                     <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                       {(link.images || []).map((img, imgIdx) => (
-                        <div key={imgIdx} style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
+                        <div key={imgIdx} draggable
+                          onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('linkImgIdx', String(imgIdx)); e.dataTransfer.setData('linkIdx', String(linkIdx)); }}
+                          onDragOver={e => { e.preventDefault(); e.currentTarget.style.outline = '2px solid #6366f1'; }}
+                          onDragLeave={e => { e.currentTarget.style.outline = ''; }}
+                          onDrop={e => { e.preventDefault(); e.currentTarget.style.outline = ''; const fromLink = parseInt(e.dataTransfer.getData('linkIdx'), 10); const from = parseInt(e.dataTransfer.getData('linkImgIdx'), 10); if (fromLink === linkIdx && from !== imgIdx) reorderLinkImage(linkIdx, from, imgIdx); }}
+                          style={{ position: 'relative', width: 64, height: 64, flexShrink: 0, cursor: 'grab' }}>
                           {img.isSocial ? (
-                            <div style={{ width: '100%', height: '100%', borderRadius: 5, border: '1px solid var(--t-border)', background: 'var(--t-surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '100%', height: '100%', borderRadius: 5, border: '1px solid var(--t-border)', background: 'var(--t-surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                               <SocialIcon network={img.network} color={img.color} size={36} />
                             </div>
                           ) : (
-                            <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 5, border: '1px solid var(--t-border)', display: 'block' }} />
+                            <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 5, border: '1px solid var(--t-border)', display: 'block', pointerEvents: 'none' }} />
                           )}
                           <button onClick={() => removeLinkImage(linkIdx, imgIdx)}
                             style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 12, lineHeight: 1 }}>×</button>
@@ -3799,7 +3821,9 @@ export default function BibliotecaItem() {
     // La imagen principal del item (screenshot) va siempre primera
     const mainUrl = item?.url;
     if (mainUrl) { imgs.push({ url: mainUrl, isMain: true }); seen.add(mainUrl); }
-    blocksLibrary.forEach(img => { if (!seen.has(img.url)) { imgs.push(img); seen.add(img.url); } });
+    // Globales justo después del MAIN, luego el resto
+    const sortedLib = [...blocksLibrary.filter(i => i.isGlobal), ...blocksLibrary.filter(i => !i.isGlobal)];
+    sortedLib.forEach(img => { if (!seen.has(img.url)) { imgs.push(img); seen.add(img.url); } });
     blocksData.forEach(b => {
       (b.images || []).forEach(img => {
         if (!seen.has(img.url)) { seen.add(img.url); imgs.push(img); }
