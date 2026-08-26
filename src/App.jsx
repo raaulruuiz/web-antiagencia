@@ -31,6 +31,7 @@ import HablemosDeEmprender from './pages/HablemosDeEmprender';
 import BlogEmailMarketing from './pages/BlogEmailMarketing';
 import Podcasts from './pages/Podcasts';
 import AgenciaShopifyGranada from './pages/AgenciaShopifyGranada';
+import TestEmail from './pages/TestEmail';
 import BlogPost from './pages/BlogPost';
 function BlogPostPage() {
   const { slug } = useParams();
@@ -221,6 +222,7 @@ const AuthenticatedApp = () => {
       <Route path="/prohibido-estacionarse" element={<PixelLayout><ProhibidoEstacionarse /></PixelLayout>} />
       <Route path="/gracias-podcast" element={<PixelLayout><GraciasJorgeCoronado /></PixelLayout>} />
       <Route path="/agencia-shopify-granada" element={<AgenciaShopifyGranada />} />
+      <Route path="/testemail" element={<TestEmail />} />
       <Route path="/blog-email-marketing" element={<BlogEmailMarketing />} />
       <Route path="/blog-email-marketing/page/:page" element={<BlogEmailMarketing />} />
       <Route path="/blog-email-marketing/:slug" element={<BlogPostPage />} />
