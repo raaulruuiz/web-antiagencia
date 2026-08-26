@@ -1578,9 +1578,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             );
           })() : block.nota ? (
             <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.nota}</p>
-          ) : (
-            <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span>
-          )}
+          ) : null}
         </div>
       )}
 
@@ -1694,7 +1692,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                 {s.url && <span style={{ fontSize: 9, color: 'var(--t-text-subtle)', maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.url.replace(/^https?:\/\//, '')}</span>}
               </div>
             ))}
-            {!(block.socials || []).length && <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin redes configuradas</span>}
+            {/* empty when no socials */}
           </div>
         </div>
       )}
