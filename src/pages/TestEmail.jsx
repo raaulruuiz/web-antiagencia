@@ -8,6 +8,8 @@ function buildIframeHtml(html_body, gmail_styles) {
   const baseRules = [
     'body { margin: 0 !important; padding: 0 !important; }',
     'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
+    /* Emojis que Gmail convierte a imágenes (clase an1): renderizar al tamaño del texto */
+    'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
     'table { border-collapse: collapse !important; }',
   ];
 
