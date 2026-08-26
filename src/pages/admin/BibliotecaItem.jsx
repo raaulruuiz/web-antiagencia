@@ -196,6 +196,7 @@ const IconAudio = () => (
     <circle cx="18" cy="16" r="3"/>
   </svg>
 );
+function IconSocial() { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>; }
 
 const CATEGORIAS = [
   { value: 'email', label: 'Email',            icon: <IconEmail /> },
@@ -223,7 +224,7 @@ const RESIZE_HANDLES = [
   { id: 'w',  style: { top: '50%', left: -5, transform: 'translateY(-50%)', cursor: 'w-resize' } },
 ];
 
-const UNIQUE_BLOCK_TYPES = ['puntuacion', 'audio', 'asunto_adelanto', 'correccion', 'transcribir'];
+const UNIQUE_BLOCK_TYPES = ['puntuacion', 'audio', 'asunto_adelanto', 'correccion', 'transcribir', 'social'];
 const MERGE_FIELDS = [
   { field: 'marca',        label: 'Marca' },
   { field: 'asunto',       label: 'Asunto' },
@@ -240,6 +241,7 @@ const BLOCK_TYPES = [
   { type: 'imagen_texto', label: 'Imagen y/o Texto', icon: <IconImageText /> },
   { type: 'transcribir',  label: 'Transcribir',      icon: <IconChipSm /> },
   { type: 'columnas',     label: 'Columnas',         icon: <IconColumns /> },
+  { type: 'social',       label: 'Social',           icon: <IconSocial /> },
 ];
 // Includes all types (for display/lookup in BlockCard, not for BlockSelector grid)
 const ALL_BLOCK_META = [
@@ -253,10 +255,13 @@ const ALL_BLOCK_META = [
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function catLabel(v)    { return CATEGORIAS.find(c => c.value === v)?.label || v; }
 function subcatLabel(v) { return SUBCATEGORIAS.find(s => s.value === v)?.label || v; }
-function formatDate(v)  {
+function formatDate(v) {
   if (!v) return '';
-  const s = new Date(v + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  const parts = v.includes(' ') ? v.split(' ') : [v, null];
+  const [datePart, timePart] = parts;
+  const s = new Date(datePart + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const formatted = s.charAt(0).toUpperCase() + s.slice(1);
+  return timePart ? `${formatted} a las ${timePart}` : formatted;
 }
 
 // ── Tag ───────────────────────────────────────────────────────────────────────
@@ -311,6 +316,7 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
   const handleConfirm = () => {
     const t = inputVal.trim();
     if (type === 'date') { if (!t) { setInputMode(false); return; } onSave(t); setInputMode(false); return; }
+    if (type === 'datetime') { if (!t) { setInputMode(false); return; } onSave(t); setInputMode(false); return; }
     if (required && !t) { setError('Obligatorio'); return; }
     if (!allowEmpty && !t) { setInputMode(false); return; }
     if (validate) { const err = validate(t); if (err) { setError(err); return; } }
@@ -332,7 +338,7 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
   }
 
   if (isSet && !inputMode) {
-    const display = type === 'date' && savedValue ? formatDate(savedValue) : savedValue;
+    const display = (type === 'date' || type === 'datetime') && savedValue ? formatDate(savedValue) : savedValue;
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -346,6 +352,26 @@ function FieldRow({ label, savedValue, onSave, required = false, allowEmpty = tr
         <div style={{ fontSize: 13, color: display ? 'var(--t-text)' : 'var(--t-text-muted)', padding: '4px 0', fontStyle: display ? 'normal' : 'italic', borderBottom: '1px solid var(--t-border)' }}>
           {display || '(Vacío)'}
         </div>
+      </div>
+    );
+  }
+
+  if (type === 'datetime') {
+    const dateVal = inputVal.includes(' ') ? inputVal.split(' ')[0] : inputVal;
+    const timeVal = inputVal.includes(' ') ? inputVal.split(' ')[1] : '';
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {isSet && <span style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>}
+        <div style={{ display: 'flex', gap: 6 }}>
+          <input type="date" value={dateVal} onChange={e => setInputVal(e.target.value + (timeVal ? ' ' + timeVal : ''))}
+            style={{ flex: 1, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '7px 10px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark' }} />
+          <input type="time" value={timeVal} onChange={e => setInputVal(dateVal + (e.target.value ? ' ' + e.target.value : ''))}
+            placeholder="hh:mm"
+            style={{ width: 100, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '7px 10px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark' }} />
+          <button onClick={handleConfirm} style={{ background: 'none', border: 'none', color: '#22c55e', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}><IconCheck /></button>
+          <button onClick={handleCancel} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}><IconX /></button>
+        </div>
+        {error && <span style={{ fontSize: 11, color: '#f87171' }}>{error}</span>}
       </div>
     );
   }
@@ -934,6 +960,35 @@ function BlockDivider({ onAdd }) {
   );
 }
 
+// ── URL cleaner ───────────────────────────────────────────────────────────────
+const TRACKING_PARAMS = new Set(['utm_source','utm_medium','utm_campaign','utm_content','utm_term','utm_id','_kx','fbclid','gclid','msclkid','mc_eid','hsa_acc','hsa_cam','hsa_grp','hsa_ad','hsa_src','hsa_tgt','hsa_kw','hsa_mt','hsa_net','hsa_ver']);
+function cleanUrl(rawUrl) {
+  if (!rawUrl) return rawUrl;
+  try {
+    const u = new URL(rawUrl);
+    for (const key of [...u.searchParams.keys()]) {
+      if (TRACKING_PARAMS.has(key) || key.startsWith('utm_') || key.startsWith('hsa_')) u.searchParams.delete(key);
+    }
+    return u.origin + u.pathname + (u.searchParams.toString() ? '?' + u.searchParams.toString() : '') + u.hash;
+  } catch { return rawUrl; }
+}
+const SOCIAL_DOMAINS = {
+  'instagram.com': 'instagram', 'www.instagram.com': 'instagram',
+  'facebook.com': 'facebook', 'www.facebook.com': 'facebook', 'fb.com': 'facebook',
+  'twitter.com': 'x', 'www.twitter.com': 'x', 'x.com': 'x', 'www.x.com': 'x',
+  'tiktok.com': 'tiktok', 'www.tiktok.com': 'tiktok',
+  'youtube.com': 'youtube', 'www.youtube.com': 'youtube', 'youtu.be': 'youtube',
+  'linkedin.com': 'linkedin', 'www.linkedin.com': 'linkedin',
+  'pinterest.com': 'pinterest', 'www.pinterest.com': 'pinterest', 'pinterest.es': 'pinterest',
+  'wa.me': 'whatsapp', 'whatsapp.com': 'whatsapp', 'api.whatsapp.com': 'whatsapp',
+};
+function detectSocialNetwork(url) {
+  try {
+    const hostname = new URL(url).hostname;
+    return SOCIAL_DOMAINS[hostname] || null;
+  } catch { return null; }
+}
+
 // ── Social networks ───────────────────────────────────────────────────────────
 const SOCIAL_NETWORKS = [
   { id: 'instagram', label: 'Instagram', color: '#E1306C' },
@@ -960,8 +1015,8 @@ function SocialIcon({ network, color = 'currentColor', size = 24 }) {
 }
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
-const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#e879f9', audio: '#f43f5e' };
-const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas', puntuacion: 'Puntuación', audio: 'Audio' };
+const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#e879f9', audio: '#f43f5e', social: '#ec4899' };
+const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas', puntuacion: 'Puntuación', audio: 'Audio', social: 'Redes Sociales' };
 
 const PLANTILLA_TYPES = {
   completo: ['puntuacion', 'audio', 'imagen', 'enlaces', 'transcribir', 'asunto_adelanto', 'imagen_texto', 'correccion'],
@@ -1613,6 +1668,24 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
         </div>
       )}
 
+      {block.type === 'social' && (
+        <div style={{ padding: '12px 14px' }}>
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Social'}</div>
+            {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginTop: 4 }}>{block.subtitulo}</div>}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, padding: '4px 0' }}>
+            {(block.socials || []).map((s, i) => (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <SocialIcon network={s.network} color={s.color} size={32} />
+                {s.url && <span style={{ fontSize: 9, color: 'var(--t-text-subtle)', maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.url.replace(/^https?:\/\//, '')}</span>}
+              </div>
+            ))}
+            {!(block.socials || []).length && <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin redes configuradas</span>}
+          </div>
+        </div>
+      )}
+
       {block.type === 'puntuacion' && (() => {
         const align = block.text_align || 'center';
         const alignItems = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
@@ -2189,7 +2262,7 @@ function AudioRecorderWidget({ draft, update, id, pendingBlobRef }) {
 }
 
 // ── Block: editor modal ───────────────────────────────────────────────────────
-function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages, categoria, allBlocks = [], itemId, onToggleGlobalImage }) {
+function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages, categoria, allBlocks = [], itemId, onToggleGlobalImage, emailHtml }) {
   const [draft, setDraft] = useState(() => {
     const d = { ...block };
     // Migrate old enlaces structure to new links structure
@@ -2260,6 +2333,15 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   });
   const addLink = () => setDraft(d => ({ ...d, links: [...(d.links || []), { images: [], url: '' }] }));
   const removeLink = (linkIdx) => setDraft(d => ({ ...d, links: (d.links || []).filter((_, i) => i !== linkIdx) }));
+
+  // Social block management
+  const updateSocial = (idx, field, val) => setDraft(d => {
+    const s = [...(d.socials || [])];
+    s[idx] = { ...s[idx], [field]: val };
+    return { ...d, socials: s };
+  });
+  const removeSocial = (idx) => setDraft(d => ({ ...d, socials: (d.socials || []).filter((_, i) => i !== idx) }));
+  const addSocial = (network, color, url = '') => setDraft(d => ({ ...d, socials: [...(d.socials || []), { network, color, url }] }));
 
   // imagen_texto items management
   const addItem = () => setDraft(d => ({ ...d, items: [...(d.items || []), { image: null, texto: '', text_color: '', text_align: 'left' }] }));
@@ -2355,6 +2437,65 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     onClose();
   };
 
+  const autoFillFromEmail = () => {
+    if (!emailHtml) return;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(emailHtml, 'text/html');
+
+    if (draft.type === 'imagen') {
+      const imgs = [...doc.querySelectorAll('img')].filter(img => {
+        const src = img.getAttribute('src') || '';
+        if (!src || src.startsWith('data:')) return false;
+        if (src.includes('gstatic.com/s/e/notoemoji')) return false;
+        const w = parseInt(img.getAttribute('width') || '100');
+        const h = parseInt(img.getAttribute('height') || '100');
+        if (w <= 5 || h <= 5) return false;
+        return true;
+      }).map(img => img.getAttribute('src'));
+      if (imgs.length) {
+        setDraft(d => ({ ...d, images: imgs.map(url => ({ url })) }));
+      }
+    }
+
+    if (draft.type === 'enlaces') {
+      const links = [];
+      doc.querySelectorAll('a').forEach(a => {
+        const href = a.getAttribute('href');
+        if (!href || href === '#' || href.startsWith('mailto:')) return;
+        const imgs = [...a.querySelectorAll('img')].filter(img => {
+          const src = img.getAttribute('src') || '';
+          if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
+          const w = parseInt(img.getAttribute('width') || '100');
+          const h = parseInt(img.getAttribute('height') || '100');
+          return w > 5 && h > 5;
+        });
+        if (imgs.length) {
+          const cleanHref = cleanUrl(href);
+          imgs.forEach(img => {
+            links.push({ images: [{ url: img.getAttribute('src') }], url: cleanHref });
+          });
+        }
+      });
+      if (links.length) setDraft(d => ({ ...d, links }));
+    }
+
+    if (draft.type === 'social') {
+      const socials = [];
+      const seenNetworks = new Set();
+      doc.querySelectorAll('a').forEach(a => {
+        const href = a.getAttribute('href');
+        if (!href) return;
+        const network = detectSocialNetwork(cleanUrl(href));
+        if (network && !seenNetworks.has(network)) {
+          seenNetworks.add(network);
+          const sn = SOCIAL_NETWORKS.find(s => s.id === network);
+          socials.push({ network, color: sn?.color || '#71717a', url: cleanUrl(href) });
+        }
+      });
+      if (socials.length) setDraft(d => ({ ...d, socials }));
+    }
+  };
+
   const bt = ALL_BLOCK_META.find(b => b.type === block.type);
   const c = BLOCK_COLORS[block.type] || '#71717a';
 
@@ -2437,6 +2578,14 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             placeholder="Opcional…"
             style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
         </div>
+
+        {/* Autorellenar desde email */}
+        {emailHtml && ['imagen', 'enlaces', 'social'].includes(draft.type) && (
+          <button onClick={autoFillFromEmail}
+            style={{ width: '100%', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '8px', fontSize: 12, color: '#818cf8', cursor: 'pointer', marginBottom: 4 }}>
+            ✦ Autorellenar desde email
+          </button>
+        )}
 
         {/* Layout selector para imagen (antes de las imágenes) */}
         {draft.type === 'imagen' && (
@@ -3186,6 +3335,41 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             </>
           );
         })()}
+
+        {draft.type === 'social' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {(draft.socials || []).map((s, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <SocialIcon network={s.network} color={s.color} size={22} />
+                <input value={s.url || ''} onChange={e => updateSocial(idx, 'url', e.target.value)}
+                  placeholder="URL…"
+                  style={{ flex: 1, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none' }} />
+                <button onClick={() => removeSocial(idx)}
+                  style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '2px 4px' }}>×</button>
+              </div>
+            ))}
+            <div>
+              <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Añadir red social</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                {SOCIAL_NETWORKS.map(sn => {
+                  const active = socialDraft.network === sn.id;
+                  return (
+                    <button key={sn.id} onClick={() => setSocialDraft(d => ({ ...d, network: sn.id, color: sn.color }))}
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: 'pointer', background: active ? 'var(--t-surface2)' : 'transparent', border: `1px solid ${active ? 'var(--t-border-muted)' : 'var(--t-border)'}`, color: 'var(--t-text-muted)', transition: 'all 0.15s' }}>
+                      <SocialIcon network={sn.id} color={active ? socialDraft.color : 'var(--t-text-subtle)'} size={16} />
+                      {sn.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <InlineColorPicker value={socialDraft.color} onChange={color => setSocialDraft(d => ({ ...d, color }))} />
+              <button onClick={() => addSocial(socialDraft.network, socialDraft.color)}
+                style={{ marginTop: 8, width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px', fontSize: 12, color: 'var(--t-text-muted)', cursor: 'pointer' }}>
+                + Añadir {SOCIAL_NETWORKS.find(s => s.id === socialDraft.network)?.label}
+              </button>
+            </div>
+          </div>
+        )}
 
         {draft.type === 'columnas' && (() => {
           const numCols = draft.num_columnas || 0;
@@ -4066,6 +4250,7 @@ export default function BibliotecaItem() {
           allBlocks={blocksData}
           itemId={id}
           onToggleGlobalImage={toggleGlobalImage}
+          emailHtml={item?.email_html || null}
         />
       ) : null; })()}
       {showCropForModal && item && <CropOverlay imageUrl={item.url} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
@@ -4373,8 +4558,16 @@ export default function BibliotecaItem() {
                   {obCategoria === 'email' && obSubcat !== 'automatizacion' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado el Día</label>
-                      <input type="date" value={obEnviadoEl} onChange={e => setObEnviadoEl(e.target.value)}
-                        style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <input type="date"
+                          value={obEnviadoEl.includes(' ') ? obEnviadoEl.split(' ')[0] : obEnviadoEl}
+                          onChange={e => setObEnviadoEl(e.target.value + (obEnviadoEl.includes(' ') ? ' ' + obEnviadoEl.split(' ')[1] : ''))}
+                          style={{ flex: 1, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', colorScheme: 'dark' }} />
+                        <input type="time"
+                          value={obEnviadoEl.includes(' ') ? obEnviadoEl.split(' ')[1] : ''}
+                          onChange={e => { const d = obEnviadoEl.includes(' ') ? obEnviadoEl.split(' ')[0] : obEnviadoEl; setObEnviadoEl(d + (e.target.value ? ' ' + e.target.value : '')); }}
+                          style={{ width: 100, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--t-text)', colorScheme: 'dark' }} />
+                      </div>
                     </div>
                   )}
 
@@ -4531,7 +4724,7 @@ export default function BibliotecaItem() {
               <FieldRow label="Adelanto" savedValue={adelanto} onSave={v => { setAdelanto(v); patch({ adelanto: v }); }} placeholder="Texto de adelanto…" />
             )}
             {categoria === 'email' && subcategoria !== 'automatizacion' && (
-              <FieldRow label="Enviado el Día" savedValue={enviadoEl} onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }} allowEmpty={false} type="date" />
+              <FieldRow label="Enviado el Día" savedValue={enviadoEl} onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }} allowEmpty={false} type="datetime" />
             )}
             {categoria === 'ficha' && (
               <FieldRow label="URL" savedValue={itemUrl} required onSave={v => { setItemUrl(v); patch({ ficha_url: v }); }} placeholder="https://dominio.com" allowEmpty={false}

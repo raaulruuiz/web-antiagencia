@@ -608,6 +608,44 @@ export default function Biblioteca() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Migration: convert enlaces-only-social blocks to type 'social' (one-time)
+  useEffect(() => {
+    if (localStorage.getItem('biblioteca_social_migrated_v1')) return;
+    (async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${API_BASE}/biblioteca`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) return;
+        const fetchedItems = await res.json();
+        for (const item of fetchedItems) {
+          const blocks = item.blocks_data?.blocks || [];
+          let changed = false;
+          const newBlocks = blocks.map(block => {
+            if (block.type !== 'enlaces') return block;
+            const links = block.links || [];
+            if (!links.length) return block;
+            const allSocial = links.every(link => (link.images || []).length > 0 && (link.images || []).every(img => img.isSocial === true));
+            if (!allSocial) return block;
+            changed = true;
+            const socials = links.map(link => {
+              const img = link.images[0];
+              return { network: img.network, color: img.color, url: link.url || '' };
+            });
+            return { ...block, type: 'social', socials, links: undefined };
+          });
+          if (changed) {
+            await fetch(`${API_BASE}/biblioteca/${item.id}`, {
+              method: 'PATCH',
+              headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ blocks_data: { blocks: newBlocks, library: item.blocks_data?.library || [] } }),
+            });
+          }
+        }
+        localStorage.setItem('biblioteca_social_migrated_v1', '1');
+      } catch (_) {}
+    })();
+  }, []);
+
   // Derived: all distinct marcas for autocomplete
   const allMarcas = useMemo(() => [...new Set(items.map(i => i.marca).filter(Boolean))].sort(), [items]);
 

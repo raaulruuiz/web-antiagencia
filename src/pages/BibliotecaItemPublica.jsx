@@ -206,6 +206,27 @@ function BlockHeader({ title, subtitle }) {
   );
 }
 
+function SocialBlockView({ block }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {block.titulo && <h3 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--t-text)', margin: 0 }}>{block.titulo}</h3>}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+        {(block.socials || []).map((s, i) => (
+          s.url
+            ? <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 22, background: 'rgba(255,255,255,0.06)', transition: 'background 0.15s', textDecoration: 'none' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}>
+                <SocialIcon network={s.network} color={s.color} size={22} />
+              </a>
+            : <div key={i} style={{ width: 44, height: 44, borderRadius: 22, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <SocialIcon network={s.network} color={s.color} size={22} />
+              </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SocialIcon({ network, color = 'currentColor', size = 24 }) {
   const c = color; const s = size;
   if (network === 'instagram') return <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke={c} strokeWidth="2"/><circle cx="12" cy="12" r="5" stroke={c} strokeWidth="2"/><circle cx="17.5" cy="6.5" r="1.2" fill={c}/></svg>;
@@ -726,6 +747,7 @@ function BlockView({ block, onPreview, theme, isMobile, item, isPro }) {
     case 'transcribir':     return <div style={wrapStyle}><TranscribirBlockView block={block} /></div>;
     case 'columnas':        return <div style={wrapStyle}><ColumnasBlockView block={block} onPreview={onPreview} theme={theme} isMobile={isMobile} item={item} /></div>;
     case 'puntuacion':      return <div style={wrapStyle}><PuntuacionBlockView block={block} /></div>;
+    case 'social':          return <div style={wrapStyle}><SocialBlockView block={block} /></div>;
     default: return null;
   }
 }
@@ -798,7 +820,14 @@ export default function BibliotecaItemPublica() {
   );
 
   const hasRightContent = item.categoria || item.subcategoria || item.marca !== null || item.asunto !== null || item.adelanto !== null || item.enviado_el || item.ficha_url || item.fecha_analisis;
-  const enviadoDisplay  = item.enviado_el ? (() => { const s = new Date(item.enviado_el + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }); return s.charAt(0).toUpperCase() + s.slice(1); })() : null;
+  const enviadoDisplay  = item.enviado_el ? (() => {
+    const v = item.enviado_el;
+    const parts = v.includes(' ') ? v.split(' ') : [v, null];
+    const [datePart, timePart] = parts;
+    const s = new Date(datePart + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const formatted = s.charAt(0).toUpperCase() + s.slice(1);
+    return timePart ? `${formatted} a las ${timePart}` : formatted;
+  })() : null;
   const fechaAnalisisDisplay = item.fecha_analisis ? new Date(item.fecha_analisis + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
   const resolvedTags    = (item.tags || []).map(tid => allTags.find(t => t.id === tid)).filter(Boolean);
   const resolvedSectors = (item.sector || []).map(sid => allSectors.find(s => s.id === sid)).filter(Boolean);
