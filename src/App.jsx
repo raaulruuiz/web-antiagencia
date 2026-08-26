@@ -222,7 +222,6 @@ const AuthenticatedApp = () => {
       <Route path="/prohibido-estacionarse" element={<PixelLayout><ProhibidoEstacionarse /></PixelLayout>} />
       <Route path="/gracias-podcast" element={<PixelLayout><GraciasJorgeCoronado /></PixelLayout>} />
       <Route path="/agencia-shopify-granada" element={<AgenciaShopifyGranada />} />
-      <Route path="/testemail" element={<TestEmail />} />
       <Route path="/blog-email-marketing" element={<BlogEmailMarketing />} />
       <Route path="/blog-email-marketing/page/:page" element={<BlogEmailMarketing />} />
       <Route path="/blog-email-marketing/:slug" element={<BlogPostPage />} />
@@ -271,6 +270,7 @@ function App() {
             <Route path="/anti-biblioteca" element={<BibliotecaPublica />} />
             <Route path="/anti-biblioteca/:id" element={<BibliotecaItemPublica />} />
             <Route path="/admin/copywriting-popup" element={<CopywritingPopup />} />
+            <Route path="/admin/testemail" element={<TestEmail />} />
             <Route path="/loom" element={<Loom />} />
             <Route path="*" element={<AuthenticatedApp />} />
           </Routes>
