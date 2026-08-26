@@ -429,11 +429,11 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Cosa 1</h3>
               <p>&nbsp;</p>
-              <p>Me queda solo una plaza para servicio en Septiembre. Si, no podemos empezar el servicio antes. Y la fecha exacta no tiene por qué ser el 1. Dependerá de mi agenda.</p>
+              <p>Ya no llegamos a Black Friday. Es una putada. Lo sé.</p>
               <p>&nbsp;</p>
-              <p>Pero eso, solo 1 más.</p>
+              <p>Pero ahora mismo la lista de espera es tan larga que las fechas de inicio no permiten llegar a Black Friday.</p>
               <p>&nbsp;</p>
-              <p>Una vez se acabe esa plaza, llegar (a tiempo y haciendo las cosas bien) a Black Friday se empieza a complicar. <strong>Hacer las cosas bien lleva su tiempo y planificación.</strong></p>
+              <p>Por lo que yo ya estoy pensando en Navidad. No sé tú. Ya sabes, <strong>hacer las cosas bien lleva su tiempo y planificación.</strong></p>
               <p>&nbsp;</p>
               <p>Si has leído hasta aquí, estoy convencido que eres de los que entienden que las cosas bien hechas no se hacen de un día para otro. Si es tu caso, pide presupuesto abajo. Si no, mejor no lo pidas.</p>
               <p><br /><br /></p>
@@ -461,13 +461,13 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Esto, como todo, hay quien lo entiende y quien no. Si eres de los que lo entiende, pide tu presupuesto aquí abajo.</p>
               <p><br /><br /></p>
-              <p>Por cierto, esto no tiene nada que ver con lo de la plaza. Si se acaba y te doy fecha de inicio en 2027, lo tienes incluido.</p>
+              <p>Por cierto, esto no tiene nada que ver con lo de las plazas. Si te doy fecha de inicio en 2027, lo tienes incluido.</p>
               <p>&nbsp;</p>
               <p>Y por supuestos, los clientes actuales lo tienen, faltaría más.</p>
               <p>&nbsp;</p>
               <p>Pues eso. Pide tu presupuesto.</p>
               <p><br /><br /></p>
-              <p><strong>P.D.</strong> Solo 1 plaza para Septiembre y te incluyo el copy de las fichas de producto hasta el 31 de Agosto a las 23:59 (no tiene nada que ver con las plazas).</p>
+              <p><strong>P.D.</strong> Ya no llegamos a Black Friday, pero sí a Navidad y te incluyo el copy de las fichas de producto hasta el 31 de Agosto a las 23:59 (no tiene nada que ver con las plazas).</p>
               <p><br /><br /></p>
               <p><strong>P.D.2</strong> Pide información aquí:</p>
               <p>&nbsp;</p>
@@ -515,6 +515,10 @@ export default function TrabajaConNosotros2() {
               <h3 className="text-xl font-bold text-gray-900 mb-2">¿Hay algún bonus?</h3>
               <p>&nbsp;</p>
               <p>Si, hasta el 31 de Agosto a las 23:59, tienes incluido el copywriting de las fichas de producto.</p>
+              <p><br /><br /></p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">¿Tienes testimonios?</h3>
+              <p>&nbsp;</p>
+              <p>Si los tengo, pero no los voy a poner. ¿Por qué? Sencillo, porque si has leído hasta aquí y todavía necesitas ver testimonios para decidir si pedir presupuesto o no, este servicio no es para ti.</p>
               <p><br /><br /></p>
               <h3 className="text-xl font-bold text-gray-900 mb-2">¿Es una buena inversión?</h3>
               <p>&nbsp;</p>
