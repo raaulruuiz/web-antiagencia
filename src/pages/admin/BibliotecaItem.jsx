@@ -3022,8 +3022,13 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                 {pendingImgs.length > 0 && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 6, marginBottom: 8 }}>
                     {pendingImgs.map((img, idx) => (
-                      <div key={idx} style={{ position: 'relative', aspectRatio: '1' }}>
-                        <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, display: 'block' }} />
+                      <div key={idx} draggable
+                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('transcribeIdx', String(imgs.indexOf(img))); }}
+                        onDragOver={e => { e.preventDefault(); e.currentTarget.style.outline = '2px solid #06b6d4'; }}
+                        onDragLeave={e => { e.currentTarget.style.outline = ''; }}
+                        onDrop={e => { e.preventDefault(); e.currentTarget.style.outline = ''; const from = parseInt(e.dataTransfer.getData('transcribeIdx'), 10); const to = imgs.indexOf(img); if (from !== to) reorderImage(from, to); }}
+                        style={{ position: 'relative', aspectRatio: '1', cursor: 'grab' }}>
+                        <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, display: 'block', pointerEvents: 'none' }} />
                         <button onClick={() => removeImage(imgs.indexOf(img))}
                           style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.75)', border: 'none', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 13, lineHeight: 1 }}>×</button>
                       </div>
