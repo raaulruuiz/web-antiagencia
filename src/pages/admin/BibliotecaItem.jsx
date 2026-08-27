@@ -4349,7 +4349,7 @@ export default function BibliotecaItem() {
             {item.email_html
               ? <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={true} />
               : (importEmail && lastEmail?.html_body)
-                ? <EmailIframe html_body={lastEmail.html_body} gmail_styles={lastEmail.gmail_styles} withLinks={false} />
+                ? <EmailIframe html_body={lastEmail.html_body} gmail_styles={lastEmail.gmail_styles} withLinks={true} />
                 : <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />}
           </div>
           {imageHover && (
