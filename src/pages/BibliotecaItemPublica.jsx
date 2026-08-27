@@ -854,7 +854,7 @@ export default function BibliotecaItemPublica() {
     </div>
   );
 
-  const hasRightContent = item.categoria || item.subcategoria || item.marca !== null || item.asunto !== null || item.adelanto !== null || item.enviado_el || item.ficha_url || item.fecha_analisis;
+  const hasRightContent = item.categoria || item.subcategoria || item.marca !== null || item.asunto !== null || item.adelanto !== null || item.enviado_el || item.remitente || item.ficha_url || item.fecha_analisis;
   const enviadoDisplay  = item.enviado_el ? (() => {
     const v = item.enviado_el;
     const parts = v.includes(' ') ? v.split(' ') : [v, null];
@@ -987,6 +987,7 @@ export default function BibliotecaItemPublica() {
               {item.categoria === 'email' && <Field label="Asunto"         value={item.asunto} />}
               {item.categoria === 'email' && <Field label="Adelanto"       value={item.adelanto} />}
               {item.categoria === 'email' && <Field label="Enviado el Día" value={enviadoDisplay} />}
+              {item.categoria === 'email' && item.remitente && <Field label="Enviado por" value={item.remitente} />}
               {/* Fields — ficha */}
               {item.categoria === 'ficha' && item.ficha_url && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

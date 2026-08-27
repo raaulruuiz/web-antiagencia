@@ -231,6 +231,7 @@ const MERGE_FIELDS = [
   { field: 'asunto',       label: 'Asunto' },
   { field: 'adelanto',     label: 'Adelanto' },
   { field: 'enviado_el',   label: 'Enviado el día' },
+  { field: 'remitente',    label: 'Enviado por' },
   { field: 'categoria',    label: 'Categoría' },
   { field: 'subcategoria', label: 'Subcategoría' },
 ];
@@ -3730,6 +3731,7 @@ export default function BibliotecaItem() {
   const [asunto, setAsunto]       = useState(null);
   const [adelanto, setAdelanto]   = useState(null);
   const [enviadoEl, setEnviadoEl] = useState(null);
+  const [remitente, setRemitente] = useState('');
   const [itemUrl, setItemUrl]     = useState(null);
   const [fechaAnalisis, setFechaAnalisis] = useState(null);
 
@@ -3791,6 +3793,7 @@ export default function BibliotecaItem() {
         setAsunto(data.asunto ?? null);
         setAdelanto(data.adelanto ?? null);
         setEnviadoEl(data.enviado_el ?? null);
+        setRemitente(data.remitente ?? '');
         setItemUrl(data.ficha_url ?? null);
         setFechaAnalisis(data.fecha_analisis ?? null);
         const rawBlocks = data.blocks_data?.blocks || [];
@@ -3910,6 +3913,7 @@ export default function BibliotecaItem() {
         if (data.asunto)     setObAsunto(data.asunto);
         if (data.adelanto)   setObAdelanto(data.adelanto);
         if (data.enviado_el) setObEnviadoEl(data.enviado_el);
+        if (data.remitente)  setRemitente(data.remitente);
       }
     } catch (e) { alert(e.message); }
     finally { setDetecting(false); }
@@ -3956,6 +3960,7 @@ export default function BibliotecaItem() {
       asunto: obCategoria === 'email' ? obAsunto.trim() : null,
       adelanto: obCategoria === 'email' ? obAdelanto.trim() : null,
       enviado_el: obCategoria === 'email' ? (obEnviadoEl || null) : null,
+      remitente: remitente || null,
       ficha_url: obCategoria === 'ficha' ? (urlTrimmed || null) : null,
       fecha_analisis: obCategoria === 'ficha' ? (obFechaAnalisis || null) : null,
       tags: obTags,
@@ -3980,6 +3985,7 @@ export default function BibliotecaItem() {
         setAsunto(data.asunto ?? null);
         setAdelanto(data.adelanto ?? null);
         setEnviadoEl(data.enviado_el ?? null);
+        setRemitente(data.remitente ?? '');
         setItemUrl(data.ficha_url ?? null);
         setFechaAnalisis(data.fecha_analisis ?? null);
         if (data.blocks_data?.blocks) {
@@ -5057,6 +5063,9 @@ export default function BibliotecaItem() {
             )}
             {categoria === 'email' && subcategoria !== 'automatizacion' && (
               <FieldRow label="Enviado el Día" savedValue={enviadoEl} onSave={v => { setEnviadoEl(v); patch({ enviado_el: v }); }} allowEmpty={false} type="datetime" />
+            )}
+            {categoria === 'email' && (
+              <FieldRow label="Enviado por" savedValue={remitente} onSave={v => { setRemitente(v); patch({ remitente: v }); }} allowEmpty={false} placeholder="Nombre <email@dominio.com>" />
             )}
             {categoria === 'ficha' && (
               <FieldRow label="URL" savedValue={itemUrl} required onSave={v => { setItemUrl(v); patch({ ficha_url: v }); }} placeholder="https://dominio.com" allowEmpty={false}
