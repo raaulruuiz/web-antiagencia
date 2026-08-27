@@ -4067,6 +4067,17 @@ export default function BibliotecaItem() {
         conflicts.push({ field, label, sourceVal, targetVal });
       }
     }
+    // Conflicto de visibilidad (boolean oculto)
+    const sourceOculto = item?.oculto ?? false;
+    const targetOculto = targetItem?.oculto ?? false;
+    if (sourceOculto !== targetOculto) {
+      conflicts.push({
+        field: 'oculto',
+        label: 'Visibilidad',
+        sourceVal: sourceOculto ? 'Oculto' : 'Visible',
+        targetVal: targetOculto ? 'Oculto' : 'Visible',
+      });
+    }
     // Inicializar choices: por defecto prevalece el target
     const choices = {};
     for (const c of conflicts) choices[c.field] = 'target';
@@ -4095,6 +4106,13 @@ export default function BibliotecaItem() {
         }
         // Si target tiene valor y source no → target lo mantiene automáticamente (no tocar)
         // Si ambos tienen el mismo valor → no tocar
+      }
+
+      // Visibilidad (oculto): aplicar choice si hubo conflicto
+      const sourceOculto = item?.oculto ?? false;
+      const targetOculto = mergeTarget?.oculto ?? false;
+      if (sourceOculto !== targetOculto) {
+        finalProps.oculto = mergeChoices['oculto'] === 'source' ? sourceOculto : targetOculto;
       }
 
       // Fusionar sector y tags (union)
