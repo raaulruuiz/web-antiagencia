@@ -18,8 +18,8 @@ function buildEmailIframeHtml(html_body, gmail_styles) {
     if (fontFamily) parts.push(`font-family: ${fontFamily}`);
     if (lineHeight && lineHeight !== 'normal') parts.push(`line-height: ${lineHeight}`);
     if (color) parts.push(`color: ${color}`);
-    if (wordBreak && wordBreak !== 'normal') parts.push(`word-break: ${wordBreak}`);
-    if (overflowWrap && overflowWrap !== 'normal') parts.push(`overflow-wrap: ${overflowWrap}`);
+    // word-break y overflow-wrap no se heredan: Gmail los tiene en break-word
+    // y aplicarlos al body del email rompe palabras a mitad en columnas estrechas
     if (parts.length) rules.push(`body { ${parts.join('; ')}; }`);
   } else {
     rules.push('body { font-size: small; font-family: Arial, Helvetica, sans-serif; }');
