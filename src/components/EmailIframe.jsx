@@ -13,7 +13,10 @@ const EMAIL_BASE_RULES = [
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
 ];
 
-const EMAIL_WIDTH = 600; // standard email width in px
+const EMAIL_WIDTH = 600; // standard email content width in px
+// Render at 601px so @media(max-width:600px) rules in email templates don't fire,
+// which would otherwise collapse multi-column layouts into single-column mobile views.
+const IFRAME_VIEWPORT = 601;
 
 function buildEmailIframeHtml(html_body, gmail_styles) {
   const rules = [...EMAIL_BASE_RULES];
@@ -53,11 +56,11 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
           onLoad={(e) => {
             if (!containerRef.current) return;
             const containerWidth = containerRef.current.offsetWidth;
-            const scale = containerWidth / EMAIL_WIDTH;
+            const scale = containerWidth / IFRAME_VIEWPORT;
             e.target.style.transform = `scale(${scale})`;
           }}
           style={{
-            width: `${EMAIL_WIDTH}px`,
+            width: `${IFRAME_VIEWPORT}px`,
             height: '3000px',
             border: 'none',
             display: 'block',
@@ -80,7 +83,7 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
         const h = e.target.contentDocument?.body?.scrollHeight;
         if (h) e.target.style.height = h + 'px';
       }}
-      style={{ width: '100%', height: '100%', border: 'none', display: 'block', ...style }}
+      style={{ width: `${IFRAME_VIEWPORT}px`, height: '100%', border: 'none', display: 'block', ...style }}
     />
   );
 }

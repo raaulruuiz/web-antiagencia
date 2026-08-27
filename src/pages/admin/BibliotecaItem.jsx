@@ -259,8 +259,10 @@ function catLabel(v)    { return CATEGORIAS.find(c => c.value === v)?.label || v
 function subcatLabel(v) { return SUBCATEGORIAS.find(s => s.value === v)?.label || v; }
 function formatDate(v) {
   if (!v) return '';
-  const parts = v.includes(' ') ? v.split(' ') : [v, null];
-  const [datePart, timePart] = parts;
+  // Only parse ISO-style dates (YYYY-MM-DD or YYYY-MM-DD HH:MM); show old verbatim strings as-is
+  const isoMatch = v.match(/^(\d{4}-\d{2}-\d{2})(?:\s+(\d{2}:\d{2}))?/);
+  if (!isoMatch) return v;
+  const [, datePart, timePart] = isoMatch;
   const s = new Date(datePart + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const formatted = s.charAt(0).toUpperCase() + s.slice(1);
   return timePart ? `${formatted} a las ${timePart}` : formatted;
@@ -3871,9 +3873,16 @@ export default function BibliotecaItem() {
     if (lastEmail.asunto) setObAsunto(lastEmail.asunto);
     if (lastEmail.fecha_email) {
       // Parse Spanish date format: "23 ago 2026, 15:16" or "jue., 23 ago. 2026, 15:16"
-      const MONTHS_ES = { ene:'01',feb:'02',mar:'03',abr:'04',may:'05',jun:'06',jul:'07',ago:'08',sep:'09',oct:'10',nov:'11',dic:'12' };
+      // or full month names: "Martes, 9 de junio de 2026, 11:30"
+      const MONTHS_ES = {
+        ene:'01', enero:'01', feb:'02', febrero:'02', mar:'03', marzo:'03',
+        abr:'04', abril:'04', may:'05', mayo:'05', jun:'06', junio:'06',
+        jul:'07', julio:'07', ago:'08', agosto:'08', sep:'09', sept:'09', septiembre:'09',
+        oct:'10', octubre:'10', nov:'11', noviembre:'11', dic:'12', diciembre:'12',
+      };
       const raw = lastEmail.fecha_email;
-      const dateMatch = raw.match(/(\d{1,2})\s+(\w+?)\.?\s+(\d{4})/);
+      // (?:de\s+)? handles "9 de junio de 2026" (Spanish preposition before month/year)
+      const dateMatch = raw.match(/(\d{1,2})\s+(?:de\s+)?(\w+?)\.?\s+(?:de\s+)?(\d{4})/);
       const timeMatch = raw.match(/(\d{1,2}):(\d{2})/);
       if (dateMatch) {
         const [, day, mon, year] = dateMatch;
