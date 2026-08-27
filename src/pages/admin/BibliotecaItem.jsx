@@ -1049,12 +1049,15 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
   }
 
   if (block.type === 'enlaces') {
+    // Filter out email noise: unsubscribe pages, management links, unresolved tracking URLs
+    const isEmailNoise = (u) => /manage\.kmail-lists\.com|list-manage\.com|unsubscribe|view\.mailchimp\.com|ctrk\.|klclick[0-9]*\.com/.test(u);
     const urlMap = new Map();
     doc.querySelectorAll('a').forEach(a => {
       const href = a.getAttribute('href');
       if (!href || href === '#' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
       const resolvedHref = resolveHref(href); // use final URL as map key
       if (detectSocialNetwork(resolvedHref)) return; // va en el bloque Social, no en enlaces
+      if (isEmailNoise(resolvedHref)) return; // descarta enlaces de gestión/tracking sin resolver
       const imgs = [...a.querySelectorAll('img')].filter(img => {
         const src = img.getAttribute('src') || '';
         if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
@@ -1072,11 +1075,15 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
       } else {
         const text = a.textContent.trim();
         if (!text || text.length < 2) return;
-        if (urlMap.has(resolvedHref)) return;
         const aStyle = a.getAttribute('style') || '';
         const innerHtml = a.innerHTML.trim();
         const html = aStyle ? `<div style="${aStyle}">${innerHtml}</div>` : innerHtml;
-        urlMap.set(resolvedHref, { images: [], html });
+        if (!urlMap.has(resolvedHref)) {
+          urlMap.set(resolvedHref, { images: [], html });
+        } else if (!urlMap.get(resolvedHref).html) {
+          // URL already has images — also store the button html
+          urlMap.get(resolvedHref).html = html;
+        }
       }
     });
     const links = [...urlMap.entries()]
