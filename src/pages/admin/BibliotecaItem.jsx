@@ -1049,15 +1049,16 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
   }
 
   if (block.type === 'enlaces') {
-    // Filter out email noise: unsubscribe pages, management links, unresolved tracking URLs
-    const isEmailNoise = (u) => /manage\.kmail-lists\.com|list-manage\.com|unsubscribe|view\.mailchimp\.com|ctrk\.|klclick[0-9]*\.com/.test(u);
-    const urlMap = new Map();
+    // Filter tracking URLs that couldn't be resolved (still point to ctrk./klclick domains)
+    const isUnresolvedTracking = (u) => /ctrk\.|klclick[0-9]*\.com/.test(u);
+    const urlMap = new Map(); // key → { images: [], htmls: [] }
     doc.querySelectorAll('a').forEach(a => {
       const href = a.getAttribute('href');
-      if (!href || href === '#' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+      if (!href || href === '#' || href === '' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+      if (!href.startsWith('http')) return; // skip relative or non-http
       const resolvedHref = resolveHref(href); // use final URL as map key
       if (detectSocialNetwork(resolvedHref)) return; // va en el bloque Social, no en enlaces
-      if (isEmailNoise(resolvedHref)) return; // descarta enlaces de gestión/tracking sin resolver
+      if (isUnresolvedTracking(resolvedHref)) return; // URL de tracking sin resolver
       const imgs = [...a.querySelectorAll('img')].filter(img => {
         const src = img.getAttribute('src') || '';
         if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
@@ -1065,10 +1066,10 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
         const h = parseInt(img.getAttribute('height') || '100');
         return w > 5 && h > 5;
       });
+      if (!urlMap.has(resolvedHref)) urlMap.set(resolvedHref, { images: [], htmls: [] });
+      const entry = urlMap.get(resolvedHref);
       if (imgs.length) {
-        if (!urlMap.has(resolvedHref)) urlMap.set(resolvedHref, { images: [], html: null });
         imgs.forEach(img => {
-          const entry = urlMap.get(resolvedHref);
           const src = img.getAttribute('src');
           if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src });
         });
@@ -1078,17 +1079,12 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
         const aStyle = a.getAttribute('style') || '';
         const innerHtml = a.innerHTML.trim();
         const html = aStyle ? `<div style="${aStyle}">${innerHtml}</div>` : innerHtml;
-        if (!urlMap.has(resolvedHref)) {
-          urlMap.set(resolvedHref, { images: [], html });
-        } else if (!urlMap.get(resolvedHref).html) {
-          // URL already has images — also store the button html
-          urlMap.get(resolvedHref).html = html;
-        }
+        if (!entry.htmls.includes(html)) entry.htmls.push(html);
       }
     });
     const links = [...urlMap.entries()]
-      .map(([url, data]) => ({ images: data.images, html: data.html || null, url }))
-      .filter(l => l.images.length > 0 || l.html);
+      .map(([url, data]) => ({ images: data.images, htmls: data.htmls, url }))
+      .filter(l => l.images.length > 0 || l.htmls.length > 0);
     if (links.length) return { ...block, links };
   }
 
@@ -1448,11 +1444,13 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                           onPreview={setLightbox} />
                       )
                     ))}
-                    {(link.images || []).length === 0 && link.html && (
-                      <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} style={{ pointerEvents: 'none', padding: '6px 0' }} />
-                      </a>
-                    )}
+                    {(link.images || []).length === 0 && (link.htmls?.length || link.html) &&
+                      (link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
+                        <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} style={{ pointerEvents: 'none', padding: '4px 0' }} />
+                        </a>
+                      ))
+                    }
                     {link.url && (
                       <a href={link.url} target="_blank" rel="noopener noreferrer"
                         style={{ fontSize: 11, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
@@ -1479,10 +1477,14 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                           onPreview={setLightbox} />
                       )
                     ))}
-                    {(link.images || []).length === 0 && link.html && (
-                      <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flexShrink: 0 }}>
-                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} style={{ pointerEvents: 'none' }} />
-                      </a>
+                    {(link.images || []).length === 0 && (link.htmls?.length || link.html) && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
+                        {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
+                          <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} style={{ pointerEvents: 'none' }} />
+                          </a>
+                        ))}
+                      </div>
                     )}
                     {link.url && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
@@ -1513,10 +1515,14 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                           onPreview={setLightbox} />
                       )
                     ))}
-                    {(link.images || []).length === 0 && link.html && (
-                      <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} style={{ pointerEvents: 'none' }} />
-                      </a>
+                    {(link.images || []).length === 0 && (link.htmls?.length || link.html) && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
+                          <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} style={{ pointerEvents: 'none' }} />
+                          </a>
+                        ))}
+                      </div>
                     )}
                     {link.url && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -2573,10 +2579,10 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     }
 
     if (draft.type === 'enlaces') {
-      const urlMap = new Map(); // cleanHref → { images: [], html: null }
+      const urlMap = new Map(); // cleanHref → { images: [], htmls: [] }
       doc.querySelectorAll('a').forEach(a => {
         const href = a.getAttribute('href');
-        if (!href || href === '#' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+        if (!href || href === '#' || href === '' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
         const cleanHref = cleanUrl(href);
         const imgs = [...a.querySelectorAll('img')].filter(img => {
           const src = img.getAttribute('src') || '';
@@ -2585,26 +2591,25 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           const h = parseInt(img.getAttribute('height') || '100');
           return w > 5 && h > 5;
         });
+        if (!urlMap.has(cleanHref)) urlMap.set(cleanHref, { images: [], htmls: [] });
+        const entry = urlMap.get(cleanHref);
         if (imgs.length) {
-          if (!urlMap.has(cleanHref)) urlMap.set(cleanHref, { images: [], html: null });
           imgs.forEach(img => {
-            const entry = urlMap.get(cleanHref);
             const src = img.getAttribute('src');
             if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src });
           });
         } else {
           const text = a.textContent.trim();
           if (!text || text.length < 2) return;
-          if (urlMap.has(cleanHref)) return;
           const aStyle = a.getAttribute('style') || '';
           const innerHtml = a.innerHTML.trim();
           const html = aStyle ? `<div style="${aStyle}">${innerHtml}</div>` : innerHtml;
-          urlMap.set(cleanHref, { images: [], html });
+          if (!entry.htmls.includes(html)) entry.htmls.push(html);
         }
       });
       const links = [...urlMap.entries()]
-        .map(([url, data]) => ({ images: data.images, html: data.html || null, url }))
-        .filter(l => l.images.length > 0 || l.html);
+        .map(([url, data]) => ({ images: data.images, htmls: data.htmls, url }))
+        .filter(l => l.images.length > 0 || l.htmls.length > 0);
       if (links.length) setDraft(d => ({ ...d, links }));
     }
 
@@ -2873,16 +2878,22 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                     </div>
                   )}
                   {/* HTML preview (auto-filled from email) */}
-                  {link.html && (link.images || []).length === 0 && (
-                    <div style={{ border: '1px solid var(--t-border)', borderRadius: 6, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>HTML del email</span>
-                        <button onClick={() => setDraft(d => { const links = [...(d.links || [])]; links[linkIdx] = { ...links[linkIdx], html: null }; return { ...d, links }; })}
-                          style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '2px 6px' }}>× Quitar</button>
+                  {(link.images || []).length === 0 && (link.htmls?.length || link.html) &&
+                    (link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
+                      <div key={hi} style={{ border: '1px solid var(--t-border)', borderRadius: 6, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>HTML del email</span>
+                          <button onClick={() => setDraft(d => {
+                            const links = [...(d.links || [])];
+                            const htmls = [...(links[linkIdx].htmls || [])].filter((_, i) => i !== hi);
+                            links[linkIdx] = { ...links[linkIdx], htmls, html: htmls[0] || null };
+                            return { ...d, links };
+                          })} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '2px 6px' }}>× Quitar</button>
+                        </div>
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} style={{ pointerEvents: 'none', fontSize: 12 }} />
                       </div>
-                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} style={{ pointerEvents: 'none', fontSize: 12 }} />
-                    </div>
-                  )}
+                    ))
+                  }
                   {/* Library picker for this link */}
                   {showLibrary === linkIdx && libraryImages?.length > 0 && (
                     <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 8 }}>

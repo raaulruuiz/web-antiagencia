@@ -1,9 +1,13 @@
+import { useRef } from 'react';
+
 const EMAIL_BASE_RULES = [
   'body { margin: 0 !important; padding: 0 !important; }',
   'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
   'table { border-collapse: collapse !important; }',
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
 ];
+
+const EMAIL_WIDTH = 600; // standard email width in px
 
 function buildEmailIframeHtml(html_body, gmail_styles) {
   const rules = [...EMAIL_BASE_RULES];
@@ -28,22 +32,46 @@ function buildEmailIframeHtml(html_body, gmail_styles) {
 }
 
 export default function EmailIframe({ html_body, gmail_styles, style, withLinks = false }) {
+  const containerRef = useRef(null);
   const iframeHtml = buildEmailIframeHtml(html_body, gmail_styles);
-  const sandbox = withLinks
-    ? 'allow-same-origin allow-popups allow-top-navigation-by-user-activation'
-    : 'allow-same-origin';
 
-  function handleLoad(e) {
-    if (!withLinks) return;
-    const h = e.target.contentDocument?.body?.scrollHeight;
-    if (h) e.target.style.height = h + 'px';
+  if (!withLinks) {
+    // Thumbnail mode: render at full email width (600px) and scale down proportionally
+    return (
+      <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
+        <iframe
+          srcDoc={iframeHtml}
+          sandbox="allow-same-origin"
+          onLoad={(e) => {
+            if (!containerRef.current) return;
+            const containerWidth = containerRef.current.offsetWidth;
+            const scale = containerWidth / EMAIL_WIDTH;
+            e.target.style.transform = `scale(${scale})`;
+          }}
+          style={{
+            width: `${EMAIL_WIDTH}px`,
+            height: '3000px',
+            border: 'none',
+            display: 'block',
+            pointerEvents: 'none',
+            transformOrigin: 'top left',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}
+        />
+      </div>
+    );
   }
 
   return (
     <iframe
       srcDoc={iframeHtml}
-      sandbox={sandbox}
-      onLoad={handleLoad}
+      sandbox="allow-same-origin allow-popups allow-top-navigation-by-user-activation"
+      onLoad={(e) => {
+        const h = e.target.contentDocument?.body?.scrollHeight;
+        if (h) e.target.style.height = h + 'px';
+      }}
       style={{ width: '100%', height: '100%', border: 'none', display: 'block', ...style }}
     />
   );

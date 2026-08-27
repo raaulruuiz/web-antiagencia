@@ -276,11 +276,13 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
                     imgStyle={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
                 )
               ))}
-              {(link.images || []).length === 0 && link.html && (
-                <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} />
-                </a>
-              )}
+              {(link.images || []).length === 0 && (link.htmls?.length || link.html) &&
+                (link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
+                  <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} />
+                  </a>
+                ))
+              }
               {link.url && (
                 <a href={link.url} target="_blank" rel="noopener noreferrer"
                   style={{ fontSize: 11, color: '#3b82f6', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
@@ -306,10 +308,14 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
                       imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                   )
                 ))}
-                {(link.images || []).length === 0 && link.html && (
-                  <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flexShrink: 0 }}>
-                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} />
-                  </a>
+                {(link.images || []).length === 0 && (link.htmls?.length || link.html) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
+                    {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
+                      <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} />
+                      </a>
+                    ))}
+                  </div>
                 )}
                 {link.url && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
@@ -338,10 +344,14 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
                       imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                   )
                 ))}
-                {(link.images || []).length === 0 && link.html && (
-                  <a href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.html) }} />
-                  </a>
+                {(link.images || []).length === 0 && (link.htmls?.length || link.html) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
+                      <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} />
+                      </a>
+                    ))}
+                  </div>
                 )}
                 {link.url && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
