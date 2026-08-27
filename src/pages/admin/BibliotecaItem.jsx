@@ -4712,11 +4712,11 @@ export default function BibliotecaItem() {
         </button>
       </div>
 
-      {/* Two columns */}
-      <div className={isMobile ? 'flex flex-col gap-6' : 'grid grid-cols-2 gap-8 items-start'}>
+      {/* Two columns — left fixed at 600px so HTML emails render at their designed width */}
+      <div className={isMobile ? 'flex flex-col gap-6' : 'flex gap-8 items-start'}>
 
         {/* Left: image */}
-        <div style={{ position: 'relative' }}
+        <div style={{ position: 'relative', flexShrink: 0, width: 600 }}
           onMouseEnter={() => setImageHover(true)}
           onMouseLeave={() => setImageHover(false)}>
           <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden' }}>
@@ -4746,7 +4746,7 @@ export default function BibliotecaItem() {
 
         {/* Right: onboarding OR display */}
         {mode === 'onboarding' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minHeight: 400 }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 24, minHeight: 400 }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
               {obCategoria && (
@@ -5095,7 +5095,7 @@ export default function BibliotecaItem() {
           </div>
         ) : (
           /* Display mode */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {categoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
