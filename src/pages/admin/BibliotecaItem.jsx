@@ -4348,7 +4348,9 @@ export default function BibliotecaItem() {
           <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden' }}>
             {item.email_html
               ? <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={true} />
-              : <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />}
+              : (importEmail && lastEmail?.html_body)
+                ? <EmailIframe html_body={lastEmail.html_body} gmail_styles={lastEmail.gmail_styles} withLinks={false} />
+                : <img src={item.url} alt={item.filename} style={{ width: '100%', display: 'block' }} />}
           </div>
           {imageHover && (
             <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
