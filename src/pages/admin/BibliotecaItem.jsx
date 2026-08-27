@@ -1024,6 +1024,78 @@ const PLANTILLA_TYPES = {
   simple:   ['puntuacion', 'asunto_adelanto', 'imagen_texto', 'correccion'],
 };
 
+function fillBlockFromEmail(block, htmlBody) {
+  if (!htmlBody) return block;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlBody, 'text/html');
+
+  if (block.type === 'imagen') {
+    const imgs = [...doc.querySelectorAll('img')].filter(img => {
+      const src = img.getAttribute('src') || '';
+      if (!src || src.startsWith('data:')) return false;
+      if (src.includes('gstatic.com/s/e/notoemoji')) return false;
+      const w = parseInt(img.getAttribute('width') || '100');
+      const h = parseInt(img.getAttribute('height') || '100');
+      return w > 5 && h > 5;
+    }).map(img => ({ url: img.getAttribute('src') }));
+    if (imgs.length) return { ...block, images: imgs };
+  }
+
+  if (block.type === 'enlaces') {
+    const urlMap = new Map();
+    doc.querySelectorAll('a').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href || href === '#' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+      const cleanHref = cleanUrl(href);
+      const imgs = [...a.querySelectorAll('img')].filter(img => {
+        const src = img.getAttribute('src') || '';
+        if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
+        const w = parseInt(img.getAttribute('width') || '100');
+        const h = parseInt(img.getAttribute('height') || '100');
+        return w > 5 && h > 5;
+      });
+      if (imgs.length) {
+        if (!urlMap.has(cleanHref)) urlMap.set(cleanHref, { images: [], html: null });
+        imgs.forEach(img => {
+          const entry = urlMap.get(cleanHref);
+          const src = img.getAttribute('src');
+          if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src });
+        });
+      } else {
+        const text = a.textContent.trim();
+        if (!text || text.length < 2) return;
+        if (urlMap.has(cleanHref)) return;
+        const aStyle = a.getAttribute('style') || '';
+        const innerHtml = a.innerHTML.trim();
+        const html = aStyle ? `<div style="${aStyle}">${innerHtml}</div>` : innerHtml;
+        urlMap.set(cleanHref, { images: [], html });
+      }
+    });
+    const links = [...urlMap.entries()]
+      .map(([url, data]) => ({ images: data.images, html: data.html || null, url }))
+      .filter(l => l.images.length > 0 || l.html);
+    if (links.length) return { ...block, links };
+  }
+
+  if (block.type === 'social') {
+    const socials = [];
+    const seenNetworks = new Set();
+    doc.querySelectorAll('a').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href) return;
+      const network = detectSocialNetwork(cleanUrl(href));
+      if (network && !seenNetworks.has(network)) {
+        seenNetworks.add(network);
+        const sn = SOCIAL_NETWORKS.find(s => s.id === network);
+        socials.push({ network, color: sn?.color || '#71717a', url: cleanUrl(href) });
+      }
+    });
+    if (socials.length) return { ...block, socials };
+  }
+
+  return block;
+}
+
 function makeTemplateBlocks(plantilla) {
   const types = PLANTILLA_TYPES[plantilla] || [];
   return types.map((type, i) => ({
@@ -3617,7 +3689,7 @@ export default function BibliotecaItem() {
   }, [searchParams]); // eslint-disable-line
 
   useEffect(() => {
-    if (!importEmail || !lastEmail || obStep !== 'campos') return;
+    if (!lastEmail || obStep !== 'campos') return;
     if (lastEmail.asunto) setObAsunto(lastEmail.asunto);
     if (lastEmail.fecha_email) setObEnviadoEl(lastEmail.fecha_email.slice(0, 10));
     if (lastEmail.html_body) {
@@ -3631,7 +3703,7 @@ export default function BibliotecaItem() {
         }
       } catch (_) {}
     }
-  }, [importEmail, lastEmail, obStep]);
+  }, [lastEmail, obStep]);
 
   const patch = useCallback(async (updates) => {
     const token = await getToken();
@@ -3692,8 +3764,14 @@ export default function BibliotecaItem() {
       ficha_url: obCategoria === 'ficha' ? (urlTrimmed || null) : null,
       fecha_analisis: obCategoria === 'ficha' ? (obFechaAnalisis || null) : null,
       tags: obTags,
-      blocks_data: { blocks: makeTemplateBlocks(obPlantilla), library: blocksLibraryRef.current },
-      ...(importEmail && lastEmail ? { email_html: lastEmail.html_body, email_gmail_styles: lastEmail.gmail_styles } : {}),
+      blocks_data: (() => {
+        let blocks = makeTemplateBlocks(obPlantilla);
+        if (importEmail && lastEmail?.html_body && obPlantilla) {
+          blocks = blocks.map(b => fillBlockFromEmail(b, lastEmail.html_body));
+        }
+        return { blocks, library: blocksLibraryRef.current };
+      })(),
+      ...(lastEmail ? { email_html: lastEmail.html_body, email_gmail_styles: lastEmail.gmail_styles } : {}),
     };
     setSaving(true);
     try {
@@ -4507,29 +4585,11 @@ export default function BibliotecaItem() {
                     </div>
                   </div>
 
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 12, color: 'var(--t-text-muted)' }}>
-                    <input type="checkbox" checked={importEmail} onChange={async e => {
-                      const checked = e.target.checked;
-                      setImportEmail(checked);
-                      if (checked && !lastEmail) {
-                        try {
-                          const res = await fetch('https://wphvmyqsxicyoifrlevt.supabase.co/rest/v1/emails_capturados?order=capturado_at.desc&limit=1&select=*', {
-                            headers: {
-                              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHZteXFzeGljeW9pZnJsZXZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTI5NzY5NiwiZXhwIjoyMDkwODczNjk2fQ.RNcpcR9civTNd9WTiciNr5_Wb0NTIeRdzA2aCix05mA',
-                              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHZteXFzeGljeW9pZnJsZXZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTI5NzY5NiwiZXhwIjoyMDkwODczNjk2fQ.RNcpcR9civTNd9WTiciNr5_Wb0NTIeRdzA2aCix05mA',
-                            },
-                          });
-                          const data = await res.json();
-                          if (data[0]) setLastEmail(data[0]);
-                        } catch (_) {}
-                      }
-                    }} style={{ accentColor: '#6366f1' }} />
-                    Importar desde email capturado
-                  </label>
-                  {importEmail && lastEmail && (
-                    <div style={{ fontSize: 11, color: '#a5b4fc', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 6, padding: '6px 10px' }}>
-                      Email de <strong>{lastEmail.remitente_nombre}</strong> capturado el {lastEmail.capturado_at ? new Date(lastEmail.capturado_at).toLocaleDateString('es-ES') : '—'}
-                    </div>
+                  {obPlantilla && lastEmail && (
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 12, color: 'var(--t-text-muted)' }}>
+                      <input type="checkbox" checked={importEmail} onChange={e => setImportEmail(e.target.checked)} style={{ accentColor: '#6366f1' }} />
+                      Rellenar bloques automáticamente
+                    </label>
                   )}
 
                   <button
