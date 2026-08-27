@@ -42,8 +42,9 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
   const iframeHtml = buildEmailIframeHtml(html_body, gmail_styles);
 
   if (!withLinks) {
-    // Use the Gmail container width captured at capture time; fall back to standard 600px.
-    const renderWidth = parseInt(gmail_styles?.containerWidth) || EMAIL_WIDTH;
+    // Render at standard email width (600px industry standard).
+    // gmail_styles.containerWidth is the Gmail reading pane width, NOT the email content width,
+    // so it cannot be used here.
     return (
       <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         <iframe
@@ -52,11 +53,11 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
           onLoad={(e) => {
             if (!containerRef.current) return;
             const containerWidth = containerRef.current.offsetWidth;
-            const scale = containerWidth / renderWidth;
+            const scale = containerWidth / EMAIL_WIDTH;
             e.target.style.transform = `scale(${scale})`;
           }}
           style={{
-            width: `${renderWidth}px`,
+            width: `${EMAIL_WIDTH}px`,
             height: '3000px',
             border: 'none',
             display: 'block',
