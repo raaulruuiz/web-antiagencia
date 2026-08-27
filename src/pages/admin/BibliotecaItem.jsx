@@ -3717,6 +3717,7 @@ export default function BibliotecaItem() {
   const [obAsunto, setObAsunto]     = useState('');
   const [obAdelanto, setObAdelanto] = useState('');
   const [obEnviadoEl, setObEnviadoEl] = useState('');
+  const [obRemitente, setObRemitente] = useState('');
   const [obUrl, setObUrl]           = useState('');
   const [obFechaAnalisis, setObFechaAnalisis] = useState('');
   const [obMarcaError, setObMarcaError] = useState('');
@@ -3862,6 +3863,10 @@ export default function BibliotecaItem() {
         }
       }
     }
+    if (lastEmail.remitente_nombre || lastEmail.remitente_email) {
+      const parts = [lastEmail.remitente_nombre, lastEmail.remitente_email ? `<${lastEmail.remitente_email}>` : ''].filter(Boolean);
+      setObRemitente(parts.join(' '));
+    }
     if (lastEmail.html_body) {
       try {
         const parser = new DOMParser();
@@ -3913,7 +3918,7 @@ export default function BibliotecaItem() {
         if (data.asunto)     setObAsunto(data.asunto);
         if (data.adelanto)   setObAdelanto(data.adelanto);
         if (data.enviado_el) setObEnviadoEl(data.enviado_el);
-        if (data.remitente)  setRemitente(data.remitente);
+        if (data.remitente)  setObRemitente(data.remitente);
       }
     } catch (e) { alert(e.message); }
     finally { setDetecting(false); }
@@ -3960,7 +3965,7 @@ export default function BibliotecaItem() {
       asunto: obCategoria === 'email' ? obAsunto.trim() : null,
       adelanto: obCategoria === 'email' ? obAdelanto.trim() : null,
       enviado_el: obCategoria === 'email' ? (obEnviadoEl || null) : null,
-      remitente: remitente || null,
+      remitente: obCategoria === 'email' ? (obRemitente.trim() || null) : null,
       ficha_url: obCategoria === 'ficha' ? (urlTrimmed || null) : null,
       fecha_analisis: obCategoria === 'ficha' ? (obFechaAnalisis || null) : null,
       tags: obTags,
@@ -4909,6 +4914,15 @@ export default function BibliotecaItem() {
                     </div>
                   )}
 
+                  {obCategoria === 'email' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enviado por</label>
+                      <input type="text" value={obRemitente} onChange={e => setObRemitente(e.target.value)}
+                        placeholder="Nombre <email@dominio.com>…"
+                        style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                    </div>
+                  )}
+
                   {obCategoria === 'ficha' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <label style={{ fontSize: 11, color: 'var(--t-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>URL <span style={{ color: '#f87171' }}>*</span></label>
@@ -5022,7 +5036,7 @@ export default function BibliotecaItem() {
               {subcategoria && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subcategoría</span>
-                  <Tag colors={SUBCAT_COLORS[subcategoria]} label={subcatLabel(subcategoria)} onRemove={() => { setSubcat(null); patch({ subcategoria: null }); setObMarca(marca || ''); setObAsunto(asunto || ''); setObAdelanto(adelanto || ''); setObEnviadoEl(enviadoEl || ''); setObTags(item?.tags || []); setMode('onboarding'); setObCategoria(categoria); setObSubcat(null); setObStep('subcategoria'); }} />
+                  <Tag colors={SUBCAT_COLORS[subcategoria]} label={subcatLabel(subcategoria)} onRemove={() => { setSubcat(null); patch({ subcategoria: null }); setObMarca(marca || ''); setObAsunto(asunto || ''); setObAdelanto(adelanto || ''); setObEnviadoEl(enviadoEl || ''); setObRemitente(item?.remitente || ''); setObTags(item?.tags || []); setMode('onboarding'); setObCategoria(categoria); setObSubcat(null); setObStep('subcategoria'); }} />
                 </div>
               )}
             </div>
