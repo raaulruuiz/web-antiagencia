@@ -977,7 +977,11 @@ export default function BibliotecaPublica() {
               return isBlurred ? (
                 <div key={item.id} style={{ cursor: 'default' }}>
                   <div style={{ aspectRatio: item.categoria === 'email' ? '9/16' : '16/9', backgroundColor: '#18181b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #27272a', position: 'relative' }}>
-                    {item.url
+                    {item.email_html
+                      ? <div style={{ width: '100%', height: '100%', filter: 'blur(18px) brightness(0.6)', transform: 'scale(1.08)', overflow: 'hidden', pointerEvents: 'none' }}>
+                          <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={false} />
+                        </div>
+                      : item.url
                       ? <img src={item.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: item.categoria === 'email' ? 'top' : 'center', display: 'block', filter: 'blur(18px) brightness(0.6)', transform: 'scale(1.08)' }} loading="lazy" />
                       : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(160deg, #1e1b2e 0%, #2a1f3d 25%, #1a2640 50%, #2d1b3d 75%, #1e1b2e 100%)' }} />
                     }
