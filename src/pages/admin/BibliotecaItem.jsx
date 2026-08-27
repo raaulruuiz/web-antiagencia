@@ -4076,10 +4076,14 @@ export default function BibliotecaItem() {
         const sourceVal = item?.[field] ?? null;
         const targetVal = mergeTarget?.[field] ?? null;
         if (sourceVal && targetVal && String(sourceVal) !== String(targetVal)) {
-          // Hay conflicto → usar choice
+          // Ambos tienen valor distinto → usar choice del usuario
           finalProps[field] = mergeChoices[field] === 'source' ? sourceVal : targetVal;
+        } else if (sourceVal && !targetVal) {
+          // Solo el source tiene valor → copiarlo al target (si no el valor se pierde al borrar el source)
+          finalProps[field] = sourceVal;
         }
-        // Si no hay conflicto, el target ya tiene su valor y no lo tocamos
+        // Si target tiene valor y source no → target lo mantiene automáticamente (no tocar)
+        // Si ambos tienen el mismo valor → no tocar
       }
 
       // Fusionar sector y tags (union)
