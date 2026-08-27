@@ -3690,10 +3690,7 @@ export default function BibliotecaItem() {
 
   useEffect(() => {
     if (!lastEmail || obStep !== 'campos') return;
-    if (lastEmail.asunto) {
-      // Strip emojis and extra whitespace
-      setObAsunto(lastEmail.asunto.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}\u200d\ufe0f]/gu, '').trim());
-    }
+    if (lastEmail.asunto) setObAsunto(lastEmail.asunto);
     if (lastEmail.fecha_email) {
       // Parse Spanish date format: "23 ago 2026, 15:16" or "jue., 23 ago. 2026, 15:16"
       const MONTHS_ES = { ene:'01',feb:'02',mar:'03',abr:'04',may:'05',jun:'06',jul:'07',ago:'08',sep:'09',oct:'10',nov:'11',dic:'12' };
