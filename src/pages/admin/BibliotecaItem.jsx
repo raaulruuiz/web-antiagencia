@@ -849,7 +849,7 @@ function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
               onMouseDown={mode==='libre' ? (e) => { e.preventDefault(); const b=imgRef.current.getBoundingClientRect(); setFreeDrag({sx:e.clientX-b.left, sy:e.clientY-b.top}); setFreeRect(null); } : undefined}
             >
               <iframe
-                srcDoc={(() => { const s='<style>body{margin:0!important;padding:0!important;background:#fff;font-size:small;font-family:Arial,Helvetica,sans-serif;}img{display:block;border:0;max-width:100%!important;}table{border-collapse:collapse!important;}</style>'; const h=emailHtml.indexOf('</head>'); return h!==-1?emailHtml.slice(0,h)+s+emailHtml.slice(h):s+emailHtml; })()}
+                srcDoc={(() => { const s='<style>body{margin:0!important;padding:0!important;background:#fff;font-size:small;font-family:Arial,Helvetica,sans-serif;}img{display:block;border:0;max-width:100%!important;}table{border-collapse:collapse!important;}img.an1{display:inline;width:1em;height:1em;vertical-align:-0.1em;max-width:none!important;}</style>'; const h=emailHtml.indexOf('</head>'); return h!==-1?emailHtml.slice(0,h)+s+emailHtml.slice(h):s+emailHtml; })()}
                 sandbox="allow-same-origin"
                 title="email-crop"
                 style={{ position:'absolute', top:0, left:0, width:600, height:EMAIL_CROP_H, border:'none', display:'block', pointerEvents:'none', transform:`scale(${zoom})`, transformOrigin:'top left' }}
@@ -907,12 +907,17 @@ function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
 }
 
 // ── Image modal ───────────────────────────────────────────────────────────────
-function ImageModal({ imageUrl, alt, onClose }) {
+function ImageModal({ imageUrl, emailHtml, emailGmailStyles, alt, onClose }) {
   return (
     <div style={{ position:'fixed', inset:0, zIndex:200, background:'var(--t-overlay)', display:'flex', alignItems:'flex-start', justifyContent:'center', overflowY:'auto', padding:'32px 24px' }} onClick={onClose}>
       <div style={{ position:'relative', maxWidth:900, width:'100%' }} onClick={e => e.stopPropagation()}>
         <button onClick={onClose} style={{ position:'absolute', top:-36, right:0, background:'transparent', border:'none', color:'var(--t-text-placeholder)', cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', gap:6 }}><IconX /> Cerrar</button>
-        <img src={imageUrl} alt={alt} style={{ width:'100%', borderRadius:12, display:'block' }} />
+        {emailHtml
+          ? <div style={{ background:'#fff', borderRadius:12, overflow:'hidden' }}>
+              <EmailIframe html_body={emailHtml} gmail_styles={emailGmailStyles} withLinks={true} />
+            </div>
+          : <img src={imageUrl} alt={alt} style={{ width:'100%', borderRadius:12, display:'block' }} />
+        }
       </div>
     </div>
   );
@@ -4634,7 +4639,7 @@ export default function BibliotecaItem() {
       {/* Overlays */}
       {showCrop && item && <CropOverlay imageUrl={item.url} onCrop={handleCrop} onCancel={() => setShowCrop(false)} />}
       {cropConfirm && <CropConfirmModal previewUrl={cropConfirm.url} onConfirm={confirmCrop} onCancel={cancelCrop} saving={replacing} />}
-      {showModal && item && <ImageModal imageUrl={item.url} alt={item.filename} onClose={() => setShowModal(false)} />}
+      {showModal && item && <ImageModal imageUrl={item.url} emailHtml={item.email_html || null} emailGmailStyles={item.email_gmail_styles || null} alt={item.filename} onClose={() => setShowModal(false)} />}
       {discardConfirm && <DiscardModal onConfirm={confirmDiscard} onCancel={() => setDiscardConfirm(false)} />}
       {editingBlockId && (() => { const eb = blocksData.find(b => b.id === editingBlockId); return eb ? (
         <BlockEditorModal
