@@ -265,7 +265,7 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
       {!hideTitle && block.subtitulo && <p style={{ fontSize: 13, color: 'var(--t-text-muted)', margin: '0 0 6px', lineHeight: 1.5 }}>{block.subtitulo}</p>}
       <div style={
         isFila
-          ? { display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto', alignItems: 'flex-start' }
+          ? { display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto', alignItems: 'center' }
           : isGrid
           ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }
           : { display: 'flex', flexDirection: 'column', gap: 12 }
@@ -304,7 +304,7 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
           ) : (
             isFila ? (
               /* Fila: imágenes en horizontal */
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
                 {(link.images || []).map((img, j) => (
                   img.isSocial ? (
                     <a key={j} href={link.url || undefined} target="_blank" rel="noopener noreferrer"
@@ -318,9 +318,9 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
                   )
                 ))}
                 {(link.images || []).length === 0 && (link.htmls?.length || link.html) && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0, alignItems: 'center' }}>
                     {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
-                      <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                      <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
                         <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} />
                       </a>
                     ))}
