@@ -37,16 +37,19 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
 
   if (!withLinks) {
     // Thumbnail mode: render at full email width (600px) and scale down proportionally
+    // Small horizontal padding mirrors Gmail's reading pane spacing
+    const THUMB_PAD = 8; // px on each side
     return (
-      <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
+      <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative', background: '#f1f3f4' }}>
         <iframe
           srcDoc={iframeHtml}
           sandbox="allow-same-origin"
           onLoad={(e) => {
             if (!containerRef.current) return;
             const containerWidth = containerRef.current.offsetWidth;
-            const scale = containerWidth / EMAIL_WIDTH;
+            const scale = (containerWidth - THUMB_PAD * 2) / EMAIL_WIDTH;
             e.target.style.transform = `scale(${scale})`;
+            e.target.style.left = `${THUMB_PAD}px`;
           }}
           style={{
             width: `${EMAIL_WIDTH}px`,
