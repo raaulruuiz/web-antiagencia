@@ -211,17 +211,20 @@ function SocialBlockView({ block }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {block.titulo && <h3 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--t-text)', margin: 0 }}>{block.titulo}</h3>}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {(block.socials || []).map((s, i) => (
-          s.url
-            ? <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 22, background: 'rgba(255,255,255,0.06)', transition: 'background 0.15s', textDecoration: 'none' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}>
-                <SocialIcon network={s.network} color={s.color} size={22} />
-              </a>
-            : <div key={i} style={{ width: 44, height: 44, borderRadius: 22, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <SocialIcon network={s.network} color={s.color} size={22} />
-              </div>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: 'var(--t-text-subtle)', fontSize: 14, flexShrink: 0 }}>→</span>
+            <SocialIcon network={s.network} color={s.color} size={20} />
+            {s.url
+              ? <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: '#60a5fa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'none' }}
+                  onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                  {s.url.replace(/^https?:\/\//, '')}
+                </a>
+              : <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Vacío</span>
+            }
+          </div>
         ))}
       </div>
     </div>
