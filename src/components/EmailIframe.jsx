@@ -1,7 +1,9 @@
 import { useRef } from 'react';
 
 const EMAIL_BASE_RULES = [
-  'body { margin: 0 !important; padding: 0 !important; word-break: normal !important; }',
+  'body { margin: 0 !important; padding: 0 !important; word-break: normal !important; overflow-wrap: normal !important; }',
+  // Override email templates that set word-break: break-word on td/p/div (more specific than body)
+  'td, th, p, div, span { word-break: normal !important; overflow-wrap: normal !important; }',
   'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
   'table { border-collapse: collapse !important; }',
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',

@@ -849,7 +849,7 @@ function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
               onMouseDown={mode==='libre' ? (e) => { e.preventDefault(); const b=imgRef.current.getBoundingClientRect(); setFreeDrag({sx:e.clientX-b.left, sy:e.clientY-b.top}); setFreeRect(null); } : undefined}
             >
               <iframe
-                srcDoc={(() => { const s='<style>body{margin:0!important;padding:0!important;background:#fff;font-size:small;font-family:Arial,Helvetica,sans-serif;}img{display:block;border:0;max-width:100%!important;}table{border-collapse:collapse!important;}img.an1{display:inline;width:1em;height:1em;vertical-align:-0.1em;max-width:none!important;}</style>'; const h=emailHtml.indexOf('</head>'); return h!==-1?emailHtml.slice(0,h)+s+emailHtml.slice(h):s+emailHtml; })()}
+                srcDoc={(() => { const s='<style>body{margin:0!important;padding:0!important;background:#fff;font-size:small;font-family:Arial,Helvetica,sans-serif;word-break:normal!important;overflow-wrap:normal!important;}td,th,p,div,span{word-break:normal!important;overflow-wrap:normal!important;}img{display:block;border:0;max-width:100%!important;}table{border-collapse:collapse!important;}img.an1{display:inline;width:1em;height:1em;vertical-align:-0.1em;max-width:none!important;}</style>'; const h=emailHtml.indexOf('</head>'); return h!==-1?emailHtml.slice(0,h)+s+emailHtml.slice(h):s+emailHtml; })()}
                 sandbox="allow-same-origin"
                 title="email-crop"
                 style={{ position:'absolute', top:0, left:0, width:600, height:EMAIL_CROP_H, border:'none', display:'block', pointerEvents:'none', transform:`scale(${zoom})`, transformOrigin:'top left' }}
@@ -4491,7 +4491,7 @@ export default function BibliotecaItem() {
         const { default: html2canvas } = await import('html2canvas');
         container = document.createElement('div');
         container.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:600px;background:#ffffff;z-index:-1;';
-        const s = '<style>body,*{box-sizing:border-box;}body{margin:0!important;padding:0!important;background:#fff;font-size:small;font-family:Arial,Helvetica,sans-serif;}img{display:block;border:0;max-width:100%!important;}table{border-collapse:collapse!important;}</style>';
+        const s = '<style>body,*{box-sizing:border-box;}body{margin:0!important;padding:0!important;background:#fff;font-size:small;font-family:Arial,Helvetica,sans-serif;word-break:normal!important;overflow-wrap:normal!important;}td,th,p,div,span{word-break:normal!important;overflow-wrap:normal!important;}img{display:block;border:0;max-width:100%!important;}table{border-collapse:collapse!important;}</style>';
         const raw = item.email_html;
         const hc = raw.indexOf('</head>');
         container.innerHTML = hc !== -1 ? raw.slice(0, hc) + s + raw.slice(hc) : s + raw;
