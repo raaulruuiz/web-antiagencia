@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 
 const EMAIL_BASE_RULES = [
-  'body { margin: 0 !important; padding: 0 !important; }',
+  'body { margin: 0 !important; padding: 0 !important; word-break: normal !important; }',
   'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
   'table { border-collapse: collapse !important; }',
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
