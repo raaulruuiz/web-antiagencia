@@ -3552,7 +3552,7 @@ export default function BibliotecaItem() {
   const [allSectors, setAllSectors] = useState([]);
   const [sector, setSector]         = useState([]);   // display mode: uuid[]
   const [obSector, setObSector]     = useState([]);   // onboarding: uuid[]
-  const [obPlantilla, setObPlantilla] = useState(null); // null | 'completo' | 'simple'
+  const [obPlantilla, setObPlantilla] = useState('completo'); // null | 'completo' | 'simple'
   const [sectorInput, setSectorInput] = useState('');
 
   // ── Onboarding state ─────────────────────────────────────────────────────
