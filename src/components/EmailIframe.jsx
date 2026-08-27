@@ -7,7 +7,7 @@ const EMAIL_BASE_RULES = [
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
 ];
 
-const EMAIL_WIDTH = 800; // render wider so full-width sections extend to edges (like Gmail's reading pane)
+const EMAIL_WIDTH = 600; // standard email width in px
 
 function buildEmailIframeHtml(html_body, gmail_styles) {
   const rules = [...EMAIL_BASE_RULES];
