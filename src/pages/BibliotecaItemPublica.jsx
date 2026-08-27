@@ -285,7 +285,7 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
                     imgStyle={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 9, border: '1px solid var(--t-border)', display: 'block' }} />
                 )
               ))}
-              {(link.images || []).length === 0 && (link.htmls?.length || link.html) &&
+              {(link.htmls?.length || link.html) &&
                 (link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
                   <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                     <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} />
@@ -317,7 +317,7 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
                       imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                   )
                 ))}
-                {(link.images || []).length === 0 && (link.htmls?.length || link.html) && (
+                {(link.htmls?.length || link.html) && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0, alignItems: 'center' }}>
                     {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
                       <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
@@ -353,7 +353,7 @@ function EnlacesBlockView({ block, onPreview, hideTitle }) {
                       imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} />
                   )
                 ))}
-                {(link.images || []).length === 0 && (link.htmls?.length || link.html) && (
+                {(link.htmls?.length || link.html) && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
                       <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>

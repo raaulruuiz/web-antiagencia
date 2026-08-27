@@ -1444,7 +1444,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                           onPreview={setLightbox} />
                       )
                     ))}
-                    {(link.images || []).length === 0 && (link.htmls?.length || link.html) &&
+                    {(link.htmls?.length || link.html) &&
                       (link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
                         <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                           <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} style={{ pointerEvents: 'none', padding: '4px 0' }} />
@@ -1477,7 +1477,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                           onPreview={setLightbox} />
                       )
                     ))}
-                    {(link.images || []).length === 0 && (link.htmls?.length || link.html) && (
+                    {(link.htmls?.length || link.html) && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
                         {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
                           <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
@@ -1515,7 +1515,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                           onPreview={setLightbox} />
                       )
                     ))}
-                    {(link.images || []).length === 0 && (link.htmls?.length || link.html) && (
+                    {(link.htmls?.length || link.html) && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                         {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
                           <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
@@ -2915,7 +2915,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                     </div>
                   )}
                   {/* HTML preview (auto-filled from email) */}
-                  {(link.images || []).length === 0 && (link.htmls?.length || link.html) &&
+                  {(link.htmls?.length || link.html) &&
                     (link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
                       <div key={hi} style={{ border: '1px solid var(--t-border)', borderRadius: 6, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
