@@ -4146,6 +4146,12 @@ export default function BibliotecaItem() {
       const libIds = new Set(targetLib.map(l => l.id));
       const mergedLib = [...targetLib, ...sourceLib.filter(l => !libIds.has(l.id))];
 
+      // Email HTML: si el objetivo no tiene HTML pero el origen sí, copiar
+      if (!mergeTarget?.email_html && item?.email_html) {
+        finalProps.email_html = item.email_html;
+        if (item.email_gmail_styles) finalProps.email_gmail_styles = item.email_gmail_styles;
+      }
+
       // PATCH target + DELETE source en paralelo
       await Promise.all([
         fetch(`${API_BASE}/biblioteca/${mergeTarget.id}`, {
