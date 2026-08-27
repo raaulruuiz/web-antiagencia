@@ -1024,10 +1024,17 @@ const PLANTILLA_TYPES = {
   simple:   ['puntuacion', 'asunto_adelanto', 'imagen_texto', 'correccion'],
 };
 
-function fillBlockFromEmail(block, htmlBody) {
+// resolvedUrls: { [originalHref]: resolvedHref } — built before calling this function
+function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
   if (!htmlBody) return block;
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlBody, 'text/html');
+
+  // Resolve an href using the pre-built map, then clean it
+  const resolveHref = (href) => {
+    const resolved = resolvedUrls[href] || href;
+    return cleanUrl(resolved);
+  };
 
   if (block.type === 'imagen') {
     const imgs = [...doc.querySelectorAll('img')].filter(img => {
@@ -1046,8 +1053,8 @@ function fillBlockFromEmail(block, htmlBody) {
     doc.querySelectorAll('a').forEach(a => {
       const href = a.getAttribute('href');
       if (!href || href === '#' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
-      const cleanHref = cleanUrl(href);
-      if (detectSocialNetwork(cleanHref)) return; // va en el bloque Social, no en enlaces
+      const resolvedHref = resolveHref(href); // use final URL as map key
+      if (detectSocialNetwork(resolvedHref)) return; // va en el bloque Social, no en enlaces
       const imgs = [...a.querySelectorAll('img')].filter(img => {
         const src = img.getAttribute('src') || '';
         if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
@@ -1056,20 +1063,20 @@ function fillBlockFromEmail(block, htmlBody) {
         return w > 5 && h > 5;
       });
       if (imgs.length) {
-        if (!urlMap.has(cleanHref)) urlMap.set(cleanHref, { images: [], html: null });
+        if (!urlMap.has(resolvedHref)) urlMap.set(resolvedHref, { images: [], html: null });
         imgs.forEach(img => {
-          const entry = urlMap.get(cleanHref);
+          const entry = urlMap.get(resolvedHref);
           const src = img.getAttribute('src');
           if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src });
         });
       } else {
         const text = a.textContent.trim();
         if (!text || text.length < 2) return;
-        if (urlMap.has(cleanHref)) return;
+        if (urlMap.has(resolvedHref)) return;
         const aStyle = a.getAttribute('style') || '';
         const innerHtml = a.innerHTML.trim();
         const html = aStyle ? `<div style="${aStyle}">${innerHtml}</div>` : innerHtml;
-        urlMap.set(cleanHref, { images: [], html });
+        urlMap.set(resolvedHref, { images: [], html });
       }
     });
     const links = [...urlMap.entries()]
@@ -1084,11 +1091,12 @@ function fillBlockFromEmail(block, htmlBody) {
     doc.querySelectorAll('a').forEach(a => {
       const href = a.getAttribute('href');
       if (!href) return;
-      const network = detectSocialNetwork(cleanUrl(href));
+      const resolvedHref = resolveHref(href);
+      const network = detectSocialNetwork(resolvedHref);
       if (network && !seenNetworks.has(network)) {
         seenNetworks.add(network);
         const sn = SOCIAL_NETWORKS.find(s => s.id === network);
-        socials.push({ network, color: sn?.color || '#71717a', url: cleanUrl(href) });
+        socials.push({ network, color: sn?.color || '#71717a', url: resolvedHref });
       }
     });
     if (socials.length) return { ...block, socials };
@@ -3776,38 +3784,26 @@ export default function BibliotecaItem() {
     // Build blocks
     let finalBlocks = makeTemplateBlocks(obPlantilla);
     if (importEmail && lastEmail?.html_body && obPlantilla) {
-      finalBlocks = finalBlocks.map(b => fillBlockFromEmail(b, lastEmail.html_body));
-      // Resolve tracking URLs in enlaces blocks
-      const trackingLinks = [];
-      for (const b of finalBlocks) {
-        if (b.type === 'enlaces') {
-          for (const link of (b.links || [])) {
-            if (link.url) trackingLinks.push(link.url);
-          }
-        }
-      }
-      if (trackingLinks.length) {
-        try {
+      // Resolve tracking URLs FIRST so fillBlockFromEmail can use final URLs for deduplication and social detection
+      let resolvedUrls = {};
+      try {
+        const parser = new DOMParser();
+        const emailDoc = parser.parseFromString(lastEmail.html_body, 'text/html');
+        const allHrefs = [...new Set(
+          [...emailDoc.querySelectorAll('a[href]')]
+            .map(a => a.getAttribute('href'))
+            .filter(h => h && h.startsWith('http'))
+        )];
+        if (allHrefs.length) {
           const rRes = await fetch(`${API_BASE}/api/resolve-urls`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${await getToken()}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ urls: trackingLinks }),
+            body: JSON.stringify({ urls: allHrefs }),
           });
-          if (rRes.ok) {
-            const urlMap = await rRes.json();
-            finalBlocks = finalBlocks.map(b => {
-              if (b.type !== 'enlaces') return b;
-              return {
-                ...b,
-                links: (b.links || []).map(link => ({
-                  ...link,
-                  url: urlMap[link.url] ? cleanUrl(urlMap[link.url]) : link.url,
-                })),
-              };
-            });
-          }
-        } catch (_) {}
-      }
+          if (rRes.ok) resolvedUrls = await rRes.json();
+        }
+      } catch (_) {}
+      finalBlocks = finalBlocks.map(b => fillBlockFromEmail(b, lastEmail.html_body, resolvedUrls));
     }
     const updates = {
       categoria: obCategoria,
