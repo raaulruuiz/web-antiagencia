@@ -4,12 +4,17 @@ const EMAIL_BASE_RULES = [
   'body { margin: 0 !important; padding: 0 !important; word-break: normal !important; overflow-wrap: normal !important; }',
   // Override email templates that set word-break: break-word on td/p/div (more specific than body)
   'td, th, p, div, span { word-break: normal !important; overflow-wrap: normal !important; }',
+  // Prevent horizontal scrollbar when email content is slightly wider than iframe
+  'html, body { overflow-x: hidden !important; }',
   'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
   'table { border-collapse: collapse !important; }',
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
 ];
 
-const EMAIL_WIDTH = 600; // standard email width in px
+// 560px matches the actual detail-panel column width (~560-570px in the two-column layout).
+// Using 600px caused thumbnails to show internal margins for emails whose content max-width is 560px,
+// while the detail view (rendering at panel width) showed them without margins — inconsistent.
+const EMAIL_WIDTH = 560;
 
 function buildEmailIframeHtml(html_body, gmail_styles) {
   const rules = [...EMAIL_BASE_RULES];
