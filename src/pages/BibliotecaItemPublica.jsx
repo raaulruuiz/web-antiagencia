@@ -214,7 +214,12 @@ function SocialBlockView({ block }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {(block.socials || []).map((s, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <SocialIcon network={s.network} color={s.color} size={22} />
+            {s.url
+              ? <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', textDecoration: 'none', flexShrink: 0 }}>
+                  <SocialIcon network={s.network} color={s.color} size={22} />
+                </a>
+              : <SocialIcon network={s.network} color={s.color} size={22} />
+            }
             <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
             {s.url
               ? <a href={s.url} target="_blank" rel="noopener noreferrer"
