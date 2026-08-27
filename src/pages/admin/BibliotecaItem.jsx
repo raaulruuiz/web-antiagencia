@@ -2558,10 +2558,31 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     onClose();
   };
 
-  const autoFillFromEmail = () => {
+  const autoFillFromEmail = async () => {
     if (!emailHtml) return;
     const parser = new DOMParser();
     const doc = parser.parseFromString(emailHtml, 'text/html');
+
+    // Resolve all tracking URLs first so social detection and deduplication work correctly
+    let resolvedUrls = {};
+    try {
+      const allHrefs = [...new Set(
+        [...doc.querySelectorAll('a[href]')]
+          .map(a => a.getAttribute('href'))
+          .filter(h => h && h.startsWith('http'))
+      )];
+      if (allHrefs.length) {
+        const rRes = await fetch(`${API_BASE}/api/resolve-urls`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${await getToken()}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ urls: allHrefs }),
+        });
+        if (rRes.ok) resolvedUrls = await rRes.json();
+      }
+    } catch (_) {}
+
+    const resolveHref = (href) => cleanUrl(resolvedUrls[href] || href);
+    const isUnresolvedTracking = (u) => /ctrk\.|klclick[0-9]*\.com/.test(u);
 
     if (draft.type === 'imagen') {
       const imgs = [...doc.querySelectorAll('img')].filter(img => {
@@ -2570,20 +2591,20 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         if (src.includes('gstatic.com/s/e/notoemoji')) return false;
         const w = parseInt(img.getAttribute('width') || '100');
         const h = parseInt(img.getAttribute('height') || '100');
-        if (w <= 5 || h <= 5) return false;
-        return true;
+        return w > 5 && h > 5;
       }).map(img => img.getAttribute('src'));
-      if (imgs.length) {
-        setDraft(d => ({ ...d, images: imgs.map(url => ({ url })) }));
-      }
+      if (imgs.length) setDraft(d => ({ ...d, images: imgs.map(url => ({ url })) }));
     }
 
     if (draft.type === 'enlaces') {
-      const urlMap = new Map(); // cleanHref → { images: [], htmls: [] }
+      const urlMap = new Map(); // resolvedHref → { images: [], htmls: [] }
       doc.querySelectorAll('a').forEach(a => {
         const href = a.getAttribute('href');
         if (!href || href === '#' || href === '' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
-        const cleanHref = cleanUrl(href);
+        if (!href.startsWith('http')) return;
+        const resolvedHref = resolveHref(href);
+        if (detectSocialNetwork(resolvedHref)) return;
+        if (isUnresolvedTracking(resolvedHref)) return;
         const imgs = [...a.querySelectorAll('img')].filter(img => {
           const src = img.getAttribute('src') || '';
           if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
@@ -2591,8 +2612,8 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           const h = parseInt(img.getAttribute('height') || '100');
           return w > 5 && h > 5;
         });
-        if (!urlMap.has(cleanHref)) urlMap.set(cleanHref, { images: [], htmls: [] });
-        const entry = urlMap.get(cleanHref);
+        if (!urlMap.has(resolvedHref)) urlMap.set(resolvedHref, { images: [], htmls: [] });
+        const entry = urlMap.get(resolvedHref);
         if (imgs.length) {
           imgs.forEach(img => {
             const src = img.getAttribute('src');
@@ -2619,11 +2640,12 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
       doc.querySelectorAll('a').forEach(a => {
         const href = a.getAttribute('href');
         if (!href) return;
-        const network = detectSocialNetwork(cleanUrl(href));
+        const resolvedHref = resolveHref(href);
+        const network = detectSocialNetwork(resolvedHref);
         if (network && !seenNetworks.has(network)) {
           seenNetworks.add(network);
           const sn = SOCIAL_NETWORKS.find(s => s.id === network);
-          socials.push({ network, color: sn?.color || '#71717a', url: cleanUrl(href) });
+          socials.push({ network, color: sn?.color || '#71717a', url: resolvedHref });
         }
       });
       if (socials.length) setDraft(d => ({ ...d, socials }));
