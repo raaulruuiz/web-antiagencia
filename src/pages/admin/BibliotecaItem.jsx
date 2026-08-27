@@ -4409,6 +4409,30 @@ export default function BibliotecaItem() {
 
               {obStep === 'sector' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <div style={{ position: 'relative' }}>
+                      <input type="text" value={obMarca}
+                        onChange={e => setObMarca(e.target.value)}
+                        placeholder="Marca…"
+                        style={{ width: '100%', background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--t-text)', outline: 'none', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                      {obMarca.length > 0 && allMarcas.filter(s => s.toLowerCase().includes(obMarca.toLowerCase()) && s !== obMarca).length > 0 && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--t-border-s)', border: '1px solid var(--t-border)', borderRadius: 8, marginTop: 4, zIndex: 20, overflow: 'hidden' }}>
+                          {allMarcas.filter(s => s.toLowerCase().includes(obMarca.toLowerCase()) && s !== obMarca).slice(0, 6).map(s => (
+                            <div key={s} onMouseDown={() => {
+                              setObMarca(s);
+                              setObSector(marcaSectorMap[s] || []);
+                            }}
+                              style={{ padding: '7px 12px', fontSize: 13, color: 'var(--t-text)', cursor: 'pointer' }}
+                              onMouseEnter={e => e.currentTarget.style.background = 'var(--t-border)'}
+                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>{s}</div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {obMarca && marcaSectorMap[obMarca.trim()] && JSON.stringify([...obSector].sort()) !== JSON.stringify([...(marcaSectorMap[obMarca.trim()] || [])].sort()) && (
+                      <span style={{ fontSize: 11, color: '#a5b4fc' }}>Los sectores de todos los emails de {obMarca} se actualizarán</span>
+                    )}
+                  </div>
                   <span style={{ fontSize: 18, fontWeight: 500, color: 'var(--t-text)' }}>Elige Sector</span>
                   <div style={{ position: 'relative' }}>
                     <input
@@ -4509,7 +4533,23 @@ export default function BibliotecaItem() {
                   )}
 
                   <button
-                    onClick={() => setObStep(obCategoria === 'email' ? 'subcategoria' : 'campos')}
+                    onClick={() => {
+                      // Si la marca ya existe y los sectores han cambiado, hacer bulk update
+                      const existingSectors = marcaSectorMap[obMarca.trim()] || [];
+                      const sectorsDiffer = JSON.stringify([...obSector].sort()) !== JSON.stringify([...existingSectors].sort());
+                      if (obMarca.trim() && existingSectors.length > 0 && sectorsDiffer) {
+                        getToken().then(token => {
+                          fetch(`${API_BASE}/biblioteca/marca-sectors`, {
+                            method: 'PATCH',
+                            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ marca: obMarca.trim(), sectors: obSector }),
+                          }).then(() => {
+                            setMarcaSectorMap(prev => ({ ...prev, [obMarca.trim()]: obSector }));
+                          }).catch(() => {});
+                        });
+                      }
+                      setObStep(obCategoria === 'email' ? 'subcategoria' : 'campos');
+                    }}
                     disabled={obSector.length === 0}
                     style={{ width: '100%', background: obSector.length === 0 ? 'var(--t-border-mid)' : 'white', color: obSector.length === 0 ? 'var(--t-text-placeholder)' : 'black', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: obSector.length === 0 ? 'not-allowed' : 'pointer' }}>
                     Continuar
