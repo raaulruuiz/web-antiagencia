@@ -1047,6 +1047,7 @@ function fillBlockFromEmail(block, htmlBody) {
       const href = a.getAttribute('href');
       if (!href || href === '#' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
       const cleanHref = cleanUrl(href);
+      if (detectSocialNetwork(cleanHref)) return; // va en el bloque Social, no en enlaces
       const imgs = [...a.querySelectorAll('img')].filter(img => {
         const src = img.getAttribute('src') || '';
         if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
@@ -1107,8 +1108,8 @@ function makeTemplateBlocks(plantilla) {
     url: '',
     texto_boton: '',
     links: type === 'enlaces' ? [{ images: [], url: '' }] : [],
-    links_layout: 'columna',
-    images_layout: 'columna',
+    links_layout: 'fila',
+    images_layout: 'fila',
     it_layout: 'img-text',
     items: type === 'imagen_texto'    ? [{ image: null, texto: '', text_color: '', text_align: 'left' }]
          : type === 'asunto_adelanto' ? [{ show_asunto: false, show_adelanto: false, texto: '', text_color: '', text_align: 'left' }]
@@ -1805,7 +1806,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
               </>
             );
           })() : (
-            <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin puntuación</span>
+            null
           )}
         </div>
         );
@@ -3772,6 +3773,42 @@ export default function BibliotecaItem() {
     if (!marcaTrimmed) { setObMarcaError('La marca es obligatoria'); return; }
     if (obCategoria === 'ficha' && !urlTrimmed) { setObUrlError('La URL es obligatoria'); return; }
     if (obCategoria === 'ficha' && !isValidHttpUrl(urlTrimmed)) { setObUrlError('URL no válida. Ej: https://dominio.com'); return; }
+    // Build blocks
+    let finalBlocks = makeTemplateBlocks(obPlantilla);
+    if (importEmail && lastEmail?.html_body && obPlantilla) {
+      finalBlocks = finalBlocks.map(b => fillBlockFromEmail(b, lastEmail.html_body));
+      // Resolve tracking URLs in enlaces blocks
+      const trackingLinks = [];
+      for (const b of finalBlocks) {
+        if (b.type === 'enlaces') {
+          for (const link of (b.links || [])) {
+            if (link.url) trackingLinks.push(link.url);
+          }
+        }
+      }
+      if (trackingLinks.length) {
+        try {
+          const rRes = await fetch(`${API_BASE}/api/resolve-urls`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${await getToken()}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ urls: trackingLinks }),
+          });
+          if (rRes.ok) {
+            const urlMap = await rRes.json();
+            finalBlocks = finalBlocks.map(b => {
+              if (b.type !== 'enlaces') return b;
+              return {
+                ...b,
+                links: (b.links || []).map(link => ({
+                  ...link,
+                  url: urlMap[link.url] ? cleanUrl(urlMap[link.url]) : link.url,
+                })),
+              };
+            });
+          }
+        } catch (_) {}
+      }
+    }
     const updates = {
       categoria: obCategoria,
       subcategoria: obCategoria === 'email' ? obSubcat : null,
@@ -3783,13 +3820,7 @@ export default function BibliotecaItem() {
       ficha_url: obCategoria === 'ficha' ? (urlTrimmed || null) : null,
       fecha_analisis: obCategoria === 'ficha' ? (obFechaAnalisis || null) : null,
       tags: obTags,
-      blocks_data: (() => {
-        let blocks = makeTemplateBlocks(obPlantilla);
-        if (importEmail && lastEmail?.html_body && obPlantilla) {
-          blocks = blocks.map(b => fillBlockFromEmail(b, lastEmail.html_body));
-        }
-        return { blocks, library: blocksLibraryRef.current };
-      })(),
+      blocks_data: { blocks: finalBlocks, library: blocksLibraryRef.current },
       ...(lastEmail ? { email_html: lastEmail.html_body, email_gmail_styles: lastEmail.gmail_styles } : {}),
     };
     setSaving(true);
