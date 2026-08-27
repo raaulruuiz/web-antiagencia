@@ -220,10 +220,10 @@ function SocialBlockView({ block }) {
                 </a>
               : <SocialIcon network={s.network} color={s.color} size={22} />
             }
-            <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
+            <span style={{ fontSize: 26, color: s.color, fontWeight: 300, flexShrink: 0 }}>→</span>
             {s.url
               ? <a href={s.url} target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
+                  style={{ fontSize: 14, color: s.color, textDecoration: 'none', wordBreak: 'break-all' }}
                   onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
                   onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
                   {s.url}
