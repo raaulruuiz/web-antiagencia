@@ -4091,10 +4091,16 @@ export default function BibliotecaItem() {
       const targetTags = mergeTarget?.tags || [];
       const mergedTags = [...new Set([...targetTags, ...sourceTags])];
 
-      // Fusionar bloques: todos los del target + todos los del source (sin excepciones)
+      // Fusionar bloques: todos los del target + todos los del source
+      // Excepto puntuacion y correccion: solo se importan si el target no los tiene ya
       const targetBlocks = mergeTarget?.blocks_data?.blocks || [];
       const sourceBlocks = blocksData || [];
-      const mergedBlocksRaw = [...targetBlocks, ...sourceBlocks];
+      const targetHas = (type) => targetBlocks.some(b => b.type === type);
+      const blocksToAdd = sourceBlocks.filter(b => {
+        if (b.type === 'puntuacion' || b.type === 'correccion') return !targetHas(b.type);
+        return true;
+      });
+      const mergedBlocksRaw = [...targetBlocks, ...blocksToAdd];
       // Corrección siempre al final
       const correccionBlock = mergedBlocksRaw.find(b => b.type === 'correccion');
       const mergedBlocks = correccionBlock
