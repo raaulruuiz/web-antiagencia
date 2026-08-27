@@ -3690,8 +3690,26 @@ export default function BibliotecaItem() {
 
   useEffect(() => {
     if (!lastEmail || obStep !== 'campos') return;
-    if (lastEmail.asunto) setObAsunto(lastEmail.asunto);
-    if (lastEmail.fecha_email) setObEnviadoEl(lastEmail.fecha_email.slice(0, 10));
+    if (lastEmail.asunto) {
+      // Strip emojis and extra whitespace
+      setObAsunto(lastEmail.asunto.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}\u200d\ufe0f]/gu, '').trim());
+    }
+    if (lastEmail.fecha_email) {
+      // Parse Spanish date format: "23 ago 2026, 15:16" or "jue., 23 ago. 2026, 15:16"
+      const MONTHS_ES = { ene:'01',feb:'02',mar:'03',abr:'04',may:'05',jun:'06',jul:'07',ago:'08',sep:'09',oct:'10',nov:'11',dic:'12' };
+      const raw = lastEmail.fecha_email;
+      const dateMatch = raw.match(/(\d{1,2})\s+(\w+?)\.?\s+(\d{4})/);
+      const timeMatch = raw.match(/(\d{1,2}):(\d{2})/);
+      if (dateMatch) {
+        const [, day, mon, year] = dateMatch;
+        const month = MONTHS_ES[mon.toLowerCase()] || null;
+        if (month) {
+          const datePart = `${year}-${month}-${day.padStart(2, '0')}`;
+          const timePart = timeMatch ? `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}` : '';
+          setObEnviadoEl(timePart ? `${datePart} ${timePart}` : datePart);
+        }
+      }
+    }
     if (lastEmail.html_body) {
       try {
         const parser = new DOMParser();
