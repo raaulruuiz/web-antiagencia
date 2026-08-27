@@ -42,7 +42,8 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
   const iframeHtml = buildEmailIframeHtml(html_body, gmail_styles);
 
   if (!withLinks) {
-    // Thumbnail mode: render at full email width (600px) and scale down proportionally
+    // Use the Gmail container width captured at capture time; fall back to standard 600px.
+    const renderWidth = parseInt(gmail_styles?.containerWidth) || EMAIL_WIDTH;
     return (
       <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
         <iframe
@@ -51,11 +52,11 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
           onLoad={(e) => {
             if (!containerRef.current) return;
             const containerWidth = containerRef.current.offsetWidth;
-            const scale = containerWidth / EMAIL_WIDTH;
+            const scale = containerWidth / renderWidth;
             e.target.style.transform = `scale(${scale})`;
           }}
           style={{
-            width: `${EMAIL_WIDTH}px`,
+            width: `${renderWidth}px`,
             height: '3000px',
             border: 'none',
             display: 'block',
