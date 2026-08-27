@@ -1795,14 +1795,21 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Social'}</div>
             {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginTop: 4 }}>{block.subtitulo}</div>}
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, padding: '4px 0' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '4px 0' }}>
             {(block.socials || []).map((s, i) => (
-              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <SocialIcon network={s.network} color={s.color} size={32} />
-                {s.url && <span style={{ fontSize: 9, color: 'var(--t-text-subtle)', maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.url.replace(/^https?:\/\//, '')}</span>}
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: 'var(--t-text-subtle)', fontSize: 14, flexShrink: 0 }}>→</span>
+                <SocialIcon network={s.network} color={s.color} size={20} />
+                {s.url
+                  ? <a href={s.url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#60a5fa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'none' }}
+                      onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                      onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                      {s.url.replace(/^https?:\/\//, '')}
+                    </a>
+                  : <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Vacío</span>
+                }
               </div>
             ))}
-            {/* empty when no socials */}
           </div>
         </div>
       )}
@@ -2401,8 +2408,10 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [uploadingItem, setUploadingItem] = useState(null); // itemIdx
   const [urlErrors, setUrlErrors] = useState({});
   const [showLibrary, setShowLibrary] = useState(null); // null | 'global' | linkIdx (number) | 'it-{idx}'
+  const [showHtmlPicker, setShowHtmlPicker] = useState(null); // null | linkIdx
   const [showSocialPicker, setShowSocialPicker] = useState(null); // null | linkIdx
   const [socialDraft, setSocialDraft] = useState({ network: 'instagram', color: '#E1306C' });
+  const [editingColorIdx, setEditingColorIdx] = useState(null); // null | idx of social being color-edited
   const [transcribing, setTranscribing] = useState(false);
   const fileInputRef = useRef(null);
   const transcribeFileInputRef = useRef(null);
@@ -2916,6 +2925,54 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                       </div>
                     ))
                   }
+                  {/* HTML Picker for this link */}
+                  {showHtmlPicker === linkIdx && (() => {
+                    const allHtmls = [];
+                    (draft.links || []).forEach(l => {
+                      (l.htmls?.length ? l.htmls : (l.html ? [l.html] : [])).forEach(h => {
+                        if (h && !allHtmls.includes(h)) allHtmls.push(h);
+                      });
+                    });
+                    const currentHtmls = link.htmls?.length ? link.htmls : (link.html ? [link.html] : []);
+                    return (
+                      <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                          <div style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Bloques HTML del email</div>
+                          <button onClick={() => setShowHtmlPicker(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
+                        </div>
+                        {allHtmls.length === 0 ? (
+                          <div style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic', padding: '4px 0' }}>No hay bloques HTML. Usa "Autorrellenar desde email" primero.</div>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {allHtmls.map((h, hi) => {
+                              const alreadyAdded = currentHtmls.includes(h);
+                              return (
+                                <div key={hi} style={{ border: `1px solid ${alreadyAdded ? '#22c55e44' : 'var(--t-border)'}`, borderRadius: 6, padding: '6px 8px', opacity: alreadyAdded ? 0.6 : 1 }}>
+                                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} style={{ pointerEvents: 'none', fontSize: 12 }} />
+                                  <button
+                                    onClick={() => {
+                                      if (alreadyAdded) return;
+                                      setDraft(d => {
+                                        const links = [...(d.links || [])];
+                                        const prevHtmls = links[linkIdx].htmls?.length ? links[linkIdx].htmls : (links[linkIdx].html ? [links[linkIdx].html] : []);
+                                        const newHtmls = [...prevHtmls, h];
+                                        links[linkIdx] = { ...links[linkIdx], htmls: newHtmls, html: newHtmls[0] };
+                                        return { ...d, links };
+                                      });
+                                      setShowHtmlPicker(null);
+                                    }}
+                                    disabled={alreadyAdded}
+                                    style={{ marginTop: 4, fontSize: 10, background: 'none', border: `1px solid ${alreadyAdded ? 'var(--t-border)' : 'var(--t-border-mid)'}`, borderRadius: 4, color: alreadyAdded ? 'var(--t-text-faint)' : 'var(--t-text-muted)', cursor: alreadyAdded ? 'default' : 'pointer', padding: '2px 10px' }}>
+                                    {alreadyAdded ? 'Ya añadido' : '+ Añadir'}
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                   {/* Library picker for this link */}
                   {showLibrary === linkIdx && libraryImages?.length > 0 && (
                     <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 8 }}>
@@ -2962,6 +3019,12 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                         Seleccionar
                       </button>
                     )}
+                    <button onClick={() => setShowHtmlPicker(showHtmlPicker === linkIdx ? null : linkIdx)}
+                      style={{ flex: 1, background: showHtmlPicker === linkIdx ? 'var(--t-surface2)' : 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 6, padding: '7px 8px', fontSize: 11, color: 'var(--t-text-muted)', cursor: 'pointer', minWidth: 80 }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--t-border-muted)'}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--t-border-mid)'}>
+                      Bloque HTML
+                    </button>
                     <input ref={linkFileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
                       onChange={async e => {
                         const files = Array.from(e.target.files || []);
@@ -3477,13 +3540,25 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         {draft.type === 'social' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {(draft.socials || []).map((s, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <SocialIcon network={s.network} color={s.color} size={22} />
-                <input value={s.url || ''} onChange={e => updateSocial(idx, 'url', e.target.value)}
-                  placeholder="URL…"
-                  style={{ flex: 1, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none' }} />
-                <button onClick={() => removeSocial(idx)}
-                  style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '2px 4px' }}>×</button>
+              <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button
+                    onClick={() => setEditingColorIdx(editingColorIdx === idx ? null : idx)}
+                    title="Clic para cambiar color"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, borderRadius: 6, display: 'flex', alignItems: 'center', outline: editingColorIdx === idx ? '2px solid var(--t-border-muted)' : 'none' }}>
+                    <SocialIcon network={s.network} color={s.color} size={22} />
+                  </button>
+                  <input value={s.url || ''} onChange={e => updateSocial(idx, 'url', e.target.value)}
+                    placeholder="URL…"
+                    style={{ flex: 1, background: 'var(--t-surface2)', border: '1px solid var(--t-border-mid)', borderRadius: 8, padding: '6px 10px', fontSize: 12, color: 'var(--t-text)', outline: 'none' }} />
+                  <button onClick={() => { removeSocial(idx); if (editingColorIdx === idx) setEditingColorIdx(null); }}
+                    style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '2px 4px' }}>×</button>
+                </div>
+                {editingColorIdx === idx && (
+                  <div style={{ paddingLeft: 30 }}>
+                    <InlineColorPicker value={s.color} onChange={color => updateSocial(idx, 'color', color)} />
+                  </div>
+                )}
               </div>
             ))}
             <div>
