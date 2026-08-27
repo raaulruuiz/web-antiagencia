@@ -689,7 +689,8 @@ function TagPicker({ selectedIds, allTags, categoria, subcategoria, onAdd, onRem
 
 // ── Crop overlay (dual mode) ──────────────────────────────────────────────────
 const SAVED_RECT_COLORS = ['#3b82f6','#22c55e','#f97316','#a855f7','#ef4444','#eab308','#06b6d4','#ec4899'];
-function CropOverlay({ imageUrl, onCrop, onCancel }) {
+const EMAIL_CROP_H = 5000;
+function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
   const [mode, setMode]               = useState('libre');
   const [freeDrag, setFreeDrag]       = useState(null);
   const [freeRect, setFreeRect]       = useState(null);
@@ -774,15 +775,16 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
   const confirmMulti = () => {
     if (!imgRef.current || savedRects.length === 0) return;
     const b = imgRef.current.getBoundingClientRect();
-    const sx = imgRef.current.naturalWidth / b.width;
-    const sy = imgRef.current.naturalHeight / b.height;
+    const sx = emailHtml ? (600 / b.width) : (imgRef.current.naturalWidth / b.width);
+    const sy = emailHtml ? (600 / b.width) : (imgRef.current.naturalHeight / b.height);
     onCrop(savedRects.map(r => ({ x: Math.round(r.x*sx), y: Math.round(r.y*sy), w: Math.round(r.w*sx), h: Math.round(r.h*sy) })));
   };
 
   const confirmResize = () => {
     if (!cropBox || !imgRef.current) return;
-    const b=imgRef.current.getBoundingClientRect();
-    const sx=imgRef.current.naturalWidth/b.width; const sy=imgRef.current.naturalHeight/b.height;
+    const b = imgRef.current.getBoundingClientRect();
+    const sx = emailHtml ? (600 / b.width) : (imgRef.current.naturalWidth / b.width);
+    const sy = emailHtml ? (600 / b.width) : (imgRef.current.naturalHeight / b.height);
     onCrop([{ x:Math.round(cropBox.x*sx), y:Math.round(cropBox.y*sy), w:Math.round(cropBox.w*sx), h:Math.round(cropBox.h*sy) }]);
   };
 
@@ -840,14 +842,29 @@ function CropOverlay({ imageUrl, onCrop, onCancel }) {
       <div style={{ flex:1, display:'flex', width:'100%', overflow:'auto' }}>
         <div style={{ margin:'auto', padding:'20px 40px', flexShrink:0 }}>
         <div style={{ position:'relative', display:'inline-block' }}>
-          <img ref={imgRef} src={imageUrl} crossOrigin="anonymous" alt="recortar"
-            onLoad={e => {
-              setBaseSize(prev => prev || (e.target.offsetWidth > 0 ? { w: e.target.offsetWidth, h: e.target.offsetHeight } : null));
-              if (mode === 'ajustar') initCropBox();
-            }}
-            style={{ width: baseSize ? Math.round(baseSize.w * zoom) : undefined, height: baseSize ? Math.round(baseSize.h * zoom) : undefined, maxWidth: baseSize ? 'none' : '80vw', maxHeight: baseSize ? 'none' : '62vh', display:'block', cursor:mode==='libre'?'crosshair':'default' }}
-            onMouseDown={mode==='libre'?(e)=>{ e.preventDefault(); const b=imgRef.current.getBoundingClientRect(); setFreeDrag({sx:e.clientX-b.left,sy:e.clientY-b.top}); setFreeRect(null); }:undefined}
-            draggable={false} />
+          {emailHtml ? (
+            <div
+              ref={imgRef}
+              style={{ position:'relative', width: Math.round(600 * zoom), height: Math.round(EMAIL_CROP_H * zoom), cursor: mode==='libre'?'crosshair':'default' }}
+              onMouseDown={mode==='libre' ? (e) => { e.preventDefault(); const b=imgRef.current.getBoundingClientRect(); setFreeDrag({sx:e.clientX-b.left, sy:e.clientY-b.top}); setFreeRect(null); } : undefined}
+            >
+              <iframe
+                srcDoc={(() => { const s='<style>body{margin:0!important;padding:0!important;background:#fff;font-size:small;font-family:Arial,Helvetica,sans-serif;}img{display:block;border:0;max-width:100%!important;}table{border-collapse:collapse!important;}</style>'; const h=emailHtml.indexOf('</head>'); return h!==-1?emailHtml.slice(0,h)+s+emailHtml.slice(h):s+emailHtml; })()}
+                sandbox="allow-same-origin"
+                title="email-crop"
+                style={{ position:'absolute', top:0, left:0, width:600, height:EMAIL_CROP_H, border:'none', display:'block', pointerEvents:'none', transform:`scale(${zoom})`, transformOrigin:'top left' }}
+              />
+            </div>
+          ) : (
+            <img ref={imgRef} src={imageUrl} crossOrigin="anonymous" alt="recortar"
+              onLoad={e => {
+                setBaseSize(prev => prev || (e.target.offsetWidth > 0 ? { w: e.target.offsetWidth, h: e.target.offsetHeight } : null));
+                if (mode === 'ajustar') initCropBox();
+              }}
+              style={{ width: baseSize ? Math.round(baseSize.w * zoom) : undefined, height: baseSize ? Math.round(baseSize.h * zoom) : undefined, maxWidth: baseSize ? 'none' : '80vw', maxHeight: baseSize ? 'none' : '62vh', display:'block', cursor:mode==='libre'?'crosshair':'default' }}
+              onMouseDown={mode==='libre'?(e)=>{ e.preventDefault(); const b=imgRef.current.getBoundingClientRect(); setFreeDrag({sx:e.clientX-b.left,sy:e.clientY-b.top}); setFreeRect(null); }:undefined}
+              draggable={false} />
+          )}
           {mode==='libre' && savedRects.map((r, i) => (
             <div key={i} style={{ position:'absolute', left:r.x, top:r.y, width:r.w, height:r.h, border:`2px solid ${SAVED_RECT_COLORS[i % SAVED_RECT_COLORS.length]}`, boxSizing:'border-box', pointerEvents:'none' }}>
               <div style={{ position:'absolute', top:-1, left:-1, background:SAVED_RECT_COLORS[i % SAVED_RECT_COLORS.length], color:'white', fontSize:10, fontWeight:700, width:18, height:18, borderRadius:'0 0 6px 0', display:'flex', alignItems:'center', justifyContent:'center' }}>{i+1}</div>
@@ -4459,8 +4476,45 @@ export default function BibliotecaItem() {
     });
   }, []);
 
-  const handleCropForModal = useCallback((cropRects) => {
+  const handleCropForModal = useCallback(async (cropRects) => {
     setShowCropForModal(false);
+
+    if (item?.email_html) {
+      // HTML email: render in hidden div and capture with html2canvas
+      let container = null;
+      try {
+        const { default: html2canvas } = await import('html2canvas');
+        container = document.createElement('div');
+        container.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:600px;background:#ffffff;z-index:-1;';
+        const s = '<style>body,*{box-sizing:border-box;}body{margin:0!important;padding:0!important;background:#fff;font-size:small;font-family:Arial,Helvetica,sans-serif;}img{display:block;border:0;max-width:100%!important;}table{border-collapse:collapse!important;}</style>';
+        const raw = item.email_html;
+        const hc = raw.indexOf('</head>');
+        container.innerHTML = hc !== -1 ? raw.slice(0, hc) + s + raw.slice(hc) : s + raw;
+        document.body.appendChild(container);
+        await new Promise(r => setTimeout(r, 800)); // wait for images
+        const urls = [];
+        for (const rect of cropRects) {
+          try {
+            const canvas = await html2canvas(container, {
+              x: rect.x, y: rect.y, width: rect.w, height: rect.h,
+              useCORS: true, allowTaint: false, scale: 2,
+              backgroundColor: '#ffffff', logging: false,
+            });
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+            if (blob) { const url = await uploadImageForBlock(blob); if (url) urls.push(url); }
+          } catch (_) {}
+        }
+        cropForModalResolveRef.current?.resolve(urls);
+      } catch (e) {
+        cropForModalResolveRef.current?.reject(e);
+      } finally {
+        if (container?.parentNode) container.parentNode.removeChild(container);
+        cropForModalResolveRef.current = null;
+      }
+      return;
+    }
+
+    // Image-based crop (existing)
     const img = new Image(); img.crossOrigin = 'anonymous';
     img.onload = () => {
       const cropOne = (cropRect) => new Promise(resolve => {
@@ -4597,7 +4651,7 @@ export default function BibliotecaItem() {
           emailHtml={item?.email_html || null}
         />
       ) : null; })()}
-      {showCropForModal && item && <CropOverlay imageUrl={item.url} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
+      {showCropForModal && item && <CropOverlay imageUrl={item.email_html ? null : item.url} emailHtml={item.email_html || null} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
       {showBlockSelectorModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'var(--t-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
           onClick={() => { setShowBlockSelectorModal(false); setInsertAtIndex(null); }}>
