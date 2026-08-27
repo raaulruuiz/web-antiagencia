@@ -4126,7 +4126,9 @@ export default function BibliotecaItem() {
         }),
       ]);
 
-      // Navegar al target
+      // Cerrar modal y navegar al target
+      setShowMerge(false);
+      setMerging(false);
       navigate(`/admin/biblioteca/${mergeTarget.id}`);
     } catch (e) {
       alert('Error al combinar: ' + e.message);
