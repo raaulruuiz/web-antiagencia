@@ -1795,18 +1795,19 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Social'}</div>
             {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginTop: 4 }}>{block.subtitulo}</div>}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '4px 0' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {(block.socials || []).map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ color: 'var(--t-text-subtle)', fontSize: 14, flexShrink: 0 }}>→</span>
-                <SocialIcon network={s.network} color={s.color} size={20} />
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <SocialIcon network={s.network} color={s.color} size={22} />
+                <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
                 {s.url
-                  ? <a href={s.url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#60a5fa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'none' }}
+                  ? <a href={s.url} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
                       onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
                       onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                      {s.url.replace(/^https?:\/\//, '')}
+                      {s.url}
                     </a>
-                  : <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Vacío</span>
+                  : <span style={{ fontSize: 14, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Vacío</span>
                 }
               </div>
             ))}
@@ -2928,11 +2929,33 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                   {/* HTML Picker for this link */}
                   {showHtmlPicker === linkIdx && (() => {
                     const allHtmls = [];
+                    // Collect from existing draft.links
                     (draft.links || []).forEach(l => {
                       (l.htmls?.length ? l.htmls : (l.html ? [l.html] : [])).forEach(h => {
                         if (h && !allHtmls.includes(h)) allHtmls.push(h);
                       });
                     });
+                    // Also parse emailHtml directly to get all blocks (even without autorellenar)
+                    if (emailHtml) {
+                      const parser = new DOMParser();
+                      const doc = parser.parseFromString(emailHtml, 'text/html');
+                      doc.querySelectorAll('a').forEach(a => {
+                        const href = a.getAttribute('href');
+                        if (!href || href === '#' || href === '' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+                        if (!href.startsWith('http')) return;
+                        const imgs = [...a.querySelectorAll('img')].filter(img => {
+                          const src = img.getAttribute('src') || '';
+                          return src && !src.startsWith('data:') && !src.includes('gstatic.com/s/e/notoemoji');
+                        });
+                        if (imgs.length) return;
+                        const text = a.textContent.trim();
+                        if (!text || text.length < 2) return;
+                        const aStyle = a.getAttribute('style') || '';
+                        const innerHtml = a.innerHTML.trim();
+                        const html = aStyle ? `<div style="${aStyle}">${innerHtml}</div>` : innerHtml;
+                        if (!allHtmls.includes(html)) allHtmls.push(html);
+                      });
+                    }
                     const currentHtmls = link.htmls?.length ? link.htmls : (link.html ? [link.html] : []);
                     return (
                       <div style={{ border: '1px solid var(--t-border)', borderRadius: 7, padding: 8 }}>
@@ -2941,7 +2964,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                           <button onClick={() => setShowHtmlPicker(null)} style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>Cerrar</button>
                         </div>
                         {allHtmls.length === 0 ? (
-                          <div style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic', padding: '4px 0' }}>No hay bloques HTML. Usa "Autorrellenar desde email" primero.</div>
+                          <div style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic', padding: '4px 0' }}>No hay bloques HTML en el email de este ítem.</div>
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             {allHtmls.map((h, hi) => {

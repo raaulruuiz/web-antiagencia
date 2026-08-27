@@ -211,18 +211,19 @@ function SocialBlockView({ block }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {block.titulo && <h3 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--t-text)', margin: 0 }}>{block.titulo}</h3>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {(block.socials || []).map((s, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ color: 'var(--t-text-subtle)', fontSize: 14, flexShrink: 0 }}>→</span>
-            <SocialIcon network={s.network} color={s.color} size={20} />
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <SocialIcon network={s.network} color={s.color} size={22} />
+            <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
             {s.url
-              ? <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: '#60a5fa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'none' }}
+              ? <a href={s.url} target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
                   onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
                   onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                  {s.url.replace(/^https?:\/\//, '')}
+                  {s.url}
                 </a>
-              : <span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Vacío</span>
+              : <span style={{ fontSize: 14, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Vacío</span>
             }
           </div>
         ))}
