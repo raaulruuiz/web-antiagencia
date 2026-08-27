@@ -4091,32 +4091,10 @@ export default function BibliotecaItem() {
       const targetTags = mergeTarget?.tags || [];
       const mergedTags = [...new Set([...targetTags, ...sourceTags])];
 
-      // Fusionar bloques: target primero, luego source (sin duplicar únicos)
-      const blockHasContent = (b) => {
-        if (!b) return false;
-        if (b.type === 'asunto_adelanto') return !!(b.asunto || b.adelanto);
-        if (b.type === 'transcribir')     return !!(b.texto);
-        if (b.type === 'audio')           return !!(b.audio_url);
-        if (b.type === 'social')          return (b.socials || []).length > 0;
-        if (b.type === 'puntuacion')      return b.valor != null;
-        if (b.type === 'correccion')      return (b.blocks || []).length > 0;
-        return true;
-      };
+      // Fusionar bloques: todos los del target + todos los del source (sin excepciones)
       const targetBlocks = mergeTarget?.blocks_data?.blocks || [];
       const sourceBlocks = blocksData || [];
-      // Para únicos: si target tiene el bloque vacío y source lo tiene relleno, sustituir por el de source
-      let mergedTargetBlocks = targetBlocks.map(tb => {
-        if (!UNIQUE_BLOCK_TYPES.includes(tb.type)) return tb;
-        if (blockHasContent(tb)) return tb; // target ya tiene contenido → mantener
-        const sb = sourceBlocks.find(b => b.type === tb.type);
-        return (sb && blockHasContent(sb)) ? sb : tb; // source tiene contenido → usar source
-      });
-      const targetUniqueTypes = new Set(mergedTargetBlocks.filter(b => UNIQUE_BLOCK_TYPES.includes(b.type)).map(b => b.type));
-      const blocksToAdd = sourceBlocks.filter(b => {
-        if (UNIQUE_BLOCK_TYPES.includes(b.type)) return !targetUniqueTypes.has(b.type);
-        return true;
-      });
-      const mergedBlocksRaw = [...mergedTargetBlocks, ...blocksToAdd];
+      const mergedBlocksRaw = [...targetBlocks, ...sourceBlocks];
       // Corrección siempre al final
       const correccionBlock = mergedBlocksRaw.find(b => b.type === 'correccion');
       const mergedBlocks = correccionBlock
