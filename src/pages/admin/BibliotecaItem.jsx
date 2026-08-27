@@ -4107,24 +4107,24 @@ export default function BibliotecaItem() {
       const libIds = new Set(targetLib.map(l => l.id));
       const mergedLib = [...targetLib, ...sourceLib.filter(l => !libIds.has(l.id))];
 
-      // PATCH target
-      await fetch(`${API_BASE}/biblioteca/${mergeTarget.id}`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...finalProps,
-          sector: mergedSector,
-          tags: mergedTags,
-          blocks_data: { blocks: mergedBlocks, library: mergedLib },
+      // PATCH target + DELETE source en paralelo
+      await Promise.all([
+        fetch(`${API_BASE}/biblioteca/${mergeTarget.id}`, {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...finalProps,
+            sector: mergedSector,
+            tags: mergedTags,
+            blocks_data: { blocks: mergedBlocks, library: mergedLib },
+          }),
         }),
-      });
-
-      // DELETE source (item actual)
-      await fetch(`${API_BASE}/biblioteca`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: [id] }),
-      });
+        fetch(`${API_BASE}/biblioteca`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: [id] }),
+        }),
+      ]);
 
       // Navegar al target
       navigate(`/admin/biblioteca/${mergeTarget.id}`);
