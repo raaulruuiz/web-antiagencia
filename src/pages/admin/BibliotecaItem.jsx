@@ -4099,7 +4099,12 @@ export default function BibliotecaItem() {
         if (UNIQUE_BLOCK_TYPES.includes(b.type)) return !targetUniqueTypes.has(b.type);
         return true;
       });
-      const mergedBlocks = [...targetBlocks, ...blocksToAdd];
+      const mergedBlocksRaw = [...targetBlocks, ...blocksToAdd];
+      // Corrección siempre al final
+      const correccionBlock = mergedBlocksRaw.find(b => b.type === 'correccion');
+      const mergedBlocks = correccionBlock
+        ? [...mergedBlocksRaw.filter(b => b.type !== 'correccion'), correccionBlock]
+        : mergedBlocksRaw;
 
       // Library: fusionar
       const targetLib = mergeTarget?.blocks_data?.library || [];
