@@ -3713,7 +3713,11 @@ export default function BibliotecaItem() {
         const doc = parser.parseFromString(lastEmail.html_body, 'text/html');
         const hidden = doc.body.querySelectorAll('[style*="display:none"],[style*="display: none"],[style*="max-height:0"],[style*="max-height: 0"],[style*="overflow:hidden"],[style*="mso-hide"]');
         for (const el of hidden) {
-          const text = el.textContent.trim().replace(/\s+/g, ' ');
+          // Strip invisible padding chars (U+034F, U+00AD, zero-width chars) used by email clients
+          const text = el.textContent
+            .replace(/[\u034f\u00ad\u200b\u200c\u200d\u200e\u200f\ufeff]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
           if (text.length > 5) { setObAdelanto(text); break; }
         }
       } catch (_) {}
