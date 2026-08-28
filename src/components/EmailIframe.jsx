@@ -8,6 +8,9 @@ const EMAIL_BASE_RULES = [
   'td, th, p, div, span { word-break: normal !important; overflow-wrap: normal !important; }',
   // Prevent horizontal scrollbar when email content is slightly wider than iframe
   'html, body { overflow-x: hidden !important; }',
+  // Reset browser-default paragraph margins — Gmail does this too; without it, <p> elements
+  // between image sections create visible gaps that don't exist in the Gmail reading pane.
+  'p { margin: 0; }',
   'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
   'table { border-collapse: collapse !important; }',
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
