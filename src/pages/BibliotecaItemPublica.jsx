@@ -185,7 +185,7 @@ function ImageModal({ imageUrl, emailHtml, emailGmailStyles, alt, initialMobileM
           <button onClick={onClose} style={{ background:'transparent', border:'none', color:'rgba(255,255,255,0.6)', cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', gap:6 }}><IconX /> Cerrar</button>
         </div>
         {emailHtml
-          ? <div style={{ background:'#fff', borderRadius:12, overflow:'hidden', display:'inline-block', width:'100%' }}>
+          ? <div style={{ background:'#fff', borderRadius:12, overflow:'hidden', width:'fit-content', margin:'0 auto' }}>
               <EmailIframe html_body={emailHtml} gmail_styles={emailGmailStyles} withLinks={true} mobileMode={mobileMode} />
             </div>
           : <img src={imageUrl} alt={alt} style={{ width:'100%', borderRadius:12, display:'block' }} />
