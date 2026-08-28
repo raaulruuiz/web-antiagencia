@@ -27,6 +27,10 @@ const EMAIL_BASE_RULES = [
   '[class*="dnd-width-33-33-percent"] { width: 33.33% !important; }',
   '[class*="dnd-width-25-percent"] { width: 25% !important; }',
   '[class*="dnd-hide-desktop"] { display: none !important; }',
+  // Gmail injects download-button overlays (div.a6S) on top of images with opacity:0.01 and
+  // absolute positioning. Without Gmail's own CSS, these render as block elements in the normal
+  // flow and create large invisible gaps between image sections.
+  'div.a6S { display: none !important; }',
 ];
 
 const EMAIL_WIDTH = 600; // standard email content width in px
