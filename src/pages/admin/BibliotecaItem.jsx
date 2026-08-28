@@ -1011,7 +1011,12 @@ const SOCIAL_DOMAINS = {
 function detectSocialNetwork(url) {
   try {
     const hostname = new URL(url).hostname;
-    return SOCIAL_DOMAINS[hostname] || null;
+    if (SOCIAL_DOMAINS[hostname]) return SOCIAL_DOMAINS[hostname];
+    // Also match regional/mobile subdomains (e.g. es.linkedin.com, m.facebook.com)
+    for (const domain of Object.keys(SOCIAL_DOMAINS)) {
+      if (hostname.endsWith('.' + domain)) return SOCIAL_DOMAINS[domain];
+    }
+    return null;
   } catch { return null; }
 }
 
