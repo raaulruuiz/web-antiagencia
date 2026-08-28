@@ -1007,7 +1007,32 @@ function BlockDivider({ onAdd }) {
 }
 
 // ── URL cleaner ───────────────────────────────────────────────────────────────
-const TRACKING_PARAMS = new Set(['utm_source','utm_medium','utm_campaign','utm_content','utm_term','utm_id','_kx','fbclid','gclid','msclkid','mc_eid','hsa_acc','hsa_cam','hsa_grp','hsa_ad','hsa_src','hsa_tgt','hsa_kw','hsa_mt','hsa_net','hsa_ver']);
+const TRACKING_PARAMS = new Set([
+  // Standard UTM
+  'utm_source','utm_medium','utm_campaign','utm_content','utm_term','utm_id',
+  // Google / Meta / Microsoft paid
+  'fbclid','gclid','msclkid',
+  // HubSpot
+  '_hsenc','_hsmi',
+  // Klaviyo
+  '_kx',
+  // Huckberry / custom Klaviyo
+  'obem',
+  // Mailchimp
+  'mc_eid','mc_cid',
+  // Marketo
+  'mkt_tok',
+  // HubSpot ads
+  'hsa_acc','hsa_cam','hsa_grp','hsa_ad','hsa_src','hsa_tgt','hsa_kw','hsa_mt','hsa_net','hsa_ver',
+  // Vero
+  'vero_id','vero_conv',
+  // ConvertKit
+  'ck_subscriber_id',
+  // Bronto
+  '_bta_tid','_bta_c',
+  // ActiveCampaign
+  'vuid',
+]);
 function cleanUrl(rawUrl) {
   if (!rawUrl) return rawUrl;
   try {
@@ -1114,8 +1139,16 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
   }
 
   if (block.type === 'enlaces') {
-    // Filter tracking URLs that couldn't be resolved (still point to ctrk./klclick domains)
-    const isUnresolvedTracking = (u) => /ctrk\.|klclick[0-9]*\.com/.test(u);
+    // Filter tracking URLs that couldn't be resolved (still point to known click-tracking domains)
+    const isUnresolvedTracking = (u) => {
+      try {
+        const { hostname, pathname } = new URL(u);
+        if (/^(trk|email|click|ctrk|r)\./i.test(hostname) && /\/ss\/c\//i.test(pathname)) return true;
+        if (/ctrk\.|klclick[0-9]*\.com/.test(hostname)) return true;
+        if (/\/ss\/c\//i.test(pathname)) return true;
+        return false;
+      } catch { return false; }
+    };
     const roundBR = getRoundBorderRadius(doc);
     const urlMap = new Map(); // key → { images: [], htmls: [] }
     doc.querySelectorAll('a').forEach(a => {
@@ -2673,7 +2706,15 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     } catch (_) {}
 
     const resolveHref = (href) => cleanUrl(resolvedUrls[href] || href);
-    const isUnresolvedTracking = (u) => /ctrk\.|klclick[0-9]*\.com/.test(u);
+    const isUnresolvedTracking = (u) => {
+      try {
+        const { hostname, pathname } = new URL(u);
+        if (/^(trk|email|click|ctrk|r)\./i.test(hostname) && /\/ss\/c\//i.test(pathname)) return true;
+        if (/ctrk\.|klclick[0-9]*\.com/.test(hostname)) return true;
+        if (/\/ss\/c\//i.test(pathname)) return true;
+        return false;
+      } catch { return false; }
+    };
     const roundBR = getRoundBorderRadius(doc);
 
     if (draft.type === 'imagen') {
