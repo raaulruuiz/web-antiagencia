@@ -161,18 +161,40 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
     );
   }
 
-  // withLinks=true: wrap in a div sized to viewport so parent containers don't add gaps
-  const viewport = mobileMode ? MOBILE_VIEWPORT : IFRAME_VIEWPORT;
+  // withLinks=true: wrap in a div sized to viewport so parent containers don't add gaps.
+  // In mobile mode we keep the iframe at IFRAME_VIEWPORT (601px) so fixed-width email tables
+  // render correctly, then scale the iframe down visually to MOBILE_VIEWPORT using transform.
+  // This is the same technique used by Litmus / Email on Acid for mobile previews.
+  const scale = mobileMode ? MOBILE_VIEWPORT / IFRAME_VIEWPORT : 1;
   return (
-    <div style={{ width: viewport, overflow: 'hidden' }}>
+    <div
+      style={{
+        width: mobileMode ? MOBILE_VIEWPORT : IFRAME_VIEWPORT,
+        overflow: 'hidden',
+        position: mobileMode ? 'relative' : undefined,
+      }}
+    >
       <iframe
         srcDoc={iframeHtml}
         sandbox="allow-same-origin allow-popups allow-top-navigation-by-user-activation"
         onLoad={(e) => {
           const h = e.target.contentDocument?.body?.scrollHeight;
-          if (h) e.target.style.height = h + 'px';
+          if (!h) return;
+          e.target.style.height = h + 'px';
+          // Shrink the container to match the scaled height so there's no whitespace below
+          if (mobileMode && e.target.parentElement) {
+            e.target.parentElement.style.height = Math.ceil(h * scale) + 'px';
+          }
         }}
-        style={{ width: `${viewport}px`, height: '100%', border: 'none', display: 'block', ...style }}
+        style={{
+          width: `${IFRAME_VIEWPORT}px`,
+          height: '100%',
+          border: 'none',
+          display: 'block',
+          transformOrigin: 'top left',
+          transform: mobileMode ? `scale(${scale})` : undefined,
+          ...style,
+        }}
       />
     </div>
   );
