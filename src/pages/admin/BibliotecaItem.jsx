@@ -1211,10 +1211,22 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
       // Fallback: when resolution failed (tracking URL), detect from context clues
       if (!network) {
         const img = a.querySelector('img');
-        network = detectSocialFromText(img?.getAttribute('src') || '')
-          || detectSocialFromText(img?.getAttribute('alt') || '')
-          || detectSocialFromText(a.getAttribute('title') || '')
-          || detectSocialFromText(a.textContent || '');
+        const imgAlt = img?.getAttribute('alt') || '';
+        const imgSrc = img?.getAttribute('src') || '';
+        const altNet = detectSocialFromText(imgAlt);
+        const srcNet = detectSocialFromText(imgSrc);
+        if (altNet && srcNet && srcNet !== altNet) {
+          // Alt is a mislabeled social (e.g., alt="Twitter" on TikTok icon) — trust src
+          network = srcNet;
+        } else if (altNet) {
+          network = altNet;
+        } else if (srcNet && !imgAlt.trim()) {
+          // No alt at all — fall back to src filename hint
+          network = srcNet;
+        } else {
+          network = detectSocialFromText(a.getAttribute('title') || '')
+            || detectSocialFromText(a.textContent || '');
+        }
       }
       if (network && !seenNetworks.has(network)) {
         seenNetworks.add(network);
@@ -2844,12 +2856,22 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         let network = detectSocialNetwork(resolvedHref);
         if (!network) {
           const img = a.querySelector('img');
-          // Check src BEFORE alt — src is the actual image file URL (more reliable than alt text
-          // which email templates sometimes mislabel, e.g. TikTok icon with alt='Twitter')
-          network = detectSocialFromText(img?.getAttribute('src') || '')
-            || detectSocialFromText(img?.getAttribute('alt') || '')
-            || detectSocialFromText(a.getAttribute('title') || '')
-            || detectSocialFromText(a.textContent || '');
+          const imgAlt = img?.getAttribute('alt') || '';
+          const imgSrc = img?.getAttribute('src') || '';
+          const altNet = detectSocialFromText(imgAlt);
+          const srcNet = detectSocialFromText(imgSrc);
+          if (altNet && srcNet && srcNet !== altNet) {
+            // Alt is a mislabeled social (e.g., alt="Twitter" on TikTok icon) — trust src
+            network = srcNet;
+          } else if (altNet) {
+            network = altNet;
+          } else if (srcNet && !imgAlt.trim()) {
+            // No alt at all — fall back to src filename hint
+            network = srcNet;
+          } else {
+            network = detectSocialFromText(a.getAttribute('title') || '')
+              || detectSocialFromText(a.textContent || '');
+          }
         }
         if (network && !seenNetworks.has(network)) {
           seenNetworks.add(network);
