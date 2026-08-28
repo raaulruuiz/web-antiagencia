@@ -1211,17 +1211,15 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
       // Fallback: when resolution failed (tracking URL), detect from context clues
       if (!network) {
         const img = a.querySelector('img');
-        network = detectSocialFromText(img?.getAttribute('alt') || '')
-          || detectSocialFromText(img?.getAttribute('src') || '')
+        network = detectSocialFromText(img?.getAttribute('src') || '')
+          || detectSocialFromText(img?.getAttribute('alt') || '')
           || detectSocialFromText(a.getAttribute('title') || '')
           || detectSocialFromText(a.textContent || '');
       }
       if (network && !seenNetworks.has(network)) {
-        const url = detectSocialNetwork(resolvedHref) ? resolvedHref : '';
-        // Only add if we have a real social URL — skip text-only detections with no URL
-        if (!url) return;
         seenNetworks.add(network);
         const sn = SOCIAL_NETWORKS.find(s => s.id === network);
+        const url = detectSocialNetwork(resolvedHref) ? resolvedHref : '';
         socials.push({ network, color: sn?.color || '#71717a', url });
       }
     });
@@ -2843,16 +2841,16 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         let network = detectSocialNetwork(resolvedHref);
         if (!network) {
           const img = a.querySelector('img');
-          network = detectSocialFromText(img?.getAttribute('alt') || '')
-            || detectSocialFromText(img?.getAttribute('src') || '')
+          // Check src BEFORE alt — src is the actual image file URL (more reliable than alt text
+          // which email templates sometimes mislabel, e.g. TikTok icon with alt='Twitter')
+          network = detectSocialFromText(img?.getAttribute('src') || '')
+            || detectSocialFromText(img?.getAttribute('alt') || '')
             || detectSocialFromText(a.getAttribute('title') || '')
             || detectSocialFromText(a.textContent || '');
         }
         if (network && !seenNetworks.has(network)) {
-          const url = detectSocialNetwork(resolvedHref) ? resolvedHref : '';
-          // Only add if we have a real social URL — skip text-only detections with no URL
-          if (!url) return;
           seenNetworks.add(network);
+          const url = detectSocialNetwork(resolvedHref) ? resolvedHref : '';
           const sn = SOCIAL_NETWORKS.find(s => s.id === network);
           socials.push({ network, color: sn?.color || '#71717a', url });
         }
