@@ -186,13 +186,13 @@ function ImageModal({ imageUrl, emailHtml, emailGmailStyles, alt, initialMobileM
           <IconX /> Cerrar
         </button>
       </div>
-      {/* Content — only this area blocks backdrop click */}
-      <div style={{ display:'flex', justifyContent:'center', padding:'0 24px 40px' }} onClick={e => e.stopPropagation()}>
+      {/* Content — stopPropagation only on the content box itself, not the flex wrapper */}
+      <div style={{ display:'flex', justifyContent:'center', padding:'0 24px 40px' }}>
         {emailHtml
-          ? <div style={{ background:'#fff', borderRadius:12, overflow:'hidden', width:'fit-content' }}>
+          ? <div style={{ background:'#fff', borderRadius:12, overflow:'hidden', width:'fit-content' }} onClick={e => e.stopPropagation()}>
               <EmailIframe html_body={emailHtml} gmail_styles={emailGmailStyles} withLinks={true} mobileMode={mobileMode} />
             </div>
-          : <img src={imageUrl} alt={alt} style={{ maxWidth:'100%', borderRadius:12, display:'block' }} />
+          : <img src={imageUrl} alt={alt} style={{ maxWidth:'100%', borderRadius:12, display:'block' }} onClick={e => e.stopPropagation()} />
         }
       </div>
     </div>
