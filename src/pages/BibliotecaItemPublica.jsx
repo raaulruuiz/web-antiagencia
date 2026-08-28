@@ -161,14 +161,22 @@ const IconX = () => (
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
   </svg>
 );
+const IconDesktop = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>);
+const IconMobile = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>);
+const IconDownload = () => (<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>);
 
 // ── ImageModal — imagen principal (same as admin) ─────────────────────────────
-function ImageModal({ imageUrl, alt, onClose }) {
+function ImageModal({ imageUrl, emailHtml, emailGmailStyles, alt, mobileMode = false, onClose }) {
   return (
     <div style={{ position:'fixed', inset:0, zIndex:200, background:'rgba(0,0,0,0.85)', display:'flex', alignItems:'flex-start', justifyContent:'center', overflowY:'auto', padding:'32px 24px' }} onClick={onClose}>
-      <div style={{ position:'relative', maxWidth:900, width:'100%' }} onClick={e => e.stopPropagation()}>
+      <div style={{ position:'relative', maxWidth: mobileMode ? 430 : 900, width:'100%' }} onClick={e => e.stopPropagation()}>
         <button onClick={onClose} style={{ position:'absolute', top:-36, right:0, background:'transparent', border:'none', color:'rgba(255,255,255,0.6)', cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', gap:6 }}><IconX /> Cerrar</button>
-        <img src={imageUrl} alt={alt} style={{ width:'100%', borderRadius:12, display:'block' }} />
+        {emailHtml
+          ? <div style={{ background:'#fff', borderRadius:12, overflow:'hidden' }}>
+              <EmailIframe html_body={emailHtml} gmail_styles={emailGmailStyles} withLinks={true} mobileMode={mobileMode} />
+            </div>
+          : <img src={imageUrl} alt={alt} style={{ width:'100%', borderRadius:12, display:'block' }} />
+        }
       </div>
     </div>
   );
@@ -186,10 +194,18 @@ function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
         ? <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>{imgEl}</a>
         : imgEl}
       {(hov || mobile) && (
-        <button onClick={e => { e.preventDefault(); e.stopPropagation(); onPreview(src); }}
-          style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 6, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 11, fontWeight: 500, backdropFilter: 'blur(4px)' }}>
-          <IconEye /> Ver
-        </button>
+        <div style={{ position: 'absolute', top: 6, right: 6, display: 'flex', gap: 4 }}>
+          <button onClick={e => { e.preventDefault(); e.stopPropagation(); onPreview(src); }}
+            style={{ background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 6, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 11, fontWeight: 500, backdropFilter: 'blur(4px)' }}>
+            <IconEye /> Ver
+          </button>
+          <a href={src} download target="_blank" rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            style={{ background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 6, padding: '4px 7px', display: 'flex', alignItems: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', textDecoration: 'none' }}
+            title="Descargar imagen">
+            <IconDownload />
+          </a>
+        </div>
       )}
     </div>
   );
@@ -800,6 +816,7 @@ export default function BibliotecaItemPublica() {
   const [error, setError]     = useState(null);
   const [lightbox, setLightbox] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [emailViewMode, setEmailViewMode] = useState('desktop');
   const [imageHover, setImageHover] = useState(false);
   const [acceso, setAcceso] = useState(() => !!loadSession());
   const [isPro] = useState(() => loadProSession());
@@ -877,7 +894,7 @@ export default function BibliotecaItemPublica() {
     <div data-theme={theme} style={{ ...s, background: 'var(--t-bg)', color: 'var(--t-text)', minHeight: '100vh' }}>
       {!acceso && <Gate onAcceso={() => setAcceso(true)} />}
       <MailerLitePopup />
-      {showModal && item && <ImageModal imageUrl={item.url} alt={item.filename} onClose={() => setShowModal(false)} />}
+      {showModal && item && <ImageModal imageUrl={item.url} emailHtml={item.email_html || null} emailGmailStyles={item.email_gmail_styles || null} alt={item.filename} mobileMode={emailViewMode === 'mobile'} onClose={() => setShowModal(false)} />}
       {lightbox && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
           onClick={() => setLightbox(null)}>
@@ -923,11 +940,21 @@ export default function BibliotecaItemPublica() {
             onMouseLeave={() => setImageHover(false)}>
             <div style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', borderRadius: 12, border: '1px solid var(--t-border)' }}>
               {item.email_html
-                ? <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={true} />
+                ? <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={true} mobileMode={emailViewMode === 'mobile'} />
                 : <img src={item.url} alt={item.filename} loading="lazy" style={{ width: '100%', display: 'block' }} />}
             </div>
             {(imageHover || isMobile) && (
               <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
+                {item.email_html && (
+                  <div style={{ display: 'flex', background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, overflow: 'hidden', backdropFilter: 'blur(4px)' }}>
+                    {[{ mode: 'desktop', Icon: IconDesktop, title: 'Vista escritorio' }, { mode: 'mobile', Icon: IconMobile, title: 'Vista móvil' }].map(({ mode: m, Icon, title }) => (
+                      <button key={m} onClick={() => setEmailViewMode(m)} title={title}
+                        style={{ background: emailViewMode === m ? 'rgba(255,255,255,0.15)' : 'none', border: 'none', color: emailViewMode === m ? 'white' : 'rgba(255,255,255,0.5)', padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                        <Icon />
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <button onClick={() => setShowModal(true)}
                   style={{ background:'rgba(0,0,0,0.7)', border:'1px solid rgba(255,255,255,0.15)', color:'rgba(255,255,255,0.8)', borderRadius:8, padding:'6px 8px', cursor:'pointer', display:'flex', alignItems:'center', gap:5, fontSize:12, backdropFilter:'blur(4px)' }}>
                   <IconEye /> Ver

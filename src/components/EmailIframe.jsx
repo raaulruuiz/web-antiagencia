@@ -79,7 +79,9 @@ function stripEmailResponsiveStyles(html) {
   );
 }
 
-function buildEmailIframeHtml(html_body, gmail_styles) {
+const MOBILE_VIEWPORT = 375;
+
+function buildEmailIframeHtml(html_body, gmail_styles, mobileMode = false) {
   const rules = [...EMAIL_BASE_RULES];
   if (gmail_styles) {
     const { fontSize, fontFamily, lineHeight, color } = gmail_styles;
@@ -95,17 +97,19 @@ function buildEmailIframeHtml(html_body, gmail_styles) {
   const style = `<style>\n${rules.join('\n')}\n</style>`;
   if (!html_body) return style;
 
-  // Strip mobile media queries before rendering
-  const body = stripEmailResponsiveStyles(html_body);
+  // Desktop: strip mobile media queries so columns render correctly.
+  // Mobile: keep them so the email collapses to its intended mobile layout.
+  const body = mobileMode ? html_body : stripEmailResponsiveStyles(html_body);
 
   const headClose = body.indexOf('</head>');
   if (headClose !== -1) return body.slice(0, headClose) + style + body.slice(headClose);
   return style + body;
 }
 
-export default function EmailIframe({ html_body, gmail_styles, style, withLinks = false }) {
+export default function EmailIframe({ html_body, gmail_styles, style, withLinks = false, mobileMode = false }) {
   const containerRef = useRef(null);
-  const iframeHtml = buildEmailIframeHtml(html_body, gmail_styles);
+  const iframeHtml = buildEmailIframeHtml(html_body, gmail_styles, mobileMode);
+  const viewport = mobileMode ? MOBILE_VIEWPORT : IFRAME_VIEWPORT;
 
   if (!withLinks) {
     return (
@@ -116,11 +120,11 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
           onLoad={(e) => {
             if (!containerRef.current) return;
             const containerWidth = containerRef.current.offsetWidth;
-            const scale = containerWidth / IFRAME_VIEWPORT;
+            const scale = containerWidth / viewport;
             e.target.style.transform = `scale(${scale})`;
           }}
           style={{
-            width: `${IFRAME_VIEWPORT}px`,
+            width: `${viewport}px`,
             height: '3000px',
             border: 'none',
             display: 'block',
@@ -143,7 +147,7 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
         const h = e.target.contentDocument?.body?.scrollHeight;
         if (h) e.target.style.height = h + 'px';
       }}
-      style={{ width: `${IFRAME_VIEWPORT}px`, height: '100%', border: 'none', display: 'block', ...style }}
+      style={{ width: `${viewport}px`, height: '100%', border: 'none', display: 'block', ...style }}
     />
   );
 }
