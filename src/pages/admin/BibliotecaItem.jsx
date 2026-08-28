@@ -1032,6 +1032,8 @@ const TRACKING_PARAMS = new Set([
   '_bta_tid','_bta_c',
   // ActiveCampaign
   'vuid',
+  // Time2Padel / custom newsletter trackers
+  '__cn_tracker', '__cn_tk',
 ]);
 function cleanUrl(rawUrl) {
   if (!rawUrl) return rawUrl;
