@@ -915,26 +915,30 @@ function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
 function ImageModal({ imageUrl, emailHtml, emailGmailStyles, alt, initialMobileMode = false, onClose }) {
   const [mobileMode, setMobileMode] = useState(initialMobileMode);
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:200, background:'var(--t-overlay)', display:'flex', alignItems:'flex-start', justifyContent:'center', overflowY:'auto', padding:'32px 24px' }} onClick={onClose}>
-      <div style={{ position:'relative', maxWidth: 900, width:'100%' }} onClick={e => e.stopPropagation()}>
-        <div style={{ position:'absolute', top:-36, left:0, right:0, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          {emailHtml ? (
-            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, overflow: 'hidden' }}>
-              {[{ m: false, Icon: IconDesktop, title: 'Vista escritorio' }, { m: true, Icon: IconMobile, title: 'Vista móvil' }].map(({ m, Icon, title }) => (
-                <button key={String(m)} onClick={() => setMobileMode(m)} title={title}
-                  style={{ background: mobileMode === m ? 'rgba(255,255,255,0.2)' : 'none', border: 'none', color: mobileMode === m ? 'white' : 'rgba(255,255,255,0.5)', padding: '5px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                  <Icon />
-                </button>
-              ))}
-            </div>
-          ) : <span />}
-          <button onClick={onClose} style={{ background:'transparent', border:'none', color:'var(--t-text-placeholder)', cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', gap:6 }}><IconX /> Cerrar</button>
-        </div>
+    <div style={{ position:'fixed', inset:0, zIndex:200, background:'var(--t-overlay)', overflowY:'auto' }} onClick={onClose}>
+      {/* Sticky controls bar — pointerEvents:none so transparent areas don't block backdrop click */}
+      <div style={{ position:'sticky', top:0, zIndex:1, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 24px', pointerEvents:'none' }}>
+        {emailHtml ? (
+          <div style={{ display:'flex', background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.2)', borderRadius:8, overflow:'hidden', pointerEvents:'auto' }} onClick={e => e.stopPropagation()}>
+            {[{ m: false, Icon: IconDesktop, title:'Vista escritorio' }, { m: true, Icon: IconMobile, title:'Vista móvil' }].map(({ m, Icon, title }) => (
+              <button key={String(m)} onClick={() => setMobileMode(m)} title={title}
+                style={{ background: mobileMode === m ? 'rgba(255,255,255,0.2)' : 'none', border:'none', color: mobileMode === m ? 'white' : 'rgba(255,255,255,0.5)', padding:'5px 8px', cursor:'pointer', display:'flex', alignItems:'center' }}>
+                <Icon />
+              </button>
+            ))}
+          </div>
+        ) : <span />}
+        <button onClick={e => { e.stopPropagation(); onClose(); }} style={{ background:'transparent', border:'none', color:'var(--t-text-placeholder)', cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', gap:6, pointerEvents:'auto' }}>
+          <IconX /> Cerrar
+        </button>
+      </div>
+      {/* Content — only this area blocks backdrop click */}
+      <div style={{ display:'flex', justifyContent:'center', padding:'0 24px 40px' }} onClick={e => e.stopPropagation()}>
         {emailHtml
-          ? <div style={{ background:'#fff', borderRadius:12, overflow:'hidden', width:'fit-content', margin:'0 auto' }}>
+          ? <div style={{ background:'#fff', borderRadius:12, overflow:'hidden', width:'fit-content' }}>
               <EmailIframe html_body={emailHtml} gmail_styles={emailGmailStyles} withLinks={true} mobileMode={mobileMode} />
             </div>
-          : <img src={imageUrl} alt={alt} style={{ width:'100%', borderRadius:12, display:'block' }} />
+          : <img src={imageUrl} alt={alt} style={{ maxWidth:'100%', borderRadius:12, display:'block' }} />
         }
       </div>
     </div>
