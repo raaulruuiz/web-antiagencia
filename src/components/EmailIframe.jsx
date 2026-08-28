@@ -16,6 +16,11 @@ const EMAIL_BASE_RULES = [
   'img[class*="image--round"], [class*="image--round"] img { border-radius: 8px !important; }',
   'table { border-collapse: collapse !important; }',
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
+  // Social icon fix: Gmail strips <style> blocks, so <a> links wrapping images lose their
+  // class-based "display:inline-block" and fall back to "display:inline". Our "img{display:block}"
+  // rule then forces each <a>+img pair onto its own line (block inside inline = implicit block).
+  // Restoring inline-block on those <a> elements keeps social icon rows horizontal.
+  'a:has(> img) { display: inline-block; }',
   // Gmail injects download-button overlays (div.a6S) on top of images with opacity:0.01 and
   // absolute positioning. Without Gmail's own CSS, these render as block elements in the normal
   // flow and create large invisible gaps between image sections.
