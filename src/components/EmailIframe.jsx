@@ -39,8 +39,6 @@ const DND_DESKTOP_RULES = [
 // Mobile-only: hide elements marked as desktop-only in the email's responsive design.
 const DND_MOBILE_RULES = [
   '[class*="dnd-hide-mobile"] { display: none !important; }',
-  // Klaviyo uses "desktop-only" class suffix for elements that should be hidden on mobile
-  '[class*="desktop-only"] { display: none !important; }',
 ];
 
 const EMAIL_WIDTH = 600; // standard email content width in px
