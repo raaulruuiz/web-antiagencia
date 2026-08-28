@@ -43,6 +43,9 @@ const DND_DESKTOP_RULES = [
 // table-specific rule must come AFTER the generic one so specificity wins.
 const DND_MOBILE_RULES = [
   '[class*="dnd-hide-mobile"] { display: none !important; }',
+  // Gmail strips <style> blocks, so Klaviyo responsive classes have no media query to toggle them.
+  // Force-hide desktop-only and force-show mobile-only explicitly.
+  '[class*="desktop-only"] { display: none !important; }',
   '[class*="mobile-only"] { display: block !important; max-height: none !important; overflow: visible !important; }',
   'table[class*="mobile-only"] { display: table !important; }',
 ];
