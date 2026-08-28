@@ -4793,10 +4793,10 @@ export default function BibliotecaItem() {
       <div className={isMobile ? 'flex flex-col gap-6' : 'flex gap-8 items-start'}>
 
         {/* Left: image */}
-        <div style={{ position: 'relative', flexShrink: 0, width: emailViewMode === 'mobile' ? 375 : 600 }}
+        <div style={{ position: 'relative', flexShrink: 0, width: 600 }}
           onMouseEnter={() => setImageHover(true)}
           onMouseLeave={() => setImageHover(false)}>
-          <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', width: emailViewMode === 'mobile' ? 375 : 600, borderRadius: 12 }}>
+          <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', width: 600, borderRadius: 12 }}>
             {item.email_html
               ? <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={true} mobileMode={emailViewMode === 'mobile'} />
               : (importEmail && lastEmail?.html_body)
