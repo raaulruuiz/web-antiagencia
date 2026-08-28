@@ -2727,23 +2727,24 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
       }
     } catch (_) {}
 
-    // Second pass: for URLs still pointing to tracking domains, delegate to the
-    // Antiagencia Chrome extension content script which bypasses CORS (user's real IP,
-    // not Railway's blocked server IP). Falls back gracefully if extension not installed.
-    const isStillTracking = (u) => {
-      try {
-        const { hostname, pathname } = new URL(u);
-        return (/^(trk|email|click|ctrk|r)\./i.test(hostname) && /\/ss\/c\//i.test(pathname))
-          || /ctrk\.|klclick[0-9]*\.com/.test(hostname)
-          || /\/ss\/c\//i.test(pathname);
-      } catch { return false; }
-    };
+    // Second pass: send to the Antiagencia Chrome extension any URL the backend
+    // couldn't resolve (returned same URL) and that isn't already a known social domain.
+    // The extension fetches with the user's real browser IP, bypassing blocks on Railway.
     try {
-      const stillTracking = [...new Set(
+      const stillUnresolved = [...new Set(
         [...doc.querySelectorAll('a[href]')]
           .map(a => a.getAttribute('href'))
-          .filter(h => h && h.startsWith('http') && isStillTracking(resolvedUrls[h] || h))
-      )];
+          .filter(h => {
+            if (!h || !h.startsWith('http')) return false;
+            const resolved = resolvedUrls[h];
+            // Only retry if backend returned same URL (couldn't resolve) or no result
+            if (resolved && resolved !== h) return false;
+            // Skip if already a known social URL
+            if (detectSocialNetwork(cleanUrl(resolved || h))) return false;
+            return true;
+          })
+      )].slice(0, 50);
+      const stillTracking = stillUnresolved;
       if (stillTracking.length) {
         const reqId = Math.random().toString(36).slice(2);
         const extResult = await new Promise((resolve) => {
