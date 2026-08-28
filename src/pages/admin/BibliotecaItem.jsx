@@ -1045,6 +1045,12 @@ function cleanUrl(rawUrl) {
   if (!rawUrl) return rawUrl;
   try {
     const u = new URL(rawUrl);
+    // Facebook redirects unauthenticated fetches to /login/?next=REAL_URL — unwrap it
+    if ((u.hostname === 'www.facebook.com' || u.hostname === 'facebook.com') &&
+        u.pathname === '/login/' && u.searchParams.has('next')) {
+      const next = u.searchParams.get('next');
+      if (next) return cleanUrl(next);
+    }
     for (const key of [...u.searchParams.keys()]) {
       if (TRACKING_PARAMS.has(key) || key.startsWith('utm_') || key.startsWith('hsa_')) u.searchParams.delete(key);
     }
