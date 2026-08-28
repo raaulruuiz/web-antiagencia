@@ -2724,6 +2724,36 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
       }
     } catch (_) {}
 
+    // Second pass: for URLs still pointing to tracking domains (backend IP blocked by ESP),
+    // try resolving directly from the browser. Browser fetch follows redirects cross-origin
+    // without CORS issues for GET requests (CORS only blocks reading the response body, not r.url).
+    const isStillTracking = (u) => {
+      try {
+        const { hostname, pathname } = new URL(u);
+        return (/^(trk|email|click|ctrk|r)\./i.test(hostname) && /\/ss\/c\//i.test(pathname))
+          || /ctrk\.|klclick[0-9]*\.com/.test(hostname)
+          || /\/ss\/c\//i.test(pathname);
+      } catch { return false; }
+    };
+    try {
+      const allHrefs2 = [...new Set(
+        [...doc.querySelectorAll('a[href]')]
+          .map(a => a.getAttribute('href'))
+          .filter(h => h && h.startsWith('http') && isStillTracking(resolvedUrls[h] || h))
+      )];
+      if (allHrefs2.length) {
+        await Promise.allSettled(allHrefs2.map(async url => {
+          try {
+            const r = await fetch(url, { method: 'GET', redirect: 'follow', signal: AbortSignal.timeout(6000) });
+            if (r.url && r.url !== url && !isStillTracking(r.url)) {
+              resolvedUrls[url] = r.url;
+            }
+            r.body?.cancel?.();
+          } catch { /* keep original */ }
+        }));
+      }
+    } catch (_) {}
+
     const resolveHref = (href) => cleanUrl(resolvedUrls[href] || href);
     const roundBR = getRoundBorderRadius(doc);
 
