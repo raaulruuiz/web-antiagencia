@@ -2735,10 +2735,13 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
           .filter(h => {
             if (!h || !h.startsWith('http')) return false;
             const resolved = resolvedUrls[h];
-            // Only retry if backend returned same URL (couldn't resolve) or no result
-            if (resolved && resolved !== h) return false;
-            // Skip if already a known social URL
-            if (detectSocialNetwork(cleanUrl(resolved || h))) return false;
+            const effective = resolved || h;
+            // Send to extension any URL whose best-known resolution is NOT a social network.
+            // We can't trust the backend resolution for Klaviyo links: Railway IPs trigger
+            // bot-detection and get redirected to the sender's homepage (e.g. fincalamesa.com)
+            // instead of the real social destination. The extension bypasses this with the
+            // user's real browser IP.
+            if (detectSocialNetwork(cleanUrl(effective))) return false;
             return true;
           })
       )].slice(0, 50);
