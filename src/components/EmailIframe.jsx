@@ -36,9 +36,15 @@ const DND_DESKTOP_RULES = [
   '[class*="mobile-only"] { display: none !important; }',
 ];
 
-// Mobile-only: hide elements marked as desktop-only in the email's responsive design.
+// Mobile-only rules injected in mobile preview mode.
+// Gmail strips <style> blocks from captured HTML, leaving only inline styles.
+// Klaviyo mobile-only elements have style="display:none" inline with no media query
+// to override them in an iframe. We force-show them explicitly.
+// table-specific rule must come AFTER the generic one so specificity wins.
 const DND_MOBILE_RULES = [
   '[class*="dnd-hide-mobile"] { display: none !important; }',
+  '[class*="mobile-only"] { display: block !important; max-height: none !important; overflow: visible !important; }',
+  'table[class*="mobile-only"] { display: table !important; }',
 ];
 
 const EMAIL_WIDTH = 600; // standard email content width in px
