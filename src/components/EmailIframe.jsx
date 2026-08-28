@@ -14,6 +14,19 @@ const EMAIL_BASE_RULES = [
   'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
   'table { border-collapse: collapse !important; }',
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
+  // Sales Manago / Beefree DnD layout system: columns are built with class-based CSS rules
+  // (dnd-display-table-cell, dnd-display-table-row, etc.). Gmail applies these via its own
+  // stylesheet so they render correctly there. Captured HTML loses those <style> rules, causing
+  // all columns to collapse to display:block. We restore them via substring attribute selectors
+  // (the classes carry a long hash prefix, e.g. "m_-533...dnd-display-table-cell").
+  '[class*="dnd-display-table"] { display: table !important; width: 100% !important; }',
+  '[class*="dnd-display-table-row"] { display: table-row !important; }',
+  '[class*="dnd-display-table-cell"] { display: table-cell !important; vertical-align: top !important; box-sizing: border-box !important; }',
+  '[class*="dnd-width-100-percent"] { width: 100% !important; }',
+  '[class*="dnd-width-50-percent"] { width: 50% !important; }',
+  '[class*="dnd-width-33-33-percent"] { width: 33.33% !important; }',
+  '[class*="dnd-width-25-percent"] { width: 25% !important; }',
+  '[class*="dnd-hide-desktop"] { display: none !important; }',
 ];
 
 const EMAIL_WIDTH = 600; // standard email content width in px
