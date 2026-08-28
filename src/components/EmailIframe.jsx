@@ -181,9 +181,12 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
           const h = e.target.contentDocument?.body?.scrollHeight;
           if (!h) return;
           e.target.style.height = h + 'px';
-          // Shrink the container to match the scaled height so there's no whitespace below
-          if (mobileMode && e.target.parentElement) {
-            e.target.parentElement.style.height = Math.ceil(h * scale) + 'px';
+          if (e.target.parentElement) {
+            // In mobile mode shrink the outer div to the scaled height so no whitespace appears.
+            // In desktop mode always clear any previously set inline height so the div auto-sizes.
+            e.target.parentElement.style.height = mobileMode
+              ? Math.ceil(h * scale) + 'px'
+              : '';
           }
         }}
         style={{
