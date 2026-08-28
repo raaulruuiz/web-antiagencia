@@ -4793,10 +4793,14 @@ export default function BibliotecaItem() {
       <div className={isMobile ? 'flex flex-col gap-6' : 'flex gap-8 items-start'}>
 
         {/* Left: image */}
-        <div style={{ position: 'relative', flexShrink: 0, width: 600 }}
+        {(() => {
+          const hasEmail = item.email_html || (importEmail && lastEmail?.html_body);
+          const previewW = hasEmail && emailViewMode === 'mobile' ? 375 : 600;
+          return (
+        <div style={{ position: 'relative', flexShrink: 0, width: previewW, transition: 'width 0.2s' }}
           onMouseEnter={() => setImageHover(true)}
           onMouseLeave={() => setImageHover(false)}>
-          <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', width: 600, borderRadius: 12 }}>
+          <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', width: previewW, borderRadius: 12, transition: 'width 0.2s' }}>
             {item.email_html
               ? <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={true} mobileMode={emailViewMode === 'mobile'} />
               : (importEmail && lastEmail?.html_body)
@@ -4830,6 +4834,8 @@ export default function BibliotecaItem() {
             </div>
           )}
         </div>
+          );
+        })()}
 
         {/* Right: onboarding OR display */}
         {mode === 'onboarding' ? (
