@@ -1034,6 +1034,8 @@ const TRACKING_PARAMS = new Set([
   'vuid',
   // Time2Padel / custom newsletter trackers
   '__cn_tracker', '__cn_tk',
+  // Braze (Appboy) email tracking
+  'bc_lcid',
 ]);
 function cleanUrl(rawUrl) {
   if (!rawUrl) return rawUrl;
