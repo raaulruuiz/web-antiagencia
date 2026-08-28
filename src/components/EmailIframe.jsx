@@ -130,7 +130,8 @@ function buildEmailIframeHtml(html_body, gmail_styles, mobileMode = false) {
 export default function EmailIframe({ html_body, gmail_styles, style, withLinks = false, mobileMode = false }) {
   const containerRef = useRef(null);
   const iframeHtml = buildEmailIframeHtml(html_body, gmail_styles, mobileMode);
-  const viewport = mobileMode ? MOBILE_VIEWPORT : IFRAME_VIEWPORT;
+  // Always render at 601px — email content is designed for this width and would clip at 375px.
+  // mobileMode only affects the injected CSS (mobile-only/desktop-only visibility, no media query strip).
 
   if (!withLinks) {
     return (
@@ -141,11 +142,11 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
           onLoad={(e) => {
             if (!containerRef.current) return;
             const containerWidth = containerRef.current.offsetWidth;
-            const scale = containerWidth / viewport;
+            const scale = containerWidth / IFRAME_VIEWPORT;
             e.target.style.transform = `scale(${scale})`;
           }}
           style={{
-            width: `${viewport}px`,
+            width: `${IFRAME_VIEWPORT}px`,
             height: '3000px',
             border: 'none',
             display: 'block',
@@ -162,7 +163,7 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
 
   // withLinks=true: wrap in a div sized to viewport so parent containers don't add gaps
   return (
-    <div style={{ width: viewport, overflow: 'hidden' }}>
+    <div style={{ width: IFRAME_VIEWPORT, overflow: 'hidden' }}>
       <iframe
         srcDoc={iframeHtml}
         sandbox="allow-same-origin allow-popups allow-top-navigation-by-user-activation"
@@ -170,7 +171,7 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
           const h = e.target.contentDocument?.body?.scrollHeight;
           if (h) e.target.style.height = h + 'px';
         }}
-        style={{ width: `${viewport}px`, height: '100%', border: 'none', display: 'block', ...style }}
+        style={{ width: `${IFRAME_VIEWPORT}px`, height: '100%', border: 'none', display: 'block', ...style }}
       />
     </div>
   );
