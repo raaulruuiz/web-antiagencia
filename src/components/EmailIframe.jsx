@@ -16,6 +16,11 @@ const EMAIL_BASE_RULES = [
   'img[class*="image--round"], [class*="image--round"] img { border-radius: 8px !important; }',
   'table { border-collapse: collapse !important; }',
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
+  // Link color fix: Gmail rewrites <style> selectors with its own scope (.gmail-compose-body a …)
+  // which don't match inside our iframe. Without those rules the browser falls back to its default
+  // "a { color: blue }". Setting color:inherit makes links take the surrounding text color instead.
+  // Inline styles (style="color:#xxx") still win because they have higher specificity.
+  'a { color: inherit; }',
   // Social icon fix: Gmail strips <style> blocks, so <a> links wrapping images lose their
   // class-based "display:inline-block" and fall back to "display:inline". Our "img{display:block}"
   // rule then forces each <a>+img pair onto its own line (block inside inline = implicit block).
