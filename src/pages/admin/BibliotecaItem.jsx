@@ -1053,7 +1053,7 @@ const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f9
 const DEFAULT_TITLES = { enlaces: 'Enlaces del Correo', imagen: 'Imágenes del Correo', imagen_texto: 'Análisis y Comentarios', correccion: 'Cómo lo Reescribiría Yo', asunto_adelanto: 'Asunto y Adelanto', transcribir: 'Transcripción', columnas: 'Columnas', puntuacion: 'Puntuación', audio: 'Audio', social: 'Redes Sociales' };
 
 const PLANTILLA_TYPES = {
-  completo: ['puntuacion', 'audio', 'imagen', 'enlaces', 'transcribir', 'asunto_adelanto', 'imagen_texto', 'correccion'],
+  completo: ['puntuacion', 'audio', 'imagen', 'enlaces', 'transcribir', 'asunto_adelanto', 'imagen_texto', 'social', 'correccion'],
   simple:   ['puntuacion', 'asunto_adelanto', 'imagen_texto', 'correccion'],
 };
 
