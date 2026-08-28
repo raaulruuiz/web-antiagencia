@@ -1091,10 +1091,14 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
       const src = img.getAttribute('src') || '';
       if (!src || src.startsWith('data:')) return false;
       if (src.includes('gstatic.com/s/e/notoemoji')) return false;
-      const w = parseInt(img.getAttribute('width') || '100');
-      const h = parseInt(img.getAttribute('height') || '100');
+      const w = parseInt(img.getAttribute('width')) || 100;  // parseInt("auto")=NaN → 100
+      const h = parseInt(img.getAttribute('height')) || 100;
       return w > 5 && h > 5;
-    }).map(img => ({ url: img.getAttribute('src') }));
+    }).map(img => {
+      const cls = img.getAttribute('class') || '';
+      const round = /image--round|img-circle/.test(cls);
+      return { url: img.getAttribute('src'), ...(round ? { borderRadius: '50%' } : {}) };
+    });
     if (imgs.length) return { ...block, images: imgs };
   }
 
@@ -1112,8 +1116,8 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
       const imgs = [...a.querySelectorAll('img')].filter(img => {
         const src = img.getAttribute('src') || '';
         if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
-        const w = parseInt(img.getAttribute('width') || '100');
-        const h = parseInt(img.getAttribute('height') || '100');
+        const w = parseInt(img.getAttribute('width')) || 100;
+        const h = parseInt(img.getAttribute('height')) || 100;
         return w > 5 && h > 5;
       });
       if (!urlMap.has(resolvedHref)) urlMap.set(resolvedHref, { images: [], htmls: [] });
@@ -1121,7 +1125,9 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
       if (imgs.length) {
         imgs.forEach(img => {
           const src = img.getAttribute('src');
-          if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src });
+          const cls = img.getAttribute('class') || '';
+          const round = /image--round|img-circle/.test(cls);
+          if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src, ...(round ? { borderRadius: '50%' } : {}) });
         });
       } else {
         const text = a.textContent.trim();
@@ -1496,7 +1502,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                         </a>
                       ) : (
                         <PreviewImg key={i} src={img.url}
-                          imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                          imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: img.borderRadius ?? 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
                           wrapperStyle={{ width: '100%' }}
                           href={link.url || undefined}
                           onPreview={setLightbox} />
@@ -1529,7 +1535,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
                         </a>
                       ) : (
                         <PreviewImg key={i} src={img.url}
-                          imgStyle={{ height: 160, borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
+                          imgStyle={{ height: 160, borderRadius: img.borderRadius ?? 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
                           wrapperStyle={{ flexShrink: 0 }}
                           href={link.url || undefined}
                           onPreview={setLightbox} />
@@ -1619,10 +1625,10 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             }>
               {imgs.map((img, i) => (
                 block.images_layout === 'grid'
-                  ? <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
+                  ? <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: img.borderRadius ?? 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
                   : block.images_layout === 'fila'
-                  ? <PreviewImg key={i} src={img.url} imgStyle={{ height: 180, width: 'auto', borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} />
-                  : <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
+                  ? <PreviewImg key={i} src={img.url} imgStyle={{ height: 180, width: 'auto', borderRadius: img.borderRadius ?? 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} />
+                  : <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: img.borderRadius ?? 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
               ))}
             </div>
           )}
@@ -2662,11 +2668,15 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         const src = img.getAttribute('src') || '';
         if (!src || src.startsWith('data:')) return false;
         if (src.includes('gstatic.com/s/e/notoemoji')) return false;
-        const w = parseInt(img.getAttribute('width') || '100');
-        const h = parseInt(img.getAttribute('height') || '100');
+        const w = parseInt(img.getAttribute('width')) || 100;
+        const h = parseInt(img.getAttribute('height')) || 100;
         return w > 5 && h > 5;
-      }).map(img => img.getAttribute('src'));
-      if (imgs.length) setDraft(d => ({ ...d, images: imgs.map(url => ({ url })) }));
+      }).map(img => {
+        const cls = img.getAttribute('class') || '';
+        const round = /image--round|img-circle/.test(cls);
+        return { url: img.getAttribute('src'), ...(round ? { borderRadius: '50%' } : {}) };
+      });
+      if (imgs.length) setDraft(d => ({ ...d, images: imgs }));
     }
 
     if (draft.type === 'enlaces') {
@@ -2681,8 +2691,8 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         const imgs = [...a.querySelectorAll('img')].filter(img => {
           const src = img.getAttribute('src') || '';
           if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
-          const w = parseInt(img.getAttribute('width') || '100');
-          const h = parseInt(img.getAttribute('height') || '100');
+          const w = parseInt(img.getAttribute('width')) || 100;
+          const h = parseInt(img.getAttribute('height')) || 100;
           return w > 5 && h > 5;
         });
         if (!urlMap.has(resolvedHref)) urlMap.set(resolvedHref, { images: [], htmls: [] });
@@ -2690,7 +2700,9 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         if (imgs.length) {
           imgs.forEach(img => {
             const src = img.getAttribute('src');
-            if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src });
+            const cls = img.getAttribute('class') || '';
+            const round = /image--round|img-circle/.test(cls);
+            if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src, ...(round ? { borderRadius: '50%' } : {}) });
           });
         } else {
           const text = a.textContent.trim();
