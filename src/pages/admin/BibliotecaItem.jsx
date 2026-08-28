@@ -1139,16 +1139,6 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
   }
 
   if (block.type === 'enlaces') {
-    // Filter tracking URLs that couldn't be resolved (still point to known click-tracking domains)
-    const isUnresolvedTracking = (u) => {
-      try {
-        const { hostname, pathname } = new URL(u);
-        if (/^(trk|email|click|ctrk|r)\./i.test(hostname) && /\/ss\/c\//i.test(pathname)) return true;
-        if (/ctrk\.|klclick[0-9]*\.com/.test(hostname)) return true;
-        if (/\/ss\/c\//i.test(pathname)) return true;
-        return false;
-      } catch { return false; }
-    };
     const roundBR = getRoundBorderRadius(doc);
     const urlMap = new Map(); // key → { images: [], htmls: [] }
     doc.querySelectorAll('a').forEach(a => {
@@ -1157,7 +1147,6 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
       if (!href.startsWith('http')) return; // skip relative or non-http
       const resolvedHref = resolveHref(href); // use final URL as map key
       if (detectSocialNetwork(resolvedHref)) return; // va en el bloque Social, no en enlaces
-      if (isUnresolvedTracking(resolvedHref)) return; // URL de tracking sin resolver
       const imgs = [...a.querySelectorAll('img')].filter(img => {
         const src = img.getAttribute('src') || '';
         if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
@@ -1190,17 +1179,41 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
   }
 
   if (block.type === 'social') {
+    // Detect social network from a string (URL, alt text, title, img src, etc.)
+    const detectSocialFromText = (text = '') => {
+      const t = text.toLowerCase();
+      if (/instagram/.test(t)) return 'instagram';
+      if (/facebook|fb\.com/.test(t)) return 'facebook';
+      if (/tiktok/.test(t)) return 'tiktok';
+      if (/youtube|youtu\.be/.test(t)) return 'youtube';
+      if (/pinterest/.test(t)) return 'pinterest';
+      if (/linkedin/.test(t)) return 'linkedin';
+      if (/whatsapp/.test(t)) return 'whatsapp';
+      if (/\bx\.com\b|twitter/.test(t)) return 'x';
+      return null;
+    };
     const socials = [];
     const seenNetworks = new Set();
     doc.querySelectorAll('a').forEach(a => {
       const href = a.getAttribute('href');
       if (!href) return;
       const resolvedHref = resolveHref(href);
-      const network = detectSocialNetwork(resolvedHref);
+      // Primary: detect from resolved URL
+      let network = detectSocialNetwork(resolvedHref);
+      // Fallback: when resolution failed (tracking URL), detect from context clues
+      if (!network) {
+        const img = a.querySelector('img');
+        network = detectSocialFromText(img?.getAttribute('alt') || '')
+          || detectSocialFromText(img?.getAttribute('src') || '')
+          || detectSocialFromText(a.getAttribute('title') || '')
+          || detectSocialFromText(a.textContent || '');
+      }
       if (network && !seenNetworks.has(network)) {
         seenNetworks.add(network);
         const sn = SOCIAL_NETWORKS.find(s => s.id === network);
-        socials.push({ network, color: sn?.color || '#71717a', url: resolvedHref });
+        // Use resolved URL if it's a real social URL; otherwise leave blank for the user to fill
+        const url = detectSocialNetwork(resolvedHref) ? resolvedHref : '';
+        socials.push({ network, color: sn?.color || '#71717a', url });
       }
     });
     if (socials.length) return { ...block, socials };
@@ -2706,15 +2719,6 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     } catch (_) {}
 
     const resolveHref = (href) => cleanUrl(resolvedUrls[href] || href);
-    const isUnresolvedTracking = (u) => {
-      try {
-        const { hostname, pathname } = new URL(u);
-        if (/^(trk|email|click|ctrk|r)\./i.test(hostname) && /\/ss\/c\//i.test(pathname)) return true;
-        if (/ctrk\.|klclick[0-9]*\.com/.test(hostname)) return true;
-        if (/\/ss\/c\//i.test(pathname)) return true;
-        return false;
-      } catch { return false; }
-    };
     const roundBR = getRoundBorderRadius(doc);
 
     if (draft.type === 'imagen') {
@@ -2741,7 +2745,6 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         if (!href.startsWith('http')) return;
         const resolvedHref = resolveHref(href);
         if (detectSocialNetwork(resolvedHref)) return;
-        if (isUnresolvedTracking(resolvedHref)) return;
         const imgs = [...a.querySelectorAll('img')].filter(img => {
           const src = img.getAttribute('src') || '';
           if (!src || src.includes('gstatic.com/s/e/notoemoji')) return false;
@@ -2774,17 +2777,37 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
     }
 
     if (draft.type === 'social') {
+      const detectSocialFromText = (text = '') => {
+        const t = text.toLowerCase();
+        if (/instagram/.test(t)) return 'instagram';
+        if (/facebook|fb\.com/.test(t)) return 'facebook';
+        if (/tiktok/.test(t)) return 'tiktok';
+        if (/youtube|youtu\.be/.test(t)) return 'youtube';
+        if (/pinterest/.test(t)) return 'pinterest';
+        if (/linkedin/.test(t)) return 'linkedin';
+        if (/whatsapp/.test(t)) return 'whatsapp';
+        if (/\bx\.com\b|twitter/.test(t)) return 'x';
+        return null;
+      };
       const socials = [];
       const seenNetworks = new Set();
       doc.querySelectorAll('a').forEach(a => {
         const href = a.getAttribute('href');
         if (!href) return;
         const resolvedHref = resolveHref(href);
-        const network = detectSocialNetwork(resolvedHref);
+        let network = detectSocialNetwork(resolvedHref);
+        if (!network) {
+          const img = a.querySelector('img');
+          network = detectSocialFromText(img?.getAttribute('alt') || '')
+            || detectSocialFromText(img?.getAttribute('src') || '')
+            || detectSocialFromText(a.getAttribute('title') || '')
+            || detectSocialFromText(a.textContent || '');
+        }
         if (network && !seenNetworks.has(network)) {
           seenNetworks.add(network);
           const sn = SOCIAL_NETWORKS.find(s => s.id === network);
-          socials.push({ network, color: sn?.color || '#71717a', url: resolvedHref });
+          const url = detectSocialNetwork(resolvedHref) ? resolvedHref : '';
+          socials.push({ network, color: sn?.color || '#71717a', url });
         }
       });
       if (socials.length) setDraft(d => ({ ...d, socials }));
