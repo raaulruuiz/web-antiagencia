@@ -1074,6 +1074,16 @@ const PLANTILLA_TYPES = {
   simple:   ['puntuacion', 'asunto_adelanto', 'imagen_texto', 'correccion'],
 };
 
+// Reads the actual border-radius for image--round from the email's own <style> tags.
+// Gmail strips stylesheets, but we still have the original HTML with the CSS intact.
+function getRoundBorderRadius(doc) {
+  for (const style of doc.querySelectorAll('style')) {
+    const match = style.textContent.match(/image--round[^{]*\{[^}]*border-radius:\s*([^;}\s]+)/i);
+    if (match) return match[1];
+  }
+  return '8px'; // fallback if class not defined in this email
+}
+
 // resolvedUrls: { [originalHref]: resolvedHref } — built before calling this function
 function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
   if (!htmlBody) return block;
@@ -1087,6 +1097,7 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
   };
 
   if (block.type === 'imagen') {
+    const roundBR = getRoundBorderRadius(doc);
     const imgs = [...doc.querySelectorAll('img')].filter(img => {
       const src = img.getAttribute('src') || '';
       if (!src || src.startsWith('data:')) return false;
@@ -1097,7 +1108,7 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
     }).map(img => {
       const cls = img.getAttribute('class') || '';
       const round = /image--round|img-circle/.test(cls);
-      return { url: img.getAttribute('src'), ...(round ? { borderRadius: '50%' } : {}) };
+      return { url: img.getAttribute('src'), ...(round ? { borderRadius: roundBR } : {}) };
     });
     if (imgs.length) return { ...block, images: imgs };
   }
@@ -1105,6 +1116,7 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
   if (block.type === 'enlaces') {
     // Filter tracking URLs that couldn't be resolved (still point to ctrk./klclick domains)
     const isUnresolvedTracking = (u) => /ctrk\.|klclick[0-9]*\.com/.test(u);
+    const roundBR = getRoundBorderRadius(doc);
     const urlMap = new Map(); // key → { images: [], htmls: [] }
     doc.querySelectorAll('a').forEach(a => {
       const href = a.getAttribute('href');
@@ -1127,7 +1139,7 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
           const src = img.getAttribute('src');
           const cls = img.getAttribute('class') || '';
           const round = /image--round|img-circle/.test(cls);
-          if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src, ...(round ? { borderRadius: '50%' } : {}) });
+          if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src, ...(round ? { borderRadius: roundBR } : {}) });
         });
       } else {
         const text = a.textContent.trim();
@@ -2662,6 +2674,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 
     const resolveHref = (href) => cleanUrl(resolvedUrls[href] || href);
     const isUnresolvedTracking = (u) => /ctrk\.|klclick[0-9]*\.com/.test(u);
+    const roundBR = getRoundBorderRadius(doc);
 
     if (draft.type === 'imagen') {
       const imgs = [...doc.querySelectorAll('img')].filter(img => {
@@ -2674,7 +2687,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
       }).map(img => {
         const cls = img.getAttribute('class') || '';
         const round = /image--round|img-circle/.test(cls);
-        return { url: img.getAttribute('src'), ...(round ? { borderRadius: '50%' } : {}) };
+        return { url: img.getAttribute('src'), ...(round ? { borderRadius: roundBR } : {}) };
       });
       if (imgs.length) setDraft(d => ({ ...d, images: imgs }));
     }
@@ -2702,7 +2715,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             const src = img.getAttribute('src');
             const cls = img.getAttribute('class') || '';
             const round = /image--round|img-circle/.test(cls);
-            if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src, ...(round ? { borderRadius: '50%' } : {}) });
+            if (!entry.images.some(e => e.url === src)) entry.images.push({ url: src, ...(round ? { borderRadius: roundBR } : {}) });
           });
         } else {
           const text = a.textContent.trim();

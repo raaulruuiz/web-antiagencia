@@ -13,7 +13,7 @@ const EMAIL_BASE_RULES = [
   'p { margin: 0; }',
   'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
   // Shopify Email / MJML "round" image class — Gmail strips the stylesheet so border-radius is lost
-  'img[class*="image--round"], [class*="image--round"] img { border-radius: 50% !important; }',
+  'img[class*="image--round"], [class*="image--round"] img { border-radius: 8px !important; }',
   'table { border-collapse: collapse !important; }',
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
   // Gmail injects download-button overlays (div.a6S) on top of images with opacity:0.01 and
