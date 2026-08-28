@@ -1038,6 +1038,8 @@ const TRACKING_PARAMS = new Set([
   'bc_lcid',
   // Klaviyo attribution params
   'absrc', 'abid',
+  // YouTube click redirect tracking (added by YouTube when following external links)
+  'cbrd', 'ucbcb',
 ]);
 function cleanUrl(rawUrl) {
   if (!rawUrl) return rawUrl;
@@ -1215,10 +1217,11 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
           || detectSocialFromText(a.textContent || '');
       }
       if (network && !seenNetworks.has(network)) {
+        const url = detectSocialNetwork(resolvedHref) ? resolvedHref : '';
+        // Only add if we have a real social URL — skip text-only detections with no URL
+        if (!url) return;
         seenNetworks.add(network);
         const sn = SOCIAL_NETWORKS.find(s => s.id === network);
-        // Use resolved URL if it's a real social URL; otherwise leave blank for the user to fill
-        const url = detectSocialNetwork(resolvedHref) ? resolvedHref : '';
         socials.push({ network, color: sn?.color || '#71717a', url });
       }
     });
@@ -2724,9 +2727,9 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
       }
     } catch (_) {}
 
-    // Second pass: for URLs still pointing to tracking domains (backend IP blocked by ESP),
-    // try resolving directly from the browser. Browser fetch follows redirects cross-origin
-    // without CORS issues for GET requests (CORS only blocks reading the response body, not r.url).
+    // Second pass: for URLs still pointing to tracking domains, delegate to the
+    // Antiagencia Chrome extension content script which bypasses CORS (user's real IP,
+    // not Railway's blocked server IP). Falls back gracefully if extension not installed.
     const isStillTracking = (u) => {
       try {
         const { hostname, pathname } = new URL(u);
@@ -2736,21 +2739,26 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
       } catch { return false; }
     };
     try {
-      const allHrefs2 = [...new Set(
+      const stillTracking = [...new Set(
         [...doc.querySelectorAll('a[href]')]
           .map(a => a.getAttribute('href'))
           .filter(h => h && h.startsWith('http') && isStillTracking(resolvedUrls[h] || h))
       )];
-      if (allHrefs2.length) {
-        await Promise.allSettled(allHrefs2.map(async url => {
-          try {
-            const r = await fetch(url, { method: 'GET', redirect: 'follow', signal: AbortSignal.timeout(6000) });
-            if (r.url && r.url !== url && !isStillTracking(r.url)) {
-              resolvedUrls[url] = r.url;
+      if (stillTracking.length) {
+        const reqId = Math.random().toString(36).slice(2);
+        const extResult = await new Promise((resolve) => {
+          const timeout = setTimeout(() => { window.removeEventListener('message', handler); resolve({}); }, 10000);
+          const handler = (e) => {
+            if (e.data?.source === 'antiagencia-ext' && e.data?.type === 'resolveUrlsResponse' && e.data?.reqId === reqId) {
+              clearTimeout(timeout);
+              window.removeEventListener('message', handler);
+              resolve(e.data.results || {});
             }
-            r.body?.cancel?.();
-          } catch { /* keep original */ }
-        }));
+          };
+          window.addEventListener('message', handler);
+          window.postMessage({ source: 'antiagencia-page', type: 'resolveUrlsRequest', urls: stillTracking, reqId }, '*');
+        });
+        Object.assign(resolvedUrls, extResult);
       }
     } catch (_) {}
 
@@ -2840,9 +2848,11 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             || detectSocialFromText(a.textContent || '');
         }
         if (network && !seenNetworks.has(network)) {
+          const url = detectSocialNetwork(resolvedHref) ? resolvedHref : '';
+          // Only add if we have a real social URL — skip text-only detections with no URL
+          if (!url) return;
           seenNetworks.add(network);
           const sn = SOCIAL_NETWORKS.find(s => s.id === network);
-          const url = detectSocialNetwork(resolvedHref) ? resolvedHref : '';
           socials.push({ network, color: sn?.color || '#71717a', url });
         }
       });
