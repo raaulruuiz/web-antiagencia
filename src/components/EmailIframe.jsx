@@ -162,8 +162,9 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
   }
 
   // withLinks=true: wrap in a div sized to viewport so parent containers don't add gaps
+  const viewport = mobileMode ? MOBILE_VIEWPORT : IFRAME_VIEWPORT;
   return (
-    <div style={{ width: IFRAME_VIEWPORT, overflow: 'hidden' }}>
+    <div style={{ width: viewport, overflow: 'hidden' }}>
       <iframe
         srcDoc={iframeHtml}
         sandbox="allow-same-origin allow-popups allow-top-navigation-by-user-activation"
@@ -171,7 +172,7 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
           const h = e.target.contentDocument?.body?.scrollHeight;
           if (h) e.target.style.height = h + 'px';
         }}
-        style={{ width: `${IFRAME_VIEWPORT}px`, height: '100%', border: 'none', display: 'block', ...style }}
+        style={{ width: `${viewport}px`, height: '100%', border: 'none', display: 'block', ...style }}
       />
     </div>
   );
