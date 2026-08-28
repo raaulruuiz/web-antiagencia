@@ -1036,6 +1036,8 @@ const TRACKING_PARAMS = new Set([
   '__cn_tracker', '__cn_tk',
   // Braze (Appboy) email tracking
   'bc_lcid',
+  // Klaviyo attribution params
+  'absrc', 'abid',
 ]);
 function cleanUrl(rawUrl) {
   if (!rawUrl) return rawUrl;
