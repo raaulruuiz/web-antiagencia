@@ -14,11 +14,16 @@ const EMAIL_BASE_RULES = [
   'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
   'table { border-collapse: collapse !important; }',
   'img.an1 { display: inline; width: 1em; height: 1em; vertical-align: -0.1em; max-width: none; }',
-  // Sales Manago / Beefree DnD layout system: columns are built with class-based CSS rules
-  // (dnd-display-table-cell, dnd-display-table-row, etc.). Gmail applies these via its own
-  // stylesheet so they render correctly there. Captured HTML loses those <style> rules, causing
-  // all columns to collapse to display:block. We restore them via substring attribute selectors
-  // (the classes carry a long hash prefix, e.g. "m_-533...dnd-display-table-cell").
+  // Gmail injects download-button overlays (div.a6S) on top of images with opacity:0.01 and
+  // absolute positioning. Without Gmail's own CSS, these render as block elements in the normal
+  // flow and create large invisible gaps between image sections.
+  'div.a6S { display: none !important; }',
+];
+
+// Desktop-only rules: restore Sales Manago/Beefree DnD column layout.
+// In mobile mode these are NOT injected — the email's own @media queries handle layout.
+// Without these rules in desktop mode, all DnD columns collapse to display:block.
+const DND_DESKTOP_RULES = [
   '[class*="dnd-display-table"] { display: table !important; width: 100% !important; }',
   '[class*="dnd-display-table-row"] { display: table-row !important; }',
   '[class*="dnd-display-table-cell"] { display: table-cell !important; vertical-align: top !important; box-sizing: border-box !important; }',
@@ -27,14 +32,16 @@ const EMAIL_BASE_RULES = [
   '[class*="dnd-width-33-33-percent"] { width: 33.33% !important; }',
   '[class*="dnd-width-25-percent"] { width: 25% !important; }',
   '[class*="dnd-hide-desktop"] { display: none !important; }',
-  // Gmail injects download-button overlays (div.a6S) on top of images with opacity:0.01 and
-  // absolute positioning. Without Gmail's own CSS, these render as block elements in the normal
-  // flow and create large invisible gaps between image sections.
-  'div.a6S { display: none !important; }',
+];
+
+// Mobile-only: hide elements marked as desktop-only in the email's responsive design.
+const DND_MOBILE_RULES = [
+  '[class*="dnd-hide-mobile"] { display: none !important; }',
 ];
 
 const EMAIL_WIDTH = 600; // standard email content width in px
 const IFRAME_VIEWPORT = 601;
+const MOBILE_VIEWPORT = 375;
 
 // Strips @media (max-width: ...) blocks from a CSS string.
 // Email templates use these to collapse multi-column desktop layouts into single-column mobile
@@ -79,10 +86,11 @@ function stripEmailResponsiveStyles(html) {
   );
 }
 
-const MOBILE_VIEWPORT = 375;
-
 function buildEmailIframeHtml(html_body, gmail_styles, mobileMode = false) {
-  const rules = [...EMAIL_BASE_RULES];
+  const rules = [
+    ...EMAIL_BASE_RULES,
+    ...(mobileMode ? DND_MOBILE_RULES : DND_DESKTOP_RULES),
+  ];
   if (gmail_styles) {
     const { fontSize, fontFamily, lineHeight, color } = gmail_styles;
     const parts = [];
@@ -139,15 +147,18 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
     );
   }
 
+  // withLinks=true: wrap in a div sized to viewport so parent containers don't add gaps
   return (
-    <iframe
-      srcDoc={iframeHtml}
-      sandbox="allow-same-origin allow-popups allow-top-navigation-by-user-activation"
-      onLoad={(e) => {
-        const h = e.target.contentDocument?.body?.scrollHeight;
-        if (h) e.target.style.height = h + 'px';
-      }}
-      style={{ width: `${viewport}px`, height: '100%', border: 'none', display: 'block', ...style }}
-    />
+    <div style={{ width: viewport, overflow: 'hidden' }}>
+      <iframe
+        srcDoc={iframeHtml}
+        sandbox="allow-same-origin allow-popups allow-top-navigation-by-user-activation"
+        onLoad={(e) => {
+          const h = e.target.contentDocument?.body?.scrollHeight;
+          if (h) e.target.style.height = h + 'px';
+        }}
+        style={{ width: `${viewport}px`, height: '100%', border: 'none', display: 'block', ...style }}
+      />
+    </div>
   );
 }

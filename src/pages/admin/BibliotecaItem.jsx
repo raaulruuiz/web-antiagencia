@@ -912,13 +912,26 @@ function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
 }
 
 // ── Image modal ───────────────────────────────────────────────────────────────
-function ImageModal({ imageUrl, emailHtml, emailGmailStyles, alt, mobileMode = false, onClose }) {
+function ImageModal({ imageUrl, emailHtml, emailGmailStyles, alt, initialMobileMode = false, onClose }) {
+  const [mobileMode, setMobileMode] = useState(initialMobileMode);
   return (
     <div style={{ position:'fixed', inset:0, zIndex:200, background:'var(--t-overlay)', display:'flex', alignItems:'flex-start', justifyContent:'center', overflowY:'auto', padding:'32px 24px' }} onClick={onClose}>
-      <div style={{ position:'relative', maxWidth: mobileMode ? 430 : 900, width:'100%' }} onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} style={{ position:'absolute', top:-36, right:0, background:'transparent', border:'none', color:'var(--t-text-placeholder)', cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', gap:6 }}><IconX /> Cerrar</button>
+      <div style={{ position:'relative', maxWidth: 900, width:'100%' }} onClick={e => e.stopPropagation()}>
+        <div style={{ position:'absolute', top:-36, left:0, right:0, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          {emailHtml ? (
+            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, overflow: 'hidden' }}>
+              {[{ m: false, Icon: IconDesktop, title: 'Vista escritorio' }, { m: true, Icon: IconMobile, title: 'Vista móvil' }].map(({ m, Icon, title }) => (
+                <button key={String(m)} onClick={() => setMobileMode(m)} title={title}
+                  style={{ background: mobileMode === m ? 'rgba(255,255,255,0.2)' : 'none', border: 'none', color: mobileMode === m ? 'white' : 'rgba(255,255,255,0.5)', padding: '5px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                  <Icon />
+                </button>
+              ))}
+            </div>
+          ) : <span />}
+          <button onClick={onClose} style={{ background:'transparent', border:'none', color:'var(--t-text-placeholder)', cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', gap:6 }}><IconX /> Cerrar</button>
+        </div>
         {emailHtml
-          ? <div style={{ background:'#fff', borderRadius:12, overflow:'hidden' }}>
+          ? <div style={{ background:'#fff', borderRadius:12, overflow:'hidden', display:'inline-block', width:'100%' }}>
               <EmailIframe html_body={emailHtml} gmail_styles={emailGmailStyles} withLinks={true} mobileMode={mobileMode} />
             </div>
           : <img src={imageUrl} alt={alt} style={{ width:'100%', borderRadius:12, display:'block' }} />
@@ -3808,7 +3821,7 @@ export default function BibliotecaItem() {
   const [cropConfirm, setCropConfirm]   = useState(null);
   const [replacing, setReplacing]       = useState(false);
   const [showModal, setShowModal]       = useState(false);
-  const [emailViewMode, setEmailViewMode] = useState('desktop'); // 'desktop' | 'mobile'
+  const [emailViewMode, setEmailViewMode] = useState(() => window.innerWidth < 640 ? 'mobile' : 'desktop');
   const [isMobile, setIsMobile]         = useState(() => window.innerWidth < 640);
   const [autopublish]                   = useState(() => localStorage.getItem('biblioteca_autopublish') === 'true');
   const [hasPendingItem, setHasPendingItem] = useState(false);
@@ -3835,6 +3848,7 @@ export default function BibliotecaItem() {
         setAsunto(data.asunto ?? null);
         setAdelanto(data.adelanto ?? null);
         setEnviadoEl(data.enviado_el ?? null);
+        if (data.enviado_el) setObEnviadoEl(data.enviado_el); // preserve time if backend already set it
         setRemitente(data.remitente ?? '');
         setItemUrl(data.ficha_url ?? null);
         setFechaAnalisis(data.fecha_analisis ?? null);
@@ -3965,7 +3979,13 @@ export default function BibliotecaItem() {
         if (data.marca)      setObMarca(data.marca);
         if (data.asunto)     setObAsunto(data.asunto);
         if (data.adelanto)   setObAdelanto(data.adelanto);
-        if (data.enviado_el) setObEnviadoEl(data.enviado_el);
+        if (data.enviado_el) {
+          // IA returns date-only (YYYY-MM-DD); preserve existing time component if present
+          setObEnviadoEl(prev => {
+            const existingTime = prev.includes(' ') ? prev.split(' ')[1] : '';
+            return existingTime ? `${data.enviado_el} ${existingTime}` : data.enviado_el;
+          });
+        }
         if (data.remitente)  setObRemitente(data.remitente);
       }
     } catch (e) { alert(e.message); }
@@ -4665,7 +4685,7 @@ export default function BibliotecaItem() {
       {/* Overlays */}
       {showCrop && item && <CropOverlay imageUrl={item.url} onCrop={handleCrop} onCancel={() => setShowCrop(false)} />}
       {cropConfirm && <CropConfirmModal previewUrl={cropConfirm.url} onConfirm={confirmCrop} onCancel={cancelCrop} saving={replacing} />}
-      {showModal && item && <ImageModal imageUrl={item.url} emailHtml={item.email_html || null} emailGmailStyles={item.email_gmail_styles || null} alt={item.filename} mobileMode={emailViewMode === 'mobile'} onClose={() => setShowModal(false)} />}
+      {showModal && item && <ImageModal imageUrl={item.url} emailHtml={item.email_html || null} emailGmailStyles={item.email_gmail_styles || null} alt={item.filename} initialMobileMode={emailViewMode === 'mobile'} onClose={() => setShowModal(false)} />}
       {discardConfirm && <DiscardModal onConfirm={confirmDiscard} onCancel={() => setDiscardConfirm(false)} />}
       {editingBlockId && (() => { const eb = blocksData.find(b => b.id === editingBlockId); return eb ? (
         <BlockEditorModal
@@ -4744,10 +4764,10 @@ export default function BibliotecaItem() {
       <div className={isMobile ? 'flex flex-col gap-6' : 'flex gap-8 items-start'}>
 
         {/* Left: image */}
-        <div style={{ position: 'relative', flexShrink: 0, width: 600 }}
+        <div style={{ position: 'relative', flexShrink: 0, width: emailViewMode === 'mobile' ? 375 : 600 }}
           onMouseEnter={() => setImageHover(true)}
           onMouseLeave={() => setImageHover(false)}>
-          <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden' }}>
+          <div className="rounded-xl border border-zinc-800" style={{ height: 560, overflowY: 'auto', overflowX: 'hidden', width: emailViewMode === 'mobile' ? 375 : 600, borderRadius: 12 }}>
             {item.email_html
               ? <EmailIframe html_body={item.email_html} gmail_styles={item.email_gmail_styles} withLinks={true} mobileMode={emailViewMode === 'mobile'} />
               : (importEmail && lastEmail?.html_body)
