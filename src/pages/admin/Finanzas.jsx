@@ -2109,8 +2109,9 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
           movimiento={errMovEditar}
           zIndex={9200}
           onGuardado={(data) => {
-            // Eliminar de la lista todos los errores asociados a este movimiento (ya corregido)
-            setErroresData(prev => prev.filter(c => c.movimiento?.id !== errMovEditar.id));
+            setErroresData(prev => prev.map(c =>
+              c.movimiento?.id === errMovEditar.id ? { ...c, movimiento: { ...c.movimiento, ...data } } : c
+            ));
             setErrMovEditar(null);
           }}
           onCerrar={() => setErrMovEditar(null)}
