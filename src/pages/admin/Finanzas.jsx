@@ -1250,6 +1250,22 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
   useEffect(() => { cargar(); }, [cargar]);
   useEffect(() => { cargarComp(); }, [cargarComp]);
 
+  // Sync factura updates (from viewer edit) into erroresData and facturasPorTrimestre
+  useEffect(() => {
+    const fv = facturaViewer;
+    if (!fv?.id || !fv?.data) return;
+    setErroresData(prev => prev.map(c =>
+      c.factura?.id === fv.id ? { ...c, factura: { ...c.factura, ...fv.data } } : c
+    ));
+    setFacturasPorTrimestre(prev => {
+      const next = {};
+      for (const [key, items] of Object.entries(prev)) {
+        next[key] = items.map(f => f.id === fv.id ? { ...f, ...fv.data } : f);
+      }
+      return next;
+    });
+  }, [facturaViewer?.data]);
+
   async function cargarFacturasTrimestre(q) {
     const key = `${anio}-${q}`;
     try {
@@ -3644,7 +3660,7 @@ export default function Finanzas() {
       const updated = await res.json();
       setDocumentosList(prev => prev.map(d => d.id === id ? updated : d));
       return updated;
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error(e); alert('Error al guardar: ' + e.message); }
   }
 
   // Calcula campos fiscales derivados al cambiar proveedor/cliente
