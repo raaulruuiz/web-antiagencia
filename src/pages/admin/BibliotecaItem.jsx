@@ -1266,10 +1266,8 @@ function extractEmailItemsInOrder(htmlBody) {
     const s = el.getAttribute('style') || '';
     if (/display\s*:\s*none/i.test(s)) return true;
     if (/visibility\s*:\s*hidden/i.test(s)) return true;
-    if (/opacity\s*:\s*0\b/i.test(s)) return true;
-    if (/max-height\s*:\s*0/i.test(s)) return true;
-    if (/font-size\s*:\s*0/i.test(s)) return true;
-    if (/overflow\s*:\s*hidden/i.test(s) && /max-height\s*:\s*0/i.test(s)) return true;
+    // Classic preheader pattern: max-height:0 + overflow:hidden together
+    if (/max-height\s*:\s*0/i.test(s) && /overflow\s*:\s*hidden/i.test(s)) return true;
     return false;
   }
 
