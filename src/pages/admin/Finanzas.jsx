@@ -107,8 +107,9 @@ const CAMPOS_FILTRO = [
   { key: 'fecha_factura',     label: 'Fecha Factura',       tipo: 'date' },
   { key: 'created_at',        label: 'Creado',    tipo: 'date' },
   { key: 'updated_at',        label: 'Modificado', tipo: 'date' },
-  { key: 'cliente_ids',       label: 'Cliente',    tipo: 'uuid_nullable' },
-  { key: 'equipo_ids',        label: 'Miembro equipo',      tipo: 'uuid_nullable' },
+  { key: 'cliente_ids',       label: 'Cliente',        tipo: 'uuid_nullable' },
+  { key: 'equipo_ids',        label: 'Miembro equipo', tipo: 'uuid_nullable' },
+  { key: 'proveedor_ids',     label: 'Proveedor',      tipo: 'uuid_nullable' },
 ];
 
 const OPS_POR_TIPO = {
@@ -133,6 +134,7 @@ const CAMPOS_SORT = [
   { key: 'updated_at',        label: 'Modificado' },
   { key: 'cliente_ids',       label: 'Cliente' },
   { key: 'equipo_ids',        label: 'Miembro equipo' },
+  { key: 'proveedor_ids',     label: 'Proveedor' },
 ];
 
 const CAMPOS_FILTRO_DOCS = [
@@ -768,12 +770,13 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
     nombre: '', fecha: new Date().toISOString().slice(0,10),
     tipo: 'Ingreso', cuenta: 'Ingresos', cantidad: '',
     iva: '21%', irpf: '0%', categorias: [],
-    cliente_ids: [], equipo_ids: [], factura_ids: [],
+    cliente_ids: [], equipo_ids: [], proveedor_ids: [], factura_ids: [],
   });
   const [loading, setLoading] = useState(false);
   const [ok, setOk] = useState(false);
   const [clientesLista, setClientesLista] = useState([]);
   const [equipoLista, setEquipoLista] = useState([]);
+  const [proveedoresListaForm, setProveedoresListaForm] = useState([]);
   const [facturasLista, setFacturasLista] = useState([]);
 
   useEffect(() => {
@@ -782,6 +785,8 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
         .then(r => r.json()).then(d => setClientesLista(Array.isArray(d) ? d : [])).catch(() => {});
       fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: { Authorization: `Bearer ${token}` } })
         .then(r => r.json()).then(d => setEquipoLista(Array.isArray(d) ? d : [])).catch(() => {});
+      fetch(`${BACKEND_URL}/admin/finanzas/proveedores/lista`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(d => setProveedoresListaForm(Array.isArray(d) ? d : [])).catch(() => {});
       fetch(`${BACKEND_URL}/admin/finanzas/facturas`, { headers: { Authorization: `Bearer ${token}` } })
         .then(r => r.json()).then(d => setFacturasLista(Array.isArray(d) ? d : [])).catch(() => {});
     });
@@ -898,8 +903,8 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
         </div>
       )}
 
-      {(clientesLista.length > 0 || equipoLista.length > 0) && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      {(clientesLista.length > 0 || equipoLista.length > 0 || proveedoresListaForm.length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
           {clientesLista.length > 0 && (
             <MultiCheckDrop
               label="Clientes"
@@ -914,6 +919,14 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
               opciones={equipoLista.map(e => ({ id: e.id, label: e.nombre }))}
               seleccionados={form.equipo_ids || []}
               onChange={ids => set('equipo_ids', ids)}
+            />
+          )}
+          {proveedoresListaForm.length > 0 && (
+            <MultiCheckDrop
+              label="Proveedores"
+              opciones={proveedoresListaForm.map(p => ({ id: p.id, label: p.nombre + (p.nombre_empresa ? ` (${p.nombre_empresa})` : '') }))}
+              seleccionados={form.proveedor_ids || []}
+              onChange={ids => set('proveedor_ids', ids)}
             />
           )}
         </div>
@@ -2342,6 +2355,7 @@ function NuevoMovimientoTab({ onGuardado }) {
   const [guardandoKey, setGuardandoKey] = useState(null); // 'si-mi'
   const [clientesLista, setClientesLista] = useState([]);
   const [equipoLista, setEquipoLista] = useState([]);
+  const [proveedoresLista, setProveedoresLista] = useState([]);
   const inputRef = useRef(null);
   const cancelRef = useRef(false);
   const [nuevasCats, setNuevasCats] = useState({}); // { 'si-mi': texto | undefined }
@@ -2368,6 +2382,8 @@ function NuevoMovimientoTab({ onGuardado }) {
         .then(r => r.json()).then(d => setClientesLista(Array.isArray(d) ? d.map(c => ({ id: c.id, label: c.nombre + (c.nombre_empresa ? ` (${c.nombre_empresa})` : '') })) : [])).catch(() => {});
       fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: { Authorization: `Bearer ${token}` } })
         .then(r => r.json()).then(d => setEquipoLista(Array.isArray(d) ? d.map(e => ({ id: e.id, label: e.nombre })) : [])).catch(() => {});
+      fetch(`${BACKEND_URL}/admin/finanzas/proveedores/lista`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(d => setProveedoresLista(Array.isArray(d) ? d.map(p => ({ id: p.id, label: p.nombre + (p.nombre_empresa ? ` (${p.nombre_empresa})` : '') })) : [])).catch(() => {});
     });
   }, []);
 
@@ -2428,7 +2444,7 @@ function NuevoMovimientoTab({ onGuardado }) {
           cantidad: String(m.amount_eur || ''),
           iva: m.iva || '0%',
           irpf: m.irpf || '0%',
-          categorias: [], cliente_ids: [], equipo_ids: [],
+          categorias: [], cliente_ids: [], equipo_ids: [], proveedor_ids: [],
           fecha_factura: '', importe_factura: '',
         }));
         const cuentaSec = detectarCuentaSec(movimientos);
@@ -2855,6 +2871,11 @@ function NuevoMovimientoTab({ onGuardado }) {
                                 <MultiCheckDrop label="Equipo" opciones={equipoLista} seleccionados={m.equipo_ids} onChange={val => setMovField(si, mi, 'equipo_ids', val)} />
                               </div>
                             )}
+                            {proveedoresLista.length > 0 && (
+                              <div>
+                                <MultiCheckDrop label="Proveedores" opciones={proveedoresLista} seleccionados={m.proveedor_ids || []} onChange={val => setMovField(si, mi, 'proveedor_ids', val)} />
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -2873,7 +2894,7 @@ function NuevoMovimientoTab({ onGuardado }) {
 // ── Celda editable inline ───────────────────────────────────────
 const CUENTAS_OPTS = ['Ingresos','Impuestos','Compensación del Dueño','Gastos de Operación','Freelancers y Material','Ganancia'];
 
-function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = [] }) {
+function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = [], proveedoresLista = [] }) {
   const [editando, setEditando] = useState(false);
   const [val, setVal] = useState(m[campo]);
   const [nuevaCat, setNuevaCat] = useState(null); // null = oculto, '' = mostrando input
@@ -2896,7 +2917,7 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
 
   const esSelect = ['tipo','cuenta','iva','irpf'].includes(campo);
   const esMulti = campo === 'categorias';
-  const esMultiUuid = ['cliente_ids','equipo_ids'].includes(campo);
+  const esMultiUuid = ['cliente_ids','equipo_ids','proveedor_ids'].includes(campo);
 
   if (esMulti) {
     const cats = m.categorias || [];
@@ -2955,7 +2976,7 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
   }
 
   if (esMultiUuid) {
-    const lista = campo === 'cliente_ids' ? clientesLista : equipoLista;
+    const lista = campo === 'cliente_ids' ? clientesLista : campo === 'proveedor_ids' ? proveedoresLista : equipoLista;
     const selIds = val || [];
     const nombres = selIds.map(id => lista.find(x => x.id === id)?.nombre || '?');
     const listaFiltrada = filtroLista.trim()
@@ -3046,7 +3067,7 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
 }
 
 // ── Tabla de movimientos ────────────────────────────────────────
-function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGuardarCelda, onVerDetalle, clientesLista, equipoLista }) {
+function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGuardarCelda, onVerDetalle, clientesLista, equipoLista, proveedoresLista }) {
   const allSel = items.length > 0 && items.every(m => seleccionados.has(m.id));
   const someSel = !allSel && items.some(m => seleccionados.has(m.id));
   const [editNombreId, setEditNombreId] = useState(null);
@@ -3169,6 +3190,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
     { key:'categorias',       label:'Categorías',     w:150 },
     { key:'cliente_ids',      label:'Clientes',       w:130 },
     { key:'equipo_ids',       label:'Equipo',         w:120 },
+    { key:'proveedor_ids',    label:'Proveedores',    w:130 },
     { key:'factura_ids',      label:'Documentos',     w:100 },
     { key:'fecha_factura',    label:'F. Factura',     w:100 },
     { key:'importe_factura',  label:'Imp. s/Factura', w:110 },
@@ -3286,7 +3308,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                           {m[col.key] != null ? (m[col.key] > 0 ? '+' : '') + fmt(m[col.key]) : '—'}
                         </span>
                       ) : (
-                        <CeldaEditable m={m} campo={col.key} onGuardar={onGuardarCelda} clientesLista={clientesLista} equipoLista={equipoLista} />
+                        <CeldaEditable m={m} campo={col.key} onGuardar={onGuardarCelda} clientesLista={clientesLista} equipoLista={equipoLista} proveedoresLista={proveedoresLista} />
                       )}
                     </td>
                     );
@@ -3578,6 +3600,7 @@ export default function Finanzas() {
   const [sinMovimientosMes, setSinMovimientosMes] = useState(false);
   const [filtroClientesLista, setFiltroClientesLista] = useState([]);
   const [filtroEquipoLista, setFiltroEquipoLista] = useState([]);
+  const [filtroProveedoresLista, setFiltroProveedoresLista] = useState([]);
   const [vistaMovs, setVistaMovs] = useState(() => lsGet('fin_vista', 'lista'));
   const [seleccionados, setSeleccionados] = useState(new Set());
   const [selTodos, setSelTodos] = useState(false); // todos los del filtro seleccionados
@@ -3597,6 +3620,8 @@ export default function Finanzas() {
         .then(r => r.json()).then(d => setFiltroClientesLista(Array.isArray(d) ? d : [])).catch(() => {});
       fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: h })
         .then(r => r.json()).then(d => setFiltroEquipoLista(Array.isArray(d) ? d : [])).catch(() => {});
+      fetch(`${BACKEND_URL}/admin/finanzas/proveedores/lista`, { headers: h })
+        .then(r => r.json()).then(d => setFiltroProveedoresLista(Array.isArray(d) ? d : [])).catch(() => {});
     });
   }, []);
 
@@ -3793,7 +3818,8 @@ export default function Finanzas() {
           categorias: m.categorias || [], fecha_factura: m.fecha_factura || null,
           importe_factura: m.importe_factura ?? null, base_imponible: m.base_imponible ?? null,
           irpf_retenido_yo: m.irpf_retenido_yo ?? null, cliente_ids: m.cliente_ids || [],
-          equipo_ids: m.equipo_ids || [], created_at: m.created_at, updated_at: m.updated_at,
+          equipo_ids: m.equipo_ids || [], proveedor_ids: m.proveedor_ids || [],
+          created_at: m.created_at, updated_at: m.updated_at,
         };
         setMovimientos(prev => ({ ...prev, items: prev.items.map(i => i.id === id ? fila : i) }));
         cargarDashboard();
@@ -4775,8 +4801,9 @@ export default function Finanzas() {
               { key:'cuenta',      label:'Cuenta',   opts:CUENTAS_OPTS },
               { key:'iva',         label:'IVA',      opts:IVA_OPTS },
               { key:'irpf',        label:'IRPF',     opts:IRPF_OPTS },
-              { key:'cliente_ids', label:'Clientes', multi:true, lista:filtroClientesLista },
-              { key:'equipo_ids',  label:'Equipo',   multi:true, lista:filtroEquipoLista },
+              { key:'cliente_ids',   label:'Clientes',    multi:true, lista:filtroClientesLista },
+              { key:'equipo_ids',    label:'Equipo',      multi:true, lista:filtroEquipoLista },
+              { key:'proveedor_ids', label:'Proveedores', multi:true, lista:filtroProveedoresLista },
             ];
             const closeBulk = () => { setBulkCampo(null); setBulkValor(''); setBulkValorMulti([]); setBulkFiltroLista(''); };
             return (
@@ -4850,7 +4877,7 @@ export default function Finanzas() {
               filtros={movFiltros} op={movFiltroOp}
               onChangeFiltros={f => { setMovFiltros(f); setPagMovs(1); }}
               onChangeOp={op => { setMovFiltroOp(op); setPagMovs(1); }}
-              listasAsignacion={{ cliente_ids: filtroClientesLista, equipo_ids: filtroEquipoLista }}
+              listasAsignacion={{ cliente_ids: filtroClientesLista, equipo_ids: filtroEquipoLista, proveedor_ids: filtroProveedoresLista }}
             />
           )}
           {panelOrdenar && (
@@ -4901,6 +4928,7 @@ export default function Finanzas() {
                       onVerDetalle={abrirDetalle}
                       clientesLista={filtroClientesLista}
                       equipoLista={filtroEquipoLista}
+                      proveedoresLista={filtroProveedoresLista}
                     />
                     {paginacion}
                   </>
