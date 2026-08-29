@@ -3692,21 +3692,9 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             <>
               {/* Autorrellenar desde email */}
               {emailHtml && (
-                <button
-                  onClick={handleAutofillFromEmail}
-                  disabled={autofillingEmail || transcribing}
-                  style={{ width: '100%', background: autofillingEmail ? 'var(--t-surface2)' : 'rgba(6,182,212,0.08)', border: '1px dashed #06b6d4', borderRadius: 8, padding: '9px 14px', fontSize: 12, fontWeight: 600, color: autofillingEmail ? 'var(--t-text-muted)' : '#06b6d4', cursor: autofillingEmail ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
-                  {autofillingEmail ? (
-                    <>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 0.7s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                      Transcribiendo email…
-                    </>
-                  ) : (
-                    <>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                      Autorrellenar desde email
-                    </>
-                  )}
+                <button onClick={handleAutofillFromEmail} disabled={autofillingEmail || transcribing}
+                  style={{ width: '100%', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '8px', fontSize: 12, color: autofillingEmail ? 'var(--t-text-muted)' : '#818cf8', cursor: autofillingEmail ? 'not-allowed' : 'pointer', marginBottom: 4 }}>
+                  {autofillingEmail ? 'Transcribiendo email…' : '✦ Autorrellenar desde email'}
                 </button>
               )}
               {/* Imágenes transcritas */}
