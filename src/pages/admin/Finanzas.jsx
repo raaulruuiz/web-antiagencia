@@ -768,12 +768,13 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
     nombre: '', fecha: new Date().toISOString().slice(0,10),
     tipo: 'Ingreso', cuenta: 'Ingresos', cantidad: '',
     iva: '21%', irpf: '0%', categorias: [],
-    cliente_ids: [], equipo_ids: [],
+    cliente_ids: [], equipo_ids: [], factura_ids: [],
   });
   const [loading, setLoading] = useState(false);
   const [ok, setOk] = useState(false);
   const [clientesLista, setClientesLista] = useState([]);
   const [equipoLista, setEquipoLista] = useState([]);
+  const [facturasLista, setFacturasLista] = useState([]);
 
   useEffect(() => {
     getToken().then(token => {
@@ -781,6 +782,8 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
         .then(r => r.json()).then(d => setClientesLista(Array.isArray(d) ? d : [])).catch(() => {});
       fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: { Authorization: `Bearer ${token}` } })
         .then(r => r.json()).then(d => setEquipoLista(Array.isArray(d) ? d : [])).catch(() => {});
+      fetch(`${BACKEND_URL}/admin/finanzas/facturas`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(d => setFacturasLista(Array.isArray(d) ? d : [])).catch(() => {});
     });
   }, []);
 
@@ -879,6 +882,21 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
           </div>
         </div>
       </div>
+
+      {facturasLista.length > 0 && (
+        <div style={{ background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, padding: '12px 14px' }}>
+          <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px 0' }}>Facturas vinculadas</p>
+          <MultiCheckDrop
+            label="Facturas"
+            opciones={facturasLista.map(f => ({
+              id: f.id,
+              label: [f.nombre_entidad, f.numero_factura, f.fecha_factura, f.importe != null ? `${f.importe}€` : null].filter(Boolean).join(' · ')
+            }))}
+            seleccionados={form.factura_ids || []}
+            onChange={ids => set('factura_ids', ids)}
+          />
+        </div>
+      )}
 
       {(clientesLista.length > 0 || equipoLista.length > 0) && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -1452,6 +1470,21 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
           return tF.some(w => tM.some(wm => wm.includes(w) || w.includes(wm)));
         });
       };
+
+      // Error: factura sin ningún movimiento vinculado en la junction table
+      for (const fac of facturasGuardadas) {
+        if (!fac.movimiento_ids || fac.movimiento_ids.length === 0) {
+          const contactoReqId = fac.tipo === 'gasto' ? fac.factura_proveedor_id : fac.factura_cliente_id;
+          if (contactoReqId) { // Solo si ya tiene contacto (sin_contacto ya lo cubre)
+            conflictos.push({
+              tipo: 'sin_movimiento_vinculado',
+              factura: fac,
+              severidad: 'error',
+              desc: `La factura de ${fmt(Math.abs(fac.importe||0))} no tiene ningún movimiento vinculado. Vincúlala desde la pestaña Documentos.`
+            });
+          }
+        }
+      }
 
       // Para cada factura subida, buscar el movimiento DB más parecido
       // NOTA: fac.importe es la BASE (sin IVA). El movimiento tiene base_imponible y cantidad (total con IVA).
@@ -2040,6 +2073,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
             {(() => {
               const tipoLabel = {
                 sin_contacto:          'Factura sin proveedor/cliente vinculado',
+                sin_movimiento_vinculado: 'Sin movimiento vinculado',
                 sin_movimiento:        'Sin movimiento en DB con datos de factura',
                 sin_factura_subida:    'Sin factura subida',
                 cross_trimestre:       'Cobro/pago en trimestre diferente al de la factura',
@@ -3135,6 +3169,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
     { key:'categorias',       label:'Categorías',     w:150 },
     { key:'cliente_ids',      label:'Clientes',       w:130 },
     { key:'equipo_ids',       label:'Equipo',         w:120 },
+    { key:'factura_ids',      label:'Documentos',     w:100 },
     { key:'fecha_factura',    label:'F. Factura',     w:100 },
     { key:'importe_factura',  label:'Imp. s/Factura', w:110 },
     { key:'base_imponible',   label:'Base Impon.',    w:95,  readonly:true },
@@ -3200,7 +3235,20 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                       className={`fin-cb${sel?' checked':''}`}
                       style={{ accentColor:'#0067FD', cursor:'pointer' }} />
                   </td>
-                  {COLS.map(col => (
+                  {COLS.map(col => {
+                    if (col.key === 'factura_ids') {
+                      const ids = m.factura_ids || [];
+                      return (
+                        <td key="factura_ids" style={{ ...td, width:col.w }}>
+                          {ids.length > 0
+                            ? <span style={{ background:'rgba(99,102,241,0.15)', color:'#818cf8', fontSize:11, padding:'2px 7px', borderRadius:4, fontWeight:600 }}>
+                                {ids.length} doc{ids.length !== 1 ? 's' : ''}
+                              </span>
+                            : <span style={{ color:'#3f3f46' }}>—</span>}
+                        </td>
+                      );
+                    }
+                    return (
                     <td key={col.key} style={{ ...td, width:col.w, maxWidth:col.flex?260:col.w, overflow:col.flex?'hidden':undefined }}>
                       {col.key==='nombre' ? (
                         editNombreId === m.id ? (
@@ -3241,7 +3289,8 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                         <CeldaEditable m={m} campo={col.key} onGuardar={onGuardarCelda} clientesLista={clientesLista} equipoLista={equipoLista} />
                       )}
                     </td>
-                  ))}
+                    );
+                  })}
                 </tr>
               );
             })}
@@ -4951,6 +5000,7 @@ export default function Finanzas() {
           { key: 'factura_cliente_id',   label: 'Cliente',    w: 150 },
           { key: 'trimestre',            label: 'Q',          w: 72  },
           { key: 'archivo_nombre',       label: 'Archivo',    w: 220, editable: true },
+          { key: 'movimiento_ids',       label: 'Movimientos',w: 105 },
           { key: 'id',                   label: 'ID',         w: 280 },
         ];
 
@@ -5196,6 +5246,19 @@ export default function Finanzas() {
                                   )}
                                 </td>
                               );
+
+                              if (col.key === 'movimiento_ids') {
+                                const ids = doc.movimiento_ids || [];
+                                return (
+                                  <td key="movimiento_ids" style={{ ...tdBase, width:col.w }}>
+                                    {ids.length > 0
+                                      ? <span style={{ background:'rgba(34,197,94,0.1)', color:'#4ade80', fontSize:11, padding:'2px 7px', borderRadius:4, fontWeight:600 }}>
+                                          {ids.length} mov{ids.length !== 1 ? 's' : ''}
+                                        </span>
+                                      : <span style={{ color:'#3f3f46' }}>—</span>}
+                                  </td>
+                                );
+                              }
 
                               if (col.key==='id') return (
                                 <td key="id" style={{ ...tdBase, width:col.w, fontFamily:'monospace', fontSize:10, color:'#52525b' }}>{val||'—'}</td>
@@ -6407,6 +6470,18 @@ export default function Finanzas() {
                 </div>
               );
             })()}
+            {/* Movimientos vinculados */}
+            {facturaViewer.data && (
+              <div style={{ padding:'8px 16px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
+                <p style={{ color:'#52525b', fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em', margin:'0 0 6px 0' }}>Movimientos vinculados</p>
+                {(facturaViewer.data.movimiento_ids || []).length === 0
+                  ? <p style={{ color:'#52525b', fontSize:12, margin:0 }}>Ninguno</p>
+                  : (facturaViewer.data.movimiento_ids || []).map(mid => (
+                      <div key={mid} style={{ fontSize:12, color:'#a1a1aa', fontFamily:'monospace', marginBottom:4 }}>{mid}</div>
+                    ))
+                }
+              </div>
+            )}
             {/* Panel edición */}
             {viewerEditando && facturaViewer.id && (() => {
               const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
