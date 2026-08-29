@@ -2190,7 +2190,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
             <div style={{ flex:1, background:'#111', display:'flex', flexDirection:'column', minWidth:0 }}>
               <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
                 <span style={{ color:'#60a5fa', fontSize:12, fontWeight:600, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{errSplitView.factura.archivo_nombre}</span>
-                <button onClick={() => { setFacturaViewer({ url: errSplitView.factura.archivo_url, nombre: errSplitView.factura.archivo_nombre, id: errSplitView.factura.id, data: errSplitView.factura }); setErrSplitView(null); }}
+                <button onClick={() => { setFacturaViewer({ url: errSplitView.factura.archivo_url, nombre: errSplitView.factura.archivo_nombre, id: errSplitView.factura.id, data: errSplitView.factura, _autoEdit: true }); setErrSplitView(null); }}
                   style={{ background:'transparent', border:'1px solid #3f3f46', color:'#71717a', borderRadius:6, padding:'2px 10px', fontSize:11, cursor:'pointer', flexShrink:0 }}>Editar</button>
                 <a href={errSplitView.factura.archivo_url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:11, textDecoration:'none', flexShrink:0 }}>↗</a>
                 <button onClick={() => setErrSplitView(null)} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:16, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
@@ -3509,10 +3509,20 @@ export default function Finanzas() {
   const [mostrarTodos, setMostrarTodos] = useState(false);
   const [movEditando, setMovEditando] = useState(null);
   const [movDetail, setMovDetail] = useState(null);
-  const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre, id?, data? } | null
+  const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre, id?, data?, _autoEdit? } | null
   const [viewerEditando, setViewerEditando] = useState(false);
   const [viewerDraft, setViewerDraft] = useState({});
-  useEffect(() => { setViewerEditando(false); setViewerDraft({}); }, [facturaViewer?.id]);
+  useEffect(() => {
+    if (!facturaViewer?.id) { setViewerEditando(false); setViewerDraft({}); return; }
+    const fv = facturaViewer.data || {};
+    if (facturaViewer._autoEdit) {
+      setViewerEditando(true);
+      setViewerDraft({ archivo_nombre: facturaViewer.nombre||'', factura_proveedor_id: fv.factura_proveedor_id||'', factura_cliente_id: fv.factura_cliente_id||'', importe: fv.importe??'', impuesto: fv.impuesto??'', irpf: fv.irpf??'' });
+    } else {
+      setViewerEditando(false);
+      setViewerDraft({});
+    }
+  }, [facturaViewer?.id]);
   const [dashComp, setDashComp] = useState(null);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errComp, setErrComp] = useState(null);
