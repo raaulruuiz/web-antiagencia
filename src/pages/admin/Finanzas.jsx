@@ -1390,7 +1390,11 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
         .split(/\s+/).filter(w => w.length >= 3);
 
       // Contactos disponibles para el matching
-      const ctodosMatch = docTabContactos.length ? docTabContactos : contactosTodos;
+      let ctodosMatch = [];
+      try {
+        const rc = await fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token}` } });
+        if (rc.ok) ctodosMatch = await rc.json();
+      } catch (_) {}
 
       // Nombres canónicos de una factura: siempre del contacto vinculado (nombre + alias).
       // Si no hay contacto vinculado, devuelve [] — se trata como error de datos.
