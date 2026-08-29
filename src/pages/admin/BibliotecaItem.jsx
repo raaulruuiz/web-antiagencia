@@ -1277,7 +1277,13 @@ function extractEmailItemsInOrder(htmlBody) {
       if (isHidden(node)) return;
       if (node.tagName === 'IMG') {
         const src = node.getAttribute('src') || '';
-        if (src && !src.startsWith('data:') && !src.includes('gstatic.com/s/e/notoemoji') && !seenImages.has(src)) {
+        // Emoji images (Google NotoEmoji CDN) — capture alt text as emoji character
+        if (src.includes('gstatic.com/s/e/notoemoji')) {
+          const alt = node.getAttribute('alt') || '';
+          if (alt) currentText += alt;
+          return;
+        }
+        if (src && !src.startsWith('data:') && !seenImages.has(src)) {
           const w = parseInt(node.getAttribute('width')) || 100;
           const h = parseInt(node.getAttribute('height')) || 100;
           if (w > 5 && h > 5) {
