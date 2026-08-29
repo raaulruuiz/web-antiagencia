@@ -3110,7 +3110,7 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
 }
 
 // ── Tabla de movimientos ────────────────────────────────────────
-function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGuardarCelda, onVerDetalle, clientesLista, equipoLista, proveedoresLista, facturasDisponibles = [], onVincularFacturas }) {
+function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGuardarCelda, onVerDetalle, clientesLista, equipoLista, proveedoresLista, facturasDisponibles = [], loadingFacsVincular = false, onAbrirFacsDropdown, onVincularFacturas }) {
   const allSel = items.length > 0 && items.every(m => seleccionados.has(m.id));
   const someSel = !allSel && items.some(m => seleccionados.has(m.id));
   const [editNombreId, setEditNombreId] = useState(null);
@@ -3307,7 +3307,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                       const abierto = vinculosMovId === m.id;
                       return (
                         <td key="factura_ids" style={{ ...td, width:col.w, position:'relative' }}>
-                          <div onClick={() => setVinculosMovId(abierto ? null : m.id)} style={{ cursor:'pointer', display:'inline-flex' }}>
+                          <div onClick={() => { setVinculosMovId(abierto ? null : m.id); if (!abierto && onAbrirFacsDropdown) onAbrirFacsDropdown(); }} style={{ cursor:'pointer', display:'inline-flex' }}>
                             {ids.length > 0
                               ? <span style={{ background:'rgba(99,102,241,0.15)', color:'#818cf8', fontSize:11, padding:'2px 7px', borderRadius:4, fontWeight:600 }}>
                                   {ids.length} doc{ids.length !== 1 ? 's' : ''}
@@ -3318,7 +3318,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                             <VinculosDropdown
                               seleccionados={ids}
                               opciones={facturasDisponibles}
-                              cargando={false}
+                              cargando={loadingFacsVincular}
                               onToggle={facId => {
                                 const newIds = ids.includes(facId) ? ids.filter(x => x !== facId) : [...ids, facId];
                                 onVincularFacturas(m.id, newIds);
@@ -3662,6 +3662,8 @@ export default function Finanzas() {
   const [filtroProveedoresLista, setFiltroProveedoresLista] = useState([]);
   const [movimientosParaVincular, setMovimientosParaVincular] = useState([]); // lista ligera para dropdown en tabla Documentos
   const [loadingMovsVincular, setLoadingMovsVincular] = useState(false);
+  const [facturasParaVincular, setFacturasParaVincular] = useState([]); // lista ligera de facturas para dropdown en TablaMovimientos
+  const [loadingFacsVincular, setLoadingFacsVincular] = useState(false);
   const [docVinculosEditando, setDocVinculosEditando] = useState(null); // factura.id con dropdown abierto
   const [viewerVincOpen, setViewerVincOpen] = useState(false); // dropdown movimientos en el viewer de factura
   const [vistaMovs, setVistaMovs] = useState(() => lsGet('fin_vista', 'lista'));
@@ -3824,6 +3826,19 @@ export default function Finanzas() {
       setMovimientosParaVincular((json.items || []).map(m => ({ id: m.id, nombre: m.nombre, fecha: m.fecha })));
     } catch(_) {}
     setLoadingMovsVincular(false);
+  }
+
+  // Carga lista ligera de facturas para el dropdown de vínculos en TablaMovimientos (lazy, una sola vez)
+  async function cargarFacturasParaVincular() {
+    if (facturasParaVincular.length || loadingFacsVincular) return;
+    setLoadingFacsVincular(true);
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas?todos=1`, { headers: { Authorization: `Bearer ${token}` } });
+      const json = await r.json();
+      setFacturasParaVincular((Array.isArray(json) ? json : json.items || []).map(f => ({ id: f.id, nombre: f.nombre_entidad || f.archivo_nombre || '—', fecha: f.fecha_factura || '' })));
+    } catch(_) {}
+    setLoadingFacsVincular(false);
   }
 
   // Toggle vínculo movimiento en una factura (desde tabla Documentos o viewer)
@@ -5044,7 +5059,9 @@ export default function Finanzas() {
                       clientesLista={filtroClientesLista}
                       equipoLista={filtroEquipoLista}
                       proveedoresLista={filtroProveedoresLista}
-                      facturasDisponibles={documentosList.map(f => ({ id: f.id, nombre: f.nombre_entidad || f.archivo_nombre || '—', fecha: f.fecha_factura || '' }))}
+                      facturasDisponibles={facturasParaVincular}
+                      loadingFacsVincular={loadingFacsVincular}
+                      onAbrirFacsDropdown={cargarFacturasParaVincular}
                       onVincularFacturas={handleVincularFacturasMovimiento}
                     />
                     {paginacion}
@@ -5396,7 +5413,7 @@ export default function Finanzas() {
                                 const ids = doc.movimiento_ids || [];
                                 const abierto = docVinculosEditando === doc.id;
                                 return (
-                                  <td key="movimiento_ids" style={{ ...tdBase, width:col.w, position:'relative' }}>
+                                  <td key="movimiento_ids" style={{ ...tdBase, width:col.w, position:'relative', overflow:'visible' }}>
                                     <div onClick={() => { setDocVinculosEditando(abierto ? null : doc.id); if (!abierto) cargarMovimientosParaVincular(); }} style={{ cursor:'pointer', display:'inline-flex' }}>
                                       {ids.length > 0
                                         ? <span style={{ background:'rgba(34,197,94,0.1)', color:'#4ade80', fontSize:11, padding:'2px 7px', borderRadius:4, fontWeight:600 }}>
@@ -6627,8 +6644,8 @@ export default function Finanzas() {
                 </div>
               );
             })()}
-            {/* Movimientos vinculados — editable */}
-            {facturaViewer.data && (() => {
+            {/* Movimientos vinculados — editable (solo en modo lectura; en edit mode aparece dentro del panel editar) */}
+            {facturaViewer.data && !viewerEditando && (() => {
               const ids = facturaViewer.data.movimiento_ids || [];
               return (
                 <div style={{ padding:'8px 16px', borderBottom:'1px solid #27272a', flexShrink:0, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
