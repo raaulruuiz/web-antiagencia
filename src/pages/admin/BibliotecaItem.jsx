@@ -1247,6 +1247,50 @@ function fillBlockFromEmail(block, htmlBody, resolvedUrls = {}) {
   return block;
 }
 
+function extractEmailItemsInOrder(htmlBody) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlBody, 'text/html');
+  const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'HEAD', 'NOSCRIPT', 'META', 'LINK', 'TITLE']);
+  const BLOCK_TAGS = new Set(['P', 'TD', 'TH', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'SECTION', 'ARTICLE']);
+  const items = [];
+  const seenImages = new Set();
+  let currentText = '';
+
+  function flushText() {
+    const t = currentText.replace(/[ \t]+/g, ' ').trim();
+    if (t.length > 1) items.push({ type: 'text', content: t });
+    currentText = '';
+  }
+
+  function walk(node) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      if (SKIP_TAGS.has(node.tagName)) return;
+      if (node.tagName === 'IMG') {
+        const src = node.getAttribute('src') || '';
+        if (src && !src.startsWith('data:') && !src.includes('gstatic.com/s/e/notoemoji') && !seenImages.has(src)) {
+          const w = parseInt(node.getAttribute('width')) || 100;
+          const h = parseInt(node.getAttribute('height')) || 100;
+          if (w > 5 && h > 5) {
+            flushText();
+            items.push({ type: 'image', url: src });
+            seenImages.add(src);
+          }
+        }
+        return;
+      }
+      for (const child of node.childNodes) walk(child);
+      if (BLOCK_TAGS.has(node.tagName)) flushText();
+    } else if (node.nodeType === Node.TEXT_NODE) {
+      const t = node.textContent;
+      if (t && /\S/.test(t)) currentText += t;
+    }
+  }
+
+  walk(doc.body || doc.documentElement);
+  flushText();
+  return items;
+}
+
 function makeTemplateBlocks(plantilla) {
   const types = PLANTILLA_TYPES[plantilla] || [];
   return types.map((type, i) => ({
@@ -2566,6 +2610,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [socialDraft, setSocialDraft] = useState({ network: 'instagram', color: '#E1306C' });
   const [editingColorIdx, setEditingColorIdx] = useState(null); // null | idx of social being color-edited
   const [transcribing, setTranscribing] = useState(false);
+  const [autofillingEmail, setAutofillingEmail] = useState(false);
   const fileInputRef = useRef(null);
   const transcribeFileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
@@ -3624,8 +3669,46 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
             finally { setTranscribing(false); }
           };
 
+          const handleAutofillFromEmail = async () => {
+            if (!emailHtml || autofillingEmail) return;
+            setAutofillingEmail(true);
+            try {
+              const items = extractEmailItemsInOrder(emailHtml);
+              if (!items.length) { alert('No se encontró contenido en el email.'); return; }
+              const token = await getToken();
+              const res = await fetch(`${API_BASE}/biblioteca/transcribe-email-content`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items }),
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+              if (data.texto) setDraft(d => ({ ...d, texto: data.texto }));
+            } catch (err) { alert('Error al autorrellenar: ' + (err.message || err)); }
+            finally { setAutofillingEmail(false); }
+          };
+
           return (
             <>
+              {/* Autorrellenar desde email */}
+              {emailHtml && (
+                <button
+                  onClick={handleAutofillFromEmail}
+                  disabled={autofillingEmail || transcribing}
+                  style={{ width: '100%', background: autofillingEmail ? 'var(--t-surface2)' : 'rgba(6,182,212,0.08)', border: '1px dashed #06b6d4', borderRadius: 8, padding: '9px 14px', fontSize: 12, fontWeight: 600, color: autofillingEmail ? 'var(--t-text-muted)' : '#06b6d4', cursor: autofillingEmail ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+                  {autofillingEmail ? (
+                    <>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 0.7s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                      Transcribiendo email…
+                    </>
+                  ) : (
+                    <>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                      Autorrellenar desde email
+                    </>
+                  )}
+                </button>
+              )}
               {/* Imágenes transcritas */}
               {doneImgs.length > 0 && (
                 <div>
@@ -4193,6 +4276,26 @@ export default function BibliotecaItem() {
         }
       } catch (_) {}
       finalBlocks = finalBlocks.map(b => fillBlockFromEmail(b, lastEmail.html_body, resolvedUrls));
+      // Auto-transcribe transcribir blocks from email content
+      const transcribirIdx = finalBlocks.findIndex(b => b.type === 'transcribir');
+      if (transcribirIdx !== -1) {
+        try {
+          const emailItems = extractEmailItemsInOrder(lastEmail.html_body);
+          if (emailItems.length) {
+            const tRes = await fetch(`${API_BASE}/biblioteca/transcribe-email-content`, {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${await getToken()}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ items: emailItems }),
+            });
+            if (tRes.ok) {
+              const tData = await tRes.json();
+              if (tData.texto) {
+                finalBlocks = finalBlocks.map((b, i) => i === transcribirIdx ? { ...b, texto: tData.texto } : b);
+              }
+            }
+          }
+        } catch (_) {}
+      }
     }
     const updates = {
       categoria: obCategoria,
