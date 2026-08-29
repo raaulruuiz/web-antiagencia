@@ -1262,9 +1262,21 @@ function extractEmailItemsInOrder(htmlBody) {
     currentText = '';
   }
 
+  function isHidden(el) {
+    const s = el.getAttribute('style') || '';
+    if (/display\s*:\s*none/i.test(s)) return true;
+    if (/visibility\s*:\s*hidden/i.test(s)) return true;
+    if (/opacity\s*:\s*0\b/i.test(s)) return true;
+    if (/max-height\s*:\s*0/i.test(s)) return true;
+    if (/font-size\s*:\s*0/i.test(s)) return true;
+    if (/overflow\s*:\s*hidden/i.test(s) && /max-height\s*:\s*0/i.test(s)) return true;
+    return false;
+  }
+
   function walk(node) {
     if (node.nodeType === Node.ELEMENT_NODE) {
       if (SKIP_TAGS.has(node.tagName)) return;
+      if (isHidden(node)) return;
       if (node.tagName === 'IMG') {
         const src = node.getAttribute('src') || '';
         if (src && !src.startsWith('data:') && !src.includes('gstatic.com/s/e/notoemoji') && !seenImages.has(src)) {
