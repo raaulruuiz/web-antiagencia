@@ -2041,6 +2041,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
                 const sevBg    = c.severidad === 'error' ? '#1a0505' : c.severidad === 'warning' ? '#1a1200' : '#050d1a';
                 const sevLabel = c.severidad === 'error' ? 'Error' : c.severidad === 'warning' ? 'Aviso' : 'Info';
                 const tienePar = c.movimiento && c.factura?.archivo_url;
+                const globalIdx = erroresData.indexOf(c);
                 return (
                   <div key={ci} style={{ borderBottom:'1px solid #1f1f1f', padding:'12px 18px', background: ci % 2 === 0 ? 'transparent' : '#0a0a0a' }}>
                     <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
@@ -2070,6 +2071,13 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
                               ⬡ Ver ambos
                             </button>
                           )}
+                          <button onClick={() => setErroresData(prev => prev.filter((_, i) => i !== globalIdx))}
+                            title="Marcar como resuelto"
+                            style={{ marginLeft:'auto', background:'transparent', border:'1px solid #27272a', color:'#52525b', borderRadius:6, padding:'3px 8px', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor='#22c55e'; e.currentTarget.style.color='#22c55e'; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor='#27272a'; e.currentTarget.style.color='#52525b'; }}>
+                            ✓ Resuelto
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -2101,9 +2109,8 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
           movimiento={errMovEditar}
           zIndex={9200}
           onGuardado={(data) => {
-            setErroresData(prev => prev.map(c =>
-              c.movimiento?.id === errMovEditar.id ? { ...c, movimiento: { ...c.movimiento, ...data } } : c
-            ));
+            // Eliminar de la lista todos los errores asociados a este movimiento (ya corregido)
+            setErroresData(prev => prev.filter(c => c.movimiento?.id !== errMovEditar.id));
             setErrMovEditar(null);
           }}
           onCerrar={() => setErrMovEditar(null)}
