@@ -1108,6 +1108,18 @@ function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm, zIndex =
           </div>
         </div>
 
+        {/* Documentos vinculados */}
+        {(m.factura_ids?.length || 0) > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px 0' }}>Documentos vinculados</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {m.factura_ids.map(fid => (
+                <span key={fid} style={{ background: 'rgba(96,165,250,0.08)', color: '#60a5fa', fontSize: 11, padding: '3px 9px', borderRadius: 6, border: '1px solid rgba(96,165,250,0.2)', fontFamily: 'monospace' }}>📄 {fid.slice(0,8)}…</span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Metadatos — zona dim */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
           <div>
@@ -1148,6 +1160,9 @@ function FilaMovimiento({ m, onVerDetalle }) {
         {m.categorias.slice(0,2).map(c => (
           <span key={c} style={{ background: '#27272a', color: '#a1a1aa', fontSize: 10, padding: '2px 6px', borderRadius: 4, whiteSpace: 'nowrap' }}>{c}</span>
         ))}
+        {(m.factura_ids?.length || 0) > 0 && (
+          <span style={{ background: 'rgba(96,165,250,0.1)', color: '#60a5fa', fontSize: 10, padding: '2px 6px', borderRadius: 4, whiteSpace: 'nowrap', border: '1px solid rgba(96,165,250,0.2)' }}>📄 {m.factura_ids.length}</span>
+        )}
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 70 }}>
         <p style={{ color: esIngreso ? '#22c55e' : '#f87171', fontSize: 14, fontWeight: 700, margin: 0 }}>{esIngreso ? '+' : '-'}{fmt(m.cantidad)}</p>
@@ -2910,7 +2925,7 @@ function VinculosDropdown({ seleccionados, opciones, cargando, onToggle, onClose
   }, [onClose]);
   const q = busqueda.toLowerCase().trim();
   const filtradas = opciones.filter(o =>
-    !q || (o.nombre||'').toLowerCase().includes(q) || (o.fecha||'').includes(q)
+    !q || (o.nombre||'').toLowerCase().includes(q) || (o.fecha||'').includes(q) || (o.subtitulo||'').toLowerCase().includes(q)
   );
   return (
     <div ref={ref} style={{ position:'absolute', zIndex:600, top:'100%', left:0, width:300, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, boxShadow:'0 8px 24px rgba(0,0,0,0.6)', padding:8 }}>
@@ -2932,7 +2947,7 @@ function VinculosDropdown({ seleccionados, opciones, cargando, onToggle, onClose
                       <input type="checkbox" readOnly checked={sel} style={{ accentColor:'#818cf8', marginTop:2, flexShrink:0 }} />
                       <div>
                         <div style={{ fontSize:12, color: sel ? '#c4b5fd' : '#d4d4d8', fontWeight: sel ? 600 : 400 }}>{o.nombre || '—'}</div>
-                        {o.fecha && <div style={{ fontSize:11, color:'#52525b' }}>{o.fecha}</div>}
+                        {o.subtitulo ? <div style={{ fontSize:10, color:'#52525b' }}>{o.subtitulo}</div> : o.fecha ? <div style={{ fontSize:11, color:'#52525b' }}>{o.fecha}</div> : null}
                       </div>
                     </div>
                   );
@@ -3862,7 +3877,11 @@ export default function Finanzas() {
       const token = await getToken();
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas?todos=1`, { headers: { Authorization: `Bearer ${token}` } });
       const json = await r.json();
-      setFacturasParaVincular((Array.isArray(json) ? json : json.items || []).map(f => ({ id: f.id, nombre: f.nombre_entidad || f.archivo_nombre || '—', fecha: f.fecha_factura || '' })));
+      setFacturasParaVincular((Array.isArray(json) ? json : json.items || []).map(f => {
+        const total = Math.abs((parseFloat(f.importe||0)||0) + (parseFloat(f.impuesto||0)||0) + (parseFloat(f.irpf||0)||0));
+        const subtitulo = [f.nombre_entidad, f.numero_factura, f.fecha_factura, total > 0 ? `${Math.round(total)}€` : null].filter(Boolean).join(' · ');
+        return { id: f.id, nombre: f.archivo_nombre || f.nombre_entidad || '—', subtitulo, fecha: f.fecha_factura || '' };
+      }));
     } catch(_) {}
     setLoadingFacsVincular(false);
   }
@@ -3884,11 +3903,24 @@ export default function Finanzas() {
       if (facturaViewer?.id === facturaId) {
         setFacturaViewer(prev => ({ ...prev, data: { ...prev.data, movimiento_ids: newIds } }));
       }
+      // Sync movimientos: add/remove facturaId from the affected movement's factura_ids
+      const wasAdded = newIds.includes(movimientoId);
+      setMovimientos(prev => ({
+        ...prev,
+        items: prev.items.map(m => {
+          if (m.id !== movimientoId) return m;
+          const fIds = m.factura_ids || [];
+          if (wasAdded && !fIds.includes(facturaId)) return { ...m, factura_ids: [...fIds, facturaId] };
+          if (!wasAdded && fIds.includes(facturaId)) return { ...m, factura_ids: fIds.filter(f => f !== facturaId) };
+          return m;
+        }),
+      }));
     } catch(e) { console.error(e); }
   }
 
   // Reemplaza los vínculos de facturas de un movimiento (desde tabla Movimientos)
   async function handleVincularFacturasMovimiento(movimientoId, newFacturaIds) {
+    const oldFacturaIds = movimientos.items.find(m => m.id === movimientoId)?.factura_ids || [];
     try {
       const token = await getToken();
       await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${movimientoId}/facturas`, {
@@ -3899,6 +3931,14 @@ export default function Finanzas() {
       setMovimientos(prev => ({
         ...prev,
         items: prev.items.map(m => m.id === movimientoId ? { ...m, factura_ids: newFacturaIds } : m),
+      }));
+      // Sync documentosList: update movimiento_ids on affected facturas
+      setDocumentosList(prev => prev.map(d => {
+        const wasLinked = oldFacturaIds.includes(d.id);
+        const nowLinked = newFacturaIds.includes(d.id);
+        if (!wasLinked && nowLinked) return { ...d, movimiento_ids: [...(d.movimiento_ids || []), movimientoId] };
+        if (wasLinked && !nowLinked) return { ...d, movimiento_ids: (d.movimiento_ids || []).filter(id => id !== movimientoId) };
+        return d;
       }));
     } catch(e) { console.error(e); }
   }
@@ -4943,7 +4983,7 @@ export default function Finanzas() {
               style={{ ...S.input, width: 180, marginLeft: 'auto' }}
             />
             </>)}
-            <div style={{ display:'flex', gap:4, background:'#1c1c1e', padding:3, borderRadius:8, flexShrink:0 }}>
+            <div style={{ display:'flex', gap:4, background:'#1c1c1e', padding:3, borderRadius:8, flexShrink:0, marginLeft: vistaMovs === 'errores' ? 'auto' : undefined }}>
               {[['lista','☰'],['tabla','⊞'],['errores','⚠']].map(([v,ic]) => (
                 <button key={v} type="button" onClick={() => { setVistaMovs(v); lsSet('fin_vista',v); setSeleccionados(new Set()); }}
                   style={{ background:vistaMovs===v?'#27272a':'transparent', border:'none', color:vistaMovs===v?(v==='errores'?'#f87171':'white'):'#52525b', borderRadius:6, padding:'5px 10px', fontSize:14, cursor:'pointer' }}>
@@ -5104,7 +5144,8 @@ export default function Finanzas() {
                 const errores = todosMovs
                   .filter(m =>
                     (m.equipo_ids?.length || 0) > 0 &&
-                    (m.categorias || []).some(c => c.toLowerCase().includes('freelancer')) &&
+                    ((m.categorias || []).some(c => c.toLowerCase().includes('freelancer')) ||
+                     (m.cuenta || '').toLowerCase().includes('freelancer')) &&
                     (m.cliente_ids?.length || 0) === 0
                   )
                   .filter(m => !movsErroresResueltos.has(m.id));
@@ -5392,7 +5433,7 @@ export default function Finanzas() {
               const tokensM = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>=3);
               const findBestMatch = (doc) => {
                 if (!movimientosParaVincular.length) return null;
-                const facBase = Math.abs(doc.importe || 0);
+                const facBase = Math.abs((doc.importe || 0) + (doc.impuesto || 0) + (doc.irpf || 0)) || Math.abs(doc.importe || 0);
                 const facTipo = doc.tipo; // 'gasto' o 'ingreso'
                 const tF = tokensM(doc.nombre_entidad || '');
                 // Movimientos ya vinculados a otras facturas (excluir de recomendaciones)
@@ -5413,12 +5454,12 @@ export default function Finanzas() {
                   const tM = tokensM(m.nombre || '');
                   const nameScore = tF.length && tM.length
                     ? 1 - (tF.filter(w => tM.some(wm => wm.includes(w) || w.includes(wm))).length / tF.length)
-                    : 0.5;
-                  return { m, score: importeScore * 4 + nameScore * 2 };
+                    : 1;
+                  return { m, score: importeScore * 4 + nameScore * 2, importeScore, nameScore };
                 }).sort((a, b) => a.score - b.score);
                 // Solo recomendar si el match es razonablemente bueno (importe ≤30% diferencia o nombre coincide)
                 const best = scored[0];
-                return best && best.score < 3 ? best.m : null;
+                return best && best.importeScore < 0.5 && best.nameScore < 0.9 ? best.m : null;
               };
               const todosConflictos = [];
               for (const doc of documentosList) {
