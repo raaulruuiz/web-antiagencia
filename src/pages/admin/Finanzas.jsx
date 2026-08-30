@@ -5144,8 +5144,7 @@ export default function Finanzas() {
                 const errores = todosMovs
                   .filter(m =>
                     (m.equipo_ids?.length || 0) > 0 &&
-                    ((m.categorias || []).some(c => c.toLowerCase().includes('freelancer')) ||
-                     (m.cuenta || '').toLowerCase().includes('freelancer')) &&
+                    (m.categorias || []).some(c => c.toLowerCase().includes('freelancer')) &&
                     (m.cliente_ids?.length || 0) === 0
                   )
                   .filter(m => !movsErroresResueltos.has(m.id));
