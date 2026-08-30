@@ -2270,7 +2270,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
                 const fac = errSplitView.factura;
                 const esGasto = fac.tipo === 'gasto';
                 const base = parseFloat(fac.importe||0)||0;
-                const total = base+(parseFloat(fac.impuesto)||0)+(parseFloat(fac.irpf)||0);
+                const total = parseFloat(fac.importe_total??0)||(base+(parseFloat(fac.impuesto)||0)+(parseFloat(fac.irpf)||0));
                 const colNum = esGasto ? '#f87171' : '#4ade80';
                 return (
                   <div style={{ display:'flex', gap:16, padding:'8px 14px', borderBottom:'1px solid #1f1f1f', flexShrink:0, flexWrap:'wrap', alignItems:'center', background:'#0d0d0d' }}>
@@ -3878,7 +3878,7 @@ export default function Finanzas() {
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas?todos=1`, { headers: { Authorization: `Bearer ${token}` } });
       const json = await r.json();
       setFacturasParaVincular((Array.isArray(json) ? json : json.items || []).map(f => {
-        const total = Math.abs((parseFloat(f.importe||0)||0) + (parseFloat(f.impuesto||0)||0) + (parseFloat(f.irpf||0)||0));
+        const total = Math.abs(parseFloat(f.importe_total ?? 0) || 0);
         const subtitulo = [f.nombre_entidad, f.numero_factura, f.fecha_factura, total > 0 ? `${Math.round(total)}€` : null].filter(Boolean).join(' · ');
         return { id: f.id, nombre: f.archivo_nombre || f.nombre_entidad || '—', subtitulo, fecha: f.fecha_factura || '' };
       }));
@@ -4226,6 +4226,12 @@ export default function Finanzas() {
     checkMovimientosMesActual();
   }, [dashboard]);
   useEffect(() => { if (tab === 'movimientos') cargarMovimientos(pagMovs, mostrarTodos); }, [tab, pagMovs, mostrarTodos, cargarMovimientos]);
+  // Al entrar en vista errores, cargar todos los movimientos para detectar errores completos
+  useEffect(() => {
+    if (vistaMovs === 'errores' && !mostrarTodos) {
+      setMostrarTodos(true);
+    }
+  }, [vistaMovs]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (tab === 'documentos') cargarDocumentos(); }, [tab]);
   useEffect(() => {
@@ -5358,7 +5364,7 @@ export default function Finanzas() {
 
         // Calc helpers
         const getDocVal = (d, key) => key === 'importe_total'
-          ? (parseFloat(d.importe)||0)+(parseFloat(d.impuesto)||0)+(parseFloat(d.irpf)||0)
+          ? parseFloat(d.importe_total ?? 0) || 0
           : parseFloat(d[key]);
         const calcDocVal = (key, type) => {
           switch(type) {
@@ -5432,7 +5438,7 @@ export default function Finanzas() {
               const tokensM = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>=3);
               const findBestMatch = (doc) => {
                 if (!movimientosParaVincular.length) return null;
-                const facBase = Math.abs((doc.importe || 0) + (doc.impuesto || 0) + (doc.irpf || 0)) || Math.abs(doc.importe || 0);
+                const facBase = Math.abs(parseFloat(doc.importe_total ?? 0) || 0) || Math.abs(doc.importe || 0);
                 const facTipo = doc.tipo; // 'gasto' o 'ingreso'
                 const tF = tokensM(doc.nombre_entidad || '');
                 // Movimientos ya vinculados a otras facturas (excluir de recomendaciones)
@@ -5724,7 +5730,7 @@ export default function Finanzas() {
                               );
 
                               if (col.key === 'importe_total') {
-                                const total = (parseFloat(doc.importe??0)||0) + (parseFloat(doc.impuesto??0)||0) + (parseFloat(doc.irpf??0)||0);
+                                const total = parseFloat(doc.importe_total ?? 0) || 0;
                                 const isZero = Math.abs(total) < 0.005;
                                 const isVenta = doc.tipo === 'ingreso';
                                 const isCompra = doc.tipo === 'gasto';
@@ -6945,7 +6951,7 @@ export default function Finanzas() {
                 const fac = docSplitView.factura;
                 const esGasto = fac.tipo === 'gasto';
                 const base = parseFloat(fac.importe||0)||0;
-                const total = base+(parseFloat(fac.impuesto)||0)+(parseFloat(fac.irpf)||0);
+                const total = parseFloat(fac.importe_total ?? 0) || (base+(parseFloat(fac.impuesto)||0)+(parseFloat(fac.irpf)||0));
                 const colNum = esGasto ? '#f87171' : '#4ade80';
                 return (
                   <div style={{ display:'flex', gap:16, padding:'8px 14px', borderBottom:'1px solid #1f1f1f', flexShrink:0, flexWrap:'wrap', alignItems:'center', background:'#0d0d0d' }}>
@@ -6998,7 +7004,7 @@ export default function Finanzas() {
                   {fv.numero_factura && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Nº</span> {fv.numero_factura}</span>}
                   {fv.nombre_entidad && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Entidad</span> {fv.nombre_entidad}</span>}
                   {fv.nif_cif && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>NIF</span> {fv.nif_cif}</span>}
-                  {fv.importe != null && (() => { const base=parseFloat(fv.importe)||0; const total=base+(parseFloat(fv.impuesto)||0)+(parseFloat(fv.irpf)||0); const isV=fv.tipo==='ingreso'; const colBase=Math.abs(base)<0.005?'#71717a':isV?'#4ade80':'#f87171'; const colTot=Math.abs(total)<0.005?'#71717a':isV?'#4ade80':'#f87171'; const signBase=Math.abs(base)<0.005?'':(isV?'+':'-'); const signTot=Math.abs(total)<0.005?'':(isV?'+':'-'); return (<><span style={{ color:colTot, fontSize:13, fontWeight:700 }}><span style={{ color:'#52525b', fontWeight:400, fontSize:11, marginRight:2 }}>Importe</span>{signTot}{Math.abs(total).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span><span style={{ color:colBase, fontSize:12 }}><span style={{ color:'#52525b' }}>Base </span>{signBase}{Math.abs(base).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span></>); })()}
+                  {fv.importe != null && (() => { const base=parseFloat(fv.importe)||0; const total=parseFloat(fv.importe_total??0)||(base+(parseFloat(fv.impuesto)||0)+(parseFloat(fv.irpf)||0)); const isV=fv.tipo==='ingreso'; const colBase=Math.abs(base)<0.005?'#71717a':isV?'#4ade80':'#f87171'; const colTot=Math.abs(total)<0.005?'#71717a':isV?'#4ade80':'#f87171'; const signBase=Math.abs(base)<0.005?'':(isV?'+':'-'); const signTot=Math.abs(total)<0.005?'':(isV?'+':'-'); return (<><span style={{ color:colTot, fontSize:13, fontWeight:700 }}><span style={{ color:'#52525b', fontWeight:400, fontSize:11, marginRight:2 }}>Importe</span>{signTot}{Math.abs(total).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span><span style={{ color:colBase, fontSize:12 }}><span style={{ color:'#52525b' }}>Base </span>{signBase}{Math.abs(base).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span></>); })()}
                   {fv.impuesto != null && fv.impuesto !== 0 && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>IVA</span> {parseFloat(fv.impuesto).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
                   {fv.irpf != null && fv.irpf !== 0 && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>IRPF</span> {parseFloat(fv.irpf).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
                   {fv.factura_proveedor_id && <span style={{ color:'#a1a1aa', fontSize:12 }}><span style={{ color:'#52525b' }}>Proveedor</span> {findC(fv.factura_proveedor_id)}</span>}
