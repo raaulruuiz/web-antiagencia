@@ -3949,6 +3949,83 @@ export default function Finanzas() {
     } catch(e) { console.error(e); }
   }
 
+  // ─── Supabase Realtime ───────────────────────────────────────────────────────
+  // Refs siempre apuntan a la versión más reciente de las funciones de carga,
+  // para que el useEffect con [] no capture closures obsoletas.
+  const rtRefs = useRef({});
+  // (se actualiza en cada render — ver useEffect debajo)
+
+  // Suscripción global: cualquier cambio en las tablas de finanzas actualiza
+  // automáticamente el estado relevante sin necesidad de re-fetch manual.
+  useEffect(() => {
+    // Vínculos factura↔movimiento
+    const chVinculos = supabase
+      .channel('fin_vinculos')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_facturas_movimientos' }, (payload) => {
+        const facId = payload.new?.factura_id || payload.old?.factura_id;
+        const movId = payload.new?.movimiento_id || payload.old?.movimiento_id;
+        if (facId) rtRefs.current.refrescarFactura?.(facId);
+        if (movId) rtRefs.current.refrescarMovimiento?.(movId);
+      })
+      .subscribe();
+
+    // Cambios en facturas (nombre, importe, fecha, estado…)
+    const chFacturas = supabase
+      .channel('fin_facturas')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_facturas' }, (payload) => {
+        if (payload.new?.id) rtRefs.current.refrescarFactura?.(payload.new.id);
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'finanzas_facturas' }, () => {
+        rtRefs.current.cargarDocumentos?.();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'finanzas_facturas' }, () => {
+        rtRefs.current.cargarDocumentos?.();
+      })
+      .subscribe();
+
+    // Cambios en movimientos (categorías, equipo, cliente, importe…)
+    const chMovimientos = supabase
+      .channel('fin_movimientos')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_movimientos' }, (payload) => {
+        if (payload.new?.id) rtRefs.current.refrescarMovimiento?.(payload.new.id);
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'finanzas_movimientos' }, () => {
+        rtRefs.current.cargarMovimientos?.();
+        rtRefs.current.cargarDashboard?.();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'finanzas_movimientos' }, () => {
+        rtRefs.current.cargarMovimientos?.();
+        rtRefs.current.cargarDashboard?.();
+      })
+      .subscribe();
+
+    // Cambios en contactos (clientes, equipo, proveedores)
+    const chClientes = supabase
+      .channel('fin_clientes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_clientes' }, () => rtRefs.current.cargarClientes?.())
+      .subscribe();
+
+    const chEquipo = supabase
+      .channel('fin_equipo')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_equipo' }, () => rtRefs.current.cargarEquipo?.())
+      .subscribe();
+
+    const chProveedores = supabase
+      .channel('fin_proveedores')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_proveedores' }, () => rtRefs.current.cargarProveedores?.())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(chVinculos);
+      supabase.removeChannel(chFacturas);
+      supabase.removeChannel(chMovimientos);
+      supabase.removeChannel(chClientes);
+      supabase.removeChannel(chEquipo);
+      supabase.removeChannel(chProveedores);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // ────────────────────────────────────────────────────────────────────────────
+
   // Calcula campos fiscales derivados al cambiar proveedor/cliente
   function contactFiscalUpdates(contactId, contacts, docTipo, campo) {
     const isExternal = (docTipo === 'gasto' && campo === 'factura_proveedor_id') ||
@@ -4307,6 +4384,21 @@ export default function Finanzas() {
   }, [desde, hasta]);
 
   useEffect(() => { if (tab === 'proveedores') cargarProveedores(); }, [tab, cargarProveedores]);
+
+  // Mantiene rtRefs.current con las versiones más recientes de las funciones de carga
+  // para que los handlers de Supabase Realtime nunca usen closures obsoletas.
+  useEffect(() => {
+    rtRefs.current = {
+      refrescarFactura,
+      refrescarMovimiento,
+      cargarDocumentos,
+      cargarMovimientos: () => cargarMovimientos(pagMovs, mostrarTodos),
+      cargarDashboard,
+      cargarClientes,
+      cargarEquipo,
+      cargarProveedores,
+    };
+  });
 
   async function eliminarContacto(id, tipo) {
     try {
