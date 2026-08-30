@@ -3591,6 +3591,8 @@ export default function Finanzas() {
   const [confirmandoContactos, setConfirmandoContactos] = useState(false);
   // Tab Documentos (main)
   const [vistaDocumentos, setVistaDocumentos] = useState('tabla');
+  const [docConflictosFiltro, setDocConflictosFiltro] = useState('todos');
+  const [docConflictosResueltos, setDocConflictosResueltos] = useState(new Set());
   const [docTabDesde, setDocTabDesde] = useState(() => lsGet('fin_doc_desde', '2023-01-01'));
   const [docTabHasta, setDocTabHasta] = useState(() => lsGet('fin_doc_hasta', new Date().toISOString().slice(0,10)));
   const [documentosList, setDocumentosList] = useState([]);
@@ -5300,61 +5302,85 @@ export default function Finanzas() {
 
             {/* Vista Conflictos */}
             {vistaDocumentos === 'conflictos' && (() => {
-              const ERRORES_DOC = {
-                sin_contacto: { label: 'Sin contacto', color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
-                sin_movimiento_vinculado: { label: 'Sin movimiento', color: '#fb923c', bg: 'rgba(251,146,60,0.1)' },
+              const tipoLabel = {
+                sin_contacto: 'Factura sin proveedor/cliente vinculado',
+                sin_movimiento_vinculado: 'Sin movimiento vinculado',
               };
-              const conflictos = [];
+              const fmtC = n => Math.abs(n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
+              const todosConflictos = [];
               for (const doc of documentosList) {
                 const esGasto = doc.tipo === 'gasto';
                 const tieneContacto = esGasto ? !!doc.factura_proveedor_id : !!doc.factura_cliente_id;
+                const key = `${doc.id}`;
                 if (!tieneContacto) {
-                  conflictos.push({ tipo: 'sin_contacto', doc });
+                  todosConflictos.push({ tipo: 'sin_contacto', doc, severidad: 'error',
+                    desc: `Factura de ${fmtC(Math.abs(doc.importe||0))} € sin ${esGasto ? 'proveedor' : 'cliente'} vinculado. Asigna el contacto en la pestaña Documentos.`,
+                    key: `${key}-sin_contacto` });
                 } else if (!doc.movimiento_ids || doc.movimiento_ids.length === 0) {
-                  conflictos.push({ tipo: 'sin_movimiento_vinculado', doc });
+                  todosConflictos.push({ tipo: 'sin_movimiento_vinculado', doc, severidad: 'error',
+                    desc: `La factura de ${fmtC(Math.abs(doc.importe||0))} € no tiene ningún movimiento vinculado. Vincúlala desde la pestaña Documentos.`,
+                    key: `${key}-sin_movimiento_vinculado` });
                 }
               }
-              const fmt = n => Math.abs(n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
-              const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
-              const findC = id => ctodos.find(c => c.id === id)?.nombre || '—';
+              const conflictos = todosConflictos.filter(c => !docConflictosResueltos.has(c.key));
+              const filtrados = docConflictosFiltro === 'todos' ? conflictos : conflictos.filter(c => c.severidad === docConflictosFiltro);
               return (
-                <div style={S.card}>
+                <div style={{ ...S.card, overflow:'hidden' }}>
+                  {/* Header con filtros */}
+                  <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', borderBottom:'1px solid #27272a', background:'#111', flexWrap:'wrap' }}>
+                    <span style={{ color:'#f87171', fontSize:13 }}>⚠</span>
+                    <span style={{ color:'white', fontWeight:700, fontSize:13 }}>Análisis de conflictos</span>
+                    <div style={{ display:'flex', gap:4, marginLeft:8 }}>
+                      {[
+                        ['todos', 'Todos', '#71717a', '#27272a'],
+                        ['error', `${conflictos.filter(c=>c.severidad==='error').length} errores`, '#f87171', '#1a0505'],
+                        ['warning', `${conflictos.filter(c=>c.severidad==='warning').length} avisos`, '#fbbf24', '#1a1200'],
+                        ['info', `${conflictos.filter(c=>c.severidad==='info').length} info`, '#60a5fa', '#050d1a'],
+                      ].map(([v, l, col, bg]) => (
+                        <button key={v} onClick={() => setDocConflictosFiltro(v)}
+                          style={{ background: docConflictosFiltro===v ? bg : 'transparent', border:`1px solid ${docConflictosFiltro===v ? col : '#3f3f46'}`, color: docConflictosFiltro===v ? col : '#52525b', borderRadius:6, padding:'2px 9px', fontSize:10, cursor:'pointer', fontWeight:600 }}>
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Contenido */}
                   {loadingDocumentos ? (
-                    <p style={{ color:'#52525b', padding:16 }}>Cargando…</p>
-                  ) : conflictos.length === 0 ? (
-                    <div style={{ padding:'32px 16px', textAlign:'center' }}>
-                      <div style={{ fontSize:32, marginBottom:8 }}>✓</div>
-                      <p style={{ color:'#4ade80', fontWeight:600 }}>Sin conflictos en el período seleccionado</p>
-                    </div>
-                  ) : (
-                    <div>
-                      <div style={{ padding:'10px 16px', borderBottom:'1px solid #27272a', color:'#71717a', fontSize:12 }}>
-                        {conflictos.length} conflicto{conflictos.length !== 1 ? 's' : ''} encontrado{conflictos.length !== 1 ? 's' : ''}
-                      </div>
-                      {conflictos.map(({ tipo, doc }, i) => {
-                        const err = ERRORES_DOC[tipo];
-                        const total = (parseFloat(doc.importe||0)||0) + (parseFloat(doc.impuesto||0)||0) + (parseFloat(doc.irpf||0)||0);
-                        const isVenta = doc.tipo === 'ingreso';
-                        const entidad = doc.nombre_entidad || findC(doc.factura_proveedor_id || doc.factura_cliente_id);
-                        return (
-                          <div key={i} onClick={() => setFacturaViewer({ id: doc.id, nombre: doc.archivo_nombre || doc.id, url: doc.url, data: doc })}
-                            style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderBottom:'1px solid #1c1c1e', cursor:'pointer' }}
-                            onMouseEnter={e => e.currentTarget.style.background='#1c1c1e'}
-                            onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                            <span style={{ background: err.bg, color: err.color, border:`1px solid ${err.color}44`, borderRadius:4, padding:'2px 8px', fontSize:11, fontWeight:600, flexShrink:0, minWidth:110, textAlign:'center' }}>
-                              {err.label}
-                            </span>
-                            <span style={{ color:'#52525b', fontSize:12, flexShrink:0, width:90 }}>{doc.fecha_factura || '—'}</span>
-                            <span style={{ color:'#d4d4d8', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{entidad || doc.archivo_nombre || doc.id?.slice(0,8)}</span>
-                            <span style={{ color:'#71717a', fontSize:12, flexShrink:0, maxWidth:200, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{doc.archivo_nombre || '—'}</span>
-                            <span style={{ color: isVenta ? '#4ade80' : '#f87171', fontSize:13, fontWeight:700, flexShrink:0 }}>
-                              {isVenta ? '+' : '-'}{fmt(total)} €
-                            </span>
+                    <p style={{ color:'#52525b', padding:24 }}>Cargando…</p>
+                  ) : filtrados.length === 0 ? (
+                    <div style={{ padding:'32px 16px', textAlign:'center', color:'#22c55e', fontWeight:600 }}>✓ Sin conflictos en este filtro</div>
+                  ) : filtrados.map((c, ci) => {
+                    const sevColor = c.severidad === 'error' ? '#f87171' : c.severidad === 'warning' ? '#fbbf24' : '#60a5fa';
+                    const sevBg    = c.severidad === 'error' ? '#1a0505' : c.severidad === 'warning' ? '#1a1200' : '#050d1a';
+                    const sevLabel = c.severidad === 'error' ? 'Error' : c.severidad === 'warning' ? 'Aviso' : 'Info';
+                    return (
+                      <div key={c.key} style={{ borderBottom:'1px solid #1f1f1f', padding:'12px 18px', background: ci % 2 === 0 ? 'transparent' : '#0a0a0a' }}>
+                        <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+                          <span style={{ background: sevBg, border:`1px solid ${sevColor}`, color: sevColor, fontSize:9, fontWeight:700, borderRadius:4, padding:'2px 6px', whiteSpace:'nowrap', flexShrink:0, marginTop:1 }}>{sevLabel}</span>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <p style={{ color:'white', fontWeight:600, fontSize:12, margin:'0 0 2px' }}>{tipoLabel[c.tipo] || c.tipo}</p>
+                            <p style={{ color:'#71717a', fontSize:11, margin:'0 0 8px', lineHeight:1.5 }}>{c.desc}</p>
+                            <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
+                              {c.doc?.archivo_url && (
+                                <button onClick={() => setFacturaViewer({ url: c.doc.archivo_url, nombre: c.doc.archivo_nombre, id: c.doc.id, data: c.doc })}
+                                  style={{ background:'#050d1a', border:'1px solid #1d4ed8', color:'#60a5fa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:260, overflow:'hidden' }}>
+                                  <span style={{ flexShrink:0 }}>📄</span>
+                                  <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.doc.archivo_nombre}</span>
+                                </button>
+                              )}
+                              <button onClick={() => setDocConflictosResueltos(prev => new Set([...prev, c.key]))}
+                                title="Marcar como resuelto"
+                                style={{ marginLeft:'auto', background:'transparent', border:'1px solid #27272a', color:'#52525b', borderRadius:6, padding:'3px 8px', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor='#22c55e'; e.currentTarget.style.color='#22c55e'; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor='#27272a'; e.currentTarget.style.color='#52525b'; }}>
+                                ✓ Resuelto
+                              </button>
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               );
             })()}
