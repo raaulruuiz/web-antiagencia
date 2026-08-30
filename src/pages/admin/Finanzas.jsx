@@ -3887,6 +3887,31 @@ export default function Finanzas() {
     setLoadingFacsVincular(false);
   }
 
+  // ── Helpers de re-fetch puntual desde DB ─────────────────────────
+  // Actualiza una factura concreta en documentosList y facturaViewer si está abierta
+  async function refrescarFactura(facId) {
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facId}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!r.ok) return;
+      const data = await r.json();
+      setDocumentosList(prev => prev.map(d => d.id === facId ? { ...d, ...data } : d));
+      setFacturaViewer(prev => prev?.id === facId ? { ...prev, data: { ...prev.data, ...data } } : prev);
+    } catch(e) { console.error('refrescarFactura', e); }
+  }
+
+  // Actualiza un movimiento concreto en movimientos.items y movDetail si está abierto
+  async function refrescarMovimiento(movId) {
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/${movId}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!r.ok) return;
+      const data = await r.json();
+      setMovimientos(prev => ({ ...prev, items: prev.items.map(m => m.id === movId ? { ...m, ...data } : m) }));
+      setMovDetail(prev => prev?.id === movId ? { ...prev, ...data } : prev);
+    } catch(e) { console.error('refrescarMovimiento', e); }
+  }
+
   // Toggle vínculo movimiento en una factura (desde tabla Documentos o viewer)
   async function toggleMovimientoEnFactura(facturaId, movimientoId) {
     const doc = documentosList.find(d => d.id === facturaId)
@@ -3900,22 +3925,8 @@ export default function Finanzas() {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ movimiento_ids: newIds }),
       });
-      setDocumentosList(prev => prev.map(d => d.id === facturaId ? { ...d, movimiento_ids: newIds } : d));
-      if (facturaViewer?.id === facturaId) {
-        setFacturaViewer(prev => ({ ...prev, data: { ...prev.data, movimiento_ids: newIds } }));
-      }
-      // Sync movimientos: add/remove facturaId from the affected movement's factura_ids
-      const wasAdded = newIds.includes(movimientoId);
-      setMovimientos(prev => ({
-        ...prev,
-        items: prev.items.map(m => {
-          if (m.id !== movimientoId) return m;
-          const fIds = m.factura_ids || [];
-          if (wasAdded && !fIds.includes(facturaId)) return { ...m, factura_ids: [...fIds, facturaId] };
-          if (!wasAdded && fIds.includes(facturaId)) return { ...m, factura_ids: fIds.filter(f => f !== facturaId) };
-          return m;
-        }),
-      }));
+      // Re-fetch ambos lados desde DB — fuente única de verdad
+      await Promise.all([refrescarFactura(facturaId), refrescarMovimiento(movimientoId)]);
     } catch(e) { console.error(e); }
   }
 
@@ -3929,25 +3940,12 @@ export default function Finanzas() {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ factura_ids: newFacturaIds }),
       });
-      setMovimientos(prev => ({
-        ...prev,
-        items: prev.items.map(m => m.id === movimientoId ? { ...m, factura_ids: newFacturaIds } : m),
-      }));
-      // Sync documentosList: update movimiento_ids on affected facturas
-      setDocumentosList(prev => prev.map(d => {
-        const wasLinked = oldFacturaIds.includes(d.id);
-        const nowLinked = newFacturaIds.includes(d.id);
-        if (!wasLinked && nowLinked) return { ...d, movimiento_ids: [...(d.movimiento_ids || []), movimientoId] };
-        if (wasLinked && !nowLinked) return { ...d, movimiento_ids: (d.movimiento_ids || []).filter(id => id !== movimientoId) };
-        return d;
-      }));
-      // Sync facturaViewer si está abierto sobre un doc afectado
-      if (facturaViewer?.id) {
-        const wasV = oldFacturaIds.includes(facturaViewer.id);
-        const nowV = newFacturaIds.includes(facturaViewer.id);
-        if (!wasV && nowV) setFacturaViewer(prev => ({ ...prev, data: { ...prev.data, movimiento_ids: [...(prev.data?.movimiento_ids || []), movimientoId] } }));
-        else if (wasV && !nowV) setFacturaViewer(prev => ({ ...prev, data: { ...prev.data, movimiento_ids: (prev.data?.movimiento_ids || []).filter(id => id !== movimientoId) } }));
-      }
+      // Re-fetch movimiento + todas las facturas afectadas desde DB
+      const facAfectadas = [...new Set([...oldFacturaIds, ...newFacturaIds])];
+      await Promise.all([
+        refrescarMovimiento(movimientoId),
+        ...facAfectadas.map(fid => refrescarFactura(fid)),
+      ]);
     } catch(e) { console.error(e); }
   }
 
@@ -4344,26 +4342,9 @@ export default function Finanzas() {
             if (data && movEditando) {
               const oldFacturaIds = movEditando.factura_ids || [];
               const newFacturaIds = data.factura_ids || [];
-              const movId = movEditando.id;
-              setMovimientos(prev => ({
-                ...prev,
-                items: prev.items.map(m => m.id === movId ? { ...m, ...data } : m),
-              }));
-              // Sync documentosList bidireccional
-              setDocumentosList(prev => prev.map(d => {
-                const wasLinked = oldFacturaIds.includes(d.id);
-                const nowLinked = newFacturaIds.includes(d.id);
-                if (!wasLinked && nowLinked) return { ...d, movimiento_ids: [...(d.movimiento_ids || []), movId] };
-                if (wasLinked && !nowLinked) return { ...d, movimiento_ids: (d.movimiento_ids || []).filter(id => id !== movId) };
-                return d;
-              }));
-              // Sync facturaViewer si está abierto sobre un doc afectado
-              if (facturaViewer?.id) {
-                const wasV = oldFacturaIds.includes(facturaViewer.id);
-                const nowV = newFacturaIds.includes(facturaViewer.id);
-                if (!wasV && nowV) setFacturaViewer(prev => ({ ...prev, data: { ...prev.data, movimiento_ids: [...(prev.data?.movimiento_ids || []), movId] } }));
-                else if (wasV && !nowV) setFacturaViewer(prev => ({ ...prev, data: { ...prev.data, movimiento_ids: (prev.data?.movimiento_ids || []).filter(id => id !== movId) } }));
-              }
+              const facAfectadas = [...new Set([...oldFacturaIds, ...newFacturaIds])];
+              // Re-fetch todas las facturas afectadas desde DB
+              facAfectadas.forEach(fid => refrescarFactura(fid));
             }
             cargarMovimientos(pagMovs);
             cargarDashboard();
