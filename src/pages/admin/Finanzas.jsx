@@ -876,16 +876,24 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
 
       <div style={{ background: '#1a1a1a', border: '1px solid #27272a', borderRadius: 8, padding: '12px 14px' }}>
         <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px 0' }}>Datos de factura (opcional)</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <div>
-            <label style={S.label}>Fecha Factura</label>
-            <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={form.fecha_factura || ''} onChange={e => set('fecha_factura', e.target.value || null)} />
+        {(form.factura_ids?.length || 0) > 0 ? (
+          <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
+            <span style={{ fontSize:11, color:'#52525b' }}>🔒 Calculado desde {form.factura_ids.length} documento{form.factura_ids.length !== 1 ? 's' : ''} vinculado{form.factura_ids.length !== 1 ? 's' : ''}</span>
+            {form.fecha_factura && <span style={{ background:'#27272a', borderRadius:4, padding:'2px 8px', fontSize:11, color:'#a1a1aa' }}>Fecha: {form.fecha_factura}</span>}
+            {form.importe_factura != null && <span style={{ background:'#27272a', borderRadius:4, padding:'2px 8px', fontSize:11, color:'#a1a1aa' }}>Importe: {Math.abs(form.importe_factura).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
           </div>
-          <div>
-            <label style={S.label}>Importe s/ factura</label>
-            <input style={S.input} type="number" step="0.01" min="0" value={form.importe_factura ?? ''} onChange={e => set('importe_factura', e.target.value === '' ? null : e.target.value)} placeholder="—" />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={S.label}>Fecha Factura</label>
+              <input style={{ ...S.input, colorScheme: 'dark' }} type="date" value={form.fecha_factura || ''} onChange={e => set('fecha_factura', e.target.value || null)} />
+            </div>
+            <div>
+              <label style={S.label}>Importe s/ factura</label>
+              <input style={S.input} type="number" step="0.01" min="0" value={form.importe_factura ?? ''} onChange={e => set('importe_factura', e.target.value === '' ? null : e.target.value)} placeholder="—" />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {facturasLista.length > 0 && (
@@ -3085,6 +3093,19 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
             )}
           </div>
         )}
+      </div>
+    );
+  }
+
+  // Campos bloqueados cuando el movimiento tiene facturas vinculadas
+  const camposBloqueados = ['fecha_factura', 'importe_factura'];
+  if (camposBloqueados.includes(campo) && (m.factura_ids?.length || 0) > 0) {
+    const val_ = m[campo];
+    return (
+      <div title="Calculado automáticamente desde los documentos vinculados"
+        style={{ display:'flex', alignItems:'center', gap:4, color:'#52525b', fontSize:12, cursor:'default' }}>
+        <span>{campo === 'importe_factura' ? (val_ != null ? fmt(val_) : '—') : (val_ || '—')}</span>
+        <span style={{ fontSize:10 }}>🔒</span>
       </div>
     );
   }
