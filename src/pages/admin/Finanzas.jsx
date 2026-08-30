@@ -5160,9 +5160,9 @@ export default function Finanzas() {
           { key: 'nif_cif',              label: 'NIF/CIF',    w: 120 },
           { key: 'factura_proveedor_id', label: 'Proveedor',  w: 150 },
           { key: 'factura_cliente_id',   label: 'Cliente',    w: 150 },
+          { key: 'movimiento_ids',       label: 'Movimientos',w: 105 },
           { key: 'trimestre',            label: 'Q',          w: 72  },
           { key: 'archivo_nombre',       label: 'Archivo',    w: 220, editable: true },
-          { key: 'movimiento_ids',       label: 'Movimientos',w: 105 },
           { key: 'id',                   label: 'ID',         w: 280 },
         ];
 
