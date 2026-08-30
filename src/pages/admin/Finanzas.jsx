@@ -3691,7 +3691,8 @@ export default function Finanzas() {
   const [loadingFacsVincular, setLoadingFacsVincular] = useState(false);
   const [docVinculosEditando, setDocVinculosEditando] = useState(null); // factura.id con dropdown abierto
   const [viewerVincOpen, setViewerVincOpen] = useState(false); // dropdown movimientos en el viewer de factura
-  const [vistaMovs, setVistaMovs] = useState(() => lsGet('fin_vista', 'lista'));
+  const [vistaMovs, setVistaMovs] = useState(() => { const v = lsGet('fin_vista', 'lista'); return ['lista','tabla','errores'].includes(v) ? v : 'lista'; });
+  const [movsErroresResueltos, setMovsErroresResueltos] = useState(new Set());
   const [seleccionados, setSeleccionados] = useState(new Set());
   const [selTodos, setSelTodos] = useState(false); // todos los del filtro seleccionados
   const [cargandoTodos, setCargandoTodos] = useState(false);
@@ -4911,6 +4912,7 @@ export default function Finanzas() {
               <DateRangePicker desde={desde} hasta={hasta} onApply={handleApplyMovimientos} />
               <button style={S.ghost} onClick={() => cargarMovimientos(pagMovs, mostrarTodos)}>↺</button>
             </div>
+            {vistaMovs !== 'errores' && (<>
             <button
               onMouseDown={e => e.preventDefault()}
               onClick={() => { setPanelFiltro(p => !p); setPanelOrdenar(false); }}
@@ -4940,10 +4942,11 @@ export default function Finanzas() {
               onChange={e => { setMovBusqueda(e.target.value); setPagMovs(1); }}
               style={{ ...S.input, width: 180, marginLeft: 'auto' }}
             />
+            </>)}
             <div style={{ display:'flex', gap:4, background:'#1c1c1e', padding:3, borderRadius:8, flexShrink:0 }}>
-              {[['lista','☰'],['tabla','⊞']].map(([v,ic]) => (
+              {[['lista','☰'],['tabla','⊞'],['errores','⚠']].map(([v,ic]) => (
                 <button key={v} type="button" onClick={() => { setVistaMovs(v); lsSet('fin_vista',v); setSeleccionados(new Set()); }}
-                  style={{ background:vistaMovs===v?'#27272a':'transparent', border:'none', color:vistaMovs===v?'white':'#52525b', borderRadius:6, padding:'5px 10px', fontSize:14, cursor:'pointer' }}>
+                  style={{ background:vistaMovs===v?'#27272a':'transparent', border:'none', color:vistaMovs===v?(v==='errores'?'#f87171':'white'):'#52525b', borderRadius:6, padding:'5px 10px', fontSize:14, cursor:'pointer' }}>
                   {ic}
                 </button>
               ))}
@@ -5091,6 +5094,61 @@ export default function Finanzas() {
                     />
                     {paginacion}
                   </>
+                );
+              }
+
+              if (vistaMovs === 'errores') {
+                const fmt_ = n => Math.abs(n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
+                // Usar todos los movimientos cargados, no solo la página actual
+                const todosMovs = movimientos.items || [];
+                const errores = todosMovs
+                  .filter(m =>
+                    (m.equipo_ids?.length || 0) > 0 &&
+                    (m.categorias || []).some(c => c.toLowerCase().includes('freelancer')) &&
+                    (m.cliente_ids?.length || 0) === 0
+                  )
+                  .filter(m => !movsErroresResueltos.has(m.id));
+                return (
+                  <div style={{ ...S.card, overflow:'hidden' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', borderBottom:'1px solid #27272a', background:'#111' }}>
+                      <span style={{ color:'#f87171', fontSize:13 }}>⚠</span>
+                      <span style={{ color:'white', fontWeight:700, fontSize:13 }}>Errores en movimientos</span>
+                      <span style={{ color:'#52525b', fontSize:12 }}>{errores.length} error{errores.length!==1?'es':''}</span>
+                    </div>
+                    {errores.length === 0 ? (
+                      <div style={{ padding:'32px 16px', textAlign:'center', color:'#22c55e', fontWeight:600 }}>✓ Sin errores detectados</div>
+                    ) : errores.map((m, ci) => {
+                      const equipoNombres = (m.equipo_ids || []).map(id => filtroEquipoLista.find(e => e.id === id)?.nombre || id);
+                      return (
+                        <div key={m.id} style={{ borderBottom:'1px solid #1f1f1f', padding:'12px 18px', background: ci % 2 === 0 ? 'transparent' : '#0a0a0a' }}>
+                          <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+                            <span style={{ background:'#1a0505', border:'1px solid #f87171', color:'#f87171', fontSize:9, fontWeight:700, borderRadius:4, padding:'2px 6px', whiteSpace:'nowrap', flexShrink:0, marginTop:1 }}>Error</span>
+                            <div style={{ flex:1, minWidth:0 }}>
+                              <p style={{ color:'white', fontWeight:600, fontSize:12, margin:'0 0 2px' }}>Freelancer sin cliente asignado</p>
+                              <p style={{ color:'#71717a', fontSize:11, margin:'0 0 8px', lineHeight:1.5 }}>
+                                El movimiento tiene miembros de equipo vinculados y categoría Freelancers, pero no tiene ningún cliente asignado. Si es un gasto facturado a un cliente, vincúlalo.
+                              </p>
+                              <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center', marginBottom:8 }}>
+                                <button onClick={() => abrirDetalle(m)}
+                                  style={{ background:'#1c1c1e', border:'1px solid #3f3f46', color:'#d4d4d8', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5 }}>
+                                  📋 {m.nombre} · {m.cantidad < 0 ? '-' : ''}{fmt_(m.cantidad)} €
+                                </button>
+                                {equipoNombres.map(n => (
+                                  <span key={n} style={{ background:'#1e1b4b', border:'1px solid #4338ca', color:'#a5b4fc', borderRadius:6, padding:'2px 8px', fontSize:10 }}>👤 {n}</span>
+                                ))}
+                              </div>
+                              <div style={{ display:'flex', gap:8 }}>
+                                <button onClick={() => setMovsErroresResueltos(prev => new Set([...prev, m.id]))}
+                                  style={{ background:'transparent', border:'1px solid #22c55e', color:'#22c55e', borderRadius:6, padding:'4px 12px', fontSize:11, cursor:'pointer', fontWeight:600 }}>
+                                  ✓ Marcar como revisado
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 );
               }
 
@@ -5339,10 +5397,14 @@ export default function Finanzas() {
                 const tF = tokensM(doc.nombre_entidad || '');
                 // Movimientos ya vinculados a otras facturas (excluir de recomendaciones)
                 const vinculados = new Set(documentosList.flatMap(d => d.movimiento_ids || []));
+                const docFecha = doc.fecha_factura || null;
                 const candidatos = movimientosParaVincular.filter(m => {
                   if (vinculados.has(m.id)) return false;
                   const mTipo = (m.tipo || '').toLowerCase();
-                  return facTipo === 'gasto' ? mTipo === 'gasto' : mTipo === 'ingreso';
+                  if (!(facTipo === 'gasto' ? mTipo === 'gasto' : mTipo === 'ingreso')) return false;
+                  // El cargo siempre es en fecha >= fecha del documento: excluir movimientos anteriores al doc
+                  if (docFecha && m.fecha && m.fecha < docFecha) return false;
+                  return true;
                 });
                 if (!candidatos.length) return null;
                 const scored = candidatos.map(m => {
