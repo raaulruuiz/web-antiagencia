@@ -3590,6 +3590,7 @@ export default function Finanzas() {
   const [contactosTodos, setContactosTodos] = useState([]);
   const [confirmandoContactos, setConfirmandoContactos] = useState(false);
   // Tab Documentos (main)
+  const [vistaDocumentos, setVistaDocumentos] = useState('tabla');
   const [docTabDesde, setDocTabDesde] = useState(() => lsGet('fin_doc_desde', '2023-01-01'));
   const [docTabHasta, setDocTabHasta] = useState(() => lsGet('fin_doc_hasta', new Date().toISOString().slice(0,10)));
   const [documentosList, setDocumentosList] = useState([]);
@@ -5270,25 +5271,96 @@ export default function Finanzas() {
             <div style={{ display:'flex', gap:8, marginBottom:10, flexWrap:'wrap', alignItems:'center' }}>
               <DateRangePicker desde={docTabDesde} hasta={docTabHasta} onApply={(d,h) => { setDocTabDesde(d); setDocTabHasta(h); lsSet('fin_doc_desde',d); lsSet('fin_doc_hasta',h); cargarDocumentos(d,h); }} />
               <button style={S.ghost} onClick={() => cargarDocumentos()}>↺</button>
-              <button onMouseDown={e=>e.preventDefault()} onClick={() => { setDocPanelFiltro(p=>!p); setDocPanelOrdenar(false); }}
-                style={{ ...S.ghost, outline:'none', display:'flex', alignItems:'center', gap:6, ...(docFiltros.length>0?{borderColor:'#0067FD',color:'#0067FD'}:{}) }}>
-                ⚡ Filtros
-                {docFiltros.length>0 && <span style={{ background:'#0067FD', color:'white', borderRadius:10, fontSize:11, padding:'1px 7px', fontWeight:700 }}>{docFiltros.length}</span>}
-              </button>
-              <button onMouseDown={e=>e.preventDefault()} onClick={() => { setDocPanelOrdenar(p=>!p); setDocPanelFiltro(false); }}
-                style={{ ...S.ghost, outline:'none', display:'flex', alignItems:'center', gap:6, ...(docSorts.length>0?{borderColor:'#8b5cf6',color:'#8b5cf6'}:{}) }}>
-                ↕ Ordenar
-                {docSorts.length>0 && <span style={{ color:'#8b5cf6', fontSize:11, fontWeight:600 }}>{docSorts.map(s=>(CAMPOS_SORT_DOCS.find(c=>c.key===s.campo)?.label||s.campo)+(s.dir==='asc'?' ↑':' ↓')).join(', ')}</span>}
-              </button>
-              <input type="text" placeholder="Buscar..." value={docTabBusqueda} onChange={e => { setDocTabBusqueda(e.target.value); setDocPagina(1); }}
-                style={{ ...S.input, width:180, marginLeft:'auto' }} />
+              {vistaDocumentos === 'tabla' && <>
+                <button onMouseDown={e=>e.preventDefault()} onClick={() => { setDocPanelFiltro(p=>!p); setDocPanelOrdenar(false); }}
+                  style={{ ...S.ghost, outline:'none', display:'flex', alignItems:'center', gap:6, ...(docFiltros.length>0?{borderColor:'#0067FD',color:'#0067FD'}:{}) }}>
+                  ⚡ Filtros
+                  {docFiltros.length>0 && <span style={{ background:'#0067FD', color:'white', borderRadius:10, fontSize:11, padding:'1px 7px', fontWeight:700 }}>{docFiltros.length}</span>}
+                </button>
+                <button onMouseDown={e=>e.preventDefault()} onClick={() => { setDocPanelOrdenar(p=>!p); setDocPanelFiltro(false); }}
+                  style={{ ...S.ghost, outline:'none', display:'flex', alignItems:'center', gap:6, ...(docSorts.length>0?{borderColor:'#8b5cf6',color:'#8b5cf6'}:{}) }}>
+                  ↕ Ordenar
+                  {docSorts.length>0 && <span style={{ color:'#8b5cf6', fontSize:11, fontWeight:600 }}>{docSorts.map(s=>(CAMPOS_SORT_DOCS.find(c=>c.key===s.campo)?.label||s.campo)+(s.dir==='asc'?' ↑':' ↓')).join(', ')}</span>}
+                </button>
+                <input type="text" placeholder="Buscar..." value={docTabBusqueda} onChange={e => { setDocTabBusqueda(e.target.value); setDocPagina(1); }}
+                  style={{ ...S.input, width:180, marginLeft:'auto' }} />
+              </>}
+              <div style={{ display:'flex', gap:4, background:'#1c1c1e', padding:3, borderRadius:8, flexShrink:0, marginLeft: vistaDocumentos === 'conflictos' ? 'auto' : undefined }}>
+                {[['tabla','☰'],['conflictos','⚠']].map(([v,ic]) => (
+                  <button key={v} type="button" onClick={() => setVistaDocumentos(v)}
+                    style={{ background:vistaDocumentos===v?'#27272a':'transparent', border:'none', color:vistaDocumentos===v?'white':'#52525b', borderRadius:6, padding:'5px 10px', fontSize:14, cursor:'pointer', title: v==='conflictos'?'Vista conflictos':'' }}>
+                    {ic}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {docPanelFiltro && <PanelFiltros filtros={docFiltros} op={docFiltroOp} onChangeFiltros={f=>{setDocFiltros(f);setDocPagina(1);}} onChangeOp={op=>{setDocFiltroOp(op);setDocPagina(1);}} campos={CAMPOS_FILTRO_DOCS} listasAsignacion={{ factura_proveedor_id: docTabContactos, factura_cliente_id: docTabContactos }} />}
-            {docPanelOrdenar && <PanelOrdenar sorts={docSorts} onChange={s=>{setDocSorts(s);setDocPagina(1);}} campos={CAMPOS_SORT_DOCS} />}
+            {vistaDocumentos === 'tabla' && docPanelFiltro && <PanelFiltros filtros={docFiltros} op={docFiltroOp} onChangeFiltros={f=>{setDocFiltros(f);setDocPagina(1);}} onChangeOp={op=>{setDocFiltroOp(op);setDocPagina(1);}} campos={CAMPOS_FILTRO_DOCS} listasAsignacion={{ factura_proveedor_id: docTabContactos, factura_cliente_id: docTabContactos }} />}
+            {vistaDocumentos === 'tabla' && docPanelOrdenar && <PanelOrdenar sorts={docSorts} onChange={s=>{setDocSorts(s);setDocPagina(1);}} campos={CAMPOS_SORT_DOCS} />}
+
+            {/* Vista Conflictos */}
+            {vistaDocumentos === 'conflictos' && (() => {
+              const ERRORES_DOC = {
+                sin_contacto: { label: 'Sin contacto', color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
+                sin_movimiento_vinculado: { label: 'Sin movimiento', color: '#fb923c', bg: 'rgba(251,146,60,0.1)' },
+              };
+              const conflictos = [];
+              for (const doc of documentosList) {
+                const esGasto = doc.tipo === 'gasto';
+                const tieneContacto = esGasto ? !!doc.factura_proveedor_id : !!doc.factura_cliente_id;
+                if (!tieneContacto) {
+                  conflictos.push({ tipo: 'sin_contacto', doc });
+                } else if (!doc.movimiento_ids || doc.movimiento_ids.length === 0) {
+                  conflictos.push({ tipo: 'sin_movimiento_vinculado', doc });
+                }
+              }
+              const fmt = n => Math.abs(n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
+              const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
+              const findC = id => ctodos.find(c => c.id === id)?.nombre || '—';
+              return (
+                <div style={S.card}>
+                  {loadingDocumentos ? (
+                    <p style={{ color:'#52525b', padding:16 }}>Cargando…</p>
+                  ) : conflictos.length === 0 ? (
+                    <div style={{ padding:'32px 16px', textAlign:'center' }}>
+                      <div style={{ fontSize:32, marginBottom:8 }}>✓</div>
+                      <p style={{ color:'#4ade80', fontWeight:600 }}>Sin conflictos en el período seleccionado</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ padding:'10px 16px', borderBottom:'1px solid #27272a', color:'#71717a', fontSize:12 }}>
+                        {conflictos.length} conflicto{conflictos.length !== 1 ? 's' : ''} encontrado{conflictos.length !== 1 ? 's' : ''}
+                      </div>
+                      {conflictos.map(({ tipo, doc }, i) => {
+                        const err = ERRORES_DOC[tipo];
+                        const total = (parseFloat(doc.importe||0)||0) + (parseFloat(doc.impuesto||0)||0) + (parseFloat(doc.irpf||0)||0);
+                        const isVenta = doc.tipo === 'ingreso';
+                        const entidad = doc.nombre_entidad || findC(doc.factura_proveedor_id || doc.factura_cliente_id);
+                        return (
+                          <div key={i} onClick={() => setFacturaViewer({ id: doc.id, nombre: doc.archivo_nombre || doc.id, url: doc.url, data: doc })}
+                            style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderBottom:'1px solid #1c1c1e', cursor:'pointer' }}
+                            onMouseEnter={e => e.currentTarget.style.background='#1c1c1e'}
+                            onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                            <span style={{ background: err.bg, color: err.color, border:`1px solid ${err.color}44`, borderRadius:4, padding:'2px 8px', fontSize:11, fontWeight:600, flexShrink:0, minWidth:110, textAlign:'center' }}>
+                              {err.label}
+                            </span>
+                            <span style={{ color:'#52525b', fontSize:12, flexShrink:0, width:90 }}>{doc.fecha_factura || '—'}</span>
+                            <span style={{ color:'#d4d4d8', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{entidad || doc.archivo_nombre || doc.id?.slice(0,8)}</span>
+                            <span style={{ color:'#71717a', fontSize:12, flexShrink:0, maxWidth:200, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{doc.archivo_nombre || '—'}</span>
+                            <span style={{ color: isVenta ? '#4ade80' : '#f87171', fontSize:13, fontWeight:700, flexShrink:0 }}>
+                              {isVenta ? '+' : '-'}{fmt(total)} €
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Bulk bar */}
-            {docSeleccionados.size>0 && (
+            {vistaDocumentos === 'tabla' && docSeleccionados.size>0 && (
               <div style={{ position:'sticky', top:0, zIndex:10, background:'#1c1c1e', border:'1px solid #3f3f46', borderRadius:8, padding:'8px 14px', marginBottom:10, display:'flex', alignItems:'center', gap:12, flexWrap:'wrap' }}>
                 <span style={{ color:'#d4d4d8', fontSize:13 }}>{docSeleccionados.size} seleccionado{docSeleccionados.size!==1?'s':''}</span>
                 {docSeleccionados.size < docs.length && (
@@ -5330,7 +5402,7 @@ export default function Finanzas() {
               </div>
             )}
 
-            {loadingDocumentos ? (
+            {vistaDocumentos === 'tabla' && (loadingDocumentos ? (
               <p style={{ color:'#52525b' }}>Cargando…</p>
             ) : (
               <div style={S.card}>
@@ -5571,7 +5643,7 @@ export default function Finanzas() {
                   </select>
                 </div>
               </div>
-            )}
+            ))}
           </>
         );
       })()}
