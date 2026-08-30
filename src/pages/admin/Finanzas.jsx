@@ -3593,6 +3593,7 @@ export default function Finanzas() {
   const [vistaDocumentos, setVistaDocumentos] = useState('tabla');
   const [docConflictosFiltro, setDocConflictosFiltro] = useState('todos');
   const [docConflictosResueltos, setDocConflictosResueltos] = useState(new Set());
+  const [docSplitView, setDocSplitView] = useState(null); // { movimiento, factura } para ver ambos desde conflictos
   const [docTabDesde, setDocTabDesde] = useState(() => lsGet('fin_doc_desde', '2023-01-01'));
   const [docTabHasta, setDocTabHasta] = useState(() => lsGet('fin_doc_hasta', new Date().toISOString().slice(0,10)));
   const [documentosList, setDocumentosList] = useState([]);
@@ -3826,7 +3827,7 @@ export default function Finanzas() {
       if (hasta) params.set('hasta', hasta);
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos?${params}`, { headers: { Authorization: `Bearer ${token}` } });
       const json = await r.json();
-      setMovimientosParaVincular((json.items || []).map(m => ({ id: m.id, nombre: m.nombre, fecha: m.fecha })));
+      setMovimientosParaVincular((json.items || []).map(m => ({ id: m.id, nombre: m.nombre, fecha: m.fecha, cantidad: m.cantidad, tipo: m.tipo })));
     } catch(_) {}
     setLoadingMovsVincular(false);
   }
@@ -5307,6 +5308,35 @@ export default function Finanzas() {
                 sin_movimiento_vinculado: 'Sin movimiento vinculado',
               };
               const fmtC = n => Math.abs(n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+              // Matching: igual que detectarErrores pero simplificado para recomendación
+              const tokensM = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>=3);
+              const findBestMatch = (doc) => {
+                if (!movimientosParaVincular.length) return null;
+                const facBase = Math.abs(doc.importe || 0);
+                const facTipo = doc.tipo; // 'gasto' o 'ingreso'
+                const tF = tokensM(doc.nombre_entidad || '');
+                // Movimientos ya vinculados a otras facturas (excluir de recomendaciones)
+                const vinculados = new Set(documentosList.flatMap(d => d.movimiento_ids || []));
+                const candidatos = movimientosParaVincular.filter(m => {
+                  if (vinculados.has(m.id)) return false;
+                  const mTipo = (m.tipo || '').toLowerCase();
+                  return facTipo === 'gasto' ? mTipo === 'gasto' : mTipo === 'ingreso';
+                });
+                if (!candidatos.length) return null;
+                const scored = candidatos.map(m => {
+                  const mCant = Math.abs(m.cantidad || 0);
+                  const importeScore = facBase > 0 ? Math.abs(mCant - facBase) / facBase : (mCant > 0 ? 1 : 0);
+                  const tM = tokensM(m.nombre || '');
+                  const nameScore = tF.length && tM.length
+                    ? 1 - (tF.filter(w => tM.some(wm => wm.includes(w) || w.includes(wm))).length / tF.length)
+                    : 0.5;
+                  return { m, score: importeScore * 4 + nameScore * 2 };
+                }).sort((a, b) => a.score - b.score);
+                // Solo recomendar si el match es razonablemente bueno (importe ≤30% diferencia o nombre coincide)
+                const best = scored[0];
+                return best && best.score < 3 ? best.m : null;
+              };
               const todosConflictos = [];
               for (const doc of documentosList) {
                 const esGasto = doc.tipo === 'gasto';
@@ -5322,6 +5352,9 @@ export default function Finanzas() {
                     key: `${key}-sin_movimiento_vinculado` });
                 }
               }
+              // Cargar movimientos para matching si no están cargados
+              if (!movimientosParaVincular.length && !loadingMovsVincular) cargarMovimientosParaVincular();
+
               const conflictos = todosConflictos.filter(c => !docConflictosResueltos.has(c.key));
               const filtrados = docConflictosFiltro === 'todos' ? conflictos : conflictos.filter(c => c.severidad === docConflictosFiltro);
               return (
@@ -5353,6 +5386,7 @@ export default function Finanzas() {
                     const sevColor = c.severidad === 'error' ? '#f87171' : c.severidad === 'warning' ? '#fbbf24' : '#60a5fa';
                     const sevBg    = c.severidad === 'error' ? '#1a0505' : c.severidad === 'warning' ? '#1a1200' : '#050d1a';
                     const sevLabel = c.severidad === 'error' ? 'Error' : c.severidad === 'warning' ? 'Aviso' : 'Info';
+                    const recom = c.tipo === 'sin_movimiento_vinculado' ? findBestMatch(c.doc) : null;
                     return (
                       <div key={c.key} style={{ borderBottom:'1px solid #1f1f1f', padding:'12px 18px', background: ci % 2 === 0 ? 'transparent' : '#0a0a0a' }}>
                         <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
@@ -5360,8 +5394,38 @@ export default function Finanzas() {
                           <div style={{ flex:1, minWidth:0 }}>
                             <p style={{ color:'white', fontWeight:600, fontSize:12, margin:'0 0 2px' }}>{tipoLabel[c.tipo] || c.tipo}</p>
                             <p style={{ color:'#71717a', fontSize:11, margin:'0 0 8px', lineHeight:1.5 }}>{c.desc}</p>
+                            {/* Recomendación de matching */}
+                            {recom && (
+                              <div style={{ marginBottom:8 }}>
+                                <span style={{ color:'#a78bfa', fontSize:11, fontWeight:600, display:'block', marginBottom:6 }}>✦ Recomendación</span>
+                                <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
+                                  {c.doc?.archivo_url && (
+                                    <button onClick={() => setFacturaViewer({ url: c.doc.archivo_url, nombre: c.doc.archivo_nombre, id: c.doc.id, data: c.doc })}
+                                      style={{ background:'#050d1a', border:'1px solid #1d4ed8', color:'#60a5fa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:220, overflow:'hidden' }}>
+                                      <span style={{ flexShrink:0 }}>📄</span>
+                                      <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.doc.archivo_nombre}</span>
+                                    </button>
+                                  )}
+                                  <button onClick={() => abrirDetalle(recom.id)}
+                                    style={{ background:'#18181b', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:220, overflow:'hidden' }}>
+                                    <span style={{ flexShrink:0 }}>📋</span>
+                                    <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{recom.nombre}</span>
+                                    <span style={{ color: recom.tipo?.toLowerCase().includes('ingreso') ? '#22c55e' : '#f87171', fontWeight:700, flexShrink:0 }}>{fmtC(Math.abs(recom.cantidad||0))}€</span>
+                                  </button>
+                                  <button onClick={() => setDocSplitView({ movimiento: recom, factura: { ...c.doc, archivo_url: c.doc.url || c.doc.archivo_url } })}
+                                    style={{ background:'#0d0d0d', border:'1px solid #3f3f46', color:'#a1a1aa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
+                                    ⬡ Ver ambos
+                                  </button>
+                                  <button onClick={async () => { await toggleMovimientoEnFactura(c.doc.id, recom.id); setDocConflictosResueltos(prev => new Set([...prev, c.key])); }}
+                                    style={{ background:'rgba(139,92,246,0.15)', border:'1px solid #7c3aed', color:'#a78bfa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0, fontWeight:600 }}>
+                                    ⚡ Vincular
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            {/* Botones sin recomendación */}
                             <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
-                              {c.doc?.archivo_url && (
+                              {!recom && c.doc?.archivo_url && (
                                 <button onClick={() => setFacturaViewer({ url: c.doc.archivo_url, nombre: c.doc.archivo_nombre, id: c.doc.id, data: c.doc })}
                                   style={{ background:'#050d1a', border:'1px solid #1d4ed8', color:'#60a5fa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:260, overflow:'hidden' }}>
                                   <span style={{ flexShrink:0 }}>📄</span>
@@ -6701,6 +6765,84 @@ export default function Finanzas() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Split view desde vista Conflictos de Documentos */}
+      {docSplitView && createPortal(
+        <div onClick={() => setDocSplitView(null)}
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.92)', zIndex:9200, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width:'100%', maxWidth:1200, height:'90vh', display:'flex', gap:0, borderRadius:14, overflow:'hidden', border:'1px solid #3f3f46' }}>
+            {/* Izq: datos movimiento */}
+            <div style={{ flex:'0 0 360px', background:'#161616', overflowY:'auto', display:'flex', flexDirection:'column' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
+                <span style={{ color:'#a1a1aa', fontSize:12, fontWeight:600, flex:1 }}>Movimiento DB</span>
+                <button onClick={() => { abrirDetalle(docSplitView.movimiento.id); setDocSplitView(null); }}
+                  style={{ background:'transparent', border:'1px solid #3f3f46', color:'#71717a', borderRadius:6, padding:'2px 10px', fontSize:11, cursor:'pointer' }}>Editar</button>
+              </div>
+              {(() => {
+                const m = docSplitView.movimiento;
+                const esIngreso = (m.tipo||'').toLowerCase().includes('ingreso');
+                const col = esIngreso ? '#22c55e' : '#f87171';
+                const Field = ({ label, value }) => (
+                  <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+                    <span style={{ color:'#52525b', fontSize:10, fontWeight:600, textTransform:'uppercase' }}>{label}</span>
+                    <span style={{ color: value ? 'white' : '#3f3f46', fontSize:13 }}>{value || '—'}</span>
+                  </div>
+                );
+                return (
+                  <div style={{ padding:16, display:'flex', flexDirection:'column', gap:14, flex:1 }}>
+                    <div>
+                      <p style={{ color:'white', fontWeight:700, fontSize:15, margin:'0 0 4px' }}>{m.nombre}</p>
+                      <p style={{ color:'#71717a', fontSize:12, margin:0 }}>{m.fecha} · {m.tipo}</p>
+                    </div>
+                    <div style={{ background:'#0d0d0d', borderRadius:10, padding:'12px 14px' }}>
+                      <p style={{ color:'#71717a', fontSize:10, fontWeight:600, textTransform:'uppercase', margin:'0 0 3px' }}>Importe</p>
+                      <p style={{ color:col, fontSize:20, fontWeight:700, margin:0 }}>{esIngreso?'+':'-'}{Math.abs(m.cantidad||0).toLocaleString('es-ES',{minimumFractionDigits:2})} €</p>
+                    </div>
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                      <Field label="Fecha" value={m.fecha} />
+                      <Field label="Tipo" value={m.tipo} />
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+            <div style={{ width:1, background:'#27272a', flexShrink:0 }} />
+            {/* Der: factura */}
+            <div style={{ flex:1, background:'#111', display:'flex', flexDirection:'column', minWidth:0 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
+                <span style={{ color:'#60a5fa', fontSize:12, fontWeight:600, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{docSplitView.factura.archivo_nombre}</span>
+                <button onClick={() => { setFacturaViewer({ url: docSplitView.factura.archivo_url, nombre: docSplitView.factura.archivo_nombre, id: docSplitView.factura.id, data: docSplitView.factura }); setDocSplitView(null); }}
+                  style={{ background:'transparent', border:'1px solid #3f3f46', color:'#71717a', borderRadius:6, padding:'2px 10px', fontSize:11, cursor:'pointer', flexShrink:0 }}>Editar</button>
+                <a href={docSplitView.factura.archivo_url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:11, textDecoration:'none', flexShrink:0 }}>↗</a>
+                <button onClick={() => setDocSplitView(null)} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:16, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
+              </div>
+              {(() => {
+                const fac = docSplitView.factura;
+                const esGasto = fac.tipo === 'gasto';
+                const base = parseFloat(fac.importe||0)||0;
+                const total = base+(parseFloat(fac.impuesto)||0)+(parseFloat(fac.irpf)||0);
+                const colNum = esGasto ? '#f87171' : '#4ade80';
+                return (
+                  <div style={{ display:'flex', gap:16, padding:'8px 14px', borderBottom:'1px solid #1f1f1f', flexShrink:0, flexWrap:'wrap', alignItems:'center', background:'#0d0d0d' }}>
+                    {fac.tipo && <span style={{ background: esGasto?'#f8717122':'#4ade8022', color: esGasto?'#f87171':'#4ade80', border:`1px solid ${esGasto?'#f8717144':'#4ade8044'}`, borderRadius:4, padding:'1px 7px', fontSize:11, fontWeight:600 }}>{esGasto?'Compra':'Venta'}</span>}
+                    {total !== 0 && <span style={{ color:colNum, fontSize:13, fontWeight:700 }}>{esGasto?'-':'+'}{Math.abs(total).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
+                    {base !== 0 && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>Base </span>{Math.abs(base).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
+                    {fac.impuesto != null && fac.impuesto !== 0 && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>IVA </span>{parseFloat(fac.impuesto).toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>}
+                    {fac.fecha_factura && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>Fecha </span>{fac.fecha_factura}</span>}
+                    {fac.nombre_entidad && <span style={{ color:'#a1a1aa', fontSize:11 }}><span style={{ color:'#52525b' }}>Entidad </span>{fac.nombre_entidad}</span>}
+                  </div>
+                );
+              })()}
+              {/\.(jpg|jpeg|png|gif|webp)$/i.test(docSplitView.factura.archivo_nombre||'')
+                ? <img src={docSplitView.factura.archivo_url} alt="" style={{ flex:1, objectFit:'contain', width:'100%', height:'100%' }} />
+                : <iframe src={docSplitView.factura.archivo_url} title="factura" style={{ flex:1, width:'100%', border:'none' }} />
+              }
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* Viewer modal documentos/facturas */}
