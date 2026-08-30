@@ -988,7 +988,7 @@ function ModalEditar({ movimiento, onGuardado, onCerrar, zIndex = 1000 }) {
 
 // ── Fila de movimiento ──────────────────────────────────────────
 
-function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm, zIndex = 1000 }) {
+function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm, onAbrirFactura, zIndex = 1000 }) {
   if (!m) return null;
   const esIngreso = m.tipo === 'Ingreso';
   const color = esIngreso ? '#22c55e' : '#f87171';
@@ -1067,6 +1067,19 @@ function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm, zIndex =
           <Field label="Fecha Factura"   value={m.fecha_factura || '—'} />
           <Field label="Clientes" value={(m.clientes_info || []).length ? m.clientes_info.map(c => c.nombre).join(', ') : null} />
           <Field label="Equipo" value={(m.equipo_info || []).length ? m.equipo_info.map(e => e.nombre).join(', ') : null} />
+          {/* Documentos vinculados — en la segunda columna, a la altura de Equipo */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Documentos vinculados</span>
+            {(m.facturas_info?.length || 0) > 0
+              ? <div style={{ display:'flex', flexWrap:'wrap', gap:4 }}>{m.facturas_info.map(f => (
+                  <button key={f.id} onClick={() => onAbrirFactura && onAbrirFactura(f.id)}
+                    style={{ background:'rgba(96,165,250,0.1)', border:'1px solid rgba(96,165,250,0.25)', color:'#60a5fa', borderRadius:5, padding:'2px 8px', fontSize:11, cursor: onAbrirFactura ? 'pointer' : 'default', fontFamily:'inherit' }}>
+                    📄 {f.nombre}
+                  </button>
+                ))}</div>
+              : <span style={{ color:'#3f3f46', fontSize:12 }}>—</span>
+            }
+          </div>
         </div>
 
         {/* Reparto — solo si hay múltiples clientes o equipo */}
@@ -1107,18 +1120,6 @@ function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm, zIndex =
             }
           </div>
         </div>
-
-        {/* Documentos vinculados */}
-        {(m.factura_ids?.length || 0) > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ color: '#52525b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px 0' }}>Documentos vinculados</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {m.factura_ids.map(fid => (
-                <span key={fid} style={{ background: 'rgba(96,165,250,0.08)', color: '#60a5fa', fontSize: 11, padding: '3px 9px', borderRadius: 6, border: '1px solid rgba(96,165,250,0.2)', fontFamily: 'monospace' }}>📄 {fid.slice(0,8)}…</span>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Metadatos — zona dim */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
@@ -3940,6 +3941,13 @@ export default function Finanzas() {
         if (wasLinked && !nowLinked) return { ...d, movimiento_ids: (d.movimiento_ids || []).filter(id => id !== movimientoId) };
         return d;
       }));
+      // Sync facturaViewer si está abierto sobre un doc afectado
+      if (facturaViewer?.id) {
+        const wasV = oldFacturaIds.includes(facturaViewer.id);
+        const nowV = newFacturaIds.includes(facturaViewer.id);
+        if (!wasV && nowV) setFacturaViewer(prev => ({ ...prev, data: { ...prev.data, movimiento_ids: [...(prev.data?.movimiento_ids || []), movimientoId] } }));
+        else if (wasV && !nowV) setFacturaViewer(prev => ({ ...prev, data: { ...prev.data, movimiento_ids: (prev.data?.movimiento_ids || []).filter(id => id !== movimientoId) } }));
+      }
     } catch(e) { console.error(e); }
   }
 
@@ -4334,10 +4342,28 @@ export default function Finanzas() {
           movimiento={movEditando}
           onGuardado={(data) => {
             if (data && movEditando) {
+              const oldFacturaIds = movEditando.factura_ids || [];
+              const newFacturaIds = data.factura_ids || [];
+              const movId = movEditando.id;
               setMovimientos(prev => ({
                 ...prev,
-                items: prev.items.map(m => m.id === movEditando.id ? { ...m, ...data } : m),
+                items: prev.items.map(m => m.id === movId ? { ...m, ...data } : m),
               }));
+              // Sync documentosList bidireccional
+              setDocumentosList(prev => prev.map(d => {
+                const wasLinked = oldFacturaIds.includes(d.id);
+                const nowLinked = newFacturaIds.includes(d.id);
+                if (!wasLinked && nowLinked) return { ...d, movimiento_ids: [...(d.movimiento_ids || []), movId] };
+                if (wasLinked && !nowLinked) return { ...d, movimiento_ids: (d.movimiento_ids || []).filter(id => id !== movId) };
+                return d;
+              }));
+              // Sync facturaViewer si está abierto sobre un doc afectado
+              if (facturaViewer?.id) {
+                const wasV = oldFacturaIds.includes(facturaViewer.id);
+                const nowV = newFacturaIds.includes(facturaViewer.id);
+                if (!wasV && nowV) setFacturaViewer(prev => ({ ...prev, data: { ...prev.data, movimiento_ids: [...(prev.data?.movimiento_ids || []), movId] } }));
+                else if (wasV && !nowV) setFacturaViewer(prev => ({ ...prev, data: { ...prev.data, movimiento_ids: (prev.data?.movimiento_ids || []).filter(id => id !== movId) } }));
+              }
             }
             cargarMovimientos(pagMovs);
             cargarDashboard();
@@ -4354,6 +4380,13 @@ export default function Finanzas() {
           onEditar={m => { setMovDetail(null); setMovEditando(m); }}
           onEliminar={id => { setMovDetail(null); eliminarMovimiento(id); }}
           onConfirm={setConfirmDialog}
+          onAbrirFactura={facId => {
+            setMovDetail(null);
+            // Find in documentosList first, else open by URL
+            const doc = documentosList.find(d => d.id === facId);
+            if (doc) setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre, id: doc.id, data: doc });
+            else setTab('documentos'); // fallback: switch to docs tab which will load and open
+          }}
         />
       )}
 
