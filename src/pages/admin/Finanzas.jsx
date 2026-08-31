@@ -1461,6 +1461,46 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer, findBes
   useEffect(() => { cargar(); }, [cargar]);
   useEffect(() => { cargarComp(); }, [cargarComp]);
 
+  // Realtime: cuando la junction table cambia, refrescar el trimestre activo para tener
+  // movimiento_ids actualizados en facturasPorTrimestre (evita falsos "sin movimiento vinculado")
+  useEffect(() => {
+    const ch = supabase
+      .channel('fiscal_vinculos')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_facturas_movimientos' }, async (payload) => {
+        const facId = payload.new?.factura_id || payload.old?.factura_id;
+        if (!facId) return;
+        // Actualizar movimiento_ids de esa factura concreta en facturasPorTrimestre
+        try {
+          const token = await getToken();
+          const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facId}`, { headers: { Authorization: `Bearer ${token}` } });
+          if (!r.ok) return;
+          const fresh = await r.json();
+          setFacturasPorTrimestre(prev => {
+            const next = {};
+            for (const [key, items] of Object.entries(prev)) {
+              next[key] = items.map(f => f.id === facId ? { ...f, ...fresh } : f);
+            }
+            return next;
+          });
+          // Actualizar también erroresData si está abierto
+          setErroresData(prev => prev.map(c => c.factura?.id === facId ? { ...c, factura: { ...c.factura, ...fresh } } : c));
+        } catch (_) {}
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_facturas' }, async (payload) => {
+        const facId = payload.new?.id;
+        if (!facId) return;
+        setFacturasPorTrimestre(prev => {
+          const next = {};
+          for (const [key, items] of Object.entries(prev)) {
+            next[key] = items.map(f => f.id === facId ? { ...f, ...payload.new } : f);
+          }
+          return next;
+        });
+      })
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Sync factura updates (from viewer edit) into erroresData and facturasPorTrimestre
   useEffect(() => {
     const fv = facturaViewer;
@@ -1594,11 +1634,19 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer, findBes
 
   async function detectarErrores() {
     const key = `${anio}-${trimestreAbierto + 1}`;
-    const facturasGuardadas = facturasPorTrimestre[key] || [];
-    if (!facturasGuardadas.length) { alert('No hay facturas guardadas en este trimestre'); return; }
+    const facturasCache = facturasPorTrimestre[key] || [];
+    if (!facturasCache.length) { alert('No hay facturas guardadas en este trimestre'); return; }
     setDetectando(true);
     try {
       const token = await getToken();
+      // Refetch facturas frescas desde DB (con movimiento_ids actualizados de la junction table)
+      const fRes = await fetch(`${BACKEND_URL}/admin/finanzas/facturas?anio=${anio}&trimestre=${trimestreAbierto + 1}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const facturasGuardadas = fRes.ok ? (await fRes.json()) : facturasCache;
+      // Actualizar también el estado local con los datos frescos
+      if (fRes.ok) setFacturasPorTrimestre(prev => ({ ...prev, [key]: facturasGuardadas }));
+
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos-con-factura?anio=${anio}&trimestre=${trimestreAbierto + 1}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -3966,7 +4014,8 @@ export default function Finanzas() {
       if (hasta) params.set('hasta', hasta);
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos?${params}`, { headers: { Authorization: `Bearer ${token}` } });
       const json = await r.json();
-      setMovimientosParaVincular((json.items || []).map(m => ({ id: m.id, nombre: m.nombre, fecha: m.fecha, cantidad: m.cantidad, tipo: m.tipo })));
+      // Guardamos el objeto completo para poder mostrarlo en el split view sin re-fetch
+      setMovimientosParaVincular(json.items || []);
     } catch(_) {}
     setLoadingMovsVincular(false);
   }
