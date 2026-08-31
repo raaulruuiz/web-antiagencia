@@ -4361,7 +4361,7 @@ export default function BibliotecaItem() {
         }
       } else {
         const errData = await res.json().catch(() => ({}));
-        alert('Error al guardar: ' + (errData.error || `HTTP ${res.status}`));
+        alert(`Error al guardar: ${errData.error || 'sin detalle'} (HTTP ${res.status})\nToken enviado: ${token?.slice(0, 20)}...`);
       }
     } catch (e) {
       console.error('[handleGuardar]', e);
