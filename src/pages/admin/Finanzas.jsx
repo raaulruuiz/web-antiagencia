@@ -1380,7 +1380,7 @@ function FiscalMetric({ label, value, color, comp }) {
   );
 }
 
-function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
+function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer, findBestMatch, movimientosParaVincular, cargarMovimientosParaVincular, loadingMovsVincular, toggleMovimientoEnFactura }) {
   const [anio, setAnio] = useState(new Date().getFullYear());
   const [datos, setDatos] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1413,6 +1413,13 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer }) {
   const [errFiltro, setErrFiltro] = useState('todos'); // 'todos' | 'error' | 'warning' | 'info'
   const [errSplitView, setErrSplitView] = useState(null); // { movimiento, factura } | null
   const [modDetalle, setModDetalle] = useState(null); // { num, titulo, desc, valor, valorLabel, secciones } | null
+
+  // Al abrir el modal de errores, cargar movimientos para el matching de recomendaciones
+  useEffect(() => {
+    if (erroresModal && cargarMovimientosParaVincular && !movimientosParaVincular?.length && !loadingMovsVincular) {
+      cargarMovimientosParaVincular();
+    }
+  }, [erroresModal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Abre un movimiento desde el contexto de errores con datos completos + actualiza URL
   async function abrirMovEnErrores(mov) {
@@ -4442,12 +4449,6 @@ export default function Finanzas() {
       setMostrarTodos(true);
     }
   }, [vistaMovs]);
-  // Al abrir el modal de errores de Fiscal, cargar movimientos para el matching de recomendaciones
-  useEffect(() => {
-    if (erroresModal && !movimientosParaVincular.length && !loadingMovsVincular) {
-      cargarMovimientosParaVincular();
-    }
-  }, [erroresModal]); // eslint-disable-line react-hooks/exhaustive-deps
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (tab === 'documentos') cargarDocumentos(); }, [tab]);
   useEffect(() => {
@@ -6076,7 +6077,7 @@ export default function Finanzas() {
       })()}
 
       {/* ── FISCAL ── */}
-      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewer={facturaViewer} setFacturaViewer={setFacturaViewer} />}
+      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewer={facturaViewer} setFacturaViewer={setFacturaViewer} findBestMatch={findBestMatch} movimientosParaVincular={movimientosParaVincular} cargarMovimientosParaVincular={cargarMovimientosParaVincular} loadingMovsVincular={loadingMovsVincular} toggleMovimientoEnFactura={toggleMovimientoEnFactura} />}
 
       {/* ── CLIENTES ── */}
       {tab === 'clientes' && (() => {
