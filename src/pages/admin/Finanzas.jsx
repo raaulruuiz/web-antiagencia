@@ -3848,6 +3848,9 @@ export default function Finanzas() {
   const [filtroClientesLista, setFiltroClientesLista] = useState([]);
   const [filtroEquipoLista, setFiltroEquipoLista] = useState([]);
   const [filtroProveedoresLista, setFiltroProveedoresLista] = useState([]);
+  // movimientosParams useMemo necesita estos dos antes de la sección TQ
+  const [vistaMovs, setVistaMovs] = useState(() => { const v = lsGet('fin_vista', 'lista'); return ['lista','tabla','errores'].includes(v) ? v : 'lista'; });
+  const [movLimit, setMovLimit] = useState(() => lsGet('fin_limit', 50));
   // ─── Selectores de vinculación (TanStack Query) ──────────────────────────────
   const qc = useQueryClient();
   const _movsPVParams = useMemo(() => {
@@ -3916,7 +3919,6 @@ export default function Finanzas() {
 
   const [docVinculosEditando, setDocVinculosEditando] = useState(null); // factura.id con dropdown abierto
   const [viewerVincOpen, setViewerVincOpen] = useState(false); // dropdown movimientos en el viewer de factura
-  const [vistaMovs, setVistaMovs] = useState(() => { const v = lsGet('fin_vista', 'lista'); return ['lista','tabla','errores'].includes(v) ? v : 'lista'; });
   const [movsErroresResueltos, setMovsErroresResueltos] = useState(new Set());
   const [seleccionados, setSeleccionados] = useState(new Set());
   const [selTodos, setSelTodos] = useState(false); // todos los del filtro seleccionados
@@ -3925,7 +3927,6 @@ export default function Finanzas() {
   const [bulkValor, setBulkValor] = useState('');
   const [bulkValorMulti, setBulkValorMulti] = useState([]); // para cliente_ids / equipo_ids
   const [bulkFiltroLista, setBulkFiltroLista] = useState('');
-  const [movLimit, setMovLimit] = useState(() => lsGet('fin_limit', 50));
   const [confirmDialog, setConfirmDialog] = useState(null); // { texto, onOk }
 
   // Cargar listas para filtros (una vez al montar)
