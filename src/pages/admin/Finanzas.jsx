@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useMovimientos,
+  useMovimiento,
   useMovimientosParaVincular, useFacturasParaVincular,
   useCrearMovimiento, useEditarMovimiento, useEliminarMovimiento,
   useBulkDeleteMovimientos, useBulkEditMovimientos,
@@ -996,8 +997,27 @@ function ModalEditar({ movimiento, onGuardado, onCerrar, zIndex = 1000 }) {
 
 // ── Fila de movimiento ──────────────────────────────────────────
 
-function ModalMovimiento({ m, onClose, onEditar, onEliminar, onConfirm, onAbrirFactura, zIndex = 1000 }) {
-  if (!m) return null;
+function ModalMovimiento({ m, isLoading, isError, onClose, onEditar, onEliminar, onConfirm, onAbrirFactura, zIndex = 1000 }) {
+  const _overlay = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 };
+  const _panel   = { background: '#161616', border: '1px solid #3f3f46', borderRadius: 14, width: '100%', maxWidth: 520 };
+
+  if (isLoading) return (
+    <div onClick={onClose} style={_overlay}>
+      <div onClick={e => e.stopPropagation()} style={{ ..._panel, padding: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120 }}>
+        <span style={{ color: '#71717a', fontSize: 14 }}>Cargando…</span>
+      </div>
+    </div>
+  );
+
+  if (isError || !m) return (
+    <div onClick={onClose} style={_overlay}>
+      <div onClick={e => e.stopPropagation()} style={{ ..._panel, padding: 24, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+        <span style={{ color: '#f87171', fontSize: 14 }}>Error al cargar el movimiento</span>
+        <button onClick={onClose} style={{ background: 'transparent', border: '1px solid #3f3f46', borderRadius: 6, color: '#71717a', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>Cerrar</button>
+      </div>
+    </div>
+  );
+
   const esIngreso = m.tipo === 'Ingreso';
   const color = esIngreso ? '#22c55e' : '#f87171';
 
@@ -3826,7 +3846,8 @@ export default function Finanzas() {
   const [pagMovs, setPagMovs] = useState(1);
   const [mostrarTodos, setMostrarTodos] = useState(false);
   const [movEditando, setMovEditando] = useState(null);
-  const [movDetail, setMovDetail] = useState(null);
+  const [movDetailId, setMovDetailId] = useState(null);
+  const { data: movDetail, isLoading: movDetailLoading, isError: movDetailError } = useMovimiento(movDetailId);
   const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre, id?, data?, _autoEdit? } | null
   const [viewerEditando, setViewerEditando] = useState(false);
   const [viewerDraft, setViewerDraft] = useState({});
@@ -3950,34 +3971,36 @@ export default function Finanzas() {
   useEffect(() => { lsSet('fin_desdeComp', desdeComp); }, [desdeComp]);
   useEffect(() => { lsSet('fin_hastaComp', hastaComp); }, [hastaComp]);
 
-  async function abrirDetalle(id) {
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await r.json();
-      if (r.ok) setMovDetail(data);
-    } catch (e) { console.error(e); }
+  function abrirDetalle(id) {
+    setMovDetailId(id || null);
   }
 
-  // URL sync: ?mov=ID ↔ movDetail (igual que Notion con &p=ID)
+  // URL sync: ?mov=ID ↔ movDetailId (igual que Notion con &p=ID)
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get('mov');
-    if (id) abrirDetalle(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (id) setMovDetailId(id);
+  }, []);
+
+  // Sincroniza back/forward del navegador con movDetailId mientras Finanzas está montado.
+  useEffect(() => {
+    function handlePopState() {
+      const id = new URLSearchParams(window.location.search).get('mov');
+      setMovDetailId(id || null);
+    }
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (movDetail) {
-      params.set('mov', movDetail.id);
+    if (movDetailId) {
+      params.set('mov', movDetailId);
     } else {
       params.delete('mov');
     }
     const qs = params.toString();
     window.history.replaceState({}, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
-  }, [movDetail]);
+  }, [movDetailId]);
 
   // URL sync: ?doc=ID ↔ facturaViewer
   useEffect(() => {
@@ -4123,19 +4146,6 @@ export default function Finanzas() {
     } catch(e) { console.error('refrescarFactura', e); }
   }
 
-  // TEMPORAL hasta Fase 4: solo actualiza movDetail para mantener el modal sincronizado.
-  // La lista principal se actualiza vía Realtime → invalidateQueries(movimientoKeys.all).
-  // refrescarMovimiento NO debe convertirse en coordinador permanente — eliminar en Fase 4.
-  async function refrescarMovimiento(movId) {
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/${movId}`, { headers: { Authorization: `Bearer ${token}` } });
-      if (!r.ok) return;
-      const data = await r.json();
-      setMovDetail(prev => prev?.id === movId ? { ...prev, ...data } : prev);
-    } catch(e) { console.error('refrescarMovimiento', e); }
-  }
-
   // Toggle vínculo movimiento en una factura (desde tabla Documentos o viewer)
   async function toggleMovimientoEnFactura(facturaId, movimientoId) {
     const doc = documentosList.find(d => d.id === facturaId)
@@ -4149,8 +4159,10 @@ export default function Finanzas() {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ movimiento_ids: newIds }),
       });
-      // Re-fetch ambos lados desde DB — fuente única de verdad
-      await Promise.all([refrescarFactura(facturaId), refrescarMovimiento(movimientoId)]);
+      await Promise.all([
+        refrescarFactura(facturaId),
+        qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) }),
+      ]);
     } catch(e) { console.error(e); }
   }
 
@@ -4164,10 +4176,9 @@ export default function Finanzas() {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ factura_ids: newFacturaIds }),
       });
-      // Re-fetch movimiento + todas las facturas afectadas desde DB
       const facAfectadas = [...new Set([...oldFacturaIds, ...newFacturaIds])];
       await Promise.all([
-        refrescarMovimiento(movimientoId),
+        qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) }),
         ...facAfectadas.map(fid => refrescarFactura(fid)),
       ]);
     } catch(e) { console.error(e); }
@@ -4182,14 +4193,14 @@ export default function Finanzas() {
   // Suscripción global: cualquier cambio en las tablas de finanzas actualiza
   // automáticamente el estado relevante sin necesidad de re-fetch manual.
   useEffect(() => {
-    // Vínculos factura↔movimiento
+    // Vínculos factura↔movimiento (tabla sin publicación Realtime aún — handler preparado)
     const chVinculos = supabase
       .channel('fin_vinculos')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_facturas_movimientos' }, (payload) => {
         const facId = payload.new?.factura_id || payload.old?.factura_id;
         const movId = payload.new?.movimiento_id || payload.old?.movimiento_id;
         if (facId) rtRefs.current.refrescarFactura?.(facId);
-        if (movId) rtRefs.current.refrescarMovimiento?.(movId);
+        if (movId) qc.invalidateQueries({ queryKey: movimientoKeys.detail(movId) });
       })
       .subscribe();
 
@@ -4208,13 +4219,11 @@ export default function Finanzas() {
       .subscribe();
 
     // Cambios en movimientos (categorías, equipo, cliente, importe…)
-    // Adaptación temporal Fase 3: invalida TanStack Query directamente (qc es estable).
-    // refrescarMovimiento se mantiene solo para actualizar movDetail hasta Fase 4.
+    // movimientoKeys.all cubre listas y detalles — el modal abierto se actualiza solo.
     const chMovimientos = supabase
       .channel('fin_movimientos')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_movimientos' }, (payload) => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_movimientos' }, () => {
         qc.invalidateQueries({ queryKey: movimientoKeys.all });
-        if (payload.new?.id) rtRefs.current.refrescarMovimiento?.(payload.new.id);
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'finanzas_movimientos' }, () => {
         qc.invalidateQueries({ queryKey: movimientoKeys.all });
@@ -4366,7 +4375,7 @@ export default function Finanzas() {
   function eliminarMovimiento(id) {
     _eliminarMovMut.mutate(id, {
       onSuccess: () => {
-        if (movDetail?.id === id) setMovDetail(null);
+        if (movDetailId === id) setMovDetailId(null);
         cargarDashboard();
       },
       onError: (e) => alert('Error al eliminar: ' + e.message),
@@ -4516,7 +4525,6 @@ export default function Finanzas() {
   useEffect(() => {
     rtRefs.current = {
       refrescarFactura,
-      refrescarMovimiento, // TEMPORAL hasta Fase 4: solo para actualizar movDetail
       cargarDocumentos,
       cargarDashboard,
       cargarClientes,
@@ -4571,19 +4579,20 @@ export default function Finanzas() {
       )}
 
       {/* Modal detalle */}
-      {movDetail && (
+      {movDetailId && (
         <ModalMovimiento
           m={movDetail}
-          onClose={() => setMovDetail(null)}
-          onEditar={m => { setMovDetail(null); setMovEditando(m); }}
-          onEliminar={id => { setMovDetail(null); eliminarMovimiento(id); }}
+          isLoading={movDetailLoading}
+          isError={movDetailError}
+          onClose={() => setMovDetailId(null)}
+          onEditar={m => { setMovDetailId(null); setMovEditando(m); }}
+          onEliminar={id => { setMovDetailId(null); eliminarMovimiento(id); }}
           onConfirm={setConfirmDialog}
           onAbrirFactura={facId => {
-            setMovDetail(null);
-            // Find in documentosList first, else open by URL
+            setMovDetailId(null);
             const doc = documentosList.find(d => d.id === facId);
             if (doc) setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre, id: doc.id, data: doc });
-            else setTab('documentos'); // fallback: switch to docs tab which will load and open
+            else setTab('documentos');
           }}
         />
       )}
@@ -5405,7 +5414,7 @@ export default function Finanzas() {
                                 El movimiento tiene miembros de equipo vinculados y categoría Freelancers, pero no tiene ningún cliente asignado. Si es un gasto facturado a un cliente, vincúlalo.
                               </p>
                               <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center', marginBottom:8 }}>
-                                <button onClick={() => abrirDetalle(m)}
+                                <button onClick={() => abrirDetalle(m.id)}
                                   style={{ background:'#1c1c1e', border:'1px solid #3f3f46', color:'#d4d4d8', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5 }}>
                                   📋 {m.nombre} · {m.cantidad < 0 ? '-' : ''}{fmt_(m.cantidad)} €
                                 </button>
