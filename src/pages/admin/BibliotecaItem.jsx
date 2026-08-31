@@ -985,10 +985,16 @@ function DiscardModal({ onConfirm, onCancel }) {
 // ── Auth helper ───────────────────────────────────────────────────────────────
 async function getToken() {
   const { data: { session } } = await supabase.auth.getSession();
-  if (session?.access_token) return session.access_token;
-  // Session expired or not loaded — try explicit refresh before giving up
+  if (session?.access_token) {
+    // Devolver el token almacenado solo si no expira en los próximos 60 segundos
+    const now = Math.floor(Date.now() / 1000);
+    if (!session.expires_at || session.expires_at > now + 60) {
+      return session.access_token;
+    }
+  }
+  // Token ausente, expirado o a punto de expirar — forzar refresh
   const { data: refreshed } = await supabase.auth.refreshSession();
-  return refreshed.session?.access_token || null;
+  return refreshed?.session?.access_token || null;
 }
 
 // ── Block: divider ────────────────────────────────────────────────────────────
