@@ -59,10 +59,11 @@ export function createMovimiento(data) {
 }
 
 export function updateMovimiento(id, data) {
+  // Backend devuelve { ok, movimiento } — extraemos el objeto directamente
   return authFetch(`/admin/finanzas/movimiento/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
-  });
+  }).then(json => json.movimiento ?? json);
 }
 
 export function deleteMovimiento(id) {
@@ -77,9 +78,10 @@ export function bulkDeleteMovimientos(ids) {
 }
 
 export function bulkEditMovimientos(ids, cambios) {
+  // Backend espera { ids, updates } — el nombre interno del parámetro es 'cambios'
   return authFetch('/admin/finanzas/movimientos/bulk-edit', {
     method: 'PUT',
-    body: JSON.stringify({ ids, cambios }),
+    body: JSON.stringify({ ids, updates: cambios }),
   });
 }
 

@@ -50,9 +50,12 @@ export function useEditarMovimiento() {
   return useMutation({
     mutationFn: ({ id, data }) => updateMovimiento(id, data),
     onSuccess: (updatedMovimiento) => {
+      // PUT devuelve campos base + factura_ids, pero SIN clientes_info/equipo_info/
+      // proveedores_info/facturas_info que sí incluye GET detail.
+      // Reemplazar la caché de detail con el objeto parcial causaría pérdida de info
+      // en el modal → se invalida para que GET detail vuelva a obtenerse completo.
       if (updatedMovimiento?.id) {
-        // Actualiza el detalle en caché directamente con la respuesta del backend
-        qc.setQueryData(movimientoKeys.detail(updatedMovimiento.id), updatedMovimiento);
+        qc.invalidateQueries({ queryKey: movimientoKeys.detail(updatedMovimiento.id) });
       }
       qc.invalidateQueries({ queryKey: movimientoKeys.lists() });
       qc.invalidateQueries({ queryKey: movimientoKeys.paraVincularAll() });
@@ -147,9 +150,11 @@ export function useEditarFactura() {
   return useMutation({
     mutationFn: ({ id, data }) => updateFactura(id, data),
     onSuccess: (updatedFactura) => {
+      // PATCH devuelve select('*') pero sin movimiento_ids (junction no consultada).
+      // GET detail sí añade movimiento_ids → reemplazar caché con objeto parcial causaría
+      // pérdida del vínculo en el viewer → se invalida para re-fetch completo.
       if (updatedFactura?.id) {
-        // Actualiza el detail en caché directamente con la respuesta del backend
-        qc.setQueryData(facturaKeys.detail(updatedFactura.id), updatedFactura);
+        qc.invalidateQueries({ queryKey: facturaKeys.detail(updatedFactura.id) });
       }
       // Los movimientos pueden contener facturas_info enriquecida — invalida ambas familias
       qc.invalidateQueries({ queryKey: facturaKeys.lists() });

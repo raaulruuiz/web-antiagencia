@@ -1,4 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  useMovimientos,
+  useMovimientosParaVincular, useFacturasParaVincular,
+  useCrearMovimiento, useEditarMovimiento, useEliminarMovimiento,
+  useBulkDeleteMovimientos, useBulkEditMovimientos,
+  movimientoKeys,
+} from '@/features/finanzas';
 import { createPortal } from 'react-dom';
 import { DayPicker } from 'react-day-picker';
 import { es } from 'date-fns/locale';
@@ -6,7 +14,7 @@ import 'react-day-picker/dist/style.css';
 import { supabase } from '@/lib/supabaseClient';
 import { BACKEND_URL } from '@/lib/config';
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 
 function SearchableSelect({ value, onChange, options, placeholder = '— elegir —', style = {}, onClose }) {
@@ -960,7 +968,7 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
           {loading ? 'Guardando…' : esEdicion ? 'Guardar cambios' : 'Guardar movimiento'}
         </button>
         {onCancelar && <button type="button" style={S.ghost} onClick={onCancelar}>Cancelar</button>}
-        {ok && <span style={{ color: '#22c55e', fontSize: 14 }}>✓ Guardado en Notion</span>}
+        {ok && <span style={{ color: '#22c55e', fontSize: 14 }}>✓ Movimiento guardado correctamente</span>}
       </div>
     </form>
   );
@@ -1380,7 +1388,7 @@ function FiscalMetric({ label, value, color, comp }) {
   );
 }
 
-function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer, findBestMatch, movimientosParaVincular, cargarMovimientosParaVincular, loadingMovsVincular, toggleMovimientoEnFactura }) {
+function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer, findBestMatch, toggleMovimientoEnFactura }) {
   const [anio, setAnio] = useState(new Date().getFullYear());
   const [datos, setDatos] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1413,13 +1421,6 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer, findBes
   const [errFiltro, setErrFiltro] = useState('todos'); // 'todos' | 'error' | 'warning' | 'info'
   const [errSplitView, setErrSplitView] = useState(null); // { movimiento, factura } | null
   const [modDetalle, setModDetalle] = useState(null); // { num, titulo, desc, valor, valorLabel, secciones } | null
-
-  // Al abrir el modal de errores, cargar movimientos para el matching de recomendaciones
-  useEffect(() => {
-    if (erroresModal && cargarMovimientosParaVincular && !movimientosParaVincular?.length && !loadingMovsVincular) {
-      cargarMovimientosParaVincular();
-    }
-  }, [erroresModal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Abre un movimiento desde el contexto de errores con datos completos + actualiza URL
   async function abrirMovEnErrores(mov) {
@@ -1872,6 +1873,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer, findBes
   const ca = datosComp?.anual;
 
   const FacturaRow = ({ f, onDelete, selectable }) => {
+    const [hovered, setHovered] = useState(false);
     if (f._procesando) return (
       <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 10px', borderBottom:'1px solid #27272a', fontSize:12 }}>
         <span style={{ color:'#52525b', fontSize:11 }}>📄</span>
@@ -1891,7 +1893,6 @@ function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer, findBes
         {onDelete && <button onClick={onDelete} style={{ background:'none', border:'none', color:'#52525b', cursor:'pointer', fontSize:14, padding:'0 2px', flexShrink:0 }}>✕</button>}
       </div>
     );
-    const [hovered, setHovered] = useState(false);
     const checked = selectable && selFacturas.has(f.id);
     return (
       <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
@@ -3296,7 +3297,7 @@ function CeldaEditable({ m, campo, onGuardar, clientesLista = [], equipoLista = 
 }
 
 // ── Tabla de movimientos ────────────────────────────────────────
-function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGuardarCelda, onVerDetalle, clientesLista, equipoLista, proveedoresLista, facturasDisponibles = [], loadingFacsVincular = false, onAbrirFacsDropdown, onVincularFacturas }) {
+function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGuardarCelda, onVerDetalle, clientesLista, equipoLista, proveedoresLista, facturasDisponibles = [], loadingFacsVincular = false, onVincularFacturas }) {
   const allSel = items.length > 0 && items.every(m => seleccionados.has(m.id));
   const someSel = !allSel && items.some(m => seleccionados.has(m.id));
   const [editNombreId, setEditNombreId] = useState(null);
@@ -3493,7 +3494,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
                       const abierto = vinculosMovId === m.id;
                       return (
                         <td key="factura_ids" style={{ ...td, width:col.w, position:'relative' }}>
-                          <div onClick={() => { setVinculosMovId(abierto ? null : m.id); if (!abierto && onAbrirFacsDropdown) onAbrirFacsDropdown(); }} style={{ cursor:'pointer', display:'inline-flex' }}>
+                          <div onClick={() => setVinculosMovId(abierto ? null : m.id)} style={{ cursor:'pointer', display:'inline-flex' }}>
                             {ids.length > 0
                               ? <span style={{ background:'rgba(99,102,241,0.15)', color:'#818cf8', fontSize:11, padding:'2px 7px', borderRadius:4, fontWeight:600 }}>
                                   {ids.length} doc{ids.length !== 1 ? 's' : ''}
@@ -3815,11 +3816,8 @@ export default function Finanzas() {
   const xAxisEvolRef  = useRef(null);
   const scrollCtaRef  = useRef(null);
   const xAxisCtaRef   = useRef(null);
-  const [movimientos, setMovimientos] = useState({ items: [], total: 0, page: 1, pages: 1 });
   const [loadingDash, setLoadingDash] = useState(true);
-  const [loadingMovs, setLoadingMovs] = useState(true);
   const [errDash, setErrDash] = useState(null);
-  const [errMovs, setErrMovs] = useState(null);
   const [movFiltros, setMovFiltros]     = useState([]);
   const [movFiltroOp, setMovFiltroOp]   = useState('and');
   const [movSorts, setMovSorts]         = useState([]);
@@ -3850,10 +3848,72 @@ export default function Finanzas() {
   const [filtroClientesLista, setFiltroClientesLista] = useState([]);
   const [filtroEquipoLista, setFiltroEquipoLista] = useState([]);
   const [filtroProveedoresLista, setFiltroProveedoresLista] = useState([]);
-  const [movimientosParaVincular, setMovimientosParaVincular] = useState([]); // lista ligera para dropdown en tabla Documentos
-  const [loadingMovsVincular, setLoadingMovsVincular] = useState(false);
-  const [facturasParaVincular, setFacturasParaVincular] = useState([]); // lista ligera de facturas para dropdown en TablaMovimientos
-  const [loadingFacsVincular, setLoadingFacsVincular] = useState(false);
+  // ─── Selectores de vinculación (TanStack Query) ──────────────────────────────
+  const qc = useQueryClient();
+  const _movsPVParams = useMemo(() => {
+    const p = {};
+    if (desde) p.desde = desde;
+    if (hasta) p.hasta = hasta;
+    return p;
+  }, [desde, hasta]);
+  const _movsPVQuery = useMovimientosParaVincular(_movsPVParams);
+  const movimientosParaVincular = _movsPVQuery.data?.items ?? [];
+  const loadingMovsVincular = _movsPVQuery.isLoading;
+
+  const _facsPVQuery = useFacturasParaVincular({});
+  const facturasParaVincular = useMemo(() => {
+    const raw = Array.isArray(_facsPVQuery.data) ? _facsPVQuery.data : [];
+    return raw.map(f => {
+      const total = Math.abs(parseFloat(f.importe_total ?? 0) || 0);
+      const subtitulo = [f.nombre_entidad, f.numero_factura, f.fecha_factura, total > 0 ? `${Math.round(total)}€` : null].filter(Boolean).join(' · ');
+      return { id: f.id, nombre: f.archivo_nombre || f.nombre_entidad || '—', subtitulo, fecha: f.fecha_factura || '' };
+    });
+  }, [_facsPVQuery.data]);
+  const loadingFacsVincular = _facsPVQuery.isLoading;
+
+  // ─── Lista principal de movimientos (TanStack Query) ─────────────────────────
+  // movBusqueda se debouncea 300ms antes de entrar en la queryKey
+  const [movBusquedaDebounced, setMovBusquedaDebounced] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => { setPagMovs(1); setMovBusquedaDebounced(movBusqueda.trim()); }, 300);
+    return () => clearTimeout(t);
+  }, [movBusqueda]);
+
+  const movimientosParams = useMemo(() => {
+    const p = { page: pagMovs, desde, hasta };
+    // errores siempre carga todo (sin paginar) — no muta mostrarTodos
+    if (mostrarTodos || vistaMovs === 'errores') {
+      p.todos = '1';
+    } else {
+      p.limit = movLimit;
+    }
+    if (movBusquedaDebounced) p.busqueda = movBusquedaDebounced;
+    const filtrosValidos = movFiltros.filter(f => {
+      if (!f.campo || !f.operador) return false;
+      if (['is_null', 'is_not_null'].includes(f.operador)) return true;
+      if (Array.isArray(f.valor)) return f.valor.length > 0;
+      return f.valor !== '';
+    });
+    if (filtrosValidos.length > 0) {
+      p.filters  = JSON.stringify(filtrosValidos.map(({ campo, operador, valor }) => ({ campo, operador, valor })));
+      p.filterOp = movFiltroOp;
+    }
+    if (movSorts.length > 0) p.sorts = JSON.stringify(movSorts);
+    return p;
+  }, [pagMovs, desde, hasta, mostrarTodos, vistaMovs, movLimit, movBusquedaDebounced, movFiltros, movFiltroOp, movSorts]);
+
+  const movimientosQuery = useMovimientos(movimientosParams);
+  const movimientos   = movimientosQuery.data ?? { items: [], total: 0, page: pagMovs, pages: 1 };
+  const loadingMovs   = movimientosQuery.isLoading;
+  const errMovs       = movimientosQuery.error?.message ?? null;
+
+  // ─── Mutations de movimientos ────────────────────────────────────────────────
+  const _crearMovMut   = useCrearMovimiento();
+  const _editarMovMut  = useEditarMovimiento();
+  const _eliminarMovMut = useEliminarMovimiento();
+  const _bulkDeleteMut = useBulkDeleteMovimientos();
+  const _bulkEditMut   = useBulkEditMovimientos();
+
   const [docVinculosEditando, setDocVinculosEditando] = useState(null); // factura.id con dropdown abierto
   const [viewerVincOpen, setViewerVincOpen] = useState(false); // dropdown movimientos en el viewer de factura
   const [vistaMovs, setVistaMovs] = useState(() => { const v = lsGet('fin_vista', 'lista'); return ['lista','tabla','errores'].includes(v) ? v : 'lista'; });
@@ -3997,27 +4057,13 @@ export default function Finanzas() {
         body: JSON.stringify(updates),
       });
       if (!res.ok) throw new Error((await res.json().catch(()=>({}))).error || 'Error');
-      const updated = await res.json();
-      setDocumentosList(prev => prev.map(d => d.id === id ? updated : d));
-      return updated;
+      await res.json(); // descartar — PATCH devuelve columnas de la tabla sin movimiento_ids
+      // TEMPORAL HASTA MIGRACIÓN DE FACTURAS A TANSTACK QUERY:
+      // Re-fetch GET detail completo para obtener movimiento_ids desde la junction
+      // y actualizar documentosList + facturaViewer con datos autoritativos.
+      const full = await refrescarFactura(id);
+      return full;
     } catch(e) { console.error(e); alert('Error al guardar: ' + e.message); }
-  }
-
-  // Carga lista ligera de movimientos para el dropdown de vínculos (lazy, una sola vez)
-  async function cargarMovimientosParaVincular() {
-    if (movimientosParaVincular.length || loadingMovsVincular) return;
-    setLoadingMovsVincular(true);
-    try {
-      const token = await getToken();
-      const params = new URLSearchParams({ todos: '1' });
-      if (desde) params.set('desde', desde);
-      if (hasta) params.set('hasta', hasta);
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos?${params}`, { headers: { Authorization: `Bearer ${token}` } });
-      const json = await r.json();
-      // Guardamos el objeto completo para poder mostrarlo en el split view sin re-fetch
-      setMovimientosParaVincular(json.items || []);
-    } catch(_) {}
-    setLoadingMovsVincular(false);
   }
 
   // Algoritmo de matching compartido: encuentra el mejor movimiento para una factura.
@@ -4053,47 +4099,39 @@ export default function Finanzas() {
     return best && best.importeScore < 0.5 && best.nameScore < 0.9 ? best.m : null;
   }, [movimientosParaVincular, documentosList]);
 
-  // Carga lista ligera de facturas para el dropdown de vínculos en TablaMovimientos (lazy, una sola vez)
-  async function cargarFacturasParaVincular() {
-    if (facturasParaVincular.length || loadingFacsVincular) return;
-    setLoadingFacsVincular(true);
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas?todos=1`, { headers: { Authorization: `Bearer ${token}` } });
-      const json = await r.json();
-      setFacturasParaVincular((Array.isArray(json) ? json : json.items || []).map(f => {
-        const total = Math.abs(parseFloat(f.importe_total ?? 0) || 0);
-        const subtitulo = [f.nombre_entidad, f.numero_factura, f.fecha_factura, total > 0 ? `${Math.round(total)}€` : null].filter(Boolean).join(' · ');
-        return { id: f.id, nombre: f.archivo_nombre || f.nombre_entidad || '—', subtitulo, fecha: f.fecha_factura || '' };
-      }));
-    } catch(_) {}
-    setLoadingFacsVincular(false);
-  }
-
   // ── Helpers de re-fetch puntual desde DB ─────────────────────────
-  // Actualiza una factura concreta en documentosList y facturaViewer si está abierta
+  // Obtiene el detail completo de una factura (incluye movimiento_ids de la junction).
+  // Actualiza documentosList y facturaViewer si está abierta.
+  // Devuelve el objeto completo para que los callers puedan usarlo directamente.
+  // TEMPORAL HASTA MIGRACIÓN DE FACTURAS A TANSTACK QUERY.
   async function refrescarFactura(facId) {
     try {
       const token = await getToken();
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facId}`, { headers: { Authorization: `Bearer ${token}` } });
       if (!r.ok) return;
       const data = await r.json();
-      setDocumentosList(prev => prev.map(d => d.id === facId ? { ...d, ...data } : d));
+      setDocumentosList(prev => {
+        const idx = prev.findIndex(d => d.id === facId);
+        // TEMPORAL: si no está en la lista (ej: vinculación desde tab movimientos),
+        // agregar para que documentosList refleje el estado real hasta migrar a TQ
+        if (idx === -1) return [...prev, data];
+        return prev.map(d => d.id === facId ? { ...d, ...data } : d);
+      });
       setFacturaViewer(prev => prev?.id === facId ? { ...prev, data: { ...prev.data, ...data } } : prev);
+      return data; // caller puede usar el detail completo sin un segundo fetch
     } catch(e) { console.error('refrescarFactura', e); }
   }
 
-  // Actualiza un movimiento concreto en movimientos.items, movDetail y movimientosParaVincular
+  // TEMPORAL hasta Fase 4: solo actualiza movDetail para mantener el modal sincronizado.
+  // La lista principal se actualiza vía Realtime → invalidateQueries(movimientoKeys.all).
+  // refrescarMovimiento NO debe convertirse en coordinador permanente — eliminar en Fase 4.
   async function refrescarMovimiento(movId) {
     try {
       const token = await getToken();
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/${movId}`, { headers: { Authorization: `Bearer ${token}` } });
       if (!r.ok) return;
       const data = await r.json();
-      setMovimientos(prev => ({ ...prev, items: prev.items.map(m => m.id === movId ? { ...m, ...data } : m) }));
       setMovDetail(prev => prev?.id === movId ? { ...prev, ...data } : prev);
-      // Mantener movimientosParaVincular sincronizado — misma fuente, sin cachés desfasadas
-      setMovimientosParaVincular(prev => prev.map(m => m.id === movId ? { ...m, ...data } : m));
     } catch(e) { console.error('refrescarMovimiento', e); }
   }
 
@@ -4169,17 +4207,20 @@ export default function Finanzas() {
       .subscribe();
 
     // Cambios en movimientos (categorías, equipo, cliente, importe…)
+    // Adaptación temporal Fase 3: invalida TanStack Query directamente (qc es estable).
+    // refrescarMovimiento se mantiene solo para actualizar movDetail hasta Fase 4.
     const chMovimientos = supabase
       .channel('fin_movimientos')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_movimientos' }, (payload) => {
+        qc.invalidateQueries({ queryKey: movimientoKeys.all });
         if (payload.new?.id) rtRefs.current.refrescarMovimiento?.(payload.new.id);
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'finanzas_movimientos' }, () => {
-        rtRefs.current.cargarMovimientos?.();
+        qc.invalidateQueries({ queryKey: movimientoKeys.all });
         rtRefs.current.cargarDashboard?.();
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'finanzas_movimientos' }, () => {
-        rtRefs.current.cargarMovimientos?.();
+        qc.invalidateQueries({ queryKey: movimientoKeys.all });
         rtRefs.current.cargarDashboard?.();
       })
       .subscribe();
@@ -4197,7 +4238,7 @@ export default function Finanzas() {
 
     const chProveedores = supabase
       .channel('fin_proveedores')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_proveedores' }, () => rtRefs.current.cargarProveedores?.())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'contactos' }, () => rtRefs.current.cargarProveedores?.())
       .subscribe();
 
     return () => {
@@ -4259,83 +4300,34 @@ export default function Finanzas() {
     else setDocBulkCliente('');
   }
 
-  async function guardarCeldaInline(id, campo, valor) {
-    try {
-      const token = await getToken();
-      const body = { [campo]: campo === 'cantidad' ? parseFloat(valor) : valor };
-      const res = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${id}`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Error ${res.status}`);
-      }
-      const json = await res.json();
-      const m = json.movimiento;
-      if (m) {
-        const fila = {
-          id: m.id, notion_id: m.notion_id, nombre: m.nombre, fecha: m.fecha,
-          tipo: m.tipo, cuenta: m.cuenta, cantidad: m.cantidad, iva: m.iva, irpf: m.irpf,
-          ivaAPagar: m.iva_a_pagar, irpfAPagar: m.irpf_a_pagar, beneficio: m.beneficio,
-          categorias: m.categorias || [], fecha_factura: m.fecha_factura || null,
-          importe_factura: m.importe_factura ?? null, base_imponible: m.base_imponible ?? null,
-          irpf_retenido_yo: m.irpf_retenido_yo ?? null, cliente_ids: m.cliente_ids || [],
-          equipo_ids: m.equipo_ids || [], proveedor_ids: m.proveedor_ids || [],
-          created_at: m.created_at, updated_at: m.updated_at,
-        };
-        setMovimientos(prev => ({ ...prev, items: prev.items.map(i => i.id === id ? fila : i) }));
-        cargarDashboard();
-        cargarEquipo();
-      }
-    } catch (err) {
-      alert('Error al guardar: ' + err.message);
-      cargarMovimientos(pagMovs);
-    }
+  function guardarCeldaInline(id, campo, valor) {
+    const data = { [campo]: campo === 'cantidad' ? parseFloat(valor) : valor };
+    _editarMovMut.mutate({ id, data }, {
+      onSuccess: () => { cargarDashboard(); cargarEquipo(); },
+      onError: (err) => alert('Error al guardar: ' + err.message),
+    });
   }
 
-  async function eliminarBulk() {
+  function eliminarBulk() {
     if (!seleccionados.size) return;
     setConfirmDialog({
       texto: `¿Eliminar ${seleccionados.size} movimiento${seleccionados.size>1?'s':''}?`,
-      onOk: async () => {
+      onOk: () => {
         const ids = [...seleccionados];
-        const token = await getToken();
-        await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/bulk-delete`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ids }),
+        _bulkDeleteMut.mutate(ids, {
+          onSuccess: () => { setSeleccionados(new Set()); cargarDashboard(); },
         });
-        setMovimientos(prev => ({ ...prev, items: prev.items.filter(m => !ids.includes(m.id)), total: prev.total - ids.length }));
-        setSeleccionados(new Set());
-        cargarDashboard();
       },
     });
   }
 
-  async function editarBulk(campo, valor) {
+  function editarBulk(campo, valor) {
     if (!seleccionados.size || !valor) return;
     const ids = [...seleccionados];
-    try {
-      const token = await getToken();
-      const res = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/bulk-edit`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids, updates: { [campo]: valor } }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Error ${res.status}`);
-      }
-      setBulkCampo(null);
-      setBulkValor('');
-      cargarMovimientos(pagMovs);
-      cargarDashboard();
-      cargarEquipo();
-    } catch (err) {
-      alert('Error al editar en bloque: ' + err.message);
-    }
+    _bulkEditMut.mutate({ ids, cambios: { [campo]: valor } }, {
+      onSuccess: () => { setBulkCampo(null); setBulkValor(''); cargarDashboard(); cargarEquipo(); },
+      onError:   (err) => alert('Error al editar en bloque: ' + err.message),
+    });
   }
 
   function toggleSel(id) { setSelTodos(false); setSeleccionados(prev => { const s=new Set(prev); s.has(id)?s.delete(id):s.add(id); return s; }); }
@@ -4370,21 +4362,14 @@ export default function Finanzas() {
     finally { setCargandoTodos(false); }
   }
 
-  async function eliminarMovimiento(id) {
-    try {
-      const token = await getToken();
-      const res = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${id}`, {
-        method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Error ${res.status}`);
-      }
-      setMovimientos(prev => ({ ...prev, items: prev.items.filter(m => m.id !== id), total: prev.total - 1 }));
-      cargarDashboard();
-    } catch (e) {
-      alert('Error al eliminar: ' + e.message);
-    }
+  function eliminarMovimiento(id) {
+    _eliminarMovMut.mutate(id, {
+      onSuccess: () => {
+        if (movDetail?.id === id) setMovDetail(null);
+        cargarDashboard();
+      },
+      onError: (e) => alert('Error al eliminar: ' + e.message),
+    });
   }
 
   function handleApplyDashboard(d, h, doComp, dComp, hComp) {
@@ -4435,46 +4420,7 @@ export default function Finanzas() {
     }
   }, [comparar, desdeComp, hastaComp]);
 
-  const cargarMovimientos = useCallback(async (page = 1, todos = false, limit = movLimit, busqueda = '') => {
-    setLoadingMovs(true);
-    setErrMovs(null);
-    try {
-      const token = await getToken();
-      const params = new URLSearchParams({ desde, hasta, page });
-      if (todos) params.set('todos', '1');
-      else params.set('limit', String(limit));
-      if (busqueda) params.set('busqueda', busqueda);
-      const filtrosValidos = movFiltros.filter(f => {
-        if (!f.campo || !f.operador) return false;
-        if (['is_null','is_not_null'].includes(f.operador)) return true;
-        if (Array.isArray(f.valor)) return f.valor.length > 0;
-        return f.valor !== '';
-      });
-      if (filtrosValidos.length > 0) {
-        params.set('filters', JSON.stringify(filtrosValidos.map(({ campo, operador, valor }) => ({ campo, operador, valor }))));
-        params.set('filterOp', movFiltroOp);
-      }
-      if (movSorts.length > 0) params.set('sorts', JSON.stringify(movSorts));
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await r.json();
-      if (!r.ok) { setErrMovs(data.error || `Error ${r.status}`); return; }
-      setMovimientos(data);
-    } catch (e) {
-      setErrMovs(e.message);
-    } finally {
-      setLoadingMovs(false);
-    }
-  }, [desde, hasta, movFiltros, movFiltroOp, movSorts, movLimit]);
-
   useEffect(() => { cargarDashboard(); }, [cargarDashboard]);
-
-  // Búsqueda server-side con debounce 300ms
-  useEffect(() => {
-    const t = setTimeout(() => { setPagMovs(1); cargarMovimientos(1, mostrarTodos, movLimit, movBusqueda.trim()); }, 300);
-    return () => clearTimeout(t);
-  }, [movBusqueda]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     async function checkMovimientosMesActual() {
@@ -4493,13 +4439,7 @@ export default function Finanzas() {
     }
     checkMovimientosMesActual();
   }, [dashboard]);
-  useEffect(() => { if (tab === 'movimientos') cargarMovimientos(pagMovs, mostrarTodos); }, [tab, pagMovs, mostrarTodos, cargarMovimientos]);
-  // Al entrar en vista errores, cargar todos los movimientos para detectar errores completos
-  useEffect(() => {
-    if (vistaMovs === 'errores' && !mostrarTodos) {
-      setMostrarTodos(true);
-    }
-  }, [vistaMovs]);
+  // errores siempre carga todos vía movimientosParams (vistaMovs === 'errores') — sin mutar mostrarTodos
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (tab === 'documentos') cargarDocumentos(); }, [tab]);
   useEffect(() => {
@@ -4575,9 +4515,8 @@ export default function Finanzas() {
   useEffect(() => {
     rtRefs.current = {
       refrescarFactura,
-      refrescarMovimiento,
+      refrescarMovimiento, // TEMPORAL hasta Fase 4: solo para actualizar movDetail
       cargarDocumentos,
-      cargarMovimientos: () => cargarMovimientos(pagMovs, mostrarTodos),
       cargarDashboard,
       cargarClientes,
       cargarEquipo,
@@ -4623,7 +4562,7 @@ export default function Finanzas() {
               // Re-fetch todas las facturas afectadas desde DB
               facAfectadas.forEach(fid => refrescarFactura(fid));
             }
-            cargarMovimientos(pagMovs);
+            qc.invalidateQueries({ queryKey: movimientoKeys.all });
             cargarDashboard();
           }}
           onCerrar={() => setMovEditando(null)}
@@ -5247,7 +5186,7 @@ export default function Finanzas() {
           <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
               <DateRangePicker desde={desde} hasta={hasta} onApply={handleApplyMovimientos} />
-              <button style={S.ghost} onClick={() => cargarMovimientos(pagMovs, mostrarTodos)}>↺</button>
+              <button style={S.ghost} onClick={() => qc.invalidateQueries({ queryKey: movimientoKeys.all })}>↺</button>
             </div>
             {vistaMovs !== 'errores' && (<>
             <button
@@ -5395,15 +5334,15 @@ export default function Finanzas() {
 
               const paginacion = (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-                  {!mostrarTodos && totalPages > 1 && (
+                  {!(mostrarTodos || vistaMovs === 'errores') && totalPages > 1 && (
                     <>
                       <button style={S.ghost} disabled={pagMovs <= 1} onClick={() => setPagMovs(p => p - 1)}>← Anterior</button>
                       <span style={{ color: '#71717a', fontSize: 13, padding: '8px 0' }}>{pagMovs} / {totalPages}</span>
                       <button style={S.ghost} disabled={pagMovs >= totalPages} onClick={() => setPagMovs(p => p + 1)}>Siguiente →</button>
                     </>
                   )}
-                  <select value={mostrarTodos ? 'todos' : String(movLimit)}
-                    onChange={e => { const v=e.target.value; if(v==='todos'){setMostrarTodos(true);setPagMovs(1);}else{const n=parseInt(v);setMovLimit(n);setMostrarTodos(false);setPagMovs(1);cargarMovimientos(1,false,n);} }}
+                  <select value={(mostrarTodos || vistaMovs === 'errores') ? 'todos' : String(movLimit)}
+                    onChange={e => { const v=e.target.value; if(v==='todos'){setMostrarTodos(true);setPagMovs(1);}else{const n=parseInt(v);setMovLimit(n);setMostrarTodos(false);setPagMovs(1);} }}
                     style={{ ...S.select, width:'auto', fontSize:13, padding:'7px 10px' }}>
                     {[50,100,200].map(n=><option key={n} value={n}>{n} por página</option>)}
                     <option value="todos">Todos ({movimientos.total})</option>
@@ -5426,7 +5365,6 @@ export default function Finanzas() {
                       proveedoresLista={filtroProveedoresLista}
                       facturasDisponibles={facturasParaVincular}
                       loadingFacsVincular={loadingFacsVincular}
-                      onAbrirFacsDropdown={cargarFacturasParaVincular}
                       onVincularFacturas={handleVincularFacturasMovimiento}
                     />
                     {paginacion}
@@ -5741,9 +5679,6 @@ export default function Finanzas() {
                     key: `${key}-sin_movimiento_vinculado` });
                 }
               }
-              // Cargar movimientos para matching si no están cargados
-              if (!movimientosParaVincular.length && !loadingMovsVincular) cargarMovimientosParaVincular();
-
               const conflictos = todosConflictos.filter(c => !docConflictosResueltos.has(c.key));
               const filtrados = docConflictosFiltro === 'todos' ? conflictos : conflictos.filter(c => c.severidad === docConflictosFiltro);
               return (
@@ -5965,7 +5900,7 @@ export default function Finanzas() {
                                 const abierto = docVinculosEditando === doc.id;
                                 return (
                                   <td key="movimiento_ids" style={{ ...tdBase, width:col.w, position:'relative', overflow:'visible' }}>
-                                    <div onClick={() => { setDocVinculosEditando(abierto ? null : doc.id); if (!abierto) cargarMovimientosParaVincular(); }} style={{ cursor:'pointer', display:'inline-flex' }}>
+                                    <div onClick={() => setDocVinculosEditando(abierto ? null : doc.id)} style={{ cursor:'pointer', display:'inline-flex' }}>
                                       {ids.length > 0
                                         ? <span style={{ background:'rgba(34,197,94,0.1)', color:'#4ade80', fontSize:11, padding:'2px 7px', borderRadius:4, fontWeight:600 }}>
                                             {ids.length} mov{ids.length !== 1 ? 's' : ''}
@@ -6128,7 +6063,7 @@ export default function Finanzas() {
       })()}
 
       {/* ── FISCAL ── */}
-      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewer={facturaViewer} setFacturaViewer={setFacturaViewer} findBestMatch={findBestMatch} movimientosParaVincular={movimientosParaVincular} cargarMovimientosParaVincular={cargarMovimientosParaVincular} loadingMovsVincular={loadingMovsVincular} toggleMovimientoEnFactura={toggleMovimientoEnFactura} />}
+      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewer={facturaViewer} setFacturaViewer={setFacturaViewer} findBestMatch={findBestMatch} toggleMovimientoEnFactura={toggleMovimientoEnFactura} />}
 
       {/* ── CLIENTES ── */}
       {tab === 'clientes' && (() => {
@@ -6961,7 +6896,7 @@ export default function Finanzas() {
 
       {/* ── NUEVO ── */}
       {tab === 'nuevo' && (
-        <NuevoMovimientoTab onGuardado={() => { setSinMovimientosMes(false); setTab('movimientos'); cargarMovimientos(1); cargarDashboard(); }} />
+        <NuevoMovimientoTab onGuardado={() => { setSinMovimientosMes(false); setTab('movimientos'); qc.invalidateQueries({ queryKey: movimientoKeys.all }); cargarDashboard(); }} />
       )}
 
       {/* ── Modal contacto (cliente / equipo) ── */}
@@ -7212,7 +7147,7 @@ export default function Finanzas() {
                 <div style={{ padding:'8px 16px', borderBottom:'1px solid #27272a', flexShrink:0, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
                   <span style={{ color:'#52525b', fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em', flexShrink:0 }}>Movimientos vinculados</span>
                   <div style={{ position:'relative', display:'inline-flex', alignItems:'center' }}>
-                    <div onClick={() => { setViewerVincOpen(o => !o); if (!viewerVincOpen) cargarMovimientosParaVincular(); }}
+                    <div onClick={() => setViewerVincOpen(o => !o)}
                       style={{ cursor:'pointer', display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
                       {ids.length > 0
                         ? ids.map(mid => {
@@ -7307,7 +7242,7 @@ export default function Finanzas() {
                   <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
                     <span style={lblStyle}>Movimientos vinculados</span>
                     <div style={{ position:'relative', display:'inline-flex', alignItems:'center' }}>
-                      <div onClick={() => { setViewerVincOpen(o => !o); if (!viewerVincOpen) cargarMovimientosParaVincular(); }}
+                      <div onClick={() => setViewerVincOpen(o => !o)}
                         style={{ cursor:'pointer', display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', minHeight:30, padding:'4px 8px', background:'#27272a', border:'1px solid #3f3f46', borderRadius:6 }}>
                         {(facturaViewer.data?.movimiento_ids||[]).length > 0
                           ? (facturaViewer.data.movimiento_ids).map(mid => {

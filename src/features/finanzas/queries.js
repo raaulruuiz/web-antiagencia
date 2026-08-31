@@ -13,7 +13,7 @@
  *   Fase 9 → useFiscal
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import {
   getMovimientos,
   getMovimiento,
@@ -41,10 +41,16 @@ import {
 
 // ── MOVIMIENTOS ──────────────────────────────────────────────────────────────
 
+// NOTA: supabase_realtime está temporalmente vacía (0 tablas) mientras se diseñan
+// las policies RLS correctas para restringir acceso Realtime a admins autorizados.
+// refetchOnWindowFocus:'always' actúa como fallback de sincronización entre pestañas
+// hasta que Realtime sea reactivado con las políticas correctas.
 export function useMovimientos(params = {}) {
   return useQuery({
-    queryKey: movimientoKeys.list(params),
-    queryFn:  () => getMovimientos(params),
+    queryKey:              movimientoKeys.list(params),
+    queryFn:               () => getMovimientos(params),
+    placeholderData:       keepPreviousData, // evita parpadeo al cambiar página/filtro
+    refetchOnWindowFocus:  'always',         // fallback temporal: Realtime deshabilitado a nivel DB
   });
 }
 
