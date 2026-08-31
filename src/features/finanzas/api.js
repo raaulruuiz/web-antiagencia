@@ -109,6 +109,27 @@ export function getFacturasParaVincular(params = {}) {
   return getFacturas(params);
 }
 
+/**
+ * Guarda el lote de facturas ya extraídas y confirmadas por el usuario.
+ * Equivale a POST /admin/finanzas/facturas (handleGuardarFacturas).
+ * El flujo previo (extracción OCR → confirmación de contactos) sigue en Finanzas.jsx
+ * hasta que se migre en su fase correspondiente.
+ */
+export function guardarFacturas(facturas) {
+  return authFetch('/admin/finanzas/facturas', {
+    method: 'POST',
+    body: JSON.stringify({ facturas }),
+  });
+}
+
+/**
+ * NOTA: POST /admin/finanzas/facturas/extraer (handleExtraerFactura) recibe
+ * archivos multipart (multer). Se ha dejado conscientemente fuera de esta capa
+ * por ahora: el flujo de subida de ficheros requiere pasar FormData directamente
+ * y tiene estado transitorio complejo (progreso, cola, errores por archivo).
+ * Se migrará en la fase de facturas cuando se aborde el flujo completo de subida.
+ */
+
 export function updateFactura(id, data) {
   return authFetch(`/admin/finanzas/facturas/${id}`, {
     method: 'PATCH',

@@ -18,6 +18,7 @@ import {
   bulkDeleteMovimientos,
   bulkEditMovimientos,
   setFacturasMovimiento,
+  guardarFacturas,
   updateFactura,
   deleteFactura,
   setMovimientosFactura,
@@ -126,15 +127,30 @@ export function useSetMovimientosFactura() {
 
 // ── FACTURAS ─────────────────────────────────────────────────────────────────
 
+export function useGuardarFacturas() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: guardarFacturas,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: facturaKeys.all });
+      qc.invalidateQueries({ queryKey: movimientoKeys.all });
+      qc.invalidateQueries({ queryKey: dashboardKeys.all });
+    },
+  });
+}
+
 export function useEditarFactura() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => updateFactura(id, data),
     onSuccess: (updatedFactura) => {
       if (updatedFactura?.id) {
+        // Actualiza el detail en caché directamente con la respuesta del backend
         qc.setQueryData(facturaKeys.detail(updatedFactura.id), updatedFactura);
       }
+      // Los movimientos pueden contener facturas_info enriquecida — invalida ambas familias
       qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+      qc.invalidateQueries({ queryKey: movimientoKeys.all });
     },
   });
 }
@@ -145,58 +161,71 @@ export function useEliminarFactura() {
     mutationFn: deleteFactura,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: facturaKeys.all });
+      // Movimientos vinculados reflejan info de la factura — limpiar también
+      qc.invalidateQueries({ queryKey: movimientoKeys.all });
+      qc.invalidateQueries({ queryKey: dashboardKeys.all });
     },
   });
 }
 
 // ── CONTACTOS ────────────────────────────────────────────────────────────────
+// Movimientos y facturas devuelven información enriquecida de contactos.
+// Cualquier cambio en un contacto puede dejar cacheados datos de nombre/empresa
+// desactualizados en esas familias. Se invalidan las tres familias hasta que
+// en una fase posterior podamos ser más quirúrgicos.
+
+function invalidarContactoYDerivados(qc) {
+  qc.invalidateQueries({ queryKey: contactoKeys.all });
+  qc.invalidateQueries({ queryKey: movimientoKeys.all });
+  qc.invalidateQueries({ queryKey: facturaKeys.all });
+}
 
 export function useCrearCliente() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createCliente,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: contactoKeys.all }); },
+    onSuccess: () => invalidarContactoYDerivados(qc),
   });
 }
 export function useEditarCliente() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => updateCliente(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: contactoKeys.all }); },
+    onSuccess: () => invalidarContactoYDerivados(qc),
   });
 }
 export function useCrearEquipo() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createEquipo,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: contactoKeys.all }); },
+    onSuccess: () => invalidarContactoYDerivados(qc),
   });
 }
 export function useEditarEquipo() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => updateEquipo(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: contactoKeys.all }); },
+    onSuccess: () => invalidarContactoYDerivados(qc),
   });
 }
 export function useCrearProveedor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createProveedor,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: contactoKeys.all }); },
+    onSuccess: () => invalidarContactoYDerivados(qc),
   });
 }
 export function useEditarProveedor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => updateProveedor(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: contactoKeys.all }); },
+    onSuccess: () => invalidarContactoYDerivados(qc),
   });
 }
 export function useEliminarContacto() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: deleteContacto,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: contactoKeys.all }); },
+    onSuccess: () => invalidarContactoYDerivados(qc),
   });
 }
