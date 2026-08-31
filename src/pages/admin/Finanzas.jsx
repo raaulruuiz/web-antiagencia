@@ -4083,7 +4083,7 @@ export default function Finanzas() {
     } catch(e) { console.error('refrescarFactura', e); }
   }
 
-  // Actualiza un movimiento concreto en movimientos.items y movDetail si está abierto
+  // Actualiza un movimiento concreto en movimientos.items, movDetail y movimientosParaVincular
   async function refrescarMovimiento(movId) {
     try {
       const token = await getToken();
@@ -4092,6 +4092,8 @@ export default function Finanzas() {
       const data = await r.json();
       setMovimientos(prev => ({ ...prev, items: prev.items.map(m => m.id === movId ? { ...m, ...data } : m) }));
       setMovDetail(prev => prev?.id === movId ? { ...prev, ...data } : prev);
+      // Mantener movimientosParaVincular sincronizado — misma fuente, sin cachés desfasadas
+      setMovimientosParaVincular(prev => prev.map(m => m.id === movId ? { ...m, ...data } : m));
     } catch(e) { console.error('refrescarMovimiento', e); }
   }
 
@@ -5704,7 +5706,7 @@ export default function Finanzas() {
               </>}
               <div style={{ display:'flex', gap:4, background:'#1c1c1e', padding:3, borderRadius:8, flexShrink:0, marginLeft: vistaDocumentos === 'conflictos' ? 'auto' : undefined }}>
                 {[['tabla','☰'],['conflictos','⚠']].map(([v,ic]) => (
-                  <button key={v} type="button" onClick={() => setVistaDocumentos(v)}
+                  <button key={v} type="button" onClick={() => { setVistaDocumentos(v); if (v === 'conflictos') cargarDocumentos(); }}
                     style={{ background:vistaDocumentos===v?'#27272a':'transparent', border:'none', color:vistaDocumentos===v?'white':'#52525b', borderRadius:6, padding:'5px 10px', fontSize:14, cursor:'pointer', title: v==='conflictos'?'Vista conflictos':'' }}>
                     {ic}
                   </button>
