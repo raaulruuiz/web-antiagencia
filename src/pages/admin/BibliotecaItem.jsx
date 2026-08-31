@@ -4324,6 +4324,7 @@ export default function BibliotecaItem() {
         ...(lastEmail ? { email_html: lastEmail.html_body, email_gmail_styles: lastEmail.gmail_styles } : {}),
       };
       const token = await getToken();
+      if (!token) throw new Error('Sesión no disponible — cierra sesión y vuelve a entrar');
       const res = await fetch(`${API_BASE}/biblioteca/${id}`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
