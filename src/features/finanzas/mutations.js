@@ -55,7 +55,7 @@ export function useEditarMovimiento() {
         qc.setQueryData(movimientoKeys.detail(updatedMovimiento.id), updatedMovimiento);
       }
       qc.invalidateQueries({ queryKey: movimientoKeys.lists() });
-      qc.invalidateQueries({ queryKey: movimientoKeys.paraVincular() });
+      qc.invalidateQueries({ queryKey: movimientoKeys.paraVincularAll() });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
     },
   });
@@ -102,9 +102,9 @@ export function useSetFacturasMovimiento() {
   return useMutation({
     mutationFn: ({ movimientoId, facturaIds }) => setFacturasMovimiento(movimientoId, facturaIds),
     onSuccess: (_data, { movimientoId }) => {
-      // Invalida ambos lados: el movimiento y todas las facturas
       qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) });
       qc.invalidateQueries({ queryKey: movimientoKeys.lists() });
+      qc.invalidateQueries({ queryKey: movimientoKeys.paraVincularAll() });
       qc.invalidateQueries({ queryKey: facturaKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
     },
@@ -119,6 +119,7 @@ export function useSetMovimientosFactura() {
     onSuccess: (_data, { facturaId }) => {
       qc.invalidateQueries({ queryKey: facturaKeys.detail(facturaId) });
       qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+      qc.invalidateQueries({ queryKey: facturaKeys.paraVincularAll() });
       qc.invalidateQueries({ queryKey: movimientoKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
     },
@@ -135,6 +136,8 @@ export function useGuardarFacturas() {
       qc.invalidateQueries({ queryKey: facturaKeys.all });
       qc.invalidateQueries({ queryKey: movimientoKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
+      // El endpoint puede actualizar datos de contactos (NIF, email, etc.)
+      qc.invalidateQueries({ queryKey: contactoKeys.all });
     },
   });
 }

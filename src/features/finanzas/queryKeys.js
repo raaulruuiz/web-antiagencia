@@ -14,19 +14,21 @@
  */
 
 export const movimientoKeys = {
-  all:         ['movimientos'],
-  lists:       ()       => ['movimientos', 'list'],
-  list:        (params) => ['movimientos', 'list', params],
-  detail:      (id)     => ['movimientos', 'detail', id],
-  paraVincular:(params) => ['movimientos', 'para-vincular', params ?? {}],
+  all:              ['movimientos'],
+  lists:            ()       => ['movimientos', 'list'],
+  list:             (params) => ['movimientos', 'list', params],
+  detail:           (id)     => ['movimientos', 'detail', id],
+  paraVincularAll:  ()       => ['movimientos', 'para-vincular'],
+  paraVincular:     (params) => ['movimientos', 'para-vincular', params ?? {}],
 };
 
 export const facturaKeys = {
-  all:         ['facturas'],
-  lists:       ()       => ['facturas', 'list'],
-  list:        (params) => ['facturas', 'list', params],
-  detail:      (id)     => ['facturas', 'detail', id],
-  paraVincular:(params) => ['facturas', 'para-vincular', params ?? {}],
+  all:              ['facturas'],
+  lists:            ()       => ['facturas', 'list'],
+  list:             (params) => ['facturas', 'list', params],
+  detail:           (id)     => ['facturas', 'detail', id],
+  paraVincularAll:  ()       => ['facturas', 'para-vincular'],
+  paraVincular:     (params) => ['facturas', 'para-vincular', params ?? {}],
 };
 
 export const dashboardKeys = {
