@@ -4256,67 +4256,69 @@ export default function BibliotecaItem() {
     if (!marcaTrimmed) { setObMarcaError('La marca es obligatoria'); return; }
     if (obCategoria === 'ficha' && !urlTrimmed) { setObUrlError('La URL es obligatoria'); return; }
     if (obCategoria === 'ficha' && !isValidHttpUrl(urlTrimmed)) { setObUrlError('URL no válida. Ej: https://dominio.com'); return; }
-    // Build blocks
-    let finalBlocks = makeTemplateBlocks(obPlantilla);
-    if (importEmail && lastEmail?.html_body && obPlantilla) {
-      // Resolve tracking URLs FIRST so fillBlockFromEmail can use final URLs for deduplication and social detection
-      let resolvedUrls = {};
-      try {
-        const parser = new DOMParser();
-        const emailDoc = parser.parseFromString(lastEmail.html_body, 'text/html');
-        const allHrefs = [...new Set(
-          [...emailDoc.querySelectorAll('a[href]')]
-            .map(a => a.getAttribute('href'))
-            .filter(h => h && h.startsWith('http'))
-        )];
-        if (allHrefs.length) {
-          const rRes = await fetch(`${API_BASE}/api/resolve-urls`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${await getToken()}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ urls: allHrefs }),
-          });
-          if (rRes.ok) resolvedUrls = await rRes.json();
-        }
-      } catch (_) {}
-      finalBlocks = finalBlocks.map(b => fillBlockFromEmail(b, lastEmail.html_body, resolvedUrls));
-      // Auto-transcribe transcribir blocks from email content
-      const transcribirIdx = finalBlocks.findIndex(b => b.type === 'transcribir');
-      if (transcribirIdx !== -1) {
-        try {
-          const emailItems = extractEmailItemsInOrder(lastEmail.html_body);
-          if (emailItems.length) {
-            const tRes = await fetch(`${API_BASE}/biblioteca/transcribe-email-content`, {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${await getToken()}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ items: emailItems }),
-            });
-            if (tRes.ok) {
-              const tData = await tRes.json();
-              if (tData.texto) {
-                finalBlocks = finalBlocks.map((b, i) => i === transcribirIdx ? { ...b, texto: tData.texto } : b);
-              }
-            }
-          }
-        } catch (_) {}
-      }
-    }
-    const updates = {
-      categoria: obCategoria,
-      subcategoria: obCategoria === 'email' ? obSubcat : null,
-      sector: obSector,
-      marca: marcaTrimmed,
-      asunto: obCategoria === 'email' ? obAsunto.trim() : null,
-      adelanto: obCategoria === 'email' ? obAdelanto.trim() : null,
-      enviado_el: obCategoria === 'email' ? (obEnviadoEl || null) : null,
-      remitente: obCategoria === 'email' ? (obRemitente.trim() || null) : null,
-      ficha_url: obCategoria === 'ficha' ? (urlTrimmed || null) : null,
-      fecha_analisis: obCategoria === 'ficha' ? (obFechaAnalisis || null) : null,
-      tags: obTags,
-      blocks_data: { blocks: finalBlocks, library: blocksLibraryRef.current },
-      ...(lastEmail ? { email_html: lastEmail.html_body, email_gmail_styles: lastEmail.gmail_styles } : {}),
-    };
     setSaving(true);
     try {
+      // Build blocks
+      let finalBlocks = makeTemplateBlocks(obPlantilla);
+      if (importEmail && lastEmail?.html_body && obPlantilla) {
+        // Resolve tracking URLs FIRST so fillBlockFromEmail can use final URLs for deduplication and social detection
+        let resolvedUrls = {};
+        try {
+          const parser = new DOMParser();
+          const emailDoc = parser.parseFromString(lastEmail.html_body, 'text/html');
+          const allHrefs = [...new Set(
+            [...emailDoc.querySelectorAll('a[href]')]
+              .map(a => a.getAttribute('href'))
+              .filter(h => h && h.startsWith('http'))
+          )];
+          if (allHrefs.length) {
+            const rRes = await fetch(`${API_BASE}/api/resolve-urls`, {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${await getToken()}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ urls: allHrefs }),
+            });
+            if (rRes.ok) resolvedUrls = await rRes.json();
+          }
+        } catch (_) {}
+        try {
+          finalBlocks = finalBlocks.map(b => fillBlockFromEmail(b, lastEmail.html_body, resolvedUrls));
+        } catch (_) {}
+        // Auto-transcribe transcribir blocks from email content
+        const transcribirIdx = finalBlocks.findIndex(b => b.type === 'transcribir');
+        if (transcribirIdx !== -1) {
+          try {
+            const emailItems = extractEmailItemsInOrder(lastEmail.html_body);
+            if (emailItems.length) {
+              const tRes = await fetch(`${API_BASE}/biblioteca/transcribe-email-content`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${await getToken()}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: emailItems }),
+              });
+              if (tRes.ok) {
+                const tData = await tRes.json();
+                if (tData.texto) {
+                  finalBlocks = finalBlocks.map((b, i) => i === transcribirIdx ? { ...b, texto: tData.texto } : b);
+                }
+              }
+            }
+          } catch (_) {}
+        }
+      }
+      const updates = {
+        categoria: obCategoria,
+        subcategoria: obCategoria === 'email' ? obSubcat : null,
+        sector: obSector,
+        marca: marcaTrimmed,
+        asunto: obCategoria === 'email' ? obAsunto.trim() : null,
+        adelanto: obCategoria === 'email' ? obAdelanto.trim() : null,
+        enviado_el: obCategoria === 'email' ? (obEnviadoEl || null) : null,
+        remitente: obCategoria === 'email' ? (obRemitente.trim() || null) : null,
+        ficha_url: obCategoria === 'ficha' ? (urlTrimmed || null) : null,
+        fecha_analisis: obCategoria === 'ficha' ? (obFechaAnalisis || null) : null,
+        tags: obTags,
+        blocks_data: { blocks: finalBlocks, library: blocksLibraryRef.current },
+        ...(lastEmail ? { email_html: lastEmail.html_body, email_gmail_styles: lastEmail.gmail_styles } : {}),
+      };
       const token = await getToken();
       const res = await fetch(`${API_BASE}/biblioteca/${id}`, {
         method: 'PATCH',
@@ -4352,7 +4354,13 @@ export default function BibliotecaItem() {
             [marcaTrimmed]: [...new Set([...(prev[marcaTrimmed] || []), ...obSector])],
           }));
         }
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert('Error al guardar: ' + (errData.error || `HTTP ${res.status}`));
       }
+    } catch (e) {
+      console.error('[handleGuardar]', e);
+      alert('Error al guardar: ' + e.message);
     } finally { setSaving(false); }
   };
 
