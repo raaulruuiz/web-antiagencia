@@ -2655,6 +2655,7 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [autofillingEmail, setAutofillingEmail] = useState(false);
   const [corrTab, setCorrTab] = useState(emailHtml ? 'editar' : 'nuevo');
   const [editImgUploading, setEditImgUploading] = useState(false);
+  const [imgPopover, setImgPopover] = useState(null); // null | { imgEl, anchorEl, href, top, left }
   const fileInputRef = useRef(null);
   const transcribeFileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
@@ -2678,8 +2679,18 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
       if (img && !img.classList.contains('an1')) {
         evt.preventDefault();
         evt.stopImmediatePropagation();
-        editImgTargetRef.current = img;
-        editImgFileRef.current?.click();
+        const imgRect = img.getBoundingClientRect();
+        const iframeRect = iframe.getBoundingClientRect();
+        const anchorEl = img.closest('a') || null;
+        setImgPopover({
+          imgEl: img,
+          anchorEl,
+          href: anchorEl?.href || '',
+          top: iframeRect.top + imgRect.bottom + 8,
+          left: iframeRect.left + imgRect.left,
+        });
+      } else {
+        setImgPopover(null);
       }
     }, true);
     const h = doc.documentElement.scrollHeight;
@@ -3732,9 +3743,49 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
                     try {
                       const url = await onUploadImage(file);
                       if (editImgTargetRef.current) editImgTargetRef.current.src = url;
+                      setImgPopover(null);
                     } catch { alert('Error al subir imagen'); }
                     finally { setEditImgUploading(false); editImgTargetRef.current = null; }
                   }} />
+                {/* Image popover — rendered fixed over the iframe */}
+                {imgPopover && (
+                  <div style={{ position: 'fixed', top: Math.min(imgPopover.top, window.innerHeight - 130), left: Math.min(imgPopover.left, window.innerWidth - 240), zIndex: 310, background: 'var(--t-surface)', border: '1px solid var(--t-border)', borderRadius: 10, padding: 12, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 220, boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <button
+                        disabled={editImgUploading}
+                        onClick={() => { editImgTargetRef.current = imgPopover.imgEl; editImgFileRef.current?.click(); }}
+                        style={{ flex: 1, fontSize: 12, fontWeight: 600, padding: '6px 12px', borderRadius: 6, border: 'none', cursor: 'pointer', background: 'white', color: 'black' }}>
+                        {editImgUploading ? 'Subiendo…' : 'Reemplazar'}
+                      </button>
+                      <button onClick={() => setImgPopover(null)}
+                        style={{ background: 'none', border: 'none', color: 'var(--t-text-subtle)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '2px 4px' }}>×</button>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 4 }}>Enlace</label>
+                      <input
+                        type="text"
+                        value={imgPopover.href}
+                        placeholder="https://..."
+                        onChange={e => {
+                          const newHref = e.target.value;
+                          setImgPopover(p => ({ ...p, href: newHref }));
+                          if (imgPopover.anchorEl) {
+                            imgPopover.anchorEl.href = newHref;
+                          } else if (newHref && imgPopover.imgEl) {
+                            const idoc = imgPopover.imgEl.ownerDocument;
+                            const a = idoc.createElement('a');
+                            a.href = newHref;
+                            a.target = '_blank';
+                            imgPopover.imgEl.parentNode.insertBefore(a, imgPopover.imgEl);
+                            a.appendChild(imgPopover.imgEl);
+                            setImgPopover(p => ({ ...p, anchorEl: a }));
+                          }
+                        }}
+                        style={{ width: '100%', boxSizing: 'border-box', fontSize: 12, padding: '5px 8px', borderRadius: 6, border: '1px solid var(--t-border-mid)', background: 'var(--t-surface2)', color: 'var(--t-text)', outline: 'none' }}
+                      />
+                    </div>
+                  </div>
+                )}
               </>
             )}
 
