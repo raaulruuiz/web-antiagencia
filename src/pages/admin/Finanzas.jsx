@@ -8,7 +8,6 @@ import {
   useBulkDeleteMovimientos, useBulkEditMovimientos,
   movimientoKeys,
   useFacturas,
-  getFactura,
   facturaKeys,
 } from '@/features/finanzas';
 import { createPortal } from 'react-dom';
@@ -1411,7 +1410,7 @@ function FiscalMetric({ label, value, color, comp }) {
   );
 }
 
-function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, setFacturaViewerAutoEdit, onFacturasEliminadas, findBestMatch, toggleMovimientoEnFactura }) {
+function TabFiscal({ onAbrirMovimiento, facturaViewer, setFacturaViewer, findBestMatch, toggleMovimientoEnFactura }) {
   const [anio, setAnio] = useState(new Date().getFullYear());
   const [datos, setDatos] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1431,7 +1430,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
   const [dragOver, setDragOver] = useState(null); // 'ingreso' | 'gasto' | null
   const [selFacturas, setSelFacturas] = useState(new Set()); // ids seleccionados para bulk delete
   const [eliminandoBulk, setEliminandoBulk] = useState(false);
-  // facturaViewerData/setFacturaViewerId/setFacturaViewerAutoEdit son props de Finanzas (Fase 6)
+  // facturaViewer is passed as prop from Finanzas
   const [facturaFiltro, setFacturaFiltro] = useState('todos'); // 'todos' | 'ingreso' | 'gasto'
   const [facturaOrden, setFacturaOrden] = useState('fecha_desc'); // 'fecha_desc' | 'fecha_asc' | 'importe_desc' | 'importe_asc'
   const [subirAbierto, setSubirAbierto] = useState(false); // mostrar zonas de drop
@@ -1525,21 +1524,21 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
     return () => supabase.removeChannel(ch);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Sync factura updates (desde viewer edit via useFactura) a erroresData y facturasPorTrimestre
+  // Sync factura updates (from viewer edit) into erroresData and facturasPorTrimestre
   useEffect(() => {
-    if (!facturaViewerData?.id) return;
-    const fv = facturaViewerData;
+    const fv = facturaViewer;
+    if (!fv?.id || !fv?.data) return;
     setErroresData(prev => prev.map(c =>
-      c.factura?.id === fv.id ? { ...c, factura: { ...c.factura, ...fv } } : c
+      c.factura?.id === fv.id ? { ...c, factura: { ...c.factura, ...fv.data } } : c
     ));
     setFacturasPorTrimestre(prev => {
       const next = {};
       for (const [key, items] of Object.entries(prev)) {
-        next[key] = items.map(f => f.id === fv.id ? { ...f, ...fv } : f);
+        next[key] = items.map(f => f.id === fv.id ? { ...f, ...fv.data } : f);
       }
       return next;
     });
-  }, [facturaViewerData]);
+  }, [facturaViewer?.data]);
 
   async function cargarFacturasTrimestre(q) {
     const key = `${anio}-${q}`;
@@ -1562,19 +1561,13 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
     setEliminandoBulk(true);
     try {
       const token = await getToken();
-      const ids = [...selFacturas];
-      const results = await Promise.allSettled(ids.map(id =>
+      await Promise.all([...selFacturas].map(id =>
         fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
       ));
-      const deletedIds = ids.filter((_, i) => results[i].status === 'fulfilled' && results[i].value.ok);
-      if (deletedIds.length) {
-        const q = trimestreAbierto + 1;
-        const key = `${anio}-${q}`;
-        const deletedSet = new Set(deletedIds);
-        setFacturasPorTrimestre(prev => ({ ...prev, [key]: (prev[key] || []).filter(f => !deletedSet.has(f.id)) }));
-        setSelFacturas(new Set(ids.filter((_, i) => !(results[i].status === 'fulfilled' && results[i].value.ok))));
-        onFacturasEliminadas?.(deletedIds);
-      }
+      const q = trimestreAbierto + 1;
+      const key = `${anio}-${q}`;
+      setFacturasPorTrimestre(prev => ({ ...prev, [key]: (prev[key] || []).filter(f => !selFacturas.has(f.id)) }));
+      setSelFacturas(new Set());
     } catch (e) { alert('Error: ' + e.message); }
     finally { setEliminandoBulk(false); }
   }
@@ -1655,12 +1648,10 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
   async function eliminarFactura(id) {
     try {
       const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-      if (!r.ok) { const d = await r.json().catch(()=>({error:`HTTP ${r.status}`})); throw new Error(d.error || `HTTP ${r.status}`); }
+      await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       const q = trimestreAbierto + 1;
       const key = `${anio}-${q}`;
       setFacturasPorTrimestre(prev => ({ ...prev, [key]: (prev[key] || []).filter(f => f.id !== id) }));
-      onFacturasEliminadas?.([id]);
     } catch (e) { alert('Error: ' + e.message); }
   }
 
@@ -1935,7 +1926,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
         )}
         <span style={{ color: f._warning ? '#f59e0b' : '#52525b', fontSize:11, minWidth:16 }} title={f._warning || undefined}>{f._warning ? '⚠️' : '📄'}</span>
         {f.archivo_url
-          ? <button onClick={() => setFacturaViewerId(f.id)} style={{ flex:1, background:'none', border:'none', padding:0, color: f._warning ? '#fbbf24' : '#60a5fa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100, textAlign:'left', cursor:'pointer', fontSize:12 }} title={f._warning || 'Ver documento'}>{f.archivo_nombre || '—'}</button>
+          ? <button onClick={() => setFacturaViewer({ url: f.archivo_url, nombre: f.archivo_nombre, id: f.id, data: f })} style={{ flex:1, background:'none', border:'none', padding:0, color: f._warning ? '#fbbf24' : '#60a5fa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100, textAlign:'left', cursor:'pointer', fontSize:12 }} title={f._warning || 'Ver documento'}>{f.archivo_nombre || '—'}</button>
           : <span style={{ flex:1, color: f._warning ? '#fbbf24' : '#a1a1aa', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:100 }} title={f._warning || undefined}>{f.archivo_nombre || '—'}</span>
         }
         <span style={{ background: f.tipo==='ingreso' ? '#052e16' : '#1a0a0a', color: f.tipo==='ingreso' ? '#22c55e' : '#f87171', border: `1px solid ${f.tipo==='ingreso'?'#166534':'#7f1d1d'}`, borderRadius:4, padding:'1px 7px', fontSize:11, flexShrink:0 }}>
@@ -2384,7 +2375,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
                             </button>
                           )}
                           {c.factura?.archivo_url && (
-                            <button onClick={() => setFacturaViewerId(c.factura.id)}
+                            <button onClick={() => setFacturaViewer({ url: c.factura.archivo_url, nombre: c.factura.archivo_nombre, id: c.factura.id, data: c.factura })}
                               style={{ background:'#050d1a', border:'1px solid #1d4ed8', color:'#60a5fa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:260, overflow:'hidden' }}>
                               <span style={{ flexShrink:0 }}>📄</span>
                               <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.factura.archivo_nombre}</span>
@@ -2474,7 +2465,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
         data={errSplitView}
         onClose={() => setErrSplitView(null)}
         onEditarMovimiento={m => { setErrMovEditar(m); setErrSplitView(null); }}
-        onEditarFactura={fac => { setFacturaViewerId(fac.id); setFacturaViewerAutoEdit(true); setErrSplitView(null); }}
+        onEditarFactura={fac => { setFacturaViewer({ url: fac.archivo_url, nombre: fac.archivo_nombre, id: fac.id, data: fac, _autoEdit: true }); setErrSplitView(null); }}
         zIndex={9300}
       />
 
@@ -2515,7 +2506,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
                         {/* Doc clicable */}
                         <div style={{ flex:'0 0 20px' }}>
                           {f.archivo_url
-                            ? <button onClick={() => setFacturaViewerId(f.id)}
+                            ? <button onClick={() => setFacturaViewer({ url: f.archivo_url, nombre: f.archivo_nombre, id: f.id, data: f })}
                                 style={{ background:'none', border:'none', padding:0, cursor:'pointer', color:'#60a5fa', fontSize:14, lineHeight:1 }} title="Ver documento">📄</button>
                             : <span style={{ color:'#3f3f46', fontSize:14 }}>—</span>
                           }
@@ -3858,23 +3849,20 @@ export default function Finanzas() {
   const [movEditando, setMovEditando] = useState(null);
   const [movDetailId, setMovDetailId] = useState(null);
   const { data: movDetail, isLoading: movDetailLoading, isError: movDetailError } = useMovimiento(movDetailId);
-  const [facturaViewerId, setFacturaViewerId] = useState(null); // UI state: ID del viewer abierto, o null
-  const [facturaViewerAutoEdit, setFacturaViewerAutoEdit] = useState(false); // true → abre en modo edición
-  const { data: facturaViewerData, isLoading: facturaViewerLoading, isError: facturaViewerError } = useFactura(facturaViewerId);
+  const [facturaViewer, setFacturaViewer] = useState(null); // { url, nombre, id?, data?, _autoEdit? } | null
   const [viewerEditando, setViewerEditando] = useState(false);
   const [viewerDraft, setViewerDraft] = useState({});
-  // Resetear estado de edición al cerrar viewer
   useEffect(() => {
-    if (!facturaViewerId) { setViewerEditando(false); setViewerDraft({}); setFacturaViewerAutoEdit(false); }
-  }, [facturaViewerId]);
-  // Cuando llega el dato y hay _autoEdit pendiente, inicializar draft y abrir edición
-  useEffect(() => {
-    if (!facturaViewerData || !facturaViewerAutoEdit) return;
-    const fv = facturaViewerData;
-    setViewerEditando(true);
-    setViewerDraft({ archivo_nombre: fv.archivo_nombre||'', factura_proveedor_id: fv.factura_proveedor_id||'', factura_cliente_id: fv.factura_cliente_id||'', importe: fv.importe??'', impuesto: fv.impuesto??'', irpf: fv.irpf??'' });
-    setFacturaViewerAutoEdit(false); // consumir flag
-  }, [facturaViewerData, facturaViewerAutoEdit]);
+    if (!facturaViewer?.id) { setViewerEditando(false); setViewerDraft({}); return; }
+    const fv = facturaViewer.data || {};
+    if (facturaViewer._autoEdit) {
+      setViewerEditando(true);
+      setViewerDraft({ archivo_nombre: facturaViewer.nombre||'', factura_proveedor_id: fv.factura_proveedor_id||'', factura_cliente_id: fv.factura_cliente_id||'', importe: fv.importe??'', impuesto: fv.impuesto??'', irpf: fv.irpf??'' });
+    } else {
+      setViewerEditando(false);
+      setViewerDraft({});
+    }
+  }, [facturaViewer?.id]);
   const [dashComp, setDashComp] = useState(null);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errComp, setErrComp] = useState(null);
@@ -3994,38 +3982,17 @@ export default function Finanzas() {
     setMovDetailId(id || null);
   }
 
-  // URL sync mount — política: ?doc gana sobre ?mov si ambos presentes
+  // URL sync: ?mov=ID ↔ movDetailId (igual que Notion con &p=ID)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const docId = params.get('doc');
-    const movId = params.get('mov');
-    if (docId) {
-      setFacturaViewerId(docId);
-      // Normalizar URL: eliminar ?mov si coexistía
-      if (movId) {
-        params.delete('mov');
-        const qs = params.toString();
-        window.history.replaceState({}, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
-      }
-    } else if (movId) {
-      setMovDetailId(movId);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    const id = new URLSearchParams(window.location.search).get('mov');
+    if (id) setMovDetailId(id);
   }, []);
 
-  // Sincroniza back/forward con la misma política: ?doc gana
+  // Sincroniza back/forward del navegador con movDetailId mientras Finanzas está montado.
   useEffect(() => {
     function handlePopState() {
-      const params = new URLSearchParams(window.location.search);
-      const docId = params.get('doc') || null;
-      const movId = params.get('mov') || null;
-      if (docId) {
-        setFacturaViewerId(docId);
-        setMovDetailId(null);
-      } else {
-        setFacturaViewerId(null);
-        setMovDetailId(movId);
-      }
+      const id = new URLSearchParams(window.location.search).get('mov');
+      setMovDetailId(id || null);
     }
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -4042,17 +4009,30 @@ export default function Finanzas() {
     window.history.replaceState({}, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
   }, [movDetailId]);
 
-  // URL sync: ?doc=ID ↔ facturaViewerId (write)
+  // URL sync: ?doc=ID ↔ facturaViewer
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('doc');
+    if (id) {
+      getToken().then(token => {
+        fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+          .then(r => r.json())
+          .then(data => { if (data?.id) setFacturaViewer({ url: data.archivo_url, nombre: data.archivo_nombre || 'Documento', id: data.id, data }); })
+          .catch(() => {});
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (facturaViewerId) {
-      params.set('doc', facturaViewerId);
+    if (facturaViewer?.id) {
+      params.set('doc', facturaViewer.id);
     } else {
       params.delete('doc');
     }
     const qs = params.toString();
     window.history.replaceState({}, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
-  }, [facturaViewerId]);
+  }, [facturaViewer]);
 
   // Fase 5: cargarDocumentos eliminado — la lista de facturas la gestiona facturasQuery (TQ).
   // La detección de huérfanas y carga de contactos se hace en efectos separados.
@@ -4106,10 +4086,15 @@ export default function Finanzas() {
         body: JSON.stringify(updates),
       });
       if (!res.ok) throw new Error((await res.json().catch(()=>({}))).error || 'Error');
-      await res.json(); // descartar — PATCH devuelve columnas sin movimiento_ids
-      // Invalidar detail (viewer abierto se actualiza solo via useFactura) + todas las listas
-      await qc.invalidateQueries({ queryKey: facturaKeys.detail(id) });
+      await res.json(); // descartar — PATCH devuelve columnas de la tabla sin movimiento_ids
+      // TEMPORAL HASTA MIGRACIÓN DE FACTURAS A TANSTACK QUERY:
+      // Re-fetch GET detail completo para obtener movimiento_ids desde la junction
+      // y actualizar documentosList + facturaViewer con datos autoritativos.
+      const full = await refrescarFactura(id);
+      // Invalidar todas las listas cacheadas — refrescarFactura solo actualiza
+      // quirúrgicamente el rango activo; otros rangos deben quedar marcados stale.
       qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+      return full;
     } catch(e) { console.error(e); alert('Error al guardar: ' + e.message); }
   }
 
@@ -4147,24 +4132,35 @@ export default function Finanzas() {
   }, [movimientosParaVincular, documentosList]);
 
   // ── refrescarFactura ─────────────────────────────────────────────
-  // Fase 6: invalida detail + listas de forma declarativa.
-  // El viewer abierto se actualiza automáticamente via useFactura(facturaViewerId).
-  // Sigue siendo utilizado por: Realtime handlers, ModalEditar onGuardado.
-  function refrescarFactura(facId) {
-    qc.invalidateQueries({ queryKey: facturaKeys.detail(facId) });
-    qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+  // GET detail autoritativo de una factura (incluye movimiento_ids de la junction).
+  // Fase 5: actualiza el caché de lista de TQ quirúrgicamente + bridge facturaViewer (Fase 6).
+  // Devuelve el objeto completo para que callers como onAbrirFactura lo usen directamente.
+  async function refrescarFactura(facId) {
+    try {
+      const token = await getToken();
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facId}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!r.ok) return;
+      const data = await r.json();
+      // Actualización quirúrgica del caché de lista — sin esperar al refetch completo
+      qc.setQueryData(facturaKeys.list({ desde: docTabDesde, hasta: docTabHasta }), prev => {
+        if (!Array.isArray(prev)) return prev;
+        const idx = prev.findIndex(d => d.id === facId);
+        if (idx === -1) return prev; // no añadir items fuera del rango actual
+        return prev.map(d => d.id === facId ? { ...d, ...data } : d);
+      });
+      // Bridge Fase 6: actualizar facturaViewer si está abierto para esta factura
+      setFacturaViewer(prev => prev?.id === facId ? { ...prev, data: { ...prev.data, ...data } } : prev);
+      return data;
+    } catch(e) { console.error('refrescarFactura', e); }
   }
 
-  // Toggle vínculo movimiento en una factura (desde tabla Documentos, viewer o TabFiscal).
-  // INTEGRIDAD: obtiene movimiento_ids actuales via GET detail justo antes del PUT,
-  // independientemente de documentosList o facturaViewerData (ambos pueden ser stale o ausentes).
-  // CONCURRENCIA: existe una window entre el GET y el PUT; si otro usuario modifica la relación
-  // en ese intervalo, el PUT puede sobreescribir su cambio. Pendiente: mutación backend atómica.
+  // Toggle vínculo movimiento en una factura (desde tabla Documentos o viewer)
   async function toggleMovimientoEnFactura(facturaId, movimientoId) {
+    const doc = documentosList.find(d => d.id === facturaId)
+      || (facturaViewer?.id === facturaId ? facturaViewer.data : null);
+    const current = doc?.movimiento_ids || [];
+    const newIds = current.includes(movimientoId) ? current.filter(x => x !== movimientoId) : [...current, movimientoId];
     try {
-      const freshFactura = await getFactura(facturaId);
-      const current = Array.isArray(freshFactura?.movimiento_ids) ? freshFactura.movimiento_ids : [];
-      const newIds = current.includes(movimientoId) ? current.filter(x => x !== movimientoId) : [...current, movimientoId];
       const token = await getToken();
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facturaId}/movimientos`, {
         method: 'PUT',
@@ -4177,7 +4173,7 @@ export default function Finanzas() {
         throw new Error(msg);
       }
       await Promise.all([
-        qc.invalidateQueries({ queryKey: facturaKeys.detail(facturaId) }),
+        refrescarFactura(facturaId),
         qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) }),
         qc.invalidateQueries({ queryKey: facturaKeys.lists() }),
       ]);
@@ -4203,7 +4199,7 @@ export default function Finanzas() {
       await Promise.all([
         qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) }),
         qc.invalidateQueries({ queryKey: facturaKeys.lists() }),
-        ...facAfectadas.map(fid => qc.invalidateQueries({ queryKey: facturaKeys.detail(fid) })),
+        ...facAfectadas.map(fid => refrescarFactura(fid)),
       ]);
     } catch(e) { console.error(e); }
   }
@@ -4312,17 +4308,11 @@ export default function Finanzas() {
     try {
       const token = await getToken();
       const ids = [...docSeleccionados];
-      const results = await Promise.allSettled(ids.map(id => fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, {
+      await Promise.all(ids.map(id => fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, {
         method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
       })));
-      const deletedIds = ids.filter((_, i) => results[i].status === 'fulfilled' && results[i].value.ok);
-      if (deletedIds.length) {
-        deletedIds.forEach(id => qc.removeQueries({ queryKey: facturaKeys.detail(id), exact: true }));
-        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
-        if (deletedIds.includes(facturaViewerId)) setFacturaViewerId(null);
-        // Mantener seleccionadas las que fallaron (response !ok o error de red); quitar las eliminadas con éxito
-        setDocSeleccionados(new Set(ids.filter((_, i) => !(results[i].status === 'fulfilled' && results[i].value.ok))));
-      }
+      qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+      setDocSeleccionados(new Set());
     } catch(e) { console.error(e); }
     finally { setDocEliminandoBulk(false); }
   }
@@ -4619,9 +4609,15 @@ export default function Finanzas() {
           onEditar={m => { setMovDetailId(null); setMovEditando(m); }}
           onEliminar={id => { setMovDetailId(null); eliminarMovimiento(id); }}
           onConfirm={setConfirmDialog}
-          onAbrirFactura={facId => {
+          onAbrirFactura={async facId => {
             setMovDetailId(null);
-            setFacturaViewerId(facId);
+            // GET detail autoritativo — no usar documentosList (puede estar stale si refrescarFactura aún en curso)
+            const fac = await refrescarFactura(facId);
+            if (fac) {
+              setFacturaViewer({ url: fac.archivo_url, nombre: fac.archivo_nombre || 'Documento', id: fac.id, data: fac });
+            } else {
+              setTab('documentos');
+            }
           }}
         />
       )}
@@ -5763,7 +5759,7 @@ export default function Finanzas() {
                                 <span style={{ color:'#a78bfa', fontSize:11, fontWeight:600, display:'block', marginBottom:6 }}>✦ Recomendación</span>
                                 <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
                                   {c.doc?.archivo_url && (
-                                    <button onClick={() => setFacturaViewerId(c.doc.id)}
+                                    <button onClick={() => setFacturaViewer({ url: c.doc.archivo_url, nombre: c.doc.archivo_nombre, id: c.doc.id, data: c.doc })}
                                       style={{ background:'#050d1a', border:'1px solid #1d4ed8', color:'#60a5fa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:220, overflow:'hidden' }}>
                                       <span style={{ flexShrink:0 }}>📄</span>
                                       <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.doc.archivo_nombre}</span>
@@ -5789,7 +5785,7 @@ export default function Finanzas() {
                             {/* Botones sin recomendación */}
                             <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
                               {!recom && c.doc?.archivo_url && (
-                                <button onClick={() => setFacturaViewerId(c.doc.id)}
+                                <button onClick={() => setFacturaViewer({ url: c.doc.archivo_url, nombre: c.doc.archivo_nombre, id: c.doc.id, data: c.doc })}
                                   style={{ background:'#050d1a', border:'1px solid #1d4ed8', color:'#60a5fa', borderRadius:6, padding:'3px 10px', fontSize:11, cursor:'pointer', display:'flex', alignItems:'center', gap:5, maxWidth:260, overflow:'hidden' }}>
                                   <span style={{ flexShrink:0 }}>📄</span>
                                   <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.doc.archivo_nombre}</span>
@@ -5898,7 +5894,7 @@ export default function Finanzas() {
                               if (col.key === 'pdf') return (
                                 <td key="pdf" style={{ width:32, padding:'6px 4px 6px 0', textAlign:'center', verticalAlign:'middle' }}>
                                   {doc.archivo_url
-                                    ? <button onClick={() => setFacturaViewerId(doc.id)}
+                                    ? <button onClick={() => setFacturaViewer({ url:doc.archivo_url, nombre:doc.archivo_nombre||'Documento', id:doc.id, data:doc })}
                                         style={{ background:'none', border:'none', color:'#60a5fa', cursor:'pointer', fontSize:14, padding:0 }} title="Ver PDF">📄</button>
                                     : <span style={{ color:'#3f3f46' }}>—</span>}
                                 </td>
@@ -6102,7 +6098,7 @@ export default function Finanzas() {
       })()}
 
       {/* ── FISCAL ── */}
-      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewerData={facturaViewerData} setFacturaViewerId={setFacturaViewerId} setFacturaViewerAutoEdit={setFacturaViewerAutoEdit} onFacturasEliminadas={ids => { ids.forEach(id => qc.removeQueries({ queryKey: facturaKeys.detail(id), exact: true })); qc.invalidateQueries({ queryKey: facturaKeys.lists() }); if (ids.includes(facturaViewerId)) setFacturaViewerId(null); }} findBestMatch={findBestMatch} toggleMovimientoEnFactura={toggleMovimientoEnFactura} />}
+      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewer={facturaViewer} setFacturaViewer={setFacturaViewer} findBestMatch={findBestMatch} toggleMovimientoEnFactura={toggleMovimientoEnFactura} />}
 
       {/* ── CLIENTES ── */}
       {tab === 'clientes' && (() => {
@@ -6282,7 +6278,7 @@ export default function Finanzas() {
                             <>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                 {docsPag.map(doc => (
-                                  <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewerId(doc.id)}
+                                  <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
                                     style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
                                     <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
                                     <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
@@ -6566,7 +6562,7 @@ export default function Finanzas() {
                             <>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                 {docsPag.map(doc => (
-                                  <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewerId(doc.id)}
+                                  <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
                                     style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
                                     <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
                                     <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
@@ -6841,7 +6837,7 @@ export default function Finanzas() {
                             <>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                 {docsPag.map(doc => (
-                                  <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewerId(doc.id)}
+                                  <div key={doc.id} onClick={() => doc.archivo_url && setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre || 'Documento', id: doc.id, data: doc })}
                                     style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, background: '#1c1c1e', cursor: doc.archivo_url ? 'pointer' : 'default' }}>
                                     <span style={{ color: '#52525b', fontSize: 12, flexShrink: 0, minWidth: 72 }}>{doc.fecha_factura || '—'}</span>
                                     <span style={{ flex: 1, color: '#d4d4d8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.numero_factura || doc.archivo_nombre || '—'}</span>
@@ -7136,45 +7132,30 @@ export default function Finanzas() {
         data={docSplitView}
         onClose={() => setDocSplitView(null)}
         onEditarMovimiento={m => { abrirDetalle(m.id); setDocSplitView(null); }}
-        onEditarFactura={fac => { setFacturaViewerId(fac.id); setDocSplitView(null); }}
+        onEditarFactura={fac => { setFacturaViewer({ url: fac.archivo_url, nombre: fac.archivo_nombre, id: fac.id, data: fac }); setDocSplitView(null); }}
         zIndex={9200}
       />
 
       {/* Viewer modal documentos/facturas */}
-      {facturaViewerId !== null && createPortal(
-        <div onClick={() => { setFacturaViewerId(null); setViewerEditando(false); setFacturaViewerAutoEdit(false); }}
+      {facturaViewer && createPortal(
+        <div onClick={() => setFacturaViewer(null)}
           style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:9999, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24 }}>
           <div onClick={e => e.stopPropagation()}
             style={{ width:'100%', maxWidth:960, height:'92vh', background:'#1a1a1a', borderRadius:12, border:'1px solid #3f3f46', display:'flex', flexDirection:'column', overflow:'hidden' }}>
             {/* Header */}
             <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderBottom:'1px solid #27272a', flexShrink:0 }}>
-              <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                {facturaViewerData?.archivo_nombre || (facturaViewerLoading ? 'Cargando…' : facturaViewerError ? 'Error al cargar' : '—')}
-              </span>
-              <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace', flexShrink:0 }}>{facturaViewerId.slice(0,8)}…</span>
-              {facturaViewerData && !viewerEditando && (
-                <button onClick={() => setViewerEditando(true) || setViewerDraft({ archivo_nombre: facturaViewerData.archivo_nombre||'', factura_proveedor_id: facturaViewerData.factura_proveedor_id||'', factura_cliente_id: facturaViewerData.factura_cliente_id||'', importe: facturaViewerData.importe??'', impuesto: facturaViewerData.impuesto??'', irpf: facturaViewerData.irpf??'' })}
+              <span style={{ color:'#a1a1aa', fontSize:13, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{facturaViewer.nombre}</span>
+              {facturaViewer.id && <span style={{ color:'#52525b', fontSize:11, fontFamily:'monospace', flexShrink:0 }}>{facturaViewer.id.slice(0,8)}…</span>}
+              {facturaViewer.id && !viewerEditando && (
+                <button onClick={() => setViewerEditando(true) || setViewerDraft({ archivo_nombre: facturaViewer.nombre||'', factura_proveedor_id: facturaViewer.data?.factura_proveedor_id||'', factura_cliente_id: facturaViewer.data?.factura_cliente_id||'', importe: facturaViewer.data?.importe??'', impuesto: facturaViewer.data?.impuesto??'', irpf: facturaViewer.data?.irpf??'' })}
                   style={{ background:'transparent', border:'1px solid #3f3f46', borderRadius:6, color:'#71717a', padding:'5px 12px', fontSize:12, cursor:'pointer', flexShrink:0 }}>Editar</button>
               )}
-              {facturaViewerData?.archivo_url && (
-                <a href={facturaViewerData.archivo_url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:12, textDecoration:'none', flexShrink:0 }}>↗ Abrir en nueva pestaña</a>
-              )}
-              <button onClick={() => { setFacturaViewerId(null); setViewerEditando(false); setFacturaViewerAutoEdit(false); }} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
+              <a href={facturaViewer.url} target="_blank" rel="noreferrer" style={{ color:'#60a5fa', fontSize:12, textDecoration:'none', flexShrink:0 }}>↗ Abrir en nueva pestaña</a>
+              <button onClick={() => { setFacturaViewer(null); setViewerEditando(false); }} style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'0 4px', flexShrink:0 }}>✕</button>
             </div>
-            {/* Loading / error */}
-            {facturaViewerLoading && (
-              <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'#52525b', fontSize:14 }}>
-                Cargando documento…
-              </div>
-            )}
-            {facturaViewerError && !facturaViewerLoading && (
-              <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'#ef4444', fontSize:14 }}>
-                Error al cargar el documento
-              </div>
-            )}
             {/* Metadata */}
-            {facturaViewerData && !facturaViewerLoading && (() => {
-              const fv = facturaViewerData;
+            {facturaViewer.data && (() => {
+              const fv = facturaViewer.data;
               const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
               const findC = id => ctodos.find(c => c.id === id)?.nombre || id?.slice(0,8) || '—';
               const pill = (txt, color) => <span style={{ background: color+'22', color, border:`1px solid ${color}44`, borderRadius:4, padding:'1px 7px', fontSize:11, fontWeight:600, flexShrink:0 }}>{txt}</span>;
@@ -7194,9 +7175,9 @@ export default function Finanzas() {
                 </div>
               );
             })()}
-            {/* Movimientos vinculados — solo modo lectura */}
-            {facturaViewerData && !facturaViewerLoading && !viewerEditando && (() => {
-              const ids = facturaViewerData.movimiento_ids || [];
+            {/* Movimientos vinculados — editable (solo en modo lectura; en edit mode aparece dentro del panel editar) */}
+            {facturaViewer.data && !viewerEditando && (() => {
+              const ids = facturaViewer.data.movimiento_ids || [];
               return (
                 <div style={{ padding:'8px 16px', borderBottom:'1px solid #27272a', flexShrink:0, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
                   <span style={{ color:'#52525b', fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em', flexShrink:0 }}>Movimientos vinculados</span>
@@ -7219,7 +7200,7 @@ export default function Finanzas() {
                         seleccionados={ids}
                         opciones={movimientosParaVincular}
                         cargando={loadingMovsVincular}
-                        onToggle={movId => toggleMovimientoEnFactura(facturaViewerId, movId)}
+                        onToggle={movId => toggleMovimientoEnFactura(facturaViewer.id, movId)}
                         onClose={() => setViewerVincOpen(false)}
                       />
                     )}
@@ -7228,9 +7209,9 @@ export default function Finanzas() {
               );
             })()}
             {/* Panel edición */}
-            {viewerEditando && facturaViewerData && (() => {
+            {viewerEditando && facturaViewer.id && (() => {
               const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
-              const fv = facturaViewerData;
+              const fv = facturaViewer.data || {};
               const selStyle = { background:'#27272a', border:'1px solid #3f3f46', borderRadius:6, color:'white', padding:'5px 8px', fontSize:12, outline:'none', flex:1 };
               const lblStyle = { color:'#52525b', fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em' };
               const handleContactChange = (campo, newId) => {
@@ -7243,8 +7224,8 @@ export default function Finanzas() {
                 if (payload.impuesto !== '') payload.impuesto = payload.impuesto != null ? parseFloat(payload.impuesto) : null;
                 if (payload.irpf     !== '') payload.irpf     = payload.irpf     != null ? parseFloat(payload.irpf)     : null;
                 const contactoCambiado = payload.factura_proveedor_id !== fv.factura_proveedor_id || payload.factura_cliente_id !== fv.factura_cliente_id;
-                await guardarCeldaDoc(facturaViewerId, payload);
-                // viewer se actualiza automáticamente via useFactura(facturaViewerId)
+                const updated = await guardarCeldaDoc(facturaViewer.id, payload);
+                if (updated) setFacturaViewer(prev => ({ ...prev, nombre: viewerDraft.archivo_nombre, data: updated }));
                 setViewerEditando(false);
                 if (contactoCambiado) { cargarProveedores(); cargarClientes(); cargarEquipo(); }
               };
@@ -7298,8 +7279,8 @@ export default function Finanzas() {
                     <div style={{ position:'relative', display:'inline-flex', alignItems:'center' }}>
                       <div onClick={() => setViewerVincOpen(o => !o)}
                         style={{ cursor:'pointer', display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', minHeight:30, padding:'4px 8px', background:'#27272a', border:'1px solid #3f3f46', borderRadius:6 }}>
-                        {(fv.movimiento_ids||[]).length > 0
-                          ? (fv.movimiento_ids).map(mid => {
+                        {(facturaViewer.data?.movimiento_ids||[]).length > 0
+                          ? (facturaViewer.data.movimiento_ids).map(mid => {
                               const mov = movimientosParaVincular.find(m => m.id === mid);
                               return (
                                 <span key={mid} style={{ background:'rgba(34,197,94,0.1)', color:'#4ade80', fontSize:11, padding:'2px 8px', borderRadius:4, fontWeight:600 }}>
@@ -7311,10 +7292,10 @@ export default function Finanzas() {
                       </div>
                       {viewerVincOpen && (
                         <VinculosDropdown
-                          seleccionados={fv.movimiento_ids||[]}
+                          seleccionados={facturaViewer.data?.movimiento_ids||[]}
                           opciones={movimientosParaVincular}
                           cargando={loadingMovsVincular}
-                          onToggle={movId => toggleMovimientoEnFactura(facturaViewerId, movId)}
+                          onToggle={movId => toggleMovimientoEnFactura(facturaViewer.id, movId)}
                           onClose={() => setViewerVincOpen(false)}
                         />
                       )}
@@ -7327,12 +7308,11 @@ export default function Finanzas() {
                 </div>
               );
             })()}
-            {/* Contenido — solo cuando hay datos */}
-            {facturaViewerData?.archivo_url && !facturaViewerLoading && (
-              /\.(jpg|jpeg|png|gif|webp)$/i.test(facturaViewerData.archivo_nombre||'')
-                ? <img src={facturaViewerData.archivo_url} alt={facturaViewerData.archivo_nombre} style={{ flex:1, objectFit:'contain', width:'100%', height:'100%' }} />
-                : <iframe src={facturaViewerData.archivo_url} title={facturaViewerData.archivo_nombre||'Documento'} style={{ flex:1, width:'100%', border:'none' }} />
-            )}
+            {/* Contenido */}
+            {/\.(jpg|jpeg|png|gif|webp)$/i.test(facturaViewer.nombre)
+              ? <img src={facturaViewer.url} alt={facturaViewer.nombre} style={{ flex:1, objectFit:'contain', width:'100%', height:'100%' }} />
+              : <iframe src={facturaViewer.url} title={facturaViewer.nombre} style={{ flex:1, width:'100%', border:'none' }} />
+            }
           </div>
         </div>,
         document.body
