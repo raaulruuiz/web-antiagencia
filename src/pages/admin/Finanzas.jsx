@@ -4154,11 +4154,16 @@ export default function Finanzas() {
     const newIds = current.includes(movimientoId) ? current.filter(x => x !== movimientoId) : [...current, movimientoId];
     try {
       const token = await getToken();
-      await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facturaId}/movimientos`, {
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facturaId}/movimientos`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ movimiento_ids: newIds }),
       });
+      if (!r.ok) {
+        let msg = `HTTP ${r.status}`;
+        try { const body = await r.json(); if (body?.error) msg = body.error; } catch {}
+        throw new Error(msg);
+      }
       await Promise.all([
         refrescarFactura(facturaId),
         qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) }),
@@ -4171,11 +4176,16 @@ export default function Finanzas() {
     const oldFacturaIds = movimientos.items.find(m => m.id === movimientoId)?.factura_ids || [];
     try {
       const token = await getToken();
-      await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${movimientoId}/facturas`, {
+      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${movimientoId}/facturas`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ factura_ids: newFacturaIds }),
       });
+      if (!r.ok) {
+        let msg = `HTTP ${r.status}`;
+        try { const body = await r.json(); if (body?.error) msg = body.error; } catch {}
+        throw new Error(msg);
+      }
       const facAfectadas = [...new Set([...oldFacturaIds, ...newFacturaIds])];
       await Promise.all([
         qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) }),
@@ -4588,11 +4598,15 @@ export default function Finanzas() {
           onEditar={m => { setMovDetailId(null); setMovEditando(m); }}
           onEliminar={id => { setMovDetailId(null); eliminarMovimiento(id); }}
           onConfirm={setConfirmDialog}
-          onAbrirFactura={facId => {
+          onAbrirFactura={async facId => {
             setMovDetailId(null);
-            const doc = documentosList.find(d => d.id === facId);
-            if (doc) setFacturaViewer({ url: doc.archivo_url, nombre: doc.archivo_nombre, id: doc.id, data: doc });
-            else setTab('documentos');
+            // GET detail autoritativo — no usar documentosList (puede estar stale si refrescarFactura aún en curso)
+            const fac = await refrescarFactura(facId);
+            if (fac) {
+              setFacturaViewer({ url: fac.archivo_url, nombre: fac.archivo_nombre || 'Documento', id: fac.id, data: fac });
+            } else {
+              setTab('documentos');
+            }
           }}
         />
       )}
