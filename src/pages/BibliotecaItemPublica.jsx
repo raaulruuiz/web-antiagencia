@@ -596,11 +596,26 @@ function renderEBBlock(eb, i, colMode, onPreview) {
 
 function CorreccionBlockView({ block, onPreview, hideTitle }) {
   const { theme } = useTheme();
+  const outerBg = theme === 'dark' ? '#1e1e1e' : '#e0e0e0';
+
+  // EDITAR EMAIL mode: block has a saved edited HTML version
+  if (block.email_html_edited) {
+    if (!block.titulo && !block.subtitulo && !block.email_html_edited) return null;
+    return (
+      <div>
+        {!hideTitle && <BlockHeader title={block.titulo} subtitle={block.subtitulo} />}
+        <div style={{ background: outerBg, borderRadius: 12, padding: '20px', display: 'flex', justifyContent: 'center' }}>
+          <EmailIframe html_body={block.email_html_edited} withLinks={true} />
+        </div>
+      </div>
+    );
+  }
+
+  // NUEVO EMAIL mode: render from email_blocks
   const emailBlocks = block.email_blocks || [];
   if (!emailBlocks.length && !block.titulo && !block.subtitulo) return null;
   if (!emailBlocks.length) return hideTitle ? null : <div><BlockHeader title={block.titulo} subtitle={block.subtitulo} /></div>;
-  const emailBg  = block.email_bg || '#ffffff';
-  const outerBg  = theme === 'dark' ? '#1e1e1e' : '#e0e0e0';
+  const emailBg = block.email_bg || '#ffffff';
 
   return (
     <div>

@@ -2601,6 +2601,29 @@ function AudioRecorderWidget({ draft, update, id, pendingBlobRef }) {
   );
 }
 
+// ── Block: editor modal helpers ───────────────────────────────────────────────
+
+/** Builds srcDoc for the editable email iframe used in EDITAR EMAIL mode. */
+function buildEditSrcDoc(html) {
+  const css = `<style id="__edit-styles">
+body{margin:0!important;word-break:normal!important;overflow-wrap:normal!important;}
+td,th,p,div,span{word-break:normal!important;overflow-wrap:normal!important;}
+html,body{overflow-x:hidden!important;}
+p{margin:0;}
+img{display:block;border:0;outline:none;text-decoration:none;max-width:100%;}
+table{border-collapse:collapse!important;}
+img.an1{display:inline;width:1em;height:1em;vertical-align:-0.1em;max-width:none;}
+a{color:inherit;}
+a:has(>img){display:inline-block;}
+img:not(.an1){cursor:pointer;}
+img:not(.an1):hover{outline:2px solid #3b82f6;outline-offset:1px;}
+[contenteditable]{outline:none;}
+</style>`;
+  const headClose = html.indexOf('</head>');
+  if (headClose !== -1) return html.slice(0, headClose) + css + html.slice(headClose);
+  return css + html;
+}
+
 // ── Block: editor modal ───────────────────────────────────────────────────────
 function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEmail, libraryImages, categoria, allBlocks = [], itemId, onToggleGlobalImage, emailHtml }) {
   const [draft, setDraft] = useState(() => {
@@ -2626,13 +2649,55 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
   const [editingColorIdx, setEditingColorIdx] = useState(null); // null | idx of social being color-edited
   const [transcribing, setTranscribing] = useState(false);
   const [autofillingEmail, setAutofillingEmail] = useState(false);
+  const [corrTab, setCorrTab] = useState(emailHtml ? 'editar' : 'nuevo');
+  const [editImgUploading, setEditImgUploading] = useState(false);
   const fileInputRef = useRef(null);
   const transcribeFileInputRef = useRef(null);
   const linkFileInputRefs = useRef({});
   const itemFileInputRefs = useRef({});
   const pendingAudioBlobRef = useRef(null);
+  const editIframeRef = useRef(null);
+  const editImgTargetRef = useRef(null);
+  const editImgFileRef = useRef(null);
 
   const update = (field, val) => setDraft(d => ({ ...d, [field]: val }));
+
+  const handleEditIframeLoad = (e) => {
+    const iframe = e.target;
+    editIframeRef.current = iframe;
+    const doc = iframe.contentDocument;
+    if (!doc?.body) return;
+    doc.body.contentEditable = 'true';
+    doc.body.style.outline = 'none';
+    doc.body.addEventListener('click', (evt) => {
+      const img = evt.target.closest('img');
+      if (img && !img.classList.contains('an1')) {
+        evt.preventDefault();
+        evt.stopImmediatePropagation();
+        editImgTargetRef.current = img;
+        editImgFileRef.current?.click();
+      }
+    }, true);
+    const h = doc.documentElement.scrollHeight;
+    iframe.style.height = Math.max(h, 200) + 'px';
+  };
+
+  const extractEditedHtml = () => {
+    const doc = editIframeRef.current?.contentDocument;
+    if (!doc) return null;
+    doc.body.removeAttribute('contenteditable');
+    const s = doc.getElementById('__edit-styles');
+    if (s) s.remove();
+    return doc.documentElement.outerHTML;
+  };
+
+  const switchCorrTab = (tab) => {
+    if (tab !== corrTab && corrTab === 'editar') {
+      const html = extractEditedHtml();
+      if (html) update('email_html_edited', html);
+    }
+    setCorrTab(tab);
+  };
 
   // Global images (for non-enlaces types)
   const addImage = (url) => setDraft(d => ({ ...d, images: [...(d.images || []), { url }] }));
@@ -2775,6 +2840,10 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
         finalDraft = { ...draft, audio_url: url };
         pendingAudioBlobRef.current = null;
       } catch (e) { alert('Error al subir audio: ' + e.message); return; }
+    }
+    if (draft.type === 'correccion' && corrTab === 'editar') {
+      const html = extractEditedHtml();
+      if (html) finalDraft = { ...finalDraft, email_html_edited: html };
     }
     onSave(finalDraft);
     onClose();
@@ -3620,20 +3689,70 @@ function BlockEditorModal({ block, onSave, onClose, onUploadImage, onCropFromEma
 
         {draft.type === 'correccion' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Email de corrección</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Fondo email</span>
-                <input type="color" value={draft.email_bg || '#ffffff'} onChange={e => update('email_bg', e.target.value)}
-                  style={{ width: 26, height: 22, borderRadius: 4, border: '1px solid var(--t-border-mid)', cursor: 'pointer', padding: 1 }} />
+            {/* Tab toggle — only when the item has an HTML email */}
+            {emailHtml && (
+              <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                {[{ id: 'editar', label: 'Editar Email' }, { id: 'nuevo', label: 'Nuevo Email' }].map(({ id, label }) => (
+                  <button key={id} onClick={() => switchCorrTab(id)}
+                    style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em',
+                      padding: '5px 12px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                      background: corrTab === id ? 'var(--t-accent, #3b82f6)' : 'var(--t-surface2)',
+                      color: corrTab === id ? '#fff' : 'var(--t-text-subtle)' }}>
+                    {label}
+                  </button>
+                ))}
               </div>
-            </div>
-            <EBCanvas
-              blocks={draft.email_blocks || []}
-              onChange={newBlocks => update('email_blocks', newBlocks)}
-              onUpload={onUploadImage}
-              onCrop={onCropFromEmail}
-              libImages={libraryImages} />
+            )}
+
+            {/* EDITAR EMAIL — inline HTML editor */}
+            {corrTab === 'editar' && emailHtml && (
+              <>
+                <div style={{ border: '1px solid var(--t-border)', borderRadius: 8, overflow: 'hidden', background: '#fff' }}>
+                  <iframe
+                    key={draft.email_html_edited ? 'edited' : 'original'}
+                    srcDoc={buildEditSrcDoc(draft.email_html_edited || emailHtml)}
+                    sandbox="allow-same-origin"
+                    onLoad={handleEditIframeLoad}
+                    style={{ width: '100%', border: 'none', display: 'block', minHeight: 200 }}
+                  />
+                </div>
+                {editImgUploading && (
+                  <p style={{ fontSize: 11, color: 'var(--t-text-subtle)', textAlign: 'center', margin: '6px 0 0' }}>Subiendo imagen…</p>
+                )}
+                <input ref={editImgFileRef} type="file" accept="image/*" style={{ display: 'none' }}
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    if (!file || !editImgTargetRef.current) return;
+                    setEditImgUploading(true);
+                    try {
+                      const url = await onUploadImage(file);
+                      if (editImgTargetRef.current) editImgTargetRef.current.src = url;
+                    } catch { alert('Error al subir imagen'); }
+                    finally { setEditImgUploading(false); editImgTargetRef.current = null; }
+                  }} />
+              </>
+            )}
+
+            {/* NUEVO EMAIL — existing block builder */}
+            {(!emailHtml || corrTab === 'nuevo') && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <label style={{ fontSize: 10, color: 'var(--t-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Nuevo email</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 10, color: 'var(--t-text-subtle)' }}>Fondo email</span>
+                    <input type="color" value={draft.email_bg || '#ffffff'} onChange={e => update('email_bg', e.target.value)}
+                      style={{ width: 26, height: 22, borderRadius: 4, border: '1px solid var(--t-border-mid)', cursor: 'pointer', padding: 1 }} />
+                  </div>
+                </div>
+                <EBCanvas
+                  blocks={draft.email_blocks || []}
+                  onChange={newBlocks => update('email_blocks', newBlocks)}
+                  onUpload={onUploadImage}
+                  onCrop={onCropFromEmail}
+                  libImages={libraryImages} />
+              </>
+            )}
           </div>
         )}
 
