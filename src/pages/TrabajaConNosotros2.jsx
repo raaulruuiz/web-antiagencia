@@ -420,8 +420,8 @@ export default function TrabajaConNosotros2() {
               <MailerLiteForm />
             </Carta>
 
-            {/* CARTA 6: Bonus indisciplinado */}
-            <Carta>
+            {/* CARTA 6: Bonus indisciplinado — OCULTA temporalmente, reactivar cuando toque */}
+            {false && <Carta>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Asunto: Bonus indisciplinado</h1>
               <p><br /></p>
               <p>2 cosas. Muy rápidas.</p>
@@ -471,7 +471,7 @@ export default function TrabajaConNosotros2() {
               <p><strong>P.D.2</strong> Pide información aquí:</p>
               <p>&nbsp;</p>
               <MailerLiteForm />
-            </Carta>
+            </Carta>}
 
             {/* CARTA 7: FAKs */}
             <Carta>
@@ -485,8 +485,6 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Por supuesto, todos los emails los escribimos con Inteligencia Humana y no Inteligencia Artificial.</p>
               <p>&nbsp;</p>
-              <p><strong>Además</strong>, si pides el presupuesto antes del 31 de Agosto a las 23:59, te incluimos el copy de las fichas de producto, para que aumentes la cantidad de gente que te compra en la tienda sin aumentar presupuestos.</p>
-              <p><br /><br /></p>
               <h3 className="text-xl font-bold text-gray-900 mb-2">¿Cuánto dura el servicio?</h3>
               <p>&nbsp;</p>
               <p>Si es la primera vez que me contratas, pagarás 3 meses por adelantado. Después de estos 3 meses, seguiremos mes a mes y sin ningún tipo de permanencia.</p>
@@ -513,7 +511,7 @@ export default function TrabajaConNosotros2() {
               <p><br /><br /></p>
               <h3 className="text-xl font-bold text-gray-900 mb-2">¿Hay algún bonus?</h3>
               <p>&nbsp;</p>
-              <p>Si, hasta el 31 de Agosto a las 23:59, tienes incluido el copywriting de las fichas de producto.</p>
+              <p>No.</p>
               <p><br /><br /></p>
               <h3 className="text-xl font-bold text-gray-900 mb-2">¿Tienes testimonios?</h3>
               <p>&nbsp;</p>
