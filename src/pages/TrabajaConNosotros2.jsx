@@ -174,7 +174,7 @@ export default function TrabajaConNosotros2() {
               <p style={{ textAlign: 'right' }}><span style={{ color: '#0067FD' }}><strong>IMPORTANTE</strong></span><strong>: Ya no llegamos a Black Friday</strong></p>
               <p style={{ textAlign: 'right' }}><strong>Es una putada, lo sé, mas info en el mail "Bonus Indisciplinado"</strong></p>
               <p>&nbsp;</p>
-              <p>Esta carta está formada por varios "emails". El motivo lo entenderás mientras lees.</p>
+              <p>Esta carta está formada por 7 "emails". El motivo lo entenderás mientras lees.</p>
               <p>&nbsp;</p>
               <p>El caso es que en esta carta no encontrarás ningún vídeo de 4 minutos hablándote de lo bueno que soy, ni una oferta con garantía de resultados, ni un botón para agendar una llamada vestida de "asesoría gratuita" en la que intentaré lavarte el cerebro para que me compres.<br />No.</p>
               <p>&nbsp;</p>
