@@ -984,10 +984,6 @@ function DiscardModal({ onConfirm, onCancel }) {
 
 // ── Auth helper ───────────────────────────────────────────────────────────────
 async function getToken() {
-  // getUser() hace llamada de red y refresca la sesión si el JWT está expirado.
-  // Después, getSession() lee el token fresco desde localStorage.
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
   const { data: { session } } = await supabase.auth.getSession();
   return session?.access_token || null;
 }
@@ -4324,7 +4320,6 @@ export default function BibliotecaItem() {
         ...(lastEmail ? { email_html: lastEmail.html_body, email_gmail_styles: lastEmail.gmail_styles } : {}),
       };
       const token = await getToken();
-      if (!token) throw new Error('Sesión no disponible — cierra sesión y vuelve a entrar');
       const res = await fetch(`${API_BASE}/biblioteca/${id}`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -4361,7 +4356,7 @@ export default function BibliotecaItem() {
         }
       } else {
         const errData = await res.json().catch(() => ({}));
-        alert(`Error al guardar: ${errData.error || 'sin detalle'} (HTTP ${res.status})\nToken enviado: ${token?.slice(0, 20)}...`);
+        alert('Error al guardar: ' + (errData.error || `HTTP ${res.status}`));
       }
     } catch (e) {
       console.error('[handleGuardar]', e);
