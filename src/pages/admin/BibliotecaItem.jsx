@@ -1857,7 +1857,7 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
           </div>
           {block.email_html_edited ? (
-            <div style={{ background: theme === 'dark' ? '#1e1e1e' : '#e0e0e0', borderRadius: 8, padding: '10px 8px', maxHeight: 420, overflowY: 'auto' }}>
+            <div style={{ background: theme === 'dark' ? '#1e1e1e' : '#e0e0e0', borderRadius: 8, padding: '10px 8px', height: 420, overflow: 'hidden' }}>
               <EmailIframe html_body={block.email_html_edited} withLinks={false} />
             </div>
           ) : (block.email_blocks || []).length > 0 ? (() => {
