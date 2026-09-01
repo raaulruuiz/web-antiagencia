@@ -7,6 +7,8 @@ import {
   useCrearMovimiento, useEditarMovimiento, useEliminarMovimiento,
   useBulkDeleteMovimientos, useBulkEditMovimientos,
   movimientoKeys,
+  useFacturas,
+  facturaKeys,
 } from '@/features/finanzas';
 import { createPortal } from 'react-dom';
 import { DayPicker } from 'react-day-picker';
@@ -3803,8 +3805,7 @@ export default function Finanzas() {
   const [docSplitView, setDocSplitView] = useState(null); // { movimiento, factura } para ver ambos desde conflictos
   const [docTabDesde, setDocTabDesde] = useState(() => lsGet('fin_doc_desde', '2023-01-01'));
   const [docTabHasta, setDocTabHasta] = useState(() => lsGet('fin_doc_hasta', new Date().toISOString().slice(0,10)));
-  const [documentosList, setDocumentosList] = useState([]);
-  const [loadingDocumentos, setLoadingDocumentos] = useState(false);
+  // documentosList y loadingDocumentos → migrados a TanStack Query en Fase 5 (ver facturasQuery más abajo)
   const [docTabBusqueda, setDocTabBusqueda] = useState('');
   const [docTabTipo, setDocTabTipo] = useState('todos');
   const [docTabSort, setDocTabSort] = useState({ campo: 'fecha_factura', dir: 'desc' });
@@ -3931,6 +3932,12 @@ export default function Finanzas() {
   const loadingMovs   = movimientosQuery.isLoading;
   const errMovs       = movimientosQuery.error?.message ?? null;
 
+  // Fase 5: facturas/documentos como server-state en TanStack Query.
+  // documentosList es un alias de lectura — NO hay setDocumentosList.
+  const facturasQuery   = useFacturas({ desde: docTabDesde, hasta: docTabHasta });
+  const documentosList  = facturasQuery.data ?? [];
+  const loadingDocumentos = facturasQuery.isFetching;
+
   // ─── Mutations de movimientos ────────────────────────────────────────────────
   const _crearMovMut   = useCrearMovimiento();
   const _editarMovMut  = useEditarMovimiento();
@@ -4027,50 +4034,48 @@ export default function Finanzas() {
     window.history.replaceState({}, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
   }, [facturaViewer]);
 
-  async function cargarDocumentos(d, h) {
-    const desde = d || docTabDesde;
-    const hasta = h || docTabHasta;
-    setLoadingDocumentos(true);
-    try {
-      const token = await getToken();
-      const params = new URLSearchParams();
-      if (desde) params.set('desde', desde);
-      if (hasta) params.set('hasta', hasta);
-      const [rDocs, rCtodos] = await Promise.all([
-        fetch(`${BACKEND_URL}/admin/finanzas/facturas?${params}`, { headers: { Authorization: `Bearer ${token}` } }),
-        docTabContactos.length ? Promise.resolve(null) :
-          fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token}` } }),
-      ]);
-      let docs = [];
-      if (rDocs.ok) { docs = await rDocs.json(); setDocumentosList(docs); }
-      if (rCtodos && rCtodos.ok) setDocTabContactos(await rCtodos.json());
-
-      // Detectar facturas huérfanas (sin proveedor/cliente asignado)
-      const huerfanas = docs.filter(f =>
-        (f.tipo === 'gasto' && !f.factura_proveedor_id) ||
-        (f.tipo === 'ingreso' && !f.factura_cliente_id)
+  // Fase 5: cargarDocumentos eliminado — la lista de facturas la gestiona facturasQuery (TQ).
+  // La detección de huérfanas y carga de contactos se hace en efectos separados.
+  const _orphanCheckedRef = useRef(false);
+  useEffect(() => {
+    // Resetear al salir del tab para que re-chequee al volver
+    if (tab !== 'documentos') { _orphanCheckedRef.current = false; return; }
+    const docs = facturasQuery.data;
+    if (!docs?.length || _orphanCheckedRef.current || modalNuevosContactos !== null) return;
+    _orphanCheckedRef.current = true;
+    const huerfanas = docs.filter(f =>
+      (f.tipo === 'gasto' && !f.factura_proveedor_id) ||
+      (f.tipo === 'ingreso' && !f.factura_cliente_id)
+    );
+    if (!huerfanas.length) return;
+    if (!contactosTodos.length) {
+      getToken().then(token =>
+        fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token}` } })
+          .then(r => r.ok ? r.json() : null).then(d => { if (d) setContactosTodos(d); })
       );
-      if (huerfanas.length > 0) {
-        if (!contactosTodos.length) {
-          const token2 = await getToken();
-          const rc = await fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token2}` } });
-          if (rc.ok) setContactosTodos(await rc.json());
-        }
-        // Agrupar por nombre_entidad+tipo
-        const grupos = new Map();
-        for (const f of huerfanas) {
-          const key = `${f.tipo}||${f.nombre_entidad || ''}`;
-          if (!grupos.has(key)) grupos.set(key, { nombre_entidad: f.nombre_entidad || '', nif_cif: f.nif_cif || null, tipo: f.tipo, factura_ids: [], archivo_url: f.archivo_url || null });
-          grupos.get(key).factura_ids.push(f.id);
-        }
-        setModalNuevosContactos([...grupos.values()].map(g => ({
-          ...g, _nombre: '', _nombre_empresa: g.nombre_entidad || '', _asignarA: null, _ignorar: false,
-          _nif_cif: g.nif_cif || '', _direccion: '', _email: '', _roles: ['proveedor'],
-        })));
-      }
-    } catch(e) {}
-    finally { setLoadingDocumentos(false); }
-  }
+    }
+    const grupos = new Map();
+    for (const f of huerfanas) {
+      const key = `${f.tipo}||${f.nombre_entidad || ''}`;
+      if (!grupos.has(key)) grupos.set(key, { nombre_entidad: f.nombre_entidad || '', nif_cif: f.nif_cif || null, tipo: f.tipo, factura_ids: [], archivo_url: f.archivo_url || null });
+      grupos.get(key).factura_ids.push(f.id);
+    }
+    setModalNuevosContactos([...grupos.values()].map(g => ({
+      ...g, _nombre: '', _nombre_empresa: g.nombre_entidad || '', _asignarA: null, _ignorar: false,
+      _nif_cif: g.nif_cif || '', _direccion: '', _email: '', _roles: ['proveedor'],
+    })));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [facturasQuery.data, tab, modalNuevosContactos]);
+
+  // Cargar docTabContactos la primera vez que se entra en tab Documentos
+  useEffect(() => {
+    if (tab !== 'documentos' || docTabContactos.length) return;
+    getToken().then(token =>
+      fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null).then(d => { if (d) setDocTabContactos(d); })
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, docTabContactos.length]);
 
   async function guardarCeldaDoc(id, updates) {
     try {
@@ -4086,6 +4091,9 @@ export default function Finanzas() {
       // Re-fetch GET detail completo para obtener movimiento_ids desde la junction
       // y actualizar documentosList + facturaViewer con datos autoritativos.
       const full = await refrescarFactura(id);
+      // Invalidar todas las listas cacheadas — refrescarFactura solo actualiza
+      // quirúrgicamente el rango activo; otros rangos deben quedar marcados stale.
+      qc.invalidateQueries({ queryKey: facturaKeys.lists() });
       return full;
     } catch(e) { console.error(e); alert('Error al guardar: ' + e.message); }
   }
@@ -4123,26 +4131,26 @@ export default function Finanzas() {
     return best && best.importeScore < 0.5 && best.nameScore < 0.9 ? best.m : null;
   }, [movimientosParaVincular, documentosList]);
 
-  // ── Helpers de re-fetch puntual desde DB ─────────────────────────
-  // Obtiene el detail completo de una factura (incluye movimiento_ids de la junction).
-  // Actualiza documentosList y facturaViewer si está abierta.
-  // Devuelve el objeto completo para que los callers puedan usarlo directamente.
-  // TEMPORAL HASTA MIGRACIÓN DE FACTURAS A TANSTACK QUERY.
+  // ── refrescarFactura ─────────────────────────────────────────────
+  // GET detail autoritativo de una factura (incluye movimiento_ids de la junction).
+  // Fase 5: actualiza el caché de lista de TQ quirúrgicamente + bridge facturaViewer (Fase 6).
+  // Devuelve el objeto completo para que callers como onAbrirFactura lo usen directamente.
   async function refrescarFactura(facId) {
     try {
       const token = await getToken();
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facId}`, { headers: { Authorization: `Bearer ${token}` } });
       if (!r.ok) return;
       const data = await r.json();
-      setDocumentosList(prev => {
+      // Actualización quirúrgica del caché de lista — sin esperar al refetch completo
+      qc.setQueryData(facturaKeys.list({ desde: docTabDesde, hasta: docTabHasta }), prev => {
+        if (!Array.isArray(prev)) return prev;
         const idx = prev.findIndex(d => d.id === facId);
-        // TEMPORAL: si no está en la lista (ej: vinculación desde tab movimientos),
-        // agregar para que documentosList refleje el estado real hasta migrar a TQ
-        if (idx === -1) return [...prev, data];
+        if (idx === -1) return prev; // no añadir items fuera del rango actual
         return prev.map(d => d.id === facId ? { ...d, ...data } : d);
       });
+      // Bridge Fase 6: actualizar facturaViewer si está abierto para esta factura
       setFacturaViewer(prev => prev?.id === facId ? { ...prev, data: { ...prev.data, ...data } } : prev);
-      return data; // caller puede usar el detail completo sin un segundo fetch
+      return data;
     } catch(e) { console.error('refrescarFactura', e); }
   }
 
@@ -4167,6 +4175,7 @@ export default function Finanzas() {
       await Promise.all([
         refrescarFactura(facturaId),
         qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) }),
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() }),
       ]);
     } catch(e) { console.error(e); }
   }
@@ -4189,6 +4198,7 @@ export default function Finanzas() {
       const facAfectadas = [...new Set([...oldFacturaIds, ...newFacturaIds])];
       await Promise.all([
         qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) }),
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() }),
         ...facAfectadas.map(fid => refrescarFactura(fid)),
       ]);
     } catch(e) { console.error(e); }
@@ -4221,10 +4231,10 @@ export default function Finanzas() {
         if (payload.new?.id) rtRefs.current.refrescarFactura?.(payload.new.id);
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'finanzas_facturas' }, () => {
-        rtRefs.current.cargarDocumentos?.();
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'finanzas_facturas' }, () => {
-        rtRefs.current.cargarDocumentos?.();
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
       })
       .subscribe();
 
@@ -4301,7 +4311,7 @@ export default function Finanzas() {
       await Promise.all(ids.map(id => fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, {
         method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
       })));
-      setDocumentosList(prev => prev.filter(d => !docSeleccionados.has(d.id)));
+      qc.invalidateQueries({ queryKey: facturaKeys.lists() });
       setDocSeleccionados(new Set());
     } catch(e) { console.error(e); }
     finally { setDocEliminandoBulk(false); }
@@ -4461,7 +4471,9 @@ export default function Finanzas() {
   }, [dashboard]);
   // errores siempre carga todos vía movimientosParams (vistaMovs === 'errores') — sin mutar mostrarTodos
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (tab === 'documentos') cargarDocumentos(); }, [tab]);
+  // Fase 5: al entrar en tab Documentos, invalidar para asegurar datos frescos
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (tab === 'documentos') qc.invalidateQueries({ queryKey: facturaKeys.lists() }); }, [tab]);
   useEffect(() => {
     if (comparar && desdeComp && hastaComp) cargarDashboardComp();
     else setDashComp(null);
@@ -4535,7 +4547,6 @@ export default function Finanzas() {
   useEffect(() => {
     rtRefs.current = {
       refrescarFactura,
-      cargarDocumentos,
       cargarDashboard,
       cargarClientes,
       cargarEquipo,
@@ -4630,7 +4641,7 @@ export default function Finanzas() {
       <div style={{ display: 'flex', gap: 4, marginBottom: 20, flexWrap: 'wrap' }}>
         <button style={tabStyle('dashboard')}   onClick={() => setTab('dashboard')}>Dashboard</button>
         <button style={tabStyle('movimientos')} onClick={() => setTab('movimientos')}>Movimientos</button>
-        <button style={tabStyle('documentos')}  onClick={() => { setTab('documentos'); if (!documentosList.length) cargarDocumentos(); }}>Documentos</button>
+        <button style={tabStyle('documentos')}  onClick={() => setTab('documentos')}>Documentos</button>
         <button style={tabStyle('fiscal')}      onClick={() => setTab('fiscal')}>Fiscal</button>
         <button style={tabStyle('clientes')}    onClick={() => setTab('clientes')}>Clientes</button>
         <button style={tabStyle('equipo')}      onClick={() => setTab('equipo')}>Equipo</button>
@@ -5650,8 +5661,8 @@ export default function Finanzas() {
           <>
             {/* Toolbar */}
             <div style={{ display:'flex', gap:8, marginBottom:10, flexWrap:'wrap', alignItems:'center' }}>
-              <DateRangePicker desde={docTabDesde} hasta={docTabHasta} onApply={(d,h) => { setDocTabDesde(d); setDocTabHasta(h); lsSet('fin_doc_desde',d); lsSet('fin_doc_hasta',h); cargarDocumentos(d,h); }} />
-              <button style={S.ghost} onClick={() => cargarDocumentos()}>↺</button>
+              <DateRangePicker desde={docTabDesde} hasta={docTabHasta} onApply={(d,h) => { setDocTabDesde(d); setDocTabHasta(h); lsSet('fin_doc_desde',d); lsSet('fin_doc_hasta',h); }} />
+              <button style={S.ghost} onClick={() => qc.invalidateQueries({ queryKey: facturaKeys.lists() })}>↺</button>
               {vistaDocumentos === 'tabla' && <>
                 <button onMouseDown={e=>e.preventDefault()} onClick={() => { setDocPanelFiltro(p=>!p); setDocPanelOrdenar(false); }}
                   style={{ ...S.ghost, outline:'none', display:'flex', alignItems:'center', gap:6, ...(docFiltros.length>0?{borderColor:'#0067FD',color:'#0067FD'}:{}) }}>
@@ -5668,7 +5679,7 @@ export default function Finanzas() {
               </>}
               <div style={{ display:'flex', gap:4, background:'#1c1c1e', padding:3, borderRadius:8, flexShrink:0, marginLeft: vistaDocumentos === 'conflictos' ? 'auto' : undefined }}>
                 {[['tabla','☰'],['conflictos','⚠']].map(([v,ic]) => (
-                  <button key={v} type="button" onClick={() => { setVistaDocumentos(v); if (v === 'conflictos') cargarDocumentos(); }}
+                  <button key={v} type="button" onClick={() => { setVistaDocumentos(v); if (v === 'conflictos') qc.invalidateQueries({ queryKey: facturaKeys.lists() }); }}
                     style={{ background:vistaDocumentos===v?'#27272a':'transparent', border:'none', color:vistaDocumentos===v?'white':'#52525b', borderRadius:6, padding:'5px 10px', fontSize:14, cursor:'pointer', title: v==='conflictos'?'Vista conflictos':'' }}>
                     {ic}
                   </button>
@@ -7082,7 +7093,7 @@ export default function Finanzas() {
                   if (!r.ok) throw new Error('Error al confirmar');
                   setModalNuevosContactos(null);
                   cargarProveedores();
-                  if (tab === 'documentos') cargarDocumentos();
+                  qc.invalidateQueries({ queryKey: facturaKeys.lists() });
                 } catch(e) { alert(e.message); }
                 finally { setConfirmandoContactos(false); }
               }}
