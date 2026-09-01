@@ -1856,7 +1856,11 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Corrección'}</div>
             {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
           </div>
-          {(block.email_blocks || []).length > 0 ? (() => {
+          {block.email_html_edited ? (
+            <div style={{ background: theme === 'dark' ? '#1e1e1e' : '#e0e0e0', borderRadius: 8, padding: '10px 8px', maxHeight: 420, overflowY: 'auto' }}>
+              <EmailIframe html_body={block.email_html_edited} withLinks={false} />
+            </div>
+          ) : (block.email_blocks || []).length > 0 ? (() => {
             const outerBg = theme === 'dark' ? '#1e1e1e' : '#e0e0e0';
             const emailBg = block.email_bg || '#ffffff';
             const renderEBBlock = (eb, i, colMode) => (
