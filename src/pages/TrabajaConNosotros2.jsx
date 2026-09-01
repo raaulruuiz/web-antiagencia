@@ -483,7 +483,7 @@ export default function TrabajaConNosotros2() {
               <p>&nbsp;</p>
               <p>Email marketing. Redactaremos y programaremos todos los mails (campañas de newsletters periódicas y automatizaciones) y los formularios de captación.</p>
               <p>&nbsp;</p>
-              <p>Por supuesto, todos los emails los escribimos con Inteligencia Humana y no Inteligencia Artificial.</p>
+              <p><strong>Por supuesto,</strong> todos los emails los escribimos con Inteligencia Humana y no Inteligencia Artificial.</p>
               <p>&nbsp;</p>
               <h3 className="text-xl font-bold text-gray-900 mb-2">¿Cuánto dura el servicio?</h3>
               <p>&nbsp;</p>
