@@ -13,6 +13,10 @@ import {
   facturaKeys,
   useDashboard,
   dashboardKeys,
+  useFiscal,
+  useGuardarFacturas,
+  useEliminarFactura,
+  useBulkDeleteFacturas,
 } from '@/features/finanzas';
 import { createPortal } from 'react-dom';
 import { DayPicker } from 'react-day-picker';
@@ -1414,18 +1418,15 @@ function FiscalMetric({ label, value, color, comp }) {
   );
 }
 
-function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, setFacturaViewerAutoEdit, onFacturasEliminadas, findBestMatch, toggleMovimientoEnFactura }) {
+function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, setFacturaViewerAutoEdit, onFacturasEliminadas, findBestMatch, toggleMovimientoEnFactura, setContactosTodos, setModalNuevosContactos }) {
+  const qc = useQueryClient();
+
+  // ─── UI-STATE ──────────────────────────────────────────────────────────────
   const [anio, setAnio] = useState(new Date().getFullYear());
-  const [datos, setDatos] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState(null);
   const [comparar, setComparar] = useState(false);
   const [anioComp, setAnioComp] = useState(null);
-  const [datosComp, setDatosComp] = useState(null);
-  const [loadingComp, setLoadingComp] = useState(false);
   // Facturas
   const [trimestreAbierto, setTrimestreAbierto] = useState(null); // 0-3
-  const [facturasPorTrimestre, setFacturasPorTrimestre] = useState({}); // { "anio-q": [] }
   const [pendientes, setPendientes] = useState([]); // facturas extraídas pendientes de guardar
   const [extrayendo, setExtrayendo] = useState(false); // solo para deshabilitar el botón que está en uso
   const [guardando, setGuardando] = useState(false);
@@ -1433,7 +1434,30 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
   const [tipoActivo, setTipoActivo] = useState(null); // 'ingreso' | 'gasto'
   const [dragOver, setDragOver] = useState(null); // 'ingreso' | 'gasto' | null
   const [selFacturas, setSelFacturas] = useState(new Set()); // ids seleccionados para bulk delete
-  const [eliminandoBulk, setEliminandoBulk] = useState(false);
+
+  // ─── Fase 9: server-state fiscal en TanStack Query ────────────────────────
+  const _fiscalQuery     = useFiscal({ anio });
+  const _fiscalCompQuery = useFiscal(
+    { anio: anioComp ?? anio },
+    { enabled: comparar && !!anioComp }
+  );
+  const datos      = _fiscalQuery.data ?? null;
+  const loading    = _fiscalQuery.isLoading;
+  const err        = _fiscalQuery.isError ? (_fiscalQuery.error?.message ?? 'Error al cargar fiscal') : null;
+  const datosComp  = comparar && anioComp ? (_fiscalCompQuery.data ?? null) : null;
+  const loadingComp = comparar && !!anioComp && _fiscalCompQuery.isLoading;
+
+  // Facturas del trimestre activo — enabled solo cuando hay trimestre abierto
+  const _facturasTriQuery = useFacturas(
+    trimestreAbierto !== null ? { anio, trimestre: trimestreAbierto + 1 } : {},
+    { enabled: trimestreAbierto !== null }
+  );
+  const facturasActivasTrimestre = _facturasTriQuery.data ?? [];
+
+  // ─── Mutations ────────────────────────────────────────────────────────────
+  const _guardarFacMut    = useGuardarFacturas();
+  const _eliminarFacMut   = useEliminarFactura();
+  const _bulkDeleteFacMut = useBulkDeleteFacturas();
   // facturaViewerData/setFacturaViewerId/setFacturaViewerAutoEdit son props de Finanzas (Fase 6)
   const [facturaFiltro, setFacturaFiltro] = useState('todos'); // 'todos' | 'ingreso' | 'gasto'
   const [facturaOrden, setFacturaOrden] = useState('fecha_desc'); // 'fecha_desc' | 'fecha_asc' | 'importe_desc' | 'importe_asc'
@@ -1442,144 +1466,83 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
   const [erroresModal, setErroresModal] = useState(false);
   const [erroresData, setErroresData] = useState([]);
   const [detectando, setDetectando] = useState(false);
-  const [errMovDetail, setErrMovDetail] = useState(null);
+  const [errMovDetailId, setErrMovDetailId] = useState(null);
+  const errMovQuery  = useMovimiento(errMovDetailId);
+  const errMovDetail = errMovQuery.data ?? null;
   const [errMovEditar, setErrMovEditar] = useState(null);
   const [errFiltro, setErrFiltro] = useState('todos'); // 'todos' | 'error' | 'warning' | 'info'
   const [errSplitView, setErrSplitView] = useState(null); // { movimiento, factura } | null
   const [modDetalle, setModDetalle] = useState(null); // { num, titulo, desc, valor, valorLabel, secciones } | null
 
   // Abre un movimiento desde el contexto de errores con datos completos + actualiza URL
-  async function abrirMovEnErrores(mov) {
+  function abrirMovEnErrores(mov) {
     const params = new URLSearchParams(window.location.search);
     params.set('mov', mov.id);
     window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos/${mov.id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await r.json();
-      setErrMovDetail(r.ok ? data : mov);
-    } catch { setErrMovDetail(mov); }
+    // useMovimiento(errMovDetailId) se activará automáticamente y poblará errMovDetail
+    setErrMovDetailId(mov.id);
   }
 
-  const cargar = useCallback(async () => {
-    setLoading(true); setErr(null);
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/fiscal?anio=${anio}`, { headers: { Authorization: `Bearer ${token}` } });
-      const data = await r.json();
-      if (!r.ok) { setErr(data.error || `Error ${r.status}`); return; }
-      setDatos(data);
-    } catch (e) { setErr(e.message); } finally { setLoading(false); }
-  }, [anio]);
+  // Fase 9: cargar/cargarComp eliminados — server-state gestionado por useFiscal arriba.
 
-  const cargarComp = useCallback(async () => {
-    if (!comparar || !anioComp) { setDatosComp(null); return; }
-    setLoadingComp(true);
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/fiscal?anio=${anioComp}`, { headers: { Authorization: `Bearer ${token}` } });
-      const data = await r.json();
-      if (r.ok) setDatosComp(data);
-    } catch { } finally { setLoadingComp(false); }
-  }, [comparar, anioComp]);
-
-  useEffect(() => { cargar(); }, [cargar]);
-  useEffect(() => { cargarComp(); }, [cargarComp]);
-
-  // Realtime: cuando la junction table cambia, refrescar el trimestre activo para tener
-  // movimiento_ids actualizados en facturasPorTrimestre (evita falsos "sin movimiento vinculado")
+  // Realtime: finanzas_facturas_movimientos y finanzas_facturas NO están en la publication
+  // (solo finanzas_movimientos está activa). El canal es no-op hasta que se añadan a la publication.
+  // Fase 9: setFacturasPorTrimestre reemplazado por invalidación TQ.
   useEffect(() => {
     const ch = supabase
       .channel('fiscal_vinculos')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_facturas_movimientos' }, async (payload) => {
         const facId = payload.new?.factura_id || payload.old?.factura_id;
         if (!facId) return;
-        // Actualizar movimiento_ids de esa factura concreta en facturasPorTrimestre
+        // Invalidar trimestre activo para que TQ refetch con movimiento_ids actualizados
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+        // Actualizar también erroresData si está abierto (fetch fresco del detalle)
         try {
           const token = await getToken();
           const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facId}`, { headers: { Authorization: `Bearer ${token}` } });
           if (!r.ok) return;
           const fresh = await r.json();
-          setFacturasPorTrimestre(prev => {
-            const next = {};
-            for (const [key, items] of Object.entries(prev)) {
-              next[key] = items.map(f => f.id === facId ? { ...f, ...fresh } : f);
-            }
-            return next;
-          });
-          // Actualizar también erroresData si está abierto
           setErroresData(prev => prev.map(c => c.factura?.id === facId ? { ...c, factura: { ...c.factura, ...fresh } } : c));
         } catch (_) {}
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_facturas' }, async (payload) => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_facturas' }, (payload) => {
         const facId = payload.new?.id;
         if (!facId) return;
-        setFacturasPorTrimestre(prev => {
-          const next = {};
-          for (const [key, items] of Object.entries(prev)) {
-            next[key] = items.map(f => f.id === facId ? { ...f, ...payload.new } : f);
-          }
-          return next;
-        });
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
       })
       .subscribe();
     return () => supabase.removeChannel(ch);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Sync factura updates (desde viewer edit via useFactura) a erroresData y facturasPorTrimestre
+  // Sync factura updates (desde viewer edit via useFactura) a erroresData y TQ cache
   useEffect(() => {
     if (!facturaViewerData?.id) return;
     const fv = facturaViewerData;
     setErroresData(prev => prev.map(c =>
       c.factura?.id === fv.id ? { ...c, factura: { ...c.factura, ...fv } } : c
     ));
-    setFacturasPorTrimestre(prev => {
-      const next = {};
-      for (const [key, items] of Object.entries(prev)) {
-        next[key] = items.map(f => f.id === fv.id ? { ...f, ...fv } : f);
-      }
-      return next;
-    });
-  }, [facturaViewerData]);
+    // Invalidar todas las listas de facturas para que TQ refetch con los datos del viewer
+    qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+  }, [facturaViewerData]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function cargarFacturasTrimestre(q) {
-    const key = `${anio}-${q}`;
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas?anio=${anio}&trimestre=${q}`, { headers: { Authorization: `Bearer ${token}` } });
-      const data = await r.json();
-      if (r.ok) setFacturasPorTrimestre(prev => ({ ...prev, [key]: data }));
-    } catch { }
-  }
-
+  // Fase 9: cargarFacturasTrimestre eliminado — TQ auto-fetches cuando trimestreAbierto cambia.
   function toggleTrimestre(i) {
-    const q = i + 1;
     if (trimestreAbierto === i) { setTrimestreAbierto(null); setPendientes([]); setSelFacturas(new Set()); setSubirAbierto(false); }
-    else { setTrimestreAbierto(i); setPendientes([]); setSelFacturas(new Set()); setSubirAbierto(false); cargarFacturasTrimestre(q); }
+    else { setTrimestreAbierto(i); setPendientes([]); setSelFacturas(new Set()); setSubirAbierto(false); }
   }
 
-  async function eliminarFacturasBulk() {
+  function eliminarFacturasBulk() {
     if (!selFacturas.size) return;
-    setEliminandoBulk(true);
-    try {
-      const token = await getToken();
-      const ids = [...selFacturas];
-      const results = await Promise.allSettled(ids.map(id =>
-        fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
-      ));
-      const deletedIds = ids.filter((_, i) => results[i].status === 'fulfilled' && results[i].value.ok);
-      if (deletedIds.length) {
-        const q = trimestreAbierto + 1;
-        const key = `${anio}-${q}`;
+    const ids = [...selFacturas];
+    _bulkDeleteFacMut.mutate(ids, {
+      onSuccess: ({ deletedIds }) => {
+        if (!deletedIds.length) return;
         const deletedSet = new Set(deletedIds);
-        setFacturasPorTrimestre(prev => ({ ...prev, [key]: (prev[key] || []).filter(f => !deletedSet.has(f.id)) }));
-        setSelFacturas(new Set(ids.filter((_, i) => !(results[i].status === 'fulfilled' && results[i].value.ok))));
+        setSelFacturas(prev => { const s = new Set(prev); deletedSet.forEach(id => s.delete(id)); return s; });
         onFacturasEliminadas?.(deletedIds);
-      }
-    } catch (e) { alert('Error: ' + e.message); }
-    finally { setEliminandoBulk(false); }
+      },
+      onError: (e) => { alert('Error: ' + e.message); },
+    });
   }
 
   async function handleFiles(files, tipo) {
@@ -1613,35 +1576,29 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
     setExtrayendo(false);
   }
 
-  async function guardarPendientes() {
+  function guardarPendientes() {
     const listas = pendientes.filter(p => !p._procesando && !p._error); // incluye _warning (datos parciales)
     if (!listas.length) return;
     setGuardando(true);
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ facturas: listas }),
-      });
-      if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || `Error ${r.status}`); }
-      const data = await r.json();
-      // Quitar solo los guardados, dejar pendientes con error o aún procesando
-      const idsGuardados = new Set(listas.map(p => p._id));
-      setPendientes(prev => prev.filter(p => !idsGuardados.has(p._id)));
-      cargarFacturasTrimestre(trimestreAbierto + 1);
-      // Si hay contactos nuevos sin asignar, mostrar modal
-      if (data.nuevos_pendientes?.length) {
-        const token2 = await getToken();
-        const rc = await fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token2}` } });
-        if (rc.ok) setContactosTodos(await rc.json());
-        setModalNuevosContactos(data.nuevos_pendientes.map(p => ({
-          ...p, _nombre: '', _nombre_empresa: p.nombre_entidad || '', _asignarA: null, _ignorar: false,
-          _nif_cif: p.nif_cif || '', _direccion: p.direccion || '', _email: p.email || '', _roles: ['proveedor'],
-        })));
-      }
-    } catch (e) { alert('Error guardando: ' + e.message); }
-    finally { setGuardando(false); }
+    _guardarFacMut.mutate(listas, {
+      onSuccess: async (data) => {
+        const idsGuardados = new Set(listas.map(p => p._id));
+        setPendientes(prev => prev.filter(p => !idsGuardados.has(p._id)));
+        // facturaKeys.all, movimientoKeys.all, dashboardKeys.all, contactoKeys.all
+        // ya invalidados por useGuardarFacturas.onSuccess
+        if (data.nuevos_pendientes?.length) {
+          const token = await getToken();
+          const rc = await fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token}` } });
+          if (rc.ok) setContactosTodos(await rc.json());
+          setModalNuevosContactos(data.nuevos_pendientes.map(p => ({
+            ...p, _nombre: '', _nombre_empresa: p.nombre_entidad || '', _asignarA: null, _ignorar: false,
+            _nif_cif: p.nif_cif || '', _direccion: p.direccion || '', _email: p.email || '', _roles: ['proveedor'],
+          })));
+        }
+      },
+      onError: (e) => { alert('Error guardando: ' + e.message); },
+      onSettled: () => { setGuardando(false); },
+    });
   }
 
   async function cargarDocsContacto(contactoId) {
@@ -1655,21 +1612,16 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
     finally { setLoadingDocs(false); }
   }
 
-  async function eliminarFactura(id) {
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-      if (!r.ok) { const d = await r.json().catch(()=>({error:`HTTP ${r.status}`})); throw new Error(d.error || `HTTP ${r.status}`); }
-      const q = trimestreAbierto + 1;
-      const key = `${anio}-${q}`;
-      setFacturasPorTrimestre(prev => ({ ...prev, [key]: (prev[key] || []).filter(f => f.id !== id) }));
-      onFacturasEliminadas?.([id]);
-    } catch (e) { alert('Error: ' + e.message); }
+  function eliminarFactura(id) {
+    _eliminarFacMut.mutate(id, {
+      onSuccess: () => onFacturasEliminadas?.([id]),
+      onError: (e) => { alert('Error: ' + e.message); },
+    });
   }
 
   async function detectarErrores() {
-    const key = `${anio}-${trimestreAbierto + 1}`;
-    const facturasCache = facturasPorTrimestre[key] || [];
+    // Fase 9: facturasCache viene de la query TQ activa del trimestre abierto
+    const facturasCache = facturasActivasTrimestre;
     if (!facturasCache.length) { alert('No hay facturas guardadas en este trimestre'); return; }
     setDetectando(true);
     try {
@@ -1679,8 +1631,8 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
         headers: { Authorization: `Bearer ${token}` },
       });
       const facturasGuardadas = fRes.ok ? (await fRes.json()) : facturasCache;
-      // Actualizar también el estado local con los datos frescos
-      if (fRes.ok) setFacturasPorTrimestre(prev => ({ ...prev, [key]: facturasGuardadas }));
+      // Fase 9: setFacturasPorTrimestre eliminado — TQ invalida y refetch automáticamente
+      if (fRes.ok) qc.invalidateQueries({ queryKey: facturaKeys.list({ anio, trimestre: trimestreAbierto + 1 }) });
 
       const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimientos-con-factura?anio=${anio}&trimestre=${trimestreAbierto + 1}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -1960,13 +1912,13 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
       {/* Selector año */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         {anios.map(a => (
-          <button key={a} onClick={() => { setAnio(a); setTrimestreAbierto(null); setPendientes([]); setFacturasPorTrimestre({}); }}
+          <button key={a} onClick={() => { setAnio(a); setTrimestreAbierto(null); setPendientes([]); }}
             style={{ background: anio === a ? '#0067FD' : '#27272a', color: 'white', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 13, cursor: 'pointer' }}>
             {a}
           </button>
         ))}
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#a1a1aa', fontSize: 12, marginLeft: 8 }}>
-          <input type="checkbox" checked={comparar} onChange={e => { setComparar(e.target.checked); if (!e.target.checked) { setDatosComp(null); setAnioComp(null); } }} style={{ accentColor: '#0067FD', cursor: 'pointer' }} />
+          <input type="checkbox" checked={comparar} onChange={e => { setComparar(e.target.checked); if (!e.target.checked) { setAnioComp(null); } }} style={{ accentColor: '#0067FD', cursor: 'pointer' }} />
           Comparar con
         </label>
         {comparar && anios.filter(a => a !== anio).map(a => (
@@ -1998,8 +1950,8 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
         {trimestres.map((t, i) => {
           const tc = datosComp?.trimestres?.[i];
           const abierto = trimestreAbierto === i;
-          const key = `${anio}-${i+1}`;
-          const facturasGuardadas = facturasPorTrimestre[key] || [];
+          // Fase 9: facturas del trimestre activo desde TQ; el resto están vacías (no cargadas)
+          const facturasGuardadas = abierto ? facturasActivasTrimestre : [];
           return (
             <div key={i} style={S.card}>
               {/* Cabecera trimestre — clickable */}
@@ -2297,9 +2249,9 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
                           <option value="importe_asc">Importe ↑</option>
                         </select>
                         {selFacturas.size > 0 && (
-                          <button onClick={eliminarFacturasBulk} disabled={eliminandoBulk}
+                          <button onClick={eliminarFacturasBulk} disabled={_bulkDeleteFacMut.isPending}
                             style={{ background:'#7f1d1d', border:'1px solid #991b1b', color:'#f87171', borderRadius:6, padding:'3px 12px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
-                            {eliminandoBulk ? 'Eliminando…' : `Eliminar ${selFacturas.size}`}
+                            {_bulkDeleteFacMut.isPending ? 'Eliminando…' : `Eliminar ${selFacturas.size}`}
                           </button>
                         )}
                       </div>
@@ -2320,7 +2272,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
 
       {/* Modal Detectar Errores */}
       {erroresModal && createPortal(
-        <div onClick={() => { setErroresModal(false); setErrMovDetail(null); setErrMovEditar(null); setErrFiltro('todos'); }}
+        <div onClick={() => { setErroresModal(false); setErrMovDetailId(null); setErrMovEditar(null); setErrFiltro('todos'); }}
           style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:9000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 16px', overflowY:'auto' }}>
           <div onClick={e => e.stopPropagation()}
             style={{ width:'100%', maxWidth:740, background:'#161616', border:'1px solid #3f3f46', borderRadius:14, overflow:'hidden' }}>
@@ -2342,7 +2294,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
                   </button>
                 ))}
               </div>
-              <button onClick={() => { setErroresModal(false); setErrMovDetail(null); setErrMovEditar(null); setErrFiltro('todos'); }}
+              <button onClick={() => { setErroresModal(false); setErrMovDetailId(null); setErrMovEditar(null); setErrFiltro('todos'); }}
                 style={{ background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:18, lineHeight:1, padding:'2px 6px', marginLeft:'auto' }}>✕</button>
             </div>
 
@@ -2447,8 +2399,8 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
       {errMovDetail && createPortal(
         <ModalMovimiento
           m={errMovDetail}
-          onClose={() => { setErrMovDetail(null); const p = new URLSearchParams(window.location.search); p.delete('mov'); window.history.replaceState({}, '', p.toString() ? `${window.location.pathname}?${p}` : window.location.pathname); }}
-          onEditar={m => { setErrMovDetail(null); setErrMovEditar(m); }}
+          onClose={() => { setErrMovDetailId(null); const p = new URLSearchParams(window.location.search); p.delete('mov'); window.history.replaceState({}, '', p.toString() ? `${window.location.pathname}?${p}` : window.location.pathname); }}
+          onEditar={m => { setErrMovDetailId(null); setErrMovEditar(m); }}
           onEliminar={null}
           onConfirm={() => {}}
           zIndex={9100}
@@ -6035,7 +5987,7 @@ export default function Finanzas() {
       })()}
 
       {/* ── FISCAL ── */}
-      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewerData={facturaViewerData} setFacturaViewerId={setFacturaViewerId} setFacturaViewerAutoEdit={setFacturaViewerAutoEdit} onFacturasEliminadas={ids => { ids.forEach(id => qc.removeQueries({ queryKey: facturaKeys.detail(id), exact: true })); qc.invalidateQueries({ queryKey: facturaKeys.lists() }); if (ids.includes(facturaViewerId)) setFacturaViewerId(null); }} findBestMatch={findBestMatch} toggleMovimientoEnFactura={toggleMovimientoEnFactura} />}
+      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewerData={facturaViewerData} setFacturaViewerId={setFacturaViewerId} setFacturaViewerAutoEdit={setFacturaViewerAutoEdit} onFacturasEliminadas={ids => { ids.forEach(id => qc.removeQueries({ queryKey: facturaKeys.detail(id), exact: true })); qc.invalidateQueries({ queryKey: facturaKeys.lists() }); if (ids.includes(facturaViewerId)) setFacturaViewerId(null); }} findBestMatch={findBestMatch} toggleMovimientoEnFactura={toggleMovimientoEnFactura} setContactosTodos={setContactosTodos} setModalNuevosContactos={setModalNuevosContactos} />}
 
       {/* ── CLIENTES ── */}
       {tab === 'clientes' && (() => {

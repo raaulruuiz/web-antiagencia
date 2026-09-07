@@ -73,10 +73,11 @@ export function useMovimientosParaVincular(params = {}) {
 
 // ── FACTURAS / DOCUMENTOS ────────────────────────────────────────────────────
 
-export function useFacturas(params = {}) {
+export function useFacturas(params = {}, { enabled: enabledOpt = true } = {}) {
   return useQuery({
     queryKey: facturaKeys.list(params),
     queryFn:  () => getFacturas(params),
+    enabled:  enabledOpt,
   });
 }
 
@@ -109,11 +110,11 @@ export function useDashboard(params = {}, { enabled = true } = {}) {
 
 // ── FISCAL ───────────────────────────────────────────────────────────────────
 
-export function useFiscal(params = {}) {
+export function useFiscal(params = {}, { enabled: enabledOpt = true } = {}) {
   return useQuery({
     queryKey: fiscalKeys.data(params),
     queryFn:  () => getFiscal(params),
-    enabled:  !!params.anio,
+    enabled:  enabledOpt && !!params.anio,
   });
 }
 

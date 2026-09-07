@@ -42,6 +42,7 @@ export function useCrearMovimiento() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: movimientoKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
+      qc.invalidateQueries({ queryKey: fiscalKeys.all });
     },
   });
 }
@@ -61,6 +62,7 @@ export function useEditarMovimiento() {
       qc.invalidateQueries({ queryKey: movimientoKeys.lists() });
       qc.invalidateQueries({ queryKey: movimientoKeys.paraVincularAll() });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
+      qc.invalidateQueries({ queryKey: fiscalKeys.all });
     },
   });
 }
@@ -72,6 +74,7 @@ export function useEliminarMovimiento() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: movimientoKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
+      qc.invalidateQueries({ queryKey: fiscalKeys.all });
     },
   });
 }
@@ -83,6 +86,7 @@ export function useBulkDeleteMovimientos() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: movimientoKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
+      qc.invalidateQueries({ queryKey: fiscalKeys.all });
     },
   });
 }
@@ -94,6 +98,7 @@ export function useBulkEditMovimientos() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: movimientoKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
+      qc.invalidateQueries({ queryKey: fiscalKeys.all });
     },
   });
 }
@@ -125,6 +130,7 @@ export function useSetFacturasMovimiento() {
       qc.invalidateQueries({ queryKey: movimientoKeys.paraVincularAll() });
       qc.invalidateQueries({ queryKey: facturaKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
+      qc.invalidateQueries({ queryKey: fiscalKeys.all });
     },
   });
 }
@@ -141,6 +147,7 @@ export function useSetMovimientosFactura() {
       qc.invalidateQueries({ queryKey: facturaKeys.paraVincularAll() });
       qc.invalidateQueries({ queryKey: movimientoKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
+      qc.invalidateQueries({ queryKey: fiscalKeys.all });
     },
   });
 }
@@ -173,6 +180,7 @@ export function useToggleMovimientoEnFactura() {
       qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) });
       qc.invalidateQueries({ queryKey: movimientoKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
+      qc.invalidateQueries({ queryKey: fiscalKeys.all });
     },
   });
 }
@@ -218,6 +226,29 @@ export function useEliminarFactura() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: facturaKeys.all });
       // Movimientos vinculados reflejan info de la factura — limpiar también
+      qc.invalidateQueries({ queryKey: movimientoKeys.all });
+      qc.invalidateQueries({ queryKey: dashboardKeys.all });
+    },
+  });
+}
+
+/**
+ * Elimina múltiples facturas en paralelo (Promise.allSettled).
+ * Devuelve { deletedIds, failedIds } para que el caller gestione la selección.
+ * Solo invalida si al menos una factura fue eliminada.
+ */
+export function useBulkDeleteFacturas() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids) => {
+      const results = await Promise.allSettled(ids.map(id => deleteFactura(id)));
+      const deletedIds = ids.filter((_, i) => results[i].status === 'fulfilled');
+      const failedIds  = ids.filter((_, i) => results[i].status !== 'fulfilled');
+      return { deletedIds, failedIds };
+    },
+    onSuccess: ({ deletedIds }) => {
+      if (!deletedIds.length) return;
+      qc.invalidateQueries({ queryKey: facturaKeys.all });
       qc.invalidateQueries({ queryKey: movimientoKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
     },
