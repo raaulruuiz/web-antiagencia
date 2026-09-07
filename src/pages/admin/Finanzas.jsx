@@ -17,6 +17,7 @@ import {
   useGuardarFacturas,
   useEliminarFactura,
   useBulkDeleteFacturas,
+  useFinanzasRealtime,
 } from '@/features/finanzas';
 import { createPortal } from 'react-dom';
 import { DayPicker } from 'react-day-picker';
@@ -1487,32 +1488,9 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
 
   // Realtime: finanzas_facturas_movimientos y finanzas_facturas NO están en la publication
   // (solo finanzas_movimientos está activa). El canal es no-op hasta que se añadan a la publication.
-  // Fase 9: setFacturasPorTrimestre reemplazado por invalidación TQ.
-  useEffect(() => {
-    const ch = supabase
-      .channel('fiscal_vinculos')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_facturas_movimientos' }, async (payload) => {
-        const facId = payload.new?.factura_id || payload.old?.factura_id;
-        if (!facId) return;
-        // Invalidar trimestre activo para que TQ refetch con movimiento_ids actualizados
-        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
-        // Actualizar también erroresData si está abierto (fetch fresco del detalle)
-        try {
-          const token = await getToken();
-          const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facId}`, { headers: { Authorization: `Bearer ${token}` } });
-          if (!r.ok) return;
-          const fresh = await r.json();
-          setErroresData(prev => prev.map(c => c.factura?.id === facId ? { ...c, factura: { ...c.factura, ...fresh } } : c));
-        } catch (_) {}
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_facturas' }, (payload) => {
-        const facId = payload.new?.id;
-        if (!facId) return;
-        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
-      })
-      .subscribe();
-    return () => supabase.removeChannel(ch);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Fase 10A: fiscal_vinculos eliminado — escuchaba finanzas_facturas_movimientos y
+  // finanzas_facturas, ambas fuera de publication. Era 100% no-op.
+  // erroresData permanece análisis efímero one-shot: el usuario re-ejecuta Detectar errores.
 
   // Sync factura updates (desde viewer edit via useFactura) a erroresData y TQ cache
   useEffect(() => {
@@ -4139,81 +4117,8 @@ export default function Finanzas() {
   }
 
   // ─── Supabase Realtime ───────────────────────────────────────────────────────
-  // Refs siempre apuntan a la versión más reciente de las funciones de carga,
-  // para que el useEffect con [] no capture closures obsoletas.
-  const rtRefs = useRef({});
-  // (se actualiza en cada render — ver useEffect debajo)
-
-  // Suscripción global: cualquier cambio en las tablas de finanzas actualiza
-  // automáticamente el estado relevante sin necesidad de re-fetch manual.
-  useEffect(() => {
-    // Vínculos factura↔movimiento (tabla sin publicación Realtime aún — handler preparado)
-    const chVinculos = supabase
-      .channel('fin_vinculos')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_facturas_movimientos' }, (payload) => {
-        const facId = payload.new?.factura_id || payload.old?.factura_id;
-        const movId = payload.new?.movimiento_id || payload.old?.movimiento_id;
-        if (facId) rtRefs.current.refrescarFactura?.(facId);
-        if (movId) qc.invalidateQueries({ queryKey: movimientoKeys.detail(movId) });
-      })
-      .subscribe();
-
-    // Cambios en facturas (nombre, importe, fecha, estado…)
-    const chFacturas = supabase
-      .channel('fin_facturas')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_facturas' }, (payload) => {
-        if (payload.new?.id) rtRefs.current.refrescarFactura?.(payload.new.id);
-      })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'finanzas_facturas' }, () => {
-        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
-      })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'finanzas_facturas' }, () => {
-        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
-      })
-      .subscribe();
-
-    // Cambios en movimientos (categorías, equipo, cliente, importe…)
-    // movimientoKeys.all cubre listas y detalles — el modal abierto se actualiza solo.
-    const chMovimientos = supabase
-      .channel('fin_movimientos')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_movimientos' }, () => {
-        qc.invalidateQueries({ queryKey: movimientoKeys.all });
-      })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'finanzas_movimientos' }, () => {
-        qc.invalidateQueries({ queryKey: movimientoKeys.all });
-        qc.invalidateQueries({ queryKey: dashboardKeys.all });
-      })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'finanzas_movimientos' }, () => {
-        qc.invalidateQueries({ queryKey: movimientoKeys.all });
-        qc.invalidateQueries({ queryKey: dashboardKeys.all });
-      })
-      .subscribe();
-
-    // Cambios en contactos (clientes, equipo, proveedores)
-    const chClientes = supabase
-      .channel('fin_clientes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_clientes' }, () => rtRefs.current.cargarClientes?.())
-      .subscribe();
-
-    const chEquipo = supabase
-      .channel('fin_equipo')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'finanzas_equipo' }, () => rtRefs.current.cargarEquipo?.())
-      .subscribe();
-
-    const chProveedores = supabase
-      .channel('fin_proveedores')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'contactos' }, () => rtRefs.current.cargarProveedores?.())
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(chVinculos);
-      supabase.removeChannel(chFacturas);
-      supabase.removeChannel(chMovimientos);
-      supabase.removeChannel(chClientes);
-      supabase.removeChannel(chEquipo);
-      supabase.removeChannel(chProveedores);
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Centralizado en src/features/finanzas/realtime.js
+  useFinanzasRealtime();
   // ────────────────────────────────────────────────────────────────────────────
 
   // Calcula campos fiscales derivados al cambiar proveedor/cliente
@@ -4437,17 +4342,6 @@ export default function Finanzas() {
   }, [desde, hasta]);
 
   useEffect(() => { if (tab === 'proveedores') cargarProveedores(); }, [tab, cargarProveedores]);
-
-  // Mantiene rtRefs.current con las versiones más recientes de las funciones de carga
-  // para que los handlers de Supabase Realtime nunca usen closures obsoletas.
-  useEffect(() => {
-    rtRefs.current = {
-      refrescarFactura,
-      cargarClientes,
-      cargarEquipo,
-      cargarProveedores,
-    };
-  });
 
   async function eliminarContacto(id, tipo) {
     try {
