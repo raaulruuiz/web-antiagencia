@@ -100,10 +100,24 @@ export function useBulkEditMovimientos() {
 
 // ── VINCULACIÓN FACTURA ↔ MOVIMIENTO ─────────────────────────────────────────
 
+/**
+ * Scope global compartido por todas las mutations que escriben la junction
+ * finanzas_facturas_movimientos mediante endpoints replace-all.
+ *
+ * TQ v5: mutations con el mismo scope.id se ejecutan en serie dentro del mismo
+ * QueryClient. Serializa useSetFacturasMovimiento, useSetMovimientosFactura y
+ * useToggleMovimientoEnFactura para evitar races replace-all locales.
+ *
+ * DEUDA (no resuelta aquí): race multiusuario entre GET y PUT — dos usuarios /
+ * pestañas distintas pueden solaparse. Pendiente endpoint atómico backend.
+ */
+const VINCULOS_SCOPE = { id: 'finanzas-facturas-movimientos' };
+
 /** Desde el lado del movimiento: reemplaza todas sus facturas vinculadas. */
 export function useSetFacturasMovimiento() {
   const qc = useQueryClient();
   return useMutation({
+    scope: VINCULOS_SCOPE,
     mutationFn: ({ movimientoId, facturaIds }) => setFacturasMovimiento(movimientoId, facturaIds),
     onSuccess: (_data, { movimientoId }) => {
       qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) });
@@ -119,6 +133,7 @@ export function useSetFacturasMovimiento() {
 export function useSetMovimientosFactura() {
   const qc = useQueryClient();
   return useMutation({
+    scope: VINCULOS_SCOPE,
     mutationFn: ({ facturaId, movimientoIds }) => setMovimientosFactura(facturaId, movimientoIds),
     onSuccess: (_data, { facturaId }) => {
       qc.invalidateQueries({ queryKey: facturaKeys.detail(facturaId) });
@@ -133,13 +148,16 @@ export function useSetMovimientosFactura() {
 /**
  * Toggle de un movimiento dentro de los vínculos de una factura.
  * INTEGRIDAD: el GET detail es autoritativo — nunca calcula desde cache parcial.
- * DEUDA: race multiusuario entre GET y PUT (replace-all); pendiente mutación atómica backend.
+ * SERIALIZACIÓN: comparte VINCULOS_SCOPE con useSetFacturasMovimiento y
+ * useSetMovimientosFactura → dos toggles rápidos se ejecutan en serie:
+ *   toggle M2 → GET [M1] → PUT [M1,M2] → termina
+ *   toggle M3 → GET [M1,M2] → PUT [M1,M2,M3]   ← sin pérdida local
+ * DEUDA: race multiusuario entre GET y PUT sigue existiendo (pendiente backend atómico).
  */
 export function useToggleMovimientoEnFactura() {
   const qc = useQueryClient();
   return useMutation({
-    // scope serializa mutaciones con el mismo facturaId → evita race de doble-clic
-    scope: ({ facturaId }) => ({ id: facturaId }),
+    scope: VINCULOS_SCOPE,
     mutationFn: async ({ facturaId, movimientoId }) => {
       const freshFactura = await getFactura(facturaId);
       const current = Array.isArray(freshFactura?.movimiento_ids) ? freshFactura.movimiento_ids : [];
