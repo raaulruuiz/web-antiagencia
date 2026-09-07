@@ -99,10 +99,11 @@ export function useFacturasParaVincular(params = {}) {
 
 // ── DASHBOARD ────────────────────────────────────────────────────────────────
 
-export function useDashboard(params = {}) {
+export function useDashboard(params = {}, { enabled = true } = {}) {
   return useQuery({
     queryKey: dashboardKeys.data(params),
     queryFn:  () => getDashboard(params),
+    enabled,
   });
 }
 

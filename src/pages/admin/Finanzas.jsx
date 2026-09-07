@@ -11,6 +11,8 @@ import {
   useFacturas,
   useFactura,
   facturaKeys,
+  useDashboard,
+  dashboardKeys,
 } from '@/features/finanzas';
 import { createPortal } from 'react-dom';
 import { DayPicker } from 'react-day-picker';
@@ -3769,7 +3771,6 @@ export default function Finanzas() {
   const [comparar, setComparar]   = useState(() => lsGet('fin_comparar', false));
   const [desdeComp, setDesdeComp] = useState(() => lsGet('fin_desdeComp', ''));
   const [hastaComp, setHastaComp] = useState(() => lsGet('fin_hastaComp', ''));
-  const [dashboard, setDashboard] = useState(null);
   const [viewCat, setViewCat] = useState('total');
   const [viewEvol, setViewEvol] = useState('barras');
   const [viewCuenta, setViewCuenta] = useState('barras');
@@ -3847,8 +3848,6 @@ export default function Finanzas() {
   const xAxisEvolRef  = useRef(null);
   const scrollCtaRef  = useRef(null);
   const xAxisCtaRef   = useRef(null);
-  const [loadingDash, setLoadingDash] = useState(true);
-  const [errDash, setErrDash] = useState(null);
   const [movFiltros, setMovFiltros]     = useState([]);
   const [movFiltroOp, setMovFiltroOp]   = useState('and');
   const [movSorts, setMovSorts]         = useState([]);
@@ -3876,9 +3875,6 @@ export default function Finanzas() {
     setViewerDraft({ archivo_nombre: fv.archivo_nombre||'', factura_proveedor_id: fv.factura_proveedor_id||'', factura_cliente_id: fv.factura_cliente_id||'', importe: fv.importe??'', impuesto: fv.impuesto??'', irpf: fv.irpf??'' });
     setFacturaViewerAutoEdit(false); // consumir flag
   }, [facturaViewerData, facturaViewerAutoEdit]);
-  const [dashComp, setDashComp] = useState(null);
-  const [loadingComp, setLoadingComp] = useState(false);
-  const [errComp, setErrComp] = useState(null);
   const [sinMovimientosMes, setSinMovimientosMes] = useState(false);
   const [filtroClientesLista, setFiltroClientesLista] = useState([]);
   const [filtroEquipoLista, setFiltroEquipoLista] = useState([]);
@@ -3950,6 +3946,20 @@ export default function Finanzas() {
   const facturasQuery   = useFacturas({ desde: docTabDesde, hasta: docTabHasta });
   const documentosList  = facturasQuery.data ?? [];
   const loadingDocumentos = facturasQuery.isFetching;
+
+  // ─── Fase 8: dashboard como server-state en TanStack Query ───────────────────
+  const dashParams = useMemo(() => ({ desde, hasta }), [desde, hasta]);
+  const dashCompParams = useMemo(
+    () => (comparar && desdeComp && hastaComp ? { desde: desdeComp, hasta: hastaComp } : null),
+    [comparar, desdeComp, hastaComp]
+  );
+  const _dashQuery     = useDashboard(dashParams);
+  const _dashCompQuery = useDashboard(dashCompParams ?? {}, { enabled: !!dashCompParams });
+  const dashboard  = _dashQuery.data ?? null;
+  const loadingDash    = _dashQuery.isLoading;
+  const errDash    = _dashQuery.isError ? (_dashQuery.error?.message ?? 'Error al cargar dashboard') : null;
+  const dashComp   = dashCompParams ? (_dashCompQuery.data ?? null) : null;
+  const loadingComp    = !!dashCompParams && _dashCompQuery.isLoading;
 
   // ─── Mutations de movimientos ────────────────────────────────────────────────
   const _crearMovMut   = useCrearMovimiento();
@@ -4219,11 +4229,11 @@ export default function Finanzas() {
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'finanzas_movimientos' }, () => {
         qc.invalidateQueries({ queryKey: movimientoKeys.all });
-        rtRefs.current.cargarDashboard?.();
+        qc.invalidateQueries({ queryKey: dashboardKeys.all });
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'finanzas_movimientos' }, () => {
         qc.invalidateQueries({ queryKey: movimientoKeys.all });
-        rtRefs.current.cargarDashboard?.();
+        qc.invalidateQueries({ queryKey: dashboardKeys.all });
       })
       .subscribe();
 
@@ -4311,7 +4321,7 @@ export default function Finanzas() {
   function guardarCeldaInline(id, campo, valor) {
     const data = { [campo]: campo === 'cantidad' ? parseFloat(valor) : valor };
     _editarMovMut.mutate({ id, data }, {
-      onSuccess: () => { cargarDashboard(); cargarEquipo(); },
+      onSuccess: () => { cargarEquipo(); },
       onError: (err) => alert('Error al guardar: ' + err.message),
     });
   }
@@ -4323,7 +4333,7 @@ export default function Finanzas() {
       onOk: () => {
         const ids = [...seleccionados];
         _bulkDeleteMut.mutate(ids, {
-          onSuccess: () => { setSeleccionados(new Set()); cargarDashboard(); },
+          onSuccess: () => { setSeleccionados(new Set()); },
         });
       },
     });
@@ -4333,7 +4343,7 @@ export default function Finanzas() {
     if (!seleccionados.size || !valor) return;
     const ids = [...seleccionados];
     _bulkEditMut.mutate({ ids, cambios: { [campo]: valor } }, {
-      onSuccess: () => { setBulkCampo(null); setBulkValor(''); cargarDashboard(); cargarEquipo(); },
+      onSuccess: () => { setBulkCampo(null); setBulkValor(''); cargarEquipo(); },
       onError:   (err) => alert('Error al editar en bloque: ' + err.message),
     });
   }
@@ -4374,7 +4384,6 @@ export default function Finanzas() {
     _eliminarMovMut.mutate(id, {
       onSuccess: () => {
         if (movDetailId === id) setMovDetailId(null);
-        cargarDashboard();
       },
       onError: (e) => alert('Error al eliminar: ' + e.message),
     });
@@ -4384,51 +4393,12 @@ export default function Finanzas() {
     setDesde(d); setHasta(h);
     setComparar(doComp);
     if (doComp) { setDesdeComp(dComp); setHastaComp(hComp); }
-    else { setDashComp(null); }
   }
 
   function handleApplyMovimientos(d, h) {
     setDesde(d); setHasta(h); setPagMovs(1);
   }
 
-  const cargarDashboard = useCallback(async () => {
-    setLoadingDash(true);
-    setErrDash(null);
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/dashboard?desde=${desde}&hasta=${hasta}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await r.json();
-      if (!r.ok) { setErrDash(data.error || `Error ${r.status}`); return; }
-      setDashboard(data);
-    } catch (e) {
-      setErrDash(e.message);
-    } finally {
-      setLoadingDash(false);
-    }
-  }, [desde, hasta]);
-
-  const cargarDashboardComp = useCallback(async () => {
-    if (!comparar || !desdeComp || !hastaComp) return;
-    setLoadingComp(true);
-    setErrComp(null);
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/dashboard?desde=${desdeComp}&hasta=${hastaComp}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await r.json();
-      if (!r.ok) { setErrComp(data.error || `Error ${r.status}`); return; }
-      setDashComp(data);
-    } catch (e) {
-      setErrComp(e.message);
-    } finally {
-      setLoadingComp(false);
-    }
-  }, [comparar, desdeComp, hastaComp]);
-
-  useEffect(() => { cargarDashboard(); }, [cargarDashboard]);
 
   useEffect(() => {
     async function checkMovimientosMesActual() {
@@ -4452,10 +4422,6 @@ export default function Finanzas() {
   // Fase 5: al entrar en tab Documentos, invalidar para asegurar datos frescos
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (tab === 'documentos') qc.invalidateQueries({ queryKey: facturaKeys.lists() }); }, [tab]);
-  useEffect(() => {
-    if (comparar && desdeComp && hastaComp) cargarDashboardComp();
-    else setDashComp(null);
-  }, [cargarDashboardComp, comparar, desdeComp, hastaComp]);
 
   const cargarClientes = useCallback(async () => {
     setLoadingClientes(true);
@@ -4525,7 +4491,6 @@ export default function Finanzas() {
   useEffect(() => {
     rtRefs.current = {
       refrescarFactura,
-      cargarDashboard,
       cargarClientes,
       cargarEquipo,
       cargarProveedores,
@@ -4571,7 +4536,7 @@ export default function Finanzas() {
               facAfectadas.forEach(fid => refrescarFactura(fid));
             }
             qc.invalidateQueries({ queryKey: movimientoKeys.all });
-            cargarDashboard();
+            qc.invalidateQueries({ queryKey: dashboardKeys.all });
           }}
           onCerrar={() => setMovEditando(null)}
         />
@@ -6903,7 +6868,7 @@ export default function Finanzas() {
 
       {/* ── NUEVO ── */}
       {tab === 'nuevo' && (
-        <NuevoMovimientoTab onGuardado={() => { setSinMovimientosMes(false); setTab('movimientos'); qc.invalidateQueries({ queryKey: movimientoKeys.all }); cargarDashboard(); }} />
+        <NuevoMovimientoTab onGuardado={() => { setSinMovimientosMes(false); setTab('movimientos'); qc.invalidateQueries({ queryKey: movimientoKeys.all }); qc.invalidateQueries({ queryKey: dashboardKeys.all }); }} />
       )}
 
       {/* ── Modal contacto (cliente / equipo) ── */}
