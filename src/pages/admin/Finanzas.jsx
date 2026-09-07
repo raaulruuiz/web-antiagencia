@@ -6,10 +6,10 @@ import {
   useMovimientosParaVincular, useFacturasParaVincular,
   useCrearMovimiento, useEditarMovimiento, useEliminarMovimiento,
   useBulkDeleteMovimientos, useBulkEditMovimientos,
+  useSetFacturasMovimiento, useToggleMovimientoEnFactura,
   movimientoKeys,
   useFacturas,
   useFactura,
-  getFactura,
   facturaKeys,
 } from '@/features/finanzas';
 import { createPortal } from 'react-dom';
@@ -3957,6 +3957,9 @@ export default function Finanzas() {
   const _eliminarMovMut = useEliminarMovimiento();
   const _bulkDeleteMut = useBulkDeleteMovimientos();
   const _bulkEditMut   = useBulkEditMovimientos();
+  // ─── Mutations de vinculación factura ↔ movimiento (Fase 7) ─────────────────
+  const _setFacturasMut  = useSetFacturasMovimiento();    // replace-all desde el lado del movimiento
+  const _toggleMovVincMut = useToggleMovimientoEnFactura(); // GET detail + toggle + PUT desde el lado de la factura
 
   const [docVinculosEditando, setDocVinculosEditando] = useState(null); // factura.id con dropdown abierto
   const [viewerVincOpen, setViewerVincOpen] = useState(false); // dropdown movimientos en el viewer de factura
@@ -4157,55 +4160,19 @@ export default function Finanzas() {
   }
 
   // Toggle vínculo movimiento en una factura (desde tabla Documentos, viewer o TabFiscal).
-  // INTEGRIDAD: obtiene movimiento_ids actuales via GET detail justo antes del PUT,
-  // independientemente de documentosList o facturaViewerData (ambos pueden ser stale o ausentes).
-  // CONCURRENCIA: existe una window entre el GET y el PUT; si otro usuario modifica la relación
-  // en ese intervalo, el PUT puede sobreescribir su cambio. Pendiente: mutación backend atómica.
+  // Fase 7: GET detail + toggle + PUT centralizado en useToggleMovimientoEnFactura (mutations.js).
   async function toggleMovimientoEnFactura(facturaId, movimientoId) {
     try {
-      const freshFactura = await getFactura(facturaId);
-      const current = Array.isArray(freshFactura?.movimiento_ids) ? freshFactura.movimiento_ids : [];
-      const newIds = current.includes(movimientoId) ? current.filter(x => x !== movimientoId) : [...current, movimientoId];
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas/${facturaId}/movimientos`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ movimiento_ids: newIds }),
-      });
-      if (!r.ok) {
-        let msg = `HTTP ${r.status}`;
-        try { const body = await r.json(); if (body?.error) msg = body.error; } catch {}
-        throw new Error(msg);
-      }
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: facturaKeys.detail(facturaId) }),
-        qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) }),
-        qc.invalidateQueries({ queryKey: facturaKeys.lists() }),
-      ]);
+      await _toggleMovVincMut.mutateAsync({ facturaId, movimientoId });
     } catch(e) { console.error(e); }
   }
 
-  // Reemplaza los vínculos de facturas de un movimiento (desde tabla Movimientos)
+  // Reemplaza los vínculos de facturas de un movimiento (desde tabla Movimientos).
+  // Fase 7: PUT centralizado en useSetFacturasMovimiento (mutations.js).
+  // Invalidaciones: movimientoKeys.detail + lists + facturaKeys.all (cubre old ∪ new details).
   async function handleVincularFacturasMovimiento(movimientoId, newFacturaIds) {
-    const oldFacturaIds = movimientos.items.find(m => m.id === movimientoId)?.factura_ids || [];
     try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/movimiento/${movimientoId}/facturas`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ factura_ids: newFacturaIds }),
-      });
-      if (!r.ok) {
-        let msg = `HTTP ${r.status}`;
-        try { const body = await r.json(); if (body?.error) msg = body.error; } catch {}
-        throw new Error(msg);
-      }
-      const facAfectadas = [...new Set([...oldFacturaIds, ...newFacturaIds])];
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) }),
-        qc.invalidateQueries({ queryKey: facturaKeys.lists() }),
-        ...facAfectadas.map(fid => qc.invalidateQueries({ queryKey: facturaKeys.detail(fid) })),
-      ]);
+      await _setFacturasMut.mutateAsync({ movimientoId, facturaIds: newFacturaIds });
     } catch(e) { console.error(e); }
   }
 

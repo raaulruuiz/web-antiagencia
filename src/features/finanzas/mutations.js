@@ -18,10 +18,11 @@ import {
   bulkDeleteMovimientos,
   bulkEditMovimientos,
   setFacturasMovimiento,
+  setMovimientosFactura,
+  getFactura,
   guardarFacturas,
   updateFactura,
   deleteFactura,
-  setMovimientosFactura,
   createCliente,
   updateCliente,
   createEquipo,
@@ -123,6 +124,35 @@ export function useSetMovimientosFactura() {
       qc.invalidateQueries({ queryKey: facturaKeys.detail(facturaId) });
       qc.invalidateQueries({ queryKey: facturaKeys.lists() });
       qc.invalidateQueries({ queryKey: facturaKeys.paraVincularAll() });
+      qc.invalidateQueries({ queryKey: movimientoKeys.all });
+      qc.invalidateQueries({ queryKey: dashboardKeys.all });
+    },
+  });
+}
+
+/**
+ * Toggle de un movimiento dentro de los vínculos de una factura.
+ * INTEGRIDAD: el GET detail es autoritativo — nunca calcula desde cache parcial.
+ * DEUDA: race multiusuario entre GET y PUT (replace-all); pendiente mutación atómica backend.
+ */
+export function useToggleMovimientoEnFactura() {
+  const qc = useQueryClient();
+  return useMutation({
+    // scope serializa mutaciones con el mismo facturaId → evita race de doble-clic
+    scope: ({ facturaId }) => ({ id: facturaId }),
+    mutationFn: async ({ facturaId, movimientoId }) => {
+      const freshFactura = await getFactura(facturaId);
+      const current = Array.isArray(freshFactura?.movimiento_ids) ? freshFactura.movimiento_ids : [];
+      const newIds = current.includes(movimientoId)
+        ? current.filter(id => id !== movimientoId)
+        : [...current, movimientoId];
+      return setMovimientosFactura(facturaId, newIds);
+    },
+    onSuccess: (_data, { facturaId, movimientoId }) => {
+      qc.invalidateQueries({ queryKey: facturaKeys.detail(facturaId) });
+      qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+      qc.invalidateQueries({ queryKey: facturaKeys.paraVincularAll() });
+      qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) });
       qc.invalidateQueries({ queryKey: movimientoKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
     },
