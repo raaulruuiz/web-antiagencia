@@ -11,9 +11,9 @@
  *
  * Tablas activas (en supabase_realtime publication):
  *   public.finanzas_movimientos ✓
+ *   public.finanzas_facturas    ✓
  *
  * Tablas pendientes de autorización (NO incluir hasta ALTER PUBLICATION + autorización):
- *   public.finanzas_facturas
  *   public.finanzas_facturas_movimientos
  *   public.contactos
  */
@@ -21,13 +21,13 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { movimientoKeys, dashboardKeys, fiscalKeys } from './queryKeys';
+import { movimientoKeys, facturaKeys, dashboardKeys, fiscalKeys } from './queryKeys';
 
 export function useFinanzasRealtime() {
   const qc = useQueryClient();
 
   useEffect(() => {
-    const ch = supabase
+    const chMov = supabase
       .channel('finanzas-movimientos')
 
       // INSERT: nuevo movimiento → listas + selectors + dashboard + fiscal
@@ -60,6 +60,42 @@ export function useFinanzasRealtime() {
 
       .subscribe();
 
-    return () => { supabase.removeChannel(ch); };
+    const chFac = supabase
+      .channel('finanzas-facturas')
+
+      // INSERT: nueva factura → listas + selector. Sin movimientoKeys: ningún movimiento
+      // la referencia aún (no hay entradas en junction todavía).
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'finanzas_facturas' }, () => {
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+        qc.invalidateQueries({ queryKey: facturaKeys.paraVincularAll() });
+      })
+
+      // UPDATE: usa payload.new.id quirúrgico para el detail; movimientoKeys.all porque
+      // el detail de movimiento embeds facturas_info (archivo_nombre/nombre_entidad/importe_total)
+      // y no podemos saber qué movimientos referencian esta factura sin consulta adicional.
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'finanzas_facturas' }, (payload) => {
+        const id = payload.new?.id;
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+        if (id) qc.invalidateQueries({ queryKey: facturaKeys.detail(id) });
+        qc.invalidateQueries({ queryKey: facturaKeys.paraVincularAll() });
+        qc.invalidateQueries({ queryKey: movimientoKeys.all });
+      })
+
+      // DELETE: usa payload.old.id; viewer mostrará error state (404 → isError).
+      // movimientoKeys.all: CASCADE delete en junction eliminó el vínculo → details stale.
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'finanzas_facturas' }, (payload) => {
+        const id = payload.old?.id;
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+        if (id) qc.invalidateQueries({ queryKey: facturaKeys.detail(id) });
+        qc.invalidateQueries({ queryKey: facturaKeys.paraVincularAll() });
+        qc.invalidateQueries({ queryKey: movimientoKeys.all });
+      })
+
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(chMov);
+      supabase.removeChannel(chFac);
+    };
   }, [qc]);
 }
