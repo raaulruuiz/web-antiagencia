@@ -10,11 +10,11 @@
  * fetch HTTP ni uso de payload como datos canónicos.
  *
  * Tablas activas (en supabase_realtime publication):
- *   public.finanzas_movimientos ✓
- *   public.finanzas_facturas    ✓
+ *   public.finanzas_movimientos          ✓
+ *   public.finanzas_facturas             ✓
+ *   public.finanzas_facturas_movimientos ✓
  *
  * Tablas pendientes de autorización (NO incluir hasta ALTER PUBLICATION + autorización):
- *   public.finanzas_facturas_movimientos
  *   public.contactos
  */
 
@@ -93,9 +93,50 @@ export function useFinanzasRealtime() {
 
       .subscribe();
 
+    const chJunction = supabase
+      .channel('finanzas-junction')
+
+      // Auditoría backend: la app solo genera INSERT y DELETE en junction.
+      // La app NO emite UPDATE directo sobre filas junction desde el flujo frontend.
+      // handleVincularFacturaMov (upsert) existe en backend pero NO es llamado por el frontend.
+      //
+      // Replica identity DEFAULT + PK(factura_id, movimiento_id) → ambos IDs disponibles
+      // en payload.old en DELETE sin necesidad de REPLICA IDENTITY FULL.
+      //
+      // Responsabilidad de este channel:
+      //   · factura_ids / movimiento_ids cruzados (relaciones estructurales)
+      //   · selectors para vincular
+      // Dashboard/Fiscal NO: los maneja el UPDATE de finanzas_movimientos (10A)
+      // que llega por recalcularCamposFactura tras cada vinculación.
+
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'finanzas_facturas_movimientos' }, (payload) => {
+        const facturaId    = payload.new?.factura_id;
+        const movimientoId = payload.new?.movimiento_id;
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+        qc.invalidateQueries({ queryKey: facturaKeys.paraVincularAll() });
+        qc.invalidateQueries({ queryKey: movimientoKeys.lists() });
+        qc.invalidateQueries({ queryKey: movimientoKeys.paraVincularAll() });
+        if (facturaId)    qc.invalidateQueries({ queryKey: facturaKeys.detail(facturaId) });
+        if (movimientoId) qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) });
+      })
+
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'finanzas_facturas_movimientos' }, (payload) => {
+        const facturaId    = payload.old?.factura_id;
+        const movimientoId = payload.old?.movimiento_id;
+        qc.invalidateQueries({ queryKey: facturaKeys.lists() });
+        qc.invalidateQueries({ queryKey: facturaKeys.paraVincularAll() });
+        qc.invalidateQueries({ queryKey: movimientoKeys.lists() });
+        qc.invalidateQueries({ queryKey: movimientoKeys.paraVincularAll() });
+        if (facturaId)    qc.invalidateQueries({ queryKey: facturaKeys.detail(facturaId) });
+        if (movimientoId) qc.invalidateQueries({ queryKey: movimientoKeys.detail(movimientoId) });
+      })
+
+      .subscribe();
+
     return () => {
       supabase.removeChannel(chMov);
       supabase.removeChannel(chFac);
+      supabase.removeChannel(chJunction);
     };
   }, [qc]);
 }
