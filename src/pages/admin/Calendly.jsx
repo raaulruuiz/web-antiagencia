@@ -274,6 +274,18 @@ export default function Calendly() {
     }
   }
 
+  async function reactivarTipo(id) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/calendly/tipos/${id}`, {
+        method: 'PUT', headers: buildHeaders(), body: JSON.stringify({ activo: true }),
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+      fetchTipos();
+    } catch (err) {
+      alert('Error reactivando: ' + err.message);
+    }
+  }
+
   function abrirCrearReunion() {
     setReunionForm(emptyReunionForm());
     setModalReunion(true);
@@ -404,7 +416,10 @@ export default function Calendly() {
                     {t.activo ? (
                       <button onClick={() => setConfirmDeleteId(t)} className="text-xs text-red-400 hover:text-red-300 px-2 py-1">Desactivar</button>
                     ) : (
-                      <button onClick={() => setConfirmDeleteId(t)} className="text-xs text-red-400 hover:text-red-300 px-2 py-1">Eliminar definitivamente</button>
+                      <>
+                        <button onClick={() => reactivarTipo(t.id)} className="text-xs text-zinc-400 hover:text-white px-2 py-1">Reactivar</button>
+                        <button onClick={() => setConfirmDeleteId(t)} className="text-xs text-red-400 hover:text-red-300 px-2 py-1">Eliminar definitivamente</button>
+                      </>
                     )}
                   </div>
                 </div>
