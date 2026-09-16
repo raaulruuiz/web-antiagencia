@@ -1,44 +1,13 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import FooterMinimal from '@/components/landing/FooterMinimal';
 import { BACKEND_URL } from '@/lib/config';
-
-const BLUE = '#0067FD';
-const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-
-function fechaDeYMD(y, m, d) {
-  // Construye la fecha 'YYYY-MM-DD' a partir de componentes numéricos (no de
-  // un Date ya formateado), para no arrastrar desfases de zona horaria.
-  return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-}
-
-function fmtDiaCorto(fecha) {
-  const [y, m, d] = fecha.split('-').map(Number);
-  const dt = new Date(y, m - 1, d, 12);
-  return dt.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short' });
-}
-
-function fmtMesAnio(year, month) {
-  const dt = new Date(year, month, 1);
-  const s = dt.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
+import CalendarPicker, { BLUE, fmtDiaCorto, initialCalMonth } from '@/components/booking/CalendarPicker';
 
 function fmtFechaHoraLarga(iso) {
   const dt = new Date(iso);
   return dt.toLocaleString('es-ES', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
-}
-
-// Celdas del mes: null para huecos antes del día 1, luego 1..N.
-function celdasDelMes(year, month) {
-  const primerDia = new Date(year, month, 1);
-  const inicioSemana = (primerDia.getDay() + 6) % 7; // lunes = 0
-  const diasEnMes = new Date(year, month + 1, 0).getDate();
-  const celdas = [];
-  for (let i = 0; i < inicioSemana; i++) celdas.push(null);
-  for (let d = 1; d <= diasEnMes; d++) celdas.push(d);
-  return celdas;
 }
 
 export default function Reservar() {
@@ -58,12 +27,6 @@ export default function Reservar() {
   const [submitError, setSubmitError] = useState(null);
   const [confirmado, setConfirmado] = useState(null);
 
-  const diasMap = useMemo(() => {
-    const m = {};
-    dias.forEach(d => { m[d.fecha] = d; });
-    return m;
-  }, [dias]);
-
   const cargar = useCallback(async () => {
     try {
       const [rTipo, rDisp] = await Promise.all([
@@ -78,12 +41,7 @@ export default function Reservar() {
 
       setTipo(dTipo);
       setDias(dDisp);
-      setCalMonth(prev => {
-        if (prev) return prev;
-        if (!dDisp.length) return null;
-        const [y, m] = dDisp[0].fecha.split('-').map(Number);
-        return { year: y, month: m - 1 };
-      });
+      setCalMonth(prev => prev || initialCalMonth(dDisp));
       setSelectedFecha(prev => (prev && dDisp.some(d => d.fecha === prev)) ? prev : null);
       setSelectedSlot(prev => {
         if (!prev) return null;
@@ -140,8 +98,6 @@ export default function Reservar() {
     }
   }
 
-  const diaActual = dias.find(d => d.fecha === selectedFecha);
-
   return (
     <>
       <Helmet>
@@ -168,7 +124,7 @@ export default function Reservar() {
                 <div className="text-center py-8">
                   <h1 className="text-2xl md:text-3xl text-gray-900 mb-4 font-bold">¡Reserva confirmada!</h1>
                   <p className="text-gray-700 mb-1">{fmtFechaHoraLarga(confirmado.inicio)}</p>
-                  <p className="text-gray-500 text-sm mb-6">Te ha llegado la invitación por email.</p>
+                  <p className="text-gray-500 text-sm mb-6">Te ha llegado la invitación por email, con la opción de modificar o cancelar.</p>
                   {confirmado.meet_link && (
                     <a
                       href={confirmado.meet_link}
@@ -188,171 +144,88 @@ export default function Reservar() {
                   {tipo.descripcion && <p className="text-gray-600 mb-2 leading-relaxed">{tipo.descripcion}</p>}
                   <p className="text-sm mb-8" style={{ color: BLUE, fontWeight: 700 }}>{tipo.duracion_minutos} minutos</p>
 
-                  {dias.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No hay huecos disponibles ahora mismo.</p>
-                  ) : (
-                    <>
-                      {calMonth && (
-                        <div className="mb-6" style={{ fontFamily: 'system-ui, sans-serif' }}>
-                          <div className="flex items-center justify-between mb-3">
-                            <button
-                              type="button"
-                              onClick={() => setCalMonth(m => {
-                                const d = new Date(m.year, m.month - 1, 1);
-                                return { year: d.getFullYear(), month: d.getMonth() };
+                  <CalendarPicker
+                    dias={dias}
+                    calMonth={calMonth}
+                    setCalMonth={setCalMonth}
+                    selectedFecha={selectedFecha}
+                    setSelectedFecha={setSelectedFecha}
+                    selectedSlot={selectedSlot}
+                    setSelectedSlot={setSelectedSlot}
+                  />
+
+                  {selectedSlot && (
+                    <form onSubmit={confirmarReserva} className="flex flex-col gap-3 border-t border-gray-200 pt-6" style={{ fontFamily: 'system-ui, sans-serif' }}>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Nombre *</label>
+                        <input required value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Email *</label>
+                        <input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Notas (opcional)</label>
+                        <textarea value={form.notas} onChange={e => setForm(f => ({ ...f, notas: e.target.value }))} rows={2}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      </div>
+
+                      {(tipo.preguntas_extra || []).map(p => (
+                        <div key={p.id}>
+                          <label className="block text-xs text-gray-500 mb-1">
+                            {p.nombre} {p.requerida && '*'}
+                          </label>
+                          {p.tipo === 'texto_largo' ? (
+                            <textarea required={p.requerida} rows={2}
+                              value={respuestas[p.id] || ''}
+                              onChange={e => setRespuestas(r => ({ ...r, [p.id]: e.target.value }))}
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                          ) : p.tipo === 'seleccion_unica' ? (
+                            <select required={p.requerida}
+                              value={respuestas[p.id] || ''}
+                              onChange={e => setRespuestas(r => ({ ...r, [p.id]: e.target.value }))}
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+                              <option value="">Selecciona una opción</option>
+                              {(p.opciones || []).map(op => <option key={op} value={op}>{op}</option>)}
+                            </select>
+                          ) : p.tipo === 'seleccion_multiple' ? (
+                            <div className="flex flex-col gap-1.5 pt-1">
+                              {(p.opciones || []).map(op => {
+                                const seleccionadas = respuestas[p.id] || [];
+                                const checked = seleccionadas.includes(op);
+                                return (
+                                  <label key={op} className="flex items-center gap-1.5 text-sm text-gray-700">
+                                    <input type="checkbox" checked={checked}
+                                      onChange={() => setRespuestas(r => {
+                                        const actuales = r[p.id] || [];
+                                        const next = checked ? actuales.filter(v => v !== op) : [...actuales, op];
+                                        return { ...r, [p.id]: next };
+                                      })} />
+                                    {op}
+                                  </label>
+                                );
                               })}
-                              disabled={calMonth.year === Number(dias[0].fecha.slice(0, 4)) && calMonth.month === Number(dias[0].fecha.slice(5, 7)) - 1}
-                              style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#374151', padding: '4px 10px', opacity: (calMonth.year === Number(dias[0].fecha.slice(0, 4)) && calMonth.month === Number(dias[0].fecha.slice(5, 7)) - 1) ? 0.3 : 1 }}
-                            >‹</button>
-                            <span className="text-sm font-semibold text-gray-800">{fmtMesAnio(calMonth.year, calMonth.month)}</span>
-                            <button
-                              type="button"
-                              onClick={() => setCalMonth(m => {
-                                const d = new Date(m.year, m.month + 1, 1);
-                                return { year: d.getFullYear(), month: d.getMonth() };
-                              })}
-                              disabled={(() => { const ult = dias[dias.length - 1].fecha; return calMonth.year === Number(ult.slice(0, 4)) && calMonth.month === Number(ult.slice(5, 7)) - 1; })()}
-                              style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#374151', padding: '4px 10px', opacity: (() => { const ult = dias[dias.length - 1].fecha; return calMonth.year === Number(ult.slice(0, 4)) && calMonth.month === Number(ult.slice(5, 7)) - 1; })() ? 0.3 : 1 }}
-                            >›</button>
-                          </div>
-                          <div className="grid grid-cols-7 gap-1 mb-1">
-                            {DIAS_SEMANA.map(w => (
-                              <div key={w} className="text-center text-[11px] text-gray-400 font-semibold py-1">{w}</div>
-                            ))}
-                          </div>
-                          <div className="grid grid-cols-7 gap-1">
-                            {celdasDelMes(calMonth.year, calMonth.month).map((d, i) => {
-                              if (d === null) return <div key={`empty-${i}`} />;
-                              const fecha = fechaDeYMD(calMonth.year, calMonth.month, d);
-                              const disponible = !!diasMap[fecha];
-                              const isSelected = fecha === selectedFecha;
-                              return (
-                                <button
-                                  key={fecha}
-                                  type="button"
-                                  disabled={!disponible}
-                                  onClick={() => { setSelectedFecha(fecha); setSelectedSlot(null); }}
-                                  style={{
-                                    aspectRatio: '1',
-                                    borderRadius: '6px',
-                                    fontSize: '13px',
-                                    fontWeight: 600,
-                                    border: isSelected ? `2px solid ${BLUE}` : '1px solid transparent',
-                                    backgroundColor: isSelected ? BLUE : (disponible ? '#eef4ff' : 'transparent'),
-                                    color: isSelected ? '#fff' : (disponible ? BLUE : '#d1d5db'),
-                                    cursor: disponible ? 'pointer' : 'default',
-                                  }}
-                                >
-                                  {d}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {diaActual && (
-                        <div className="mb-8">
-                          <p className="text-xs text-gray-500 mb-2" style={{ fontFamily: 'system-ui, sans-serif' }}>
-                            Horas disponibles el {fmtDiaCorto(selectedFecha)}
-                          </p>
-                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2" style={{ fontFamily: 'system-ui, sans-serif' }}>
-                            {diaActual.slots.map(s => (
-                              <button
-                                key={s.startISO}
-                                onClick={() => setSelectedSlot(s)}
-                                style={{
-                                  padding: '10px 8px',
-                                  borderRadius: '6px',
-                                  fontSize: '13px',
-                                  fontWeight: 600,
-                                  border: selectedSlot?.startISO === s.startISO ? `2px solid ${BLUE}` : '1px solid #e5e7eb',
-                                  backgroundColor: selectedSlot?.startISO === s.startISO ? BLUE : '#fff',
-                                  color: selectedSlot?.startISO === s.startISO ? '#fff' : '#374151',
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                {s.horaInicio}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {selectedSlot && (
-                        <form onSubmit={confirmarReserva} className="flex flex-col gap-3 border-t border-gray-200 pt-6" style={{ fontFamily: 'system-ui, sans-serif' }}>
-                          <div>
-                            <label className="block text-xs text-gray-500 mb-1">Nombre *</label>
-                            <input required value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))}
-                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-gray-500 mb-1">Email *</label>
-                            <input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-gray-500 mb-1">Notas (opcional)</label>
-                            <textarea value={form.notas} onChange={e => setForm(f => ({ ...f, notas: e.target.value }))} rows={2}
-                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                          </div>
-
-                          {(tipo.preguntas_extra || []).map(p => (
-                            <div key={p.id}>
-                              <label className="block text-xs text-gray-500 mb-1">
-                                {p.nombre} {p.requerida && '*'}
-                              </label>
-                              {p.tipo === 'texto_largo' ? (
-                                <textarea required={p.requerida} rows={2}
-                                  value={respuestas[p.id] || ''}
-                                  onChange={e => setRespuestas(r => ({ ...r, [p.id]: e.target.value }))}
-                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                              ) : p.tipo === 'seleccion_unica' ? (
-                                <select required={p.requerida}
-                                  value={respuestas[p.id] || ''}
-                                  onChange={e => setRespuestas(r => ({ ...r, [p.id]: e.target.value }))}
-                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
-                                  <option value="">Selecciona una opción</option>
-                                  {(p.opciones || []).map(op => <option key={op} value={op}>{op}</option>)}
-                                </select>
-                              ) : p.tipo === 'seleccion_multiple' ? (
-                                <div className="flex flex-col gap-1.5 pt-1">
-                                  {(p.opciones || []).map(op => {
-                                    const seleccionadas = respuestas[p.id] || [];
-                                    const checked = seleccionadas.includes(op);
-                                    return (
-                                      <label key={op} className="flex items-center gap-1.5 text-sm text-gray-700">
-                                        <input type="checkbox" checked={checked}
-                                          onChange={() => setRespuestas(r => {
-                                            const actuales = r[p.id] || [];
-                                            const next = checked ? actuales.filter(v => v !== op) : [...actuales, op];
-                                            return { ...r, [p.id]: next };
-                                          })} />
-                                        {op}
-                                      </label>
-                                    );
-                                  })}
-                                </div>
-                              ) : (
-                                <input required={p.requerida}
-                                  value={respuestas[p.id] || ''}
-                                  onChange={e => setRespuestas(r => ({ ...r, [p.id]: e.target.value }))}
-                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                              )}
                             </div>
-                          ))}
+                          ) : (
+                            <input required={p.requerida}
+                              value={respuestas[p.id] || ''}
+                              onChange={e => setRespuestas(r => ({ ...r, [p.id]: e.target.value }))}
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                          )}
+                        </div>
+                      ))}
 
-                          {submitError && <p className="text-sm text-red-600">{submitError}</p>}
-                          <button
-                            type="submit"
-                            disabled={submitting}
-                            style={{ backgroundColor: BLUE, color: '#fff', border: 'none', borderRadius: '4px', padding: '14px 24px', fontWeight: 700, fontSize: '15px', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}
-                          >
-                            {submitting ? 'Confirmando…' : `Confirmar ${selectedSlot.horaInicio} · ${fmtDiaCorto(selectedFecha)}`}
-                          </button>
-                        </form>
-                      )}
-                    </>
+                      {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        style={{ backgroundColor: BLUE, color: '#fff', border: 'none', borderRadius: '4px', padding: '14px 24px', fontWeight: 700, fontSize: '15px', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}
+                      >
+                        {submitting ? 'Confirmando…' : `Confirmar ${selectedSlot.horaInicio} · ${fmtDiaCorto(selectedFecha)}`}
+                      </button>
+                    </form>
                   )}
                 </div>
               )}
