@@ -103,6 +103,15 @@ export default function Calendly() {
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [copiedSlug, setCopiedSlug] = useState(null);
+
+  function copiarUrl(slug) {
+    const url = `https://antiagencia.es/reservar/${slug}`;
+    navigator.clipboard?.writeText(url).then(() => {
+      setCopiedSlug(slug);
+      setTimeout(() => setCopiedSlug(s => s === slug ? null : s), 1500);
+    }).catch(() => {});
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -270,7 +279,14 @@ export default function Calendly() {
                   <div>
                     <p className="text-sm font-medium">{t.nombre} {!t.activo && <span className="text-zinc-600">(inactivo)</span>}</p>
                     <p className="text-xs text-zinc-500 mt-0.5">{t.duracion_minutos} min</p>
-                    <p className="text-xs text-zinc-600 mt-0.5">antiagencia.es/reservar/{t.slug} <span className="text-zinc-700">(página pública pendiente — Fase 2)</span></p>
+                    <p className="text-xs text-zinc-600 mt-0.5 flex items-center gap-1.5">
+                      antiagencia.es/reservar/{t.slug}
+                      <button type="button" onClick={() => copiarUrl(t.slug)} title="Copiar URL"
+                        className="text-zinc-500 hover:text-white transition-colors">
+                        {copiedSlug === t.slug ? '✓' : '⧉'}
+                      </button>
+                      <span className="text-zinc-700">(página pública pendiente — Fase 2)</span>
+                    </p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => abrirEditar(t)} className="text-xs text-zinc-400 hover:text-white px-2 py-1">Editar</button>
