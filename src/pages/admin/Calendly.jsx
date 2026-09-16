@@ -18,10 +18,12 @@ const CUENTAS = [
 ];
 
 const TIPOS_PREGUNTA = [
-  { key: 'texto_corto', label: 'Texto corto' },
-  { key: 'texto_largo', label: 'Texto largo' },
-  { key: 'si_no',       label: 'Sí / No' },
+  { key: 'texto_corto',       label: 'Texto corto' },
+  { key: 'texto_largo',       label: 'Texto largo' },
+  { key: 'seleccion_unica',   label: 'Opciones (una)' },
+  { key: 'seleccion_multiple', label: 'Opciones (varias)' },
 ];
+const TIPOS_CON_OPCIONES = ['seleccion_unica', 'seleccion_multiple'];
 const MAX_PREGUNTAS_EXTRA = 10;
 
 function slugify(nombre) {
@@ -220,7 +222,24 @@ export default function Calendly() {
     setForm(f => ({ ...f, preguntas: f.preguntas.filter((_, i) => i !== idx) }));
   }
   function setPregunta(idx, campo, valor) {
-    setForm(f => ({ ...f, preguntas: f.preguntas.map((p, i) => i === idx ? { ...p, [campo]: valor } : p) }));
+    setForm(f => ({
+      ...f,
+      preguntas: f.preguntas.map((p, i) => {
+        if (i !== idx) return p;
+        const next = { ...p, [campo]: valor };
+        if (campo === 'tipo' && TIPOS_CON_OPCIONES.includes(valor) && !next.opciones?.length) next.opciones = [''];
+        return next;
+      }),
+    }));
+  }
+  function addOpcion(idx) {
+    setForm(f => ({ ...f, preguntas: f.preguntas.map((p, i) => i === idx ? { ...p, opciones: [...(p.opciones || []), ''] } : p) }));
+  }
+  function removeOpcion(idx, oi) {
+    setForm(f => ({ ...f, preguntas: f.preguntas.map((p, i) => i === idx ? { ...p, opciones: p.opciones.filter((_, j) => j !== oi) } : p) }));
+  }
+  function setOpcion(idx, oi, valor) {
+    setForm(f => ({ ...f, preguntas: f.preguntas.map((p, i) => i === idx ? { ...p, opciones: p.opciones.map((o, j) => j === oi ? valor : o) } : p) }));
   }
 
   async function guardarTipo(e) {
@@ -343,11 +362,9 @@ export default function Calendly() {
                     <span className={`text-[10px] uppercase tracking-wide px-2 py-1 rounded ${r.fuente === 'google' ? 'bg-blue-950 text-blue-300' : 'bg-zinc-800 text-zinc-400'}`}>
                       {r.fuente === 'google' ? 'Google Calendar' : 'Interna'}
                     </span>
-                    {r.fuente === 'google' && (
-                      <button onClick={() => setConfirmDeleteReunionId(r.id)} className="text-xs text-red-400 hover:text-red-300 px-2 py-1">
-                        Eliminar
-                      </button>
-                    )}
+                    <button onClick={() => setConfirmDeleteReunionId(r.id)} className="text-xs text-red-400 hover:text-red-300 px-2 py-1">
+                      Eliminar
+                    </button>
                   </div>
                 </div>
               ))}
@@ -587,19 +604,39 @@ export default function Calendly() {
                 </div>
                 <div className="flex flex-col gap-2">
                   {form.preguntas.map((p, idx) => (
-                    <div key={p.id || idx} className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2">
-                      <input value={p.nombre} onChange={e => setPregunta(idx, 'nombre', e.target.value)}
-                        placeholder="Nombre de la pregunta" required
-                        className="flex-1 bg-transparent text-sm text-white outline-none" />
-                      <select value={p.tipo} onChange={e => setPregunta(idx, 'tipo', e.target.value)}
-                        className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white">
-                        {TIPOS_PREGUNTA.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
-                      </select>
-                      <label className="flex items-center gap-1 text-xs text-zinc-400 flex-shrink-0">
-                        <input type="checkbox" checked={p.requerida} onChange={e => setPregunta(idx, 'requerida', e.target.checked)} />
-                        Requerida
-                      </label>
-                      <button type="button" onClick={() => removePregunta(idx)} className="text-zinc-600 hover:text-red-400 text-xs">✕</button>
+                    <div key={p.id || idx} className="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <input value={p.nombre} onChange={e => setPregunta(idx, 'nombre', e.target.value)}
+                          placeholder="Nombre de la pregunta" required
+                          className="flex-1 bg-transparent text-sm text-white outline-none" />
+                        <select value={p.tipo} onChange={e => setPregunta(idx, 'tipo', e.target.value)}
+                          className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white">
+                          {TIPOS_PREGUNTA.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
+                        </select>
+                        <label className="flex items-center gap-1 text-xs text-zinc-400 flex-shrink-0">
+                          <input type="checkbox" checked={p.requerida} onChange={e => setPregunta(idx, 'requerida', e.target.checked)} />
+                          Requerida
+                        </label>
+                        <button type="button" onClick={() => removePregunta(idx)} className="text-zinc-600 hover:text-red-400 text-xs">✕</button>
+                      </div>
+
+                      {TIPOS_CON_OPCIONES.includes(p.tipo) && (
+                        <div className="flex flex-col gap-1.5 mt-2 pl-1">
+                          {(p.opciones || []).map((op, oi) => (
+                            <div key={oi} className="flex items-center gap-2">
+                              <input value={op} onChange={e => setOpcion(idx, oi, e.target.value)}
+                                placeholder={`Opción ${oi + 1}`} required
+                                className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white" />
+                              {p.opciones.length > 1 && (
+                                <button type="button" onClick={() => removeOpcion(idx, oi)} className="text-zinc-600 hover:text-red-400 text-xs">✕</button>
+                              )}
+                            </div>
+                          ))}
+                          <button type="button" onClick={() => addOpcion(idx)} className="text-xs text-zinc-500 hover:text-white text-left">
+                            + añadir opción
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

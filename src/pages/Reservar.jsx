@@ -307,16 +307,31 @@ export default function Reservar() {
                                   value={respuestas[p.id] || ''}
                                   onChange={e => setRespuestas(r => ({ ...r, [p.id]: e.target.value }))}
                                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                              ) : p.tipo === 'si_no' ? (
-                                <div className="flex gap-4 pt-1">
-                                  {['Sí', 'No'].map(opt => (
-                                    <label key={opt} className="flex items-center gap-1.5 text-sm text-gray-700">
-                                      <input type="radio" name={`preg-${p.id}`} required={p.requerida}
-                                        checked={respuestas[p.id] === opt}
-                                        onChange={() => setRespuestas(r => ({ ...r, [p.id]: opt }))} />
-                                      {opt}
-                                    </label>
-                                  ))}
+                              ) : p.tipo === 'seleccion_unica' ? (
+                                <select required={p.requerida}
+                                  value={respuestas[p.id] || ''}
+                                  onChange={e => setRespuestas(r => ({ ...r, [p.id]: e.target.value }))}
+                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+                                  <option value="">Selecciona una opción</option>
+                                  {(p.opciones || []).map(op => <option key={op} value={op}>{op}</option>)}
+                                </select>
+                              ) : p.tipo === 'seleccion_multiple' ? (
+                                <div className="flex flex-col gap-1.5 pt-1">
+                                  {(p.opciones || []).map(op => {
+                                    const seleccionadas = respuestas[p.id] || [];
+                                    const checked = seleccionadas.includes(op);
+                                    return (
+                                      <label key={op} className="flex items-center gap-1.5 text-sm text-gray-700">
+                                        <input type="checkbox" checked={checked}
+                                          onChange={() => setRespuestas(r => {
+                                            const actuales = r[p.id] || [];
+                                            const next = checked ? actuales.filter(v => v !== op) : [...actuales, op];
+                                            return { ...r, [p.id]: next };
+                                          })} />
+                                        {op}
+                                      </label>
+                                    );
+                                  })}
                                 </div>
                               ) : (
                                 <input required={p.requerida}
