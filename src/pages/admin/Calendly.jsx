@@ -17,6 +17,13 @@ const CUENTAS = [
   { key: 'ruizromeroraul@gmail.com',   label: 'Personal (Gmail)' },
 ];
 
+const TIPOS_PREGUNTA = [
+  { key: 'texto_corto', label: 'Texto corto' },
+  { key: 'texto_largo', label: 'Texto largo' },
+  { key: 'si_no',       label: 'Sí / No' },
+];
+const MAX_PREGUNTAS_EXTRA = 10;
+
 function slugify(nombre) {
   return (nombre || '')
     .toLowerCase()
@@ -34,6 +41,7 @@ function emptyForm() {
     min_notice_horas: 24, horizonte_dias: 60,
     dias,
     cuentas: { 'raul@antiagencia.es': true, 'ruizromeroraul@gmail.com': true },
+    preguntas: [],
   };
 }
 
@@ -59,6 +67,7 @@ function tipoToForm(tipo) {
   const cuentas = {};
   CUENTAS.forEach(c => { cuentas[c.key] = (tipo.calendarios_conflicto || []).includes(c.key); });
   f.cuentas = cuentas;
+  f.preguntas = (tipo.preguntas_extra || []).map(p => ({ ...p }));
   return f;
 }
 
@@ -78,6 +87,7 @@ function formToPayload(form, nombreParaSlug) {
     horizonte_dias: parseInt(form.horizonte_dias, 10) || 60,
     horario,
     calendarios_conflicto,
+    preguntas_extra: form.preguntas,
   };
 }
 
@@ -198,6 +208,19 @@ export default function Calendly() {
         },
       },
     }));
+  }
+
+  function addPregunta() {
+    setForm(f => f.preguntas.length >= MAX_PREGUNTAS_EXTRA ? f : ({
+      ...f,
+      preguntas: [...f.preguntas, { id: `q_${Date.now()}`, nombre: '', tipo: 'texto_corto', requerida: false }],
+    }));
+  }
+  function removePregunta(idx) {
+    setForm(f => ({ ...f, preguntas: f.preguntas.filter((_, i) => i !== idx) }));
+  }
+  function setPregunta(idx, campo, valor) {
+    setForm(f => ({ ...f, preguntas: f.preguntas.map((p, i) => i === idx ? { ...p, [campo]: valor } : p) }));
   }
 
   async function guardarTipo(e) {
@@ -550,6 +573,34 @@ export default function Calendly() {
                         onChange={e => setForm(f => ({ ...f, cuentas: { ...f.cuentas, [c.key]: e.target.checked } }))} />
                       {c.label}
                     </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs text-zinc-500">Preguntas extra ({form.preguntas.length}/{MAX_PREGUNTAS_EXTRA})</label>
+                  <button type="button" onClick={addPregunta} disabled={form.preguntas.length >= MAX_PREGUNTAS_EXTRA}
+                    className="text-xs text-zinc-400 hover:text-white disabled:opacity-40 disabled:hover:text-zinc-400">
+                    + añadir pregunta
+                  </button>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {form.preguntas.map((p, idx) => (
+                    <div key={p.id || idx} className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2">
+                      <input value={p.nombre} onChange={e => setPregunta(idx, 'nombre', e.target.value)}
+                        placeholder="Nombre de la pregunta" required
+                        className="flex-1 bg-transparent text-sm text-white outline-none" />
+                      <select value={p.tipo} onChange={e => setPregunta(idx, 'tipo', e.target.value)}
+                        className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white">
+                        {TIPOS_PREGUNTA.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
+                      </select>
+                      <label className="flex items-center gap-1 text-xs text-zinc-400 flex-shrink-0">
+                        <input type="checkbox" checked={p.requerida} onChange={e => setPregunta(idx, 'requerida', e.target.checked)} />
+                        Requerida
+                      </label>
+                      <button type="button" onClick={() => removePregunta(idx)} className="text-zinc-600 hover:text-red-400 text-xs">✕</button>
+                    </div>
                   ))}
                 </div>
               </div>
