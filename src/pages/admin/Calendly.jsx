@@ -220,9 +220,10 @@ export default function Calendly() {
     }
   }
 
-  async function eliminarTipo(id) {
+  async function eliminarTipo(id, hard) {
     try {
-      const res = await fetch(`${BACKEND_URL}/admin/calendly/tipos/${id}`, { method: 'DELETE', headers: buildHeaders() });
+      const url = `${BACKEND_URL}/admin/calendly/tipos/${id}${hard ? '?hard=true' : ''}`;
+      const res = await fetch(url, { method: 'DELETE', headers: buildHeaders() });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
       setConfirmDeleteId(null);
       fetchTipos();
@@ -359,7 +360,11 @@ export default function Calendly() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => abrirEditar(t)} className="text-xs text-zinc-400 hover:text-white px-2 py-1">Editar</button>
-                    <button onClick={() => setConfirmDeleteId(t.id)} className="text-xs text-red-400 hover:text-red-300 px-2 py-1">Desactivar</button>
+                    {t.activo ? (
+                      <button onClick={() => setConfirmDeleteId(t)} className="text-xs text-red-400 hover:text-red-300 px-2 py-1">Desactivar</button>
+                    ) : (
+                      <button onClick={() => setConfirmDeleteId(t)} className="text-xs text-red-400 hover:text-red-300 px-2 py-1">Eliminar definitivamente</button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -371,10 +376,16 @@ export default function Calendly() {
       {confirmDeleteId && (
         <div onClick={() => setConfirmDeleteId(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={e => e.stopPropagation()} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-sm w-full">
-            <p className="text-sm mb-4">¿Desactivar este tipo de reunión? No se volverá a mostrar como activo, pero no se borra.</p>
+            <p className="text-sm mb-4">
+              {confirmDeleteId.activo
+                ? '¿Desactivar este tipo de reunión? No se volverá a mostrar como activo, pero no se borra.'
+                : '¿Eliminar definitivamente este tipo de reunión? No se puede deshacer.'}
+            </p>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setConfirmDeleteId(null)} className="text-sm text-zinc-400 px-3 py-1.5">Cancelar</button>
-              <button onClick={() => eliminarTipo(confirmDeleteId)} className="text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg px-3 py-1.5">Desactivar</button>
+              <button onClick={() => eliminarTipo(confirmDeleteId.id, !confirmDeleteId.activo)} className="text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg px-3 py-1.5">
+                {confirmDeleteId.activo ? 'Desactivar' : 'Eliminar'}
+              </button>
             </div>
           </div>
         </div>
