@@ -16,6 +16,7 @@ const PAGE_OPTIONS = [
   { value: 'dashboard',        label: 'Dashboard' },
   { value: 'email-builder',    label: 'Email Builder' },
   { value: 'finanzas',         label: 'Finanzas' },
+  { value: 'calendly',         label: 'Calendly' },
   { value: 'gym',              label: 'Entrenos' },
   { value: 'loom',             label: 'Loom' },
   { value: 'paginas',          label: 'Páginas' },
