@@ -22,6 +22,7 @@ import TrabajaConNosotrosV3 from './pages/TrabajaConNosotrosV3'
 import TrabajaConNosotros2 from './pages/TrabajaConNosotros2'
 import PlanningQ3 from './pages/PlanningQ3'
 import PlanningQ3Venta from './pages/PlanningQ3Venta'
+import PlanningQ4 from './pages/PlanningQ4'
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import TikTokConnect from './pages/TikTokConnect';
 import JorgeCoronado from './pages/JorgeCoronado';
@@ -214,6 +215,7 @@ const AuthenticatedApp = () => {
       {/* <Route path="/planningq3" element={<PlanningQ3Venta />} /> */}
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/q3" element={<PlanningQ3 />} />
+      <Route path="/q4" element={<PlanningQ4 />} />
       <Route path="/tiktok-connect" element={<TikTokConnect />} />
       <Route path="/jorge-coronado" element={<PixelLayout><JorgeCoronado /></PixelLayout>} />
       <Route path="/capsula-digital" element={<PixelLayout><CapsuleDigital /></PixelLayout>} />
