@@ -87,6 +87,10 @@ function fmtFechaHora(iso) {
   return d.toLocaleString('es-ES', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
+function emptyReunionForm() {
+  return { titulo: '', nombre_invitado: '', email_invitado: '', fecha: '', hora_inicio: '', hora_fin: '', descripcion: '' };
+}
+
 export default function Calendly() {
   const [tab, setTab] = useState('reuniones');
 
@@ -104,6 +108,12 @@ export default function Calendly() {
   const [saving, setSaving] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [copiedSlug, setCopiedSlug] = useState(null);
+
+  const [modalReunion, setModalReunion] = useState(false);
+  const [reunionForm, setReunionForm] = useState(emptyReunionForm());
+  const [savingReunion, setSavingReunion] = useState(false);
+  const [confirmDeleteReunionId, setConfirmDeleteReunionId] = useState(null);
+  const [deletingReunion, setDeletingReunion] = useState(false);
 
   function copiarUrl(slug) {
     const url = `https://antiagencia.es/reservar/${slug}`;
@@ -221,6 +231,50 @@ export default function Calendly() {
     }
   }
 
+  function abrirCrearReunion() {
+    setReunionForm(emptyReunionForm());
+    setModalReunion(true);
+  }
+
+  async function guardarReunion(e) {
+    e.preventDefault();
+    if (!reunionForm.titulo.trim() || !reunionForm.fecha || !reunionForm.hora_inicio || !reunionForm.hora_fin) return;
+    setSavingReunion(true);
+    try {
+      const payload = {
+        titulo: reunionForm.titulo,
+        nombre_invitado: reunionForm.nombre_invitado || null,
+        email_invitado: reunionForm.email_invitado || null,
+        descripcion: reunionForm.descripcion || null,
+        fecha_hora_inicio: `${reunionForm.fecha}T${reunionForm.hora_inicio}:00`,
+        fecha_hora_fin: `${reunionForm.fecha}T${reunionForm.hora_fin}:00`,
+      };
+      const res = await fetch(`${BACKEND_URL}/admin/calendly/reuniones`, { method: 'POST', headers: buildHeaders(), body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al crear la reunión');
+      setModalReunion(false);
+      fetchReuniones();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      setSavingReunion(false);
+    }
+  }
+
+  async function eliminarReunion(id) {
+    setDeletingReunion(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/calendly/reuniones/${encodeURIComponent(id)}`, { method: 'DELETE', headers: buildHeaders() });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+      setConfirmDeleteReunionId(null);
+      fetchReuniones();
+    } catch (err) {
+      alert('Error eliminando: ' + err.message);
+    } finally {
+      setDeletingReunion(false);
+    }
+  }
+
   return (
     <div className="p-6 max-w-4xl mx-auto" style={{ backgroundColor: '#0d0d0d', color: 'white', minHeight: '100vh' }}>
       <div className="mb-6">
@@ -241,6 +295,9 @@ export default function Calendly() {
 
       {tab === 'reuniones' && (
         <div>
+          <button onClick={abrirCrearReunion} className="mb-4 px-4 py-2 rounded-lg bg-white text-black text-sm font-medium hover:bg-zinc-200 transition-colors">
+            + Añadir reunión
+          </button>
           {loadingReuniones ? (
             <p className="text-zinc-500 text-sm">Cargando…</p>
           ) : reuniones.length === 0 ? (
@@ -252,10 +309,22 @@ export default function Calendly() {
                   <div>
                     <p className="text-sm font-medium">{r.titulo}</p>
                     <p className="text-xs text-zinc-500 mt-0.5">{fmtFechaHora(r.inicio)}{r.invitado ? ` · ${r.invitado}` : ''}</p>
+                    {r.meet_link && (
+                      <a href={r.meet_link} target="_blank" rel="noreferrer" className="text-xs text-blue-400 hover:text-blue-300 mt-0.5 inline-block">
+                        Enlace de Google Meet →
+                      </a>
+                    )}
                   </div>
-                  <span className={`text-[10px] uppercase tracking-wide px-2 py-1 rounded ${r.fuente === 'google' ? 'bg-blue-950 text-blue-300' : 'bg-zinc-800 text-zinc-400'}`}>
-                    {r.fuente === 'google' ? 'Google Calendar' : 'Interna'}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] uppercase tracking-wide px-2 py-1 rounded ${r.fuente === 'google' ? 'bg-blue-950 text-blue-300' : 'bg-zinc-800 text-zinc-400'}`}>
+                      {r.fuente === 'google' ? 'Google Calendar' : 'Interna'}
+                    </span>
+                    {r.fuente === 'google' && (
+                      <button onClick={() => setConfirmDeleteReunionId(r.id)} className="text-xs text-red-400 hover:text-red-300 px-2 py-1">
+                        Eliminar
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -307,6 +376,76 @@ export default function Calendly() {
               <button onClick={() => setConfirmDeleteId(null)} className="text-sm text-zinc-400 px-3 py-1.5">Cancelar</button>
               <button onClick={() => eliminarTipo(confirmDeleteId)} className="text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg px-3 py-1.5">Desactivar</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {confirmDeleteReunionId && (
+        <div onClick={() => setConfirmDeleteReunionId(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-sm w-full">
+            <p className="text-sm mb-4">¿Eliminar esta reunión? Se borra el evento en Google Calendar y se avisa a los invitados si los hay.</p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setConfirmDeleteReunionId(null)} className="text-sm text-zinc-400 px-3 py-1.5">Cancelar</button>
+              <button onClick={() => eliminarReunion(confirmDeleteReunionId)} disabled={deletingReunion} className="text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg px-3 py-1.5 disabled:opacity-60">
+                {deletingReunion ? 'Eliminando…' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalReunion && (
+        <div onClick={() => setModalReunion(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-white text-base font-bold mb-4">Añadir reunión</h3>
+            <form onSubmit={guardarReunion} className="flex flex-col gap-3">
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Título *</label>
+                <input value={reunionForm.titulo} onChange={e => setReunionForm(f => ({ ...f, titulo: e.target.value }))} required
+                  className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" placeholder="Llamada con..." />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1">Nombre invitado</label>
+                  <input value={reunionForm.nombre_invitado} onChange={e => setReunionForm(f => ({ ...f, nombre_invitado: e.target.value }))}
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1">Email invitado</label>
+                  <input type="email" value={reunionForm.email_invitado} onChange={e => setReunionForm(f => ({ ...f, email_invitado: e.target.value }))}
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" placeholder="opcional" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1">Fecha *</label>
+                  <input type="date" value={reunionForm.fecha} onChange={e => setReunionForm(f => ({ ...f, fecha: e.target.value }))} required
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1">Hora inicio *</label>
+                  <input type="time" value={reunionForm.hora_inicio} onChange={e => setReunionForm(f => ({ ...f, hora_inicio: e.target.value }))} required
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1">Hora fin *</label>
+                  <input type="time" value={reunionForm.hora_fin} onChange={e => setReunionForm(f => ({ ...f, hora_fin: e.target.value }))} required
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Descripción</label>
+                <textarea value={reunionForm.descripcion} onChange={e => setReunionForm(f => ({ ...f, descripcion: e.target.value }))}
+                  className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" rows={2} />
+              </div>
+              <p className="text-xs text-zinc-600">Se crea en el calendario Reuniones con un enlace de Google Meet automático. Si pones email, se le enviará la invitación.</p>
+              <div className="flex gap-2 justify-end mt-2">
+                <button type="button" onClick={() => setModalReunion(false)} className="text-sm text-zinc-400 px-3 py-1.5">Cancelar</button>
+                <button type="submit" disabled={savingReunion} className="text-sm bg-white text-black rounded-lg px-4 py-1.5 font-medium disabled:opacity-60">
+                  {savingReunion ? 'Creando…' : 'Crear reunión'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
