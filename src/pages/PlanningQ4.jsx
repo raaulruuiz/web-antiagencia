@@ -43,6 +43,7 @@ const ITEMS = [
   <>Tenemos una <strong>reunión para revisar todo tu email marketing</strong> (automatizaciones, campañas, estilo, cliente ideal…)</>,
   <>La reunión <strong>no tiene duración fija, estaremos el tiempo necesario</strong>.</>,
   <>Después de la reunión, prepararé un <strong>plan personalizado</strong> como el que paso a mis clientes adaptado a lo que hemos hablado en la reunión.</>,
+  <>Al comprar te llegará un <strong>email con las instrucciones para agendar la llamada</strong>.</>,
 ];
 
 function ListaNumerada() {
