@@ -152,23 +152,26 @@ export function useContactosTodos() {
   });
 }
 
-export function useClientes(params = {}) {
+export function useClientes(params = {}, { enabled = true } = {}) {
   return useQuery({
     queryKey: contactoKeys.clientes(params),
     queryFn:  () => getClientes(params),
+    enabled,
   });
 }
 
-export function useEquipo(params = {}) {
+export function useEquipo(params = {}, { enabled = true } = {}) {
   return useQuery({
     queryKey: contactoKeys.equipo(params),
     queryFn:  () => getEquipo(params),
+    enabled,
   });
 }
 
-export function useProveedores(params = {}) {
+export function useProveedores(params = {}, { enabled = true } = {}) {
   return useQuery({
     queryKey: contactoKeys.proveedores(params),
     queryFn:  () => getProveedores(params),
+    enabled,
   });
 }

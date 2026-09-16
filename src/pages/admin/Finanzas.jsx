@@ -18,6 +18,13 @@ import {
   useEliminarFactura,
   useBulkDeleteFacturas,
   useFinanzasRealtime,
+  useClientesLista, useEquipoLista, useProveedoresLista, useContactosTodos,
+  useClientes, useEquipo, useProveedores,
+  useCrearCliente, useEditarCliente,
+  useCrearEquipo, useEditarEquipo,
+  useCrearProveedor, useEditarProveedor,
+  useEliminarContacto,
+  contactoKeys,
 } from '@/features/finanzas';
 import { createPortal } from 'react-dom';
 import { DayPicker } from 'react-day-picker';
@@ -794,19 +801,13 @@ function FormularioMovimiento({ inicial, onGuardado, onCancelar }) {
   });
   const [loading, setLoading] = useState(false);
   const [ok, setOk] = useState(false);
-  const [clientesLista, setClientesLista] = useState([]);
-  const [equipoLista, setEquipoLista] = useState([]);
-  const [proveedoresListaForm, setProveedoresListaForm] = useState([]);
+  const { data: clientesLista = [] } = useClientesLista();
+  const { data: equipoLista = [] } = useEquipoLista();
+  const { data: proveedoresListaForm = [] } = useProveedoresLista();
   const [facturasLista, setFacturasLista] = useState([]);
 
   useEffect(() => {
     getToken().then(token => {
-      fetch(`${BACKEND_URL}/admin/finanzas/clientes/lista`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.json()).then(d => setClientesLista(Array.isArray(d) ? d : [])).catch(() => {});
-      fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.json()).then(d => setEquipoLista(Array.isArray(d) ? d : [])).catch(() => {});
-      fetch(`${BACKEND_URL}/admin/finanzas/proveedores/lista`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.json()).then(d => setProveedoresListaForm(Array.isArray(d) ? d : [])).catch(() => {});
       fetch(`${BACKEND_URL}/admin/finanzas/facturas`, { headers: { Authorization: `Bearer ${token}` } })
         .then(r => r.json()).then(d => setFacturasLista(Array.isArray(d) ? d : [])).catch(() => {});
     });
@@ -1419,7 +1420,7 @@ function FiscalMetric({ label, value, color, comp }) {
   );
 }
 
-function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, setFacturaViewerAutoEdit, onFacturasEliminadas, findBestMatch, toggleMovimientoEnFactura, setContactosTodos, setModalNuevosContactos }) {
+function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, setFacturaViewerAutoEdit, onFacturasEliminadas, findBestMatch, toggleMovimientoEnFactura, setModalNuevosContactos }) {
   const qc = useQueryClient();
 
   // ─── UI-STATE ──────────────────────────────────────────────────────────────
@@ -1565,9 +1566,7 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
         // facturaKeys.all, movimientoKeys.all, dashboardKeys.all, contactoKeys.all
         // ya invalidados por useGuardarFacturas.onSuccess
         if (data.nuevos_pendientes?.length) {
-          const token = await getToken();
-          const rc = await fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token}` } });
-          if (rc.ok) setContactosTodos(await rc.json());
+          // contactoKeys.all ya invalidado por useGuardarFacturas.onSuccess → useContactosTodos() se refresca solo
           setModalNuevosContactos(data.nuevos_pendientes.map(p => ({
             ...p, _nombre: '', _nombre_empresa: p.nombre_entidad || '', _asignarA: null, _ignorar: false,
             _nif_cif: p.nif_cif || '', _direccion: p.direccion || '', _email: p.email || '', _roles: ['proveedor'],
@@ -1577,17 +1576,6 @@ function TabFiscal({ onAbrirMovimiento, facturaViewerData, setFacturaViewerId, s
       onError: (e) => { alert('Error guardando: ' + e.message); },
       onSettled: () => { setGuardando(false); },
     });
-  }
-
-  async function cargarDocsContacto(contactoId) {
-    setLoadingDocs(true);
-    setDocsContacto([]);
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/facturas?contacto_id=${contactoId}`, { headers: { Authorization: `Bearer ${token}` } });
-      if (r.ok) setDocsContacto(await r.json());
-    } catch(e) {}
-    finally { setLoadingDocs(false); }
   }
 
   function eliminarFactura(id) {
@@ -2491,9 +2479,12 @@ function NuevoMovimientoTab({ onGuardado }) {
   const [pagina, setPagina] = useState(0); // página actual en el modo de revisión
   const [extrayendoIdx, setExtrayendoIdx] = useState(null); // which image is being processed
   const [guardandoKey, setGuardandoKey] = useState(null); // 'si-mi'
-  const [clientesLista, setClientesLista] = useState([]);
-  const [equipoLista, setEquipoLista] = useState([]);
-  const [proveedoresLista, setProveedoresLista] = useState([]);
+  const { data: clientesListaRaw = [] } = useClientesLista();
+  const { data: equipoListaRaw = [] } = useEquipoLista();
+  const { data: proveedoresListaRaw = [] } = useProveedoresLista();
+  const clientesLista = useMemo(() => clientesListaRaw.map(c => ({ id: c.id, label: c.nombre + (c.nombre_empresa ? ` (${c.nombre_empresa})` : '') })), [clientesListaRaw]);
+  const equipoLista = useMemo(() => equipoListaRaw.map(e => ({ id: e.id, label: e.nombre })), [equipoListaRaw]);
+  const proveedoresLista = useMemo(() => proveedoresListaRaw.map(p => ({ id: p.id, label: p.nombre + (p.nombre_empresa ? ` (${p.nombre_empresa})` : '') })), [proveedoresListaRaw]);
   const inputRef = useRef(null);
   const cancelRef = useRef(false);
   const [nuevasCats, setNuevasCats] = useState({}); // { 'si-mi': texto | undefined }
@@ -2514,16 +2505,6 @@ function NuevoMovimientoTab({ onGuardado }) {
     }));
   }
 
-  useEffect(() => {
-    getToken().then(token => {
-      fetch(`${BACKEND_URL}/admin/finanzas/clientes/lista`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.json()).then(d => setClientesLista(Array.isArray(d) ? d.map(c => ({ id: c.id, label: c.nombre + (c.nombre_empresa ? ` (${c.nombre_empresa})` : '') })) : [])).catch(() => {});
-      fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.json()).then(d => setEquipoLista(Array.isArray(d) ? d.map(e => ({ id: e.id, label: e.nombre })) : [])).catch(() => {});
-      fetch(`${BACKEND_URL}/admin/finanzas/proveedores/lista`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.json()).then(d => setProveedoresLista(Array.isArray(d) ? d.map(p => ({ id: p.id, label: p.nombre + (p.nombre_empresa ? ` (${p.nombre_empresa})` : '') })) : [])).catch(() => {});
-    });
-  }, []);
 
   function onFileChange(e) {
     const files = Array.from(e.target.files);
@@ -3584,7 +3565,7 @@ function TablaMovimientos({ items, seleccionados, onToggleSel, onToggleAll, onGu
 
 // ── Modal para crear / editar contacto (cliente o equipo) ───────
 
-function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setSavingContacto }) {
+function ModalContacto({ tipo, datos, onGuardado, onCerrar }) {
   const esEdicion = !!datos?.id;
   const esCliente = tipo === 'cliente';
   const esEquipo = tipo === 'equipo';
@@ -3603,29 +3584,28 @@ function ModalContacto({ tipo, datos, onGuardado, onCerrar, savingContacto, setS
   });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  async function handleGuardar(e) {
+  const crearCliente   = useCrearCliente();
+  const editarCliente  = useEditarCliente();
+  const crearEquipo    = useCrearEquipo();
+  const editarEquipo   = useEditarEquipo();
+  const crearProveedor = useCrearProveedor();
+  const editarProveedor = useEditarProveedor();
+  const mutation = esCliente ? (esEdicion ? editarCliente : crearCliente)
+    : esEquipo ? (esEdicion ? editarEquipo : crearEquipo)
+    : (esEdicion ? editarProveedor : crearProveedor);
+  const savingContacto = mutation.isPending;
+
+  function handleGuardar(e) {
     e.preventDefault();
     if (!form.nombre.trim()) return;
-    setSavingContacto(true);
-    try {
-      const token = await getToken();
-      const aliasArr = form.alias.split(',').map(s => s.trim()).filter(Boolean);
-      const base = { nombre: form.nombre, nombre_empresa: form.nombre_empresa || null, email: form.email || null, nif_cif: form.nif_cif || null, direccion: form.direccion || null, notas: form.notas || null, alias: aliasArr };
-      const body = esCliente ? { ...base, activo: form.activo } : esEquipo ? { ...base, fijo: form.fijo } : base;
-      const ruta = esCliente ? 'clientes' : esEquipo ? 'equipo' : 'proveedores';
-      const url = esEdicion
-        ? `${BACKEND_URL}/admin/finanzas/${ruta}/${datos.id}`
-        : `${BACKEND_URL}/admin/finanzas/${ruta}`;
-      const method = esEdicion ? 'PUT' : 'POST';
-      const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || `Error ${r.status}`);
-      onGuardado();
-    } catch (err) {
-      alert('Error: ' + err.message);
-    } finally {
-      setSavingContacto(false);
-    }
+    const aliasArr = form.alias.split(',').map(s => s.trim()).filter(Boolean);
+    const base = { nombre: form.nombre, nombre_empresa: form.nombre_empresa || null, email: form.email || null, nif_cif: form.nif_cif || null, direccion: form.direccion || null, notas: form.notas || null, alias: aliasArr };
+    const body = esCliente ? { ...base, activo: form.activo } : esEquipo ? { ...base, fijo: form.fijo } : base;
+    const args = esEdicion ? { id: datos.id, data: body } : body;
+    mutation.mutate(args, {
+      onSuccess: () => onGuardado(),
+      onError: (err) => alert('Error: ' + err.message),
+    });
   }
 
   return (
@@ -3706,11 +3686,7 @@ export default function Finanzas() {
   const [viewCuenta, setViewCuenta] = useState('barras');
   const [zoomEvol, setZoomEvol] = useState(0);
   const [zoomCuenta, setZoomCuenta] = useState(0);
-  const [clientes, setClientes] = useState([]);
-  const [loadingClientes, setLoadingClientes] = useState(false);
   const [clienteAbierto, setClienteAbierto] = useState(null);
-  const [equipo, setEquipo] = useState([]);
-  const [loadingEquipo, setLoadingEquipo] = useState(false);
   const [equipoAbierto, setEquipoAbierto] = useState(null);
   const [equipoBusqueda, setEquipoBusqueda] = useState('');
   const [equipoSort, setEquipoSort] = useState({ campo: 'beneficio', dir: 'asc' });
@@ -3724,20 +3700,14 @@ export default function Finanzas() {
   const [clienteBusqueda, setClienteBusqueda] = useState('');
   // Modal contacto (cliente / equipo)
   const [modalContacto, setModalContacto] = useState(null); // null | { tipo: 'cliente'|'equipo', datos: {} | null }
-  const [proveedores, setProveedores] = useState([]);
-  const [loadingProveedores, setLoadingProveedores] = useState(false);
   const [proveedorAbierto, setProveedorAbierto] = useState(null);
   const [proveedorBusqueda, setProveedorBusqueda] = useState('');
   const [proveedorSort, setProveedorSort] = useState({ campo: 'gasto', dir: 'desc' });
-  const [savingContacto, setSavingContacto] = useState(false);
   // Tabs internas en filas expandibles (Movimientos / Documentos)
   const [contactoTabInner, setContactoTabInner] = useState('movimientos');
-  const [docsContacto, setDocsContacto] = useState([]);
-  const [loadingDocs, setLoadingDocs] = useState(false);
   const [docFiltroTipo, setDocFiltroTipo] = useState('todos');
   // Modal nuevos contactos detectados al guardar facturas
   const [modalNuevosContactos, setModalNuevosContactos] = useState(null); // null | array
-  const [contactosTodos, setContactosTodos] = useState([]);
   const [confirmandoContactos, setConfirmandoContactos] = useState(false);
   // Tab Documentos (main)
   const [vistaDocumentos, setVistaDocumentos] = useState('tabla');
@@ -3751,7 +3721,6 @@ export default function Finanzas() {
   const [docTabTipo, setDocTabTipo] = useState('todos');
   const [docTabSort, setDocTabSort] = useState({ campo: 'fecha_factura', dir: 'desc' });
   const [docTabEditando, setDocTabEditando] = useState(null); // { id, campo, valor }
-  const [docTabContactos, setDocTabContactos] = useState([]);
   const [docFiltros, setDocFiltros] = useState([]);
   const [docFiltroOp, setDocFiltroOp] = useState('and');
   const [docSorts, setDocSorts] = useState([]);
@@ -3806,9 +3775,9 @@ export default function Finanzas() {
     setFacturaViewerAutoEdit(false); // consumir flag
   }, [facturaViewerData, facturaViewerAutoEdit]);
   const [sinMovimientosMes, setSinMovimientosMes] = useState(false);
-  const [filtroClientesLista, setFiltroClientesLista] = useState([]);
-  const [filtroEquipoLista, setFiltroEquipoLista] = useState([]);
-  const [filtroProveedoresLista, setFiltroProveedoresLista] = useState([]);
+  const { data: filtroClientesLista = [] } = useClientesLista();
+  const { data: filtroEquipoLista = [] } = useEquipoLista();
+  const { data: filtroProveedoresLista = [] } = useProveedoresLista();
   // movimientosParams useMemo necesita estos dos antes de la sección TQ
   const [vistaMovs, setVistaMovs] = useState(() => { const v = lsGet('fin_vista', 'lista'); return ['lista','tabla','errores'].includes(v) ? v : 'lista'; });
   const [movLimit, setMovLimit] = useState(() => lsGet('fin_limit', 50));
@@ -3897,6 +3866,8 @@ export default function Finanzas() {
   const _eliminarMovMut = useEliminarMovimiento();
   const _bulkDeleteMut = useBulkDeleteMovimientos();
   const _bulkEditMut   = useBulkEditMovimientos();
+  // ─── Mutations de contactos (Fase 11E1) ──────────────────────────────────────
+  const _eliminarContactoMut = useEliminarContacto();
   // ─── Mutations de vinculación factura ↔ movimiento (Fase 7) ─────────────────
   const _setFacturasMut  = useSetFacturasMovimiento();    // replace-all desde el lado del movimiento
   const _toggleMovVincMut = useToggleMovimientoEnFactura(); // GET detail + toggle + PUT desde el lado de la factura
@@ -3912,19 +3883,6 @@ export default function Finanzas() {
   const [bulkValorMulti, setBulkValorMulti] = useState([]); // para cliente_ids / equipo_ids
   const [bulkFiltroLista, setBulkFiltroLista] = useState('');
   const [confirmDialog, setConfirmDialog] = useState(null); // { texto, onOk }
-
-  // Cargar listas para filtros (una vez al montar)
-  useEffect(() => {
-    getToken().then(token => {
-      const h = { Authorization: `Bearer ${token}` };
-      fetch(`${BACKEND_URL}/admin/finanzas/clientes/lista`, { headers: h })
-        .then(r => r.json()).then(d => setFiltroClientesLista(Array.isArray(d) ? d : [])).catch(() => {});
-      fetch(`${BACKEND_URL}/admin/finanzas/equipo/lista`, { headers: h })
-        .then(r => r.json()).then(d => setFiltroEquipoLista(Array.isArray(d) ? d : [])).catch(() => {});
-      fetch(`${BACKEND_URL}/admin/finanzas/proveedores/lista`, { headers: h })
-        .then(r => r.json()).then(d => setFiltroProveedoresLista(Array.isArray(d) ? d : [])).catch(() => {});
-    });
-  }, []);
 
   // Persistir en localStorage cuando cambian
   useEffect(() => { lsSet('fin_desde', desde); }, [desde]);
@@ -3999,7 +3957,8 @@ export default function Finanzas() {
   }, [facturaViewerId]);
 
   // Fase 5: cargarDocumentos eliminado — la lista de facturas la gestiona facturasQuery (TQ).
-  // La detección de huérfanas y carga de contactos se hace en efectos separados.
+  // La detección de huérfanas se hace en un efecto separado; contactosTodos viene de TanStack Query.
+  const { data: contactosTodos = [] } = useContactosTodos();
   const _orphanCheckedRef = useRef(false);
   useEffect(() => {
     // Resetear al salir del tab para que re-chequee al volver
@@ -4012,12 +3971,6 @@ export default function Finanzas() {
       (f.tipo === 'ingreso' && !f.factura_cliente_id)
     );
     if (!huerfanas.length) return;
-    if (!contactosTodos.length) {
-      getToken().then(token =>
-        fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token}` } })
-          .then(r => r.ok ? r.json() : null).then(d => { if (d) setContactosTodos(d); })
-      );
-    }
     const grupos = new Map();
     for (const f of huerfanas) {
       const key = `${f.tipo}||${f.nombre_entidad || ''}`;
@@ -4031,15 +3984,6 @@ export default function Finanzas() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facturasQuery.data, tab, modalNuevosContactos]);
 
-  // Cargar docTabContactos la primera vez que se entra en tab Documentos
-  useEffect(() => {
-    if (tab !== 'documentos' || docTabContactos.length) return;
-    getToken().then(token =>
-      fetch(`${BACKEND_URL}/admin/finanzas/contactos/todos`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.ok ? r.json() : null).then(d => { if (d) setDocTabContactos(d); })
-    );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, docTabContactos.length]);
 
   async function guardarCeldaDoc(id, updates) {
     try {
@@ -4164,7 +4108,7 @@ export default function Finanzas() {
 
   async function editarDocsBulkContacto(campo, contactId) {
     if (!contactId) return;
-    const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
+    const ctodos = contactosTodos;
     const ids = [...docSeleccionados];
     await Promise.all(ids.map(id => {
       const doc = documentosList.find(d => d.id === id);
@@ -4178,7 +4122,7 @@ export default function Finanzas() {
   function guardarCeldaInline(id, campo, valor) {
     const data = { [campo]: campo === 'cantidad' ? parseFloat(valor) : valor };
     _editarMovMut.mutate({ id, data }, {
-      onSuccess: () => { cargarEquipo(); },
+      onSuccess: () => { qc.invalidateQueries({ queryKey: contactoKeys.all }); },
       onError: (err) => alert('Error al guardar: ' + err.message),
     });
   }
@@ -4200,7 +4144,7 @@ export default function Finanzas() {
     if (!seleccionados.size || !valor) return;
     const ids = [...seleccionados];
     _bulkEditMut.mutate({ ids, cambios: { [campo]: valor } }, {
-      onSuccess: () => { setBulkCampo(null); setBulkValor(''); cargarEquipo(); },
+      onSuccess: () => { setBulkCampo(null); setBulkValor(''); qc.invalidateQueries({ queryKey: contactoKeys.all }); },
       onError:   (err) => alert('Error al editar en bloque: ' + err.message),
     });
   }
@@ -4280,83 +4224,22 @@ export default function Finanzas() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (tab === 'documentos') qc.invalidateQueries({ queryKey: facturaKeys.lists() }); }, [tab]);
 
-  const cargarClientes = useCallback(async () => {
-    setLoadingClientes(true);
-    try {
-      const token = await getToken();
-      const params = new URLSearchParams();
-      if (desde) params.set('desde', desde);
-      if (hasta) params.set('hasta', hasta);
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/clientes?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await r.json();
-      setClientes(data.clientes || []);
-    } catch (e) {
-      console.error('Error cargando clientes:', e);
-    } finally {
-      setLoadingClientes(false);
-    }
-  }, [desde, hasta]);
+  const _clientesQuery = useClientes({ desde, hasta }, { enabled: tab === 'clientes' });
+  const clientes = _clientesQuery.data?.clientes ?? [];
+  const loadingClientes = _clientesQuery.isLoading;
 
-  useEffect(() => { if (tab === 'clientes') cargarClientes(); }, [tab, cargarClientes]);
+  const _equipoQuery = useEquipo({ desde, hasta }, { enabled: tab === 'equipo' });
+  const equipo = _equipoQuery.data?.equipo ?? [];
+  const loadingEquipo = _equipoQuery.isLoading;
 
-  const cargarEquipo = useCallback(async () => {
-    setLoadingEquipo(true);
-    try {
-      const token = await getToken();
-      const params = new URLSearchParams();
-      if (desde) params.set('desde', desde);
-      if (hasta) params.set('hasta', hasta);
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/equipo?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await r.json();
-      setEquipo(data.equipo || []);
-    } catch (e) {
-      console.error('Error cargando equipo:', e);
-    } finally {
-      setLoadingEquipo(false);
-    }
-  }, [desde, hasta]);
+  const _proveedoresQuery = useProveedores({ desde, hasta }, { enabled: tab === 'proveedores' });
+  const proveedores = _proveedoresQuery.data?.proveedores ?? [];
+  const loadingProveedores = _proveedoresQuery.isLoading;
 
-  useEffect(() => { if (tab === 'equipo') cargarEquipo(); }, [tab, cargarEquipo]);
-
-  const cargarProveedores = useCallback(async () => {
-    setLoadingProveedores(true);
-    try {
-      const token = await getToken();
-      const params = new URLSearchParams();
-      if (desde) params.set('desde', desde);
-      if (hasta) params.set('hasta', hasta);
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/proveedores?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await r.json();
-      setProveedores(data.proveedores || []);
-    } catch (e) {
-      console.error('Error cargando proveedores:', e);
-    } finally {
-      setLoadingProveedores(false);
-    }
-  }, [desde, hasta]);
-
-  useEffect(() => { if (tab === 'proveedores') cargarProveedores(); }, [tab, cargarProveedores]);
-
-  async function eliminarContacto(id, tipo) {
-    try {
-      const token = await getToken();
-      const r = await fetch(`${BACKEND_URL}/admin/finanzas/contactos/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
-      if (tipo === 'cliente') setClientes(prev => prev.filter(c => c.id !== id));
-      else if (tipo === 'equipo') setEquipo(prev => prev.filter(e => e.id !== id));
-      else setProveedores(prev => prev.filter(p => p.id !== id));
-    } catch (err) {
-      alert('Error eliminando: ' + err.message);
-    }
+  function eliminarContacto(id) {
+    _eliminarContactoMut.mutate(id, {
+      onError: (err) => alert('Error eliminando: ' + err.message),
+    });
   }
 
   const tabStyle = (t) => ({
@@ -5320,7 +5203,7 @@ export default function Finanzas() {
 
       {/* ── DOCUMENTOS ── */}
       {tab === 'documentos' && (() => {
-        const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
+        const ctodos = contactosTodos;
         const findC = id => ctodos.find(c => c.id === id)?.nombre || '—';
 
         const COLS_DOCS = [
@@ -5470,7 +5353,7 @@ export default function Finanzas() {
               </div>
             </div>
 
-            {vistaDocumentos === 'tabla' && docPanelFiltro && <PanelFiltros filtros={docFiltros} op={docFiltroOp} onChangeFiltros={f=>{setDocFiltros(f);setDocPagina(1);}} onChangeOp={op=>{setDocFiltroOp(op);setDocPagina(1);}} campos={CAMPOS_FILTRO_DOCS} listasAsignacion={{ factura_proveedor_id: docTabContactos, factura_cliente_id: docTabContactos }} />}
+            {vistaDocumentos === 'tabla' && docPanelFiltro && <PanelFiltros filtros={docFiltros} op={docFiltroOp} onChangeFiltros={f=>{setDocFiltros(f);setDocPagina(1);}} onChangeOp={op=>{setDocFiltroOp(op);setDocPagina(1);}} campos={CAMPOS_FILTRO_DOCS} listasAsignacion={{ factura_proveedor_id: contactosTodos, factura_cliente_id: contactosTodos }} />}
             {vistaDocumentos === 'tabla' && docPanelOrdenar && <PanelOrdenar sorts={docSorts} onChange={s=>{setDocSorts(s);setDocPagina(1);}} campos={CAMPOS_SORT_DOCS} />}
 
             {/* Vista Conflictos */}
@@ -5605,7 +5488,7 @@ export default function Finanzas() {
                 <div style={{ display:'flex', alignItems:'center', gap:4 }}>
                   <span style={{ color:'#71717a', fontSize:12 }}>Proveedor:</span>
                   <SearchableSelect value={docBulkProveedor} onChange={v => setDocBulkProveedor(v)}
-                    options={docTabContactos.length ? docTabContactos : contactosTodos}
+                    options={contactosTodos}
                     placeholder="— elegir —" />
                   {docBulkProveedor && (
                     <button onClick={() => editarDocsBulkContacto('factura_proveedor_id', docBulkProveedor)}
@@ -5616,7 +5499,7 @@ export default function Finanzas() {
                 <div style={{ display:'flex', alignItems:'center', gap:4 }}>
                   <span style={{ color:'#71717a', fontSize:12 }}>Cliente:</span>
                   <SearchableSelect value={docBulkCliente} onChange={v => setDocBulkCliente(v)}
-                    options={docTabContactos.length ? docTabContactos : contactosTodos}
+                    options={contactosTodos}
                     placeholder="— elegir —" />
                   {docBulkCliente && (
                     <button onClick={() => editarDocsBulkContacto('factura_cliente_id', docBulkCliente)}
@@ -5881,7 +5764,7 @@ export default function Finanzas() {
       })()}
 
       {/* ── FISCAL ── */}
-      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewerData={facturaViewerData} setFacturaViewerId={setFacturaViewerId} setFacturaViewerAutoEdit={setFacturaViewerAutoEdit} onFacturasEliminadas={ids => { ids.forEach(id => qc.removeQueries({ queryKey: facturaKeys.detail(id), exact: true })); qc.invalidateQueries({ queryKey: facturaKeys.lists() }); if (ids.includes(facturaViewerId)) setFacturaViewerId(null); }} findBestMatch={findBestMatch} toggleMovimientoEnFactura={toggleMovimientoEnFactura} setContactosTodos={setContactosTodos} setModalNuevosContactos={setModalNuevosContactos} />}
+      {tab === 'fiscal' && <TabFiscal onAbrirMovimiento={abrirDetalle} facturaViewerData={facturaViewerData} setFacturaViewerId={setFacturaViewerId} setFacturaViewerAutoEdit={setFacturaViewerAutoEdit} onFacturasEliminadas={ids => { ids.forEach(id => qc.removeQueries({ queryKey: facturaKeys.detail(id), exact: true })); qc.invalidateQueries({ queryKey: facturaKeys.lists() }); if (ids.includes(facturaViewerId)) setFacturaViewerId(null); }} findBestMatch={findBestMatch} toggleMovimientoEnFactura={toggleMovimientoEnFactura} setModalNuevosContactos={setModalNuevosContactos} />}
 
       {/* ── CLIENTES ── */}
       {tab === 'clientes' && (() => {
@@ -5926,9 +5809,9 @@ export default function Finanzas() {
           return (
             <div key={c.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
-                <span onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <span onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); }}
                   style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
-                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); }}
                   style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{c.nombre}</span>
                   {c.nombre_empresa && c.nombre_empresa !== c.nombre && (
@@ -5943,7 +5826,7 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Eliminar
                 </button>
-                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setClienteAbierto(abierto ? null : c.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
@@ -6219,9 +6102,9 @@ export default function Finanzas() {
           return (
             <div key={e.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
-                <span onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <span onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); }}
                   style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
-                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); }}
                   style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{e.nombre}</span>
                   {e.email && <span style={{ color: '#71717a', fontSize: 12, marginLeft: 8 }}>{e.email}</span>}
@@ -6234,7 +6117,7 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Eliminar
                 </button>
-                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setEquipoAbierto(abierto ? null : e.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
@@ -6493,9 +6376,9 @@ export default function Finanzas() {
           return (
             <div key={p.id} style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: 12 }}>
-                <span onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <span onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); }}
                   style={{ color: '#52525b', fontSize: 12, flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: abierto ? 'rotate(90deg)' : 'none', cursor: 'pointer' }}>▶</span>
-                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); }}
                   style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
                   <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{p.nombre}</span>
                   {p.nombre_empresa && p.nombre_empresa !== p.nombre && (
@@ -6510,7 +6393,7 @@ export default function Finanzas() {
                   style={{ background: 'transparent', border: '1px solid #7f1d1d', color: '#f87171', borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}>
                   Eliminar
                 </button>
-                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); setDocsContacto([]); }}
+                <div onClick={() => { setProveedorAbierto(abierto ? null : p.id); setMovFiltroTipo('todos'); setMovPagina(1); setMovPorPagina(10); setDocFiltroTipo('todos'); setDocContactoPagina(1); setDocContactoPorPagina(10); setContactoTabInner('movimientos'); }}
                   style={{ display: 'flex', gap: 16, flexShrink: 0, cursor: 'pointer' }}>
                   <span style={{ fontSize: 13, color: '#22c55e', fontWeight: 500 }}>{fmt(ingresos)}</span>
                   <span style={{ fontSize: 13, color: '#f87171', fontWeight: 500 }}>{fmt(-gastos)}</span>
@@ -6721,15 +6604,8 @@ export default function Finanzas() {
       {modalContacto && <ModalContacto
         tipo={modalContacto.tipo}
         datos={modalContacto.datos}
-        onGuardado={() => {
-          setModalContacto(null);
-          if (modalContacto.tipo === 'cliente') cargarClientes();
-          else if (modalContacto.tipo === 'equipo') cargarEquipo();
-          else cargarProveedores();
-        }}
+        onGuardado={() => setModalContacto(null)}
         onCerrar={() => setModalContacto(null)}
-        savingContacto={savingContacto}
-        setSavingContacto={setSavingContacto}
       />}
 
       {/* ── Modal Nuevos Contactos detectados al guardar facturas ── */}
@@ -6875,7 +6751,7 @@ export default function Finanzas() {
                   });
                   if (!r.ok) throw new Error('Error al confirmar');
                   setModalNuevosContactos(null);
-                  cargarProveedores();
+                  qc.invalidateQueries({ queryKey: contactoKeys.all });
                   qc.invalidateQueries({ queryKey: facturaKeys.lists() });
                 } catch(e) { alert(e.message); }
                 finally { setConfirmandoContactos(false); }
@@ -6954,7 +6830,7 @@ export default function Finanzas() {
             {/* Metadata */}
             {facturaViewerData && !facturaViewerLoading && (() => {
               const fv = facturaViewerData;
-              const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
+              const ctodos = contactosTodos;
               const findC = id => ctodos.find(c => c.id === id)?.nombre || id?.slice(0,8) || '—';
               const pill = (txt, color) => <span style={{ background: color+'22', color, border:`1px solid ${color}44`, borderRadius:4, padding:'1px 7px', fontSize:11, fontWeight:600, flexShrink:0 }}>{txt}</span>;
               return (
@@ -7008,7 +6884,7 @@ export default function Finanzas() {
             })()}
             {/* Panel edición */}
             {viewerEditando && facturaViewerData && (() => {
-              const ctodos = docTabContactos.length ? docTabContactos : contactosTodos;
+              const ctodos = contactosTodos;
               const fv = facturaViewerData;
               const selStyle = { background:'#27272a', border:'1px solid #3f3f46', borderRadius:6, color:'white', padding:'5px 8px', fontSize:12, outline:'none', flex:1 };
               const lblStyle = { color:'#52525b', fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em' };
@@ -7025,7 +6901,7 @@ export default function Finanzas() {
                 await guardarCeldaDoc(facturaViewerId, payload);
                 // viewer se actualiza automáticamente via useFactura(facturaViewerId)
                 setViewerEditando(false);
-                if (contactoCambiado) { cargarProveedores(); cargarClientes(); cargarEquipo(); }
+                if (contactoCambiado) qc.invalidateQueries({ queryKey: contactoKeys.all });
               };
               return (
                 <div style={{ padding:'12px 16px', borderBottom:'1px solid #27272a', background:'#111', flexShrink:0, display:'flex', flexDirection:'column', gap:10 }}>
