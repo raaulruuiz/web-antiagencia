@@ -349,14 +349,15 @@ export default function Calendly() {
                   <div>
                     <p className="text-sm font-medium">{t.nombre} {!t.activo && <span className="text-zinc-600">(inactivo)</span>}</p>
                     <p className="text-xs text-zinc-500 mt-0.5">{t.duracion_minutos} min</p>
-                    <p className="text-xs text-zinc-600 mt-0.5 flex items-center gap-1.5">
-                      antiagencia.es/reservar/{t.slug}
-                      <button type="button" onClick={() => copiarUrl(t.slug)} title="Copiar URL"
-                        className="text-zinc-500 hover:text-white transition-colors">
-                        {copiedSlug === t.slug ? '✓' : '⧉'}
-                      </button>
-                      <span className="text-zinc-700">(página pública pendiente — Fase 2)</span>
-                    </p>
+                    {t.activo && (
+                      <p className="text-xs text-zinc-600 mt-0.5 flex items-center gap-1.5">
+                        antiagencia.es/reservar/{t.slug}
+                        <button type="button" onClick={() => copiarUrl(t.slug)} title="Copiar URL"
+                          className="text-zinc-500 hover:text-white transition-colors">
+                          {copiedSlug === t.slug ? '✓' : '⧉'}
+                        </button>
+                      </p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => abrirEditar(t)} className="text-xs text-zinc-400 hover:text-white px-2 py-1">Editar</button>
