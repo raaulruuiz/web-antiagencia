@@ -27,7 +27,7 @@ function slugify(nombre) {
 
 function emptyForm() {
   const dias = {};
-  WEEKDAYS.forEach(d => { dias[d.key] = { activo: false, from: '11:00', to: '19:00' }; });
+  WEEKDAYS.forEach(d => { dias[d.key] = { activo: false, intervals: [{ from: '11:00', to: '19:00' }] }; });
   return {
     nombre: '', descripcion: '', duracion_minutos: 60,
     buffer_antes_min: 0, buffer_despues_min: 0,
@@ -40,8 +40,8 @@ function emptyForm() {
 function horarioToForm(horario) {
   const f = emptyForm();
   (horario || []).forEach(r => {
-    if (f.dias[r.wday] && r.intervals?.[0]) {
-      f.dias[r.wday] = { activo: true, from: r.intervals[0].from, to: r.intervals[0].to };
+    if (f.dias[r.wday] && r.intervals?.length) {
+      f.dias[r.wday] = { activo: true, intervals: r.intervals.map(i => ({ from: i.from, to: i.to })) };
     }
   });
   return f;
@@ -65,7 +65,7 @@ function tipoToForm(tipo) {
 function formToPayload(form, nombreParaSlug) {
   const horario = WEEKDAYS
     .filter(d => form.dias[d.key].activo)
-    .map(d => ({ wday: d.key, intervals: [{ from: form.dias[d.key].from, to: form.dias[d.key].to }] }));
+    .map(d => ({ wday: d.key, intervals: form.dias[d.key].intervals }));
   const calendarios_conflicto = CUENTAS.filter(c => form.cuentas[c.key]).map(c => c.key);
   return {
     nombre: form.nombre,
@@ -162,6 +162,25 @@ export default function Calendly() {
     setModalTipo({ tipo });
   }
 
+  function addFranja(dayKey) {
+    setForm(f => ({ ...f, dias: { ...f.dias, [dayKey]: { ...f.dias[dayKey], intervals: [...f.dias[dayKey].intervals, { from: '11:00', to: '19:00' }] } } }));
+  }
+  function removeFranja(dayKey, idx) {
+    setForm(f => ({ ...f, dias: { ...f.dias, [dayKey]: { ...f.dias[dayKey], intervals: f.dias[dayKey].intervals.filter((_, i) => i !== idx) } } }));
+  }
+  function setFranja(dayKey, idx, campo, valor) {
+    setForm(f => ({
+      ...f,
+      dias: {
+        ...f.dias,
+        [dayKey]: {
+          ...f.dias[dayKey],
+          intervals: f.dias[dayKey].intervals.map((iv, i) => i === idx ? { ...iv, [campo]: valor } : iv),
+        },
+      },
+    }));
+  }
+
   async function guardarTipo(e) {
     e.preventDefault();
     if (!form.nombre.trim()) return;
@@ -250,7 +269,8 @@ export default function Calendly() {
                 <div key={t.id} className="flex items-center justify-between border border-zinc-800 rounded-lg px-4 py-3">
                   <div>
                     <p className="text-sm font-medium">{t.nombre} {!t.activo && <span className="text-zinc-600">(inactivo)</span>}</p>
-                    <p className="text-xs text-zinc-500 mt-0.5">{t.duracion_minutos} min · /{t.slug}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">{t.duracion_minutos} min</p>
+                    <p className="text-xs text-zinc-600 mt-0.5">antiagencia.es/reservar/{t.slug} <span className="text-zinc-700">(página pública pendiente — Fase 2)</span></p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => abrirEditar(t)} className="text-xs text-zinc-400 hover:text-white px-2 py-1">Editar</button>
@@ -320,21 +340,35 @@ export default function Calendly() {
 
               <div>
                 <label className="block text-xs text-zinc-500 mb-2">Horario</label>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   {WEEKDAYS.map(d => (
-                    <div key={d.key} className="flex items-center gap-2">
-                      <label className="flex items-center gap-2 w-28 text-xs text-zinc-300">
+                    <div key={d.key} className="flex items-start gap-2">
+                      <label className="flex items-center gap-2 w-28 text-xs text-zinc-300 pt-1.5 flex-shrink-0">
                         <input type="checkbox" checked={form.dias[d.key].activo}
                           onChange={e => setForm(f => ({ ...f, dias: { ...f.dias, [d.key]: { ...f.dias[d.key], activo: e.target.checked } } }))} />
                         {d.label}
                       </label>
-                      <input type="time" value={form.dias[d.key].from} disabled={!form.dias[d.key].activo}
-                        onChange={e => setForm(f => ({ ...f, dias: { ...f.dias, [d.key]: { ...f.dias[d.key], from: e.target.value } } }))}
-                        className="bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-xs text-white disabled:opacity-40" />
-                      <span className="text-zinc-600 text-xs">a</span>
-                      <input type="time" value={form.dias[d.key].to} disabled={!form.dias[d.key].activo}
-                        onChange={e => setForm(f => ({ ...f, dias: { ...f.dias, [d.key]: { ...f.dias[d.key], to: e.target.value } } }))}
-                        className="bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-xs text-white disabled:opacity-40" />
+                      <div className="flex flex-col gap-1.5 flex-1">
+                        {form.dias[d.key].intervals.map((iv, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <input type="time" value={iv.from} disabled={!form.dias[d.key].activo}
+                              onChange={e => setFranja(d.key, idx, 'from', e.target.value)}
+                              className="bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-xs text-white disabled:opacity-40" />
+                            <span className="text-zinc-600 text-xs">a</span>
+                            <input type="time" value={iv.to} disabled={!form.dias[d.key].activo}
+                              onChange={e => setFranja(d.key, idx, 'to', e.target.value)}
+                              className="bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-xs text-white disabled:opacity-40" />
+                            {form.dias[d.key].intervals.length > 1 && (
+                              <button type="button" onClick={() => removeFranja(d.key, idx)} disabled={!form.dias[d.key].activo}
+                                className="text-zinc-600 hover:text-red-400 text-xs disabled:opacity-40">✕</button>
+                            )}
+                          </div>
+                        ))}
+                        <button type="button" onClick={() => addFranja(d.key)} disabled={!form.dias[d.key].activo}
+                          className="text-xs text-zinc-500 hover:text-white text-left disabled:opacity-40 disabled:hover:text-zinc-500">
+                          + añadir franja
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
