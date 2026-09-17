@@ -13,15 +13,19 @@
  *   public.finanzas_movimientos          ✓
  *   public.finanzas_facturas             ✓
  *   public.finanzas_facturas_movimientos ✓
+ *   public.contactos                     ✓ (FASE 11E4B)
  *
- * Tablas pendientes de autorización (NO incluir hasta ALTER PUBLICATION + autorización):
- *   public.contactos
+ * contactos: INSERT/UPDATE/DELETE invalidan solo contactoKeys.all +
+ * movimientoKeys.all (el detail de movimiento resuelve nombres de
+ * contacto en vivo en el backend). NO invalida facturaKeys (nombre_entidad/
+ * nif_cif son columnas propias de la factura, sin join a contactos — ver
+ * auditoría FASE 11E4A), ni fiscalKeys/dashboardKeys (0 dependencia real).
  */
 
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { movimientoKeys, facturaKeys, dashboardKeys, fiscalKeys } from './queryKeys';
+import { movimientoKeys, facturaKeys, dashboardKeys, fiscalKeys, contactoKeys } from './queryKeys';
 
 export function useFinanzasRealtime() {
   const qc = useQueryClient();
@@ -133,10 +137,23 @@ export function useFinanzasRealtime() {
 
       .subscribe();
 
+    const chContactos = supabase
+      .channel('finanzas-contactos')
+
+      // INSERT/UPDATE/DELETE: mismo tratamiento para los tres — invalidación
+      // amplia por familia, sin inspeccionar payload (auditoría FASE 11E4A).
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'contactos' }, () => {
+        qc.invalidateQueries({ queryKey: contactoKeys.all });
+        qc.invalidateQueries({ queryKey: movimientoKeys.all });
+      })
+
+      .subscribe();
+
     return () => {
       supabase.removeChannel(chMov);
       supabase.removeChannel(chFac);
       supabase.removeChannel(chJunction);
+      supabase.removeChannel(chContactos);
     };
   }, [qc]);
 }
