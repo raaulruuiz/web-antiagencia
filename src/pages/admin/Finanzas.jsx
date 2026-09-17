@@ -215,27 +215,6 @@ const S = {
   danger:  { background: 'transparent', color: '#f87171', border: '1px solid #7f1d1d', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer' },
 };
 
-// Misma lógica que calcularCampos del backend — rellena campos derivados si faltan
-function enriquecerMovimiento(m) {
-  if (!m) return m;
-  if (m.base_imponible != null && m.iva_a_pagar != null) return m; // ya completo
-  const ivaPct  = parseFloat(m.iva)  / 100 || 0;
-  const irpfPct = parseFloat(m.irpf) / 100 || 0;
-  const cantidad = m.cantidad || 0;
-  const esIngreso = m.tipo === 'Ingreso';
-  let extra;
-  if (esIngreso) {
-    const divisor = 1 + ivaPct - irpfPct;
-    const base = divisor > 0 ? Math.round(cantidad / divisor * 100) / 100 : cantidad;
-    extra = { base_imponible: base, iva_a_pagar: Math.round(base * ivaPct * 100) / 100, irpf_a_pagar: 0, irpf_retenido_yo: Math.round(base * irpfPct * 100) / 100 };
-  } else {
-    const base = irpfPct > 0 ? Math.round(cantidad / (1 - irpfPct) * 100) / 100 : cantidad;
-    const baseReal = ivaPct > 0 ? Math.round(base / (1 + ivaPct) * 100) / 100 : base;
-    extra = { base_imponible: baseReal, iva_a_pagar: ivaPct > 0 ? Math.round(-baseReal * ivaPct * 100) / 100 : 0, irpf_a_pagar: Math.round(irpfPct > 0 ? baseReal * irpfPct * 100 / 100 : 0), irpf_retenido_yo: 0 };
-  }
-  return { ...m, ...extra };
-}
-
 function fmt(n) {
   if (n == null) return '—';
   const [int, dec] = Math.abs(n).toFixed(2).split('.');
