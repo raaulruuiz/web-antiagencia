@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
 const EMAIL_BASE_RULES = [
   // margin:0 removes the browser default 8px body margin; padding is NOT overridden so
@@ -139,9 +139,25 @@ function buildEmailIframeHtml(html_body, gmail_styles, mobileMode = false) {
 
 export default function EmailIframe({ html_body, gmail_styles, style, withLinks = false, mobileMode = false }) {
   const containerRef = useRef(null);
+  const resizeObserverRef = useRef(null);
+  const fallbackTimersRef = useRef([]);
+  const rafRef = useRef(null);
+  const lastHeightRef = useRef(0);
+  const lastWidthScaleRef = useRef(1);
   const iframeHtml = buildEmailIframeHtml(html_body, gmail_styles, mobileMode);
   // Always render at 601px — email content is designed for this width and would clip at 375px.
   // mobileMode only affects the injected CSS (mobile-only/desktop-only visibility, no media query strip).
+
+  // Drops whatever autosize machinery (observer/timers/pending frame) is currently live —
+  // called both when a new document loads into the same iframe and on unmount, so we never
+  // keep observing/measuring a document that's gone.
+  function cleanupAutosize() {
+    if (resizeObserverRef.current) { resizeObserverRef.current.disconnect(); resizeObserverRef.current = null; }
+    fallbackTimersRef.current.forEach(clearTimeout);
+    fallbackTimersRef.current = [];
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+  }
+  useEffect(() => cleanupAutosize, []);
 
   if (!withLinks) {
     return (
@@ -151,9 +167,22 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
           sandbox="allow-same-origin"
           onLoad={(e) => {
             if (!containerRef.current) return;
+            const iframeEl = e.target;
+            // Same principle as the withLinks branch: a fixed 601px iframe width clips
+            // anything wider than that (via overflow-x:hidden inside the doc) before this
+            // scale runs. Detect the content's real width and widen the iframe to match
+            // before scaling, so the thumbnail shrinks a complete render instead of an
+            // already-clipped one.
+            const doc = iframeEl.contentDocument;
+            let naturalWidth = IFRAME_VIEWPORT;
+            if (doc) {
+              const w = Math.max(doc.body?.scrollWidth || 0, doc.documentElement?.scrollWidth || 0);
+              if (w > IFRAME_VIEWPORT) naturalWidth = w;
+            }
+            if (naturalWidth !== IFRAME_VIEWPORT) iframeEl.style.width = `${naturalWidth}px`;
             const containerWidth = containerRef.current.offsetWidth;
-            const scale = containerWidth / IFRAME_VIEWPORT;
-            e.target.style.transform = `scale(${scale})`;
+            const scale = containerWidth / naturalWidth;
+            iframeEl.style.transform = `scale(${scale})`;
           }}
           style={{
             width: `${IFRAME_VIEWPORT}px`,
@@ -176,6 +205,100 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
   // render correctly, then scale the iframe down visually to MOBILE_VIEWPORT using transform.
   // This is the same technique used by Litmus / Email on Acid for mobile previews.
   const scale = mobileMode ? MOBILE_VIEWPORT / IFRAME_VIEWPORT : 1;
+
+  // Applies the measured height, accounting for any visual scale currently in effect
+  // (fixed mobile scale, or the dynamic desktop width-scale from applyWidthScale) so the
+  // parent div's box matches what's actually rendered instead of leaving dead space.
+  function applyHeight(iframeEl, h, extraScale) {
+    if (!h || h === lastHeightRef.current) return;
+    lastHeightRef.current = h;
+    iframeEl.style.height = h + 'px';
+    if (iframeEl.parentElement) {
+      const effectiveScale = mobileMode ? scale : (extraScale || 1);
+      iframeEl.parentElement.style.height = (mobileMode || effectiveScale < 1) ? Math.ceil(h * effectiveScale) + 'px' : '';
+    }
+  }
+
+  // Desktop-only: a handful of captured emails use a fixed-px master table wider than
+  // IFRAME_VIEWPORT (e.g. 636px) meant to be shrunk by a responsive class on small screens —
+  // but Gmail strips <style> tags on capture, so that class has no rule left and the desktop
+  // width applies unconditionally. Without this, overflow-x:hidden on body just clips the
+  // excess (content runs off the right edge) instead of scaling it down. Emails that already
+  // fit (the vast majority — fluid width:100% tables, or designed for ~600px) are untouched:
+  // widthScale stays 1 and nothing changes for them.
+  function applyWidthScale(iframeEl, ws) {
+    if (mobileMode) return; // mobile already has its own fixed scale via CSS transform in JSX
+    if (ws === lastWidthScaleRef.current) return;
+    lastWidthScaleRef.current = ws;
+    iframeEl.style.transform = ws < 1 ? `scale(${ws})` : '';
+  }
+
+  function measure(iframeEl) {
+    const doc = iframeEl.contentDocument;
+    if (!doc) return;
+    const body = doc.body, docEl = doc.documentElement;
+    let widthScale = 1;
+    if (!mobileMode) {
+      const w = Math.max(body?.scrollWidth || 0, docEl?.scrollWidth || 0);
+      if (w > IFRAME_VIEWPORT) widthScale = IFRAME_VIEWPORT / w;
+      // Give the iframe its real (unclipped) width when content overflows 601px.
+      // `overflow-x:hidden` (EMAIL_BASE_RULES) clips anything past the iframe's OWN
+      // viewport before any outer transform runs — a fixed-width iframe would discard
+      // those pixels permanently, and scale() can't recover content that was never
+      // painted. Widening first, then scaling the whole (now-complete) box back down,
+      // is the only way to shrink it visually without losing the overflow.
+      const targetWidth = widthScale < 1 ? w : IFRAME_VIEWPORT;
+      if (iframeEl.style.width !== `${targetWidth}px`) iframeEl.style.width = `${targetWidth}px`;
+    }
+    applyWidthScale(iframeEl, widthScale);
+    // Height measured AFTER the width above, so a fixed-width table that only renders
+    // in full at its natural width reports its true (post-widen) height.
+    const h = Math.max(body?.scrollHeight || 0, body?.offsetHeight || 0, docEl?.scrollHeight || 0, docEl?.offsetHeight || 0);
+    applyHeight(iframeEl, h, widthScale);
+  }
+
+  // Coalesces bursts of ResizeObserver callbacks (e.g. several images finishing at once)
+  // into a single measurement per frame — avoids a resize→measure→resize loop.
+  function scheduleMeasure(iframeEl) {
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => { rafRef.current = null; measure(iframeEl); });
+  }
+
+  function handleLoad(e) {
+    cleanupAutosize(); // a fresh document just loaded — drop any observer/timers from the previous one
+    lastHeightRef.current = 0;
+    lastWidthScaleRef.current = 1;
+    const iframeEl = e.target;
+    if (!mobileMode) {
+      // Reset to the baseline 601px viewport before measuring this fresh document —
+      // a previously loaded (different) email may have left this same iframe node
+      // widened + scaled, which would bias the overflow check below.
+      iframeEl.style.width = `${IFRAME_VIEWPORT}px`;
+      iframeEl.style.transform = '';
+    }
+    measure(iframeEl);
+    const doc = iframeEl.contentDocument;
+    if (!doc) return;
+
+    if (typeof ResizeObserver !== 'undefined') {
+      // Catches height changes after `load` — images/resources that finish rendering late,
+      // or any other post-load layout shift — without polling.
+      const ro = new ResizeObserver(() => scheduleMeasure(iframeEl));
+      if (doc.body) ro.observe(doc.body);
+      if (doc.documentElement) ro.observe(doc.documentElement);
+      resizeObserverRef.current = ro;
+    } else {
+      // No ResizeObserver available: a handful of bounded re-measurements (not infinite
+      // polling) as a reasonable fallback for the same late-loading-resources case.
+      fallbackTimersRef.current = [150, 400, 800, 1500, 3000].map(delay => setTimeout(() => measure(iframeEl), delay));
+    }
+
+    // Fonts resolving after layout can reflow text and change height — re-measure once.
+    if (doc.fonts?.ready) {
+      doc.fonts.ready.then(() => scheduleMeasure(iframeEl)).catch(() => {});
+    }
+  }
+
   return (
     <div
       style={{
@@ -187,18 +310,7 @@ export default function EmailIframe({ html_body, gmail_styles, style, withLinks 
       <iframe
         srcDoc={iframeHtml}
         sandbox="allow-same-origin allow-popups allow-top-navigation-by-user-activation"
-        onLoad={(e) => {
-          const h = e.target.contentDocument?.body?.scrollHeight;
-          if (!h) return;
-          e.target.style.height = h + 'px';
-          if (e.target.parentElement) {
-            // In mobile mode shrink the outer div to the scaled height so no whitespace appears.
-            // In desktop mode always clear any previously set inline height so the div auto-sizes.
-            e.target.parentElement.style.height = mobileMode
-              ? Math.ceil(h * scale) + 'px'
-              : '';
-          }
-        }}
+        onLoad={handleLoad}
         style={{
           width: `${IFRAME_VIEWPORT}px`,
           height: '100%',

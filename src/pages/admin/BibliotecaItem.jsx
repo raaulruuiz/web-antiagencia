@@ -4,6 +4,10 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useTheme } from '@/lib/ThemeContext';
 import EmailIframe from '@/components/EmailIframe';
+import { BlockRenderer } from '@/features/biblioteca/renderer/BlockRenderer';
+import { ColumnasLayout } from '@/features/biblioteca/renderer/blocks/ColumnasBlockView';
+import { SocialIcon } from '@/features/biblioteca/renderer/shared/SocialIcon';
+import { AudioPlayer } from '@/features/biblioteca/renderer/blocks/AudioBlockView';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
 
@@ -1091,18 +1095,6 @@ const SOCIAL_NETWORKS = [
   { id: 'whatsapp',  label: 'WhatsApp',  color: '#25D366' },
 ];
 
-function SocialIcon({ network, color = 'currentColor', size = 24 }) {
-  const c = color; const s = size;
-  if (network === 'instagram') return <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke={c} strokeWidth="2"/><circle cx="12" cy="12" r="5" stroke={c} strokeWidth="2"/><circle cx="17.5" cy="6.5" r="1.2" fill={c}/></svg>;
-  if (network === 'facebook')  return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>;
-  if (network === 'x')         return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>;
-  if (network === 'pinterest')  return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>;
-  if (network === 'youtube')   return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>;
-  if (network === 'tiktok')    return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.5a8.26 8.26 0 0 0 4.83 1.56V6.59a4.85 4.85 0 0 1-1.06-.1z"/></svg>;
-  if (network === 'linkedin')  return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>;
-  if (network === 'whatsapp')  return <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.554 4.121 1.524 5.855L.057 23.886a.5.5 0 0 0 .611.611l6.031-1.467A11.953 11.953 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.894a9.876 9.876 0 0 1-5.034-1.376l-.361-.214-3.733.907.922-3.642-.235-.374A9.859 9.859 0 0 1 2.106 12C2.106 6.533 6.533 2.106 12 2.106S21.894 6.533 21.894 12 17.467 21.894 12 21.894z"/></svg>;
-  return null;
-}
 
 // ── Block: selector panel ─────────────────────────────────────────────────────
 const BLOCK_COLORS = { enlaces: '#3b82f6', imagen: '#22c55e', imagen_texto: '#f97316', correccion: '#a855f7', asunto_adelanto: '#f59e0b', transcribir: '#06b6d4', columnas: '#14b8a6', puntuacion: '#e879f9', audio: '#f43f5e', social: '#ec4899' };
@@ -1417,32 +1409,6 @@ function BlockSelector({ onSelect, hasCorreccion, hasPuntuacion, onClose, catego
 }
 
 // ── Preview image with lightbox hover ────────────────────────────────────────
-function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
-  const [hov, setHov] = useState(false);
-  const imgEl = <img src={src} alt="" style={{ display: 'block', ...imgStyle }} />;
-  return (
-    <div style={{ position: 'relative', ...wrapperStyle }}
-      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
-      {href
-        ? <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>{imgEl}</a>
-        : imgEl}
-      {hov && (
-        <div style={{ position: 'absolute', top: 6, right: 6, display: 'flex', gap: 4 }}>
-          <button onClick={e => { e.preventDefault(); e.stopPropagation(); onPreview(src); }}
-            style={{ background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 6, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 11, fontWeight: 500, backdropFilter: 'blur(4px)' }}>
-            <IconEye /> Ver
-          </button>
-          <a href={src} download target="_blank" rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
-            style={{ background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 6, padding: '4px 7px', display: 'flex', alignItems: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', textDecoration: 'none' }}
-            title="Descargar imagen">
-            <IconDownload />
-          </a>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ── Block: card ───────────────────────────────────────────────────────────────
 function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown, onMoveLeft, onMoveRight, onToggleVisible, itemAsunto, itemAdelanto, onUpdateBlock, onExtract, categoria, onUploadImage, onCropFromEmail, libraryImages, isMobile }) {
@@ -1450,7 +1416,6 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
   const c = BLOCK_COLORS[block.type] || '#71717a';
   const isCorreccion = block.type === 'correccion';
   const isPuntuacion = block.type === 'puntuacion';
-  const imgs = block.images || [];
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showColumnaModal, setShowColumnaModal] = useState(false);
   const [lightbox, setLightbox] = useState(null);
@@ -1619,353 +1584,72 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
 
       {/* Content preview */}
       {block.type === 'enlaces' && (
-        <div style={{ padding: '14px 14px 14px' }}>
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Enlace'}</div>
-            {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginTop: 4 }}>{block.subtitulo}</div>}
-          </div>
-          {/* Link previews */}
-          {(block.links || (block.url ? [{ images: block.images || [], url: block.url }] : [])).length > 0 ? (
-            <div style={
-              block.links_layout === 'fila'
-                ? { display: 'flex', flexDirection: 'row', gap: 12, overflowX: 'auto' }
-                : block.links_layout === 'grid'
-                ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }
-                : { display: 'flex', flexDirection: 'column', gap: 12 }
-            }>
-              {(block.links || (block.url ? [{ images: block.images || [], url: block.url }] : [])).map((link, li) => (
-                block.links_layout === 'grid' ? (
-                  <div key={li} style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
-                    {(link.images || []).map((img, i) => (
-                      img.isSocial ? (
-                        <a key={i} href={link.url || undefined} target="_blank" rel="noopener noreferrer"
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', aspectRatio: '1', borderRadius: 9, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', textDecoration: 'none' }}>
-                          <SocialIcon network={img.network} color={img.color} size={40} />
-                        </a>
-                      ) : (
-                        <PreviewImg key={i} src={img.url}
-                          imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: img.borderRadius ?? 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
-                          wrapperStyle={{ width: '100%' }}
-                          href={link.url || undefined}
-                          onPreview={setLightbox} />
-                      )
-                    ))}
-                    {(link.htmls?.length || link.html) &&
-                      (link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
-                        <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} style={{ pointerEvents: 'none', padding: '4px 0' }} />
-                        </a>
-                      ))
-                    }
-                    {link.url && (
-                      <a href={link.url} target="_blank" rel="noopener noreferrer"
-                        style={{ fontSize: 11, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                        onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                        onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                        {link.url}
-                      </a>
-                    )}
-                  </div>
-                ) : block.links_layout === 'fila' ? (
-                  /* Fila: imágenes en horizontal dentro del link item */
-                  <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, overflow: 'hidden' }}>
-                    {(link.images || []).map((img, i) => (
-                      img.isSocial ? (
-                        <a key={i} href={link.url || undefined} target="_blank" rel="noopener noreferrer"
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 9, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', textDecoration: 'none', flexShrink: 0 }}>
-                          <SocialIcon network={img.network} color={img.color} size={36} />
-                        </a>
-                      ) : (
-                        <PreviewImg key={i} src={img.url}
-                          imgStyle={{ height: 160, borderRadius: img.borderRadius ?? 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
-                          wrapperStyle={{ flexShrink: 0 }}
-                          href={link.url || undefined}
-                          onPreview={setLightbox} />
-                      )
-                    ))}
-                    {(link.htmls?.length || link.html) && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
-                        {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
-                          <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} style={{ pointerEvents: 'none' }} />
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                    {link.url && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, maxWidth: 320 }}>
-                        <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
-                        <a href={link.url} target="_blank" rel="noopener noreferrer"
-                          style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                          onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                          onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                          {link.url}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  /* Columna: imágenes apiladas verticalmente dentro del link item */
-                  <div key={li} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {(link.images || []).map((img, i) => (
-                      img.isSocial ? (
-                        <a key={i} href={link.url || undefined} target="_blank" rel="noopener noreferrer"
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 9, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', textDecoration: 'none', flexShrink: 0 }}>
-                          <SocialIcon network={img.network} color={img.color} size={36} />
-                        </a>
-                      ) : (
-                        <PreviewImg key={i} src={img.url}
-                          imgStyle={{ height: 160, width: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)' }}
-                          wrapperStyle={{ flexShrink: 0 }}
-                          href={link.url || undefined}
-                          onPreview={setLightbox} />
-                      )
-                    ))}
-                    {(link.htmls?.length || link.html) && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        {(link.htmls?.length ? link.htmls : [link.html]).map((h, hi) => (
-                          <a key={hi} href={link.url || undefined} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(h) }} style={{ pointerEvents: 'none' }} />
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                    {link.url && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontSize: 26, color: '#3b82f6', fontWeight: 300, flexShrink: 0 }}>→</span>
-                        <a href={link.url} target="_blank" rel="noopener noreferrer"
-                          style={{ fontSize: 14, color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
-                          onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                          onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                          {link.url}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                )
-              ))}
-            </div>
-          ) : (
-            <span style={{ fontSize: 13, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin links configurados</span>
-          )}
-        </div>
+        <BlockRenderer block={block} wrap={false} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={{ asunto: itemAsunto, adelanto: itemAdelanto }} isPro={true} />
       )}
 
       {block.type === 'imagen' && (
-        <div style={{ padding: '12px 14px' }}>
-          <div style={{ marginBottom: imgs.length > 0 ? 10 : 0 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Imagen'}</div>
-            {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
-          </div>
-          {imgs.length > 0 && (
-            <div style={
-              block.images_layout === 'fila'
-                ? { display: 'flex', flexDirection: 'row', gap: 10, overflowX: 'auto' }
-                : block.images_layout === 'grid'
-                ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }
-                : { display: 'flex', flexDirection: 'column', gap: 10 }
-            }>
-              {imgs.map((img, i) => (
-                block.images_layout === 'grid'
-                  ? <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', aspectRatio: '1', borderRadius: img.borderRadius ?? 9, objectFit: 'cover', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
-                  : block.images_layout === 'fila'
-                  ? <PreviewImg key={i} src={img.url} imgStyle={{ height: 180, width: 'auto', borderRadius: img.borderRadius ?? 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ flexShrink: 0 }} onPreview={setLightbox} />
-                  : <PreviewImg key={i} src={img.url} imgStyle={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: img.borderRadius ?? 9, objectFit: 'contain', border: '1px solid var(--t-border)' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
-              ))}
-            </div>
-          )}
-        </div>
+        <BlockRenderer block={block} wrap={false} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={{ asunto: itemAsunto, adelanto: itemAdelanto }} isPro={true} />
       )}
 
-      {block.type === 'imagen_texto' && (() => {
-        const items = block.items || (block.images?.length || block.texto ? [{ image: block.images?.[0] || null, texto: block.texto || '' }] : []);
-        const layout  = block.it_layout || 'img-text';
-        const isHoriz = layout === 'img-text' || layout === 'text-img';
-        const imgFirst = layout === 'img-text' || layout === 'img-top';
-        if (!items.length) return <div style={{ padding: '12px 14px' }}><span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span></div>;
-        return (
-          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Imagen y/o Texto'}</div>
-              {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
-            </div>
-            {items.map((it, i) => {
-              const tc = it.text_color;
-              const hasImage = it.image?.url;
-              const hasText  = it.texto?.trim();
-              const imgEl = hasImage ? (
-                <PreviewImg src={it.image.url} imgStyle={{ width: '100%', height: 'auto', borderRadius: 9, objectFit: 'cover', border: '1px solid var(--t-border)', display: 'block' }} wrapperStyle={{ width: '100%' }} onPreview={setLightbox} />
-              ) : null;
-              const txtEl = hasText ? (
-                <div style={{ padding: '10px 12px', borderRadius: 8, fontSize: 12, lineHeight: 1.6, textAlign: it.text_align || 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: tc ? tc + '22' : 'transparent', border: tc ? `1px solid ${tc}` : '1px solid var(--t-border)', color: tc || 'var(--t-text)' }}>{it.texto}</div>
-              ) : null;
-              const first = imgFirst ? imgEl : txtEl;
-              const second = imgFirst ? txtEl : imgEl;
-              return (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasImage && hasText && !isMobile ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start' }}>
-                  {first}
-                  {second}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })()}
+      {block.type === 'imagen_texto' && (
+        <BlockRenderer block={block} wrap={false} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={{ asunto: itemAsunto, adelanto: itemAdelanto }} isPro={true} />
+      )}
 
-      {block.type === 'asunto_adelanto' && (() => {
-        const items = block.items || [];
-        const layout   = block.it_layout || 'img-text';
-        const isHoriz  = layout === 'img-text' || layout === 'text-img';
-        const fieldFirst = layout === 'img-text' || layout === 'img-top';
-        if (!items.length) return <div style={{ padding: '12px 14px' }}><span style={{ fontSize: 12, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Sin contenido</span></div>;
-        return (
-          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Asunto y/o Adelanto'}</div>
-              {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
-            </div>
-            {items.map((it, i) => {
-              const tc = it.text_color;
-              const hasField = it.show_asunto || it.show_adelanto;
-              const hasText  = it.texto?.trim();
-              const fieldEl = hasField ? (
-                <div style={{ padding: '8px 10px', borderRadius: 7, fontSize: 11, background: 'var(--t-surface2)', border: '1px solid var(--t-border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {it.show_asunto && <><span style={{ fontSize: 16, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Asunto</span>{itemAsunto && <span style={{ fontSize: 24, color: '#ffffff', marginTop: 4, lineHeight: 1.3 }}>{itemAsunto}</span>}</>}
-                  {it.show_adelanto && <><span style={{ fontSize: 16, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Adelanto</span>{itemAdelanto && <span style={{ fontSize: 24, color: '#ffffff', marginTop: 4, lineHeight: 1.3 }}>{itemAdelanto}</span>}</>}
-                </div>
-              ) : null;
-              const txtEl = hasText ? (
-                <div style={{ padding: '10px 12px', borderRadius: 8, fontSize: 12, lineHeight: 1.6, textAlign: it.text_align || 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: tc ? tc + '22' : 'transparent', border: tc ? `1px solid ${tc}` : '1px solid var(--t-border)', color: tc || 'var(--t-text)' }}>{it.texto}</div>
-              ) : null;
-              const first = fieldFirst ? fieldEl : txtEl;
-              const second = fieldFirst ? txtEl : fieldEl;
-              return (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: isHoriz && hasField && hasText && !isMobile ? '1fr 1fr' : '1fr', gap: 12, alignItems: 'start' }}>
-                  {first}
-                  {second}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })()}
+      {block.type === 'asunto_adelanto' && (
+        <BlockRenderer block={block} wrap={false} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={{ asunto: itemAsunto, adelanto: itemAdelanto }} isPro={true} />
+      )}
 
       {block.type === 'correccion' && (
-        <div style={{ padding: '10px 12px' }}>
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Corrección'}</div>
-            {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', marginTop: 3 }}>{block.subtitulo}</div>}
-          </div>
-          {block.email_html_edited ? (
-            <div style={{ background: theme === 'dark' ? '#1e1e1e' : '#e0e0e0', borderRadius: 8, padding: '10px 8px', height: 420, overflow: 'hidden' }}>
-              <EmailIframe html_body={block.email_html_edited} withLinks={false} />
-            </div>
-          ) : (block.email_blocks || []).length > 0 ? (() => {
-            const outerBg = theme === 'dark' ? '#1e1e1e' : '#e0e0e0';
-            const emailBg = block.email_bg || '#ffffff';
-            const renderEBBlock = (eb, i, colMode) => (
-              <div key={i}>
-                {eb.type === 'text' && eb.content && (() => {
-                  const p = <p style={{ margin: 0, fontSize: eb.size || 14, fontWeight: eb.bold ? 700 : 400, textAlign: eb.align || 'left', color: '#1a1a1a', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{eb.content}</p>;
-                  return eb.href ? <a href={eb.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>{p}</a> : p;
-                })()}
-                {eb.type === 'image' && eb.url && (() => {
-                  const img = <img src={eb.url} alt="" style={{ display: 'block', maxWidth: '100%', maxHeight: colMode ? 120 : 200, objectFit: 'contain', borderRadius: 6, margin: '0 auto' }} />;
-                  return <div style={{ textAlign: 'center' }}>{eb.href ? <a href={eb.href} target="_blank" rel="noopener noreferrer">{img}</a> : img}</div>;
-                })()}
-                {eb.type === 'button' && eb.text && (
-                  <div style={{ textAlign: 'center', padding: '4px 0' }}>
-                    <span style={{ display: 'inline-block', background: eb.bg || '#3b82f6', color: eb.color || '#ffffff', borderRadius: 6, padding: '7px 20px', fontSize: 13, fontWeight: 600 }}>{eb.text}</span>
-                  </div>
-                )}
-                {eb.type === 'columns' && (
-                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
-                    {['left','right'].map(side => (
-                      <div key={side} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {(eb[side] || []).map((sub, j) => renderEBBlock(sub, j, true))}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-            return (
-              <div style={{ background: outerBg, borderRadius: 8, padding: '10px 8px', maxHeight: 420, overflowY: 'auto' }}>
-                <div style={{ background: emailBg, maxWidth: 520, margin: '0 auto', borderRadius: 4, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {(block.email_blocks || []).map((eb, i) => renderEBBlock(eb, i, false))}
-                </div>
-              </div>
-            );
-          })() : block.nota ? (
-            <p style={{ fontSize: 12, color: 'var(--t-text-placeholder)', margin: 0, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.nota}</p>
-          ) : null}
-        </div>
+        <BlockRenderer block={block} wrap={false} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={{ asunto: itemAsunto, adelanto: itemAdelanto }} isPro={true} />
       )}
 
       {block.type === 'audio' && (
-        <div style={{ padding: '14px' }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, marginBottom: block.subtitulo || block.audio_url ? 8 : 0 }}>{block.titulo || 'Audio'}</div>
-          {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginBottom: 10 }}>{block.subtitulo}</div>}
-          {block.audio_url && <AudioPlayer url={block.audio_url} color={block.color || BLOCK_COLORS.audio} />}
-        </div>
+        <BlockRenderer block={block} wrap={false} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={{ asunto: itemAsunto, adelanto: itemAdelanto }} isPro={true} />
       )}
 
       {block.type === 'transcribir' && (
-        <div style={{ padding: '14px' }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, marginBottom: block.subtitulo || block.texto ? 8 : 0 }}>{block.titulo || 'Transcripción'}</div>
-          {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginBottom: 8 }}>{block.subtitulo}</div>}
-          {block.texto && (() => {
-            const col = block.text_color || '#06b6d4';
-            return (
-              <div style={{ background: col + '18', border: `1px solid ${col}44`, borderRadius: 10, padding: '12px 14px' }}>
-                <p style={{ fontSize: 12, color: col, margin: 0, lineHeight: 1.6, textAlign: block.text_align || 'left', whiteSpace: 'pre-wrap' }}>
-                  {block.texto}
-                </p>
-              </div>
-            );
-          })()}
-        </div>
+        <BlockRenderer block={block} wrap={false} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={{ asunto: itemAsunto, adelanto: itemAdelanto }} isPro={true} />
       )}
 
       {block.type === 'columnas' && (
         <div style={{ padding: '12px 14px' }}>
           <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, marginBottom: 8 }}>{block.titulo || 'Columnas'}</div>
           {block.num_columnas && (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${block.num_columnas}, 1fr)`, gap: 6 }}>
-              {Array.from({ length: block.num_columnas }, (_, ci) => {
+            <ColumnasLayout
+              block={block}
+              isMobile={isMobile}
+              columnWrapperStyle={ci => ({ border: `1px solid ${addingToCol === ci ? '#14b8a666' : 'var(--t-border)'}`, borderRadius: 6, padding: 4, minHeight: 48, background: 'var(--t-bg)', minWidth: 0, overflow: 'hidden' })}
+              renderItem={(nb, bi, ci) => {
                 const col = (block.columns || [])[ci] || [];
-                const colColor = '#14b8a6';
                 const numCols = block.num_columnas;
                 return (
-                  <div key={ci} style={{ border: `1px solid ${addingToCol === ci ? colColor + '66' : 'var(--t-border)'}`, borderRadius: 6, padding: 4, minHeight: 48, display: 'flex', flexDirection: 'column', gap: 4, background: 'var(--t-bg)', minWidth: 0, overflow: 'hidden' }}>
-                    {col.map((nb, bi) => (
-                      <BlockCard
-                        key={nb.id || bi}
-                        block={nb}
-                        index={bi}
-                        total={col.length}
-                        onEdit={() => setEditingNestedBlock({ colIdx: ci, blockIdx: bi })}
-                        onDelete={() => removeNested(ci, bi)}
-                        onMoveUp={() => moveNestedUD(ci, bi, -1)}
-                        onMoveDown={() => moveNestedUD(ci, bi, 1)}
-                        onMoveLeft={ci > 0 ? () => moveNestedLR(ci, bi, -1) : null}
-                        onMoveRight={ci < numCols - 1 ? () => moveNestedLR(ci, bi, 1) : null}
-                        onToggleVisible={() => updateNestedBlock(ci, bi, { ...nb, visible: nb.visible === false ? true : false })}
-                        onUpdateBlock={updated => updateNestedBlock(ci, bi, updated)}
-                        categoria={categoria}
-                        onUploadImage={onUploadImage}
-                        onCropFromEmail={onCropFromEmail}
-                        libraryImages={libraryImages}
-                      />
-                    ))}
-                    <button onClick={() => setColPickerIdx(ci)}
-                      style={{ background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 4, padding: '4px 0', fontSize: 9, color: 'var(--t-text-subtle)', cursor: 'pointer', width: '100%', marginTop: 'auto' }}>
-                      + bloque
-                    </button>
-                  </div>
+                  <BlockCard
+                    key={nb.id || bi}
+                    block={nb}
+                    index={bi}
+                    total={col.length}
+                    onEdit={() => setEditingNestedBlock({ colIdx: ci, blockIdx: bi })}
+                    onDelete={() => removeNested(ci, bi)}
+                    onMoveUp={() => moveNestedUD(ci, bi, -1)}
+                    onMoveDown={() => moveNestedUD(ci, bi, 1)}
+                    onMoveLeft={ci > 0 ? () => moveNestedLR(ci, bi, -1) : null}
+                    onMoveRight={ci < numCols - 1 ? () => moveNestedLR(ci, bi, 1) : null}
+                    onToggleVisible={() => updateNestedBlock(ci, bi, { ...nb, visible: nb.visible === false ? true : false })}
+                    onUpdateBlock={updated => updateNestedBlock(ci, bi, updated)}
+                    categoria={categoria}
+                    onUploadImage={onUploadImage}
+                    onCropFromEmail={onCropFromEmail}
+                    libraryImages={libraryImages}
+                  />
                 );
-              })}
-            </div>
+              }}
+              renderAfterColumn={ci => (
+                <button onClick={() => setColPickerIdx(ci)}
+                  style={{ background: 'transparent', border: '1px dashed var(--t-border-mid)', borderRadius: 4, padding: '4px 0', fontSize: 9, color: 'var(--t-text-subtle)', cursor: 'pointer', width: '100%', marginTop: 'auto' }}>
+                  + bloque
+                </button>
+              )}
+            />
           )}
           {colPickerIdx !== null && (
             <div style={{ position: 'fixed', inset: 0, background: 'var(--t-overlay)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
@@ -2000,61 +1684,12 @@ function BlockCard({ block, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       )}
 
       {block.type === 'social' && (
-        <div style={{ padding: '12px 14px' }}>
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2 }}>{block.titulo || 'Social'}</div>
-            {block.subtitulo && <div style={{ fontSize: 13, color: 'var(--t-text-muted)', marginTop: 4 }}>{block.subtitulo}</div>}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {(block.socials || []).map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                {s.url
-                  ? <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', textDecoration: 'none', flexShrink: 0 }}>
-                      <SocialIcon network={s.network} color={s.color} size={22} />
-                    </a>
-                  : <SocialIcon network={s.network} color={s.color} size={22} />
-                }
-                <span style={{ fontSize: 26, color: s.color, fontWeight: 300, flexShrink: 0 }}>→</span>
-                {s.url
-                  ? <a href={s.url} target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize: 14, color: s.color, textDecoration: 'none', wordBreak: 'break-all' }}
-                      onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                      onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
-                      {s.url}
-                    </a>
-                  : <span style={{ fontSize: 14, color: 'var(--t-text-faint)', fontStyle: 'italic' }}>Vacío</span>
-                }
-              </div>
-            ))}
-          </div>
-        </div>
+        <BlockRenderer block={block} wrap={false} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={{ asunto: itemAsunto, adelanto: itemAdelanto }} isPro={true} />
       )}
 
-      {block.type === 'puntuacion' && (() => {
-        const align = block.text_align || 'center';
-        const alignItems = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
-        return (
-        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', alignItems, gap: 10 }}>
-          {block.titulo && <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--t-text)', lineHeight: 1.2, textAlign: align }}>{block.titulo}</div>}
-          {block.subtitulo && <div style={{ fontSize: 12, color: 'var(--t-text-muted)', textAlign: align, marginTop: block.titulo ? -4 : 0 }}>{block.subtitulo}</div>}
-          {block.valor != null ? (() => {
-            const col = scoreColor(block.valor);
-            const label = block.valor < 5 ? 'Suspenso' : block.valor < 7.5 ? 'Notable' : 'Sobresaliente';
-            return (
-              <>
-                <div style={{ border: `2px solid ${col}44`, borderRadius: 14, padding: '14px 24px', background: col + '0d', display: 'flex', alignItems: 'baseline', gap: 3 }}>
-                  <span style={{ fontSize: 52, fontWeight: 800, color: col, lineHeight: 1 }}>{block.valor}</span>
-                  <span style={{ fontSize: 18, fontWeight: 500, color: 'var(--t-text-muted)' }}>/10</span>
-                </div>
-                <span style={{ fontSize: 13, fontWeight: 600, color: col, opacity: 0.8 }}>{label}</span>
-              </>
-            );
-          })() : (
-            null
-          )}
-        </div>
-        );
-      })()}
+      {block.type === 'puntuacion' && (
+        <BlockRenderer block={block} wrap={false} onPreview={setLightbox} theme={theme} isMobile={isMobile} item={{ asunto: itemAsunto, adelanto: itemAdelanto }} isPro={true} />
+      )}
 
       {/* Columnas delete modal */}
       {showColumnaModal && (
@@ -2388,81 +2023,6 @@ function EBCanvas({ blocks, onChange, onUpload, onCrop, libImages, nested = fals
 }
 
 // ── Library image cell (con checkbox GLOBAL en hover) ────────────────────────
-function AudioPlayer({ url, color = '#6366f1' }) {
-  const audioRef = useRef(null);
-  const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [speed, setSpeed] = useState(1);
-
-  const toggle = () => {
-    const a = audioRef.current;
-    if (!a) return;
-    if (playing) { a.pause(); setPlaying(false); }
-    else { a.play(); setPlaying(true); }
-  };
-
-  const setSpeedVal = (s) => {
-    setSpeed(s);
-    if (audioRef.current) audioRef.current.playbackRate = s;
-  };
-
-  const fmt = (s) => {
-    const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60);
-    return `${m}:${sec.toString().padStart(2, '0')}`;
-  };
-
-  const handleSeek = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    if (audioRef.current && duration) {
-      audioRef.current.currentTime = ratio * duration;
-      setProgress(ratio);
-      setCurrentTime(ratio * duration);
-    }
-  };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <audio ref={audioRef} src={url} preload="metadata"
-        onLoadedMetadata={e => setDuration(e.target.duration)}
-        onTimeUpdate={e => { const a = e.target; setCurrentTime(a.currentTime); setProgress(a.duration ? a.currentTime / a.duration : 0); }}
-        onEnded={() => setPlaying(false)} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {/* Play/pause button */}
-        <button onClick={toggle}
-          style={{ width: 40, height: 40, borderRadius: '50%', background: color, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          {playing
-            ? <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-            : <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
-          }
-        </button>
-        {/* Progress bar */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div onClick={handleSeek} style={{ height: 4, background: 'var(--t-border)', borderRadius: 99, cursor: 'pointer', position: 'relative' }}>
-            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${progress * 100}%`, background: color, borderRadius: 99 }} />
-            <div style={{ position: 'absolute', top: '50%', left: `${progress * 100}%`, transform: 'translate(-50%, -50%)', width: 12, height: 12, borderRadius: '50%', background: color, boxShadow: '0 0 0 2px var(--t-bg)' }} />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--t-text-subtle)' }}>
-            <span>{fmt(currentTime)}</span>
-            <span>{duration ? fmt(duration) : '--:--'}</span>
-          </div>
-        </div>
-        {/* Speed controls */}
-        <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
-          {[1, 1.5, 2].map(s => (
-            <button key={s} onClick={() => setSpeedVal(s)}
-              style={{ background: speed === s ? color : 'transparent', border: `1px solid ${speed === s ? color : 'var(--t-border)'}`, borderRadius: 5, padding: '2px 6px', fontSize: 10, color: speed === s ? 'white' : 'var(--t-text-subtle)', cursor: 'pointer', fontWeight: speed === s ? 700 : 400 }}>
-              {s === 1 ? '1x' : `${s}x`}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function LibImgCell({ libImg, alreadyAdded, isSource, color, onSelect, onToggleGlobal, onRemove }) {
   const [hov, setHov] = useState(false);
