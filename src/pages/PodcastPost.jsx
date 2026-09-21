@@ -52,6 +52,15 @@ const PLATFORM_ICONS = {
       <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 14.5l-4.5-2.5-4.5 2.5 1-5-3.5-3 5-.5L12 3l2 5 5 .5-3.5 3 1 5z"/>
     </svg>
   ),
+  listennotes: (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <circle cx="10" cy="10" r="7" />
+      <line x1="15" y1="15" x2="21" y2="21" />
+      <path d="M7 10.3a2.7 2.7 0 012.7 2.7" strokeWidth="1.6" />
+      <path d="M7 7.4a5.6 5.6 0 015.6 5.6" strokeWidth="1.6" />
+      <circle cx="7" cy="13" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  ),
 };
 
 const PLATFORM_COLORS = {
@@ -61,7 +70,7 @@ const PLATFORM_COLORS = {
   ivoox: "#FF6600",
   amazon: "#00A8E1",
   google: "#4285F4",
-  listennotes: "#D84727",
+  listennotes: "#B82F00",
 };
 
 export default function PodcastPost({ slug }) {
