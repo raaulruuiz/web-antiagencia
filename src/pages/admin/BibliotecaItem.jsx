@@ -3877,21 +3877,31 @@ export default function BibliotecaItem() {
     setItemTags((item.tags || []).map(id => allTags.find(t => t.id === id)).filter(Boolean));
   }, [item, allTags]);
 
-  // Auto-load email when item created from extension capture
+  // Auto-load email when item created from extension capture.
+  // create-from-email already wrote email_html/email_gmail_styles/asunto/enviado_el/remitente
+  // onto the item at creation time — everything the onboarding needs is already there once
+  // `item` loads, so this derives `lastEmail` from it instead of querying Supabase directly
+  // (that direct query used to run with a hardcoded service_role key — removed in Hito 2).
   useEffect(() => {
-    if (searchParams.get('fromEmail') !== '1' || lastEmail) return;
-    fetch('https://wphvmyqsxicyoifrlevt.supabase.co/rest/v1/emails_capturados?order=capturado_at.desc&limit=1&select=*', {
-      headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHZteXFzeGljeW9pZnJsZXZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTI5NzY5NiwiZXhwIjoyMDkwODczNjk2fQ.RNcpcR9civTNd9WTiciNr5_Wb0NTIeRdzA2aCix05mA',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHZteXFzeGljeW9pZnJsZXZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTI5NzY5NiwiZXhwIjoyMDkwODczNjk2fQ.RNcpcR9civTNd9WTiciNr5_Wb0NTIeRdzA2aCix05mA',
-      },
-    }).then(r => r.json()).then(data => { if (data[0]) setLastEmail(data[0]); }).catch(() => {});
-  }, [searchParams]); // eslint-disable-line
+    if (searchParams.get('fromEmail') !== '1' || lastEmail || !item?.email_html) return;
+    const m = (item.remitente || '').match(/^(.*?)\s*<([^>]+)>$/);
+    setLastEmail({
+      html_body: item.email_html,
+      gmail_styles: item.email_gmail_styles || null,
+      asunto: item.asunto || null,
+      fecha_email: item.enviado_el || null, // already "YYYY-MM-DD[ HH:MM]" — see parsing below
+      remitente_nombre: m ? m[1] : (item.remitente || null),
+      remitente_email: m ? m[2] : null,
+    });
+  }, [searchParams, item, lastEmail]);
 
   useEffect(() => {
     if (!lastEmail || obStep !== 'campos') return;
     if (lastEmail.asunto) setObAsunto(lastEmail.asunto);
-    if (lastEmail.fecha_email) {
+    if (lastEmail.fecha_email && /^\d{4}-\d{2}-\d{2}/.test(lastEmail.fecha_email)) {
+      // Already backend-parsed ("YYYY-MM-DD" or "YYYY-MM-DD HH:MM") — item.enviado_el as-is.
+      setObEnviadoEl(lastEmail.fecha_email);
+    } else if (lastEmail.fecha_email) {
       // Parse Spanish date format: "23 ago 2026, 15:16" or "jue., 23 ago. 2026, 15:16"
       // or full month names: "Martes, 9 de junio de 2026, 11:30"
       const MONTHS_ES = {
