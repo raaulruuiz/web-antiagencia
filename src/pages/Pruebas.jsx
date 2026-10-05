@@ -126,7 +126,7 @@ export default function Pruebas() {
 
               <Paso>
                 <p><B>En la reunión</B> te presentaré el rumbo de comunicación que considero más efectivo para tu tienda y tus productos.</p>
-                <p>Te presentaré un dossier completo con la estrategia de comunicación por email que puedes llevar a cabo <B>para que tus clientes NO pierdan</B> el interés por tu marca, y los que aún no lo son, empiecen a tenerlo y a demostrarlo comprándote.</p>
+                <p>Te presentaré un dossier completo con la estrategia de comunicación por email que puedes llevar a cabo <u>para que tus clientes NO pierdan el interés por tu marca</u>, y los que aún no lo son, empiecen a tenerlo y a demostrarlo comprándote.</p>
               </Paso>
               <p>&nbsp;</p>
               <p>Que alguien externo mire tu tienda SIEMPRE te va a ayudar a ver cosas que NUNCA verías desde dentro.</p>
