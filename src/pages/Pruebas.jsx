@@ -152,16 +152,16 @@ export default function Pruebas() {
 
               <H2>PLAZOS</H2>
               <p><B>Sencillo:</B></p>
-              <Paso>Una vez que rellenas el formulario, me pongo en contacto contigo al día siguiente para decirte si me interesa o no el proyecto</Paso>
-              <Paso>Si es que sí, te paso las fechas disponibles</Paso>
-              <Paso>Eliges</Paso>
-              <Paso>Pagas el total por adelantado</Paso>
-              <Paso>Te envío la factura y el contrato</Paso>
-              <Paso>Creo un grupo de WhatsApp por el que te pediré la info y el material que voy a necesitar para trabajar</Paso>
-              <Paso>Agendamos la visita presencial</Paso>
-              <Paso>Trabajo sobre el dossier</Paso>
-              <Paso>Nos vemos en la reunión online</Paso>
-              <Paso>Te envío la grabación de la reunión y el dossier</Paso>
+              <Paso>Una vez que rellenas el formulario, me pongo en contacto contigo al día siguiente para decirte si me interesa o no el proyecto.</Paso>
+              <Paso>Si es que sí, te paso las fechas disponibles.</Paso>
+              <Paso>Eliges.</Paso>
+              <Paso>Pagas el total <u>por adelantado</u>.</Paso>
+              <Paso>Te envío la factura y el contrato.</Paso>
+              <Paso>Creo un grupo de WhatsApp por el que te pediré la info y el material que voy a necesitar para trabajar.</Paso>
+              <Paso>Agendamos la visita presencial.</Paso>
+              <Paso>Trabajo sobre el dossier.</Paso>
+              <Paso>Nos vemos en la reunión online.</Paso>
+              <Paso>Te envío la grabación de la reunión y el dossier.</Paso>
               <p>&nbsp;</p>
 
               <H2>FORMA DE PAGO</H2>
