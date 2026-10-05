@@ -49,7 +49,7 @@ function H1({ children, size = "text-2xl md:text-3xl" }) {
 }
 
 function H2({ children }) {
-  return <h2 className="text-2xl font-bold text-gray-900 mb-2">{children}</h2>;
+  return <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{children}</h2>;
 }
 
 function Carta({ children }) {
@@ -131,7 +131,7 @@ export default function Pruebas() {
               <p>Que alguien externo mire tu tienda SIEMPRE te va a ayudar a ver cosas que NUNCA verías desde dentro.</p>
               <p>&nbsp;</p>
 
-              <Destacado>Al finalizar la reunión, ese mismo día, te envío la grabación de la misma y el dossier completo en formato PDF.</Destacado>
+              <Destacado>Al finalizar la reunión, ese mismo día, te envío <u>la grabación</u> de la misma y <u>el dossier</u> completo en formato PDF.</Destacado>
               <p>&nbsp;</p>
 
               <H2>IMPORTANTE</H2>
