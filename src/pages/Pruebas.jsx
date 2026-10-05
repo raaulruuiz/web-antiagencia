@@ -136,7 +136,7 @@ export default function Pruebas() {
               <p>&nbsp;</p>
 
               <H2>IMPORTANTE</H2>
-              <p>Después de esa reunión, sabrás EXACTAMENTE lo que tienes que hacer para no perder ventas y clientes por culpa de una comunicación poco eficaz y cómo diferenciarte frente a tus competidores.</p>
+              <p>Después de esa reunión, sabrás EXACTAMENTE lo que tienes que hacer <u>para no perder ventas y clientes</u> por culpa de una comunicación poco eficaz y cómo diferenciarte frente a tus competidores.</p>
               <p>&nbsp;</p>
 
               <H2>LO QUE OBTIENES</H2>
