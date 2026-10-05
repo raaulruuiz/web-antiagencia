@@ -18,7 +18,9 @@ function B({ children }) {
 function Bullet({ children }) {
   return (
     <div className="flex items-start gap-3 mb-2">
-      <span className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-[#0067FD] flex items-center justify-center text-white text-xs font-bold">✓</span>
+      <span className="flex-shrink-0 h-[2em] flex items-center">
+        <span className="w-5 h-5 rounded-full bg-[#0067FD] flex items-center justify-center text-white text-xs font-bold">✓</span>
+      </span>
       <span>{children}</span>
     </div>
   );
@@ -38,7 +40,9 @@ function Paso({ children }) {
 function Destacado({ children }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="mt-1 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold shadow" style={{ backgroundColor: ROJO }} aria-hidden="true">★</span>
+      <span className="flex-shrink-0 h-[2em] flex items-center" aria-hidden="true">
+        <span className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold shadow" style={{ backgroundColor: ROJO }}>★</span>
+      </span>
       <span>{children}</span>
     </div>
   );
