@@ -141,7 +141,6 @@ export default function Pruebas() {
               <H2>LO QUE OBTIENES</H2>
               <p><B>La reunión no tiene horario.</B> Termina cuando hayamos terminado.</p>
               <p><B>Igual que el dossier</B>. Tendrá las páginas que tenga que tener. Pero incluirá:</p>
-              <p>&nbsp;</p>
               <Bullet>Análisis y comentarios sobre tus automatizaciones (y sus respectivas propuestas de mejora para vender más en automático sin dañar tu imagen de marca).</Bullet>
               <Bullet>Análisis y comentarios sobre tus formularios de captación (y sus respectivas propuestas de mejora para conseguir más y mejores clientes potenciales).</Bullet>
               <Bullet>Análisis y comentarios sobre las newsletters que envías (y sus respectivas propuestas de mejora para vender, fidelizar y generar recurrencia entre tus clientes).</Bullet>
