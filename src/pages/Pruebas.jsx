@@ -117,7 +117,8 @@ export default function Pruebas() {
               <p>&nbsp;</p>
 
               <Paso>
-                <p><B>Antes de realizarla</B> te pido una serie de datos, haré una investigación e iré a visitarte en persona. Y sí, voy a ir a verte. No creo que pueda decirte cómo vender mejor un producto que solo conozco por las fotos de tu web. Quiero verlo, tocarlo si se puede, entender cómo trabajáis, conocer quién está detrás del negocio y escuchar cómo habláis de él cuando no estáis intentando venderme nada. Porque sin conocer de primera mano el producto que voy a vender, al cliente y a ti, no puedo venderlo.</p>
+                <p><B>Antes de realizarla</B> te pido una serie de datos, haré una investigación e iré a visitarte en persona.</p>
+                <p>Y sí, voy a ir a verte. No creo que pueda decirte cómo vender mejor un producto que solo conozco por las fotos de tu web. Quiero verlo, tocarlo si se puede, entender cómo trabajáis, conocer quién está detrás del negocio y escuchar cómo habláis de él cuando no estáis intentando venderme nada. Porque sin conocer de primera mano el producto que voy a vender, al cliente y a ti, no puedo venderlo.</p>
                 <p>La <u>investigación</u> viene antes de la <u>estrategia</u>, y la estrategia viene antes de <u>escribir los emails</u> (esto es importante recordarlo, que ya sabes que muchos te dicen que llegan y en 7 días te lo ponen todo en marcha, y luego la cosa acaba como acaba…).</p>
                 <p>Porque, aunque tengas el mejor producto del mundo, si no tienes <u>la estrategia más conveniente para vender ESE producto</u>, es casi seguro que no saldrá como quieres.</p>
               </Paso>
