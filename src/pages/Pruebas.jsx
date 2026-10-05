@@ -105,7 +105,7 @@ export default function Pruebas() {
           <div className="w-full max-w-3xl">
 
             <Carta>
-              <p>Estamos dando fechas para las primeras dos semanas de diciembre (especial enfoque en Navidad, Año Nuevo y principios de año). Luego cerramos la auditoría hasta 2027.</p>
+              <p style={{ color: ROJO }}>Estamos dando fechas para las primeras dos semanas de diciembre (especial enfoque en Navidad, Año Nuevo y principios de año). Luego cerramos la auditoría hasta 2027.</p>
               <p>&nbsp;</p>
               <H1>ANTI-AUDITORÍA</H1>
               <H1>Completa. De email marketing. Con Raúl Ruiz</H1>
