@@ -44,8 +44,8 @@ function Destacado({ children }) {
   );
 }
 
-function H1({ children }) {
-  return <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">{children}</h1>;
+function H1({ children, size = "text-2xl md:text-3xl" }) {
+  return <h1 className={`${size} font-bold text-gray-900 mb-4`}>{children}</h1>;
 }
 
 function H2({ children }) {
@@ -107,9 +107,10 @@ export default function Pruebas() {
             <Carta>
               <p style={{ color: ROJO }}>Estamos dando fechas para las primeras dos semanas de diciembre (especial enfoque en Navidad, Año Nuevo y principios de año). Luego cerramos la auditoría hasta 2027.</p>
               <p>&nbsp;</p>
-              <H1>ANTI-AUDITORÍA</H1>
-              <H1>Completa. De email marketing. Con Raúl Ruiz</H1>
-              <H1>Precio: 1.250€ + IVA</H1>
+              <H1 size="text-4xl md:text-5xl">ANTI-AUDITORÍA</H1>
+              <H1 size="text-xl md:text-2xl">Completa. De email marketing. Con Raúl Ruiz</H1>
+              <p>&nbsp;</p>
+              <H1 size="text-3xl md:text-4xl">Precio: 1.250€ + IVA</H1>
               <p>&nbsp;</p>
 
               <Paso><B>Esta auditoría</B> es una reunión de trabajo posterior a un proceso de investigación. No es una charla. Es un paso adelante para ti y tu tienda. Es hacer que tus clientes recuernden tu marca y quieran comprarte de nuevo (esto es tan básico que la mayoría se olvida).</Paso>
