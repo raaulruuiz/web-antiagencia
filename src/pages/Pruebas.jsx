@@ -49,13 +49,13 @@ function H1({ children, size = "text-2xl md:text-3xl" }) {
 }
 
 function H2({ children }) {
-  return <h2 className="text-xl font-bold text-gray-900 mb-2">{children}</h2>;
+  return <h2 className="text-2xl font-bold text-gray-900 mb-2">{children}</h2>;
 }
 
 function Carta({ children }) {
   return (
-    <div className="bg-white shadow-xl rounded-sm px-8 md:px-16 py-12 mb-10" style={{ fontFamily: "'Georgia', serif" }}>
-      <div className="text-gray-800 text-base" style={{ lineHeight: '2' }}>
+    <div className="bg-white shadow-xl rounded-sm px-6 md:px-12 py-12 mb-10" style={{ fontFamily: "'Georgia', serif" }}>
+      <div className="text-gray-800 text-lg" style={{ lineHeight: '2' }}>
         {children}
       </div>
     </div>
@@ -102,7 +102,7 @@ export default function Pruebas() {
       </Helmet>
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
-          <div className="w-full max-w-3xl">
+          <div className="w-full max-w-4xl">
 
             <Carta>
               <p style={{ color: ROJO }}>Estamos dando fechas para las primeras dos semanas de diciembre (especial enfoque en Navidad, Año Nuevo y principios de año). Luego cerramos la auditoría hasta 2027.</p>
