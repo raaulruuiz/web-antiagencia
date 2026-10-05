@@ -113,7 +113,7 @@ export default function Pruebas() {
               <H1 size="text-3xl md:text-4xl">Precio: 1.250€ + IVA</H1>
               <p>&nbsp;</p>
 
-              <Paso><B>Esta auditoría</B> es una reunión de trabajo posterior a un proceso de investigación. No es una charla. Es un paso adelante para ti y tu tienda. Es hacer que tus clientes recuernden tu marca y quieran comprarte de nuevo (esto es tan básico que la mayoría se olvida).</Paso>
+              <Paso><B>Esta auditoría</B> es una reunión de trabajo posterior a un proceso de investigación. No es una charla. Es un paso adelante para ti y tu tienda. <u>Es hacer que tus clientes recuernden tu marca y quieran comprarte de nuevo</u> (esto es tan básico que la mayoría se olvida).</Paso>
               <p>&nbsp;</p>
 
               <Paso>
