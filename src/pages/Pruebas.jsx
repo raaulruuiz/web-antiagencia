@@ -165,7 +165,7 @@ export default function Pruebas() {
               <p>&nbsp;</p>
 
               <H2>FORMA DE PAGO</H2>
-              <p>Cobro por adelantado siempre.</p>
+              <p>Cobro por adelantado <u>siempre</u>.</p>
               <p>Una vez que te mande las fechas disponibles, tienes <B>dos días</B> para realizar el pago de la Anti-Auditoría.</p>
               <p>Si no se ha pagado en ese tiempo, la fecha elegida quedará a disposición de otro cliente.</p>
               <p>&nbsp;</p>
@@ -177,7 +177,7 @@ export default function Pruebas() {
               <p>&nbsp;</p>
               <p><B>P.D.</B> Recuerda que la vida es para disfrutarla. Y es mejor hacerlo con un negocio que crece, no con uno que se estanca.</p>
               <p>&nbsp;</p>
-              <MailerLiteForm />
+              <MailerLiteForm buttonText="Estudia mi caso" />
             </Carta>
 
           </div>

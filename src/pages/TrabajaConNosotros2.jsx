@@ -35,7 +35,7 @@ export const mailerLiteCSS = `
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow.ml-error .label-description p,.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow.ml-error .label-description p:first-letter{color:#ff0000!important}
 `;
 
-export function MailerLiteForm() {
+export function MailerLiteForm({ buttonText = "Solicitar el mejor presupuesto que me harán" } = {}) {
   return (
     <div id="mlb2-38800152" className="ml-form-embedContainer ml-subscribe-form ml-subscribe-form-38800152">
       <div className="ml-form-align-center">
@@ -92,7 +92,7 @@ export function MailerLiteForm() {
               </div>
               <input type="hidden" name="ml-submit" value="1" />
               <div className="ml-form-embedSubmit">
-                <button type="submit" className="primary">Solicitar el mejor presupuesto que me harán</button>
+                <button type="submit" className="primary">{buttonText}</button>
                 <button disabled type="button" className="loading" style={{ display: "none" }}>
                   <div className="ml-form-embedSubmitLoad"></div>
                   <span className="sr-only">Loading...</span>
