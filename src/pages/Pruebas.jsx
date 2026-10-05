@@ -55,7 +55,7 @@ function H2({ children }) {
 function Carta({ children }) {
   return (
     <div className="bg-white shadow-xl rounded-sm px-6 md:px-12 py-12 mb-10" style={{ fontFamily: "'Georgia', serif" }}>
-      <div className="text-gray-800 text-lg [&>p]:mb-4" style={{ lineHeight: '2' }}>
+      <div className="text-gray-800 text-xl [&>p]:mb-4" style={{ lineHeight: '2' }}>
         {children}
       </div>
     </div>
