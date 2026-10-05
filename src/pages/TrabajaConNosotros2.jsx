@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 
-const mailerLiteCSS = `
+export const mailerLiteCSS = `
 @import url("https://assets.mlcdn.com/fonts.css?version=1780922");
 .ml-form-embedSubmitLoad{display:inline-block;width:20px;height:20px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
@@ -35,7 +35,7 @@ const mailerLiteCSS = `
 #mlb2-38800152.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow.ml-error .label-description p,.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-checkboxRow.ml-error .label-description p:first-letter{color:#ff0000!important}
 `;
 
-function MailerLiteForm() {
+export function MailerLiteForm() {
   return (
     <div id="mlb2-38800152" className="ml-form-embedContainer ml-subscribe-form ml-subscribe-form-38800152">
       <div className="ml-form-align-center">
