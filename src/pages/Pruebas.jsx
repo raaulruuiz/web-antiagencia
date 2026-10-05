@@ -27,7 +27,7 @@ function Bullet({ children }) {
 // Sustituye a ➜: rombo azul
 function Paso({ children }) {
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-3 mb-4">
       <span className="flex-shrink-0 font-bold" style={{ color: AZUL }} aria-hidden="true">◆</span>
       <span>{children}</span>
     </div>
@@ -55,7 +55,7 @@ function H2({ children }) {
 function Carta({ children }) {
   return (
     <div className="bg-white shadow-xl rounded-sm px-6 md:px-12 py-12 mb-10" style={{ fontFamily: "'Georgia', serif" }}>
-      <div className="text-gray-800 text-lg" style={{ lineHeight: '2' }}>
+      <div className="text-gray-800 text-lg [&>p]:mb-4" style={{ lineHeight: '2' }}>
         {children}
       </div>
     </div>
