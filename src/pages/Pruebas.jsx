@@ -29,7 +29,7 @@ function Paso({ children }) {
   return (
     <div className="flex items-start gap-3 mb-4">
       <span className="flex-shrink-0 font-bold" style={{ color: AZUL }} aria-hidden="true">◆</span>
-      <span>{children}</span>
+      <div className="[&>p]:mb-4 [&>p:last-child]:mb-0">{children}</div>
     </div>
   );
 }
@@ -116,13 +116,17 @@ export default function Pruebas() {
               <Paso><B>Esta auditoría</B> es una reunión de trabajo posterior a un proceso de investigación. No es una charla. Es un paso adelante para ti y tu tienda. Es hacer que tus clientes recuernden tu marca y quieran comprarte de nuevo (esto es tan básico que la mayoría se olvida).</Paso>
               <p>&nbsp;</p>
 
-              <Paso><B>Antes de realizarla</B> te pido una serie de datos, haré una investigación e iré a visitarte en persona. Y sí, voy a ir a verte. No creo que pueda decirte cómo vender mejor un producto que solo conozco por las fotos de tu web. Quiero verlo, tocarlo si se puede, entender cómo trabajáis, conocer quién está detrás del negocio y escuchar cómo habláis de él cuando no estáis intentando venderme nada. Porque sin conocer de primera mano el producto que voy a vender, al cliente y a ti, no puedo venderlo.</Paso>
-              <p>La <u>investigación</u> viene antes de la <u>estrategia</u>, y la estrategia viene antes de <u>escribir los emails</u> (esto es importante recordarlo, que ya sabes que muchos te dicen que llegan y en 7 días te lo ponen todo en marcha, y luego la cosa acaba como acaba…).</p>
-              <p>Porque, aunque tengas el mejor producto del mundo, si no tienes <u>la estrategia más conveniente para vender ESE producto</u>, es casi seguro que no saldrá como quieres.</p>
+              <Paso>
+                <p><B>Antes de realizarla</B> te pido una serie de datos, haré una investigación e iré a visitarte en persona. Y sí, voy a ir a verte. No creo que pueda decirte cómo vender mejor un producto que solo conozco por las fotos de tu web. Quiero verlo, tocarlo si se puede, entender cómo trabajáis, conocer quién está detrás del negocio y escuchar cómo habláis de él cuando no estáis intentando venderme nada. Porque sin conocer de primera mano el producto que voy a vender, al cliente y a ti, no puedo venderlo.</p>
+                <p>La <u>investigación</u> viene antes de la <u>estrategia</u>, y la estrategia viene antes de <u>escribir los emails</u> (esto es importante recordarlo, que ya sabes que muchos te dicen que llegan y en 7 días te lo ponen todo en marcha, y luego la cosa acaba como acaba…).</p>
+                <p>Porque, aunque tengas el mejor producto del mundo, si no tienes <u>la estrategia más conveniente para vender ESE producto</u>, es casi seguro que no saldrá como quieres.</p>
+              </Paso>
               <p>&nbsp;</p>
 
-              <Paso><B>En la reunión</B> te presentaré el rumbo de comunicación que considero más efectivo para tu tienda y tus productos.</Paso>
-              <p>Te presentaré un dossier completo con la estrategia de comunicación por email que puedes llevar a cabo <B>para que tus clientes NO pierdan</B> el interés por tu marca, y los que aún no lo son, empiecen a tenerlo y a demostrarlo comprándote.</p>
+              <Paso>
+                <p><B>En la reunión</B> te presentaré el rumbo de comunicación que considero más efectivo para tu tienda y tus productos.</p>
+                <p>Te presentaré un dossier completo con la estrategia de comunicación por email que puedes llevar a cabo <B>para que tus clientes NO pierdan</B> el interés por tu marca, y los que aún no lo son, empiecen a tenerlo y a demostrarlo comprándote.</p>
+              </Paso>
               <p>&nbsp;</p>
               <p>Que alguien externo mire tu tienda SIEMPRE te va a ayudar a ver cosas que NUNCA verías desde dentro.</p>
               <p>&nbsp;</p>
