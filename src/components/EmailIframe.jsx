@@ -109,13 +109,35 @@ function stripEmailResponsiveStyles(html) {
   );
 }
 
+// Rules that only approximate the email's own stylesheet, which older captures lack.
+const STYLESHEET_COMPENSATION_RULES = new Set([
+  'img { display: block; border: 0; outline: none; text-decoration: none; max-width: 100%; }',
+  'a:has(> img) { display: inline-block; }',
+]);
+
 function buildEmailIframeHtml(html_body, gmail_styles, mobileMode = false) {
+  // Newer captures carry the email's real (Gmail-scoped) stylesheet — see the extension's
+  // data-gmail-email-css wrapper. Then the compensations would only diverge from Gmail
+  // (img display stays as the email defines it).
+  const hasEmailCss = !!html_body && html_body.includes('data-gmail-email-css');
+  const baseRules = hasEmailCss
+    ? EMAIL_BASE_RULES.filter(r => !STYLESHEET_COMPENSATION_RULES.has(r))
+        .concat('img { border: 0; outline: none; text-decoration: none; max-width: 100%; }')
+    : EMAIL_BASE_RULES;
   const rules = [
-    ...EMAIL_BASE_RULES,
+    ...baseRules,
     ...(mobileMode ? DND_MOBILE_RULES : DND_DESKTOP_RULES),
   ];
   if (gmail_styles) {
-    const { fontSize, fontFamily, lineHeight, color } = gmail_styles;
+    const { fontSize, fontFamily, color } = gmail_styles;
+    let { lineHeight } = gmail_styles;
+    // Gmail's container rule is ".a3s { line-height: 1.5; font-size: small }" — unitless, so every
+    // descendant gets 1.5× its OWN font size. The capture stores the computed px (13px → 19.5px);
+    // applied as px it would force 19.5px on 16px/18px text too. Restore the ratio (new captures
+    // only — older ones keep their current, already-reviewed rendering).
+    if (hasEmailCss && /px$/.test(lineHeight || '') && /px$/.test(fontSize || '') && parseFloat(fontSize) > 0) {
+      lineHeight = String(+(parseFloat(lineHeight) / parseFloat(fontSize)).toFixed(4));
+    }
     const parts = [];
     if (fontSize) parts.push(`font-size: ${fontSize}`);
     if (fontFamily) parts.push(`font-family: ${fontFamily}`);
