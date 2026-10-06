@@ -146,12 +146,12 @@ export default function Pruebas() {
               <H2>LO QUE OBTIENES</H2>
               <p><B>La reunión no tiene horario.</B> Termina cuando hayamos terminado.</p>
               <p><B>Igual que el dossier</B>. Tendrá las páginas que tenga que tener. Pero incluirá:</p>
-              <Bullet>Análisis y comentarios sobre tus automatizaciones (y sus respectivas propuestas de mejora para vender más en automático sin dañar tu imagen de marca).</Bullet>
-              <Bullet>Análisis y comentarios sobre tus formularios de captación (y sus respectivas propuestas de mejora para conseguir más y mejores clientes potenciales).</Bullet>
-              <Bullet>Análisis y comentarios sobre las newsletters que envías (y sus respectivas propuestas de mejora para vender, fidelizar y generar recurrencia entre tus clientes).</Bullet>
-              <Bullet>Revisión técnica de la plataforma para asegurar que no hay problemas que estén limitando la estrategia.</Bullet>
-              <Bullet>Análisis de tu cliente actual vs tu cliente ideal (y cómo llegar a él si no lo estamos atrayendo correctamente).</Bullet>
-              <Bullet>Plan de acción detallado y semana a semana, para los próximos 90 días.</Bullet>
+              <Bullet><strong>Análisis y comentarios sobre tus automatizaciones</strong> (y sus respectivas propuestas de mejora <u>para vender más en automático</u> sin dañar tu imagen de marca).</Bullet>
+              <Bullet><strong>Análisis y comentarios sobre tus formularios de captación</strong> (y sus respectivas propuestas de mejora <u>para conseguir más y mejores clientes</u> potenciales).</Bullet>
+              <Bullet><strong>Análisis y comentarios sobre las newsletters que envías</strong> (y sus respectivas propuestas de mejora <u>para vender, fidelizar y generar recurrencia</u> entre tus clientes).</Bullet>
+              <Bullet><strong>Revisión técnica de la plataforma</strong> para asegurar que no hay problemas que estén <u>limitando la estrategia</u>.</Bullet>
+              <Bullet><strong>Análisis de tu cliente actual vs tu cliente ideal</strong> (y <u>cómo llegar a él</u> si no lo estamos atrayendo correctamente).</Bullet>
+              <Bullet><strong>Plan de acción detallado</strong> y semana a semana, <u>para los próximos 90 días</u>.</Bullet>
               <Bullet>Si te falta alguna automatización, formulario o pieza importante, te indicaré qué deberías crear, cómo hacerlo, cómo debería funcionar y qué función debe cumplir.</Bullet>
               <p>&nbsp;</p>
 
