@@ -151,7 +151,7 @@ export default function AntiAuditoria() {
               <Bullet><strong>Análisis y comentarios sobre tus formularios de captación</strong> (y sus respectivas propuestas de mejora <u>para conseguir más y mejores clientes</u> potenciales).</Bullet>
               <Bullet><strong>Análisis y comentarios sobre las newsletters que envías</strong> (y sus respectivas propuestas de mejora <u>para vender, fidelizar y generar recurrencia</u> entre tus clientes).</Bullet>
               <Bullet><strong>Revisión técnica de la plataforma</strong> para asegurar que no hay problemas que estén <u>limitando la estrategia</u>.</Bullet>
-              <Bullet><strong>Análisis de tu cliente actual vs tu cliente ideal</strong> (y <u>cómo llegar a él</u> si no lo estamos atrayendo correctamente).</Bullet>
+              <Bullet><strong>Análisis de tu cliente actual vs tu cliente ideal</strong>, porque sí, es posible, y muy común, que no estés atrayendo al cliente que de verdad te interesa (y <u>cómo llegar a él</u> si no lo estamos atrayendo correctamente).</Bullet>
               <Bullet><strong>Plan de acción detallado</strong> y semana a semana, <u>para los próximos 90 días</u>.</Bullet>
               <Bullet>Si te falta alguna automatización, formulario o pieza importante, te indicaré qué deberías crear, cómo hacerlo, cómo debería funcionar y qué función debe cumplir.</Bullet>
               <p>&nbsp;</p>
