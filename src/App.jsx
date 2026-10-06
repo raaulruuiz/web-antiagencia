@@ -19,6 +19,7 @@ import AudioSecreto from './pages/AudioSecreto';
 import CookieBanner from './components/CookieBanner';
 import TrabajaConNosotrosOld from './pages/TrabajaConNosotrosOld'
 import TrabajaConNosotrosV3 from './pages/TrabajaConNosotrosV3'
+import TrabajaConNosotros2 from './pages/TrabajaConNosotros2'
 import AntiAuditoria from './pages/AntiAuditoria'
 import PlanningQ3 from './pages/PlanningQ3'
 import PlanningQ3Venta from './pages/PlanningQ3Venta'
@@ -213,9 +214,9 @@ const AuthenticatedApp = () => {
       <Route path="/audiosecreto" element={<AudioSecreto />} />
       <Route path="/UltimoPaso" element={<SmartPage path="/UltimoPaso"><LayoutWrapper currentPageName="UltimoPaso"><UltimoPaso /></LayoutWrapper></SmartPage>} />
       <Route path="/YaPorFin" element={<SmartPage path="/YaPorFin"><LayoutWrapper currentPageName="YaPorFin"><YaPorFin /></LayoutWrapper></SmartPage>} />
-      {/* Versión anterior archivada sin ruta en pages/TrabajaConNosotros2.jsx */}
       <Route path="/trabajaconnosotros" element={<AntiAuditoria />} />
-      <Route path="/trabajaconnosotros-old" element={<LayoutWrapper currentPageName="TrabajaConNosotrosOld"><TrabajaConNosotrosOld /></LayoutWrapper>} />
+      {/* Versión anterior de /trabajaconnosotros. La aún más antigua (TrabajaConNosotrosOld) queda archivada sin ruta. */}
+      <Route path="/trabajaconnosotros-old" element={<TrabajaConNosotros2 />} />
       {/* <Route path="/planningq3" element={<PlanningQ3Venta />} /> */}
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/q3" element={<PlanningQ3 />} />
