@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import { IconEye, IconDownload } from './icons';
 
+// Email crops are captured at 2× (html2canvas scale: 2) and uploaded with a "_2x.png" name.
+// Declaring that density via srcSet makes the browser size them at their CSS-px width, so a
+// crop shows at the same scale as in the email while staying sharp on retina screens.
+export function isRetinaCrop(src) {
+  return typeof src === 'string' && /_2x\.png(?:[?#]|$)/i.test(src);
+}
+
 export function PreviewImg({ src, imgStyle, wrapperStyle, onPreview, href }) {
   const [hov, setHov] = useState(false);
   const mobile = window.innerWidth < 640;
-  const imgEl = <img src={src} alt="" loading="lazy" style={{ display: 'block', ...imgStyle }} />;
+  const imgEl = <img src={src} srcSet={isRetinaCrop(src) ? `${src} 2x` : undefined} alt="" loading="lazy" style={{ display: 'block', ...imgStyle }} />;
   return (
     <div style={{ position: 'relative', ...wrapperStyle }}
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>

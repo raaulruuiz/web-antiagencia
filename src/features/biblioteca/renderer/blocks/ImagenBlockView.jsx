@@ -1,4 +1,4 @@
-import { PreviewImg } from '../shared/PreviewImg';
+import { PreviewImg, isRetinaCrop } from '../shared/PreviewImg';
 import { BlockHeader } from '../shared/BlockHeader';
 
 export function ImagenBlockView({ block, onPreview, hideTitle }) {
@@ -42,11 +42,16 @@ export function ImagenBlockView({ block, onPreview, hideTitle }) {
     <div>
       {!hideTitle && <BlockHeader title={block.titulo} subtitle={block.subtitulo} />}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {images.map((img, i) => (
-          <PreviewImg key={i} src={img.url || img} onPreview={onPreview}
-            wrapperStyle={{ borderRadius: 9 }}
-            imgStyle={{ width: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)', display: 'block' }} />
-        ))}
+        {images.map((img, i) => {
+          const src = img.url || img;
+          // 2× email crops keep their email scale instead of stretching to the column width.
+          const crop = isRetinaCrop(src);
+          return (
+            <PreviewImg key={i} src={src} onPreview={onPreview}
+              wrapperStyle={crop ? { borderRadius: 9, width: 'fit-content', maxWidth: '100%' } : { borderRadius: 9 }}
+              imgStyle={{ width: crop ? 'auto' : '100%', maxWidth: '100%', height: 'auto', maxHeight: 320, borderRadius: 9, objectFit: 'contain', border: '1px solid var(--t-border)', display: 'block' }} />
+          );
+        })}
       </div>
     </div>
   );

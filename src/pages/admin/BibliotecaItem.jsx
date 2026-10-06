@@ -4627,7 +4627,9 @@ export default function BibliotecaItem() {
         setShowCropForModal(false);
         const urls = [];
         for (const blob of blobs) {
-          try { const url = await uploadImageForBlock(blob); if (url) urls.push(url); } catch (_) {}
+          // "_2x" tells the block renderer this bitmap is 2 px per email CSS px (scale: 2 above).
+          const file = new File([blob], `block_crop_${Date.now()}_2x.png`, { type: 'image/png' });
+          try { const url = await uploadImageForBlock(file); if (url) urls.push(url); } catch (_) {}
         }
         cropForModalResolveRef.current?.resolve(urls);
       } catch (e) {
