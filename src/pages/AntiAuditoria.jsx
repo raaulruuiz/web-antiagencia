@@ -184,6 +184,16 @@ export default function AntiAuditoria() {
               <p><B>P.D.</B> Recuerda que la vida es para disfrutarla. Y es mejor hacerlo con un negocio que crece, no con uno que se estanca.</p>
               <p>&nbsp;</p>
               <MailerLiteForm buttonText="Estudia mi caso" />
+
+              {/* Firma con logo, igual que en la versión antigua de /trabajaconnosotros-old */}
+              <div className="clear-both flex items-center justify-center gap-4 mt-8 pt-8 border-t border-gray-200">
+                <img
+                  src="https://media.base44.com/images/public/697678eac9cf34e2aefb7d57/82d53b854_logonegro.png"
+                  alt="AntiAgencia"
+                  className="h-10 w-auto"
+                />
+                <span className="font-bold text-gray-900 text-xl tracking-wide" style={{ fontFamily: "'Rubik', monospace" }}>Antiagencia</span>
+              </div>
             </Carta>
 
           </div>
