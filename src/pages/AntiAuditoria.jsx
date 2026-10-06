@@ -3,8 +3,9 @@ import { Helmet } from "react-helmet-async";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import { MailerLiteForm, mailerLiteCSS } from "./TrabajaConNosotros2";
 
-// Página temporal para previsualizar landings antes de publicarlas en su URL definitiva.
-// Mismo estilo "carta/email" y mismo formulario MailerLite que /trabajaconnosotros.
+// /trabajaconnosotros — landing de la Anti-Auditoría.
+// Mismo estilo "carta/email" y mismo formulario MailerLite que la versión anterior
+// (TrabajaConNosotros2.jsx, archivada sin ruta).
 
 const AZUL = '#0067FD';
 const ROJO = '#E00000';
@@ -66,15 +67,15 @@ function Carta({ children }) {
   );
 }
 
-export default function Pruebas() {
+export default function AntiAuditoria() {
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = mailerLiteCSS;
-    style.id = "mailerlite-css-pruebas";
+    style.id = "mailerlite-css-tcn";
     document.head.appendChild(style);
 
     window.ml_webform_success_38800152 = function () {
-      window.umami?.track('registro-presupuesto-pruebas');
+      window.umami?.track('registro-anti-auditoria');
       const $ = window.ml_jQuery || window.jQuery;
       if ($) {
         $('.ml-subscribe-form-38800152 .row-success').show();
@@ -87,13 +88,13 @@ export default function Pruebas() {
     const script = document.createElement("script");
     script.src = "https://groot.mailerlite.com/js/w/webforms.min.js?v83147fa8ce2d95cb73ece7f28b469519";
     script.type = "text/javascript";
-    script.id = "mailerlite-script-pruebas";
+    script.id = "mailerlite-script-tcn";
     document.body.appendChild(script);
 
     return () => {
-      const css = document.getElementById("mailerlite-css-pruebas");
+      const css = document.getElementById("mailerlite-css-tcn");
       if (css && css.parentNode) css.parentNode.removeChild(css);
-      const scr = document.getElementById("mailerlite-script-pruebas");
+      const scr = document.getElementById("mailerlite-script-tcn");
       if (scr && scr.parentNode) scr.parentNode.removeChild(scr);
     };
   }, []);
@@ -102,7 +103,7 @@ export default function Pruebas() {
     <>
       <Helmet>
         <title>Anti-Auditoría — Antiagencia</title>
-        <meta name="robots" content="noindex, nofollow" />
+        <meta name="description" content="Anti-Auditoría completa de email marketing con Raúl Ruiz: investigación, visita presencial, reunión y dossier con plan de acción a 90 días." />
       </Helmet>
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
