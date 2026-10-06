@@ -63,7 +63,7 @@ const DND_MOBILE_RULES = [
 ];
 
 const EMAIL_WIDTH = 600; // standard email content width in px
-const IFRAME_VIEWPORT = 601;
+export const IFRAME_VIEWPORT = 601;
 const MOBILE_VIEWPORT = 375;
 
 // Strips @media (max-width: ...) blocks from a CSS string.
@@ -115,7 +115,7 @@ const STYLESHEET_COMPENSATION_RULES = new Set([
   'a:has(> img) { display: inline-block; }',
 ]);
 
-function buildEmailIframeHtml(html_body, gmail_styles, mobileMode = false) {
+export function buildEmailIframeHtml(html_body, gmail_styles, mobileMode = false) {
   // Newer captures carry the email's real (Gmail-scoped) stylesheet — see the extension's
   // data-gmail-email-css wrapper. Then the compensations would only diverge from Gmail
   // (img display stays as the email defines it).

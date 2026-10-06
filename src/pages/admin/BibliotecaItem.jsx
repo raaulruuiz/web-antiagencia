@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useTheme } from '@/lib/ThemeContext';
-import EmailIframe from '@/components/EmailIframe';
+import EmailIframe, { buildEmailIframeHtml, IFRAME_VIEWPORT } from '@/components/EmailIframe';
 import { BlockRenderer } from '@/features/biblioteca/renderer/BlockRenderer';
 import { ColumnasLayout } from '@/features/biblioteca/renderer/blocks/ColumnasBlockView';
 import { SocialIcon } from '@/features/biblioteca/renderer/shared/SocialIcon';
@@ -698,8 +698,7 @@ function TagPicker({ selectedIds, allTags, categoria, subcategoria, onAdd, onRem
 
 // ── Crop overlay (dual mode) ──────────────────────────────────────────────────
 const SAVED_RECT_COLORS = ['#3b82f6','#22c55e','#f97316','#a855f7','#ef4444','#eab308','#06b6d4','#ec4899'];
-const EMAIL_CROP_H = 5000;
-function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
+function CropOverlay({ imageUrl, emailHtml, emailGmailStyles, onCrop, onCancel }) {
   const [mode, setMode]               = useState('libre');
   const [freeDrag, setFreeDrag]       = useState(null);
   const [freeRect, setFreeRect]       = useState(null);
@@ -709,8 +708,53 @@ function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
   const [aspectRatio, setAspectRatio] = useState(null);
   const [zoom, setZoom]               = useState(1);
   const [baseSize, setBaseSize]       = useState(null);
+  const [capturing, setCapturing]     = useState(false);
   const imgRef = useRef(null);
+  const emailIframeRef = useRef(null);
+  const emailObserverRef = useRef(null);
   const ZOOM_STEPS = [0.5, 0.75, 1, 1.5, 2, 3, 4];
+
+  // Email mode renders the same document as the Biblioteca detail (EmailIframe, desktop mode:
+  // same builder, same 601px viewport, so the same media queries apply). The iframe is sized to
+  // the document's real size — no fixed height, so the whole email is selectable.
+  const emailSrcDoc = useMemo(() => (emailHtml ? buildEmailIframeHtml(emailHtml, emailGmailStyles, false) : null), [emailHtml, emailGmailStyles]);
+  const [emailSize, setEmailSize] = useState(null); // {w,h} CSS px of the email document
+  const handleEmailLoad = (e) => {
+    emailObserverRef.current?.disconnect();
+    const doc = e.target.contentDocument;
+    if (!doc) return;
+    const measure = () => {
+      const body = doc.body, docEl = doc.documentElement;
+      // Same measurements as EmailIframe: content wider than the viewport widens the iframe
+      // instead of being clipped by overflow-x:hidden.
+      const w = Math.max(IFRAME_VIEWPORT, body?.scrollWidth || 0, docEl?.scrollWidth || 0);
+      const h = Math.max(body?.scrollHeight || 0, body?.offsetHeight || 0, docEl?.scrollHeight || 0, docEl?.offsetHeight || 0);
+      setEmailSize(prev => (prev && prev.w === w && prev.h === h ? prev : { w, h }));
+    };
+    measure();
+    if (typeof ResizeObserver !== 'undefined') {
+      // Late-loading images grow the document after `load`.
+      const ro = new ResizeObserver(measure);
+      if (doc.body) ro.observe(doc.body);
+      if (doc.documentElement) ro.observe(doc.documentElement);
+      emailObserverRef.current = ro;
+    }
+  };
+  useEffect(() => () => emailObserverRef.current?.disconnect(), []);
+  const emailW = emailSize?.w || IFRAME_VIEWPORT;
+  // Before the first measurement the iframe needs some viewport to lay out in; replaced by the
+  // measured height on load.
+  const emailH = emailSize?.h || 800;
+
+  // Email mode: rects are in CSS px of the preview iframe's document, so the capture must come
+  // from that same document (not a re-render elsewhere, whose layout can differ). The overlay
+  // stays mounted until onCrop resolves, so the iframe is still alive while it's captured.
+  const submitRects = async (rects) => {
+    if (capturing) return;
+    setCapturing(true);
+    try { await onCrop(rects, emailHtml ? { emailDoc: emailIframeRef.current?.contentDocument || null } : undefined); }
+    finally { setCapturing(false); }
+  };
 
   useEffect(() => {
     const up = () => { setDragHandle(null); setFreeDrag(null); };
@@ -784,17 +828,19 @@ function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
   const confirmMulti = () => {
     if (!imgRef.current || savedRects.length === 0) return;
     const b = imgRef.current.getBoundingClientRect();
-    const sx = emailHtml ? (600 / b.width) : (imgRef.current.naturalWidth / b.width);
-    const sy = emailHtml ? (600 / b.width) : (imgRef.current.naturalHeight / b.height);
-    onCrop(savedRects.map(r => ({ x: Math.round(r.x*sx), y: Math.round(r.y*sy), w: Math.round(r.w*sx), h: Math.round(r.h*sy) })));
+    // Email: the iframe is drawn at exactly scale(zoom), so display px → document px is 1/zoom.
+    const sx = emailHtml ? (1 / zoom) : (imgRef.current.naturalWidth / b.width);
+    const sy = emailHtml ? (1 / zoom) : (imgRef.current.naturalHeight / b.height);
+    submitRects(savedRects.map(r => ({ x: Math.round(r.x*sx), y: Math.round(r.y*sy), w: Math.round(r.w*sx), h: Math.round(r.h*sy) })));
   };
 
   const confirmResize = () => {
     if (!cropBox || !imgRef.current) return;
     const b = imgRef.current.getBoundingClientRect();
-    const sx = emailHtml ? (600 / b.width) : (imgRef.current.naturalWidth / b.width);
-    const sy = emailHtml ? (600 / b.width) : (imgRef.current.naturalHeight / b.height);
-    onCrop([{ x:Math.round(cropBox.x*sx), y:Math.round(cropBox.y*sy), w:Math.round(cropBox.w*sx), h:Math.round(cropBox.h*sy) }]);
+    // Email: the iframe is drawn at exactly scale(zoom), so display px → document px is 1/zoom.
+    const sx = emailHtml ? (1 / zoom) : (imgRef.current.naturalWidth / b.width);
+    const sy = emailHtml ? (1 / zoom) : (imgRef.current.naturalHeight / b.height);
+    submitRects([{ x:Math.round(cropBox.x*sx), y:Math.round(cropBox.y*sy), w:Math.round(cropBox.w*sx), h:Math.round(cropBox.h*sy) }]);
   };
 
   const changeZoom = useCallback((dir) => {
@@ -854,14 +900,16 @@ function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
           {emailHtml ? (
             <div
               ref={imgRef}
-              style={{ position:'relative', width: Math.round(600 * zoom), height: Math.round(EMAIL_CROP_H * zoom), cursor: mode==='libre'?'crosshair':'default' }}
+              style={{ position:'relative', width: emailW * zoom, height: emailH * zoom, cursor: mode==='libre'?'crosshair':'default' }}
               onMouseDown={mode==='libre' ? (e) => { e.preventDefault(); const b=imgRef.current.getBoundingClientRect(); setFreeDrag({sx:e.clientX-b.left, sy:e.clientY-b.top}); setFreeRect(null); } : undefined}
             >
               <iframe
-                srcDoc={(() => { const s='<style>body{margin:0!important;padding:0!important;background:#fff;font-size:small;font-family:Arial,Helvetica,sans-serif;word-break:normal!important;overflow-wrap:normal!important;}td,th,p,div,span{word-break:normal!important;overflow-wrap:normal!important;}img{display:block;border:0;max-width:100%!important;}table{border-collapse:collapse!important;}img.an1{display:inline;width:1em;height:1em;vertical-align:-0.1em;max-width:none!important;}</style>'; const h=emailHtml.indexOf('</head>'); return h!==-1?emailHtml.slice(0,h)+s+emailHtml.slice(h):s+emailHtml; })()}
+                ref={emailIframeRef}
+                srcDoc={emailSrcDoc}
+                onLoad={handleEmailLoad}
                 sandbox="allow-same-origin"
                 title="email-crop"
-                style={{ position:'absolute', top:0, left:0, width:600, height:EMAIL_CROP_H, border:'none', display:'block', pointerEvents:'none', transform:`scale(${zoom})`, transformOrigin:'top left' }}
+                style={{ position:'absolute', top:0, left:0, width:emailW, height:emailH, border:'none', display:'block', pointerEvents:'none', transform:`scale(${zoom})`, transformOrigin:'top left' }}
               />
             </div>
           ) : (
@@ -903,12 +951,12 @@ function CropOverlay({ imageUrl, emailHtml, onCrop, onCancel }) {
       <div style={{ padding:'12px 0 20px', display:'flex', gap:10, alignItems:'center' }}>
         <button onClick={onCancel} style={{ background:'transparent', border:'1px solid var(--t-border-mid)', color:'var(--t-text-placeholder)', borderRadius:999, padding:'7px 18px', fontSize:13, cursor:'pointer' }}>Cancelar</button>
         {mode==='libre' && savedRects.length > 0 && (
-          <button onClick={confirmMulti} style={{ background:'white', color:'black', border:'none', borderRadius:999, padding:'7px 20px', fontSize:13, fontWeight:600, cursor:'pointer' }}>
-            Confirmar {savedRects.length === 1 ? '1 recorte' : `${savedRects.length} recortes`}
+          <button onClick={confirmMulti} disabled={capturing} style={{ background:'white', color:'black', border:'none', borderRadius:999, padding:'7px 20px', fontSize:13, fontWeight:600, cursor: capturing ? 'wait' : 'pointer', opacity: capturing ? 0.6 : 1 }}>
+            {capturing ? 'Capturando…' : `Confirmar ${savedRects.length === 1 ? '1 recorte' : `${savedRects.length} recortes`}`}
           </button>
         )}
         {mode==='ajustar' && cropBox && (
-          <button onClick={confirmResize} style={{ background:'white', color:'black', border:'none', borderRadius:999, padding:'7px 20px', fontSize:13, fontWeight:600, cursor:'pointer' }}>Confirmar recorte</button>
+          <button onClick={confirmResize} disabled={capturing} style={{ background:'white', color:'black', border:'none', borderRadius:999, padding:'7px 20px', fontSize:13, fontWeight:600, cursor: capturing ? 'wait' : 'pointer', opacity: capturing ? 0.6 : 1 }}>{capturing ? 'Capturando…' : 'Confirmar recorte'}</button>
         )}
       </div>
     </div>
@@ -4554,43 +4602,44 @@ export default function BibliotecaItem() {
     });
   }, []);
 
-  const handleCropForModal = useCallback(async (cropRects) => {
-    setShowCropForModal(false);
-
+  const handleCropForModal = useCallback(async (cropRects, source) => {
     if (item?.email_html) {
-      // HTML email: render in hidden div and capture with html2canvas
-      let container = null;
+      // HTML email: capture from the CropOverlay's own preview iframe — the exact document the
+      // rects were drawn on. Rects are CSS px of that document (zoom already divided out), so they
+      // map 1:1; html2canvas offsets x/y by the captured element's position, hence the body offset.
       try {
+        const doc = source?.emailDoc;
+        if (!doc?.body) throw new Error('La vista del email aún no está cargada');
         const { default: html2canvas } = await import('html2canvas');
-        container = document.createElement('div');
-        container.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:600px;background:#ffffff;z-index:-1;';
-        const s = '<style>body,*{box-sizing:border-box;}body{margin:0!important;padding:0!important;background:#fff;font-size:small;font-family:Arial,Helvetica,sans-serif;word-break:normal!important;overflow-wrap:normal!important;}td,th,p,div,span{word-break:normal!important;overflow-wrap:normal!important;}img{display:block;border:0;max-width:100%!important;}table{border-collapse:collapse!important;}</style>';
-        const raw = item.email_html;
-        const hc = raw.indexOf('</head>');
-        container.innerHTML = hc !== -1 ? raw.slice(0, hc) + s + raw.slice(hc) : s + raw;
-        document.body.appendChild(container);
-        await new Promise(r => setTimeout(r, 800)); // wait for images
-        const urls = [];
+        const bodyRect = doc.body.getBoundingClientRect();
+        const blobs = [];
         for (const rect of cropRects) {
           try {
-            const canvas = await html2canvas(container, {
-              x: rect.x, y: rect.y, width: rect.w, height: rect.h,
+            const canvas = await html2canvas(doc.body, {
+              x: rect.x - bodyRect.left, y: rect.y - bodyRect.top, width: rect.w, height: rect.h,
               useCORS: true, allowTaint: false, scale: 2,
               backgroundColor: '#ffffff', logging: false,
             });
             const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-            if (blob) { const url = await uploadImageForBlock(blob); if (url) urls.push(url); }
+            if (blob) blobs.push(blob);
           } catch (_) {}
+        }
+        setShowCropForModal(false);
+        const urls = [];
+        for (const blob of blobs) {
+          try { const url = await uploadImageForBlock(blob); if (url) urls.push(url); } catch (_) {}
         }
         cropForModalResolveRef.current?.resolve(urls);
       } catch (e) {
+        setShowCropForModal(false);
         cropForModalResolveRef.current?.reject(e);
       } finally {
-        if (container?.parentNode) container.parentNode.removeChild(container);
         cropForModalResolveRef.current = null;
       }
       return;
     }
+
+    setShowCropForModal(false);
 
     // Image-based crop (existing)
     const img = new Image(); img.crossOrigin = 'anonymous';
@@ -4729,7 +4778,7 @@ export default function BibliotecaItem() {
           emailHtml={item?.email_html || null}
         />
       ) : null; })()}
-      {showCropForModal && item && <CropOverlay imageUrl={item.email_html ? null : item.url} emailHtml={item.email_html || null} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
+      {showCropForModal && item && <CropOverlay imageUrl={item.email_html ? null : item.url} emailHtml={item.email_html || null} emailGmailStyles={item.email_gmail_styles || null} onCrop={handleCropForModal} onCancel={() => { setShowCropForModal(false); cropForModalResolveRef.current?.reject(new Error('cancelled')); cropForModalResolveRef.current = null; }} />}
       {showBlockSelectorModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'var(--t-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
           onClick={() => { setShowBlockSelectorModal(false); setInsertAtIndex(null); }}>
