@@ -696,6 +696,27 @@ function TagPicker({ selectedIds, allTags, categoria, subcategoria, onAdd, onRem
   );
 }
 
+// html2canvas re-downloads (CORS) every <img> of the document it renders, even when only a small
+// region is captured. In its clone, images that lie entirely outside the crop can't affect the
+// result, so they become a blank of the exact same box size: layout stays identical and only the
+// images that actually show in the crop are fetched.
+const BLANK_GIF = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+function blankImagesOutside(sourceDoc, cloneDoc, rect) {
+  const originals = sourceDoc.images;
+  const clones = cloneDoc.images;
+  if (originals.length !== clones.length) return; // unexpected clone shape: leave everything as is
+  for (let i = 0; i < clones.length; i++) {
+    const r = originals[i].getBoundingClientRect();
+    const outside = r.right <= rect.x || r.left >= rect.x + rect.w || r.bottom <= rect.y || r.top >= rect.y + rect.h;
+    if (!outside) continue;
+    const img = clones[i];
+    img.style.setProperty('width', `${r.width}px`, 'important');
+    img.style.setProperty('height', `${r.height}px`, 'important');
+    img.removeAttribute('srcset');
+    img.src = BLANK_GIF;
+  }
+}
+
 // ── Crop overlay (dual mode) ──────────────────────────────────────────────────
 const SAVED_RECT_COLORS = ['#3b82f6','#22c55e','#f97316','#a855f7','#ef4444','#eab308','#06b6d4','#ec4899'];
 function CropOverlay({ imageUrl, emailHtml, emailGmailStyles, onCrop, onCancel }) {
@@ -4619,6 +4640,7 @@ export default function BibliotecaItem() {
               x: rect.x - bodyRect.left, y: rect.y - bodyRect.top, width: rect.w, height: rect.h,
               useCORS: true, allowTaint: false, scale: 2,
               backgroundColor: '#ffffff', logging: false,
+              onclone: (cloneDoc) => blankImagesOutside(doc, cloneDoc, rect),
             });
             const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
             if (blob) blobs.push(blob);
