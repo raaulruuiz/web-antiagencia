@@ -61,6 +61,11 @@ const PLATFORM_ICONS = {
       <circle cx="7" cy="13" r="1.1" fill="currentColor" stroke="none" />
     </svg>
   ),
+  spreaker: (
+    <svg viewBox="189 -1 36 38" className="w-5 h-5" fill="#FFC00E">
+      <path d="M201.925 17.7426L190.376 29.2861L201.925 25.7713L210.933 35.8945L211.499 22.6417L223.482 17.7426L211.74 12.8315L210.271 0.325012L202.66 9.88242L190.376 7.6676L201.925 17.7426Z"/>
+    </svg>
+  ),
 };
 
 const PLATFORM_COLORS = {
@@ -71,6 +76,7 @@ const PLATFORM_COLORS = {
   amazon: "#00A8E1",
   google: "#4285F4",
   listennotes: "#B82F00",
+  spreaker: "#101820",
 };
 
 export default function PodcastPost({ slug }) {
