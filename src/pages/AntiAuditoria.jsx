@@ -161,8 +161,8 @@ export default function AntiAuditoria() {
               <Paso>Una vez que rellenas el formulario, me pongo en contacto contigo al día siguiente para decirte si me interesa o no el proyecto.</Paso>
               <Paso>Si es que sí, te paso las fechas disponibles.</Paso>
               <Paso>Eliges.</Paso>
-              <Paso>Pagas el total <u>por adelantado</u>.</Paso>
               <Paso>Te envío la factura y el contrato.</Paso>
+              <Paso>Pagas el total <u>por adelantado</u>.</Paso>
               <Paso>Creo un grupo de WhatsApp por el que te pediré la info y el material que voy a necesitar para trabajar.</Paso>
               <Paso>Agendamos la visita presencial.</Paso>
               <Paso>Trabajo sobre el dossier.</Paso>
@@ -172,7 +172,7 @@ export default function AntiAuditoria() {
 
               <H2>FORMA DE PAGO</H2>
               <p>Cobro por adelantado <u>siempre</u>.</p>
-              <p>Una vez que te mande las fechas disponibles, tienes <B>dos días</B> para realizar el pago de la Anti-Auditoría.</p>
+              <p>Una vez que te mande la factura, tienes <B>dos días</B> para realizar el pago de la Anti-Auditoría.</p>
               <p>Si no se ha pagado en ese tiempo, la fecha elegida quedará a disposición de otro cliente.</p>
               <p>&nbsp;</p>
               <p>Y ya estaría.</p>
