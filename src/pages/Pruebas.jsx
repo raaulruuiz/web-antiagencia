@@ -15,6 +15,11 @@ function B({ children }) {
   return <strong style={{ color: AZUL }}>{children}</strong>;
 }
 
+// Negritas en morado (nombres de clientas)
+function M({ children }) {
+  return <strong style={{ color: MORADO }}>{children}</strong>;
+}
+
 // Bullets de lista: check en círculo azul
 function Bullet({ children }) {
   return (
@@ -168,7 +173,7 @@ export default function Pruebas() {
               <Espacio />
               <p>Si te ha pasado, lee este caso, que podría ser inventado, pero es real:</p>
               <Espacio />
-              <p><strong style={{ color: MORADO }}>Inés</strong> es una clienta que enviaba 2 campañas a la semana. Cada email vendía más de 1.000€, empezamos a enviar 6, y siguieron vendiendo más de 1.000€ cada uno. Multiplicamos por 3 sin tocar nada más.</p>
+              <p><M>Inés</M> es una clienta que enviaba 2 campañas a la semana. Cada email vendía más de 1.000€, empezamos a enviar 6, y siguieron vendiendo más de 1.000€ cada uno. Multiplicamos por 3 sin tocar nada más.</p>
               <Espacio />
               <H2>NO NECESITAS</H2>
               <p>No necesitas a nadie más que te diga lo que tienes que hacer. La mayoría ya tenemos suficiente información.</p>
@@ -179,7 +184,7 @@ export default function Pruebas() {
               <Espacio />
               <p>Mucho ruido y pocas nueces.</p>
               <Espacio />
-              <p>No necesitas más información, quizá ni siquiera tienes que hacer más de lo que ya haces. Se trata de hacer lo que tu marca necesita y puede permitirse. Por eso…</p>
+              <p><B>No necesitas más información</B>, quizá ni siquiera tienes que hacer más de lo que ya haces. Se trata de hacer lo que tu marca necesita y puede permitirse. Por eso…</p>
               <Espacio />
               <p>La Anti-Auditoría no tiene grupos, ni clases en directo, ni contenido grabado, ni 400 recursos, ni llamadas semanales, ni audios adicionales, ni comunidad de whatsapp, ni agentes de IA, ni consultores privados.</p>
               <Espacio />
@@ -199,7 +204,7 @@ export default function Pruebas() {
               <Espacio />
               <p>Aquí tienes otro caso que podría ser inventado, pero no lo es:</p>
               <Espacio />
-              <p>Celia, con solo 3 emails por semana, ha conseguido, en menos de un año, que varias clientas le hayan comprado incluso más de veinte veces. Y un tercio, compran de nuevo cada mes.</p>
+              <p><M>Celia</M>, con solo 3 emails por semana, ha conseguido, en menos de un año, que varias clientas le hayan comprado incluso más de veinte veces. Y un tercio, compran de nuevo cada mes.</p>
               <Espacio />
               <H2>LO MÁS IMPORTANTE</H2>
               <p><B>Te visitaré en persona.</B></p>
@@ -212,7 +217,7 @@ export default function Pruebas() {
               <Espacio />
               <p>Y conocerte. Quiero saber cómo eres en persona cuando estás trabajando, y cuando no lo haces. Quiero entender por qué tu marca es cómo es y que me cuentes toda la historia, y los detalles. Quiero saber si eres más o menos alto que yo (mido 1,89), si cuentas chistes cuando hablamos, si eres una persona seria. Quiero que me cuentes los malos momentos, y los buenos, cómo los viviste. Quiero ver tu cara cuando me lo cuentas.</p>
               <Espacio />
-              <p>Quiero saberlo todo.</p>
+              <p><B>Quiero saberlo todo.</B></p>
               <Espacio />
               <p>Luego hablaré con tus clientes. Llamaré personalmente a algunos clientes para preguntarles por su experiencia, sus sensaciones, sus opiniones, por qué compraron y por qué lo volverían a hacer.</p>
               <Espacio />
@@ -220,11 +225,11 @@ export default function Pruebas() {
               <Espacio />
               <p>Y por supuesto, miraré todo lo que has hecho hasta ahora. El pasado nos habla mucho del presente y nos permite preparar el futuro. Illo, suena muy filosófico, pero es verdad. Leeré los emails que has enviado, veré los vídeos y anuncios que has publicado y analizaré las decisiones más importantes que has tomado para tu tienda.</p>
               <Espacio />
-              <p>¿Todo esto para qué?</p>
+              <p><B>¿Todo esto para qué?</B></p>
               <Espacio />
               <p>Para darte criterio. Este será el módulo +1 de la Anti-Auditoría. Un resumen, con sus conclusiones de la investigación que voy a hacer. Esto no va de instalarte un sistema en 7 días. Va de dedicar el tiempo necesario a entender TU negocio y TU cliente, no un copia y pega que le entregue a cualquiera, con mensajes muy bonitos pero que no dicen nada.</p>
               <Espacio />
-              <p>Quizá puede que te pase como a Sheyla, que entendiendo a su público y haciendo un pequeño cambio en el formulario de registro y el estilo de comunicación, en pocas semanas pasó de no vender por campañas, a vender en cada campaña que manda.</p>
+              <p>Quizá puede que te pase como a <M>Sheyla</M>, que entendiendo a su público y haciendo un pequeño cambio en el formulario de registro y el estilo de comunicación, en pocas semanas pasó de no vender por campañas, a vender en cada campaña que manda.</p>
               <Espacio />
               <p>Lo mismo hicimos en los flujos, entendimos al cliente y pasamos de 7 a 22 automatizaciones, multiplicando por 10 los resultados.</p>
               <Espacio />
@@ -253,18 +258,18 @@ export default function Pruebas() {
               <Espacio />
               <p>Obvio hay parte de habilidad en todo, pero en cada módulo tendrás:</p>
               <Espacio />
-              <Bullet>Ejemplos de cómo otras marcas implementan lo que te recomiendo. Tanto de tu sector, como de otros (se consigue mucho criterio mirando fuera de tu sector).</Bullet>
-              <Bullet>Propuestas escritas por mí para tu propia marca. Podrás usarlas o adaptarlas.</Bullet>
-              <Bullet>Descripciones, imágenes y guías de las plataformas de email para que sepas donde ir en cada momento.</Bullet>
-              <Bullet>Guía y detalles que tienes que tener en cuenta a la hora de realizar los cambios.</Bullet>
+              <Bullet><u>Ejemplos de cómo otras marcas implementan lo que te recomiendo</u>. Tanto de tu sector, como de otros (se consigue mucho criterio mirando fuera de tu sector).</Bullet>
+              <Bullet><u>Propuestas escritas por mí</u> para tu propia marca. Podrás usarlas o adaptarlas.</Bullet>
+              <Bullet><u>Descripciones, imágenes y guías</u> de las plataformas de email para que sepas donde ir en cada momento.</Bullet>
+              <Bullet><u>Guía y detalles que tienes que tener en cuenta</u> a la hora de realizar los cambios.</Bullet>
               <Espacio />
               <p>En definitiva, <B>todo lo que necesitas para poder trabajar teniendo delante solo la auditoría</B>, no mil pestañas abiertas.</p>
               <Espacio />
               <p>Lee esto, que son casos reales:</p>
               <Espacio />
-              <p>A Neus el email le lleva 10 minutos cada día, y más de la mitad de las ventas de su tienda, vienen por ahí.</p>
+              <p>A <M>Neus</M> el email le lleva 10 minutos cada día, y más de la mitad de las ventas de su tienda, vienen por ahí.</p>
               <Espacio />
-              <p>U otra clienta, que factura el 70% de lo que vende por email, y le dedica menos de 20 minutos al día.</p>
+              <p>U <M>otra clienta</M>, que factura el 70% de lo que vende por email, y le dedica menos de 20 minutos al día.</p>
               <Espacio />
               <H2>LA VENTAJA PRINCIPAL</H2>
               <p>La Anti-Auditoría es de por sí un producto que se rentabiliza con 3-4 emails que envíes. No es porque lo haga yo ni nada por el estilo. No soy tan importante. Es porque lo he visto en decenas de tiendas.</p>
@@ -281,7 +286,7 @@ export default function Pruebas() {
               <Espacio />
               <p>Por eso, este módulo es para responder esa pregunta. En los demás módulos tendrás una explicación del razonamiento por el que llego a proponerte lo que te propongo.</p>
               <Espacio />
-              <p>Aquí entramos en el detalle, en las tripas: Cómo pienso para tomar las decisiones. Qué miro, qué dejo de mirar, cómo lo evalúo… Te voy a enseñar a analizar cada cosa que implementas para que no me necesites más. Ni a mí, ni a nadie.</p>
+              <p><B>Aquí entramos en el detalle, en las tripas:</B> Cómo pienso para tomar las decisiones. Qué miro, qué dejo de mirar, cómo lo evalúo… Te voy a enseñar a analizar cada cosa que implementas para que no me necesites más. Ni a mí, ni a nadie.</p>
               <Espacio />
               <p>Te voy a mostrar posibles escenarios, cómo actuar en cada uno, cómo desarrollar el plan A, B y C de cada cambio que haces, para que si algo falla, sepas:</p>
               <Espacio />
@@ -292,9 +297,9 @@ export default function Pruebas() {
               <Espacio />
               <p>Este módulo solo justifica los 1.350€ que vale la Anti-Auditoría. De hecho es por lo que me pagan mis clientes de servicio y de consultoría (y pagan mucho más).</p>
               <Espacio />
-              <p>Este criterio es el que aplicamos con Inés hace un año. Tenía muy poco beneficio, y con una anti-promoción especial de una semana, aumentamos el beneficio total de la tienda un 30% ad eternum (para siempre).</p>
+              <p>Este criterio es el que aplicamos con <M>Inés</M> hace un año. Tenía muy poco beneficio, y con una anti-promoción especial de una semana, aumentamos el beneficio total de la tienda un 30% ad eternum (para siempre).</p>
               <Espacio />
-              <p>O a Delia, con quién hicimos un lanzamiento sin publicidad, a una lista de menos de 1000 personas y generamos 25.000€ en menos de una semana.</p>
+              <p>O a <M>Delia</M>, con quién hicimos un lanzamiento sin publicidad, a una lista de menos de 1000 personas y generamos 25.000€ en menos de una semana.</p>
               <Espacio />
               <H2>PLAZOS</H2>
               <p>Sencillo:</p>
@@ -311,7 +316,7 @@ export default function Pruebas() {
               <Paso>Te envío la grabación de la reunión y el dossier.</Paso>
               <Espacio />
               <H2>FORMAS DE PAGO</H2>
-              <p>Cobro por adelantado siempre.</p>
+              <p>Cobro por adelantado <u>siempre</u>.</p>
               <Espacio />
               <p>Una vez que te mande la factura, tienes dos días para realizar el pago de la Anti-Auditoría.</p>
               <Espacio />
