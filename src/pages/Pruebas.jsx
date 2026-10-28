@@ -364,7 +364,7 @@ export default function Pruebas() {
               <p>Módulo 5.</p>
               <Espacio />
               <H3>¿Cómo es el proceso de apuntarse?</H3>
-              <p>Rellenas el formulario de arriba - Si me gusta el proyecto te paso las fechas disponibles - Eliges - Te envío la factura y el contrato - Pagas - Creo un grupo de WhatsApp por el que te pediré la info y el material - Agendamos la visita presencial - Trabajo sobre el dossier - Nos vemos en la reunión online - Te envío la grabación de la reunión y el dossier.</p>
+              <p>Rellenas el formulario - Si me gusta el proyecto te paso las fechas disponibles - Eliges - Te envío la factura y el contrato - Pagas - Creo un grupo de WhatsApp por el que te pediré la info y el material - Agendamos la visita presencial - Trabajo sobre el dossier - Nos vemos en la reunión online - Te envío la grabación de la reunión y el dossier.</p>
               <Espacio />
               <MailerLiteForm buttonText="Estudia mi caso" />
               <div className="clear-both" />
