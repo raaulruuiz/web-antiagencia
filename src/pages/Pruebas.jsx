@@ -158,10 +158,7 @@ export default function Pruebas() {
               <Espacio />
               <p>Y la <B>cuarta cosa que tienes que saber</B>, como diría el Josep, el de los pistachos… es que soy Raúl, y escribo emails. Encantado.</p>
               <Espacio />
-              <Espacio />
-              <Espacio />
               <H2>¿DE QUÉ VA ESTO?</H2>
-              <Espacio />
               <p>Ya sabes…</p>
               <Espacio />
               <p>Algunos envían 2 newsletters a la semana. O una al día. O una al mes. Unos tienen 7 automatizaciones. O 9. O ninguna. Hay quien piensa que es mejor hacer emails cortos con muchas imágenes porque la gente no lee. O quien escribe emails largos sin imágenes. Unos quieren delegar el email. O dejar de depender tanto de la publicidad. O de las redes. O enviar sólo promociones. O dejar de hacerlas. Hay quien escribe los emails siempre a última hora. O quién se programa la semana entera para que no le pille el toro.</p>
@@ -172,10 +169,7 @@ export default function Pruebas() {
               <Espacio />
               <p>Inés es una clienta que enviaba 2 campañas a la semana. Cada email vendía más de 1.000€, empezamos a enviar 6, y siguieron vendiendo más de 1.000€ cada uno. Multiplicamos por 3 sin tocar nada más.</p>
               <Espacio />
-              <Espacio />
-              <Espacio />
               <H2>NO NECESITAS</H2>
-              <Espacio />
               <p>No necesitas a nadie más que te diga lo que tienes que hacer. La mayoría ya tenemos suficiente información.</p>
               <Espacio />
               <p>Todos sabemos que el email es el canal más rentable (si no lo sabes, esto no es para ti). Y muchos piensan, con bastante razón, que pueden vender más por ahí.</p>
@@ -206,10 +200,7 @@ export default function Pruebas() {
               <Espacio />
               <p>Celia, con solo 3 emails por semana, ha conseguido, en menos de un año, que varias clientas le hayan comprado incluso más de veinte veces. Y un tercio, compran de nuevo cada mes.</p>
               <Espacio />
-              <Espacio />
-              <Espacio />
               <H2>LO MÁS IMPORTANTE</H2>
-              <Espacio />
               <p><B>Te visitaré en persona.</B></p>
               <Espacio />
               <p>En esta época de la IA, me parece lo más importante. Porque sí, puedo ver tu web, tus fotos, preguntar a la IA que me haga un resumen de tu empresa… Eso está bien pero, entre tú y yo, no es suficiente.</p>
@@ -236,10 +227,7 @@ export default function Pruebas() {
               <Espacio />
               <p>Lo mismo hicimos en los flujos, entendimos al cliente y pasamos de 7 a 22 automatizaciones, multiplicando por 10 los resultados.</p>
               <Espacio />
-              <Espacio />
-              <Espacio />
               <H2>LO GORDO</H2>
-              <Espacio />
               <p>Fíjate que hasta ahora solo hemos hablado del primer módulo de la Anti-Auditoría. También es que es el más importante, eso es verdad. ¿Pero qué hay de los otros?</p>
               <Espacio />
               <p>Los siguientes cuatro módulos ya son los bloques de trabajo. Es el criterio aplicado a tu tienda. Lo que tienes que hacer, lo que tienes que dejar de hacer, lo que puedes mejorar, lo que tienes que cambiar.</p>
@@ -277,10 +265,7 @@ export default function Pruebas() {
               <Espacio />
               <p>U otra clienta, que factura el 70% de lo que vende por email, y le dedica menos de 20 minutos al día.</p>
               <Espacio />
-              <Espacio />
-              <Espacio />
               <H2>LA VENTAJA PRINCIPAL</H2>
-              <Espacio />
               <p>La Anti-Auditoría es de por sí un producto que se rentabiliza con 3-4 emails que envíes. No es porque lo haga yo ni nada por el estilo. No soy tan importante. Es porque lo he visto en decenas de tiendas.</p>
               <Espacio />
               <p>Pero es que este último módulo de la Anti-Auditoría, el módulo 5…</p>
@@ -310,36 +295,21 @@ export default function Pruebas() {
               <Espacio />
               <p>O a Delia, con quién hicimos un lanzamiento sin publicidad, a una lista de menos de 1000 personas y generamos 25.000€ en menos de una semana.</p>
               <Espacio />
-              <Espacio />
-              <Espacio />
               <H2>PLAZOS</H2>
-              <Espacio />
               <p>Sencillo:</p>
               <Espacio />
               <Paso>Una vez que rellenas el formulario, me pongo en contacto contigo al día siguiente para decirte si me interesa o no el proyecto.</Paso>
-              <Espacio />
               <Paso>Si es que sí, te paso las fechas disponibles.</Paso>
-              <Espacio />
               <Paso>Eliges.</Paso>
-              <Espacio />
               <Paso>Te envío la factura y el contrato.</Paso>
-              <Espacio />
               <Paso>Pagas el total por adelantado.</Paso>
-              <Espacio />
               <Paso>Creo un grupo de WhatsApp por el que te pediré la info y el material que voy a necesitar para trabajar.</Paso>
-              <Espacio />
               <Paso>Agendamos la visita presencial.</Paso>
-              <Espacio />
               <Paso>Trabajo sobre el dossier.</Paso>
-              <Espacio />
               <Paso>Nos vemos en la reunión online.</Paso>
-              <Espacio />
               <Paso>Te envío la grabación de la reunión y el dossier.</Paso>
               <Espacio />
-              <Espacio />
-              <Espacio />
               <H2>FORMAS DE PAGO</H2>
-              <Espacio />
               <p>Cobro por adelantado siempre.</p>
               <Espacio />
               <p>Una vez que te mande la factura, tienes dos días para realizar el pago de la Anti-Auditoría.</p>
@@ -348,75 +318,53 @@ export default function Pruebas() {
               <Espacio />
               <p>En el enlace de pago, podrás fraccionarlo en 3 plazos sin intereses con Klarna. Si quieres pagar por transferencia bancaria, me lo tendrás que decir.</p>
               <Espacio />
-              <Espacio />
-              <Espacio />
               <p>Y ya estaría.</p>
               <Espacio />
-              <Espacio />
-              <Espacio />
               <p>Si te interesa, aquí abajo tienes el formulario para que estudie tu caso.</p>
-              <Espacio />
               <Espacio />
               <p>Disfruta la vida.</p>
               <Espacio />
               <p>Raúl.</p>
               <Espacio />
-              <Espacio />
               <MailerLiteForm buttonText="Estudia mi caso" />
               <div className="clear-both" />
               <Espacio />
-              <Espacio />
-              <Espacio />
               <H2>PREGUNTAS</H2>
-              <Espacio />
               <H3>¿Cómo funciona exactamente?</H3>
-              <Espacio />
               <p>Te entrego un dossier con las páginas que tenga que tener y te lo presento en una reunión que dure lo que tenga que durar, luego te paso también la grabación. Para hacer este dossier iré a verte en persona y dedicaré el tiempo necesario a investigar y redactar el plan para los siguientes 90 días a la reunión que vamos a tener.</p>
               <Espacio />
               <H3>¿Se puede pagar a plazos?</H3>
-              <Espacio />
               <p>Sí, en el momento del pago puedes elegir si pagarlo de una vez o financiarlo con Klarna a 3 meses sin intereses, es decir, pagas el mismo precio pero dividido en 3 meses.</p>
               <Espacio />
               <H3>¿Cuánto cuesta?</H3>
-              <Espacio />
               <p>¿De verdad? 1.350€ con todos los respectivos impuestos incluidos.</p>
               <Espacio />
               <H3>¿Cuándo son la visita presencial y la reunión?</H3>
-              <Espacio />
               <p>La reunión final la eliges al inicio, entre las fechas que tengo disponibles. Esto te lo paso cuando rellenes el formulario, si me interesa el proyecto. La visita presencial la coordinamos después de realizar el pago.</p>
               <Espacio />
               <H3>¿Entonces pago antes o en el momento de empezar?</H3>
-              <Espacio />
               <p>El pago se hace en el momento en el que eliges una de las fechas disponibles. Es decir, para reservar la fecha debes realizar primero el pago, una vez hecho, tendrás tu plaza y fecha aseguradas.</p>
               <Espacio />
               <H3>¿Qué incluye?</H3>
-              <Espacio />
               <p>Un plan de 90 días, separado en módulos y en tareas que no te van a llevar más de 20 minutos. Está organizado para que hagas primero lo que más resultados te va a traer en menor tiempo.</p>
               <Espacio />
               <H3>¿Cuánto tiempo le tengo que dedicar al día?</H3>
-              <Espacio />
               <p>¿Otra vez? 20 minutos al día. Te doy todo lo que necesitas para que sea así. Si tienes más tiempo, mejor. Si tienes equipo, mejor.</p>
               <Espacio />
               <H3>¿No es caro 1.350€?</H3>
-              <Espacio />
               <p>No, es barato.</p>
               <Espacio />
               <H3>¿Y si mi sector es raro?</H3>
-              <Espacio />
               <p>Raro tú.</p>
               <Espacio />
               <H3>¿Hay grupos, comunidad o recursos adicionales?</H3>
-              <Espacio />
               <p>No, es un dossier y una reunión. Nada más. Bueno sí, criterio. Mucho.</p>
               <Espacio />
               <H3>¿Qué pasa si aplico algo y no funciona?</H3>
-              <Espacio />
               <p>Módulo 5.</p>
               <Espacio />
               <H3>¿Cómo es el proceso de apuntarse?</H3>
-              <Espacio />
               <p>Rellenas el formulario de arriba - Si me gusta el proyecto te paso las fechas disponibles - Eliges - Te envío la factura y el contrato - Pagas - Creo un grupo de WhatsApp por el que te pediré la info y el material - Agendamos la visita presencial - Trabajo sobre el dossier - Nos vemos en la reunión online - Te envío la grabación de la reunión y el dossier.</p>
-              <Espacio />
               <Espacio />
               <MailerLiteForm buttonText="Estudia mi caso" />
               <div className="clear-both" />
