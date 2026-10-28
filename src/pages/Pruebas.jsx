@@ -108,7 +108,7 @@ export default function Pruebas() {
         <title>Anti-Auditoría — Antiagencia</title>
         <meta name="robots" content="noindex" />
       </Helmet>
-      <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="min-h-screen bg-gray-100 flex flex-col selection:bg-[#7000FF] selection:text-white">
         <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
           <div className="w-full max-w-4xl">
 
