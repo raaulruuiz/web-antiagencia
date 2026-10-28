@@ -7,6 +7,7 @@ import { MailerLiteForm, mailerLiteCSS } from "./TrabajaConNosotros2";
 // Copia de AntiAuditoria.jsx (/trabajaconnosotros) con los mismos estilos; la original no se toca.
 
 const AZUL = '#0067FD';
+const MORADO = '#7000FF';
 const ROJO = '#E00000';
 
 // Negritas del cuerpo en azul (h1/h2/h3 van en negro)
@@ -163,11 +164,11 @@ export default function Pruebas() {
               <Espacio />
               <p>Algunos envían 2 newsletters a la semana. O una al día. O una al mes. Unos tienen 7 automatizaciones. O 9. O ninguna. Hay quien piensa que es mejor hacer emails cortos con muchas imágenes porque la gente no lee. O quien escribe emails largos sin imágenes. Unos quieren delegar el email. O dejar de depender tanto de la publicidad. O de las redes. O enviar sólo promociones. O dejar de hacerlas. Hay quien escribe los emails siempre a última hora. O quién se programa la semana entera para que no le pille el toro.</p>
               <Espacio />
-              <p>Hacen de todo sin saber muy bien por qué. Sin un criterio claro. Son como las viejas de los pueblos, mirando por el visillo de la ventana lo que hace el vecino.</p>
+              <p>Hacen de todo sin saber muy bien por qué. Sin un criterio claro. <u>Son como las viejas de los pueblos, mirando por el visillo de la ventana lo que hace el vecino.</u></p>
               <Espacio />
               <p>Si te ha pasado, lee este caso, que podría ser inventado, pero es real:</p>
               <Espacio />
-              <p>Inés es una clienta que enviaba 2 campañas a la semana. Cada email vendía más de 1.000€, empezamos a enviar 6, y siguieron vendiendo más de 1.000€ cada uno. Multiplicamos por 3 sin tocar nada más.</p>
+              <p><strong style={{ color: MORADO }}>Inés</strong> es una clienta que enviaba 2 campañas a la semana. Cada email vendía más de 1.000€, empezamos a enviar 6, y siguieron vendiendo más de 1.000€ cada uno. Multiplicamos por 3 sin tocar nada más.</p>
               <Espacio />
               <H2>NO NECESITAS</H2>
               <p>No necesitas a nadie más que te diga lo que tienes que hacer. La mayoría ya tenemos suficiente información.</p>
