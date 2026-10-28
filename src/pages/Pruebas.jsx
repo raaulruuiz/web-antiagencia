@@ -269,7 +269,7 @@ export default function Pruebas() {
               <Espacio />
               <p>A <M>Neus</M> el email le lleva 10 minutos cada día, y más de la mitad de las ventas de su tienda, vienen por ahí.</p>
               <Espacio />
-              <p>U <M>otra clienta</M>, que factura el 70% de lo que vende por email, y le dedica menos de 20 minutos al día.</p>
+              <p>U <M>otro cliente</M>, que factura el 70% de lo que vende por email, y le dedica menos de 20 minutos al día.</p>
               <Espacio />
               <H2>LA VENTAJA PRINCIPAL</H2>
               <p>La Anti-Auditoría es de por sí un producto que se rentabiliza con 3-4 emails que envíes. No es porque lo haga yo ni nada por el estilo. No soy tan importante. Es porque lo he visto en decenas de tiendas.</p>
