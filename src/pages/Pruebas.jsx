@@ -7,6 +7,7 @@ import { MailerLiteForm, mailerLiteCSS } from "./TrabajaConNosotros2";
 // Copia de AntiAuditoria.jsx (/trabajaconnosotros) con los mismos estilos; la original no se toca.
 
 const AZUL = '#0067FD';
+const ROJO = '#E00000';
 
 // Negritas del cuerpo en azul (h1/h2/h3 van en negro)
 function B({ children }) {
@@ -112,6 +113,8 @@ export default function Pruebas() {
           <div className="w-full max-w-4xl">
 
             <Carta>
+              <p style={{ color: ROJO }}>Estamos dando fechas para las primeras dos semanas de diciembre (especial enfoque en Navidad, Año Nuevo y principios de año). Luego cerramos la auditoría hasta 2027.</p>
+              <Espacio />
               <H1 size="text-4xl md:text-5xl">ANTI-AUDITORÍA</H1>
               <H1 size="text-xl md:text-2xl">Completa. De email marketing. Con Raúl Ruiz</H1>
               <Espacio />
@@ -124,7 +127,7 @@ export default function Pruebas() {
               <p>Ahora entramos en todos los detalles, pero es una reunión y un documento.</p>
               <p><B>La tercera cosa</B> que tienes que entender es una historia (real) muy breve que leí hace poco y que me encaja bastante para este punto:</p>
               <p>Un tipo muy millonario hizo una fiesta. Y entre los asistentes había otro tipo millonario, pero menos que el organizador. Pues bien, otro de los asistentes le dijo al tipo menos millonario que el organizador:</p>
-              <p>— ¿Sabes que ese tio gana en un día lo que tú en un año?</p>
+              <p>— ¿Sabes que ese tío gana en un día lo que tú en un año?</p>
               <p>El tipo se encogió de hombros, indiferente, luego miró al que le había hecho la pregunta.</p>
               <p>— Pero yo tengo algo que este millonario nunca tendrá.</p>
               <p>— ¿El qué?</p>
@@ -132,7 +135,7 @@ export default function Pruebas() {
               <p>Bien. Esto te lo digo porque no necesito tu dinero. Aún no soy millonario, pero vivo muy tranquilo en mi pueblo en la montaña.</p>
               <p>Lejos de querer vacilarte, te lo digo para que decidas tranquilamente si esto es para ti o no. Yo trabajo cada día porque amo mi trabajo y amo contar historias. Lo hago constantemente en todo lo que escribo.</p>
               <p>Y no me malinterpretes, también amo el dinero. Pero no soy de los que te van a perseguir hasta la saciedad para que me compres. Como te digo, no lo necesito.</p>
-              <p>Vas a invertir tu dinero y tu tiempo en un tio que ha levantado su negocio enviando emails, y que ha hecho lo mismo para más de 60 tiendas online. No hago absolutamente nada que no haya demostrado ya decenas de veces.</p>
+              <p>Vas a invertir tu dinero y tu tiempo en un tío que ha levantado su negocio enviando emails, y que ha hecho lo mismo para más de 60 tiendas online. No hago absolutamente nada que no haya demostrado ya decenas de veces.</p>
               <p>Si esto te parece superficial, o chulesco, o arrogante, o no te gusta mi estilo, te puedes marchar, te deseo lo mejor. De verdad, espero que te vaya bien.</p>
               <p>Ahora bien, aquí <B>te voy a aportar criterio</B>. Algo que escasea mucho a la hora de escribir emails.</p>
               <p>Y la <B>cuarta cosa que tienes que saber</B>, como diría el Josep, el de los pistachos… es que soy Raúl, y escribo emails. Encantado.</p>
@@ -153,7 +156,7 @@ export default function Pruebas() {
               <p>Mucho ruido y pocas nueces.</p>
               <p>No necesitas más información, quizá ni siquiera tienes que hacer más de lo que ya haces. Se trata de hacer lo que tu marca necesita y puede permitirse. Por eso…</p>
               <p>La Anti-Auditoría no tiene grupos, ni clases en directo, ni contenido grabado, ni 400 recursos, ni llamadas semanales, ni audios adicionales, ni comunidad de whatsapp, ni agentes de IA, ni consultores privados.</p>
-              <p><B>Somos tú y yo.</B> Y un proceso de investigación concluye en un dossier y en una reunión que se quedará grabada. Nada más. <B>No pagas por tener más cosas, pagas por criterio, que lo más importante.</B></p>
+              <p><B>Somos tú y yo.</B> Y un proceso de investigación concluye en un dossier y en una reunión que se quedará grabada. Nada más. <B>No pagas por tener más cosas, pagas por criterio, que es lo más importante.</B></p>
               <p><B>Te voy a dar la estrategia concreta de email marketing para los próximos 90 días.</B></p>
               <p>3 meses de estrategia recogidos en un documento que, como te decía, tendrá las páginas que tenga que tener. Lo importante no es lo largo, es lo de dentro.</p>
               <p>Y te lo presentaré en una reunión, que durará lo que tenga que durar, y en la que me podrás preguntar cualquier duda que te surja. Aquí no hay preguntas tontas, hay tontos que no preguntan.</p>
@@ -175,9 +178,9 @@ export default function Pruebas() {
               <p>Investigaré qué hace tu cliente en internet, qué ve, qué comenta, cómo habla, qué le preocupa. Iré a lugares presenciales donde se encuentre, para escucharle hablar. Me mezclaré como un ninja entre tus potenciales clientes.</p>
               <p>Y por supuesto, miraré todo lo que has hecho hasta ahora. El pasado nos habla mucho del presente y nos permite preparar el futuro. Illo, suena muy filosófico, pero es verdad. Leeré los emails que has enviado, veré los vídeos y anuncios que has publicado y analizaré las decisiones más importantes que has tomado para tu tienda.</p>
               <p>¿Todo esto para qué?</p>
-              <p>Para darte criterio. Este será el módulo +1 de la Anti-Auditoría. Un resumen, con sus conclusiones de la investigación que voy a hacer. Esto no va de instalarte un sistema en 7 días. Va de dedicar el tiempo necesario a entender TÚ negocio y TÚ cliente, no un copia y pega que le entregue a cualquiera, con mensajes muy bonitos pero que no dicen nada.</p>
+              <p>Para darte criterio. Este será el módulo +1 de la Anti-Auditoría. Un resumen, con sus conclusiones de la investigación que voy a hacer. Esto no va de instalarte un sistema en 7 días. Va de dedicar el tiempo necesario a entender TU negocio y TU cliente, no un copia y pega que le entregue a cualquiera, con mensajes muy bonitos pero que no dicen nada.</p>
               <p>Quizá puede que te pase como a Sheyla, que entendiendo a su público y haciendo un pequeño cambio en el formulario de registro y el estilo de comunicación, en pocas semanas pasó de no vender por campañas, a vender en cada campaña que manda.</p>
-              <p>Lo mismo hicimos en los flujos, entendimos al cliente y pasamos de 7 a 22 automatizaciones, multipliando por 10 los resultados.</p>
+              <p>Lo mismo hicimos en los flujos, entendimos al cliente y pasamos de 7 a 22 automatizaciones, multiplicando por 10 los resultados.</p>
               <Espacio />
 
               <H2>LO GORDO</H2>
@@ -212,7 +215,7 @@ export default function Pruebas() {
               <p><B>¿Qué ocurre si implemento todo y no funciona?</B></p>
               <p>Esa es la pregunta que todos se hacen.</p>
               <p>Por eso, este módulo es para responder esa pregunta. En los demás módulos tendrás una explicación del razonamiento por el que llego a proponerte lo que te propongo.</p>
-              <p>Aquí entramos en el detalle, en las tripas: Cómo pienso para tomar las decisiones. Qué miro, qué dejo de mirar, cómo lo evalúo… Te voy a enseñar a analizar cada cosa que implementas para que no me necesites más. Ni a mi, ni a nadie.</p>
+              <p>Aquí entramos en el detalle, en las tripas: Cómo pienso para tomar las decisiones. Qué miro, qué dejo de mirar, cómo lo evalúo… Te voy a enseñar a analizar cada cosa que implementas para que no me necesites más. Ni a mí, ni a nadie.</p>
               <p>Te voy a mostrar posibles escenarios, cómo actuar en cada uno, cómo desarrollar el plan A, B y C de cada cambio que haces, para que si algo falla, sepas:</p>
               <Numero n={1}>Qué ha fallado.</Numero>
               <Numero n={2}>Por qué ha fallado.</Numero>
