@@ -154,7 +154,7 @@ export default function Pruebas() {
               <Espacio />
               <p>Si esto te parece superficial, o chulesco, o arrogante, o no te gusta mi estilo, te puedes marchar, te deseo lo mejor. De verdad, espero que te vaya bien.</p>
               <Espacio />
-              <p>Ahora bien, aquí <B>te voy a aportar criterio</B>. Algo que escasea mucho a la hora de escribir emails.</p>
+              <p>Ahora bien, aquí <u>te voy a aportar criterio</u>. Algo que escasea mucho a la hora de escribir emails.</p>
               <Espacio />
               <p>Y la <B>cuarta cosa que tienes que saber</B>, como diría el Josep, el de los pistachos… es que soy Raúl, y escribo emails. Encantado.</p>
               <Espacio />
