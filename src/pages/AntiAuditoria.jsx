@@ -119,7 +119,7 @@ export default function AntiAuditoria() {
           <div className="w-full max-w-4xl">
 
             <Carta>
-              <p style={{ color: ROJO }}>Estoy dando fechas para las primeras dos semanas de diciembre (especial enfoque en Navidad, Año Nuevo y principios de año). Luego cerramos la auditoría hasta 2027.</p>
+              <p style={{ color: ROJO }}>Me queda solo una fecha para diciembre. Luego cerramos la auditoría hasta 2027.</p>
               <Espacio />
               <H1 size="text-4xl md:text-5xl">ANTI-AUDITORÍA</H1>
               <H1 size="text-xl md:text-2xl">Completa. De email marketing. Con Raúl Ruiz</H1>
