@@ -345,8 +345,14 @@ export default function AntiAuditoria() {
               <H3>¿Cuánto cuesta?</H3>
               <p>¿De verdad? 1.350€ con todos los respectivos impuestos incluidos.</p>
               <Espacio />
+              <H3>¿Por qué los plazos para empezar son tan tarde?</H3>
+              <p>Por mi agenda y porque esto no es una estrategia igual para cada cliente que copio y pego en tu negocio. No. Es criterio, y la investigación y el desarrollo de una buena estrategia lleva su tiempo.</p>
+              <Espacio />
               <H3>¿Cuándo son la visita presencial y la reunión?</H3>
               <p>La reunión final la eliges al inicio, entre las fechas que tengo disponibles. Esto te lo paso cuando rellenes el formulario, si me interesa el proyecto. La visita presencial la coordinamos después de realizar el pago.</p>
+              <Espacio />
+              <H3>¿Qué pasa si la reunión se alarga?</H3>
+              <p>Si nos alargamos más del tiempo que establecemos, no hay problema, cuadramos para terminarla en otro momento.</p>
               <Espacio />
               <H3>¿Entonces pago antes o en el momento de empezar?</H3>
               <p>El pago se hace en el momento en el que eliges una de las fechas disponibles. Es decir, para reservar la fecha debes realizar primero el pago, una vez hecho, tendrás tu plaza y fecha aseguradas.</p>
