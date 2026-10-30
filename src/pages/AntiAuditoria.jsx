@@ -346,7 +346,7 @@ export default function AntiAuditoria() {
               <p>¿De verdad? 1.350€ con todos los respectivos impuestos incluidos.</p>
               <Espacio />
               <H3>¿Por qué los plazos para empezar son tan tarde?</H3>
-              <p>Por mi agenda y porque esto no es una estrategia igual para cada cliente que copio y pego en tu negocio. No. Es criterio, y la investigación y el desarrollo de una buena estrategia lleva su tiempo.</p>
+              <p>Por mi agenda y porque esto no es una estrategia igual para cada cliente que copio y pego en tu tienda. No. Es criterio, y la investigación y el desarrollo de una buena estrategia lleva su tiempo.</p>
               <Espacio />
               <H3>¿Cuándo son la visita presencial y la reunión?</H3>
               <p>La reunión final la eliges al inicio, entre las fechas que tengo disponibles. Esto te lo paso cuando rellenes el formulario, si me interesa el proyecto. La visita presencial la coordinamos después de realizar el pago.</p>
