@@ -68,6 +68,7 @@ import BibliotecaItem from './pages/admin/BibliotecaItem';
 import BibliotecaPublica from './pages/BibliotecaPublica';
 import BibliotecaItemPublica from './pages/BibliotecaItemPublica';
 import CV from './pages/CV';
+import CVEn from './pages/CVEn';
 import { supabase } from '@/lib/supabaseClient';
 
 // Guard para rutas de lector: redirige a /admin/users si no tiene permiso
@@ -237,6 +238,7 @@ const AuthenticatedApp = () => {
       <Route path="/blog" element={<Navigate to="/blog-email-marketing" replace />} />
       <Route path="/blog/*" element={<Navigate to="/blog-email-marketing" replace />} />
       <Route path="/cv" element={<CV />} />
+      <Route path="/cv-en" element={<CVEn />} />
       <Route path="/podcasts" element={<Podcasts />} />
       <Route path="/podcasts/page/:page" element={<Podcasts />} />
       <Route path="/podcasts/:slug" element={<PodcastPostPage />} />

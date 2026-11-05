@@ -134,3 +134,17 @@ export const PANTALLAS = [
     botones: [{ label: "DESCARGAR CURRÍCULUM EN PDF", accion: "pdf" }],
   },
 ];
+
+export const CV_ES = {
+  idioma: "es",
+  pdf: PDF,
+  pantallas: PANTALLAS,
+  textos: {
+    titulo: "Currículum de Raúl Ruiz Romero · Antiagencia",
+    descripcion: "El currículum de Raúl Ruiz Romero contado como una pequeña historia: del campo de Ventas de Zafarraya a Antiagencia, email marketing para tiendas online.",
+    verTodo: "Toca para ver todo el texto",
+    reloj: "Retroceder en el tiempo",
+    pdfSutil: "Descargar currículum en PDF",
+    otroIdioma: { label: "English", href: "/cv-en", idioma: "en" },
+  },
+};

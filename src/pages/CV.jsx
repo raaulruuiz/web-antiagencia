@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { PANTALLAS, PDF } from "./cvDatos";
+import { Link } from "react-router-dom";
+import { CV_ES } from "./cvDatos";
 
 // Currículum interactivo: pantallas con texto a máquina de escribir y un botón para pasar a la siguiente.
-// El PDF se abre en el navegador (pestaña nueva), no se fuerza la descarga.
+// El PDF se abre en el navegador (pestaña nueva), no se fuerza la descarga. Mismo componente para /cv y /cv-en
+// (los textos de cada idioma están en cvDatos.js y cvDatosEn.js).
 
 const EMAIL = "raul@antiagencia.es";
 const sinMovimiento = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -22,7 +24,7 @@ function conEnlaces(texto) {
 }
 
 // Escribe los párrafos uno tras otro; un toque sobre el texto lo completa de golpe
-function MaquinaDeEscribir({ parrafos, onFin }) {
+function MaquinaDeEscribir({ parrafos, onFin, aviso }) {
   const ps = useMemo(() => parrafos.map(norm), [parrafos]);
   const total = useMemo(() => ps.reduce((n, p) => n + p.t.length, 0), [ps]);
   const [n, setN] = useState(() => (sinMovimiento() ? total : 0));
@@ -47,7 +49,7 @@ function MaquinaDeEscribir({ parrafos, onFin }) {
 
   let quedan = n;
   return (
-    <div className="cv-texto" onClick={() => setN(total)} title={n < total ? "Toca para ver todo el texto" : undefined}>
+    <div className="cv-texto" onClick={() => setN(total)} title={n < total ? aviso : undefined}>
       {ps.map((p, i) => {
         if (quedan < 0) return null;
         const visible = p.t.slice(0, Math.max(0, quedan));
@@ -90,9 +92,9 @@ function Imagenes({ lista }) {
   );
 }
 
-function RelojDeArena({ onClick, girado }) {
+function RelojDeArena({ onClick, girado, etiqueta }) {
   return (
-    <button type="button" className={`cv-reloj ${girado ? "cv-girado" : ""}`} onClick={onClick} aria-label="Retroceder en el tiempo">
+    <button type="button" className={`cv-reloj ${girado ? "cv-girado" : ""}`} onClick={onClick} aria-label={etiqueta}>
       <svg viewBox="0 0 64 96" width="72" height="108" aria-hidden="true">
         <defs>
           <linearGradient id="cv-grad" x1="0" y1="0" x2="1" y2="1">
@@ -111,7 +113,7 @@ function RelojDeArena({ onClick, girado }) {
   );
 }
 
-function Pantalla({ datos, numero, onSiguiente, onPdf }) {
+function Pantalla({ datos, textos, numero, onSiguiente, onPdf }) {
   // fases: intro-img → intro-frase → imagenes → texto → fin
   const [fase, setFase] = useState(datos.intro ? "intro-img" : "imagenes");
   const [saliendo, setSaliendo] = useState(false);
@@ -167,11 +169,11 @@ function Pantalla({ datos, numero, onSiguiente, onPdf }) {
 
       {!enIntro && <Imagenes lista={datos.imagenes} />}
 
-      {(fase === "texto" || fase === "fin") && <MaquinaDeEscribir parrafos={datos.texto} onFin={alTerminar} />}
+      {(fase === "texto" || fase === "fin") && <MaquinaDeEscribir parrafos={datos.texto} onFin={alTerminar} aviso={textos.verTodo} />}
 
       {fase === "fin" && datos.reloj && (
         <div className="cv-aparece cv-centro">
-          <RelojDeArena onClick={girar} girado={girado} />
+          <RelojDeArena onClick={girar} girado={girado} etiqueta={textos.reloj} />
         </div>
       )}
 
@@ -188,18 +190,19 @@ function Pantalla({ datos, numero, onSiguiente, onPdf }) {
   );
 }
 
-export default function CV() {
+export function CVPagina({ cv }) {
+  const { pantallas: PANTALLAS, pdf: PDF, textos } = cv;
   const [i, setI] = useState(0);
 
   const abrirPdf = (pantalla) => {
-    window.umami?.track("cv-pdf", { pantalla });
+    window.umami?.track("cv-pdf", { pantalla, idioma: cv.idioma });
     window.open(PDF, "_blank", "noopener");
   };
 
   const siguiente = () => {
     setI((x) => {
       const n = Math.min(PANTALLAS.length - 1, x + 1);
-      window.umami?.track("cv-pantalla", { pantalla: n + 1 });
+      window.umami?.track("cv-pantalla", { pantalla: n + 1, idioma: cv.idioma });
       return n;
     });
     window.scrollTo(0, 0);
@@ -210,21 +213,29 @@ export default function CV() {
   return (
     <>
       <Helmet>
-        <title>Currículum de Raúl Ruiz Romero · Antiagencia</title>
-        <meta name="description" content="El currículum de Raúl Ruiz Romero contado como una pequeña historia: del campo de Ventas de Zafarraya a Antiagencia, email marketing para tiendas online." />
+        <html lang={cv.idioma} />
+        <title>{textos.titulo}</title>
+        <meta name="description" content={textos.descripcion} />
       </Helmet>
       <style>{CSS}</style>
       <div className="cv-raiz">
+        <Link to={textos.otroIdioma.href} className="cv-idioma" hrefLang={textos.otroIdioma.idioma} lang={textos.otroIdioma.idioma}>
+          {textos.otroIdioma.label}
+        </Link>
         <div className="cv-progreso" aria-hidden="true"><span style={{ width: `${((i + 1) / PANTALLAS.length) * 100}%` }} /></div>
         <main className="cv-main">
-          <Pantalla key={i} datos={PANTALLAS[i]} numero={i + 1} onSiguiente={siguiente} onPdf={abrirPdf} />
+          <Pantalla key={i} datos={PANTALLAS[i]} textos={textos} numero={i + 1} onSiguiente={siguiente} onPdf={abrirPdf} />
         </main>
-        <a href={PDF} target="_blank" rel="noopener" className="cv-pdf-sutil" onClick={() => window.umami?.track("cv-pdf", { pantalla: i + 1, sutil: true })}>
-          Descargar currículum en PDF
+        <a href={PDF} target="_blank" rel="noopener" className="cv-pdf-sutil" onClick={() => window.umami?.track("cv-pdf", { pantalla: i + 1, sutil: true, idioma: cv.idioma })}>
+          {textos.pdfSutil}
         </a>
       </div>
     </>
   );
+}
+
+export default function CV() {
+  return <CVPagina cv={CV_ES} />;
 }
 
 const CSS = `
@@ -274,6 +285,9 @@ const CSS = `
 .cv-aparece{animation:cv-pop .6s ease both}
 .cv-pdf-sutil{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;
   padding:7px 14px;border-radius:999px;background:rgba(18,18,18,.82);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(6px);white-space:nowrap;z-index:20;transition:color .2s,border-color .2s}
+.cv-idioma{position:fixed;top:14px;right:16px;z-index:21;font-size:13px;font-weight:500;letter-spacing:.04em;color:rgba(255,255,255,.55);text-decoration:none;
+  padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(18,18,18,.7);backdrop-filter:blur(6px);transition:color .2s,border-color .2s}
+.cv-idioma:hover{color:#fff;border-color:rgba(112,0,255,.6)}
 .cv-pdf-sutil:hover{color:#fff;border-color:rgba(112,0,255,.6)}
 @keyframes cv-entra{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes cv-sale{to{opacity:0;transform:translateY(-10px)}}
