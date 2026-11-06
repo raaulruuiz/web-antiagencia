@@ -28,6 +28,7 @@ import Reservar from './pages/Reservar'
 import GestionarReserva from './pages/GestionarReserva'
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import PoliticaPrivacidadAntiStudio from './pages/PoliticaPrivacidadAntiStudio';
+import CuentaAntiStudio from './pages/CuentaAntiStudio';
 import TikTokConnect from './pages/TikTokConnect';
 import JorgeCoronado from './pages/JorgeCoronado';
 import GraciasJorgeCoronado from './pages/GraciasJorgeCoronado';
@@ -223,6 +224,7 @@ const AuthenticatedApp = () => {
       {/* <Route path="/planningq3" element={<PlanningQ3Venta />} /> */}
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/anti-studio/privacidad" element={<PoliticaPrivacidadAntiStudio />} />
+      <Route path="/anti-studio/cuenta" element={<CuentaAntiStudio />} />
       <Route path="/q3" element={<PlanningQ3 />} />
       <Route path="/q4" element={<PlanningQ4 />} />
       <Route path="/reservar/gestionar/:token" element={<GestionarReserva />} />
