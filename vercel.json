@@ -1,4 +1,7 @@
 {
+  "crons": [
+    { "path": "/api/anti-studio-latido", "schedule": "0 7 */2 * *" }
+  ],
   "redirects": [
     { "source": "/newsletter", "destination": "/", "permanent": false },
     { "source": "/facebook-instagram", "destination": "/", "permanent": true },
