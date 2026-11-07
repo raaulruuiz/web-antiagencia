@@ -1,0 +1,21 @@
+{
+  "novedades": [
+    { "id": "como-hablas", "fecha": "2026-11-07", "icono": "voz", "titulo": "Emails que suenan a ti", "texto": "Responde a cinco preguntas en voz alta o sube un audio. Tu IA saca tus expresiones y tu forma de contar las cosas.", "destino": "marca", "ancla": ".voz-marca" },
+    { "id": "metodos", "fecha": "2026-11-07", "icono": "metodos", "titulo": "Métodos de escritura", "texto": "Guarda tu forma de escribir emails y ponla en cualquier pizarra. Tu IA la sigue paso a paso.", "destino": "metodos" },
+    { "id": "contexto-casillas", "fecha": "2026-11-07", "icono": "contexto", "titulo": "Elige qué contexto usa cada email", "texto": "Doble clic en el bloque de contexto y marca lo que quieres: colores sí, tipografía no.", "destino": "nuevo" },
+    { "id": "videos-redes", "fecha": "2026-11-07", "icono": "video", "titulo": "Vídeos de redes al momento", "texto": "Pega un enlace de YouTube, Instagram o TikTok: sale la miniatura al instante y el texto en segundos.", "destino": "nuevo" },
+    { "id": "edicion-mano", "fecha": "2026-11-07", "icono": "editar", "titulo": "Retoca el email a mano", "texto": "Cambia colores, alineación, imágenes, asunto y preheader sin pedírselo a la IA.", "destino": "emails" }
+  ],
+  "enCurso": [
+    { "titulo": "Instalador para Mac", "texto": "Para descargarla y empezar en un par de clics." },
+    { "titulo": "Plantillas de email", "texto": "Puntos de partida para newsletter, flujos, promociones y storytelling." }
+  ],
+  "pendiente": [
+    { "titulo": "Conexión con Shopify y WooCommerce", "texto": "Productos, imágenes y los más vendidos, directos a tus emails." },
+    { "titulo": "Flujos completos", "texto": "Todos los emails de una automatización de una sola vez." },
+    { "titulo": "Más herramientas de email", "texto": "Además de Klaviyo, las más usadas en ecommerce." },
+    { "titulo": "Bloques de tu herramienta", "texto": "Como los productos dinámicos de Klaviyo." },
+    { "titulo": "Ideas de contenido", "texto": "Artículos y tendencias de tu sector para saber de qué escribir." },
+    { "titulo": "Windows y Linux", "texto": "Instaladores para los demás sistemas." }
+  ]
+}

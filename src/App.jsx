@@ -30,6 +30,7 @@ import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import PoliticaPrivacidadAntiStudio from './pages/PoliticaPrivacidadAntiStudio';
 import CuentaAntiStudio from './pages/CuentaAntiStudio';
 import AntiStudio from './pages/AntiStudio';
+import NovedadesAntiStudio from './pages/NovedadesAntiStudio';
 import TikTokConnect from './pages/TikTokConnect';
 import JorgeCoronado from './pages/JorgeCoronado';
 import GraciasJorgeCoronado from './pages/GraciasJorgeCoronado';
@@ -226,6 +227,7 @@ const AuthenticatedApp = () => {
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
       <Route path="/anti-studio/privacidad" element={<PoliticaPrivacidadAntiStudio />} />
       <Route path="/anti-studio/cuenta" element={<CuentaAntiStudio />} />
+      <Route path="/anti-studio/novedades" element={<NovedadesAntiStudio />} />
       <Route path="/anti-studio" element={<AntiStudio />} />
       <Route path="/q3" element={<PlanningQ3 />} />
       <Route path="/q4" element={<PlanningQ4 />} />
