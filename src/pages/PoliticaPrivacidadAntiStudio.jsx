@@ -18,7 +18,7 @@ export default function PoliticaPrivacidadAntiStudio() {
         </Link>
 
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Política de privacidad de Anti-Studio</h1>
-        <p className="text-white/40 text-sm mb-12">Última actualización: 6 de noviembre de 2026</p>
+        <p className="text-white/40 text-sm mb-12">Última actualización: 7 de noviembre de 2026</p>
 
         <div className="space-y-10 text-white/80 leading-relaxed">
 
@@ -40,6 +40,8 @@ export default function PoliticaPrivacidadAntiStudio() {
               <li>Tu email y tu nombre.</li>
               <li>Tu contraseña, cifrada, si te registras con email. Nunca la vemos.</li>
               <li>La fecha de alta y de último acceso a tu cuenta.</li>
+              <li>Tus respuestas a las preguntas iniciales: si eres marca o agencia, qué quieres crear y la facturación aproximada, si decides contestar.</li>
+              <li>Los mensajes y capturas que nos envíes por Feedback.</li>
             </ul>
             <p className="mt-3">Si entras con Google, recibimos de Google tu nombre, tu email y tu foto de perfil. No accedemos a tu Gmail, tus contactos ni otros datos de tu cuenta de Google.</p>
           </section>
@@ -56,6 +58,7 @@ export default function PoliticaPrivacidadAntiStudio() {
             <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
               <li><strong className="text-white">Claude (Anthropic) y ChatGPT (OpenAI):</strong> reciben el contenido de tu pizarra, el contexto de tu marca y lo que les pidas, para escribir emails o crear imágenes.</li>
               <li><strong className="text-white">Klaviyo:</strong> recibe los emails que subes o programas. Si activas su uso como contexto, la app lee tus emails enviados y sus métricas.</li>
+              <li><strong className="text-white">Tu correo:</strong> si lo conectas, la app lee desde tu ordenador los emails que pidas, sin cambiar nada. Lo que traigas a una pizarra puede enviarse a tu IA cuando se lo pidas.</li>
             </ul>
             <p className="mt-3">Al escanear una web, la app la visita desde tu ordenador. Antiagencia no recibe nada de todo esto.</p>
           </section>
