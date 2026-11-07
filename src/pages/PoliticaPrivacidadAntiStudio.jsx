@@ -58,6 +58,7 @@ export default function PoliticaPrivacidadAntiStudio() {
             <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
               <li><strong className="text-white">Claude (Anthropic) y ChatGPT (OpenAI):</strong> reciben el contenido de tu pizarra, el contexto de tu marca y lo que les pidas, para escribir emails o crear imágenes.</li>
               <li><strong className="text-white">Klaviyo:</strong> recibe los emails que subes o programas. Si activas su uso como contexto, la app lee tus emails enviados y sus métricas.</li>
+              <li><strong className="text-white">Cómo hablas:</strong> si grabas o subes un audio para analizar tu forma de hablar, se transcribe en tu ordenador y se borra. Solo el texto se envía a tu IA, y el resultado se guarda en tu ordenador.</li>
               <li><strong className="text-white">Tu correo:</strong> si lo conectas, la app lee desde tu ordenador los emails que pidas, sin cambiar nada. Lo que traigas a una pizarra puede enviarse a tu IA cuando se lo pidas.</li>
             </ul>
             <p className="mt-3">Al escanear una web, la app la visita desde tu ordenador. Antiagencia no recibe nada de todo esto.</p>
@@ -68,7 +69,7 @@ export default function PoliticaPrivacidadAntiStudio() {
             <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
               <li>Crear tu cuenta, dejarte entrar y recuperar tu contraseña. La base legal es la ejecución del servicio que pides.</li>
               <li>Enviarte avisos necesarios sobre tu cuenta o sobre la app.</li>
-              <li>Enviarte comunicaciones comerciales, solo si das tu consentimiento expreso. Puedes retirarlo cuando quieras.</li>
+              <li>Enviarte novedades y consejos por email, solo si marcas la casilla en la app. La base legal es tu consentimiento. Puedes retirarlo cuando quieras en Editar perfil o desde cualquiera de esos emails.</li>
             </ul>
           </section>
 
@@ -84,6 +85,7 @@ export default function PoliticaPrivacidadAntiStudio() {
               <li><strong className="text-white">Supabase:</strong> aloja las cuentas de usuario en servidores de Europa.</li>
               <li><strong className="text-white">Google:</strong> si eliges entrar con tu cuenta de Google.</li>
               <li><strong className="text-white">Proveedor de envío de emails:</strong> para los emails de confirmación y recuperación de contraseña.</li>
+              <li><strong className="text-white">MailerLite:</strong> si aceptas recibir novedades, guarda tu nombre y tu email para enviártelas.</li>
             </ul>
             <p className="mt-3">Algunos proveedores pueden tratar datos fuera del Espacio Económico Europeo, con las garantías que exige la normativa.</p>
           </section>
