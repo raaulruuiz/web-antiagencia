@@ -10,8 +10,17 @@ const PASOS = [
   ["Súbelo a Klaviyo", "Como borrador, como plantilla o programado. Nada se envía sin que lo confirmes."],
 ];
 
+function Descarga({ href, titulo, nota }) {
+  return (
+    <a href={href} className="block p-4 border-2 border-gray-900 rounded-sm hover:bg-gray-100 transition-colors">
+      <span className="block font-bold text-gray-900" style={rubik}>{titulo}</span>
+      <span className="block text-sm text-gray-600">{nota}</span>
+    </a>
+  );
+}
+
 export default function AntiStudio() {
-  const { novedades } = useNovedades();
+  const { novedades, descargas: enlaces = {} } = useNovedades();
   const { hash, search } = useLocation();
   const invitado = new URLSearchParams(search).has("invita");
   useEffect(() => {
@@ -55,8 +64,30 @@ export default function AntiStudio() {
             <div id="descarga" className="scroll-mt-8">
               <Hoja>
                 <Titulo>Descarga</Titulo>
-                <p className="text-gray-800 text-lg leading-loose mb-4">Todavía no se puede descargar: estamos terminando el instalador. En cuanto esté, lo tendrás aquí.</p>
-                <p className="text-gray-800 text-lg leading-loose">Para usarla necesitas tu cuenta de Claude o de ChatGPT.</p>
+                {!enlaces.windows && <p className="text-gray-800 text-lg leading-loose mb-4">Todavía no se puede descargar: estamos terminando el instalador. En cuanto esté, lo tendrás aquí.</p>}
+                {enlaces.windows && (
+                  <>
+                    <div className="grid md:grid-cols-3 gap-4 mb-8">
+                      <Descarga href={enlaces.macApple} titulo="Mac con Apple" nota="Chips M1, M2, M3 o posteriores" />
+                      <Descarga href={enlaces.macIntel} titulo="Mac con Intel" nota="Mira cuál tienes en  → Acerca de este Mac" />
+                      <Descarga href={enlaces.windows} titulo="Windows" nota="Windows 10 o 11" />
+                    </div>
+                    <p className="text-gray-800 text-lg leading-loose mb-6">Anti-Studio es gratis, y para que siga siéndolo no pagamos los certificados de Apple y Microsoft. Por eso, la primera vez tu ordenador te avisará de que no reconoce la app. Se abre así:</p>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2" style={rubik}>En Mac</h3>
+                    <ol className="list-decimal pl-6 text-gray-800 text-lg leading-loose mb-6">
+                      <li>Abre el archivo y arrastra Anti-Studio a Aplicaciones.</li>
+                      <li>Ábrela. El Mac te dirá que no puede comprobarla: acepta el aviso.</li>
+                      <li>Ve a Ajustes del Sistema → Privacidad y seguridad, baja hasta el final y pulsa «Abrir igualmente».</li>
+                    </ol>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2" style={rubik}>En Windows</h3>
+                    <ol className="list-decimal pl-6 text-gray-800 text-lg leading-loose mb-6">
+                      <li>Abre el archivo.</li>
+                      <li>Si Windows avisa de que no lo reconoce, pulsa «Más información» y luego «Ejecutar de todas formas».</li>
+                    </ol>
+                    <p className="text-gray-800 text-lg leading-loose mb-4">Solo la primera vez. Después crea tu cuenta y la app te guía para conectar tu IA.</p>
+                  </>
+                )}
+                <p className="text-gray-800 text-lg leading-loose">Para usarla necesitas tu cuenta de Claude (Pro o Max) o de ChatGPT (Plus o superior).</p>
               </Hoja>
             </div>
           </div>
