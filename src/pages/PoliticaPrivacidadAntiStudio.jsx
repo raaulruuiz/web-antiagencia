@@ -69,7 +69,7 @@ export default function PoliticaPrivacidadAntiStudio() {
             <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
               <li>Crear tu cuenta, dejarte entrar y recuperar tu contraseña. La base legal es la ejecución del servicio que pides.</li>
               <li>Enviarte avisos necesarios sobre tu cuenta o sobre la app.</li>
-              <li>Enviarte novedades y consejos por email, solo si marcas la casilla en la app. La base legal es tu consentimiento. Puedes retirarlo cuando quieras en Editar perfil o desde cualquiera de esos emails.</li>
+              <li>Enviarte novedades y consejos por email, solo si marcas la casilla al empezar a usar la app. La base legal es tu consentimiento. Puedes retirarlo cuando quieras con el enlace de baja de cualquiera de esos emails.</li>
             </ul>
           </section>
 
