@@ -1,6 +1,22 @@
 {
   "novedades": [
     {
+      "id": "flujos",
+      "fecha": "2026-11-08",
+      "icono": "flujo",
+      "titulo": "Flujos enteros, de una vez",
+      "texto": "Pídele a tu IA una secuencia de bienvenida o un carrito abandonado: dibuja el flujo en la pizarra, escribe todos los emails y lo sube a Klaviyo con esperas y caminos, en borrador o activo. Cada email guarda sus versiones.",
+      "destino": "nuevo"
+    },
+    {
+      "id": "disenos",
+      "fecha": "2026-11-08",
+      "icono": "diseno",
+      "titulo": "Diseños que entran por los ojos",
+      "texto": "Pide un email sencillo o uno vistoso, con imagen principal, secciones de color y bloques de producto. O pon un email en la pizarra y dile que use su estilo.",
+      "destino": "nuevo"
+    },
+    {
       "id": "privacidad-ia",
       "fecha": "2026-11-08",
       "icono": "privacidad",
@@ -69,10 +85,6 @@
     }
   ],
   "pendiente": [
-    {
-      "titulo": "Flujos completos",
-      "texto": "Todos los emails de una automatización de una sola vez."
-    },
     {
       "titulo": "Más herramientas de email",
       "texto": "Además de Klaviyo, las más usadas en ecommerce."
