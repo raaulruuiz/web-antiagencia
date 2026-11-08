@@ -1,6 +1,14 @@
 {
   "novedades": [
     {
+      "id": "privacidad-ia",
+      "fecha": "2026-11-08",
+      "icono": "privacidad",
+      "titulo": "Tu IA solo ve lo que le das",
+      "texto": "Más privacidad: tu IA, también ChatGPT, solo lee lo que pones en la pizarra y nunca el resto de tu ordenador. Y ahora entiende los PDF que sueltes, con cualquiera de las dos.",
+      "destino": "nuevo"
+    },
+    {
       "id": "tiendas",
       "fecha": "2026-11-08",
       "icono": "tienda",
