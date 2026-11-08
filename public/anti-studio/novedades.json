@@ -1,6 +1,14 @@
 {
   "novedades": [
     {
+      "id": "mailerlite",
+      "fecha": "2026-11-08",
+      "icono": "herramienta",
+      "titulo": "MailerLite, conectado",
+      "texto": "Además de Klaviyo, ahora puedes llevar tus emails a MailerLite como borrador o dejarlos programados. Tu IA también lee tus campañas enviadas para escribir como tú.",
+      "destino": "marca"
+    },
+    {
       "id": "flujos",
       "fecha": "2026-11-08",
       "icono": "flujo",
@@ -87,7 +95,7 @@
   "pendiente": [
     {
       "titulo": "Más herramientas de email",
-      "texto": "Además de Klaviyo, las más usadas en ecommerce."
+      "texto": "Además de Klaviyo y MailerLite, las más usadas en ecommerce."
     },
     {
       "titulo": "Bloques de tu herramienta",
