@@ -85,8 +85,8 @@ export default function AntiAuditoriaV2() {
   return (
     <>
       <Helmet>
-        <title>Anti-Auditoría — Antiagencia</title>
-        <meta name="description" content="Anti-Auditoría completa de email marketing con Raúl Ruiz: investigación, visita presencial, reunión y dossier con plan de acción a 90 días." />
+        <title>Acompañamiento de email marketing 1 a 1 — Antiagencia</title>
+        <meta name="description" content="Durante 90 días te ayudo a sacar más partido al email marketing de tu tienda online: visita presencial, un plan para cada mes y revisión de resultados." />
       </Helmet>
       <div className="min-h-screen bg-gray-100 flex flex-col selection:bg-[#7000FF] selection:text-white">
         <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
@@ -420,7 +420,7 @@ export default function AntiAuditoriaV2() {
               <Paso>Pagas el total por adelantado.</Paso>
               <Paso>Creo un grupo de WhatsApp por el que te pediré la info y el material que voy a necesitar para trabajar.</Paso>
               <Paso>Agendamos la visita presencial.</Paso>
-              <Paso>Trabajo sobre el plan de general 3 meses y el plan detallado del primer mes</Paso>
+              <Paso>Trabajo sobre el plan general de 3 meses y el plan detallado del primer mes</Paso>
               <Paso>Nos vemos en la primera reunión online.</Paso>
               <Paso>Te envío la grabación de la reunión y los documentos, y comenzamos a trabajar codo con codo.</Paso>
               <Espacio />
