@@ -170,7 +170,7 @@ export default function PruebasVenta() {
               <Espacio />
               <p><B>{"Te voy a contar algunos problemas por los que me suelen contratar las tiendas online con las que trabajo."}</B></p>
               <Espacio />
-              <p>{"Sabes que podrías vender más por email, pero no sabes exactamente qué cambiar."}</p>
+              <H3>{"Sabes que podrías vender más por email, pero no sabes exactamente qué cambiar."}</H3>
               <Espacio />
               <p>{"A lo mejor llevas meses enviando newsletters y tienes varias automatizaciones funcionando. Haces lo que te dijeron o lo que viste en un curso, y no has cambiado nada o prácticamente nada desde entonces."}</p>
               <Espacio />
@@ -200,7 +200,7 @@ export default function PruebasVenta() {
               <Espacio />
               <Espacio />
               <Espacio />
-              <p>{"Las ventas que te llegan del email, no son del email"}{"."}</p>
+              <H3>{"Las ventas que te llegan del email, no son del email."}</H3>
               <Espacio />
               <p>{"Tu herramienta de email, ya sea Klaviyo, Connectif o la que sea, te marca ventas. Muchas. Parece que va de puta madre."}</p>
               <Espacio />
@@ -212,7 +212,7 @@ export default function PruebasVenta() {
               <Espacio />
               <Espacio />
               <Espacio />
-              <p>{"Dependes demasiado de la publicidad o de las redes"}{"."}</p>
+              <H3>{"Dependes demasiado de la publicidad o de las redes."}</H3>
               <Espacio />
               <p>{"Conseguir que alguien visite tu tienda cuesta dinero, tiempo grabando y publicnado contenido, o ambas cosas."}</p>
               <Espacio />
@@ -238,7 +238,7 @@ export default function PruebasVenta() {
               <Espacio />
               <Espacio />
               <Espacio />
-              <p>{"Tus emails podrían ser los de cualquier otra tienda."}</p>
+              <H3>{"Tus emails podrían ser los de cualquier otra tienda."}</H3>
               <Espacio />
               <p>{"Llevas años construyendo tu marca. Tus vídeos en redes molan, tienen personalidad. Claro, sales tú o alguien de tu equipo hablando, y eso se transmite."}</p>
               <Espacio />
@@ -264,7 +264,7 @@ export default function PruebasVenta() {
               <Espacio />
               <Espacio />
               <Espacio />
-              <p>{"No tienes tiempo para estar pensando constantemente qué hacer."}</p>
+              <H3>{"No tienes tiempo para estar pensando constantemente qué hacer."}</H3>
               <Espacio />
               <p>{"Tienes una tienda que dirigir. Proveedores que te pierden los pedidos. Clientes que te tocan los cojones con quejas absurdas. Empleados. Publicidad…."}</p>
               <Espacio />
@@ -276,7 +276,7 @@ export default function PruebasVenta() {
               <Espacio />
               <Espacio />
               <Espacio />
-              <p>{"Es demasiado caro"}</p>
+              <H3>{"Es demasiado caro"}</H3>
               <Espacio />
               <p>{"Tienes a alguien contratado, alguien interno. O una agencia. O un freelance. O incluso lo haces tú (piensa lo que te cuesta respecto al tiempo que le inviertes)."}</p>
               <Espacio />
@@ -314,7 +314,7 @@ export default function PruebasVenta() {
               <p><span style={{ color: ROJO }}>{"(Solo me queda una plaza para empezar en diciembre)"}</span></p>
               <Espacio />
               <Espacio />
-              <p>{"Bien, ¿cómo voy a conseguir esto para ti?"}</p>
+              <H2>{"Bien, ¿cómo voy a conseguir esto para ti?"}</H2>
               <Espacio />
               <p>{"Primero me presento, que no lo he hecho: Soy Raúl, tuve una tienda que quebró porque me bloquearon la publi y como no sabía hacer email marketing, no pude remontar."}</p>
               <Espacio />
@@ -326,7 +326,7 @@ export default function PruebasVenta() {
               <Espacio />
               <p>{"¿Cómo?"}</p>
               <Espacio />
-              <H3>{"1. Voy a visitarte en persona."}</H3>
+              <p><B>{"1. Voy a visitarte en persona."}</B></p>
               <Espacio />
               <p>{"Esto quizá es lo más importante. Porque estamos en una época en la que parece que el contacto humano no merece la pena."}</p>
               <Espacio />
@@ -345,7 +345,7 @@ export default function PruebasVenta() {
               <p>{"Además de encontrar oportunidades que quizá estas pasando por alto por estar muy metido en el negocio."}</p>
               <Espacio />
               <Espacio />
-              <H3>{"2. Te prepararé un plan de acción para que sepas exactamente qué hacer."}</H3>
+              <p><B>{"2. Te prepararé un plan de acción para que sepas exactamente qué hacer."}</B></p>
               <Espacio />
               <p>{"Tendrás una estrategia general para los 90 días y un plan detallado para cada mes, organizado por semanas. Te lo entregaré en un documento PDF y lo veremos en una reunión que quedará grabada."}</p>
               <Espacio />
@@ -355,7 +355,7 @@ export default function PruebasVenta() {
               <Espacio />
               <Espacio />
               <Espacio />
-              <H3>{"3. Estaré a tu lado mientras lo pones en práctica."}</H3>
+              <p><B>{"3. Estaré a tu lado mientras lo pones en práctica."}</B></p>
               <Espacio />
               <p>{"Durante los tres meses podrás consultarme las dudas que te vayan surgiendo."}</p>
               <Espacio />
@@ -365,7 +365,7 @@ export default function PruebasVenta() {
               <Espacio />
               <Espacio />
               <Espacio />
-              <H3>{"4. Revisaremos los resultados y adaptaremos la estrategia."}</H3>
+              <p><B>{"4. Revisaremos los resultados y adaptaremos la estrategia."}</B></p>
               <Espacio />
               <p>{"Cada mes nos reuniremos para analizar qué se ha hecho, qué resultados hemos conseguido y qué podemos mejorar."}</p>
               <Espacio />
@@ -375,7 +375,7 @@ export default function PruebasVenta() {
               <Espacio />
               <Espacio />
               <Espacio />
-              <H3>{"5. ¿Y qué NO voy a hacer?"}</H3>
+              <p><B>{"5. ¿Y qué NO voy a hacer?"}</B></p>
               <Espacio />
               <p>{"No voy a escribir tus emails, diseñar campañas, configurar automatizaciones ni enviarlas."}</p>
               <Espacio />
@@ -400,7 +400,7 @@ export default function PruebasVenta() {
               <Espacio />
               <Espacio />
               <Espacio />
-              <H2>{"PERO ESTO NO ES TODO"}</H2>
+              <H3>{"PERO ESTO NO ES TODO"}</H3>
               <Espacio />
               <p>{"Aún está en BETA, pero vas a tener acceso a una herramienta que estoy construyendo y que "}<B>{"te permitirá escribir tus emails prácticamente en segundos"}</B>{", sin que suenen a IA y reflejando tu personalidad como si el que te lee estuviera hablando contigo."}</p>
               <Espacio />
