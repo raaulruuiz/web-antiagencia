@@ -115,14 +115,12 @@
   {
     "id": "rendimiento-equipo",
     "nombre": "Rendimiento del equipo",
-    "descripcion": "Genera con IA un informe de productividad del equipo basado en las tareas de Notion, lo escribe en Google Sheets y lo envía por email. Se ejecuta los domingos a las 23:59.",
+    "descripcion": "Calcula las métricas de productividad del equipo a partir de las tareas de Notion y las escribe en Google Sheets (una fila por persona). Se ejecuta los domingos a las 23:59.",
     "tipo": "cron",
     "schedule": "Domingos · 23:59",
     "apps": [
       "Notion",
-      "Google Sheets",
-      "Gmail",
-      "OpenAI"
+      "Google Sheets"
     ]
   },
   {
