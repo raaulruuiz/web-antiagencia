@@ -3,8 +3,8 @@ import { Helmet } from "react-helmet-async";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import { MailerLiteForm, mailerLiteCSS } from "./TrabajaConNosotros2";
 
-// Venta de prueba: documento «Página Venta», desde su página 11 (11-11-2026).
-// /trabajaconnosotros conserva AntiAuditoria sin cambios.
+// /trabajaconnosotros — nueva página de venta: documento «Página Venta», desde su página 11 (11-11-2026).
+// La versión anterior (Anti-Auditoría del 28-10-2026) queda archivada sin ruta en AntiAuditoria.jsx.
 
 const AZUL = '#0067FD';
 const MORADO = '#7000FF';
@@ -50,21 +50,7 @@ function Carta({ children }) {
 
 const Espacio = () => <p>&nbsp;</p>;
 
-export default function PruebasVenta() {
-  useEffect(() => {
-    const previous = document.querySelector('meta[name="robots"]');
-    const robots = previous || document.createElement('meta');
-    const previousContent = robots.getAttribute('content');
-    robots.name = 'robots';
-    robots.content = 'noindex, nofollow, noarchive';
-    if (!previous) document.head.appendChild(robots);
-    return () => {
-      if (!previous) robots.remove();
-      else if (previousContent === null) robots.removeAttribute('content');
-      else robots.setAttribute('content', previousContent);
-    };
-  }, []);
-
+export default function AntiAuditoriaV2() {
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = mailerLiteCSS;
@@ -99,7 +85,7 @@ export default function PruebasVenta() {
   return (
     <>
       <Helmet>
-        <title>Página de venta — Prueba — Antiagencia</title>
+        <title>Anti-Auditoría — Antiagencia</title>
         <meta name="description" content="Anti-Auditoría completa de email marketing con Raúl Ruiz: investigación, visita presencial, reunión y dossier con plan de acción a 90 días." />
       </Helmet>
       <div className="min-h-screen bg-gray-100 flex flex-col selection:bg-[#7000FF] selection:text-white">
