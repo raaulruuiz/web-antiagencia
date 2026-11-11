@@ -12,6 +12,10 @@
     { "source": "/r", "destination": "/", "permanent": true },
     { "source": "/r/", "destination": "/", "permanent": true }
   ],
+  "headers": [
+    { "source": "/pruebas", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }] },
+    { "source": "/pruebas/", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }] }
+  ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/(.*)", "destination": "/index.html" }
