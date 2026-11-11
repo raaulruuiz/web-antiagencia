@@ -34,8 +34,8 @@ function H2({ children }) {
   return <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{children}</h2>;
 }
 
-function H3({ children }) {
-  return <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{children}</h3>;
+function H3({ children, centered = false }) {
+  return <h3 className={`text-xl md:text-2xl font-bold text-gray-900 mb-2${centered ? ' text-center' : ''}`}>{children}</h3>;
 }
 
 function Carta({ children }) {
@@ -140,7 +140,7 @@ export default function PruebasVenta() {
               <Espacio />
               <p>{"La cosa es que ya trabajaban con una agencia. Que se supone que también hace ese trabajo. Cuando me lo contó mi primera reacción fue algo como:"}</p>
               <Espacio />
-              <p>{"“"}<em>{"¿Para qué contratas a un tio que te diga que hacer cuando tienes a alguien que se supone que decide que hacer, y además, lo hace…?"}</em>{"”"}</p>
+              <p><em>{"“¿Para qué contratas a un tio que te diga que hacer cuando tienes a alguien que se supone que decide que hacer, y además, lo hace…?”"}</em></p>
               <Espacio />
               <p>{"No dije nada, solo lo pensé. En silencio."}</p>
               <Espacio />
@@ -186,14 +186,14 @@ export default function PruebasVenta() {
               <Espacio />
               <p><B>{"Y no tienes a nadie que te diga si lo estás haciendo bien o mal."}</B></p>
               <Espacio />
-              <p>{"Porque sí, le preguntas a ChatGPT: “oye, debería hacer esta campaña”"}</p>
+              <p>{"Porque sí, le preguntas a ChatGPT: "}<em>{"“oye, debería hacer esta campaña”"}</em></p>
               <Espacio />
-              <p>{"Y te responde: “por supuesto, suena genial, de hecho tiene más sentido que lo que yo te había propuesto antes.”"}</p>
+              <p>{"Y te responde: "}<em>{"“por supuesto, suena genial, de hecho tiene más sentido que lo que yo te había propuesto antes.”"}</em></p>
               <Espacio />
               <Espacio />
-              <p>{"O le dices: “compañero, tengo un problema, ¿debería escribirle a mi ex? Pero no me digas que sí, razona y dame una respuesta con criterio”"}</p>
+              <p>{"O le dices: "}<em>{"“compañero, tengo un problema, ¿debería escribirle a mi ex? Pero no me digas que sí, razona y dame una respuesta con criterio”"}</em></p>
               <Espacio />
-              <p>{"Y te responde: “Sí, pero con un matiz. No deberías escribirle directamente “oye, vuelve conmigo”, porque ahí parecería que estás desesperado…”"}</p>
+              <p>{"Y te responde: "}<em>{"“Sí, pero con un matiz. No deberías escribirle directamente “oye, vuelve conmigo”, porque ahí parecería que estás desesperado…”"}</em></p>
               <Espacio />
               <Espacio />
               <p>{"Ya sabes a lo que me refiero con esto. Siguiente problema que veo."}</p>
@@ -248,13 +248,13 @@ export default function PruebasVenta() {
               <Espacio />
               <p>{"La cosa es que con toda tu personalidad, única, característica, contagiosa… En email pones cosas como: "}</p>
               <Espacio />
-              <p>{"«Descubre la nueva colección»."}</p>
+              <p><em>{"«Descubre la nueva colección»"}</em>{"."}</p>
               <Espacio />
-              <p>{"«20 % de descuento por tiempo limitado»."}</p>
+              <p><em>{"«20 % de descuento por tiempo limitado»"}</em>{"."}</p>
               <Espacio />
-              <p>{"«Últimas horas para hacerte con tus favoritos»."}</p>
+              <p><em>{"«Últimas horas para hacerte con tus favoritos»"}</em>{"."}</p>
               <Espacio />
-              <p>{"«Llevamos 40 años en el sector»."}</p>
+              <p><em>{"«Llevamos 40 años en el sector»"}</em>{"."}</p>
               <Espacio />
               <p>{"Vamos, no me jodas…"}</p>
               <Espacio />
@@ -272,7 +272,7 @@ export default function PruebasVenta() {
               <Espacio />
               <p>{"Pues nada, la vieja confiable: pillamos la plantilla que mejor nos funciona, cambiamos tres cosas y a enviar. Un email rapidito, corto y listo. Le pongo varias imágenes para que el producto se vea bien y ale."}</p>
               <Espacio />
-              <p>{"Y te justificas con “mi cliente no lee”, “total si solo le interesan las promos, esto no le van a hacer mucho caso” y cosas así."}</p>
+              <p>{"Y te justificas con "}<em>{"“mi cliente no lee”"}</em>{", "}<em>{"“total si solo le interesan las promos, esto no le van a hacer mucho caso”"}</em>{" y cosas así."}</p>
               <Espacio />
               <Espacio />
               <Espacio />
@@ -395,18 +395,18 @@ export default function PruebasVenta() {
               <Espacio />
               <Espacio />
               <Espacio />
-              <p><B>{"El resultado de todo esto es que vas a vender más, con más beneficio porque no dependerás tanto de la publicidad, y tu marca va a transmitir la personalidad que llevas años trabajando, para que no parezca un “más de lo mismo” pero con otro logo."}</B></p>
+              <p><B>{"El resultado de todo esto es que vas a vender más, con más beneficio porque no dependerás tanto de la publicidad, y tu marca va a transmitir la personalidad que llevas años trabajando, para que no parezca un "}<em>{"“más de lo mismo”"}</em>{" pero con otro logo."}</B></p>
               <Espacio />
               <Espacio />
               <Espacio />
               <Espacio />
-              <H3>{"PERO ESTO NO ES TODO"}</H3>
+              <H3 centered>{"PERO ESTO NO ES TODO"}</H3>
               <Espacio />
-              <p>{"Aún está en BETA, pero vas a tener acceso a una herramienta que estoy construyendo y que "}<B>{"te permitirá escribir tus emails prácticamente en segundos"}</B>{", sin que suenen a IA y reflejando tu personalidad como si el que te lee estuviera hablando contigo."}</p>
+              <p className="text-center">{"Aún está en BETA, pero vas a tener acceso a una herramienta que estoy construyendo y que "}<B>{"te permitirá escribir tus emails prácticamente en segundos"}</B>{", sin que suenen a IA y reflejando tu personalidad como si el que te lee estuviera hablando contigo."}</p>
               <Espacio />
-              <p>{"Podrás elegir entre hacer diseños más sencillos o más profesionales, flujos completos desde 0, y luego llevártelo a tu plataforma de email con un clic."}</p>
+              <p className="text-center">{"Podrás elegir entre hacer diseños más sencillos o más profesionales, flujos completos desde 0, y luego llevártelo a tu plataforma de email con un clic."}</p>
               <Espacio />
-              <p>{"Así no solo tendrás el criterio que te voy a aportar, sino que lo podrás ejecutar  más rápido, ya sea que lo hagas tú o tu equipo."}</p>
+              <p className="text-center">{"Así no solo tendrás el criterio que te voy a aportar, sino que lo podrás ejecutar  más rápido, ya sea que lo hagas tú o tu equipo."}</p>
               <Espacio />
               <Espacio />
               <Espacio />
@@ -418,7 +418,7 @@ export default function PruebasVenta() {
               <Espacio />
               <p>{"A "}<M>{"Neus"}</M>{" el email le lleva 10 minutos cada día, y más de la mitad de las ventas de su tienda, vienen por ahí (ventas reales, no de esas que no sabes de dónde vienen realmente). Hemos hecho la prueba, y con la herramienta, se consigue lo mismo en menos de 5 minutos."}</p>
               <Espacio />
-              <p><B>{"Otro cliente"}</B>{", factura el 70% de lo que vende por email, y le dedica menos de 20 minutos al día. Con la herramienta, consigue lo mismo también en menos de 5 minutos. "}</p>
+              <p><M>{"Otro cliente"}</M>{", factura el 70% de lo que vende por email, y le dedica menos de 20 minutos al día. Con la herramienta, consigue lo mismo también en menos de 5 minutos. "}</p>
               <Espacio />
               <Espacio />
               <p><span style={{ color: ROJO }}>{"(Solo me queda una plaza para empezar en diciembre)"}</span></p>
