@@ -10,7 +10,7 @@ function fmtFechaHoraLarga(iso) {
   return new Date(iso).toLocaleString('es-ES', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
 }
 
-export default function ReservaEmbebida({ slug, origen = '', onReservada }) {
+export default function ReservaEmbebida({ slug, origen = '', onReservada, mostrarDuracion = true }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tipo, setTipo] = useState(null);
@@ -90,7 +90,7 @@ export default function ReservaEmbebida({ slug, origen = '', onReservada }) {
 
   return (
     <div className="text-gray-800">
-      <p className="text-sm mb-6" style={{ color: BLUE, fontWeight: 700 }}>{tipo.duracion_minutos} minutos · videollamada</p>
+      {mostrarDuracion && <p className="text-sm mb-6" style={{ color: BLUE, fontWeight: 700 }}>{tipo.duracion_minutos} minutos · videollamada</p>}
       <CalendarPicker
         dias={dias} calMonth={calMonth} setCalMonth={setCalMonth}
         selectedFecha={selectedFecha} setSelectedFecha={setSelectedFecha}

@@ -27,19 +27,20 @@ export default function AntiAgenteGracias() {
         <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
           <div className="w-full max-w-4xl">
             <Hoja>
-              <Pendiente>Textos de esta página provisionales (no venían en el PDF).</Pendiente>
               <p className="text-[#0067FD] font-bold mb-6" style={rubik}>Lista prioritaria de Anti-Agente</p>
-              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 uppercase mb-6 leading-tight" style={rubik}>Ya estás dentro.</h1>
-              <Parrafo>Te voy a escribir yo, personalmente, para preparar tu videollamada: dejamos tu equipo de agentes a punto para tu tienda y miramos tus costes.</Parrafo>
-              <Parrafo>Si no quieres esperar a mi correo, elige ya el día y la hora que mejor te vengan:</Parrafo>
+              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 uppercase mb-6 leading-tight" style={rubik}>Ya estás dentro. Gracias.</h1>
+              <Parrafo>Te escribiré yo personalmente, no un correo automático, para contarte los siguientes pasos.</Parrafo>
+              <Parrafo>Si no quieres esperar, elige ya el día de tu videollamada aquí abajo. En esa llamada dejamos tu equipo a punto y hacemos la auditoría de costes.</Parrafo>
             </Hoja>
 
             <Hoja>
               <Titulo>Elige tu hueco</Titulo>
+              <Parrafo>Elige el hueco que mejor te venga. Son 30 minutos y los hago yo.</Parrafo>
+              <Pendiente>Sin decidir: duración de la llamada (30 minutos, provisional), herramienta de agenda (de momento la de Raúl, /admin/calendly) y qué pasa cuando se llenen las 5 plazas.</Pendiente>
               {slug
-                ? <ReservaEmbebida slug={slug} origen={utmATexto(utm)} />
-                : <Pendiente>Falta el tipo de reunión del calendario de Raúl (/admin/calendly). Para probar: añade ?tipo=&lt;slug&gt; a la URL.</Pendiente>}
-              <p className="text-gray-600 text-base mt-8">Raúl.</p>
+                ? <ReservaEmbebida slug={slug} origen={utmATexto(utm)} mostrarDuracion={false} />
+                : <Pendiente>Falta el tipo de reunión en /admin/calendly (30 min). Para probar con uno existente: añade ?tipo=&lt;slug&gt; a la URL.</Pendiente>}
+              <p className="text-sm text-gray-600 mt-8" style={rubik}>¿Ningún hueco te encaja? Responde a mi correo y lo buscamos.</p>
             </Hoja>
           </div>
         </div>

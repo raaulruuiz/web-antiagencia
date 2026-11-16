@@ -7,21 +7,30 @@ import {
 } from "./antiAgenteComun";
 
 // /anti-agente — landing de la lista prioritaria de Anti-Agente (BORRADOR, noindex).
-// Textos: PDF de Perro Sanxe (16-11-2026) + cambios de Raúl vía Rafa.
-// Los recuadros <Pendiente> marcan lo que cambia; se quitan antes de publicar.
+// Textos: «cambios v2» de Perro Sanxe (16-11-2026) sobre el PDF del mismo día, con las
+// correcciones factuales de Anti-Agente (IA, datos, aprobación, conexiones).
+// Los recuadros <Pendiente> son notas para Raúl: solo se ven en local, nunca en producción.
 
-const TEXTO_BOTON = "Quiero una de las 5 plazas"; // provisional
+const TEXTO_BOTON = "Quiero una de las 5 plazas";
+const IA = "tu suscripción de Claude o de ChatGPT";
+const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación";
+
+const NOTA_APROBACION = "«Por defecto, nada se publica ni se envía sin tu aprobación»: es cierto por defecto, pero no si el usuario activa el modo «Más libertad». Raúl decide si queda así.";
+const NOTA_CONEXIONES = "Shopify y WooCommerce existen en la app pero no se han probado nunca con una tienda real. Raúl decide si se nombran así.";
 
 function Video() {
   return (
-    <div className="p-[3px] rounded-sm bg-gradient-to-r from-[#0067FD] to-[#7000FF] mb-8">
+    <div className="p-[3px] rounded-sm bg-gradient-to-r from-[#0067FD] to-[#7000FF] mb-3">
       <div className="aspect-video bg-[#121212] rounded-sm flex flex-col items-center justify-center text-center px-6">
         <span className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-white text-2xl mb-4" aria-hidden="true">▶</span>
         <p className="text-white font-bold" style={rubik}>Vídeo de 60-90 s (lo graba Raúl)</p>
-        <p className="text-white/60 text-sm" style={rubik}>«Antes, esto me llevaba media mañana. Ahora está hecho a las 9.»</p>
       </div>
     </div>
   );
+}
+
+function Microcopy({ children }) {
+  return <p className="text-sm text-gray-600 mt-3" style={rubik}>{children}</p>;
 }
 
 function Formulario({ utm }) {
@@ -34,7 +43,6 @@ function Formulario({ utm }) {
         <li>Nombre</li>
         <li>Email</li>
         <li>Web de tu tienda</li>
-        <li>¿Qué tarea te quita más tiempo? (respuesta corta)</li>
         <li>Casilla: acepto la <a href="/politica-privacidad" className="underline">política de privacidad</a></li>
       </ul>
       <p className="text-sm mb-4">Botón: «{TEXTO_BOTON}». Al enviarse, lleva a la página de gracias con los UTM de la visita.</p>
@@ -51,7 +59,7 @@ export default function AntiAgente() {
     <>
       <Helmet>
         <title>Anti-Agente — Un equipo de agentes para tu tienda online</title>
-        <meta name="description" content="Un equipo de agentes para tu tienda online. Gratis. Apúntate a la lista prioritaria: solo 5 plazas." />
+        <meta name="description" content="Un equipo de agentes para tu tienda online. Gratis. Empiezo con 5 tiendas y con esas 5 lo monto yo: apúntate a la lista prioritaria." />
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="min-h-screen bg-gray-100 flex flex-col selection:bg-[#7000FF] selection:text-white">
@@ -60,24 +68,28 @@ export default function AntiAgente() {
 
             {/* 1 · Cabecera */}
             <Hoja>
-              <p className="text-[#0067FD] font-bold mb-6" style={rubik}>Lista prioritaria · Solo 5 plazas</p>
-              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 uppercase mb-8 leading-tight" style={rubik}>
+              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 uppercase mb-6 leading-tight" style={rubik}>
                 Un equipo de agentes para tu tienda online. Gratis.
               </h1>
+              <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Con este equipo hago en 2 horas lo que antes me llevaba el día entero. No te lo cuento: lo uso cada día en mi propio negocio.</Parrafo>
               <Video />
-              <Parrafo>Llevo años haciendo marketing para tiendas online. Con este equipo hago en 2 horas lo que antes me llevaba el día entero. No te lo cuento: lo uso cada día en mi propio negocio.</Parrafo>
-
-              <Pendiente>Texto exacto de las 5 plazas y sus ventajas: lo redacta Perro Sanxe. Abajo, provisional.</Pendiente>
-              <div className="border-l-4 border-[#7000FF] pl-5 my-8">
-                <p className="text-xl font-bold text-gray-900 mb-4" style={rubik}>Solo hay 5 plazas en la lista prioritaria. Esas 5 personas tienen:</p>
-                <Check titulo="Onboarding gratis en videollamada.">Dejamos la herramienta a punto para tu negocio, juntos.</Check>
-                <Check titulo="Auditoría de costes gratis.">Miramos qué gasto y qué tiempo te puede quitar en tu caso.</Check>
-                <Check titulo="Condiciones especiales de lanzamiento">si quieres algo hecho a tu medida.</Check>
-              </div>
-
+              <p className="text-gray-800 text-lg italic text-center mb-8">«Antes, esto me llevaba media mañana. Ahora está hecho a las 9.»</p>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
-              <p className="text-sm text-gray-600 mt-3" style={rubik}>Funciona con tu suscripción de Claude, ChatGPT u otra · Nada sale sin tu visto bueno</p>
-              <Pendiente>Texto del botón provisional (no es «Descargar»: es para apuntarse a la lista).</Pendiente>
+              <Microcopy>Te escribo yo personalmente para agendar · Funciona con {IA} · {APROBACION}</Microcopy>
+              <Pendiente>{NOTA_APROBACION}</Pendiente>
+            </Hoja>
+
+            {/* 1 bis · Las 5 plazas */}
+            <Hoja>
+              <Titulo>Empiezo con 5 tiendas. Y con esas 5 lo monto yo.</Titulo>
+              <Parrafo>No es una forma de meterte prisa. Son 5 porque las llamadas las hago yo, una a una, y no quiero hacerlas mal.</Parrafo>
+              <Parrafo>Si te quedas una de las 5 plazas, tienes:</Parrafo>
+              <Check titulo="Onboarding gratis en videollamada.">Dejamos juntos tu equipo de agentes a punto para tu tienda: conectamos tus herramientas y lo adaptamos a cómo trabajas.</Check>
+              <Check titulo="Auditoría de costes gratis.">Miramos qué gasto y qué tiempo te puede quitar Anti-Agente en tu caso.</Check>
+              <Check titulo="Condiciones de lanzamiento si quieres algo a tu medida.">Si en la llamada vemos que te conviene algo hecho para ti, te lo ofrezco con precio de lanzamiento cerrado. Si no, no pasa nada: el equipo es gratis igual.</Check>
+              <Parrafo className="mt-6">Más adelante, el onboarding y la auditoría serán de pago. Te lo digo ahora para que lo sepas desde el principio.</Parrafo>
+              <Pendiente>Sin decidir: qué pasa cuando se llenen las 5 plazas (calendario con solo 5 huecos y luego lista de espera, o mensaje de siguiente tanda).</Pendiente>
+              <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
             </Hoja>
 
             {/* 2 · Qué hace tu equipo */}
@@ -89,17 +101,18 @@ export default function AntiAgente() {
               <Check titulo="Contenido y redes:">ideas, textos y calendario a partir de lo que ya tienes.</Check>
               <Check titulo="Publicidad:">revisa tus anuncios y te propone campañas listas para aprobar.</Check>
               <Check titulo="Números:">te resume cada mañana cómo va la tienda.</Check>
-              <Parrafo className="mt-6">Viene ya montado. Al empezar, le cuentas cómo es tu negocio y el equipo se adapta: tu tono, tus productos, tus clientes. Se conecta con las herramientas que ya usas, como Shopify, Gmail, Meta o MailerLite. No tienes que dejar ninguna.</Parrafo>
+              <Parrafo className="mt-6">Viene ya montado. Al empezar, le cuentas cómo es tu negocio y el equipo se adapta: tu tono, tus productos, tus clientes. Se conecta con tu tienda (Shopify, WooCommerce), tu email (Klaviyo, MailerLite), Gmail y Meta. No tienes que dejar ninguna de tus herramientas.</Parrafo>
+              <Pendiente>{NOTA_CONEXIONES}</Pendiente>
               <Parrafo>Empieza por tu tienda online y, si quieres, se extiende al resto de tu negocio.</Parrafo>
             </Hoja>
 
-            {/* 3 · Especialistas que hablan entre sí (sustituye a «verlo trabajar») */}
+            {/* 3 · Un equipo de verdad */}
             <Hoja>
-              <Pendiente>Sección nueva: la redacta Perro Sanxe. Idea: cada agente está especializado y hablan entre sí, como un equipo de personas reales; tú solo revisas. Texto provisional.</Pendiente>
-              <Titulo>Cada uno, especialista en lo suyo. Y hablan entre sí.</Titulo>
-              <Parrafo>Cada agente se ocupa de una cosa y la hace bien. Cuando uno necesita algo del otro, se lo pide, como en un equipo de personas de verdad. Tú no coordinas a nadie: solo revisas lo que te dejan preparado.</Parrafo>
-              <Parrafo>En español, y con una persona detrás. Si algo falla, no hablas con un formulario: hablas conmigo.</Parrafo>
-              <Pendiente>Confirmar si se mantiene esta última frase (venía de la sección «verlo trabajar»).</Pendiente>
+              <Titulo>Como tener tu propio equipo. Tú solo revisas.</Titulo>
+              <Parrafo>Cada agente está especializado en una cosa: uno lleva tu correo, otro tus emails, otro tu contenido, otro tus anuncios. Y hablan entre ellos: si el de contenido necesita un dato de ventas, se lo pide al que lleva los números, igual que harían dos personas de tu equipo.</Parrafo>
+              <Parrafo>Tú no tienes que coordinar a nadie ni explicar cada cosa dos veces. Te dejan el trabajo preparado y tú solo tienes que revisar.</Parrafo>
+              <Parrafo>Y si algo no te encaja, se lo dices como a una persona: «esto más corto», «a este cliente no», «la semana que viene, otra vez».</Parrafo>
+              <Parrafo>En español, y con una persona detrás. Si algo falla, hablas conmigo.</Parrafo>
             </Hoja>
 
             {/* 4 · Mi caso */}
@@ -115,17 +128,19 @@ export default function AntiAgente() {
             {/* 5 · Tú apruebas */}
             <Hoja>
               <Titulo>Tu equipo prepara. Tú decides.</Titulo>
-              <Parrafo>Ningún correo, publicación o anuncio sale de tu negocio sin que tú lo apruebes. Te llega como una tarjeta: lo lees, lo cambias si quieres y le das a enviar. O no.</Parrafo>
+              <Parrafo>Por defecto, ningún correo, publicación o anuncio sale de tu negocio sin tu aprobación. Te llega como una tarjeta: lo lees, lo cambias si quieres y le das a enviar. O no.</Parrafo>
+              <Pendiente>{NOTA_APROBACION} Detalle: cada publicación o cambio en las conexiones pide aprobación, las campañas de anuncios se crean en pausa y el correo solo sale desde una tarjeta aprobada.</Pendiente>
               <Parrafo><strong className="text-[#0067FD]">Tu tienda es tuya.</strong> El equipo trabaja para ti, no en tu lugar.</Parrafo>
             </Hoja>
 
             {/* 6 · Requisitos */}
             <Hoja>
               <Titulo>Qué necesitas</Titulo>
-              <Check titulo="Un ordenador.">La app se instala en tu ordenador y, de momento, funciona mientras está encendido.</Check>
-              <Check titulo="Tu propia suscripción de IA: Claude, ChatGPT u otra.">Anti-Agente es gratis; la IA que lo mueve la pagas tú a quien ya se la pagas. Si ya tienes una, no pagas nada más.</Check>
-              <Check titulo="Tus herramientas de siempre,">si quieres conectarlas: tu tienda, tu correo, tus redes.</Check>
-              <Parrafo className="mt-6"><strong>Para pequeñas empresas, no para multinacionales.</strong> Está pensado para tiendas y negocios donde el dueño lo hace casi todo.</Parrafo>
+              <Check titulo="Tu ordenador.">De momento Anti-Agente funciona en tu ordenador, mientras está encendido.</Check>
+              <Check titulo="Tu propia suscripción de IA: Claude o ChatGPT.">Anti-Agente es gratis; la IA que lo mueve la sigues pagando a quien ya se la pagas. Si ya tienes una, no pagas nada más.</Check>
+              <Check titulo="Tus herramientas de siempre,">si quieres conectarlas: tu tienda (Shopify, WooCommerce), tu email (Klaviyo, MailerLite), Gmail y Meta.</Check>
+              <Pendiente>{NOTA_CONEXIONES}</Pendiente>
+              <Parrafo className="mt-6"><strong>Para pequeñas empresas, no para multinacionales.</strong> Está pensado para tiendas donde el dueño lo hace casi todo.</Parrafo>
             </Hoja>
 
             {/* 7 · Lo que viene */}
@@ -142,30 +157,34 @@ export default function AntiAgente() {
             <Hoja>
               <Titulo>Preguntas frecuentes</Titulo>
               {[
-                ["¿De verdad es gratis?", "Sí, la app es gratis. Lo único que necesitas es tu propia suscripción de IA (Claude, ChatGPT u otra)."],
+                ["¿De verdad es gratis?", `Sí, la app es gratis. Lo único que necesitas es ${IA}.`],
                 ["¿Tengo que saber de IA?", "No. Viene montado y al empezar le explicas tu negocio con tus palabras."],
                 ["¿Tengo que dejar mis herramientas?", "No. Se conecta con las que ya usas."],
-                ["¿Puede enviar algo sin que yo lo vea?", "No. Todo lo importante te llega para aprobar."],
+                ["¿Puede enviar algo sin que yo lo vea?", "Por defecto, no: todo lo que se publica o se envía te llega antes para que lo apruebes."],
               ].map(([p, r]) => (
                 <div key={p} className="mb-5">
                   <h3 className="text-lg font-bold text-gray-900 mb-1" style={rubik}>{p}</h3>
                   <p className="text-gray-800 text-lg leading-loose">{r}</p>
                 </div>
               ))}
+              <Pendiente>{NOTA_APROBACION}</Pendiente>
               <div className="mb-5">
                 <h3 className="text-lg font-bold text-gray-900 mb-1" style={rubik}>¿Dónde quedan los datos de mi tienda?</h3>
-                <Pendiente>Respuesta pendiente de Anti-Agente: qué se queda en tu ordenador y qué no.</Pendiente>
+                <p className="text-gray-800 text-lg leading-loose mb-3">En tu ordenador. Tus conversaciones, memorias y archivos se guardan en tu propio ordenador, y las claves y accesos de tus conexiones también, cifrados con el llavero del sistema.</p>
+                <p className="text-gray-800 text-lg leading-loose mb-3">Las llamadas a tu tienda y a tus herramientas van directas de tu ordenador a cada servicio: no pasan por ningún servidor mío. Mis servidores solo reciben tu inicio de sesión (tu email), nada de tu tienda.</p>
+                <p className="text-gray-800 text-lg leading-loose mb-3">Lo que lee o escribe tu equipo pasa por la IA que uses (Anthropic u OpenAI), según sus condiciones, no las mías.</p>
+                <p className="text-gray-800 text-lg leading-loose">Solo si tú lo autorizas, se compartirá algo para mejorar la app.</p>
+                <Pendiente>Respuesta real confirmada por Anti-Agente tras mirar el código (sustituye a la de Perro Sanxe). Redacción para revisión de Raúl.</Pendiente>
               </div>
             </Hoja>
 
             {/* 9 · Cierre + formulario */}
             <div id="apuntarme" className="scroll-mt-8">
               <Hoja>
-                <Pendiente>El cierre del PDF («Pruébalo mañana a las 9. Descárgalo hoy…») habla de descargar y todavía no se puede. Texto provisional hasta que Perro Sanxe lo adapte a la lista.</Pendiente>
-                <Titulo>Apúntate a la lista prioritaria</Titulo>
-                <Parrafo>Solo hay 5 plazas. Déjame tus datos y te escribo yo, personalmente, para agendar la videollamada.</Parrafo>
+                <Titulo>Imagina tenerlo hecho a las 9.</Titulo>
+                <Parrafo>Apúntate, te escribo yo y lo dejamos a punto juntos.</Parrafo>
                 <Formulario utm={utm} />
-                <p className="text-sm text-gray-600 mt-4" style={rubik}>Funciona con tu suscripción de IA · Nada sale sin tu visto bueno</p>
+                <Microcopy>Con {IA} · {APROBACION}</Microcopy>
               </Hoja>
             </div>
 

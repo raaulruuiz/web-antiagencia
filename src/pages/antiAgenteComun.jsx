@@ -39,8 +39,10 @@ export const utmAQuery = (utm) => {
 export const utmATexto = (utm) => Object.entries(utm).map(([k, v]) => `${k}=${v}`).join(", ");
 
 // ── Marcas de borrador ────────────────────────────────────────────────────
-// Recuadro naranja: texto que va a cambiar o está pendiente. Se quita antes de publicar.
+// Recuadro naranja: nota interna para la revisión de Raúl. Solo se ve en local
+// (vite dev, la vista previa); en cualquier build de producción no se renderiza.
 export function Pendiente({ children }) {
+  if (!import.meta.env.DEV) return null;
   return (
     <div className="border-2 border-dashed border-orange-400 bg-orange-50 text-orange-900 text-sm rounded-sm px-4 py-3 my-4" style={rubik}>
       <strong>PENDIENTE · </strong>{children}
