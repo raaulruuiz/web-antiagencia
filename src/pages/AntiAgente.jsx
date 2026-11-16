@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import FooterMinimal from "@/components/landing/FooterMinimal";
-import MailerLiteEmbebido from "@/components/MailerLiteEmbebido";
+import FormularioListaPrioritaria from "@/components/FormularioListaPrioritaria";
 import {
-  Boton, Check, FORM_MAILERLITE, Hoja, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, RUTA_GRACIAS, rubik, Titulo, leerUtm, utmAQuery,
+  Boton, Check, claseBoton, FORM_MAILERLITE, Hoja, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, RUTA_GRACIAS, rubik, Titulo, leerUtm, utmAQuery,
 } from "./antiAgenteComun";
 
 // /anti-agente — landing de la lista prioritaria de Anti-Agente (BORRADOR, noindex).
@@ -34,51 +34,19 @@ function Microcopy({ children }) {
   return <p className="text-sm text-gray-600 mt-3" style={rubik}>{children}</p>;
 }
 
-// Estilo de la web sobre el formulario de MailerLite (sus reglas llevan id, de ahí los !important).
-const CSS_FORM = `
-.ml-antiagencia .ml-form-embedContainer, .ml-antiagencia .ml-form-embedWrapper { max-width: 100% !important; width: 100% !important; }
-.ml-antiagencia .ml-form-embedWrapper { background: transparent !important; border: 0 !important; border-radius: 0 !important; }
-.ml-antiagencia .ml-form-embedBody, .ml-antiagencia .ml-form-successBody { padding: 0 !important; }
-.ml-antiagencia .ml-form-embedContent h4, .ml-antiagencia .ml-form-successContent h4 { font-family: 'Rubik', sans-serif !important; color: #111827 !important; font-weight: 700 !important; }
-.ml-antiagencia .ml-form-embedContent p, .ml-antiagencia .ml-form-successContent p { font-family: Georgia, serif !important; color: #1f2937 !important; font-size: 18px !important; line-height: 1.8 !important; }
-.ml-antiagencia label, .ml-antiagencia .ml-form-checkboxRow p, .ml-antiagencia .ml-form-embedPermissions p { font-family: 'Rubik', sans-serif !important; color: #4b5563 !important; font-size: 14px !important; }
-.ml-antiagencia input[type="text"], .ml-antiagencia input[type="email"], .ml-antiagencia input[type="url"], .ml-antiagencia textarea {
-  font-family: 'Rubik', sans-serif !important; font-size: 16px !important; color: #111827 !important; background: #fff !important;
-  border: 1px solid #d1d5db !important; border-radius: 2px !important; padding: 12px 14px !important; }
-.ml-antiagencia input:focus, .ml-antiagencia textarea:focus { border-color: #0067FD !important; outline: 2px solid #0067FD33 !important; }
-.ml-antiagencia a { color: #0067FD !important; text-decoration: underline !important; }
-.ml-antiagencia .ml-form-embedSubmit button { font-family: 'Rubik', sans-serif !important; font-weight: 700 !important; font-size: 18px !important;
-  background: #7000FF !important; border: 0 !important; border-radius: 2px !important; color: #fff !important; padding: 16px 24px !important; height: auto !important; transition: background-color .2s !important; }
-.ml-antiagencia .ml-form-embedSubmit button:hover { background: #0067FD !important; }
-`;
-
 function Formulario({ utm }) {
   const navigate = useNavigate();
   const gracias = `${RUTA_GRACIAS}${utmAQuery(utm)}`;
   const alEnviar = useCallback(() => navigate(gracias), [navigate, gracias]);
-  if (FORM_MAILERLITE) {
-    return (
-      <>
-        <style>{CSS_FORM}</style>
-        <MailerLiteEmbebido {...FORM_MAILERLITE} utm={utm} onEnviado={alEnviar} className="ml-antiagencia" />
-        <Pendiente>Al enviarse, la página lleva a {RUTA_GRACIAS} con los UTM. Los UTM llegan a MailerLite solo si el formulario tiene campos ocultos utm_source, utm_medium, utm_campaign (u origen).</Pendiente>
-      </>
-    );
-  }
   return (
-    <div className="border-2 border-dashed border-gray-400 rounded-sm px-6 py-6 text-gray-700" style={rubik}>
-      <p className="font-bold text-gray-900 mb-3">Aquí va el formulario de MailerLite (lo crea Raúl)</p>
-      <ul className="list-disc pl-6 mb-3 text-sm leading-relaxed">
-        <li>Nombre</li>
-        <li>Email</li>
-        <li>Web de tu tienda</li>
-        <li>¿Qué tarea te quita más tiempo? (notas)</li>
-        <li>Casilla: acepto la <a href="/politica-privacidad" className="underline">política de privacidad</a></li>
-        <li>Casilla aparte, sin marcar: quiero recibir la newsletter diaria</li>
-      </ul>
-      <p className="text-sm mb-4">Botón: «{TEXTO_BOTON}». Al enviarse, lleva a la página de gracias con los UTM de la visita.</p>
-      <Link to={gracias} className="text-[#0067FD] font-bold hover:underline text-sm">Simular envío → ver la página de gracias</Link>
-    </div>
+    <FormularioListaPrioritaria
+      {...FORM_MAILERLITE}
+      textoBoton={TEXTO_BOTON}
+      claseBoton={claseBoton()}
+      estiloBoton={rubik}
+      textoBajoBoton="Te escribo yo personalmente para agendar."
+      onEnviado={alEnviar}
+    />
   );
 }
 

@@ -2,7 +2,7 @@ import React from "react";
 import { rubik } from "./antiStudioComun";
 import { leerConsentimiento } from "@/lib/consentimiento";
 
-export { Hoja, Titulo, Boton, rubik } from "./antiStudioComun";
+export { Hoja, Titulo, Boton, claseBoton, rubik } from "./antiStudioComun";
 
 // ── Ajustes de la lista prioritaria ───────────────────────────────────────
 // Tipo de reunión creado en /admin/calendly (30 min, horario copiado del tipo Q4).
@@ -13,11 +13,9 @@ export const SLUG_RESERVA = "lista-prioritaria-anti-agente";
 export const PLAZAS_CERRADAS = false;
 export const TEXTO_CERRADA = "Las 5 plazas están cogidas. Las siguientes personas entrarán en una lista de espera, ya de pago.";
 
-// Formulario insertado de MailerLite que crea Raúl (lista prioritaria). Del código de inserción:
-//   ml('account', '686354')                        → cuenta
-//   <div class="ml-embedded" data-form="AbCd12">   → formulario
-// Mientras sea null, la landing muestra el hueco del formulario.
-export const FORM_MAILERLITE = null; // { cuenta: "686354", formulario: "AbCd12" }
+// Formulario de MailerLite de la lista prioritaria (creado por Raúl; añade al grupo
+// «Lista prioritaria Anti-Agente»). La landing usa marcado propio y envía a su URL de alta.
+export const FORM_MAILERLITE = { cuenta: "686354", formulario: "204330336655509273" };
 
 export const RUTA_GRACIAS = "/anti-agente/gracias";
 

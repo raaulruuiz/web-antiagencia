@@ -83,19 +83,17 @@ export default function PoliticaPrivacidad() {
 
             <Tratamiento
               titulo="a) Lista prioritaria de Anti-Agente"
-              datos="nombre, email, web de tu tienda, tu respuesta libre sobre la tarea que más tiempo te quita y, si llegas desde un enlace con parámetros (UTM), el origen de la visita."
-              finalidad="apuntarte a la lista prioritaria, escribirte personalmente sobre Anti-Agente, valorar si encaja con tu tienda y, si quieres, agendar una videollamada para dejarlo listo. Apuntarte a la lista no te suscribe a la newsletter: para eso hay una casilla aparte, sin marcar, en el mismo formulario."
-              base="tu consentimiento al apuntarte (art. 6.1.a RGPD) y la aplicación, a petición tuya, de medidas precontractuales (art. 6.1.b RGPD)."
-              conservacion="mientras no te des de baja ni retires tu consentimiento. Cada correo que te enviemos incluye un enlace para darte de baja."
-            >
-              <Falta>La casilla separada y sin marcar de la newsletter tiene que existir en el formulario de MailerLite tal como lo describe este texto. Lo compruebo cuando llegue el código del formulario.</Falta>
-            </Tratamiento>
+              datos="nombre, email, web de tu tienda y, si quieres contárnoslo, tu respuesta libre sobre la tarea que más tiempo te quita. MailerLite registra además la fecha y la dirección IP del alta. Si después reservas una llamada, el origen de la visita (UTM) se añade a la reserva."
+              finalidad="apuntarte a la lista prioritaria, escribirte personalmente sobre Anti-Agente, valorar si encaja con tu tienda, agendar contigo una videollamada si quieres y enviarte la newsletter diaria de Antiagencia."
+              base="tu consentimiento (art. 6.1.a RGPD y, para la newsletter, art. 21 LSSI-CE), que das marcando la casilla del formulario, que aparece sin marcar y es obligatoria para apuntarte. Esa casilla cubre a la vez la lista prioritaria y la newsletter diaria. La videollamada, si la pides, se basa además en medidas precontractuales a petición tuya (art. 6.1.b RGPD)."
+              conservacion="mientras no te des de baja ni retires tu consentimiento. Cada correo incluye un enlace para darte de baja."
+            />
 
             <Tratamiento
               titulo="b) Newsletter y comunicaciones por email"
               datos="email y, si lo das, tu nombre; datos de apertura y clics de los correos."
-              finalidad="enviarte la newsletter diaria y novedades de Antiagencia, si te has suscrito en un formulario de newsletter o has marcado la casilla de la newsletter al apuntarte a la lista prioritaria."
-              base="tu consentimiento expreso (art. 6.1.a RGPD y art. 21 LSSI-CE), que das marcando la casilla o enviando el formulario de suscripción. Cada correo incluye un enlace para darte de baja."
+              finalidad="enviarte la newsletter diaria y novedades de Antiagencia, si te has suscrito en un formulario de newsletter o te has apuntado a la lista prioritaria de Anti-Agente aceptando recibirla."
+              base="tu consentimiento expreso (art. 6.1.a RGPD y art. 21 LSSI-CE), que das al enviar el formulario de suscripción o, en la lista prioritaria, al marcar su casilla. Cada correo incluye un enlace para darte de baja."
               conservacion="mientras no te des de baja ni retires tu consentimiento. Después conservamos solo tu email en una lista de bajas, para no volver a escribirte."
             />
 

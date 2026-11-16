@@ -20,9 +20,11 @@ export function Titulo({ children }) {
   return <h2 className="text-2xl md:text-3xl font-bold text-gray-900 uppercase mb-4" style={rubik}>{children}</h2>;
 }
 
+export const claseBoton = (secundario) =>
+  `inline-block px-6 py-3 rounded-sm font-bold transition-colors ${secundario ? "bg-white text-gray-900 border border-gray-900 hover:bg-gray-100" : "bg-[#7000FF] text-white hover:bg-[#0067FD]"}`;
+
 export function Boton({ href, children, secundario }) {
-  const color = secundario ? "bg-white text-gray-900 border border-gray-900 hover:bg-gray-100" : "bg-[#7000FF] text-white hover:bg-[#0067FD]";
-  return <a href={href} className={`inline-block px-6 py-3 rounded-sm font-bold transition-colors ${color}`} style={rubik}>{children}</a>;
+  return <a href={href} className={claseBoton(secundario)} style={rubik}>{children}</a>;
 }
 
 export function Novedad({ n }) {
