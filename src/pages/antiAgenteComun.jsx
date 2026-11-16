@@ -12,9 +12,11 @@ export const SLUG_RESERVA = "lista-prioritaria-anti-agente";
 export const PLAZAS_CERRADAS = false;
 export const TEXTO_CERRADA = "Las 5 plazas están cogidas. Las siguientes personas entrarán en una lista de espera, ya de pago.";
 
-// Datos del formulario de MailerLite que prepara Raucu (lista prioritaria).
+// Formulario insertado de MailerLite que crea Raúl (lista prioritaria). Del código de inserción:
+//   ml('account', '686354')                        → cuenta
+//   <div class="ml-embedded" data-form="AbCd12">   → formulario
 // Mientras sea null, la landing muestra el hueco del formulario.
-export const FORM_MAILERLITE = null; // { mlb2Id, accountId, formActionId, css, scriptVersion }
+export const FORM_MAILERLITE = null; // { cuenta: "686354", formulario: "AbCd12" }
 
 export const RUTA_GRACIAS = "/anti-agente/gracias";
 
