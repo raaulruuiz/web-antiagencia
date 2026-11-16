@@ -3,11 +3,14 @@ import { rubik } from "./antiStudioComun";
 
 export { Hoja, Titulo, Boton, rubik } from "./antiStudioComun";
 
-// ── Ajustes pendientes de cerrar ──────────────────────────────────────────
-// Slug del tipo de reunión en /admin/calendly para la videollamada de la lista
-// prioritaria. Mientras sea null, la página de gracias muestra un aviso.
-// Para probar con otro tipo sin tocar código: /anti-agente/gracias?tipo=<slug>
-export const SLUG_RESERVA = null;
+// ── Ajustes de la lista prioritaria ───────────────────────────────────────
+// Tipo de reunión creado en /admin/calendly (30 min, horario copiado del tipo Q4).
+export const SLUG_RESERVA = "lista-prioritaria-anti-agente";
+
+// Interruptor: true cuando se llenen las 5 plazas. Quita el formulario de la
+// landing y el calendario de la página de gracias, y muestra TEXTO_CERRADA.
+export const PLAZAS_CERRADAS = false;
+export const TEXTO_CERRADA = "Las 5 plazas están cogidas. Las siguientes personas entrarán en una lista de espera, ya de pago.";
 
 // Datos del formulario de MailerLite que prepara Raucu (lista prioritaria).
 // Mientras sea null, la landing muestra el hueco del formulario.
@@ -63,5 +66,17 @@ export function Check({ titulo, children }) {
       </span>
       <span>{titulo && <strong className="text-[#0067FD]">{titulo}</strong>}{titulo && " "}{children}</span>
     </div>
+  );
+}
+
+// Aviso de lista cerrada (se muestra en lugar del formulario y del calendario)
+export function ListaCerrada() {
+  return (
+    <>
+      <div className="border-l-4 border-[#7000FF] pl-5 my-4">
+        <p className="text-xl font-bold text-gray-900" style={rubik}>{TEXTO_CERRADA}</p>
+      </div>
+      <Pendiente>Texto provisional de lista cerrada: lo revisa Raúl. Sin cifras ni precios.</Pendiente>
+    </>
   );
 }

@@ -1,5 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { BACKEND_URL } from '@/lib/config';
+// En local la vista previa usa el proxy de vite.config.js (el backend no admite su origen).
+const API = import.meta.env.DEV ? '/__calendly' : `${BACKEND_URL}/public/calendly`;
+
 import CalendarPicker, { BLUE, fmtDiaCorto, initialCalMonth } from '@/components/booking/CalendarPicker';
 
 // Calendario de reservas embebible en cualquier página. Usa la misma herramienta
@@ -25,8 +28,8 @@ export default function ReservaEmbebida({ slug, origen = '', onReservada, mostra
   const cargar = useCallback(async () => {
     try {
       const [rTipo, rDisp] = await Promise.all([
-        fetch(`${BACKEND_URL}/public/calendly/${slug}`),
-        fetch(`${BACKEND_URL}/public/calendly/${slug}/disponibilidad`),
+        fetch(`${API}/${slug}`),
+        fetch(`${API}/${slug}/disponibilidad`),
       ]);
       if (!rTipo.ok || !rDisp.ok) throw new Error('No se ha podido cargar el calendario.');
       const dDisp = await rDisp.json();
@@ -49,7 +52,7 @@ export default function ReservaEmbebida({ slug, origen = '', onReservada, mostra
     setError(null);
     try {
       const notas = [form.notas.trim(), origen && `Origen: ${origen}`].filter(Boolean).join('\n');
-      const res = await fetch(`${BACKEND_URL}/public/calendly/${slug}/reservar`, {
+      const res = await fetch(`${API}/${slug}/reservar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "react-router-dom";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import {
-  Boton, Check, FORM_MAILERLITE, Hoja, Parrafo, Pendiente, RUTA_GRACIAS, rubik, Titulo, leerUtm, utmAQuery,
+  Boton, Check, FORM_MAILERLITE, Hoja, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, RUTA_GRACIAS, rubik, Titulo, leerUtm, utmAQuery,
 } from "./antiAgenteComun";
 
 // /anti-agente — landing de la lista prioritaria de Anti-Agente (BORRADOR, noindex).
@@ -43,6 +43,7 @@ function Formulario({ utm }) {
         <li>Nombre</li>
         <li>Email</li>
         <li>Web de tu tienda</li>
+        <li>¿Qué tarea te quita más tiempo? (notas)</li>
         <li>Casilla: acepto la <a href="/politica-privacidad" className="underline">política de privacidad</a></li>
       </ul>
       <p className="text-sm mb-4">Botón: «{TEXTO_BOTON}». Al enviarse, lleva a la página de gracias con los UTM de la visita.</p>
@@ -88,7 +89,7 @@ export default function AntiAgente() {
               <Check titulo="Auditoría de costes gratis.">Miramos qué gasto y qué tiempo te puede quitar Anti-Agente en tu caso.</Check>
               <Check titulo="Condiciones de lanzamiento si quieres algo a tu medida.">Si en la llamada vemos que te conviene algo hecho para ti, te lo ofrezco con precio de lanzamiento cerrado. Si no, no pasa nada: el equipo es gratis igual.</Check>
               <Parrafo className="mt-6">Más adelante, el onboarding y la auditoría serán de pago. Te lo digo ahora para que lo sepas desde el principio.</Parrafo>
-              <Pendiente>Sin decidir: qué pasa cuando se llenen las 5 plazas (calendario con solo 5 huecos y luego lista de espera, o mensaje de siguiente tanda).</Pendiente>
+              <Pendiente>Cuando se llenen las 5 plazas: poner PLAZAS_CERRADAS = true (antiAgenteComun.jsx). Quita formulario y calendario y muestra el aviso de lista de espera de pago.</Pendiente>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
             </Hoja>
 
@@ -183,7 +184,7 @@ export default function AntiAgente() {
               <Hoja>
                 <Titulo>Imagina tenerlo hecho a las 9.</Titulo>
                 <Parrafo>Apúntate, te escribo yo y lo dejamos a punto juntos.</Parrafo>
-                <Formulario utm={utm} />
+                {PLAZAS_CERRADAS ? <ListaCerrada /> : <Formulario utm={utm} />}
                 <Microcopy>Con {IA} · {APROBACION}</Microcopy>
               </Hoja>
             </div>
