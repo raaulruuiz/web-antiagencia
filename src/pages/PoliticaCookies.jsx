@@ -159,12 +159,13 @@ export default function PoliticaCookies() {
           <Seccion titulo="5. Contenido de otras webs integrado en algunas páginas">
             <p>Algunas páginas muestran contenido de otros servicios. Al cargarlo o usarlo, esos servicios pueden guardar sus propias cookies, según sus políticas:</p>
             <ul className="space-y-2 list-disc list-inside pl-2">
-              <li><B>YouTube</B> (Google): vídeos de los podcasts. <Enlace href="https://policies.google.com/technologies/cookies?hl=es">Política de cookies de Google</Enlace>.</li>
-              <li><B>Wistia</B>: algunos vídeos de la web; puede recordar por dónde vas en el vídeo y medir su reproducción. <Enlace href="https://wistia.com/privacy">Privacidad de Wistia</Enlace>.</li>
+              <li><B>YouTube</B> (Google): vídeos de los podcasts. Usamos la versión de privacidad mejorada (youtube-nocookie.com). <Enlace href="https://policies.google.com/technologies/cookies?hl=es">Política de cookies de Google</Enlace>.</li>
+              <li><B>Wistia</B>: el vídeo de la página Cómo trabajamos; puede recordar por dónde vas en el vídeo y medir su reproducción. <Enlace href="https://wistia.com/privacy">Privacidad de Wistia</Enlace>.</li>
               <li><B>MailerLite</B>: los formularios para apuntarte a la newsletter (el de la lista prioritaria de Anti-Agente no carga nada de MailerLite en tu navegador: solo le envía tus datos cuando pulsas el botón). <Enlace href="https://www.mailerlite.com/legal/cookie-policy">Política de cookies de MailerLite</Enlace>.</li>
-              <li><B>Calendly</B>: el calendario de reservas de algunas páginas. <Enlace href="https://calendly.com/legal/privacy-notice">Privacidad de Calendly</Enlace>.</li>
+              <li><B>Calendly</B>: el calendario de reservas de las páginas Contacto y Cómo trabajamos (en Contacto se carga al abrir la página; en Cómo trabajamos, al pulsar «Agendar llamada»). El resto de reservas de la web usan nuestra propia herramienta, sin Calendly. <Enlace href="https://calendly.com/legal/privacy-notice">Privacidad de Calendly</Enlace>.</li>
             </ul>
-            <Falta>Estos contenidos se cargan hoy sin esperar al banner. Lo ideal es que YouTube y Wistia no se carguen hasta que se acepten las cookies o se pulse «reproducir» (en YouTube basta con usar youtube-nocookie.com). Decide si lo hago. Los formularios de MailerLite y el calendario se pueden considerar parte del servicio que pides al usarlos. Ojo: el script de los formularios de newsletter de MailerLite guarda un identificador (ml_guid) en el navegador al cargar la página, sin esperar al banner. Además, confirma si Calendly sigue en uso: solo lo usan las páginas antiguas de Contacto y Cómo trabajamos.</Falta>
+            <p>Los vídeos de YouTube y Wistia no se cargan hasta que aceptas las cookies o pulsas «reproducir»: hasta entonces solo ves un recuadro nuestro, y tu navegador no se conecta con esos servicios.</p>
+            <Falta>Los formularios de MailerLite y el calendario de Calendly se pueden considerar parte del servicio que pides al usarlos. Ojo: el script de los formularios de newsletter de MailerLite guarda un identificador (ml_guid) en el navegador al cargar la página, sin esperar al banner, y Calendly se carga al abrir la página de Contacto.</Falta>
           </Seccion>
 
           <Seccion titulo="6. Cómo cambiar de opinión o borrar las cookies">

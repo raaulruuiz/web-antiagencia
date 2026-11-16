@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { supabase } from "@/lib/supabaseClient";
 import PodcastLayout from "@/components/blog/PodcastLayout";
 import MailerLiteForm from "@/components/MailerLiteForm";
+import VideoConsentido from "@/components/VideoConsentido";
 
 const ML_CSS = `
 @import url("https://assets.mlcdn.com/fonts.css?version=1778769");
@@ -171,17 +172,8 @@ export default function PodcastPost({ slug }) {
 
           {/* YouTube embed */}
           {youtubeId && (
-            <div
-              className="mb-6 w-full overflow-hidden rounded"
-              style={{ aspectRatio: "16/9" }}
-            >
-              <iframe
-                src={`https://www.youtube.com/embed/${youtubeId}`}
-                title={podcast.titulo}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full border-0"
-              />
+            <div className="mb-6 w-full">
+              <VideoConsentido tipo="youtube" id={youtubeId} titulo={podcast.titulo} />
             </div>
           )}
 

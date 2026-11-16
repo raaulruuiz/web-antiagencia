@@ -7,6 +7,8 @@
 export const COOKIE_CONSENTIMIENTO = "cookie_consent"; // "accepted" | "rejected"
 export const DIAS_CONSENTIMIENTO = 30;
 export const EVENTO_CONFIGURAR = "antiagencia:configurar-cookies";
+// Se emite al pulsar «Aceptar» (lo escuchan los vídeos de YouTube/Wistia, ver VideoConsentido.jsx).
+export const EVENTO_ACEPTADAS = "antiagencia:cookies-aceptadas";
 
 const META_PIXEL_ID = "776144446677406";
 const GTM_ID = "GTM-WB2WR532";
@@ -103,6 +105,7 @@ function borrarCookiesTerceros() {
 export function aceptarCookies() {
   guardarCookie(COOKIE_CONSENTIMIENTO, "accepted", DIAS_CONSENTIMIENTO);
   cargarMarketing();
+  window.dispatchEvent(new Event(EVENTO_ACEPTADAS));
 }
 
 export function rechazarCookies() {

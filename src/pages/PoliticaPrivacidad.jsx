@@ -86,7 +86,7 @@ export default function PoliticaPrivacidad() {
               datos="nombre, email, web de tu tienda y, si quieres contárnoslo, tu respuesta libre sobre la tarea que más tiempo te quita. MailerLite registra además la fecha y la dirección IP del alta. Si después reservas una llamada, el origen de la visita (UTM) se añade a la reserva."
               finalidad="apuntarte a la lista prioritaria, escribirte personalmente sobre Anti-Agente, valorar si encaja con tu tienda, agendar contigo una videollamada si quieres y enviarte la newsletter diaria de Antiagencia."
               base="tu consentimiento (art. 6.1.a RGPD y, para la newsletter, art. 21 LSSI-CE), que das marcando la casilla del formulario, que aparece sin marcar y es obligatoria para apuntarte. Esa casilla cubre a la vez la lista prioritaria y la newsletter diaria. La videollamada, si la pides, se basa además en medidas precontractuales a petición tuya (art. 6.1.b RGPD)."
-              conservacion="mientras no te des de baja ni retires tu consentimiento. Cada correo incluye un enlace para darte de baja."
+              conservacion="mientras no te des de baja ni retires tu consentimiento. Cada correo incluye un enlace para darte de baja. Como es una sola suscripción, al darte de baja dejas de recibir tanto los correos sobre Anti-Agente como la newsletter."
             />
 
             <Tratamiento
@@ -153,7 +153,7 @@ export default function PoliticaPrivacidad() {
               <li><B>Hotjar</B> (Hotjar Ltd., Malta): análisis de uso de la web, si aceptas las cookies.</li>
               <li><B>Stripe</B> (Stripe Payments Europe Ltd., Irlanda): pagos, cuando compras algo a través de un enlace de pago.</li>
               <li><B>Wistia</B> (Wistia Inc., EE. UU.) y <B>YouTube</B> (Google): reproducción de algunos vídeos de la web.</li>
-              <li><B>Calendly</B> (Calendly LLC, EE. UU.): calendario de reservas de algunas páginas.</li>
+              <li><B>Calendly</B> (Calendly LLC, EE. UU.): calendario de reservas de las páginas Contacto y Cómo trabajamos. El resto de reservas de la web usan nuestra propia herramienta.</li>
               <li>Asesoría fiscal y contable, para cumplir obligaciones legales con clientes.</li>
             </Lista>
             <Falta>Meta y Google Ads funcionan en parte como responsables independientes de lo que miden (no solo como encargados). Si quieres afinarlo, es un punto para la revisión legal.</Falta>

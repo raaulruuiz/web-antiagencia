@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import FooterMinimal from "@/components/landing/FooterMinimal";
+import VideoConsentido from "@/components/VideoConsentido";
 
 function AnnouncementBar() {
   const text = "Para tiendas online que facturan +5.000€/mes y ya invierten en publicidad";
@@ -72,24 +73,6 @@ const bullets = [
 export default function ComoTrabajamos() {
   const [showCalendly, setShowCalendly] = useState(false);
 
-  useEffect(() => {
-    const s1 = document.createElement("script");
-    s1.src = "https://fast.wistia.com/player.js";
-    s1.async = true;
-    document.body.appendChild(s1);
-
-    const s2 = document.createElement("script");
-    s2.src = "https://fast.wistia.com/embed/l9q38afs0c.js";
-    s2.async = true;
-    s2.type = "module";
-    document.body.appendChild(s2);
-
-    return () => {
-      document.body.removeChild(s1);
-      document.body.removeChild(s2);
-    };
-  }, []);
-
   return (
     <>
     <Helmet>
@@ -127,7 +110,13 @@ export default function ComoTrabajamos() {
             wistia-player[media-id='l9q38afs0c'] .w-logo { display: none !important; }
             wistia-player[media-id='l9q38afs0c'] .w-bpb-wrapper { display: none !important; }
           `}</style>
-          <wistia-player media-id="l9q38afs0c" aspect="1.7777777777777777" playbar="false" fullscreen-button="true" volume-control="true" settings-control="false" playback-rate-control="false" wistia-logo="false" />
+          <VideoConsentido
+            tipo="wistia"
+            id="l9q38afs0c"
+            titulo="Caso de estudio de 3 minutos"
+            oscuro
+            wistiaAtributos={{ aspect: "1.7777777777777777", playbar: "false", "fullscreen-button": "true", "volume-control": "true", "settings-control": "false", "playback-rate-control": "false", "wistia-logo": "false" }}
+          />
         </div>
 
         {/* Botón CTA */}
