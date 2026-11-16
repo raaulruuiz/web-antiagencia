@@ -74,6 +74,7 @@ function Formulario({ utm }) {
         <li>Web de tu tienda</li>
         <li>¿Qué tarea te quita más tiempo? (notas)</li>
         <li>Casilla: acepto la <a href="/politica-privacidad" className="underline">política de privacidad</a></li>
+        <li>Casilla aparte, sin marcar: quiero recibir la newsletter diaria</li>
       </ul>
       <p className="text-sm mb-4">Botón: «{TEXTO_BOTON}». Al enviarse, lleva a la página de gracias con los UTM de la visita.</p>
       <Link to={gracias} className="text-[#0067FD] font-bold hover:underline text-sm">Simular envío → ver la página de gracias</Link>

@@ -76,7 +76,6 @@ export default function PoliticaPrivacidad() {
               <li><span className="text-white/50">Email de contacto (también para privacidad):</span> <Mail /></li>
             </ul>
             <p>Antiagencia no está obligada a nombrar un delegado de protección de datos. Para cualquier cuestión sobre tus datos, escribe al email anterior.</p>
-            <Falta>NIF y domicilio se han mantenido tal como estaban en la política publicada. Confirma que siguen vigentes y que no hay teléfono u otro dato que deba constar.</Falta>
           </Seccion>
 
           <Seccion titulo="2. Qué datos tratamos, para qué, con qué base y cuánto tiempo">
@@ -85,19 +84,19 @@ export default function PoliticaPrivacidad() {
             <Tratamiento
               titulo="a) Lista prioritaria de Anti-Agente"
               datos="nombre, email, web de tu tienda, tu respuesta libre sobre la tarea que más tiempo te quita y, si llegas desde un enlace con parámetros (UTM), el origen de la visita."
-              finalidad="apuntarte a la lista prioritaria, escribirte personalmente sobre Anti-Agente, valorar si encaja con tu tienda y, si quieres, agendar una videollamada para dejarlo listo."
+              finalidad="apuntarte a la lista prioritaria, escribirte personalmente sobre Anti-Agente, valorar si encaja con tu tienda y, si quieres, agendar una videollamada para dejarlo listo. Apuntarte a la lista no te suscribe a la newsletter: para eso hay una casilla aparte, sin marcar, en el mismo formulario."
               base="tu consentimiento al apuntarte (art. 6.1.a RGPD) y la aplicación, a petición tuya, de medidas precontractuales (art. 6.1.b RGPD)."
-              conservacion="mientras la lista esté activa y, como máximo, 12 meses desde tu alta, salvo que antes pidas la baja o pases a ser usuario o cliente."
+              conservacion="mientras no te des de baja ni retires tu consentimiento. Cada correo que te enviemos incluye un enlace para darte de baja."
             >
-              <Falta>Plazo de conservación de la lista prioritaria (propuesta: 12 meses desde el alta). Decide también si quien se apunta a la lista recibe la newsletter: si es así, el formulario necesita una casilla aparte y no premarcada.</Falta>
+              <Falta>La casilla separada y sin marcar de la newsletter tiene que existir en el formulario de MailerLite tal como lo describe este texto. Lo compruebo cuando llegue el código del formulario.</Falta>
             </Tratamiento>
 
             <Tratamiento
               titulo="b) Newsletter y comunicaciones por email"
               datos="email y, si lo das, tu nombre; datos de apertura y clics de los correos."
-              finalidad="enviarte la newsletter y novedades de Antiagencia que has pedido recibir."
-              base="tu consentimiento (art. 6.1.a RGPD y art. 21 LSSI-CE). Cada correo incluye un enlace para darte de baja."
-              conservacion="hasta que te des de baja. Después conservamos solo tu email en una lista de bajas, para no volver a escribirte."
+              finalidad="enviarte la newsletter diaria y novedades de Antiagencia, si te has suscrito en un formulario de newsletter o has marcado la casilla de la newsletter al apuntarte a la lista prioritaria."
+              base="tu consentimiento expreso (art. 6.1.a RGPD y art. 21 LSSI-CE), que das marcando la casilla o enviando el formulario de suscripción. Cada correo incluye un enlace para darte de baja."
+              conservacion="mientras no te des de baja ni retires tu consentimiento. Después conservamos solo tu email en una lista de bajas, para no volver a escribirte."
             />
 
             <Tratamiento
@@ -106,9 +105,7 @@ export default function PoliticaPrivacidad() {
               finalidad="agendar la videollamada, enviarte la invitación y los avisos, y permitirte cambiarla o cancelarla."
               base="medidas precontractuales aplicadas a petición tuya (art. 6.1.b RGPD)."
               conservacion="12 meses desde la fecha de la llamada, salvo que se convierta en una relación comercial."
-            >
-              <Falta>Plazo de conservación de las reservas (propuesta: 12 meses desde la llamada).</Falta>
-            </Tratamiento>
+            />
 
             <Tratamiento
               titulo="d) Contacto y presupuestos"
@@ -129,12 +126,10 @@ export default function PoliticaPrivacidad() {
             <Tratamiento
               titulo="f) Analítica, medición y publicidad"
               datos="datos de navegación: páginas visitadas, origen de la visita, dispositivo y navegador, interacciones y, en el caso de herramientas de terceros con cookies, identificadores online y la dirección IP."
-              finalidad="saber cuántas personas visitan la web y qué funciona (Umami, sin cookies); y, si lo aceptas, medir campañas y mostrar publicidad (Meta Pixel, Google Ads y Google Tag Manager) y analizar cómo se usa la web (Hotjar)."
-              base="interés legítimo en conocer el uso de la web de forma agregada (art. 6.1.f RGPD) para la analítica sin cookies; tu consentimiento (art. 6.1.a RGPD y art. 22.2 LSSI-CE) para las herramientas que usan cookies o identificadores."
-              conservacion="la analítica sin cookies se guarda de forma agregada; las cookies, según los plazos de la Política de Cookies."
-            >
-              <Falta>Confirma qué etiquetas hay dentro de Google Tag Manager (GTM-WB2WR532). Si incluye Google Analytics, se nombra aquí. Ver además el aviso sobre el banner de cookies en el informe.</Falta>
-            </Tratamiento>
+              finalidad="saber cuántas personas visitan la web y qué funciona (Umami, sin cookies, y nuestro recuento propio de páginas vistas); y, solo si aceptas las cookies, medir campañas y mostrar publicidad (Meta Pixel, y Google Ads a través de Google Tag Manager) y analizar cómo se usa la web (Hotjar). No usamos Google Analytics."
+              base="interés legítimo en conocer el uso de la web de forma agregada (art. 6.1.f RGPD) para la estadística que no guarda nada en tu navegador; tu consentimiento (art. 6.1.a RGPD y art. 22.2 LSSI-CE) para las herramientas que usan cookies o identificadores. Hasta que no pulsas «Aceptar» en el aviso de cookies, esas herramientas no se cargan."
+              conservacion="la estadística sin cookies, de forma agregada, mientras sea útil; las cookies, según los plazos de la Política de Cookies; lo que guarda cada proveedor, según sus condiciones."
+            />
 
             <Tratamiento
               titulo="g) Acceso a áreas privadas"
@@ -152,22 +147,23 @@ export default function PoliticaPrivacidad() {
             <p>No vendemos ni cedemos tus datos a terceros, salvo obligación legal. Para que la web funcione usamos proveedores que tratan datos por cuenta nuestra (encargados del tratamiento), con contrato y solo según nuestras instrucciones:</p>
             <Lista>
               <li><B>MailerLite</B> (UAB MailerLite, Lituania): formularios, lista prioritaria y newsletter.</li>
-              <li><B>Google</B> (Google Ireland Ltd.): correo electrónico (Gmail / Google Workspace), Google Calendar y Google Meet para las reservas, y Google Tag Manager y Google Ads para la medición si los aceptas.</li>
-              <li><B>Supabase</B> (Supabase Inc., EE. UU.): base de datos de la web, de las reservas y de las cuentas de acceso.</li>
+              <li><B>Google</B> (Google Ireland Ltd.): correo electrónico (Gmail / Google Workspace), Google Calendar y Google Meet para las reservas, y Google Tag Manager y Google Ads para medir los anuncios, si aceptas las cookies.</li>
+              <li><B>Supabase</B> (Supabase Inc., EE. UU.): base de datos de la web, de las reservas y de las cuentas de acceso, alojada en la Unión Europea (París).</li>
               <li><B>Vercel</B> (Vercel Inc., EE. UU.): alojamiento de la web.</li>
-              <li><B>Railway</B> (Railway Corp., EE. UU.): servidores de nuestras automatizaciones (reservas y avisos) y de nuestra analítica Umami, que instalamos nosotros y no usa cookies.</li>
-              <li><B>Meta</B> (Meta Platforms Ireland Ltd.): Meta Pixel, si lo aceptas.</li>
-              <li><B>Hotjar</B> (Hotjar Ltd., Malta): análisis de uso de la web, si lo aceptas.</li>
+              <li><B>Railway</B> (Railway Corp., EE. UU.): servidores de nuestras automatizaciones (reservas, avisos y recuento de visitas) y de nuestra analítica Umami, que instalamos nosotros y no usa cookies, alojados en la Unión Europea (Países Bajos).</li>
+              <li><B>Meta</B> (Meta Platforms Ireland Ltd.): Meta Pixel, si aceptas las cookies.</li>
+              <li><B>Hotjar</B> (Hotjar Ltd., Malta): análisis de uso de la web, si aceptas las cookies.</li>
               <li><B>Stripe</B> (Stripe Payments Europe Ltd., Irlanda): pagos, cuando compras algo a través de un enlace de pago.</li>
               <li><B>Wistia</B> (Wistia Inc., EE. UU.) y <B>YouTube</B> (Google): reproducción de algunos vídeos de la web.</li>
+              <li><B>Calendly</B> (Calendly LLC, EE. UU.): calendario de reservas de algunas páginas.</li>
               <li>Asesoría fiscal y contable, para cumplir obligaciones legales con clientes.</li>
             </Lista>
-            <Falta>La política anterior nombraba Mailchimp, PayPal y empresas de mensajería. En el código de la web no aparecen (se ha sustituido Mailchimp por MailerLite y se han quitado los otros dos). Si sigues usando PayPal o envías productos físicos, dímelo y lo vuelvo a añadir. Confirma también que sigues teniendo asesoría.</Falta>
+            <Falta>Meta y Google Ads funcionan en parte como responsables independientes de lo que miden (no solo como encargados). Si quieres afinarlo, es un punto para la revisión legal.</Falta>
           </Seccion>
 
           <Seccion titulo="4. Transferencias internacionales">
-            <p>Algunos de estos proveedores están en Estados Unidos o pueden acceder a datos desde allí (Google, Meta, Supabase, Vercel, Railway, Wistia). En esos casos la transferencia se ampara en el Marco de Privacidad de Datos UE-EE. UU. cuando la empresa está certificada o, si no, en las cláusulas contractuales tipo aprobadas por la Comisión Europea (art. 45 y 46 RGPD). Puedes pedirnos más información en <Mail />.</p>
-            <Falta>Comprueba en Supabase y Railway en qué región están alojados los proyectos (si están en la UE, se puede decir) y que cada proveedor tiene firmado o aceptado su contrato de encargo del tratamiento (DPA).</Falta>
+            <p>La base de datos (Supabase) y nuestros servidores (Railway) están alojados en la Unión Europea. Aun así, algunos proveedores son empresas de Estados Unidos o pueden acceder a datos desde allí (Google, Meta, Supabase, Vercel, Railway, Wistia, Calendly). En esos casos la transferencia se ampara en el Marco de Privacidad de Datos UE-EE. UU. cuando la empresa está certificada o, si no, en las cláusulas contractuales tipo aprobadas por la Comisión Europea (art. 45 y 46 RGPD). Puedes pedirnos más información en <Mail />.</p>
+            <Falta>Regiones comprobadas el 16/11: Supabase de la web en eu-west-3 (París) y los tres servicios de Railway en europe-west4 (Países Bajos). Falta que aceptes el contrato de encargo (DPA) en el panel de cada proveedor: lo detallo en el informe.</Falta>
           </Seccion>
 
           <Seccion titulo="5. Tus derechos">
@@ -189,7 +185,7 @@ export default function PoliticaPrivacidad() {
             <Lista>
               <li><B>Newsletter y lista prioritaria:</B> con el enlace de baja de cualquier correo o escribiendo a <Mail />.</li>
               <li><B>Reservas:</B> con el enlace para cambiar o cancelar que viene en la invitación, o escribiendo a <Mail />.</li>
-              <li><B>Cookies:</B> desde la configuración de tu navegador, como explica la <Link to="/PoliticaCookies" className="text-[#0067FD] hover:underline">Política de Cookies</Link>.</li>
+              <li><B>Cookies:</B> con el enlace «Configurar cookies» del pie de cualquier página, como explica la <Link to="/PoliticaCookies" className="text-[#0067FD] hover:underline">Política de Cookies</Link>.</li>
             </Lista>
           </Seccion>
 
@@ -227,7 +223,7 @@ export default function PoliticaPrivacidad() {
           </Seccion>
 
           <Seccion titulo="11. Cookies y enlaces a terceros">
-            <p>Esta web usa cookies propias y de terceros. Tienes el detalle en la <Link to="/PoliticaCookies" className="text-[#0067FD] hover:underline">Política de Cookies</Link>. La web puede contener enlaces a sitios externos, que tienen sus propias políticas de privacidad.</p>
+            <p>Esta web usa cookies propias y, solo si las aceptas, de terceros. Tienes el detalle en la <Link to="/PoliticaCookies" className="text-[#0067FD] hover:underline">Política de Cookies</Link>. La web puede contener enlaces a sitios externos, que tienen sus propias políticas de privacidad.</p>
           </Seccion>
 
           <Seccion titulo="12. Cambios en esta política">

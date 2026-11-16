@@ -1,5 +1,6 @@
 import React from "react";
 import { rubik } from "./antiStudioComun";
+import { leerConsentimiento } from "@/lib/consentimiento";
 
 export { Hoja, Titulo, Boton, rubik } from "./antiStudioComun";
 
@@ -23,16 +24,24 @@ export const RUTA_GRACIAS = "/anti-agente/gracias";
 // ── UTM ───────────────────────────────────────────────────────────────────
 // Se guardan al entrar en la landing (por si MailerLite pierde la URL al
 // redirigir) y se reenvían a la página de gracias y a la reserva.
+// Sin consentimiento de cookies solo se guardan en memoria (no en el navegador):
+// valen para la navegación dentro de la web, pero no sobreviven a una recarga.
 const CLAVE_UTM = "anti-agente-utm";
+let utmEnMemoria = {};
+const puedeGuardar = () => leerConsentimiento() === "accepted";
 
 export function leerUtm(search) {
   const p = new URLSearchParams(search);
   const utm = {};
   for (const [k, v] of p) if (k.startsWith("utm_") && v) utm[k] = v.slice(0, 100);
   if (Object.keys(utm).length) {
-    try { sessionStorage.setItem(CLAVE_UTM, JSON.stringify(utm)); } catch { /* sin almacenamiento */ }
+    utmEnMemoria = utm;
+    if (puedeGuardar()) {
+      try { sessionStorage.setItem(CLAVE_UTM, JSON.stringify(utm)); } catch { /* sin almacenamiento */ }
+    }
     return utm;
   }
+  if (Object.keys(utmEnMemoria).length || !puedeGuardar()) return utmEnMemoria;
   try { return JSON.parse(sessionStorage.getItem(CLAVE_UTM) || "{}"); } catch { return {}; }
 }
 
