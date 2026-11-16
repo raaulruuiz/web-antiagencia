@@ -4,10 +4,54 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import Footer from "@/components/landing/Footer";
 
+// Política de privacidad de antiagencia.es (RGPD, LOPDGDD y LSSI-CE).
+// BORRADOR 16/11/2026: los recuadros <Falta> son decisiones o datos que tiene que
+// confirmar Raúl. Solo se ven en local (vite dev); en producción no se renderizan.
+
+const ACTUALIZADA = "16 de noviembre de 2026";
+const EMAIL = "raul@antiagencia.es";
+
+const Mail = () => <a href={`mailto:${EMAIL}`} className="text-[#0067FD] hover:underline">{EMAIL}</a>;
+const B = ({ children }) => <strong className="text-white">{children}</strong>;
+
+function Seccion({ titulo, children }) {
+  return (
+    <section>
+      <h2 className="text-lg font-semibold text-white mb-3">{titulo}</h2>
+      <div className="space-y-3">{children}</div>
+    </section>
+  );
+}
+
+const Lista = ({ children }) => <ul className="space-y-2 list-disc list-inside pl-2">{children}</ul>;
+
+function Falta({ children }) {
+  if (!import.meta.env.DEV) return null;
+  return (
+    <div className="border-2 border-dashed border-orange-400 bg-orange-50 text-orange-900 text-sm rounded-sm px-4 py-3">
+      <strong>PENDIENTE DE RAÚL · </strong>{children}
+    </div>
+  );
+}
+
+function Tratamiento({ titulo, datos, finalidad, base, conservacion, children }) {
+  return (
+    <div className="pl-4 border-l border-white/10 space-y-1">
+      <h3 className="font-semibold text-white">{titulo}</h3>
+      <p><span className="text-white/50">Datos:</span> {datos}</p>
+      <p><span className="text-white/50">Para qué:</span> {finalidad}</p>
+      <p><span className="text-white/50">Base jurídica:</span> {base}</p>
+      <p><span className="text-white/50">Cuánto tiempo:</span> {conservacion}</p>
+      {children}
+    </div>
+  );
+}
+
 export default function PoliticaPrivacidad() {
   return (
     <>
     <Helmet>
+      <title>Política de privacidad — Antiagencia</title>
       <meta name="robots" content="noindex" />
     </Helmet>
     <div className="min-h-screen bg-[#121212] text-white flex flex-col">
@@ -17,98 +61,178 @@ export default function PoliticaPrivacidad() {
         </Link>
 
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Política de Privacidad</h1>
-        <p className="text-white/40 text-sm mb-12">Antiagencia</p>
+        <p className="text-white/40 text-sm mb-12">Antiagencia · Última actualización: {ACTUALIZADA}</p>
 
         <div className="space-y-10 text-white/80 leading-relaxed">
 
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">1. Identificación del Responsable del Tratamiento</h2>
-            <p>El responsable del tratamiento de los datos personales recogidos en este sitio web es:</p>
-            <ul className="mt-3 space-y-1 pl-4 border-l border-white/10">
+          <Falta>Borrador técnico basado en el RGPD (Reglamento UE 2016/679), la LOPDGDD (LO 3/2018) y la LSSI-CE (Ley 34/2002). No sustituye una revisión legal. Las notas naranjas no se publican: solo se ven en la revisión.</Falta>
+
+          <Seccion titulo="1. Quién es el responsable de tus datos">
+            <p>El responsable del tratamiento de los datos personales que se recogen en este sitio web (antiagencia.es) es:</p>
+            <ul className="space-y-1 pl-4 border-l border-white/10">
               <li><span className="text-white/50">Titular:</span> Raúl Ruiz Romero (Antiagencia)</li>
               <li><span className="text-white/50">NIF:</span> 20995373F</li>
               <li><span className="text-white/50">Domicilio:</span> Calle Defensor de Granada 17A, Ventas de Zafarraya, Granada, España</li>
-              <li><span className="text-white/50">Email:</span> <a href="mailto:raul@antiagencia.es" className="text-[#0067FD] hover:underline">raul@antiagencia.es</a></li>
+              <li><span className="text-white/50">Email de contacto (también para privacidad):</span> <Mail /></li>
             </ul>
-          </section>
+            <p>Antiagencia no está obligada a nombrar un delegado de protección de datos. Para cualquier cuestión sobre tus datos, escribe al email anterior.</p>
+            <Falta>NIF y domicilio se han mantenido tal como estaban en la política publicada. Confirma que siguen vigentes y que no hay teléfono u otro dato que deba constar.</Falta>
+          </Seccion>
 
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">2. Finalidad del Tratamiento de Datos</h2>
-            <p>En Antiagencia tratamos la información que nos facilitan las personas interesadas con las siguientes finalidades:</p>
-            <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
-              <li><strong className="text-white">Gestión de consultas y presupuestos:</strong> Atender las solicitudes de información realizadas a través de los formularios de contacto.</li>
-              <li><strong className="text-white">Relación comercial y contractual:</strong> Gestionar la venta de productos o servicios, facturación y, en su caso, la entrega física de pedidos.</li>
-              <li><strong className="text-white">Envío de comunicaciones comerciales:</strong> Gestión de suscripciones a nuestra newsletter y envío de ofertas o novedades (siempre que el usuario haya dado su consentimiento explícito).</li>
-            </ul>
-          </section>
+          <Seccion titulo="2. Qué datos tratamos, para qué, con qué base y cuánto tiempo">
+            <p>Solo tratamos los datos que nos das tú al rellenar un formulario, reservar una llamada o escribirnos, y los datos de navegación que se indican en el apartado de analítica. No pidas ni envíes datos especialmente protegidos (salud, ideología, etc.): no los necesitamos.</p>
 
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">3. Legitimación para el Tratamiento</h2>
-            <p>La base legal para el tratamiento de sus datos es:</p>
-            <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
-              <li><strong className="text-white">El consentimiento del interesado:</strong> Para la suscripción a la newsletter y consultas generales.</li>
-              <li><strong className="text-white">La ejecución de un contrato:</strong> Para la contratación de servicios, compra de productos y emisión de facturas.</li>
-              <li><strong className="text-white">Interés legítimo:</strong> Para garantizar la seguridad de la web y mejorar nuestros servicios a través de análisis estadísticos.</li>
-            </ul>
-          </section>
+            <Tratamiento
+              titulo="a) Lista prioritaria de Anti-Agente"
+              datos="nombre, email, web de tu tienda, tu respuesta libre sobre la tarea que más tiempo te quita y, si llegas desde un enlace con parámetros (UTM), el origen de la visita."
+              finalidad="apuntarte a la lista prioritaria, escribirte personalmente sobre Anti-Agente, valorar si encaja con tu tienda y, si quieres, agendar una videollamada para dejarlo listo."
+              base="tu consentimiento al apuntarte (art. 6.1.a RGPD) y la aplicación, a petición tuya, de medidas precontractuales (art. 6.1.b RGPD)."
+              conservacion="mientras la lista esté activa y, como máximo, 12 meses desde tu alta, salvo que antes pidas la baja o pases a ser usuario o cliente."
+            >
+              <Falta>Plazo de conservación de la lista prioritaria (propuesta: 12 meses desde el alta). Decide también si quien se apunta a la lista recibe la newsletter: si es así, el formulario necesita una casilla aparte y no premarcada.</Falta>
+            </Tratamiento>
 
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">4. Destinatarios y Transferencias de Datos</h2>
-            <p>Sus datos no se cederán a terceros, salvo obligación legal o cuando sea necesario para la prestación del servicio. Esto incluye:</p>
-            <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
-              <li><strong className="text-white">Proveedores de servicios de pago:</strong> Pasarelas seguras como Stripe o PayPal.</li>
-              <li><strong className="text-white">Herramientas de marketing y análisis:</strong> Mailchimp (para envíos de correo) y Google Analytics.</li>
-              <li><strong className="text-white">Logística:</strong> Empresas de mensajería para el envío de productos físicos.</li>
-              <li><strong className="text-white">Asesoría legal/fiscal:</strong> Para el cumplimiento de obligaciones contables.</li>
-            </ul>
-          </section>
+            <Tratamiento
+              titulo="b) Newsletter y comunicaciones por email"
+              datos="email y, si lo das, tu nombre; datos de apertura y clics de los correos."
+              finalidad="enviarte la newsletter y novedades de Antiagencia que has pedido recibir."
+              base="tu consentimiento (art. 6.1.a RGPD y art. 21 LSSI-CE). Cada correo incluye un enlace para darte de baja."
+              conservacion="hasta que te des de baja. Después conservamos solo tu email en una lista de bajas, para no volver a escribirte."
+            />
 
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">5. Plazo de Conservación</h2>
-            <p>Los datos personales proporcionados se conservarán mientras se mantenga la relación comercial o durante el tiempo necesario para cumplir con las obligaciones legales (generalmente 5 años para obligaciones fiscales y mercantiles). En el caso de la newsletter, hasta que el usuario solicite su baja.</p>
-          </section>
+            <Tratamiento
+              titulo="c) Reservas de llamadas"
+              datos="nombre, email, fecha y hora elegidas y lo que quieras contarnos en las notas (y el origen de la visita, si llegas desde un enlace con UTM)."
+              finalidad="agendar la videollamada, enviarte la invitación y los avisos, y permitirte cambiarla o cancelarla."
+              base="medidas precontractuales aplicadas a petición tuya (art. 6.1.b RGPD)."
+              conservacion="12 meses desde la fecha de la llamada, salvo que se convierta en una relación comercial."
+            >
+              <Falta>Plazo de conservación de las reservas (propuesta: 12 meses desde la llamada).</Falta>
+            </Tratamiento>
 
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">6. Derechos del Usuario</h2>
-            <p>Usted tiene derecho a obtener confirmación sobre si en Antiagencia estamos tratando sus datos personales. Puede ejercer sus derechos de:</p>
-            <ul className="mt-3 space-y-1 list-disc list-inside pl-2">
-              <li>Acceso, Rectificación y Supresión de sus datos.</li>
-              <li>Limitación u Oposición a su tratamiento.</li>
-              <li>Portabilidad de los datos.</li>
-            </ul>
-            <p className="mt-3">Para ejercer estos derechos, puede enviar un correo electrónico a <a href="mailto:raul@antiagencia.es" className="text-[#0067FD] hover:underline">raul@antiagencia.es</a> adjuntando una copia de su DNI. Asimismo, tiene derecho a presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD).</p>
-          </section>
+            <Tratamiento
+              titulo="d) Contacto y presupuestos"
+              datos="los que nos des al escribirnos (normalmente nombre, email, tienda y tu consulta)."
+              finalidad="responder a tu consulta o prepararte un presupuesto."
+              base="medidas precontractuales a petición tuya (art. 6.1.b RGPD) o, en consultas generales, tu consentimiento (art. 6.1.a RGPD)."
+              conservacion="el tiempo necesario para atenderte y, si no hay contratación, 12 meses."
+            />
 
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">7. Aplicación de Shopify — Antiagencia</h2>
-            <p>La aplicación <strong className="text-white">Antiagencia</strong>, disponible en el Shopify App Store, accede a los datos de las tiendas Shopify de nuestros clientes exclusivamente para prestar los servicios contratados con Antiagencia. A continuación se detalla el uso que hacemos de dichos datos:</p>
-            <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
-              <li><strong className="text-white">Datos a los que accedemos:</strong> Productos, pedidos, clientes, inventario, descuentos y configuración de la tienda.</li>
-              <li><strong className="text-white">Finalidad:</strong> Gestión y automatización de operaciones de la tienda en nombre del comerciante (modificación de precios, creación de descuentos, gestión de stock, etc.).</li>
-              <li><strong className="text-white">Almacenamiento:</strong> Guardamos únicamente el token de acceso necesario para operar la tienda. No almacenamos datos de clientes finales de la tienda.</li>
-              <li><strong className="text-white">Compartición:</strong> No compartimos los datos de las tiendas con terceros. Los datos se procesan internamente en nuestros servidores (Railway) y base de datos (Supabase), bajo las mismas garantías de confidencialidad.</li>
-              <li><strong className="text-white">Eliminación:</strong> Al desinstalar la aplicación, el acceso queda revocado automáticamente. Para solicitar la eliminación de los datos almacenados, contacta con <a href="mailto:raul@antiagencia.es" className="text-[#0067FD] hover:underline">raul@antiagencia.es</a>.</li>
-            </ul>
-            <p className="mt-3">Para cualquier consulta sobre el uso de datos en el contexto de la aplicación de Shopify, puedes contactarnos en <a href="mailto:raul@antiagencia.es" className="text-[#0067FD] hover:underline">raul@antiagencia.es</a>.</p>
-          </section>
+            <Tratamiento
+              titulo="e) Clientes"
+              datos="datos de contacto y de facturación."
+              finalidad="prestar los servicios contratados, facturar y cumplir obligaciones contables y fiscales."
+              base="ejecución del contrato (art. 6.1.b RGPD) y cumplimiento de obligaciones legales (art. 6.1.c RGPD)."
+              conservacion="mientras dure la relación y, después, durante los plazos legales (hasta 6 años para la documentación contable y 4 años para la fiscal)."
+            />
 
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">8. Aplicación de TikTok — Automatizaciones (Antiagencia)</h2>
-            <p>Antiagencia opera la aplicación <strong className="text-white">Automatizaciones</strong>, registrada en TikTok for Developers, que utiliza la API de TikTok para publicar contenido en nombre de sus clientes en la plataforma TikTok. A continuación se detalla el uso que hacemos de los datos obtenidos a través de dicha integración:</p>
-            <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
-              <li><strong className="text-white">Datos a los que accedemos:</strong> Información básica de la cuenta de TikTok del cliente (nombre de usuario, ID de cuenta) y contenido de vídeo proporcionado por el propio cliente para su publicación.</li>
-              <li><strong className="text-white">Finalidad:</strong> Publicación y programación de contenido de vídeo en TikTok exclusivamente en nombre y con autorización expresa del cliente titular de la cuenta.</li>
-              <li><strong className="text-white">Almacenamiento:</strong> Guardamos únicamente los tokens de acceso necesarios para operar la cuenta. No almacenamos contenido de vídeo más allá del tiempo necesario para su publicación.</li>
-              <li><strong className="text-white">Compartición:</strong> Los datos de las cuentas de TikTok no se comparten con terceros. Se procesan internamente en nuestros servidores (Railway) bajo las mismas garantías de confidencialidad.</li>
-              <li><strong className="text-white">Eliminación:</strong> El cliente puede revocar el acceso en cualquier momento desde la configuración de su cuenta de TikTok. Para solicitar la eliminación de los datos almacenados, contacta con <a href="mailto:raul@antiagencia.es" className="text-[#0067FD] hover:underline">raul@antiagencia.es</a>.</li>
-            </ul>
-            <p className="mt-3">Para cualquier consulta sobre el uso de datos en el contexto de la integración con TikTok, puedes contactarnos en <a href="mailto:raul@antiagencia.es" className="text-[#0067FD] hover:underline">raul@antiagencia.es</a>.</p>
-          </section>
+            <Tratamiento
+              titulo="f) Analítica, medición y publicidad"
+              datos="datos de navegación: páginas visitadas, origen de la visita, dispositivo y navegador, interacciones y, en el caso de herramientas de terceros con cookies, identificadores online y la dirección IP."
+              finalidad="saber cuántas personas visitan la web y qué funciona (Umami, sin cookies); y, si lo aceptas, medir campañas y mostrar publicidad (Meta Pixel, Google Ads y Google Tag Manager) y analizar cómo se usa la web (Hotjar)."
+              base="interés legítimo en conocer el uso de la web de forma agregada (art. 6.1.f RGPD) para la analítica sin cookies; tu consentimiento (art. 6.1.a RGPD y art. 22.2 LSSI-CE) para las herramientas que usan cookies o identificadores."
+              conservacion="la analítica sin cookies se guarda de forma agregada; las cookies, según los plazos de la Política de Cookies."
+            >
+              <Falta>Confirma qué etiquetas hay dentro de Google Tag Manager (GTM-WB2WR532). Si incluye Google Analytics, se nombra aquí. Ver además el aviso sobre el banner de cookies en el informe.</Falta>
+            </Tratamiento>
 
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">9. Cookies y Enlaces a Terceros</h2>
-            <p>Este sitio web utiliza cookies propias y de terceros para mejorar la navegación y analizar el tráfico (Google Analytics). Para más información, consulte nuestra <Link to={createPageUrl("PoliticaCookies")} className="text-[#0067FD] hover:underline">Política de Cookies</Link>. Nuestra web puede contener enlaces a sitios externos cuyas políticas de privacidad son ajenas a Antiagencia.</p>
-          </section>
+            <Tratamiento
+              titulo="g) Acceso a áreas privadas"
+              datos="email y contraseña (cifrada) de las personas a las que damos acceso."
+              finalidad="permitir el acceso a contenidos privados de la web."
+              base="la relación que justifica el acceso (art. 6.1.b RGPD)."
+              conservacion="mientras la cuenta esté activa."
+            />
+
+            <p>No tomamos decisiones automatizadas ni elaboramos perfiles con efectos jurídicos o significativos sobre ti (art. 22 RGPD). Las personas que leen y responden tus mensajes y solicitudes son personas, no un sistema automático.</p>
+            <p>Si nos das datos de otra persona, debes haberla informado antes. Los menores de 14 años no pueden facilitarnos sus datos (art. 7 LOPDGDD).</p>
+          </Seccion>
+
+          <Seccion titulo="3. Quién más accede a tus datos">
+            <p>No vendemos ni cedemos tus datos a terceros, salvo obligación legal. Para que la web funcione usamos proveedores que tratan datos por cuenta nuestra (encargados del tratamiento), con contrato y solo según nuestras instrucciones:</p>
+            <Lista>
+              <li><B>MailerLite</B> (UAB MailerLite, Lituania): formularios, lista prioritaria y newsletter.</li>
+              <li><B>Google</B> (Google Ireland Ltd.): correo electrónico (Gmail / Google Workspace), Google Calendar y Google Meet para las reservas, y Google Tag Manager y Google Ads para la medición si los aceptas.</li>
+              <li><B>Supabase</B> (Supabase Inc., EE. UU.): base de datos de la web, de las reservas y de las cuentas de acceso.</li>
+              <li><B>Vercel</B> (Vercel Inc., EE. UU.): alojamiento de la web.</li>
+              <li><B>Railway</B> (Railway Corp., EE. UU.): servidores de nuestras automatizaciones (reservas y avisos) y de nuestra analítica Umami, que instalamos nosotros y no usa cookies.</li>
+              <li><B>Meta</B> (Meta Platforms Ireland Ltd.): Meta Pixel, si lo aceptas.</li>
+              <li><B>Hotjar</B> (Hotjar Ltd., Malta): análisis de uso de la web, si lo aceptas.</li>
+              <li><B>Stripe</B> (Stripe Payments Europe Ltd., Irlanda): pagos, cuando compras algo a través de un enlace de pago.</li>
+              <li><B>Wistia</B> (Wistia Inc., EE. UU.) y <B>YouTube</B> (Google): reproducción de algunos vídeos de la web.</li>
+              <li>Asesoría fiscal y contable, para cumplir obligaciones legales con clientes.</li>
+            </Lista>
+            <Falta>La política anterior nombraba Mailchimp, PayPal y empresas de mensajería. En el código de la web no aparecen (se ha sustituido Mailchimp por MailerLite y se han quitado los otros dos). Si sigues usando PayPal o envías productos físicos, dímelo y lo vuelvo a añadir. Confirma también que sigues teniendo asesoría.</Falta>
+          </Seccion>
+
+          <Seccion titulo="4. Transferencias internacionales">
+            <p>Algunos de estos proveedores están en Estados Unidos o pueden acceder a datos desde allí (Google, Meta, Supabase, Vercel, Railway, Wistia). En esos casos la transferencia se ampara en el Marco de Privacidad de Datos UE-EE. UU. cuando la empresa está certificada o, si no, en las cláusulas contractuales tipo aprobadas por la Comisión Europea (art. 45 y 46 RGPD). Puedes pedirnos más información en <Mail />.</p>
+            <Falta>Comprueba en Supabase y Railway en qué región están alojados los proyectos (si están en la UE, se puede decir) y que cada proveedor tiene firmado o aceptado su contrato de encargo del tratamiento (DPA).</Falta>
+          </Seccion>
+
+          <Seccion titulo="5. Tus derechos">
+            <p>Puedes ejercer en cualquier momento tus derechos de:</p>
+            <Lista>
+              <li><B>Acceso:</B> saber qué datos tuyos tratamos.</li>
+              <li><B>Rectificación:</B> corregir datos inexactos.</li>
+              <li><B>Supresión:</B> pedir que los borremos.</li>
+              <li><B>Oposición:</B> oponerte a un tratamiento, también al envío de comunicaciones.</li>
+              <li><B>Limitación:</B> pedir que dejemos de usarlos temporalmente.</li>
+              <li><B>Portabilidad:</B> recibir tus datos en un formato habitual para llevártelos.</li>
+            </Lista>
+            <p>Escribe a <Mail /> indicando qué derecho quieres ejercer. Si tenemos dudas razonables sobre tu identidad, podremos pedirte información adicional para confirmarla. Te responderemos en el plazo de un mes, ampliable en dos meses más en casos complejos.</p>
+            <p>Si crees que no hemos atendido bien tu solicitud, puedes reclamar ante la Agencia Española de Protección de Datos (<a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer" className="text-[#0067FD] hover:underline">www.aepd.es</a>).</p>
+          </Seccion>
+
+          <Seccion titulo="6. Retirar tu consentimiento y darte de baja">
+            <p>Puedes retirar tu consentimiento cuando quieras, sin que afecte a lo que hayamos hecho antes con él:</p>
+            <Lista>
+              <li><B>Newsletter y lista prioritaria:</B> con el enlace de baja de cualquier correo o escribiendo a <Mail />.</li>
+              <li><B>Reservas:</B> con el enlace para cambiar o cancelar que viene en la invitación, o escribiendo a <Mail />.</li>
+              <li><B>Cookies:</B> desde la configuración de tu navegador, como explica la <Link to="/PoliticaCookies" className="text-[#0067FD] hover:underline">Política de Cookies</Link>.</li>
+            </Lista>
+          </Seccion>
+
+          <Seccion titulo="7. Anti-Agente">
+            <p>Anti-Agente es una aplicación en desarrollo que funcionará en el ordenador de cada usuario. Esta política cubre solo esta web y las listas (como la lista prioritaria), no el uso de la aplicación. La aplicación tendrá su propia política de privacidad, que publicaremos junto con ella.</p>
+            <p>La aplicación Anti-Studio tiene su propia <Link to="/anti-studio/privacidad" className="text-[#0067FD] hover:underline">política de privacidad</Link>.</p>
+          </Seccion>
+
+          <Seccion titulo="8. Aplicación de Shopify — Antiagencia">
+            <p>La aplicación <B>Antiagencia</B>, disponible en el Shopify App Store, accede a los datos de las tiendas Shopify de nuestros clientes exclusivamente para prestar los servicios contratados con Antiagencia. A continuación se detalla el uso que hacemos de dichos datos:</p>
+            <Lista>
+              <li><B>Datos a los que accedemos:</B> Productos, pedidos, clientes, inventario, descuentos y configuración de la tienda.</li>
+              <li><B>Finalidad:</B> Gestión y automatización de operaciones de la tienda en nombre del comerciante (modificación de precios, creación de descuentos, gestión de stock, etc.).</li>
+              <li><B>Almacenamiento:</B> Guardamos únicamente el token de acceso necesario para operar la tienda. No almacenamos datos de clientes finales de la tienda.</li>
+              <li><B>Compartición:</B> No compartimos los datos de las tiendas con terceros. Los datos se procesan internamente en nuestros servidores (Railway) y base de datos (Supabase), bajo las mismas garantías de confidencialidad.</li>
+              <li><B>Eliminación:</B> Al desinstalar la aplicación, el acceso queda revocado automáticamente. Para solicitar la eliminación de los datos almacenados, contacta con <Mail />.</li>
+            </Lista>
+            <p>Para cualquier consulta sobre el uso de datos en el contexto de la aplicación de Shopify, puedes contactarnos en <Mail />.</p>
+          </Seccion>
+
+          <Seccion titulo="9. Aplicación de TikTok — Automatizaciones (Antiagencia)">
+            <p>Antiagencia opera la aplicación <B>Automatizaciones</B>, registrada en TikTok for Developers, que utiliza la API de TikTok para publicar contenido en nombre de sus clientes en la plataforma TikTok. A continuación se detalla el uso que hacemos de los datos obtenidos a través de dicha integración:</p>
+            <Lista>
+              <li><B>Datos a los que accedemos:</B> Información básica de la cuenta de TikTok del cliente (nombre de usuario, ID de cuenta) y contenido de vídeo proporcionado por el propio cliente para su publicación.</li>
+              <li><B>Finalidad:</B> Publicación y programación de contenido de vídeo en TikTok exclusivamente en nombre y con autorización expresa del cliente titular de la cuenta.</li>
+              <li><B>Almacenamiento:</B> Guardamos únicamente los tokens de acceso necesarios para operar la cuenta. No almacenamos contenido de vídeo más allá del tiempo necesario para su publicación.</li>
+              <li><B>Compartición:</B> Los datos de las cuentas de TikTok no se comparten con terceros. Se procesan internamente en nuestros servidores (Railway) bajo las mismas garantías de confidencialidad.</li>
+              <li><B>Eliminación:</B> El cliente puede revocar el acceso en cualquier momento desde la configuración de su cuenta de TikTok. Para solicitar la eliminación de los datos almacenados, contacta con <Mail />.</li>
+            </Lista>
+            <p>Para cualquier consulta sobre el uso de datos en el contexto de la integración con TikTok, puedes contactarnos en <Mail />.</p>
+          </Seccion>
+
+          <Seccion titulo="10. Seguridad">
+            <p>Aplicamos medidas técnicas y organizativas adecuadas para proteger tus datos: conexión cifrada (HTTPS), acceso restringido a las herramientas y contraseñas cifradas. Si se produjera una brecha de seguridad que pusiera en riesgo tus datos, lo notificaríamos a la AEPD y, cuando corresponda, a ti.</p>
+          </Seccion>
+
+          <Seccion titulo="11. Cookies y enlaces a terceros">
+            <p>Esta web usa cookies propias y de terceros. Tienes el detalle en la <Link to="/PoliticaCookies" className="text-[#0067FD] hover:underline">Política de Cookies</Link>. La web puede contener enlaces a sitios externos, que tienen sus propias políticas de privacidad.</p>
+          </Seccion>
+
+          <Seccion titulo="12. Cambios en esta política">
+            <p>Si cambiamos esta política, publicaremos aquí la nueva versión con su fecha de actualización. Si el cambio es importante y tenemos tu email, te avisaremos.</p>
+          </Seccion>
 
         </div>
       </div>
