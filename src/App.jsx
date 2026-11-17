@@ -5,86 +5,82 @@ import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import Newsletter from './pages/Newsletter';
-import UltimoPaso from './pages/UltimoPaso';
-import YaPorFin from './pages/YaPorFin';
-import Home from './pages/Home';
-import HomeV2 from './pages/HomeV2';
-import AudioSecreto from './pages/AudioSecreto';
+const Newsletter = lazy(() => import('./pages/Newsletter'));
+const UltimoPaso = lazy(() => import('./pages/UltimoPaso'));
+const YaPorFin = lazy(() => import('./pages/YaPorFin'));
+const Home = lazy(() => import('./pages/Home'));
+const HomeV2 = lazy(() => import('./pages/HomeV2'));
+const AudioSecreto = lazy(() => import('./pages/AudioSecreto'));
 import CookieBanner from './components/CookieBanner';
-import TrabajaConNosotrosOld from './pages/TrabajaConNosotrosOld'
-import TrabajaConNosotrosV3 from './pages/TrabajaConNosotrosV3'
-import TrabajaConNosotros2 from './pages/TrabajaConNosotros2'
-import AntiAuditoriaV2 from './pages/AntiAuditoriaV2'
-import PlanningQ3 from './pages/PlanningQ3'
-import PlanningQ3Venta from './pages/PlanningQ3Venta'
-import PlanningQ4 from './pages/PlanningQ4'
-import Reservar from './pages/Reservar'
-import GestionarReserva from './pages/GestionarReserva'
-import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
-import PoliticaPrivacidadAntiStudio from './pages/PoliticaPrivacidadAntiStudio';
-import CuentaAntiStudio from './pages/CuentaAntiStudio';
-import AntiStudio from './pages/AntiStudio';
-import AntiAgente from './pages/AntiAgente';
-import AntiAgenteGracias from './pages/AntiAgenteGracias';
-import AntiAgenteB from './pages/AntiAgenteB';
-import NovedadesAntiAgente from './pages/NovedadesAntiAgente';
-import NovedadesAntiStudio from './pages/NovedadesAntiStudio';
-import TikTokConnect from './pages/TikTokConnect';
-import JorgeCoronado from './pages/JorgeCoronado';
-import GraciasJorgeCoronado from './pages/GraciasJorgeCoronado';
-import CapsuleDigital from './pages/CapsuleDigital';
-import HablemosDeEmprender from './pages/HablemosDeEmprender';
-import BlogEmailMarketing from './pages/BlogEmailMarketing';
-import Podcasts from './pages/Podcasts';
-import AgenciaShopifyGranada from './pages/AgenciaShopifyGranada';
-import BlogPost from './pages/BlogPost';
+const TrabajaConNosotrosOld = lazy(() => import('./pages/TrabajaConNosotrosOld'));
+const TrabajaConNosotrosV3 = lazy(() => import('./pages/TrabajaConNosotrosV3'));
+const TrabajaConNosotros2 = lazy(() => import('./pages/TrabajaConNosotros2'));
+const AntiAuditoriaV2 = lazy(() => import('./pages/AntiAuditoriaV2'));
+const PlanningQ3 = lazy(() => import('./pages/PlanningQ3'));
+const PlanningQ3Venta = lazy(() => import('./pages/PlanningQ3Venta'));
+const PlanningQ4 = lazy(() => import('./pages/PlanningQ4'));
+const Reservar = lazy(() => import('./pages/Reservar'));
+const GestionarReserva = lazy(() => import('./pages/GestionarReserva'));
+const PoliticaPrivacidad = lazy(() => import('./pages/PoliticaPrivacidad'));
+const PoliticaPrivacidadAntiStudio = lazy(() => import('./pages/PoliticaPrivacidadAntiStudio'));
+const CuentaAntiStudio = lazy(() => import('./pages/CuentaAntiStudio'));
+const AntiStudio = lazy(() => import('./pages/AntiStudio'));
+const AntiAgente = lazy(() => import('./pages/AntiAgente'));
+const AntiAgenteGracias = lazy(() => import('./pages/AntiAgenteGracias'));
+const AntiAgenteB = lazy(() => import('./pages/AntiAgenteB'));
+const NovedadesAntiAgente = lazy(() => import('./pages/NovedadesAntiAgente'));
+const NovedadesAntiStudio = lazy(() => import('./pages/NovedadesAntiStudio'));
+const TikTokConnect = lazy(() => import('./pages/TikTokConnect'));
+const JorgeCoronado = lazy(() => import('./pages/JorgeCoronado'));
+const GraciasJorgeCoronado = lazy(() => import('./pages/GraciasJorgeCoronado'));
+const CapsuleDigital = lazy(() => import('./pages/CapsuleDigital'));
+const HablemosDeEmprender = lazy(() => import('./pages/HablemosDeEmprender'));
+const BlogEmailMarketing = lazy(() => import('./pages/BlogEmailMarketing'));
+const Podcasts = lazy(() => import('./pages/Podcasts'));
+const AgenciaShopifyGranada = lazy(() => import('./pages/AgenciaShopifyGranada'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
 function BlogPostPage() {
   const { slug } = useParams();
   return <BlogPost slug={slug} />;
 }
-import PodcastPost from './pages/PodcastPost';
+const PodcastPost = lazy(() => import('./pages/PodcastPost'));
 function PodcastPostPage() {
   const { slug } = useParams();
   return <PodcastPost slug={slug} />;
 }
-import ProhibidoEstacionarse from './pages/ProhibidoEstacionarse';
+const ProhibidoEstacionarse = lazy(() => import('./pages/ProhibidoEstacionarse'));
 import PixelLayout from './Layout';
-import LoomLogin from './pages/LoomLogin';
-import Loom from './pages/Loom';
-import AdminLayout, { useAdmin } from './pages/admin/AdminLayout';
-import Dashboard from './pages/admin/Dashboard';
-import AdminUsers from './pages/admin/AdminUsers';
-import Automatizaciones from './pages/admin/Automatizaciones';
-import Gym from './pages/admin/Gym';
-import Briefing from './pages/admin/Briefing';
-import Copywriting from './pages/admin/Copywriting';
-import CopywritingPopup from './pages/admin/CopywritingPopup';
-import AdminHome from './pages/admin/AdminHome';
-import EmailBuilder from './pages/admin/EmailBuilder';
-import Paginas from './pages/admin/Paginas';
-import Pomodoro from './pages/admin/Pomodoro';
-import Finanzas from './pages/admin/Finanzas';
-import Calendly from './pages/admin/Calendly';
-import Biblioteca from './pages/admin/Biblioteca';
-import BibliotecaItem from './pages/admin/BibliotecaItem';
-import BibliotecaPublica from './pages/BibliotecaPublica';
-import BibliotecaItemPublica from './pages/BibliotecaItemPublica';
-import CV from './pages/CV';
-import CVEn from './pages/CVEn';
+const LoomLogin = lazy(() => import('./pages/LoomLogin'));
+const Loom = lazy(() => import('./pages/Loom'));
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+// En un archivo aparte para que useAdmin no meta el admin en la carga inicial
+const RequirePage = lazy(() => import('./pages/admin/RequirePage'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const Automatizaciones = lazy(() => import('./pages/admin/Automatizaciones'));
+const Gym = lazy(() => import('./pages/admin/Gym'));
+const Briefing = lazy(() => import('./pages/admin/Briefing'));
+const Copywriting = lazy(() => import('./pages/admin/Copywriting'));
+const CopywritingPopup = lazy(() => import('./pages/admin/CopywritingPopup'));
+const AdminHome = lazy(() => import('./pages/admin/AdminHome'));
+const EmailBuilder = lazy(() => import('./pages/admin/EmailBuilder'));
+const Paginas = lazy(() => import('./pages/admin/Paginas'));
+const Pomodoro = lazy(() => import('./pages/admin/Pomodoro'));
+const Finanzas = lazy(() => import('./pages/admin/Finanzas'));
+const Calendly = lazy(() => import('./pages/admin/Calendly'));
+const Biblioteca = lazy(() => import('./pages/admin/Biblioteca'));
+const BibliotecaItem = lazy(() => import('./pages/admin/BibliotecaItem'));
+const BibliotecaPublica = lazy(() => import('./pages/BibliotecaPublica'));
+const BibliotecaItemPublica = lazy(() => import('./pages/BibliotecaItemPublica'));
+const CV = lazy(() => import('./pages/CV'));
+const CVEn = lazy(() => import('./pages/CVEn'));
 import { supabase } from '@/lib/supabaseClient';
 
-// Guard para rutas de lector: redirige a /admin/users si no tiene permiso
-function RequirePage({ page, children }) {
-  const { role, pages } = useAdmin();
-  if (role === 'admin' || pages.includes(page)) return children;
-  return <Navigate to="/admin/users" replace />;
-}
 import { trackPageView } from './lib/pageTracker';
 
 function PageViewTracker() {
@@ -280,6 +276,8 @@ function App() {
         <Router>
           <NavigationTracker />
           <PageViewTracker />
+          {/* Cada página se descarga al visitarla (React.lazy); mientras, pantalla vacía como antes */}
+          <Suspense fallback={null}>
           <Routes>
             <Route path="/admin/login" element={<LoomLogin redirectTo="/admin/dashboard" />} />
             <Route path="/loom-login"  element={<LoomLogin redirectTo="/admin/dashboard" />} />
@@ -306,6 +304,7 @@ function App() {
             <Route path="/loom" element={<Loom />} />
             <Route path="*" element={<AuthenticatedApp />} />
           </Routes>
+          </Suspense>
         </Router>
         <Toaster />
       </QueryClientProvider>

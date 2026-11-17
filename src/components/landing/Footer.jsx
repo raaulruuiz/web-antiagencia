@@ -5,15 +5,15 @@ import ConfigurarCookies from "@/components/ConfigurarCookies";
 
 const partnerLogos = [
   {
-    src: "/images/2a57c54d9_1.png",
+    src: "/images/2a57c54d9_1-320.webp",
     alt: "Shopify Partner",
   },
   {
-    src: "/images/032d0e683_2.png",
+    src: "/images/032d0e683_2-320.webp",
     alt: "Partner 2",
   },
   {
-    src: "/images/45e269286_PRUEBASOCIAL.png",
+    src: "/images/45e269286_PRUEBASOCIAL-320.webp",
     alt: "Klaviyo Partner",
   },
 ];
@@ -48,6 +48,10 @@ export default function Footer() {
               key={i}
               src={logo.src}
               alt={logo.alt}
+              width={320}
+              height={180}
+              loading="lazy"
+              decoding="async"
               className="h-8 w-auto object-contain opacity-80"
             />
           ))}

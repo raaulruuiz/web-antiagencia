@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, Suspense, useContext, useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { CopywritingProvider } from './CopywritingContext';
@@ -198,7 +198,7 @@ function AdminLayoutInner() {
 
         {/* ── Contenido ── */}
         <main className="flex-1 overflow-y-auto">
-          <Outlet />
+          <Suspense fallback={null}><Outlet /></Suspense>
         </main>
       </div>
     </AdminCtx.Provider>
