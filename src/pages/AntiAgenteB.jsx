@@ -122,6 +122,7 @@ export default function AntiAgenteB() {
             {/* 5 · Qué recibes en la llamada */}
             <Seccion>
               <Titulo>Qué recibes en la llamada</Titulo>
+              <Parrafo><strong>Son solo 5 plazas.</strong></Parrafo>
               <Parrafo>No es una forma de meterte prisa. Son 5 porque las llamadas las hago yo, una a una, y te voy a dar gratis un servicio que será de pago.</Parrafo>
               <Parrafo>Si te quedas una de las 5 plazas, tienes:</Parrafo>
               <Check titulo="Onboarding gratis en videollamada.">Dejamos juntos tu equipo de agentes a punto para tu tienda: conectamos tus herramientas y lo adaptamos a cómo trabajas.</Check>
