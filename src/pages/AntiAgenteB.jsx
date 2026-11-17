@@ -3,11 +3,11 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import {
-  Boton, Check, Contador, Formulario, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, PREGUNTAS, rubik, TEXTO_BOTON, Titulo, Video, VIDEO_VISIBLE, leerUtm,
+  Boton, Check, Contador, Formulario, Hoja, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, PREGUNTAS, rubik, TEXTO_BOTON, Titulo, Video, VIDEO_VISIBLE, leerUtm,
 } from "./antiAgenteComun";
 
 // /anti-agente-b — segunda versión de la landing de la lista prioritaria (BORRADOR, noindex),
-// para comparar con /anti-agente. Una sola columna y secciones apiladas, con los estilos de la web.
+// para comparar con /anti-agente. Secciones apiladas en las mismas tarjetas (Hoja) y fondo que /anti-agente.
 // Mismo formulario de MailerLite, misma página de gracias y mismo contador (antiAgenteComun.jsx).
 // Textos: los aprobados de /anti-agente. Los títulos marcados «propuesto» son nuevos, pendientes de Raúl.
 
@@ -28,17 +28,18 @@ function TextoVideo() {
 // Línea de ventajas bajo el formulario (propuesta)
 const VENTAJAS = "Gratis · En tu ordenador · Con tu Claude o tu ChatGPT";
 
+// Cada sección va en la misma tarjeta blanca (Hoja) que /anti-agente
 function Seccion({ children, id, className = "" }) {
   return (
-    <section id={id} className={`py-14 md:py-16 border-t border-gray-200 first:border-t-0 scroll-mt-8 ${className}`}>
-      {children}
+    <section id={id} className={`scroll-mt-8 ${className}`}>
+      <Hoja>{children}</Hoja>
     </section>
   );
 }
 
 function Paso({ numero, titulo, children }) {
   return (
-    <div className="border border-gray-200 rounded-sm p-6 md:p-8 mb-5 flex gap-5">
+    <div className="bg-white border border-gray-200 shadow-md rounded-sm p-6 md:p-8 mb-5 flex gap-5">
       <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[#0067FD] text-white font-bold flex items-center justify-center" style={rubik}>{numero}</span>
       <div>
         <h3 className="text-xl font-bold text-gray-900 mb-2" style={rubik}>{titulo}</h3>
@@ -61,9 +62,9 @@ export default function AntiAgenteB() {
         <meta name="description" content="Un equipo de agentes para tu tienda online. Gratis. Empiezo con 5 tiendas y con esas 5 lo monto yo: apúntate a la lista prioritaria." />
         <meta name="robots" content="noindex" />
       </Helmet>
-      <div className="min-h-screen bg-white flex flex-col selection:bg-[#7000FF] selection:text-white">
-        <main className="flex-1 flex justify-center px-5 py-8 md:py-12" style={{ fontFamily: "'Georgia', serif" }}>
-          <div className="w-full max-w-3xl">
+      <div className="min-h-screen bg-gray-100 flex flex-col selection:bg-[#7000FF] selection:text-white">
+        <main className="flex-1 flex justify-center px-4 py-12 md:py-20">
+          <div className="w-full max-w-4xl">
 
             {/* 1 · Cabecera */}
             <Seccion className="text-center">
