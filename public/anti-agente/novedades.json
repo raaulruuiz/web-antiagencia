@@ -1,7 +1,18 @@
 {
-  "ultima": { "version": "0.1.8", "fecha": "2026-11-17" },
+  "ultima": { "version": "0.1.9", "fecha": "2026-11-17" },
   "descargas": { "mac": "" },
   "versiones": [
+    {
+      "version": "0.1.9",
+      "fecha": "2026-11-17",
+      "entradas": [
+        { "id": "maximo-respuesta", "titulo": "Máximo te confirma tus comentarios", "texto": "Cuando le mandas una idea o un fallo, te dice si ha llegado. Si no se ha podido enviar, te explica por qué y puedes reintentarlo.", "ca": {"titulo": "En Màxim et confirma els teus comentaris", "texto": "Quan li envies una idea o un error, et diu si ha arribat. Si no s'ha pogut enviar, t'explica per què i pots tornar-ho a provar."}, "en": {"titulo": "Máximo confirms your feedback", "texto": "When you send an idea or a bug, it tells you whether it arrived. If it couldn't be sent, it explains why and you can try again."} },
+        { "id": "maximo-flotante", "titulo": "Máximo con su foto, donde prefieras", "texto": "El botón flotante lleva su foto, que puedes quitar en su ficha. Tu coordinador también puede ponerlo flotante o en el menú si se lo pides.", "ca": {"titulo": "En Màxim amb la seva foto, on prefereixis", "texto": "El botó flotant porta la seva foto, que pots treure a la seva fitxa. El teu coordinador també el pot posar flotant o al menú si li ho demanes."}, "en": {"titulo": "Máximo with his photo, wherever you like", "texto": "The floating button shows his photo, which you can turn off in his profile. Your coordinator can also make it floating or move it to the menu if you ask."} },
+        { "id": "foto-perfil", "titulo": "Tu foto de perfil", "texto": "Pon o cambia tu foto desde el menú del perfil. Si Máximo va en el menú, abajo solo sale tu foto para que no se corte nada.", "ca": {"titulo": "La teva foto de perfil", "texto": "Posa o canvia la teva foto des del menú del perfil. Si en Màxim va al menú, a baix només surt la teva foto perquè no es talli res."}, "en": {"titulo": "Your profile photo", "texto": "Add or change your photo from the profile menu. If Máximo is in the menu, only your photo shows at the bottom so nothing gets cut off."} },
+        { "id": "logos", "titulo": "Logos reales en Apps conectadas", "texto": "Google Ads, TikTok Ads, Publer, TubeAlfred y Canva ya salen con su logo.", "ca": {"titulo": "Logos reals a Apps connectades", "texto": "Google Ads, TikTok Ads, Publer, TubeAlfred i Canva ja surten amb el seu logo."}, "en": {"titulo": "Real logos in Connected apps", "texto": "Google Ads, TikTok Ads, Publer, TubeAlfred and Canva now show their own logo."} },
+        { "id": "herramientas-arreglo", "titulo": "Arreglado: agentes sin herramientas", "texto": "En la 0.1.8 los agentes podían quedarse sin herramientas. Ya está arreglado y la app lo comprueba antes de cada versión.", "ca": {"titulo": "Arreglat: agents sense eines", "texto": "A la 0.1.8 els agents es podien quedar sense eines. Ja està arreglat i l'app ho comprova abans de cada versió."}, "en": {"titulo": "Fixed: agents without tools", "texto": "In 0.1.8 agents could end up without their tools. It's fixed, and the app now checks for it before every release."} }
+      ]
+    },
     {
       "version": "0.1.8",
       "fecha": "2026-11-17",
