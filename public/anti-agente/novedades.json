@@ -78,14 +78,20 @@
     }
   ],
   "enCurso": [
-    { "titulo": "Instalación sin avisos", "texto": "La app firmada por Apple, para instalarla sin avisos de seguridad." }
+    {"titulo": "Soporte desde la app", "texto": "Si algo falla, mándanos el error desde la app (solo si tú quieres) y te ayudamos antes."},
+    {"titulo": "Editar tu tienda", "texto": "Cambios en tu tema de Shopify con vista previa antes de publicar."},
+    {"titulo": "Herramientas dentro de la app", "texto": "Herramientas como Anti-Studio, que tus agentes abren y usan mientras tú revisas."},
+    {"titulo": "Tienda de herramientas", "texto": "Herramientas gratis y de pago que añades desde la propia app."},
+    {"titulo": "A tu medida", "texto": "Herramientas y servicios hechos para tu negocio, dentro de tu Anti-Agente."}
   ],
   "pendiente": [
-    { "titulo": "Windows", "texto": "Versión para Windows." },
-    { "titulo": "Se actualiza sola", "texto": "Las versiones nuevas se instalan solas, sin descargar nada." },
-    { "titulo": "Para todo tu equipo", "texto": "Instalarlo a cada persona de tu equipo." },
-    { "titulo": "Editar tu tienda", "texto": "Cambios en tu tema de Shopify con vista previa antes de publicar, y páginas de WooCommerce." },
-    { "titulo": "Herramientas dentro de la app", "texto": "Herramientas como Anti-Studio, que tus agentes abren y usan contigo." },
-    { "titulo": "Edición de vídeo", "texto": "Cortar, pasar a vertical y poner subtítulos, con tu aprobación del resultado." }
+    {"titulo": "Edición de vídeo", "texto": "Cortar, unir, pasar a vertical, subtítulos, música y miniatura, con tu aprobación del resultado."},
+    {"titulo": "Con tu clave de Anthropic", "texto": "Un respaldo opcional para seguir trabajando con tu propia clave de la API."},
+    {"titulo": "Menos consumo con tu código", "texto": "Un índice de tus proyectos para que los agentes busquen sin gastar de más."},
+    {"titulo": "Avisos de los hilos", "texto": "Un aviso cuando un hilo termina o espera tu decisión."},
+    {"titulo": "LinkedIn y TikTok", "texto": "Publicar directamente en LinkedIn y TikTok."},
+    {"titulo": "Sin el ordenador", "texto": "Hablar con tu equipo desde el móvil, también con el ordenador apagado."},
+    {"titulo": "Calendario", "texto": "Rutinas, publicaciones programadas y citas en un mismo calendario."},
+    {"titulo": "Más conexiones por MCP", "texto": "ActiveCampaign, Klaviyo y Cloudflare también por MCP."}
   ]
 }
