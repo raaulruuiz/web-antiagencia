@@ -151,9 +151,10 @@ export default function AntiAgente() {
             <Hoja>
               <Titulo>Qué necesitas</Titulo>
               <Check titulo="Tu ordenador.">De momento Anti-Agente funciona en tu ordenador, mientras está encendido.</Check>
-              <Check titulo="Tu propia cuenta de IA.">{TEXTO_IA}</Check>
+              <Check titulo="Tu propia cuenta de IA.">Funciona con Claude Code y Codex (ChatGPT), los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan: la aplicación no tiene ningún coste extra a lo que ya pagas. Solo está sujeto a los términos de cada proveedor.</Check>
               <Check titulo="Tus herramientas de siempre,">si quieres conectarlas: tu tienda (Shopify, WooCommerce), tu email (Klaviyo, MailerLite), Gmail y Meta.</Check>
-              <Parrafo className="mt-6"><strong>Para pequeñas empresas, no para multinacionales.</strong> Está pensado para tiendas donde el dueño lo hace casi todo.</Parrafo>
+              <Check titulo="Herramientas a medida:">en la auditoría de costes, veremos qué herramientas a medida se pueden crear para tus agentes, que sustituyan herramientas actuales y te ahorren dinero. El desarrollo tiene un precio especial de lanzamiento, aunque puedes rechazarlo si solo quieres los bots.</Check>
+              <Parrafo className="mt-6"><strong>Para pequeñas empresas, no para multinacionales.</strong> Está pensado para tiendas donde el dueño hace mucho o tiene un equipo pequeño.</Parrafo>
             </Hoja>
 
             {/* 7 · Lo que viene */}
