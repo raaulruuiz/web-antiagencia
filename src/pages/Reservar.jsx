@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import FooterMinimal from '@/components/landing/FooterMinimal';
 import { BACKEND_URL } from '@/lib/config';
-import CalendarPicker, { BLUE, fmtDiaCorto, initialCalMonth } from '@/components/booking/CalendarPicker';
+import CalendarPicker, { BLUE, fmtDiaCorto, initialCalMonth, mensajeError } from '@/components/booking/CalendarPicker';
 
 function fmtFechaHoraLarga(iso) {
   const dt = new Date(iso);
@@ -49,7 +49,7 @@ export default function Reservar() {
         return dia?.slots.find(s => s.startISO === prev.startISO) || null;
       });
     } catch (err) {
-      setSubmitError(err.message);
+      setSubmitError(mensajeError(err));
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ export default function Reservar() {
       if (!res.ok) throw new Error(data.error || 'Error al reservar');
       setConfirmado(data);
     } catch (err) {
-      setSubmitError(err.message);
+      setSubmitError(mensajeError(err));
     } finally {
       setSubmitting(false);
     }

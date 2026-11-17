@@ -3,7 +3,7 @@ import { BACKEND_URL } from '@/lib/config';
 // En local la vista previa usa el proxy de vite.config.js (el backend no admite su origen).
 const API = import.meta.env.DEV ? '/__calendly' : `${BACKEND_URL}/public/calendly`;
 
-import CalendarPicker, { BLUE, fmtDiaCorto, initialCalMonth } from '@/components/booking/CalendarPicker';
+import CalendarPicker, { BLUE, fmtDiaCorto, initialCalMonth, mensajeError } from '@/components/booking/CalendarPicker';
 
 // Calendario de reservas embebible en cualquier página. Usa la misma herramienta
 // que /reservar/:slug (tipos creados en /admin/calendly), sin su marco de página.
@@ -37,7 +37,7 @@ export default function ReservaEmbebida({ slug, origen = '', onReservada, mostra
       setDias(dDisp);
       setCalMonth(prev => prev || initialCalMonth(dDisp));
     } catch (err) {
-      setError(err.message);
+      setError(mensajeError(err));
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ export default function ReservaEmbebida({ slug, origen = '', onReservada, mostra
       setConfirmado(data);
       onReservada?.(data);
     } catch (err) {
-      setError(err.message);
+      setError(mensajeError(err));
     } finally {
       setSubmitting(false);
     }

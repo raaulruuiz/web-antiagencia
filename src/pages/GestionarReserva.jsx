@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import FooterMinimal from '@/components/landing/FooterMinimal';
 import { BACKEND_URL } from '@/lib/config';
-import CalendarPicker, { BLUE, fmtDiaCorto, initialCalMonth } from '@/components/booking/CalendarPicker';
+import CalendarPicker, { BLUE, fmtDiaCorto, initialCalMonth, mensajeError } from '@/components/booking/CalendarPicker';
 
 function fmtFechaHoraLarga(iso) {
   const dt = new Date(iso);
@@ -36,7 +36,7 @@ export default function GestionarReserva() {
       if (!res.ok) throw new Error(data.error || 'Error al cargar');
       setBooking(data);
     } catch (err) {
-      setError(err.message);
+      setError(mensajeError(err));
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ export default function GestionarReserva() {
       setSelectedFecha(null);
       setSelectedSlot(null);
     } catch (err) {
-      setError(err.message);
+      setError(mensajeError(err));
     }
   }
 
@@ -82,7 +82,7 @@ export default function GestionarReserva() {
       setModo('ver');
       await cargar();
     } catch (err) {
-      setError(err.message);
+      setError(mensajeError(err));
     } finally {
       setGuardandoCambio(false);
     }
@@ -97,7 +97,7 @@ export default function GestionarReserva() {
       if (!res.ok) throw new Error(data.error || 'Error al cancelar');
       setCancelado(true);
     } catch (err) {
-      setError(err.message);
+      setError(mensajeError(err));
     } finally {
       setCancelando(false);
     }

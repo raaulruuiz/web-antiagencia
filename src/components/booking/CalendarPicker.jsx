@@ -33,6 +33,15 @@ function celdasDelMes(year, month) {
 }
 
 // Mes inicial a mostrar: el del primer día con huecos.
+// Errores del calendario y de la reserva en español. Un fallo de red (fetch rechaza con
+// TypeError: «Failed to fetch», «Load failed»…) o una respuesta que no es JSON (SyntaxError)
+// no deben llegar en inglés al visitante; los mensajes propios del servidor se respetan.
+export const ERROR_CONEXION = 'No se ha podido conectar. Revisa tu conexión e inténtalo de nuevo.';
+export function mensajeError(err) {
+  if (err instanceof TypeError || err instanceof SyntaxError || !err?.message) return ERROR_CONEXION;
+  return err.message;
+}
+
 export function initialCalMonth(dias) {
   if (!dias?.length) return null;
   const [y, m] = dias[0].fecha.split('-').map(Number);
