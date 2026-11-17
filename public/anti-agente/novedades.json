@@ -1,7 +1,23 @@
 {
-  "ultima": { "version": "0.1.7", "fecha": "2026-11-16" },
+  "ultima": { "version": "0.1.8", "fecha": "2026-11-17" },
   "descargas": { "mac": "" },
   "versiones": [
+    {
+      "version": "0.1.8",
+      "fecha": "2026-11-17",
+      "entradas": [
+        { "id": "novedades", "titulo": "Novedades y comentarios en la app", "texto": "Mira lo nuevo y lo que viene, y manda ideas o fallos desde la app. Cuando salga una versión, te avisa con un botón para instalarla.", "ca": {"titulo": "Novetats i comentaris a l'app", "texto": "Mira què hi ha de nou i què vindrà, i envia idees o errors des de l'app. Quan surti una versió, t'avisa amb un botó per instal·lar-la."}, "en": {"titulo": "News and feedback in the app", "texto": "See what's new and what's coming, and send ideas or bugs from the app. When a new version comes out, it lets you know with a button to install it."} },
+        { "id": "entrevista", "titulo": "Empieza contándole tu negocio", "texto": "El coordinador te hace una entrevista por partes, que puedes pausar, y con lo que le cuentas te propone tu equipo de agentes.", "ca": {"titulo": "Comença explicant-li el teu negoci", "texto": "El coordinador et fa una entrevista per parts, que pots pausar, i amb el que li expliques et proposa el teu equip d'agents."}, "en": {"titulo": "Start by telling it about your business", "texto": "The coordinator interviews you in parts, which you can pause, and uses what you tell it to suggest your team of agents."} },
+        { "id": "voz", "titulo": "Escribe como tú", "texto": "Guarda tu forma de escribir y la de cada marca, y la tiene en cuenta antes de escribir en tu nombre.", "ca": {"titulo": "Escriu com tu", "texto": "Desa la teva manera d'escriure i la de cada marca, i la té en compte abans d'escriure en nom teu."}, "en": {"titulo": "Writes like you", "texto": "It saves your writing style and each brand's, and uses it before writing on your behalf."} },
+        { "id": "aprende-tarjetas", "titulo": "Aprende de lo que corriges", "texto": "Si cambias una tarjeta antes de aprobarla, te propone apuntarse el cambio para no repetir el error.", "ca": {"titulo": "Aprèn del que corregeixes", "texto": "Si canvies una targeta abans d'aprovar-la, et proposa apuntar-se el canvi per no repetir l'error."}, "en": {"titulo": "Learns from your corrections", "texto": "If you change a card before approving it, it offers to note the change so it doesn't repeat the mistake."} },
+        { "id": "revisar-correo", "titulo": "Revisa el correo de un vistazo", "texto": "Te enseña una tabla con lo que haría con cada correo y no toca nada hasta que decides.", "ca": {"titulo": "Revisa el correu d'un cop d'ull", "texto": "T'ensenya una taula amb el que faria amb cada correu i no toca res fins que decideixes."}, "en": {"titulo": "Check your email at a glance", "texto": "It shows you a table with what it would do with each email and doesn't touch anything until you decide."} },
+        { "id": "cola-correos", "titulo": "Tus correos en cola, a la vista", "texto": "Ves los que esperan para salir y puedes sacarlos o enviarlos ya. Si uno falla, vuelve a su tarjeta con el motivo.", "ca": {"titulo": "Els teus correus a la cua, a la vista", "texto": "Veus els que esperen per sortir i pots treure'ls o enviar-los ja. Si un falla, torna a la seva targeta amb el motiu."}, "en": {"titulo": "Your queued emails, in sight", "texto": "You see the ones waiting to go out and can remove them or send them now. If one fails, it goes back to its card with the reason."} },
+        { "id": "hilos", "titulo": "Un hilo por agente", "texto": "Cada encargo va al hilo de su agente y la respuesta vuelve allí, sin mezclar conversaciones. Y puedes editar un mensaje ya enviado.", "ca": {"titulo": "Un fil per agent", "texto": "Cada encàrrec va al fil del seu agent i la resposta hi torna, sense barrejar converses. I pots editar un missatge ja enviat."}, "en": {"titulo": "One thread per agent", "texto": "Each task goes to its agent's thread and the reply comes back there, without mixing conversations. And you can edit a message you've already sent."} },
+        { "id": "seguridad", "titulo": "Más libertad, con límites", "texto": "Aunque des más libertad a tus agentes, te siguen preguntando antes de publicar o desplegar, de enviar invitaciones de calendario y de cambiar algo en tus apps.", "ca": {"titulo": "Més llibertat, amb límits", "texto": "Encara que donis més llibertat als teus agents, et continuen preguntant abans de publicar o desplegar, d'enviar invitacions de calendari i de canviar res a les teves apps."}, "en": {"titulo": "More freedom, with limits", "texto": "Even if you give your agents more freedom, they still ask you before publishing or deploying, sending calendar invitations or changing anything in your apps."} },
+        { "id": "conexiones-nuevas", "titulo": "Más apps conectadas", "texto": "Squarespace, GoHighLevel, Google Ads y TikTok Ads. En los anuncios, mira y prepara cambios, y nada se activa sin ti.", "ca": {"titulo": "Més apps connectades", "texto": "Squarespace, GoHighLevel, Google Ads i TikTok Ads. Als anuncis, mira i prepara canvis, i res no s'activa sense tu."}, "en": {"titulo": "More connected apps", "texto": "Squarespace, GoHighLevel, Google Ads and TikTok Ads. For ads, it looks and prepares changes, and nothing goes live without you."} },
+        { "id": "idiomas", "titulo": "En español, catalán e inglés", "texto": "Elige el idioma de la app en Configuración.", "ca": {"titulo": "En castellà, català i anglès", "texto": "Tria l'idioma de l'app a Configuració."}, "en": {"titulo": "In Spanish, Catalan and English", "texto": "Choose the app's language in Settings."} }
+      ]
+    },
     {
       "version": "0.1.6",
       "fecha": "2026-11-16",
@@ -62,21 +78,14 @@
     }
   ],
   "enCurso": [
-    { "titulo": "Cola de correos a la vista", "texto": "Ves los correos que esperan en la cola y puedes sacarlos o enviarlos ya." },
-    { "titulo": "Si un correo falla, vuelve a ti", "texto": "Vuelve a su tarjeta con el motivo, para corregirlo y enviarlo." },
-    { "titulo": "Editar un mensaje ya enviado", "texto": "El agente recibe la versión nueva." },
-    { "titulo": "Un hilo por agente", "texto": "Cada encargo, en el hilo de su agente, sin mezclar conversaciones." },
-    { "titulo": "Squarespace", "texto": "Conecta tu tienda de Squarespace." }
+    { "titulo": "Instalación sin avisos", "texto": "La app firmada por Apple, para instalarla sin avisos de seguridad." }
   ],
   "pendiente": [
     { "titulo": "Windows", "texto": "Versión para Windows." },
-    { "titulo": "Se actualiza sola", "texto": "Actualizaciones automáticas, con aviso de lo nuevo." },
+    { "titulo": "Se actualiza sola", "texto": "Las versiones nuevas se instalan solas, sin descargar nada." },
     { "titulo": "Para todo tu equipo", "texto": "Instalarlo a cada persona de tu equipo." },
-    { "titulo": "Tus comentarios, desde la app", "texto": "Un botón para mandar ideas y fallos." },
-    { "titulo": "Novedades dentro de la app", "texto": "Esta misma lista, dentro de Anti-Agente." },
-    { "titulo": "Edición de vídeo", "texto": "Cortar, pasar a vertical y poner subtítulos, con tu aprobación del resultado." },
-    { "titulo": "Presupuestos de anuncios", "texto": "Revisión de tus campañas con una propuesta de reparto. Y Google Ads y TikTok Ads." },
     { "titulo": "Editar tu tienda", "texto": "Cambios en tu tema de Shopify con vista previa antes de publicar, y páginas de WooCommerce." },
-    { "titulo": "Aprender de tus correcciones", "texto": "Lo que cambias en cada tarjeta, guardado para que no repita el error." }
+    { "titulo": "Herramientas dentro de la app", "texto": "Herramientas como Anti-Studio, que tus agentes abren y usan contigo." },
+    { "titulo": "Edición de vídeo", "texto": "Cortar, pasar a vertical y poner subtítulos, con tu aprobación del resultado." }
   ]
 }
