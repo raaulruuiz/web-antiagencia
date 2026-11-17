@@ -21,12 +21,19 @@ const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación
 const NOTA_APROBACION = "«Por defecto, nada se publica ni se envía sin tu aprobación»: es cierto por defecto, pero no si el usuario activa el modo «Más libertad». Raúl decide si queda así.";
 const NOTA_CONEXIONES = "Shopify y WooCommerce existen en la app pero no se han probado nunca con una tienda real. Raúl decide si se nombran así.";
 
+// Vídeo de la cabecera: lo grabará Raúl. Mientras VIDEO_PENDIENTE sea true, en la revisión
+// (vite dev) se ve un hueco naranja señalado y en producción no se pinta nada, para no
+// publicar una caja vacía. Cuando exista el vídeo, se monta aquí (con VideoConsentido).
+const VIDEO_PENDIENTE = true;
+
 function Video() {
+  if (VIDEO_PENDIENTE && !import.meta.env.DEV) return null;
   return (
-    <div className="p-[3px] rounded-sm bg-gradient-to-r from-[#0067FD] to-[#7000FF] mb-3">
-      <div className="aspect-video bg-[#121212] rounded-sm flex flex-col items-center justify-center text-center px-6">
-        <span className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-white text-2xl mb-4" aria-hidden="true">▶</span>
-        <p className="text-white font-bold" style={rubik}>Vídeo de 60-90 s (lo graba Raúl)</p>
+    <div className="border-2 border-dashed border-orange-400 bg-orange-50 rounded-sm mb-3">
+      <div className="aspect-video flex flex-col items-center justify-center text-center px-6 text-orange-900" style={rubik}>
+        <span className="w-14 h-14 rounded-full bg-orange-200 flex items-center justify-center text-2xl mb-4" aria-hidden="true">▶</span>
+        <p className="font-bold">PENDIENTE · Hueco provisional del vídeo</p>
+        <p className="text-sm mt-1">Vídeo de 60-90 s que grabará Raúl. En la web publicada este hueco no se muestra hasta que esté el vídeo.</p>
       </div>
     </div>
   );
@@ -78,7 +85,6 @@ export default function AntiAgente() {
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
               <Microcopy>Te escribo yo personalmente para agendar · {APROBACION}.</Microcopy>
               <Microcopy>{TEXTO_IA}</Microcopy>
-              <Pendiente>{NOTA_APROBACION}</Pendiente>
             </Hoja>
 
             {/* 1 bis · Las 5 plazas */}
@@ -90,7 +96,6 @@ export default function AntiAgente() {
               <Check titulo="Auditoría de costes gratis.">Miramos qué gasto y qué tiempo te puede quitar Anti-Agente en tu caso.</Check>
               <Check titulo="Condiciones de lanzamiento si quieres algo a tu medida.">Si en la llamada vemos que te conviene algo hecho para ti, te lo ofrezco con precio de lanzamiento cerrado. Si no, no pasa nada: el equipo es gratis igual.</Check>
               <Parrafo className="mt-6">Más adelante, el onboarding y la auditoría serán de pago. Te lo digo ahora para que lo sepas desde el principio.</Parrafo>
-              <Pendiente>Cuando se llenen las 5 plazas: poner PLAZAS_CERRADAS = true (antiAgenteComun.jsx). Quita formulario y calendario y muestra el aviso de lista de espera de pago.</Pendiente>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
             </Hoja>
 
@@ -141,7 +146,6 @@ export default function AntiAgente() {
               <Check titulo="Tu ordenador.">De momento Anti-Agente funciona en tu ordenador, mientras está encendido.</Check>
               <Check titulo="Tu propia cuenta de IA.">{TEXTO_IA}</Check>
               <Check titulo="Tus herramientas de siempre,">si quieres conectarlas: tu tienda (Shopify, WooCommerce), tu email (Klaviyo, MailerLite), Gmail y Meta.</Check>
-              <Pendiente>{NOTA_CONEXIONES}</Pendiente>
               <Parrafo className="mt-6"><strong>Para pequeñas empresas, no para multinacionales.</strong> Está pensado para tiendas donde el dueño lo hace casi todo.</Parrafo>
             </Hoja>
 
@@ -169,7 +173,6 @@ export default function AntiAgente() {
                   <p className="text-gray-800 text-lg leading-loose">{r}</p>
                 </div>
               ))}
-              <Pendiente>{NOTA_APROBACION}</Pendiente>
               <div className="mb-5">
                 <h3 className="text-lg font-bold text-gray-900 mb-1" style={rubik}>¿Dónde quedan los datos de mi tienda?</h3>
                 <p className="text-gray-800 text-lg leading-loose mb-3">En tu ordenador. Tus conversaciones, memorias y archivos se guardan en tu propio ordenador, y las claves y accesos de tus conexiones también, cifrados con el llavero del sistema.</p>
