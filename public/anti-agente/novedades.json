@@ -1,7 +1,17 @@
 {
-  "ultima": { "version": "0.1.9", "fecha": "2026-11-17" },
+  "ultima": { "version": "0.1.10", "fecha": "2026-11-17" },
   "descargas": { "mac": "" },
   "versiones": [
+    {
+      "version": "0.1.10",
+      "fecha": "2026-11-17",
+      "entradas": [
+        {"id": "libertad-niveles", "titulo": "«Más libertad» en tres niveles", "texto": "En Configuración › General eliges: apagado, más libertad o aprobar siempre. En el tercero puedes decir que un agente publique un tipo de cambio sin preguntarte, con doble confirmación, y quitarlo cuando quieras.", "ca": {"titulo": "«Més llibertat» en tres nivells", "texto": "A Configuració › General tries: apagat, més llibertat o aprovar sempre. En el tercer pots dir que un agent publiqui un tipus de canvi sense preguntar-te, amb doble confirmació, i treure-ho quan vulguis."}, "en": {"titulo": "“More freedom” in three levels", "texto": "In Settings › General you choose: off, more freedom or always approve. In the third one you can let an agent publish a type of change without asking you, with a double confirmation, and remove it whenever you want."}},
+        {"id": "ajustes-coordinador", "titulo": "Tu coordinador puede cambiar la configuración", "texto": "Pídele que cambie un ajuste de la app y te saldrá una tarjeta que explica el cambio y su riesgo. No se aplica nada sin tu OK.", "ca": {"titulo": "El teu coordinador pot canviar la configuració", "texto": "Demana-li que canviï un ajust de l'app i et sortirà una targeta que explica el canvi i el seu risc. No s'aplica res sense el teu OK."}, "en": {"titulo": "Your coordinator can change the settings", "texto": "Ask it to change an app setting and you'll get a card explaining the change and its risk. Nothing is applied without your OK."}},
+        {"id": "maximo-adjuntos", "titulo": "Adjunta archivos a Máximo", "texto": "Manda capturas o documentos junto a tus ideas y fallos. Los agentes con permiso también pueden enviarlos, después de que lo apruebes.", "ca": {"titulo": "Adjunta arxius a en Màxim", "texto": "Envia captures o documents amb les teves idees i errors. Els agents amb permís també els poden enviar, després que ho aprovis."}, "en": {"titulo": "Attach files to Máximo", "texto": "Send screenshots or documents along with your ideas and bugs. Agents with permission can send them too, after you approve it."}},
+        {"id": "configuracion-salto", "titulo": "Arreglado: Configuración ya no salta", "texto": "Al pulsar un interruptor, la ventana de Configuración ya no se mueve de sitio.", "ca": {"titulo": "Arreglat: Configuració ja no salta", "texto": "En prémer un interruptor, la finestra de Configuració ja no es mou de lloc."}, "en": {"titulo": "Fixed: Settings no longer jumps", "texto": "When you flip a switch, the Settings window no longer moves around."}}
+      ]
+    },
     {
       "version": "0.1.9",
       "fecha": "2026-11-17",
