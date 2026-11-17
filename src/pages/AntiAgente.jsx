@@ -108,14 +108,16 @@ export default function AntiAgente() {
 
             {/* 2 · Qué hace tu equipo */}
             <Hoja>
-              <Titulo>Lo que hoy haces tú a ratos, lo prepara tu equipo.</Titulo>
-              <Parrafo>Anti-Agente es una app con un equipo de agentes con IA. Cada uno se ocupa de una parte de tu tienda y te lo deja preparado para que tú lo revises:</Parrafo>
+              <Titulo>Lo que haces tú, ahora lo prepara tu equipo.</Titulo>
+              <Parrafo>Anti-Agente es una app con un equipo de agentes con IA. Consumen de tus propias suscripciones, así que no tienen coste extra. Cada uno se ocupa de una parte de tu tienda y te lo deja preparado para que tú lo revises.</Parrafo>
+              <Parrafo>Algunos ejemplos de lo que pueden hacer:</Parrafo>
               <Check titulo="Correo:">lee tu bandeja, te dice qué es importante y te deja las respuestas escritas.</Check>
-              <Check titulo="Email marketing:">prepara tus newsletters y campañas con tu tono.</Check>
-              <Check titulo="Contenido y redes:">ideas, textos y calendario a partir de lo que ya tienes.</Check>
-              <Check titulo="Publicidad:">revisa tus anuncios y te propone campañas listas para aprobar.</Check>
+              <Check titulo="Email marketing:">prepara tus newsletters y campañas con tu tono. No parece que lo haya escrito una IA.</Check>
+              <Check titulo="Contenido y redes:">analiza tu contenido y el de tu competencia, te propone ideas e incluso te edita los vídeos e imágenes.</Check>
+              <Check titulo="Publicidad:">revisa tus anuncios, te monta las campañas, optimiza presupuestos...</Check>
               <Check titulo="Números:">te resume cada mañana cómo va la tienda.</Check>
-              <Parrafo className="mt-6">Viene ya montado. Al empezar, le cuentas cómo es tu negocio y el equipo se adapta: tu tono, tus productos, tus clientes. Se conecta con tu tienda (Shopify, WooCommerce), tu email (Klaviyo, MailerLite), Gmail y Meta. No tienes que dejar ninguna de tus herramientas.</Parrafo>
+              <Check>También pueden editar la web e implementar funciones que serían de pago con otras herramientas.</Check>
+              <Parrafo className="mt-6">Viene ya montado. Al empezar, le cuentas cómo es tu negocio y el equipo se adapta a tu tono, tus productos, tus clientes. Se conecta con tu tienda (Shopify o WooCommerce), tu email (Klaviyo, MailerLite), Gmail y Meta. No tienes que dejar ninguna de tus herramientas.</Parrafo>
               <Parrafo>Empieza por tu tienda online y, si quieres, se extiende al resto de tu negocio.</Parrafo>
             </Hoja>
 
