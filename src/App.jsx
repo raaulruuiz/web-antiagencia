@@ -32,6 +32,7 @@ import CuentaAntiStudio from './pages/CuentaAntiStudio';
 import AntiStudio from './pages/AntiStudio';
 import AntiAgente from './pages/AntiAgente';
 import AntiAgenteGracias from './pages/AntiAgenteGracias';
+import AntiAgenteB from './pages/AntiAgenteB';
 import NovedadesAntiStudio from './pages/NovedadesAntiStudio';
 import TikTokConnect from './pages/TikTokConnect';
 import JorgeCoronado from './pages/JorgeCoronado';
@@ -234,6 +235,8 @@ const AuthenticatedApp = () => {
       {/* Borrador: lista prioritaria de Anti-Agente (noindex, sin publicar) */}
       <Route path="/anti-agente" element={<AntiAgente />} />
       <Route path="/anti-agente/gracias" element={<AntiAgenteGracias />} />
+      {/* Borrador: versión B de la landing, para comparar (noindex, sin publicar) */}
+      <Route path="/anti-agente-b" element={<AntiAgenteB />} />
       <Route path="/q3" element={<PlanningQ3 />} />
       <Route path="/q4" element={<PlanningQ4 />} />
       <Route path="/reservar/gestionar/:token" element={<GestionarReserva />} />

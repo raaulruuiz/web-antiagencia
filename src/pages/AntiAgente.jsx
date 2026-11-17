@@ -1,60 +1,15 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import FooterMinimal from "@/components/landing/FooterMinimal";
-import FormularioListaPrioritaria from "@/components/FormularioListaPrioritaria";
 import {
-  Boton, Check, claseBoton, Contador, FORM_MAILERLITE, Hoja, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, RUTA_GRACIAS, rubik, Titulo, leerUtm, utmAQuery,
+  APROBACION, Boton, PREGUNTAS, Check, Contador, Formulario, Hoja, ListaCerrada, Microcopy, Parrafo, Pendiente, PLAZAS_CERRADAS, rubik, TEXTO_BAJO_BOTON, TEXTO_BOTON, Titulo, Video, VIDEO_VISIBLE, leerUtm,
 } from "./antiAgenteComun";
 
 // /anti-agente — landing de la lista prioritaria de Anti-Agente (BORRADOR, noindex).
 // Textos: «cambios v2» de Perro Sanxe (16-11-2026) sobre el PDF del mismo día, con las
 // correcciones factuales de Anti-Agente (IA, datos, aprobación, conexiones).
 // Los recuadros <Pendiente> son notas para Raúl: solo se ven en local, nunca en producción.
-
-const TEXTO_BOTON = "Quiero una de las 5 plazas";
-const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación";
-// Microtexto bajo los botones con microtexto (cabecera y formulario). Texto de Raúl, 17-11-2026.
-const TEXTO_BAJO_BOTON = "Cuando te apuntes, te escribiré para agendar una llamada: te hago una demo para enseñarte la herramienta, dejamos tu equipo a punto y hacemos la auditoría de costes. Es gratis porque usa Claude Code y Codex (ChatGPT), los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Así que solo está sujeto a los términos de cada proveedor.";
-
-// Vídeo de la cabecera: lo grabará Raúl. Mientras VIDEO_PENDIENTE sea true, en la revisión
-// (vite dev) se ve un hueco naranja señalado y en producción no se pinta nada, para no
-// publicar una caja vacía. Cuando exista el vídeo, se monta aquí (con VideoConsentido).
-const VIDEO_PENDIENTE = true;
-const VIDEO_VISIBLE = !VIDEO_PENDIENTE || import.meta.env.DEV;
-
-function Video() {
-  if (!VIDEO_VISIBLE) return null;
-  return (
-    <div className="border-2 border-dashed border-orange-400 bg-orange-50 rounded-sm mb-3">
-      <div className="aspect-video flex flex-col items-center justify-center text-center px-6 text-orange-900" style={rubik}>
-        <span className="w-14 h-14 rounded-full bg-orange-200 flex items-center justify-center text-2xl mb-4" aria-hidden="true">▶</span>
-        <p className="font-bold">PENDIENTE · Hueco provisional del vídeo</p>
-        <p className="text-sm mt-1">Vídeo de 60-90 s que grabará Raúl. En la web publicada este hueco no se muestra hasta que esté el vídeo.</p>
-      </div>
-    </div>
-  );
-}
-
-function Microcopy({ children }) {
-  return <p className="text-sm text-gray-600 mt-3" style={rubik}>{children}</p>;
-}
-
-function Formulario({ utm }) {
-  const navigate = useNavigate();
-  const gracias = `${RUTA_GRACIAS}${utmAQuery(utm)}`;
-  const alEnviar = useCallback(() => navigate(gracias), [navigate, gracias]);
-  return (
-    <FormularioListaPrioritaria
-      {...FORM_MAILERLITE}
-      textoBoton={TEXTO_BOTON}
-      claseBoton={claseBoton()}
-      estiloBoton={rubik}
-      bajoBoton={<><Contador /><Microcopy>{TEXTO_BAJO_BOTON}</Microcopy></>}
-      onEnviado={alEnviar}
-    />
-  );
-}
 
 export default function AntiAgente() {
   const { search } = useLocation();
@@ -166,12 +121,7 @@ export default function AntiAgente() {
             {/* 8 · Preguntas */}
             <Hoja>
               <Titulo>Preguntas frecuentes</Titulo>
-              {[
-                ["¿De verdad es gratis?", "Sí, la app es gratis. Usa Claude Code y Codex (ChatGPT), los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Sujeto a los términos de cada proveedor."],
-                ["¿Tengo que saber de IA?", "No. Viene montado y al empezar le explicas tu negocio con tus palabras. Y si tienes dudas, hablas conmigo."],
-                ["¿Tengo que dejar mis herramientas?", "No. Se conecta con las que ya usas. En la auditoría de costes es posible que quieras sustituir algo que ya usas por algo gratis hecho a medida para ti, pero no es necesario si no quieres. Los agentes pueden usar todas tus herramientas."],
-                ["¿Puede enviar algo sin que yo lo vea?", "Por defecto, no. Todo lo que se publica o se envía te llega antes para que lo apruebes."],
-              ].map(([p, r]) => (
+              {PREGUNTAS.map(([p, r]) => (
                 <div key={p} className="mb-5">
                   <h3 className="text-lg font-bold text-gray-900 mb-1" style={rubik}>{p}</h3>
                   <p className="text-gray-800 text-lg leading-loose">{r}</p>

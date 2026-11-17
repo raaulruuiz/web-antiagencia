@@ -1,5 +1,7 @@
-import React from "react";
-import { rubik } from "./antiStudioComun";
+import React, { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import FormularioListaPrioritaria from "@/components/FormularioListaPrioritaria";
+import { claseBoton, rubik } from "./antiStudioComun";
 import { leerConsentimiento } from "@/lib/consentimiento";
 
 export { Hoja, Titulo, Boton, claseBoton, rubik } from "./antiStudioComun";
@@ -97,3 +99,56 @@ export function ListaCerrada() {
     </div>
   );
 }
+
+// ── Piezas compartidas por /anti-agente y /anti-agente-b ─────────────────
+export const TEXTO_BOTON = "Quiero una de las 5 plazas";
+export const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación";
+// Microtexto bajo los botones con microtexto (cabecera y formulario). Texto de Raúl, 17-11-2026.
+export const TEXTO_BAJO_BOTON = "Cuando te apuntes, te escribiré para agendar una llamada: te hago una demo para enseñarte la herramienta, dejamos tu equipo a punto y hacemos la auditoría de costes. Es gratis porque usa Claude Code y Codex (ChatGPT), los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Así que solo está sujeto a los términos de cada proveedor.";
+
+// Vídeo de la cabecera: lo grabará Raúl. Mientras VIDEO_PENDIENTE sea true, en la revisión
+// (vite dev) se ve un hueco naranja señalado y en producción no se pinta nada, para no
+// publicar una caja vacía. Cuando exista el vídeo, se monta aquí (con VideoConsentido).
+export const VIDEO_PENDIENTE = true;
+export const VIDEO_VISIBLE = !VIDEO_PENDIENTE || import.meta.env.DEV;
+
+export function Video() {
+  if (!VIDEO_VISIBLE) return null;
+  return (
+    <div className="border-2 border-dashed border-orange-400 bg-orange-50 rounded-sm mb-3">
+      <div className="aspect-video flex flex-col items-center justify-center text-center px-6 text-orange-900" style={rubik}>
+        <span className="w-14 h-14 rounded-full bg-orange-200 flex items-center justify-center text-2xl mb-4" aria-hidden="true">▶</span>
+        <p className="font-bold">PENDIENTE · Hueco provisional del vídeo</p>
+        <p className="text-sm mt-1">Vídeo de 60-90 s que grabará Raúl. En la web publicada este hueco no se muestra hasta que esté el vídeo.</p>
+      </div>
+    </div>
+  );
+}
+
+export function Microcopy({ children }) {
+  return <p className="text-sm text-gray-600 mt-3" style={rubik}>{children}</p>;
+}
+
+export function Formulario({ utm }) {
+  const navigate = useNavigate();
+  const gracias = `${RUTA_GRACIAS}${utmAQuery(utm)}`;
+  const alEnviar = useCallback(() => navigate(gracias), [navigate, gracias]);
+  return (
+    <FormularioListaPrioritaria
+      {...FORM_MAILERLITE}
+      textoBoton={TEXTO_BOTON}
+      claseBoton={claseBoton()}
+      estiloBoton={rubik}
+      bajoBoton={<><Contador /><Microcopy>{TEXTO_BAJO_BOTON}</Microcopy></>}
+      onEnviado={alEnviar}
+    />
+  );
+}
+
+// Preguntas frecuentes cortas (texto de Raúl, 17-11-2026), en las dos versiones de la landing.
+export const PREGUNTAS = [
+  ["¿De verdad es gratis?", "Sí, la app es gratis. Usa Claude Code y Codex (ChatGPT), los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Sujeto a los términos de cada proveedor."],
+  ["¿Tengo que saber de IA?", "No. Viene montado y al empezar le explicas tu negocio con tus palabras. Y si tienes dudas, hablas conmigo."],
+  ["¿Tengo que dejar mis herramientas?", "No. Se conecta con las que ya usas. En la auditoría de costes es posible que quieras sustituir algo que ya usas por algo gratis hecho a medida para ti, pero no es necesario si no quieres. Los agentes pueden usar todas tus herramientas."],
+  ["¿Puede enviar algo sin que yo lo vea?", "Por defecto, no. Todo lo que se publica o se envía te llega antes para que lo apruebes."],
+];
