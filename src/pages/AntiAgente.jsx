@@ -13,7 +13,9 @@ import {
 // Los recuadros <Pendiente> son notas para Raúl: solo se ven en local, nunca en producción.
 
 const TEXTO_BOTON = "Quiero una de las 5 plazas";
-const IA = "tu suscripción de Claude o de ChatGPT";
+// Texto único sobre la IA (decisión de Raúl, 17-11-2026). Sin «gratis con tu IA», sin logos ni
+// «compatible oficialmente», sin claves de API.
+const TEXTO_IA = "Usa Claude Code y Codex, los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Sujeto a los términos de cada proveedor.";
 const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación";
 
 const NOTA_APROBACION = "«Por defecto, nada se publica ni se envía sin tu aprobación»: es cierto por defecto, pero no si el usuario activa el modo «Más libertad». Raúl decide si queda así.";
@@ -74,7 +76,8 @@ export default function AntiAgente() {
               <Video />
               <p className="text-gray-800 text-lg italic text-center mb-8">«Antes, esto me llevaba media mañana. Ahora está hecho a las 9.»</p>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
-              <Microcopy>Te escribo yo personalmente para agendar · Funciona con {IA} · {APROBACION}</Microcopy>
+              <Microcopy>Te escribo yo personalmente para agendar · {APROBACION}.</Microcopy>
+              <Microcopy>{TEXTO_IA}</Microcopy>
               <Pendiente>{NOTA_APROBACION}</Pendiente>
             </Hoja>
 
@@ -136,7 +139,7 @@ export default function AntiAgente() {
             <Hoja>
               <Titulo>Qué necesitas</Titulo>
               <Check titulo="Tu ordenador.">De momento Anti-Agente funciona en tu ordenador, mientras está encendido.</Check>
-              <Check titulo="Tu propia suscripción de IA: Claude o ChatGPT.">Anti-Agente es gratis; la IA que lo mueve la sigues pagando a quien ya se la pagas. Si ya tienes una, no pagas nada más.</Check>
+              <Check titulo="Tu propia cuenta de IA.">{TEXTO_IA}</Check>
               <Check titulo="Tus herramientas de siempre,">si quieres conectarlas: tu tienda (Shopify, WooCommerce), tu email (Klaviyo, MailerLite), Gmail y Meta.</Check>
               <Pendiente>{NOTA_CONEXIONES}</Pendiente>
               <Parrafo className="mt-6"><strong>Para pequeñas empresas, no para multinacionales.</strong> Está pensado para tiendas donde el dueño lo hace casi todo.</Parrafo>
@@ -156,7 +159,7 @@ export default function AntiAgente() {
             <Hoja>
               <Titulo>Preguntas frecuentes</Titulo>
               {[
-                ["¿De verdad es gratis?", `Sí, la app es gratis. Lo único que necesitas es ${IA}.`],
+                ["¿De verdad es gratis?", `Sí, la app es gratis. ${TEXTO_IA}`],
                 ["¿Tengo que saber de IA?", "No. Viene montado y al empezar le explicas tu negocio con tus palabras."],
                 ["¿Tengo que dejar mis herramientas?", "No. Se conecta con las que ya usas."],
                 ["¿Puede enviar algo sin que yo lo vea?", "Por defecto, no: todo lo que se publica o se envía te llega antes para que lo apruebes."],
@@ -171,7 +174,7 @@ export default function AntiAgente() {
                 <h3 className="text-lg font-bold text-gray-900 mb-1" style={rubik}>¿Dónde quedan los datos de mi tienda?</h3>
                 <p className="text-gray-800 text-lg leading-loose mb-3">En tu ordenador. Tus conversaciones, memorias y archivos se guardan en tu propio ordenador, y las claves y accesos de tus conexiones también, cifrados con el llavero del sistema.</p>
                 <p className="text-gray-800 text-lg leading-loose mb-3">Las llamadas a tu tienda y a tus herramientas van directas de tu ordenador a cada servicio: no pasan por ningún servidor mío. Mis servidores solo reciben tu inicio de sesión (tu email), nada de tu tienda.</p>
-                <p className="text-gray-800 text-lg leading-loose mb-3">Lo que lee o escribe tu equipo pasa por la IA que uses (Anthropic u OpenAI), según sus condiciones, no las mías.</p>
+                <p className="text-gray-800 text-lg leading-loose mb-3">Lo que lee o escribe tu equipo pasa por la IA que uses (Claude Code, de Anthropic, o Codex, de OpenAI), según los términos de cada proveedor, no los míos.</p>
                 <p className="text-gray-800 text-lg leading-loose">Solo si tú lo autorizas, se compartirá algo para mejorar la app.</p>
                 <Pendiente>Respuesta real confirmada por Anti-Agente tras mirar el código (sustituye a la de Perro Sanxe). Redacción para revisión de Raúl.</Pendiente>
               </div>
@@ -183,7 +186,8 @@ export default function AntiAgente() {
                 <Titulo>Imagina tenerlo hecho a las 9.</Titulo>
                 <Parrafo>Apúntate, te escribo yo y lo dejamos a punto juntos.</Parrafo>
                 {PLAZAS_CERRADAS ? <ListaCerrada /> : <Formulario utm={utm} />}
-                <Microcopy>Con {IA} · {APROBACION}</Microcopy>
+                <Microcopy>{APROBACION}.</Microcopy>
+                <Microcopy>{TEXTO_IA}</Microcopy>
               </Hoja>
             </div>
 
