@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import FormularioListaPrioritaria from "@/components/FormularioListaPrioritaria";
 import {
-  Boton, Check, claseBoton, FORM_MAILERLITE, Hoja, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, RUTA_GRACIAS, rubik, Titulo, leerUtm, utmAQuery,
+  Boton, Check, claseBoton, Contador, FORM_MAILERLITE, Hoja, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, RUTA_GRACIAS, rubik, Titulo, leerUtm, utmAQuery,
 } from "./antiAgenteComun";
 
 // /anti-agente — landing de la lista prioritaria de Anti-Agente (BORRADOR, noindex).
@@ -17,14 +17,17 @@ const TEXTO_BOTON = "Quiero una de las 5 plazas";
 // «compatible oficialmente», sin claves de API.
 const TEXTO_IA = "Usa Claude Code y Codex, los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Sujeto a los términos de cada proveedor.";
 const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación";
+// Microtexto bajo los botones con microtexto (cabecera y formulario). Texto de Raúl, 17-11-2026.
+const TEXTO_BAJO_BOTON = "Cuando te apuntes, te escribiré para agendar una demo y enseñarte la herramienta. Es gratis porque usa Claude Code y Codex, los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Así que solo está sujeto a los términos de cada proveedor.";
 
 // Vídeo de la cabecera: lo grabará Raúl. Mientras VIDEO_PENDIENTE sea true, en la revisión
 // (vite dev) se ve un hueco naranja señalado y en producción no se pinta nada, para no
 // publicar una caja vacía. Cuando exista el vídeo, se monta aquí (con VideoConsentido).
 const VIDEO_PENDIENTE = true;
+const VIDEO_VISIBLE = !VIDEO_PENDIENTE || import.meta.env.DEV;
 
 function Video() {
-  if (VIDEO_PENDIENTE && !import.meta.env.DEV) return null;
+  if (!VIDEO_VISIBLE) return null;
   return (
     <div className="border-2 border-dashed border-orange-400 bg-orange-50 rounded-sm mb-3">
       <div className="aspect-video flex flex-col items-center justify-center text-center px-6 text-orange-900" style={rubik}>
@@ -50,7 +53,7 @@ function Formulario({ utm }) {
       textoBoton={TEXTO_BOTON}
       claseBoton={claseBoton()}
       estiloBoton={rubik}
-      textoBajoBoton="Te escribo yo personalmente para agendar."
+      bajoBoton={<><Contador /><Microcopy>{TEXTO_BAJO_BOTON}</Microcopy></>}
       onEnviado={alEnviar}
     />
   );
@@ -76,13 +79,16 @@ export default function AntiAgente() {
               <h1 className="text-3xl md:text-5xl font-bold text-gray-900 uppercase mb-6 leading-tight" style={rubik}>
                 Un equipo de agentes para tu tienda online. Gratis.
               </h1>
-              <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Con este equipo hago en 2 horas lo que antes me llevaba el día entero. No te lo cuento: lo uso cada día en mi propio negocio.</Parrafo>
+              {/* «Te lo enseño en el vídeo:» solo se pinta cuando el vídeo se ve (en producción, cuando exista). */}
+              <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Ahora mi equipo hace todo mi trabajo de un día en menos de 2 horas. Cada agente se especializa en una tarea e interactúan entre ellos.{VIDEO_VISIBLE && " Te lo enseño en el vídeo:"}</Parrafo>
               <Pendiente>Descripción para buscadores y al compartir: sigue la general de la web en las redes que no leen la de esta página. Pendiente de decisión de Raúl; no se toca.</Pendiente>
               <Video />
               <p className="text-gray-800 text-lg italic text-center mb-8">«Antes, esto me llevaba media mañana. Ahora está hecho a las 9.»</p>
-              <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
-              <Microcopy>Te escribo yo personalmente para agendar · {APROBACION}.</Microcopy>
-              <Microcopy>{TEXTO_IA}</Microcopy>
+              <div className="text-center">
+                <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
+                <Contador />
+                <Microcopy>{TEXTO_BAJO_BOTON}</Microcopy>
+              </div>
             </Hoja>
 
             {/* 1 bis · Las 5 plazas */}
@@ -95,6 +101,7 @@ export default function AntiAgente() {
               <Check titulo="Condiciones de lanzamiento si quieres algo a tu medida.">Si en la llamada vemos que te conviene algo hecho para ti, te lo ofrezco con precio de lanzamiento cerrado. Si no, no pasa nada: el equipo es gratis igual.</Check>
               <Parrafo className="mt-6">Más adelante, el onboarding y la auditoría serán de pago. Te lo digo ahora para que lo sepas desde el principio.</Parrafo>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
+              <Contador />
             </Hoja>
 
             {/* 2 · Qué hace tu equipo */}
@@ -185,7 +192,6 @@ export default function AntiAgente() {
                 <Parrafo>Apúntate, te escribo yo y lo dejamos a punto juntos.</Parrafo>
                 {PLAZAS_CERRADAS ? <ListaCerrada /> : <Formulario utm={utm} />}
                 <Microcopy>{APROBACION}.</Microcopy>
-                <Microcopy>{TEXTO_IA}</Microcopy>
               </Hoja>
             </div>
 

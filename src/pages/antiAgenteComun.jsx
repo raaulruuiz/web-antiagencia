@@ -8,9 +8,13 @@ export { Hoja, Titulo, Boton, claseBoton, rubik } from "./antiStudioComun";
 // Tipo de reunión creado en /admin/calendly (30 min, horario copiado del tipo Q4).
 export const SLUG_RESERVA = "lista-prioritaria-anti-agente";
 
-// Interruptor: true cuando se llenen las 5 plazas. Quita el formulario de la
-// landing y el calendario de la página de gracias, y muestra TEXTO_CERRADA.
-export const PLAZAS_CERRADAS = false;
+// Plazas: PLAZAS_RESTANTES es el único valor que hay que cambiar a mano cuando
+// alguien coge una plaza. Alimenta el contador de todos los botones de la landing
+// («Quedan 5 de 5 plazas»). Con 0 la lista queda cerrada: se quita el formulario de
+// la landing y el calendario de la página de gracias, y se muestra TEXTO_CERRADA.
+export const PLAZAS_TOTALES = 5;
+export const PLAZAS_RESTANTES = 5;
+export const PLAZAS_CERRADAS = PLAZAS_RESTANTES <= 0;
 export const TEXTO_CERRADA = "Las 5 plazas están cogidas. Las siguientes personas entrarán en una lista de espera, ya de pago.";
 
 // Formulario de MailerLite de la lista prioritaria (creado por Raúl; añade al grupo
@@ -76,6 +80,13 @@ export function Check({ titulo, children }) {
       <span>{titulo && <strong className="text-[#0067FD]">{titulo}</strong>}{titulo && " "}{children}</span>
     </div>
   );
+}
+
+// Contador de plazas que va debajo de cada botón (no se muestra con la lista cerrada)
+export function Contador({ className = "" }) {
+  if (PLAZAS_CERRADAS) return null;
+  const texto = PLAZAS_RESTANTES === 1 ? `Queda 1 de ${PLAZAS_TOTALES} plazas` : `Quedan ${PLAZAS_RESTANTES} de ${PLAZAS_TOTALES} plazas`;
+  return <p className={`text-sm font-bold text-[#7000FF] mt-3 ${className}`} style={rubik}>{texto}</p>;
 }
 
 // Aviso de lista cerrada (se muestra en lugar del formulario y del calendario)

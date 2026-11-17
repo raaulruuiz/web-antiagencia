@@ -28,7 +28,7 @@ const Etiqueta = ({ htmlFor, children }) => (
 );
 
 export default function FormularioListaPrioritaria({
-  cuenta, formulario, textoBoton, claseBoton, estiloBoton, textoBajoBoton, onEnviado,
+  cuenta, formulario, textoBoton, claseBoton, estiloBoton, bajoBoton, onEnviado,
 }) {
   const [datos, setDatos] = useState({ name: "", email: "", web: "", notas: "" });
   const [acepto, setAcepto] = useState(false);
@@ -131,7 +131,7 @@ export default function FormularioListaPrioritaria({
         <button type="submit" disabled={enviando} className={`${claseBoton} disabled:opacity-60 disabled:cursor-wait`} style={estiloBoton}>
           {enviando ? "Enviando…" : textoBoton}
         </button>
-        {textoBajoBoton && <p className="text-sm text-gray-600 mt-3">{textoBajoBoton}</p>}
+        {bajoBoton}
       </div>
     </form>
   );
