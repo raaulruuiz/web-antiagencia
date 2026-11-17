@@ -152,15 +152,14 @@ export default function PoliticaPrivacidad() {
               <li><B>Meta</B> (Meta Platforms Ireland Ltd.): Meta Pixel, si aceptas las cookies.</li>
               <li><B>Hotjar</B> (Hotjar Ltd., Malta): análisis de uso de la web, si aceptas las cookies.</li>
               <li><B>Stripe</B> (Stripe Payments Europe Ltd., Irlanda): pagos, cuando compras algo a través de un enlace de pago.</li>
-              <li><B>Wistia</B> (Wistia Inc., EE. UU.) y <B>YouTube</B> (Google): reproducción de algunos vídeos de la web.</li>
-              <li><B>Calendly</B> (Calendly LLC, EE. UU.): calendario de reservas de las páginas Contacto y Cómo trabajamos. El resto de reservas de la web usan nuestra propia herramienta.</li>
+              <li><B>YouTube</B> (Google): reproducción de algunos vídeos de la web.</li>
               <li>Asesoría fiscal y contable, para cumplir obligaciones legales con clientes.</li>
             </Lista>
             <Falta>Meta y Google Ads funcionan en parte como responsables independientes de lo que miden (no solo como encargados). Si quieres afinarlo, es un punto para la revisión legal.</Falta>
           </Seccion>
 
           <Seccion titulo="4. Transferencias internacionales">
-            <p>La base de datos (Supabase) y nuestros servidores (Railway) están alojados en la Unión Europea. Aun así, algunos proveedores son empresas de Estados Unidos o pueden acceder a datos desde allí (Google, Meta, Supabase, Vercel, Railway, Wistia, Calendly). En esos casos la transferencia se ampara en el Marco de Privacidad de Datos UE-EE. UU. cuando la empresa está certificada o, si no, en las cláusulas contractuales tipo aprobadas por la Comisión Europea (art. 45 y 46 RGPD). Puedes pedirnos más información en <Mail />.</p>
+            <p>La base de datos (Supabase) y nuestros servidores (Railway) están alojados en la Unión Europea. Aun así, algunos proveedores son empresas de Estados Unidos o pueden acceder a datos desde allí (Google, Meta, Supabase, Vercel, Railway). En esos casos la transferencia se ampara en el Marco de Privacidad de Datos UE-EE. UU. cuando la empresa está certificada o, si no, en las cláusulas contractuales tipo aprobadas por la Comisión Europea (art. 45 y 46 RGPD). Puedes pedirnos más información en <Mail />.</p>
             <Falta>Regiones comprobadas el 16/11: Supabase de la web en eu-west-3 (París) y los tres servicios de Railway en europe-west4 (Países Bajos). Falta que aceptes el contrato de encargo (DPA) en el panel de cada proveedor: lo detallo en el informe.</Falta>
           </Seccion>
 
