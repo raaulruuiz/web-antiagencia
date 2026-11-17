@@ -242,18 +242,6 @@
     ]
   },
   {
-    "id": "calendly-crm",
-    "nombre": "Calendly → CRM",
-    "descripcion": "Cuando se reserva una reunión en Calendly, crea el contacto en el CRM de Notion y lo añade al grupo de Newsletter en MailerLite.",
-    "tipo": "webhook",
-    "schedule": "Webhook · POST /webhooks/calendly",
-    "apps": [
-      "Calendly",
-      "Notion",
-      "MailerLite"
-    ]
-  },
-  {
     "id": "telegram-movimientos",
     "nombre": "Bot Telegram",
     "descripcion": "Bot de Telegram que interpreta mensajes con IA para crear facturas, contratos, presupuestos y movimientos financieros en Notion y Google Drive. También convierte libros epub a azw3 con Calibre y los envía al Kindle.",
