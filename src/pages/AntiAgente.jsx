@@ -13,9 +13,6 @@ import {
 // Los recuadros <Pendiente> son notas para Raúl: solo se ven en local, nunca en producción.
 
 const TEXTO_BOTON = "Quiero una de las 5 plazas";
-// Texto único sobre la IA (decisión de Raúl, 17-11-2026). Sin «gratis con tu IA», sin logos ni
-// «compatible oficialmente», sin claves de API.
-const TEXTO_IA = "Usa Claude Code y Codex, los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Sujeto a los términos de cada proveedor.";
 const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación";
 // Microtexto bajo los botones con microtexto (cabecera y formulario). Texto de Raúl, 17-11-2026.
 const TEXTO_BAJO_BOTON = "Cuando te apuntes, te escribiré para agendar una demo y enseñarte la herramienta. Es gratis porque usa Claude Code y Codex, los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Así que solo está sujeto a los términos de cada proveedor.";
@@ -172,10 +169,10 @@ export default function AntiAgente() {
             <Hoja>
               <Titulo>Preguntas frecuentes</Titulo>
               {[
-                ["¿De verdad es gratis?", `Sí, la app es gratis. ${TEXTO_IA}`],
-                ["¿Tengo que saber de IA?", "No. Viene montado y al empezar le explicas tu negocio con tus palabras."],
-                ["¿Tengo que dejar mis herramientas?", "No. Se conecta con las que ya usas."],
-                ["¿Puede enviar algo sin que yo lo vea?", "Por defecto, no: todo lo que se publica o se envía te llega antes para que lo apruebes."],
+                ["¿De verdad es gratis?", "Sí, la app es gratis. Usa Claude Code y Codex (ChatGPT), los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Sujeto a los términos de cada proveedor."],
+                ["¿Tengo que saber de IA?", "No. Viene montado y al empezar le explicas tu negocio con tus palabras. Y si tienes dudas, hablas conmigo."],
+                ["¿Tengo que dejar mis herramientas?", "No. Se conecta con las que ya usas. En la auditoría de costes es posible que quieras sustituir algo que ya usas por algo gratis hecho a medida para ti, pero no es necesario si no quieres. Los agentes pueden usar todas tus herramientas."],
+                ["¿Puede enviar algo sin que yo lo vea?", "Por defecto, no. Todo lo que se publica o se envía te llega antes para que lo apruebes."],
               ].map(([p, r]) => (
                 <div key={p} className="mb-5">
                   <h3 className="text-lg font-bold text-gray-900 mb-1" style={rubik}>{p}</h3>
@@ -184,10 +181,14 @@ export default function AntiAgente() {
               ))}
               <div className="mb-5">
                 <h3 className="text-lg font-bold text-gray-900 mb-1" style={rubik}>¿Dónde quedan los datos de mi tienda?</h3>
-                <p className="text-gray-800 text-lg leading-loose mb-3">En tu ordenador. Tus conversaciones, memorias y archivos se guardan en tu propio ordenador, y las claves y accesos de tus conexiones también, cifrados con el llavero del sistema.</p>
-                <p className="text-gray-800 text-lg leading-loose mb-3">Las llamadas a tu tienda y a tus herramientas van directas de tu ordenador a cada servicio: no pasan por ningún servidor mío. Mis servidores solo reciben tu inicio de sesión (tu email), nada de tu tienda.</p>
+                <p className="text-gray-800 text-lg leading-loose mb-3">En tu ordenador. Tus conversaciones, memorias y archivos se guardan en tu propio ordenador, y las claves y accesos de tus conexiones también, cifrados para que no haya fallos de seguridad.</p>
+                <p className="text-gray-800 text-lg leading-loose mb-3">El uso de tu tienda y tus herramientas va directo de tu ordenador a cada servicio: no pasan por ningún servidor mío. Mis servidores solo reciben tu inicio de sesión (tu email), nada de tu tienda.</p>
                 <p className="text-gray-800 text-lg leading-loose mb-3">Lo que lee o escribe tu equipo pasa por la IA que uses (Claude Code, de Anthropic, o Codex, de OpenAI), según los términos de cada proveedor, no los míos.</p>
                 <p className="text-gray-800 text-lg leading-loose">Solo si tú lo autorizas, se compartirá algo para mejorar la app.</p>
+              </div>
+              <div className="mb-5">
+                <h3 className="text-lg font-bold text-gray-900 mb-1" style={rubik}>¿Y si ya tengo equipo?</h3>
+                <p className="text-gray-800 text-lg leading-loose">En la llamada podrán venir e instalamos la aplicación para ellos también: cada uno puede tener su equipo de agentes para su propio trabajo. Esto no consume plazas extra, está dentro de tu propia plaza.</p>
               </div>
             </Hoja>
 
