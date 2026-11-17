@@ -6,7 +6,8 @@ import {
   APROBACION, Boton, PREGUNTAS, Check, Contador, Formulario, Hoja, ListaCerrada, Microcopy, Parrafo, Pendiente, PLAZAS_CERRADAS, rubik, TEXTO_BAJO_BOTON, TEXTO_BOTON, Titulo, Video, VIDEO_VISIBLE, leerUtm,
 } from "./antiAgenteComun";
 
-// /anti-agente — landing de la lista prioritaria de Anti-Agente (BORRADOR, noindex).
+// /anti-agente-a — versión A de la landing, solo como RESPALDO oculto (noindex, sin enlaces).
+// La oficial en /anti-agente es la versión B (AntiAgenteB.jsx) desde el 17-11-2026.
 // Textos: «cambios v2» de Perro Sanxe (16-11-2026) sobre el PDF del mismo día, con las
 // correcciones factuales de Anti-Agente (IA, datos, aprobación, conexiones).
 // Los recuadros <Pendiente> son notas para Raúl: solo se ven en local, nunca en producción.

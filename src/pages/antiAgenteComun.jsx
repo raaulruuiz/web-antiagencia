@@ -100,7 +100,7 @@ export function ListaCerrada() {
   );
 }
 
-// ── Piezas compartidas por /anti-agente y /anti-agente-b ─────────────────
+// ── Piezas compartidas por /anti-agente (B) y /anti-agente-a ─────────────────
 export const TEXTO_BOTON = "Quiero una de las 5 plazas";
 export const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación";
 // Microtexto bajo los botones con microtexto (cabecera y formulario). Texto de Raúl, 17-11-2026.

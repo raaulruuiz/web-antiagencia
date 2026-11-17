@@ -3,13 +3,12 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import {
-  Boton, Check, Contador, Formulario, Hoja, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, PREGUNTAS, rubik, TEXTO_BOTON, Titulo, Video, VIDEO_VISIBLE, leerUtm,
+  Boton, Check, Contador, Formulario, Hoja, ListaCerrada, Parrafo, PLAZAS_CERRADAS, PREGUNTAS, rubik, TEXTO_BOTON, Titulo, Video, VIDEO_VISIBLE, leerUtm,
 } from "./antiAgenteComun";
 
-// /anti-agente-b — segunda versión de la landing de la lista prioritaria (BORRADOR, noindex),
-// para comparar con /anti-agente. Secciones apiladas en las mismas tarjetas (Hoja) y fondo que /anti-agente.
+// /anti-agente — landing oficial de la lista prioritaria (versión B, elegida por Raúl el 17-11-2026; noindex).
+// Secciones apiladas en tarjetas (Hoja) sobre fondo gris. La versión A queda de respaldo en /anti-agente-a.
 // Mismo formulario de MailerLite, misma página de gracias y mismo contador (antiAgenteComun.jsx).
-// Textos: los aprobados de /anti-agente. Los títulos marcados «propuesto» son nuevos, pendientes de Raúl.
 
 // Duración del vídeo para el texto de encima («Antes de nada, mira cómo funciona. (X minutos)»).
 // Se rellena cuando esté el vídeo, p. ej. "3 minutos". Mientras esté vacía, en la vista previa
@@ -25,7 +24,7 @@ function TextoVideo() {
   );
 }
 
-// Línea de ventajas bajo el formulario (propuesta)
+// Línea de ventajas bajo el formulario
 const VENTAJAS = "Gratis · En tu ordenador · Con tu Claude o tu ChatGPT";
 
 // Cada sección va en la misma tarjeta blanca (Hoja) que /anti-agente
@@ -74,7 +73,6 @@ export default function AntiAgenteB() {
               <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Ahora mi equipo hace todo mi trabajo de un día en menos de 2 horas. Cada agente se especializa en una tarea e interactúan entre ellos.</Parrafo>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
               <Contador />
-              <Pendiente>Versión B (para comparar con /anti-agente). Títulos de pasos y bloques, la línea de ventajas y «Antes de nada, mira cómo funciona.» son propuestas, pendientes de Raúl.</Pendiente>
             </Seccion>
 
             {/* 2 · Vídeo (en producción no se pinta hasta que exista) */}

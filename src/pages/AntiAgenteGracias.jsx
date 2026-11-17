@@ -5,7 +5,7 @@ import FooterMinimal from "@/components/landing/FooterMinimal";
 import ReservaEmbebida from "@/components/booking/ReservaEmbebida";
 import { Hoja, ListaCerrada, Parrafo, PLAZAS_CERRADAS, rubik, SLUG_RESERVA, Titulo, leerUtm, utmATexto } from "./antiAgenteComun";
 
-// /anti-agente/gracias — a donde redirige el formulario de la lista prioritaria (BORRADOR, noindex).
+// /anti-agente/gracias — a donde redirige el formulario de la lista prioritaria (noindex).
 // Acepta UTM en la URL (?utm_source=newsletter…) y los pasa a las notas de la reserva.
 
 export default function AntiAgenteGracias() {
