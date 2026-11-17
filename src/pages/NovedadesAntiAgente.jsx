@@ -47,6 +47,19 @@ function Version({ v }) {
   );
 }
 
+function LoQuieres() {
+  return (
+    <Hoja>
+      <div className="text-center">
+        <Titulo>¿Lo quieres para tu tienda?</Titulo>
+        <p className="text-gray-800 text-lg leading-loose mb-6">Empiezo con 5 tiendas. Y con esas 5 lo monto yo.</p>
+        <Boton href="/anti-agente#apuntarme">{TEXTO_BOTON}</Boton>
+        <Contador />
+      </div>
+    </Hoja>
+  );
+}
+
 export default function NovedadesAntiAgente() {
   const { versiones, enCurso, pendiente } = useNovedadesAgente();
   // La página se carga aparte, así que el navegador no llega a saltar al ancla
@@ -81,19 +94,14 @@ export default function NovedadesAntiAgente() {
               </Hoja>
             </div>
 
+            <LoQuieres />
+
             <Hoja>
               <Titulo>Lo que ya hace</Titulo>
               {versiones.map((v) => <Version key={v.version} v={v} />)}
             </Hoja>
 
-            <Hoja>
-              <div className="text-center">
-                <Titulo>¿Lo quieres para tu tienda?</Titulo>
-                <p className="text-gray-800 text-lg leading-loose mb-6">Empiezo con 5 tiendas. Y con esas 5 lo monto yo.</p>
-                <Boton href="/anti-agente#apuntarme">{TEXTO_BOTON}</Boton>
-                <Contador />
-              </div>
-            </Hoja>
+            <LoQuieres />
           </div>
         </div>
         <FooterMinimal />
