@@ -37,7 +37,8 @@ export default function AntiAgenteGracias() {
                 <>
                   <Titulo>Elige tu hueco</Titulo>
                   <Parrafo>Elige el hueco que mejor te venga. Son 30 minutos y los hago yo.</Parrafo>
-                  <ReservaEmbebida slug={SLUG_RESERVA} origen={utmATexto(utm)} mostrarDuracion={false} />
+                  {/* Solo esta semana (decisión de Raúl, 17-11-2026): reservas desde el lunes 23-11. Pasada esa fecha no hace nada. */}
+                  <ReservaEmbebida slug={SLUG_RESERVA} origen={utmATexto(utm)} mostrarDuracion={false} desde="2026-11-23" />
                   <p className="text-sm text-gray-600 mt-8" style={rubik}>¿Ningún hueco te encaja? Responde a mi correo y lo buscamos.</p>
                 </>
               )}

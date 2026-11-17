@@ -8,12 +8,13 @@ import CalendarPicker, { BLUE, fmtDiaCorto, initialCalMonth, mensajeError } from
 // Calendario de reservas embebible en cualquier página. Usa la misma herramienta
 // que /reservar/:slug (tipos creados en /admin/calendly), sin su marco de página.
 // `origen` (p. ej. los UTM) se añade a las notas de la reserva para saber de dónde viene.
+// `desde` ('YYYY-MM-DD', opcional) oculta los días anteriores a esa fecha; pasada la fecha no hace nada.
 
 function fmtFechaHoraLarga(iso) {
   return new Date(iso).toLocaleString('es-ES', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
 }
 
-export default function ReservaEmbebida({ slug, origen = '', onReservada, mostrarDuracion = true }) {
+export default function ReservaEmbebida({ slug, origen = '', onReservada, mostrarDuracion = true, desde = null }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tipo, setTipo] = useState(null);
@@ -32,7 +33,7 @@ export default function ReservaEmbebida({ slug, origen = '', onReservada, mostra
         fetch(`${API}/${slug}/disponibilidad`),
       ]);
       if (!rTipo.ok || !rDisp.ok) throw new Error('No se ha podido cargar el calendario.');
-      const dDisp = await rDisp.json();
+      const dDisp = (await rDisp.json()).filter(d => !desde || d.fecha >= desde);
       setTipo(await rTipo.json());
       setDias(dDisp);
       setCalMonth(prev => prev || initialCalMonth(dDisp));
@@ -41,7 +42,7 @@ export default function ReservaEmbebida({ slug, origen = '', onReservada, mostra
     } finally {
       setLoading(false);
     }
-  }, [slug]);
+  }, [slug, desde]);
 
   useEffect(() => { cargar(); }, [cargar]);
 
