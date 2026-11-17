@@ -15,7 +15,7 @@ import {
 const TEXTO_BOTON = "Quiero una de las 5 plazas";
 const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación";
 // Microtexto bajo los botones con microtexto (cabecera y formulario). Texto de Raúl, 17-11-2026.
-const TEXTO_BAJO_BOTON = "Cuando te apuntes, te escribiré para agendar una demo y enseñarte la herramienta. Es gratis porque usa Claude Code y Codex, los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Así que solo está sujeto a los términos de cada proveedor.";
+const TEXTO_BAJO_BOTON = "Cuando te apuntes, te escribiré para agendar una demo y enseñarte la herramienta. Es gratis porque usa Claude Code y Codex (ChatGPT), los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Así que solo está sujeto a los términos de cada proveedor.";
 
 // Vídeo de la cabecera: lo grabará Raúl. Mientras VIDEO_PENDIENTE sea true, en la revisión
 // (vite dev) se ve un hueco naranja señalado y en producción no se pinta nada, para no
