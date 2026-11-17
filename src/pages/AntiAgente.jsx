@@ -124,10 +124,10 @@ export default function AntiAgente() {
             {/* 3 · Un equipo de verdad */}
             <Hoja>
               <Titulo>Como tener tu propio equipo. Tú solo revisas.</Titulo>
-              <Parrafo>Cada agente está especializado en una cosa: uno lleva tu correo, otro tus emails, otro tu contenido, otro tus anuncios. Y hablan entre ellos: si el de contenido necesita un dato de ventas, se lo pide al que lleva los números, igual que harían dos personas de tu equipo.</Parrafo>
-              <Parrafo>Tú no tienes que coordinar a nadie ni explicar cada cosa dos veces. Te dejan el trabajo preparado y tú solo tienes que revisar.</Parrafo>
-              <Parrafo>Y si algo no te encaja, se lo dices como a una persona: «esto más corto», «a este cliente no», «la semana que viene, otra vez».</Parrafo>
-              <Parrafo>En español, y con una persona detrás. Si algo falla, hablas conmigo.</Parrafo>
+              <Parrafo>Cada agente se especializa en una cosa. Por ejemplo, uno lleva tu correo, otro tus emails, otro tu contenido, otro tus anuncios... Hablan entre ellos, como si fuera un equipo de verdad. Por ejemplo, si el de anuncios necesita números de la tienda, se los pide.</Parrafo>
+              <Parrafo>Tú no tienes que coordinar a nadie ni explicar cada cosa dos veces. Aprenden de tu forma de trabajar para no cometer el mismo error dos veces. Te dejan el trabajo preparado y tú solo tienes que revisar.</Parrafo>
+              <Parrafo>Y si algo no te encaja, se lo dices como a una persona. Y si tienes algún problema, podrás enviarme los comentarios para que yo lo revise.</Parrafo>
+              <Parrafo>Tus agentes hablan cualquier idioma, así que puedes expandir el negocio a otros países si lo deseas.</Parrafo>
             </Hoja>
 
             {/* 4 · Mi caso */}
