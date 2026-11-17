@@ -143,17 +143,12 @@ export default function TrabajaConNosotros2() {
 
     fetch("https://assets.mailerlite.com/jsonp/686354/forms/182583896449222335/takel");
 
-    const script = document.createElement("script");
-    script.src = "https://groot.mailerlite.com/js/w/webforms.min.js?v83147fa8ce2d95cb73ece7f28b469519";
-    script.type = "text/javascript";
-    script.id = "mailerlite-script-tcn2";
-    document.body.appendChild(script);
+    // Sin script de MailerLite (dejaba la cookie ml_guid sin consentimiento): el envío lo hace
+    // src/lib/mailerliteSinScript.js, activado en main.jsx.
 
     return () => {
       const css = document.getElementById("mailerlite-css-tcn2");
       if (css && css.parentNode) css.parentNode.removeChild(css);
-      const scr = document.getElementById("mailerlite-script-tcn2");
-      if (scr && scr.parentNode) scr.parentNode.removeChild(scr);
     };
   }, []);
 

@@ -160,10 +160,9 @@ export default function PoliticaCookies() {
             <p>Algunas páginas muestran contenido de otros servicios. Al cargarlo o usarlo, esos servicios pueden guardar sus propias cookies, según sus políticas:</p>
             <ul className="space-y-2 list-disc list-inside pl-2">
               <li><B>YouTube</B> (Google): vídeos de los podcasts. Usamos la versión de privacidad mejorada (youtube-nocookie.com). <Enlace href="https://policies.google.com/technologies/cookies?hl=es">Política de cookies de Google</Enlace>.</li>
-              <li><B>MailerLite</B>: los formularios para apuntarte a la newsletter (el de la lista prioritaria de Anti-Agente no carga nada de MailerLite en tu navegador: solo le envía tus datos cuando pulsas el botón). <Enlace href="https://www.mailerlite.com/legal/cookie-policy">Política de cookies de MailerLite</Enlace>.</li>
+              <li><B>MailerLite</B>: los formularios de la web para apuntarte a la newsletter, a la lista prioritaria de Anti-Agente o para pedir presupuesto. No cargamos el script de MailerLite ni guardan cookies en tu navegador: al abrir la página solo se descargan las fuentes y el estilo del formulario y se avisa a MailerLite de la visita (para contar cuántas veces se ve), y tus datos solo se le envían cuando pulsas el botón. <Enlace href="https://www.mailerlite.com/legal/cookie-policy">Política de cookies de MailerLite</Enlace>.</li>
             </ul>
             <p>Los vídeos de YouTube no se cargan hasta que aceptas las cookies o pulsas «reproducir»: hasta entonces solo ves un recuadro nuestro, y tu navegador no se conecta con YouTube.</p>
-            <Falta>Los formularios de MailerLite se pueden considerar parte del servicio que pides al usarlos. Ojo: el script de los formularios de newsletter de MailerLite guarda un identificador (ml_guid) en el navegador al cargar la página, sin esperar al banner.</Falta>
           </Seccion>
 
           <Seccion titulo="6. Cómo cambiar de opinión o borrar las cookies">

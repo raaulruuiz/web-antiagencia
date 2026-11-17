@@ -194,14 +194,8 @@ export default function MailerLitePopup() {
 
     fetch('https://assets.mailerlite.com/jsonp/686354/forms/182583896449222335/takel');
 
-    // Script
-    if (!document.getElementById('ml-popup-script')) {
-      const script = document.createElement('script');
-      script.src = 'https://groot.mailerlite.com/js/w/webforms.min.js?vb397d78ebaa8a0f631d35384c46d781b';
-      script.type = 'text/javascript';
-      script.id = 'ml-popup-script';
-      document.body.appendChild(script);
-    }
+    // Sin script de MailerLite (dejaba la cookie ml_guid sin consentimiento): el envío lo hace
+    // src/lib/mailerliteSinScript.js, activado en main.jsx.
   }, []);
 
   // Close on Escape

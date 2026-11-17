@@ -25,17 +25,12 @@ export default function CapsuleDigital() {
 
     fetch("https://assets.mailerlite.com/jsonp/686354/forms/189647442613896255/takel");
 
-    const script = document.createElement("script");
-    script.src = "https://groot.mailerlite.com/js/w/webforms.min.js?v95037e5bac78f29ed026832ca21a7c7b";
-    script.type = "text/javascript";
-    script.id = "mailerlite-script-capsula";
-    document.body.appendChild(script);
+    // Sin script de MailerLite (dejaba la cookie ml_guid sin consentimiento): el envío lo hace
+    // src/lib/mailerliteSinScript.js, activado en main.jsx.
 
     return () => {
       const css = document.getElementById("mailerlite-css-capsula");
       if (css && css.parentNode) css.parentNode.removeChild(css);
-      const s = document.getElementById("mailerlite-script-capsula");
-      if (s && s.parentNode) s.parentNode.removeChild(s);
     };
   }, []);
 

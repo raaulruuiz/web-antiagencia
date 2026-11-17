@@ -35,17 +35,12 @@ export default function Newsletter() {
 
     fetch("https://assets.mailerlite.com/jsonp/686354/forms/181751106241562330/takel");
 
-    const script = document.createElement("script");
-    script.src = "https://groot.mailerlite.com/js/w/webforms.min.js?v95037e5bac78f29ed026832ca21a7c7b";
-    script.type = "text/javascript";
-    script.id = "mailerlite-script-newsletter";
-    document.body.appendChild(script);
+    // Sin script de MailerLite (dejaba la cookie ml_guid sin consentimiento): el envío lo hace
+    // src/lib/mailerliteSinScript.js, activado en main.jsx.
 
     return () => {
       const css = document.getElementById("mailerlite-css-newsletter");
       if (css && css.parentNode) css.parentNode.removeChild(css);
-      const s = document.getElementById("mailerlite-script-newsletter");
-      if (s && s.parentNode) s.parentNode.removeChild(s);
     };
   }, []);
 
