@@ -94,11 +94,13 @@ export default function AntiAgente() {
             {/* 1 bis · Las 5 plazas */}
             <Hoja>
               <Titulo>Empiezo con 5 tiendas. Y con esas 5 lo monto yo.</Titulo>
-              <Parrafo>No es una forma de meterte prisa. Son 5 porque las llamadas las hago yo, una a una, y no quiero hacerlas mal.</Parrafo>
+              <Parrafo>No es una forma de meterte prisa. Son 5 porque las llamadas las hago yo, una a una, y te voy a dar gratis un servicio que será de pago.</Parrafo>
               <Parrafo>Si te quedas una de las 5 plazas, tienes:</Parrafo>
               <Check titulo="Onboarding gratis en videollamada.">Dejamos juntos tu equipo de agentes a punto para tu tienda: conectamos tus herramientas y lo adaptamos a cómo trabajas.</Check>
-              <Check titulo="Auditoría de costes gratis.">Miramos qué gasto y qué tiempo te puede quitar Anti-Agente en tu caso.</Check>
-              <Check titulo="Condiciones de lanzamiento si quieres algo a tu medida.">Si en la llamada vemos que te conviene algo hecho para ti, te lo ofrezco con precio de lanzamiento cerrado. Si no, no pasa nada: el equipo es gratis igual.</Check>
+              <Check titulo="Auditoría de costes gratis.">Miramos qué gasto y qué tiempo te puede quitar Anti-Agente en tu caso. En mi caso, me ahorré más de 200 € al mes en costes fijos, y el trabajo de un día entero lo hago en 2 horas.</Check>
+              <Check titulo="Oferta de lanzamiento.">Puedo construir herramientas únicas y personalizadas para tus agentes, que te reducirán los costes que vemos en la auditoría de costes. Si te interesa, tendrás un precio especial por lanzamiento, solo para las 5 primeras plazas. Si no lo quieres, me lo dices en la llamada y no pasa nada.</Check>
+              {/* Anti-Studio: descripción facilitada por el bot de Anti-Studio (17-11-2026); pendiente de visto bueno de Raúl. */}
+              <Check titulo="Anti-Studio gratis.">Una app para escribir los emails de tu tienda con IA y con tu voz, que te los deja como borrador en Klaviyo, MailerLite o ActiveCampaign. Por ahora es una app aparte; en la oferta de lanzamiento entra gratis y después será de pago.</Check>
               <Parrafo className="mt-6">Más adelante, el onboarding y la auditoría serán de pago. Te lo digo ahora para que lo sepas desde el principio.</Parrafo>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
               <Contador />
