@@ -81,6 +81,10 @@ export default function AntiAgenteB() {
               <Seccion>
                 <TextoVideo />
                 <Video />
+                <div className="text-center mt-8">
+                  <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
+                  <Contador />
+                </div>
               </Seccion>
             )}
 
