@@ -15,7 +15,7 @@ import {
 const TEXTO_BOTON = "Quiero una de las 5 plazas";
 const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación";
 // Microtexto bajo los botones con microtexto (cabecera y formulario). Texto de Raúl, 17-11-2026.
-const TEXTO_BAJO_BOTON = "Cuando te apuntes, te escribiré para agendar una demo y enseñarte la herramienta. Es gratis porque usa Claude Code y Codex (ChatGPT), los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Así que solo está sujeto a los términos de cada proveedor.";
+const TEXTO_BAJO_BOTON = "Cuando te apuntes, te escribiré para agendar una llamada: te hago una demo para enseñarte la herramienta, dejamos tu equipo a punto y hacemos la auditoría de costes. Es gratis porque usa Claude Code y Codex (ChatGPT), los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Así que solo está sujeto a los términos de cada proveedor.";
 
 // Vídeo de la cabecera: lo grabará Raúl. Mientras VIDEO_PENDIENTE sea true, en la revisión
 // (vite dev) se ve un hueco naranja señalado y en producción no se pinta nada, para no
@@ -194,7 +194,7 @@ export default function AntiAgente() {
             <div id="apuntarme" className="scroll-mt-8">
               <Hoja>
                 <Titulo>Imagina tenerlo hecho a las 9.</Titulo>
-                <Parrafo>Apúntate, te escribo yo y lo dejamos a punto juntos.</Parrafo>
+                <Parrafo>Apúntate, te escribo yo y en la llamada te enseño la herramienta, lo dejamos a punto juntos y hacemos la auditoría de costes.</Parrafo>
                 {PLAZAS_CERRADAS ? <ListaCerrada /> : <Formulario utm={utm} />}
                 <Microcopy>{APROBACION}.</Microcopy>
               </Hoja>

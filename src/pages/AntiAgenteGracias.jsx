@@ -29,7 +29,7 @@ export default function AntiAgenteGracias() {
               <p className="text-[#0067FD] font-bold mb-6" style={rubik}>Lista prioritaria de Anti-Agente</p>
               <h1 className="text-3xl md:text-5xl font-bold text-gray-900 uppercase mb-6 leading-tight" style={rubik}>Ya estás dentro. Gracias.</h1>
               <Parrafo>Te escribiré yo personalmente, no un correo automático, para contarte los siguientes pasos.</Parrafo>
-              {!PLAZAS_CERRADAS && <Parrafo>Si no quieres esperar, elige ya el día de tu videollamada aquí abajo. En esa llamada dejamos tu equipo a punto y hacemos la auditoría de costes.</Parrafo>}
+              {!PLAZAS_CERRADAS && <Parrafo>Si no quieres esperar, elige ya el día de tu videollamada aquí abajo. En esa llamada te enseño la herramienta, dejamos tu equipo a punto y hacemos la auditoría de costes.</Parrafo>}
             </Hoja>
 
             <Hoja>
