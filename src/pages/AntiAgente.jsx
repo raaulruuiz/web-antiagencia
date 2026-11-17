@@ -92,6 +92,7 @@ export default function AntiAgente() {
               <Titulo>Empiezo con 5 tiendas. Y con esas 5 lo monto yo.</Titulo>
               <Parrafo>No es una forma de meterte prisa. Son 5 porque las llamadas las hago yo, una a una, y te voy a dar gratis un servicio que será de pago.</Parrafo>
               <Parrafo>Si te quedas una de las 5 plazas, tienes:</Parrafo>
+              <Check titulo="Onboarding gratis en videollamada.">Dejamos juntos tu equipo de agentes a punto para tu tienda: conectamos tus herramientas y lo adaptamos a cómo trabajas.</Check>
               <Check titulo="Auditoría de costes gratis.">Miramos qué gasto y qué tiempo te puede quitar Anti-Agente en tu caso. En mi caso, me ahorré más de 200 € al mes en costes fijos, y el trabajo de un día entero lo hago en 2 horas.</Check>
               <Check titulo="Oferta de lanzamiento.">Puedo construir herramientas únicas y personalizadas para tus agentes, que te reducirán los costes que vemos en la auditoría de costes. Si te interesa, tendrás un precio especial por lanzamiento, solo para las 5 primeras plazas. Si no lo quieres, me lo dices en la llamada y no pasa nada.</Check>
               <Check titulo="Anti-Studio gratis.">Una app para escribir los emails de tu tienda con IA, pero que no suenan a IA, que te los deja montados o programados en Klaviyo, MailerLite o ActiveCampaign. Por ahora es una app aparte; en la oferta de lanzamiento entra gratis y después será de pago.</Check>
