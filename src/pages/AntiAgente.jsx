@@ -160,11 +160,12 @@ export default function AntiAgente() {
             {/* 7 · Lo que viene */}
             <Hoja>
               <Titulo>Esto acaba de empezar</Titulo>
-              <Check>Más herramientas dentro de la propia app.</Check>
-              <Check>Más skills especializadas para tu equipo.</Check>
-              <Check>Más conexiones con las herramientas que ya usas.</Check>
-              <Check>Equipos preparados para más tipos de negocio.</Check>
-              <Parrafo className="mt-6">Sin fechas: lo iremos sacando cuando funcione de verdad.</Parrafo>
+              <Check>Puedes enviar tu feedback, comentarios y funcionalidades que quieras que tenga la app para que las desarrolle.</Check>
+              <Check>Añadiré más herramientas propias dentro de la propia app.</Check>
+              <Check>Añadiré más skills especializadas para tus agentes.</Check>
+              <Check>Añadiré más conexiones con las herramientas que ya existen.</Check>
+              <Check>Podrás ver todo lo que hay pendiente en la hoja de ruta de la aplicación.</Check>
+              <Parrafo className="mt-6">Cada semana tendrás al menos una nueva actualización.</Parrafo>
             </Hoja>
 
             {/* 8 · Preguntas */}
