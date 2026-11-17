@@ -12,6 +12,11 @@ export default function AntiAgenteGracias() {
   const { search } = useLocation();
   const utm = useMemo(() => leerUtm(search), [search]);
 
+  // Se llega desde el formulario de la landing sin recargar: sin esto se abre con su scroll.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     window.umami?.track("anti-agente-lista", utm);
   }, [utm]);
