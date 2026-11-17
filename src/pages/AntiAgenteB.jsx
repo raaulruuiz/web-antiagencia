@@ -11,6 +11,20 @@ import {
 // Mismo formulario de MailerLite, misma página de gracias y mismo contador (antiAgenteComun.jsx).
 // Textos: los aprobados de /anti-agente. Los títulos marcados «propuesto» son nuevos, pendientes de Raúl.
 
+// Duración del vídeo para el texto de encima («Antes de nada, mira cómo funciona. (X minutos)»).
+// Se rellena cuando esté el vídeo, p. ej. "3 minutos". Mientras esté vacía, en la vista previa
+// se ve el marcador «(X minutos)» en naranja; en producción la sección del vídeo no se pinta.
+const DURACION_VIDEO = "";
+
+function TextoVideo() {
+  return (
+    <p className="text-center text-[#0067FD] font-bold mb-4" style={rubik}>
+      Antes de nada, mira cómo funciona.{" "}
+      {DURACION_VIDEO ? `(${DURACION_VIDEO})` : import.meta.env.DEV && <span className="text-orange-600">(X minutos)</span>}
+    </p>
+  );
+}
+
 // Línea de ventajas bajo el formulario (propuesta)
 const VENTAJAS = "Gratis · En tu ordenador · Con tu Claude o tu ChatGPT";
 
@@ -59,13 +73,13 @@ export default function AntiAgenteB() {
               <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Ahora mi equipo hace todo mi trabajo de un día en menos de 2 horas. Cada agente se especializa en una tarea e interactúan entre ellos.</Parrafo>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
               <Contador />
-              <Pendiente>Versión B (para comparar con /anti-agente). Títulos de pasos y bloques, la línea de ventajas y «Antes de nada, mira esto» son propuestas, pendientes de Raúl.</Pendiente>
+              <Pendiente>Versión B (para comparar con /anti-agente). Títulos de pasos y bloques, la línea de ventajas y «Antes de nada, mira cómo funciona.» son propuestas, pendientes de Raúl.</Pendiente>
             </Seccion>
 
             {/* 2 · Vídeo (en producción no se pinta hasta que exista) */}
             {VIDEO_VISIBLE && (
               <Seccion>
-                <p className="text-center text-[#0067FD] font-bold mb-4" style={rubik}>Antes de nada, mira esto.</p>
+                <TextoVideo />
                 <Video />
               </Seccion>
             )}
