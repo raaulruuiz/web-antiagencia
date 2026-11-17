@@ -30,6 +30,9 @@ import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import PoliticaPrivacidadAntiStudio from './pages/PoliticaPrivacidadAntiStudio';
 import CuentaAntiStudio from './pages/CuentaAntiStudio';
 import AntiStudio from './pages/AntiStudio';
+import AntiAgente from './pages/AntiAgente';
+import AntiAgenteGracias from './pages/AntiAgenteGracias';
+import AntiAgenteB from './pages/AntiAgenteB';
 import NovedadesAntiStudio from './pages/NovedadesAntiStudio';
 import TikTokConnect from './pages/TikTokConnect';
 import JorgeCoronado from './pages/JorgeCoronado';
@@ -229,6 +232,13 @@ const AuthenticatedApp = () => {
       <Route path="/anti-studio/cuenta" element={<CuentaAntiStudio />} />
       <Route path="/anti-studio/novedades" element={<NovedadesAntiStudio />} />
       <Route path="/anti-studio" element={<AntiStudio />} />
+      {/* Lista prioritaria de Anti-Agente: la versión B es la oficial (17-11-2026). */}
+      <Route path="/anti-agente" element={<AntiAgenteB />} />
+      <Route path="/anti-agente/gracias" element={<AntiAgenteGracias />} />
+      {/* Versión A, solo como respaldo oculto (noindex, sin enlaces) */}
+      <Route path="/anti-agente-a" element={<AntiAgente />} />
+      {/* La dirección de comparación lleva a la oficial (también redirige vercel.json) */}
+      <Route path="/anti-agente-b" element={<Navigate to="/anti-agente" replace />} />
       <Route path="/q3" element={<PlanningQ3 />} />
       <Route path="/q4" element={<PlanningQ4 />} />
       <Route path="/reservar/gestionar/:token" element={<GestionarReserva />} />

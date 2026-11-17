@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import ConfigurarCookies from "@/components/ConfigurarCookies";
 
 export default function BlogLayout({ children }) {
   return (
@@ -51,6 +52,7 @@ export default function BlogLayout({ children }) {
           <Link to={createPageUrl("PoliticaPrivacidad")} className="hover:text-white transition-colors">Privacidad</Link>
           <Link to={createPageUrl("AvisoLegal")} className="hover:text-white transition-colors">Aviso Legal</Link>
           <Link to={createPageUrl("PoliticaCookies")} className="hover:text-white transition-colors">Política de Cookies</Link>
+          <ConfigurarCookies className="hover:text-white transition-colors" />
           <a href="mailto:raul@antiagencia.es" className="hover:text-white transition-colors">raul@antiagencia.es</a>
         </div>
         <p className="text-white/25 text-xs tracking-widest text-center">

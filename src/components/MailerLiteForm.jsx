@@ -12,7 +12,7 @@ import { useEffect } from "react";
  *   submitText   — Texto del botón de envío.
  *   instanceId   — Sufijo único para los elementos style/script del DOM (ej: "home", "homev2").
  *   successRedirect — URL a la que redirigir tras el envío exitoso.
- *   scriptVersion — Hash de versión del script de MailerLite (ej: "vb397d78ebaa8a0f631d35384c46d781b").
+ *   scriptVersion — Ya no se usa (el script de MailerLite no se carga); se acepta por compatibilidad.
  *   noSetup      — Si true, solo renderiza el HTML sin inyectar CSS/script (para segundas instancias en la misma página).
  */
 export default function MailerLiteForm({
@@ -23,6 +23,7 @@ export default function MailerLiteForm({
   submitText,
   instanceId,
   successRedirect = "https://antiagencia.es/yaporfin",
+  // eslint-disable-next-line no-unused-vars
   scriptVersion = "",
   noSetup = false,
 }) {
@@ -40,18 +41,12 @@ export default function MailerLiteForm({
 
     fetch(`https://assets.mailerlite.com/jsonp/${accountId}/forms/${formActionId}/takel`);
 
-    const script = document.createElement("script");
-    const versionSuffix = scriptVersion ? `?${scriptVersion}` : "";
-    script.src = `https://groot.mailerlite.com/js/w/webforms.min.js${versionSuffix}`;
-    script.type = "text/javascript";
-    script.id = `mailerlite-script-${instanceId}`;
-    document.body.appendChild(script);
+    // Sin script de MailerLite (dejaba la cookie ml_guid sin consentimiento): el envío lo hace
+    // src/lib/mailerliteSinScript.js, activado en main.jsx.
 
     return () => {
       const el = document.getElementById(`mailerlite-css-${instanceId}`);
       if (el && el.parentNode) el.parentNode.removeChild(el);
-      const sc = document.getElementById(`mailerlite-script-${instanceId}`);
-      if (sc && sc.parentNode) sc.parentNode.removeChild(sc);
     };
   }, []);
 

@@ -11,8 +11,6 @@ const STATIC_URLS = [
   { loc: 'https://antiagencia.es/trabajaconnosotros', changefreq: 'monthly', priority: '0.8' },
   { loc: 'https://antiagencia.es/anti-biblioteca', changefreq: 'weekly', priority: '0.8' },
   { loc: 'https://antiagencia.es/jorge-coronado', changefreq: 'monthly', priority: '0.7' },
-  { loc: 'https://antiagencia.es/ComoTrabajamos', changefreq: 'monthly', priority: '0.7' },
-  { loc: 'https://antiagencia.es/Contacto', changefreq: 'monthly', priority: '0.6' },
 ];
 
 function fetchFromSupabase(path) {

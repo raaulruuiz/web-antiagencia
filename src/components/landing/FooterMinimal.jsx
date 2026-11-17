@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import ConfigurarCookies from "@/components/ConfigurarCookies";
 
 const partnerLogos = [
   {
@@ -47,6 +48,7 @@ export default function FooterMinimal() {
           <Link to={createPageUrl("AvisoLegal")} className="hover:text-white transition-colors">Aviso Legal</Link>
           <Link to={createPageUrl("AvisoLegal")} className="hover:text-white transition-colors">Términos de Servicio</Link>
           <Link to={createPageUrl("PoliticaCookies")} className="hover:text-white transition-colors">Política de Cookies</Link>
+          <ConfigurarCookies className="hover:text-white transition-colors" />
         </div>
 
         {/* Copyright */}
@@ -56,8 +58,8 @@ export default function FooterMinimal() {
 
         {/* Disclaimer */}
         <p className="text-white/20 text-[10px] font-body text-center max-w-2xl leading-relaxed">
-          DISCLAIMER: Results are never guaranteed. Any client outcomes we share are provided as examples of what has been achieved in the past, not as promises of future performance. Every business is different, and your results will depend on your own effort, circumstances, and market conditions.
-          This website is not affiliated with, sponsored by, or endorsed by YouTube, Google, Facebook, or Meta in any way. FACEBOOK is a registered trademark of FACEBOOK Inc. YOUTUBE is a registered trademark of GOOGLE Inc.
+          AVISO: Los resultados nunca están garantizados. Los resultados de clientes que mostramos son ejemplos de lo que se ha conseguido en el pasado, no promesas de resultados futuros. Cada negocio es distinto y tus resultados dependerán de tu esfuerzo, tus circunstancias y el mercado.
+          Esta web no está afiliada, patrocinada ni respaldada de ningún modo por YouTube, Google, Facebook ni Meta. FACEBOOK es una marca registrada de Meta Platforms, Inc. YOUTUBE es una marca registrada de Google LLC.
         </p>
 
       </div>

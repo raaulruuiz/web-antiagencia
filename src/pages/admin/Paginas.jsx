@@ -12,8 +12,6 @@ const SITE_URL = 'https://antiagencia.es';
 const HARDCODED_PAGES = [
   { nombre: 'Home',                   path: '/' },
   { nombre: 'Aviso Legal',            path: '/AvisoLegal' },
-  { nombre: 'Cómo Trabajamos',        path: '/ComoTrabajamos' },
-  { nombre: 'Contacto',               path: '/Contacto' },
   { nombre: 'Gracias',                path: '/Gracias' },
   { nombre: 'Política de Privacidad', path: '/politica-privacidad' },
   { nombre: 'Política de Cookies',    path: '/PoliticaCookies' },

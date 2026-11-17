@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import ConfigurarCookies from "@/components/ConfigurarCookies";
 
 const partnerLogos = [
   {
@@ -58,6 +59,7 @@ export default function Footer() {
           <Link to={createPageUrl("AvisoLegal")} className="hover:text-white transition-colors">Aviso Legal</Link>
           <Link to={createPageUrl("AvisoLegal")} className="hover:text-white transition-colors">Términos de Servicio</Link>
           <Link to={createPageUrl("PoliticaCookies")} className="hover:text-white transition-colors">Política de Cookies</Link>
+          <ConfigurarCookies className="hover:text-white transition-colors" />
           <a href="mailto:raul@antiagencia.es" className="hover:text-white transition-colors">raul@antiagencia.es</a>
         </div>
 

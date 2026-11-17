@@ -10,7 +10,9 @@
     { "source": "/anti-newsletter/", "destination": "/", "permanent": true },
     { "source": "/PoliticaPrivacidad", "destination": "/politica-privacidad", "permanent": true },
     { "source": "/r", "destination": "/", "permanent": true },
-    { "source": "/r/", "destination": "/", "permanent": true }
+    { "source": "/r/", "destination": "/", "permanent": true },
+    { "source": "/anti-agente-b", "destination": "/anti-agente", "permanent": false },
+    { "source": "/anti-agente-b/", "destination": "/anti-agente", "permanent": false }
   ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },

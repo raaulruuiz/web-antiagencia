@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import MailerLitePopup from '@/components/MailerLitePopup';
 import EmailIframe from '@/components/EmailIframe';
-import { IconEye, IconDownload } from '@/features/biblioteca/renderer/shared/icons';
+import { IconEye } from '@/features/biblioteca/renderer/shared/icons';
 import { BlockRenderer } from '@/features/biblioteca/renderer/BlockRenderer';
 
 const API_BASE = 'https://automatizaciones-production-a376.up.railway.app';
