@@ -33,6 +33,7 @@ import AntiStudio from './pages/AntiStudio';
 import AntiAgente from './pages/AntiAgente';
 import AntiAgenteGracias from './pages/AntiAgenteGracias';
 import AntiAgenteB from './pages/AntiAgenteB';
+import NovedadesAntiAgente from './pages/NovedadesAntiAgente';
 import NovedadesAntiStudio from './pages/NovedadesAntiStudio';
 import TikTokConnect from './pages/TikTokConnect';
 import JorgeCoronado from './pages/JorgeCoronado';
@@ -235,6 +236,7 @@ const AuthenticatedApp = () => {
       {/* Lista prioritaria de Anti-Agente: la versión B es la oficial (17-11-2026). */}
       <Route path="/anti-agente" element={<AntiAgenteB />} />
       <Route path="/anti-agente/gracias" element={<AntiAgenteGracias />} />
+      <Route path="/anti-agente/novedades" element={<NovedadesAntiAgente />} />
       {/* Versión A, solo como respaldo oculto (noindex, sin enlaces) */}
       <Route path="/anti-agente-a" element={<AntiAgente />} />
       {/* La dirección de comparación lleva a la oficial (también redirige vercel.json) */}

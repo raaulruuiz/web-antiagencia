@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import {
   Boton, Check, Contador, Formulario, Hoja, ListaCerrada, Parrafo, PLAZAS_CERRADAS, PREGUNTAS, rubik, TEXTO_BOTON, Titulo, Video, VIDEO_VISIBLE, leerUtm,
@@ -100,6 +100,7 @@ export default function AntiAgenteB() {
               <Paso numero="3" titulo="Con tus herramientas de siempre">
                 <Parrafo className="mb-0">Viene ya montado. Al empezar, le cuentas cómo es tu negocio y el equipo se adapta a tu tono, tus productos, tus clientes. Se conecta con tu tienda (Shopify o WooCommerce), tu email (Klaviyo, MailerLite), Gmail y Meta. No tienes que dejar ninguna de tus herramientas.</Parrafo>
               </Paso>
+              <p className="mt-6 text-center"><Link to="/anti-agente/novedades" className="text-[#0067FD] font-bold hover:underline" style={rubik}>Mira lo que ya hace y lo que viene →</Link></p>
             </Seccion>
 
             {/* 4 · Con tu Claude, tu ChatGPT y desde tu ordenador */}

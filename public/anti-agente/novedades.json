@@ -1,0 +1,80 @@
+{
+  "versiones": [
+    {
+      "version": "0.1.6",
+      "fecha": "2026-11-16",
+      "entradas": [
+        { "id": "chrome-lectura", "titulo": "Tu navegador, solo para mirar", "texto": "Puedes dejar que un agente use tu Chrome solo para leer: mira webs y saca información, pero no escribe ni sube nada. Si necesita pulsar algo, te lo pregunta antes." },
+        { "id": "videos-al-momento", "titulo": "Vídeos y audios, sin esperar", "texto": "Adjunta un vídeo o un audio y envíalo al momento. Solo se transcribe si se lo pides." }
+      ]
+    },
+    {
+      "version": "0.1.4",
+      "fecha": "2026-11-15",
+      "entradas": [
+        { "id": "cloudflare", "titulo": "Tu dominio en Cloudflare", "texto": "Tu equipo revisa los DNS de tu dominio y prepara los cambios, por ejemplo para que tus emails no acaben en spam. Los cambios van con tu aprobación y no puede borrar nada." }
+      ]
+    },
+    {
+      "version": "0.1.3",
+      "fecha": "2026-11-15",
+      "entradas": [
+        { "id": "espera-decision", "titulo": "Lo que espera tu decisión, siempre arriba", "texto": "Lo que te piden tus agentes se queda fijo arriba del chat y se distingue en la lista de la izquierda, para que no se te pase nada." },
+        { "id": "pegar-imagenes", "titulo": "Pega imágenes", "texto": "Pega una imagen o arrástrala desde el navegador, y ábrela para revisarla antes de enviarla." },
+        { "id": "rutinas-dormido", "titulo": "Rutinas aunque el ordenador duerma", "texto": "Si el ordenador estaba dormido a la hora de una rutina, la hace al despertar. Y si falla, lo vuelve a intentar." }
+      ]
+    },
+    {
+      "version": "0.1.2",
+      "fecha": "2026-11-14",
+      "entradas": [
+        { "id": "supabase", "titulo": "Tu base de datos de Supabase", "texto": "Tu equipo puede añadir y cambiar datos en tu Supabase, siempre con tu aprobación. Borrar está bloqueado." }
+      ]
+    },
+    {
+      "version": "0.1.1",
+      "fecha": "2026-11-13",
+      "entradas": [
+        { "id": "drive", "titulo": "Sube archivos a Google Drive", "texto": "Tu equipo te prepara la subida con el nombre, la carpeta y la descripción. Tú le das a subir. Si se corta, sigue donde iba." },
+        { "id": "adjuntos", "titulo": "Abre lo que adjuntas", "texto": "Las imágenes y los PDF que adjuntas se abren dentro de la app; el resto, con su programa." },
+        { "id": "reintentos", "titulo": "Si la IA no responde, lo vuelve a intentar", "texto": "Si Claude no contesta en ese momento, lo reintenta solo. Si sigue sin contestar, te avisa con un botón para reintentar." }
+      ]
+    },
+    {
+      "version": "0.1.0",
+      "fecha": "2026-11-11",
+      "entradas": [
+        { "id": "equipo", "titulo": "Tu equipo de agentes", "texto": "Cada agente tiene su tarea y su memoria. Un coordinador reparte los encargos, los agentes se piden cosas entre ellos y cada encargo va en su propio hilo." },
+        { "id": "tu-ia", "titulo": "Con tu Claude o tu ChatGPT", "texto": "Funciona con Claude Code y Codex (ChatGPT), con tu propia cuenta. Si se te acaba el plan de uno, pasas al otro mientras tanto con un botón." },
+        { "id": "aprobacion", "titulo": "Tú apruebas los cambios", "texto": "Si un agente quiere cambiar algo en una de tus herramientas, te sale una tarjeta para aprobarlo. Los correos te llegan editables: los cambias, los envías, los dejas en cola o los guardas como borrador." },
+        { "id": "conexiones", "titulo": "Tus herramientas, conectadas", "texto": "Gmail, Google Calendar, Sheets, Drive y Docs, Klaviyo, MailerLite, ActiveCampaign, Notion, Stripe, Trello, Asana, WordPress, Calendly y Publer, entre otras. Puedes conectar varias cuentas de cada una y elegir qué agente usa cada cuenta." },
+        { "id": "rutinas", "titulo": "Tareas con horario", "texto": "Pídele que haga algo cada día o cada semana a una hora. Si no hay nada nuevo, no te molesta." },
+        { "id": "en-directo", "titulo": "Ves lo que está haciendo", "texto": "Mientras trabaja, ves en qué paso va: qué busca, qué lee y qué está pensando." },
+        { "id": "plan", "titulo": "Antes de un trabajo largo, te dice lo que haría", "texto": "Te enseña los pasos y no empieza hasta que le das a «Hazlo». Luego ves cómo avanza." },
+        { "id": "aprende", "titulo": "Aprende de ti", "texto": "Cada agente tiene su memoria y hay otra común para todo el equipo. Al terminar un trabajo te propone qué apuntarse de tus preferencias, y tú eliges qué se guarda." },
+        { "id": "voz", "titulo": "Habla en vez de escribir", "texto": "Grábale un audio o adjunta archivos. Los audios y vídeos se transcriben en tu ordenador. Y cuando tiene que elegir contigo, te pregunta con botones." },
+        { "id": "documentos", "titulo": "PDF e imágenes dentro de la app", "texto": "Los PDF se abren en un visor junto al chat. Las imágenes las puedes ver, descargar o pedirle que las cambie." },
+        { "id": "web", "titulo": "Revisa tu web antes de publicar", "texto": "Si un agente trabaja en tu web, te la enseña funcionando dentro del chat antes de publicar nada." },
+        { "id": "avisos", "titulo": "Te avisa cuando te necesita", "texto": "Contador de mensajes sin leer y notificaciones en el ordenador." }
+      ]
+    }
+  ],
+  "enCurso": [
+    { "titulo": "Cola de correos a la vista", "texto": "Ves los correos que esperan en la cola y puedes sacarlos o enviarlos ya." },
+    { "titulo": "Si un correo falla, vuelve a ti", "texto": "Vuelve a su tarjeta con el motivo, para corregirlo y enviarlo." },
+    { "titulo": "Editar un mensaje ya enviado", "texto": "El agente recibe la versión nueva." },
+    { "titulo": "Un hilo por agente", "texto": "Cada encargo, en el hilo de su agente, sin mezclar conversaciones." },
+    { "titulo": "Squarespace", "texto": "Conecta tu tienda de Squarespace." }
+  ],
+  "pendiente": [
+    { "titulo": "Windows", "texto": "Versión para Windows." },
+    { "titulo": "Se actualiza sola", "texto": "Actualizaciones automáticas, con aviso de lo nuevo." },
+    { "titulo": "Para todo tu equipo", "texto": "Instalarlo a cada persona de tu equipo." },
+    { "titulo": "Tus comentarios, desde la app", "texto": "Un botón para mandar ideas y fallos." },
+    { "titulo": "Novedades dentro de la app", "texto": "Esta misma lista, dentro de Anti-Agente." },
+    { "titulo": "Edición de vídeo", "texto": "Cortar, pasar a vertical y poner subtítulos, con tu aprobación del resultado." },
+    { "titulo": "Presupuestos de anuncios", "texto": "Revisión de tus campañas con una propuesta de reparto. Y Google Ads y TikTok Ads." },
+    { "titulo": "Editar tu tienda", "texto": "Cambios en tu tema de Shopify con vista previa antes de publicar, y páginas de WooCommerce." },
+    { "titulo": "Aprender de tus correcciones", "texto": "Lo que cambias en cada tarjeta, guardado para que no repita el error." }
+  ]
+}
