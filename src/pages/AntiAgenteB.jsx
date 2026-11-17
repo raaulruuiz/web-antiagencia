@@ -70,7 +70,7 @@ export default function AntiAgenteB() {
               <h1 className="text-3xl md:text-5xl font-bold text-gray-900 uppercase mb-6 leading-tight" style={rubik}>
                 Un equipo de agentes para tu tienda online. Gratis.
               </h1>
-              <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Ahora mi equipo hace todo mi trabajo de un día en menos de 2 horas. Cada agente se especializa en una tarea e interactúan entre ellos.</Parrafo>
+              <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Ahora mi equipo hace todo mi trabajo de un día en menos de 2 horas. Cada agente se especializa en una tarea e interactúan entre ellos. Y te lo entrego completamente gratis.</Parrafo>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
               <Contador />
             </Seccion>

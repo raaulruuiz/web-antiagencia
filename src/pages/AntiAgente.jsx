@@ -33,7 +33,7 @@ export default function AntiAgente() {
                 Un equipo de agentes para tu tienda online. Gratis.
               </h1>
               {/* «Te lo enseño en el vídeo:» solo se pinta cuando el vídeo se ve (en producción, cuando exista). */}
-              <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Ahora mi equipo hace todo mi trabajo de un día en menos de 2 horas. Cada agente se especializa en una tarea e interactúan entre ellos.{VIDEO_VISIBLE && " Te lo enseño en el vídeo:"}</Parrafo>
+              <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Ahora mi equipo hace todo mi trabajo de un día en menos de 2 horas. Cada agente se especializa en una tarea e interactúan entre ellos. Y te lo entrego completamente gratis.{VIDEO_VISIBLE && " Te lo enseño en el vídeo:"}</Parrafo>
               <Pendiente>Descripción para buscadores y al compartir: sigue la general de la web en las redes que no leen la de esta página. Pendiente de decisión de Raúl; no se toca.</Pendiente>
               <Video />
               <div className="text-center mt-8">
