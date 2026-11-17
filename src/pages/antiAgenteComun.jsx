@@ -81,11 +81,8 @@ export function Check({ titulo, children }) {
 // Aviso de lista cerrada (se muestra en lugar del formulario y del calendario)
 export function ListaCerrada() {
   return (
-    <>
-      <div className="border-l-4 border-[#7000FF] pl-5 my-4">
-        <p className="text-xl font-bold text-gray-900" style={rubik}>{TEXTO_CERRADA}</p>
-      </div>
-      <Pendiente>Texto provisional de lista cerrada: lo revisa Raúl. Sin cifras ni precios.</Pendiente>
-    </>
+    <div className="border-l-4 border-[#7000FF] pl-5 my-4">
+      <p className="text-xl font-bold text-gray-900" style={rubik}>{TEXTO_CERRADA}</p>
+    </div>
   );
 }

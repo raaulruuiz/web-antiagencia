@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import ReservaEmbebida from "@/components/booking/ReservaEmbebida";
-import { Hoja, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, rubik, SLUG_RESERVA, Titulo, leerUtm, utmATexto } from "./antiAgenteComun";
+import { Hoja, ListaCerrada, Parrafo, PLAZAS_CERRADAS, rubik, SLUG_RESERVA, Titulo, leerUtm, utmATexto } from "./antiAgenteComun";
 
 // /anti-agente/gracias — a donde redirige el formulario de la lista prioritaria (BORRADOR, noindex).
 // Acepta UTM en la URL (?utm_source=newsletter…) y los pasa a las notas de la reserva.
@@ -37,7 +37,6 @@ export default function AntiAgenteGracias() {
                 <>
                   <Titulo>Elige tu hueco</Titulo>
                   <Parrafo>Elige el hueco que mejor te venga. Son 30 minutos y los hago yo.</Parrafo>
-                  <Pendiente>Duración de 30 minutos provisional. Calendario: tipo «Lista prioritaria Anti-Agente» de /admin/calendly, con el mismo horario que Q4.</Pendiente>
                   <ReservaEmbebida slug={SLUG_RESERVA} origen={utmATexto(utm)} mostrarDuracion={false} />
                   <p className="text-sm text-gray-600 mt-8" style={rubik}>¿Ningún hueco te encaja? Responde a mi correo y lo buscamos.</p>
                 </>

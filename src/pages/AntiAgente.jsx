@@ -18,9 +18,6 @@ const TEXTO_BOTON = "Quiero una de las 5 plazas";
 const TEXTO_IA = "Usa Claude Code y Codex, los programas oficiales, con tu propia cuenta. Inicias sesión tú y gasta de tu plan. Sujeto a los términos de cada proveedor.";
 const APROBACION = "Por defecto, nada se publica ni se envía sin tu aprobación";
 
-const NOTA_APROBACION = "«Por defecto, nada se publica ni se envía sin tu aprobación»: es cierto por defecto, pero no si el usuario activa el modo «Más libertad». Raúl decide si queda así.";
-const NOTA_CONEXIONES = "Shopify y WooCommerce existen en la app pero no se han probado nunca con una tienda real. Raúl decide si se nombran así.";
-
 // Vídeo de la cabecera: lo grabará Raúl. Mientras VIDEO_PENDIENTE sea true, en la revisión
 // (vite dev) se ve un hueco naranja señalado y en producción no se pinta nada, para no
 // publicar una caja vacía. Cuando exista el vídeo, se monta aquí (con VideoConsentido).
@@ -80,6 +77,7 @@ export default function AntiAgente() {
                 Un equipo de agentes para tu tienda online. Gratis.
               </h1>
               <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Con este equipo hago en 2 horas lo que antes me llevaba el día entero. No te lo cuento: lo uso cada día en mi propio negocio.</Parrafo>
+              <Pendiente>Descripción para buscadores y al compartir: sigue la general de la web en las redes que no leen la de esta página. Pendiente de decisión de Raúl; no se toca.</Pendiente>
               <Video />
               <p className="text-gray-800 text-lg italic text-center mb-8">«Antes, esto me llevaba media mañana. Ahora está hecho a las 9.»</p>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
@@ -109,7 +107,6 @@ export default function AntiAgente() {
               <Check titulo="Publicidad:">revisa tus anuncios y te propone campañas listas para aprobar.</Check>
               <Check titulo="Números:">te resume cada mañana cómo va la tienda.</Check>
               <Parrafo className="mt-6">Viene ya montado. Al empezar, le cuentas cómo es tu negocio y el equipo se adapta: tu tono, tus productos, tus clientes. Se conecta con tu tienda (Shopify, WooCommerce), tu email (Klaviyo, MailerLite), Gmail y Meta. No tienes que dejar ninguna de tus herramientas.</Parrafo>
-              <Pendiente>{NOTA_CONEXIONES}</Pendiente>
               <Parrafo>Empieza por tu tienda online y, si quieres, se extiende al resto de tu negocio.</Parrafo>
             </Hoja>
 
@@ -136,7 +133,6 @@ export default function AntiAgente() {
             <Hoja>
               <Titulo>Tu equipo prepara. Tú decides.</Titulo>
               <Parrafo>Por defecto, ningún correo, publicación o anuncio sale de tu negocio sin tu aprobación. Te llega como una tarjeta: lo lees, lo cambias si quieres y le das a enviar. O no.</Parrafo>
-              <Pendiente>{NOTA_APROBACION} Detalle: cada publicación o cambio en las conexiones pide aprobación, las campañas de anuncios se crean en pausa y el correo solo sale desde una tarjeta aprobada.</Pendiente>
               <Parrafo><strong className="text-[#0067FD]">Tu tienda es tuya.</strong> El equipo trabaja para ti, no en tu lugar.</Parrafo>
             </Hoja>
 
@@ -179,7 +175,6 @@ export default function AntiAgente() {
                 <p className="text-gray-800 text-lg leading-loose mb-3">Las llamadas a tu tienda y a tus herramientas van directas de tu ordenador a cada servicio: no pasan por ningún servidor mío. Mis servidores solo reciben tu inicio de sesión (tu email), nada de tu tienda.</p>
                 <p className="text-gray-800 text-lg leading-loose mb-3">Lo que lee o escribe tu equipo pasa por la IA que uses (Claude Code, de Anthropic, o Codex, de OpenAI), según los términos de cada proveedor, no los míos.</p>
                 <p className="text-gray-800 text-lg leading-loose">Solo si tú lo autorizas, se compartirá algo para mejorar la app.</p>
-                <Pendiente>Respuesta real confirmada por Anti-Agente tras mirar el código (sustituye a la de Perro Sanxe). Redacción para revisión de Raúl.</Pendiente>
               </div>
             </Hoja>
 
