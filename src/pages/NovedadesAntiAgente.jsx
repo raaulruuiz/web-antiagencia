@@ -8,28 +8,13 @@ import { Boton, Contador, TEXTO_BOTON } from "./antiAgenteComun";
 // /anti-agente/novedades — registro público de Anti-Agente (noindex), con el mismo diseño
 // que /anti-studio/novedades. El contenido está en public/anti-agente/novedades.json:
 // una entrada por versión de la app, más «enCurso» y «pendiente».
-// Una entrada con «porConfirmar» solo se ve en local (vista previa), con su nota en naranja;
-// en producción no sale hasta que se quite ese campo.
-
-const visible = (e) => !e.porConfirmar || import.meta.env.DEV;
 
 function useNovedadesAgente() {
   const [datos, setDatos] = useState({ versiones: [], enCurso: [], pendiente: [] });
   useEffect(() => {
     fetch("/anti-agente/novedades.json").then((r) => r.json()).then(setDatos).catch(() => {});
   }, []);
-  return {
-    versiones: datos.versiones
-      .map((v) => ({ ...v, entradas: v.entradas.filter(visible) }))
-      .filter((v) => v.entradas.length),
-    enCurso: datos.enCurso.filter(visible),
-    pendiente: datos.pendiente.filter(visible),
-  };
-}
-
-function PorConfirmar({ e }) {
-  if (!e.porConfirmar) return null;
-  return <span className="block text-xs font-bold text-orange-600 mt-1" style={rubik}>POR CONFIRMAR · {e.porConfirmar}</span>;
+  return datos;
 }
 
 function Columna({ titulo, lista }) {
@@ -40,7 +25,6 @@ function Columna({ titulo, lista }) {
         <div key={t.titulo} className="mb-4">
           <p className="font-bold text-gray-900" style={rubik}>{t.titulo}</p>
           {t.texto && <p className="text-gray-700 text-sm leading-relaxed">{t.texto}</p>}
-          <PorConfirmar e={t} />
         </div>
       ))}
     </div>
@@ -57,7 +41,6 @@ function Version({ v }) {
         <article key={e.id} className="py-5 border-b border-gray-200 last:border-0">
           <h3 className="text-lg font-bold text-gray-900 mb-1" style={rubik}>{e.titulo}</h3>
           <p className="text-gray-800 leading-relaxed">{e.texto}</p>
-          <PorConfirmar e={e} />
         </article>
       ))}
     </div>

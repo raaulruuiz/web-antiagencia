@@ -9,13 +9,6 @@
       ]
     },
     {
-      "version": "0.1.5",
-      "fecha": "2026-11-15",
-      "entradas": [
-        { "id": "meta-paginas", "titulo": "Facebook e Instagram", "texto": "Con tu cuenta de Meta, tu equipo trabaja con tus páginas de Facebook e Instagram: publicaciones y mensajes de Messenger e Instagram. Antes de publicar o responder, te pide tu aprobación.", "porConfirmar": "Hecho y probado en pruebas, sin uso real con una cuenta de Meta." }
-      ]
-    },
-    {
       "version": "0.1.4",
       "fecha": "2026-11-15",
       "entradas": [
@@ -55,8 +48,6 @@
         { "id": "tu-ia", "titulo": "Con tu Claude o tu ChatGPT", "texto": "Funciona con Claude Code y Codex (ChatGPT), con tu propia cuenta. Si se te acaba el plan de uno, pasas al otro mientras tanto con un botón." },
         { "id": "aprobacion", "titulo": "Tú apruebas los cambios", "texto": "Si un agente quiere cambiar algo en una de tus herramientas, te sale una tarjeta para aprobarlo. Los correos te llegan editables: los cambias, los envías, los dejas en cola o los guardas como borrador." },
         { "id": "conexiones", "titulo": "Tus herramientas, conectadas", "texto": "Gmail, Google Calendar, Sheets, Drive y Docs, Klaviyo, MailerLite, ActiveCampaign, Notion, Stripe, Trello, Asana, WordPress, Calendly y Publer, entre otras. Puedes conectar varias cuentas de cada una y elegir qué agente usa cada cuenta." },
-        { "id": "tiendas", "titulo": "Tu tienda en Shopify o WooCommerce", "texto": "Tu equipo lee tus productos y pedidos. Los cambios en la tienda, con tu aprobación.", "porConfirmar": "Los conectores existen, pero aún no se han probado con una tienda real." },
-        { "id": "meta-ads", "titulo": "Campañas de Meta, en pausa", "texto": "Tu agente de anuncios prepara la campaña y los anuncios con su vista previa. Se crean en pausa: activarlos es cosa tuya.", "porConfirmar": "Hecho; falta confirmar que ya se ha usado con una cuenta publicitaria real." },
         { "id": "rutinas", "titulo": "Tareas con horario", "texto": "Pídele que haga algo cada día o cada semana a una hora. Si no hay nada nuevo, no te molesta." },
         { "id": "en-directo", "titulo": "Ves lo que está haciendo", "texto": "Mientras trabaja, ves en qué paso va: qué busca, qué lee y qué está pensando." },
         { "id": "plan", "titulo": "Antes de un trabajo largo, te dice lo que haría", "texto": "Te enseña los pasos y no empieza hasta que le das a «Hazlo». Luego ves cómo avanza." },
@@ -84,7 +75,6 @@
     { "titulo": "Edición de vídeo", "texto": "Cortar, pasar a vertical y poner subtítulos, con tu aprobación del resultado." },
     { "titulo": "Presupuestos de anuncios", "texto": "Revisión de tus campañas con una propuesta de reparto. Y Google Ads y TikTok Ads." },
     { "titulo": "Editar tu tienda", "texto": "Cambios en tu tema de Shopify con vista previa antes de publicar, y páginas de WooCommerce." },
-    { "titulo": "Aprender de tus correcciones", "texto": "Lo que cambias en cada tarjeta, guardado para que no repita el error." },
-    { "titulo": "La app en otros idiomas", "texto": "Hoy la app está en español.", "porConfirmar": "Raúl: ¿la landing promete la interfaz en otros idiomas o solo que tu equipo trabaja en varios?" }
+    { "titulo": "Aprender de tus correcciones", "texto": "Lo que cambias en cada tarjeta, guardado para que no repita el error." }
   ]
 }
