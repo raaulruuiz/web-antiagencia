@@ -28,6 +28,7 @@ const Reservar = lazy(() => import('./pages/Reservar'));
 const GestionarReserva = lazy(() => import('./pages/GestionarReserva'));
 const PoliticaPrivacidad = lazy(() => import('./pages/PoliticaPrivacidad'));
 const PoliticaPrivacidadAntiStudio = lazy(() => import('./pages/PoliticaPrivacidadAntiStudio'));
+const PoliticaPrivacidadAntiAgente = lazy(() => import('./pages/PoliticaPrivacidadAntiAgente'));
 const CuentaAntiStudio = lazy(() => import('./pages/CuentaAntiStudio'));
 const AntiStudio = lazy(() => import('./pages/AntiStudio'));
 const AntiAgente = lazy(() => import('./pages/AntiAgente'));
@@ -233,6 +234,7 @@ const AuthenticatedApp = () => {
       <Route path="/anti-agente" element={<AntiAgenteB />} />
       <Route path="/anti-agente/gracias" element={<AntiAgenteGracias />} />
       <Route path="/anti-agente/novedades" element={<NovedadesAntiAgente />} />
+      <Route path="/anti-agente/privacidad" element={<PoliticaPrivacidadAntiAgente />} />
       {/* Versión A, solo como respaldo oculto (noindex, sin enlaces) */}
       <Route path="/anti-agente-a" element={<AntiAgente />} />
       {/* La dirección de comparación lleva a la oficial (también redirige vercel.json) */}
