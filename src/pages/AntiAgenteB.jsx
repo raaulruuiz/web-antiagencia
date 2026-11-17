@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import {
-  Boton, Check, Contador, Formulario, ListaCerrada, Microcopy, Parrafo, Pendiente, PLAZAS_CERRADAS, PREGUNTAS, rubik, TEXTO_BAJO_BOTON, TEXTO_BOTON, Titulo, Video, VIDEO_VISIBLE, leerUtm,
+  Boton, Check, Contador, Formulario, ListaCerrada, Parrafo, Pendiente, PLAZAS_CERRADAS, PREGUNTAS, rubik, TEXTO_BOTON, Titulo, Video, VIDEO_VISIBLE, leerUtm,
 } from "./antiAgenteComun";
 
 // /anti-agente-b — segunda versión de la landing de la lista prioritaria (BORRADOR, noindex),
@@ -59,7 +59,6 @@ export default function AntiAgenteB() {
               <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Ahora mi equipo hace todo mi trabajo de un día en menos de 2 horas. Cada agente se especializa en una tarea e interactúan entre ellos.</Parrafo>
               <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
               <Contador />
-              <Microcopy>{TEXTO_BAJO_BOTON}</Microcopy>
               <Pendiente>Versión B (para comparar con /anti-agente). Títulos de pasos y bloques, la línea de ventajas y «Antes de nada, mira esto» son propuestas, pendientes de Raúl.</Pendiente>
             </Seccion>
 
