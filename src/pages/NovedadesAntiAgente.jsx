@@ -49,6 +49,12 @@ function Version({ v }) {
 
 export default function NovedadesAntiAgente() {
   const { versiones, enCurso, pendiente } = useNovedadesAgente();
+  // La página se carga aparte, así que el navegador no llega a saltar al ancla
+  // (/anti-agente/novedades#hoja-de-ruta): saltamos cuando ya hay contenido.
+  useEffect(() => {
+    if (window.location.hash !== "#hoja-de-ruta" || !versiones.length) return;
+    document.getElementById("hoja-de-ruta")?.scrollIntoView();
+  }, [versiones.length]);
   return (
     <>
       <Helmet>
@@ -65,13 +71,15 @@ export default function NovedadesAntiAgente() {
               <p className="text-gray-800 text-lg leading-loose">Lo que ya está, en qué andamos y lo que viene.</p>
             </Hoja>
 
-            <Hoja>
-              <Titulo>Qué viene</Titulo>
-              <div className="grid md:grid-cols-2 gap-8 mt-6">
-                <Columna titulo="En curso" lista={enCurso} />
-                <Columna titulo="Pendiente" lista={pendiente} />
-              </div>
-            </Hoja>
+            <div id="hoja-de-ruta" className="scroll-mt-6">
+              <Hoja>
+                <Titulo>Qué viene</Titulo>
+                <div className="grid md:grid-cols-2 gap-8 mt-6">
+                  <Columna titulo="En curso" lista={enCurso} />
+                  <Columna titulo="Pendiente" lista={pendiente} />
+                </div>
+              </Hoja>
+            </div>
 
             <Hoja>
               <Titulo>Lo que ya hace</Titulo>
