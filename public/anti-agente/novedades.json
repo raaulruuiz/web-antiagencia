@@ -1,7 +1,17 @@
 {
-  "ultima": { "version": "0.1.11", "fecha": "2026-11-18" },
+  "ultima": { "version": "0.1.12", "fecha": "2026-11-18" },
   "descargas": { "mac": "" },
   "versiones": [
+    {
+      "version": "0.1.12",
+      "fecha": "2026-11-18",
+      "entradas": [
+        {"id": "herramientas-bajo-demanda", "titulo": "Menos consumo en cada mensaje", "texto": "Los agentes cargan sus herramientas solo cuando las necesitan, en vez de mandarlas todas en cada mensaje. Con varias apps conectadas, la primera llamada gasta hasta cinco veces menos.", "ca": {"titulo": "Menys consum a cada missatge", "texto": "Els agents carreguen les seves eines només quan les necessiten, en lloc d'enviar-les totes a cada missatge. Amb diverses apps connectades, la primera crida gasta fins a cinc vegades menys."}, "en": {"titulo": "Lower usage on every message", "texto": "Agents load their tools only when they need them, instead of sending them all with every message. With several apps connected, the first call uses up to five times less."}},
+        {"id": "codex-ajustado", "titulo": "Agentes con ChatGPT más ligeros", "texto": "Mantienen los plugins y skills de tu Codex, y la búsqueda en internet y las imágenes se activan solo en los agentes que las usan.", "ca": {"titulo": "Agents amb ChatGPT més lleugers", "texto": "Mantenen els plugins i les skills del teu Codex, i la cerca a internet i les imatges només s'activen als agents que les fan servir."}, "en": {"titulo": "Lighter ChatGPT agents", "texto": "They keep your Codex plugins and skills, and web search and images are only turned on for the agents that use them."}},
+        {"id": "herramientas-a-medida", "titulo": "Herramientas hechas para ti", "texto": "Si te hacemos una herramienta a medida, aparece sola en tu cuenta al iniciar sesión y solo la ves tú.", "ca": {"titulo": "Eines fetes per a tu", "texto": "Si et fem una eina a mida, apareix sola al teu compte en iniciar sessió i només la veus tu."}, "en": {"titulo": "Tools made for you", "texto": "If we build you a custom tool, it shows up in your account by itself when you sign in, and only you can see it."}},
+        {"id": "herramientas-manejo", "titulo": "Herramientas más fáciles de manejar", "texto": "Puedes activarlas o desactivarlas y plegar su pantalla. Si les falta una conexión, te la piden. Los agentes las manejan contigo delante, y lo que cambia algo pasa antes por una tarjeta.", "ca": {"titulo": "Eines més fàcils de fer servir", "texto": "Les pots activar o desactivar i plegar-ne la pantalla. Si els falta una connexió, te la demanen. Els agents les fan servir amb tu al davant, i el que canvia alguna cosa passa abans per una targeta."}, "en": {"titulo": "Easier-to-use tools", "texto": "You can turn them on or off and fold their screen. If they're missing a connection, they ask you for it. Agents use them in front of you, and anything that changes something goes through a card first."}}
+      ]
+    },
     {
       "version": "0.1.11",
       "fecha": "2026-11-18",
