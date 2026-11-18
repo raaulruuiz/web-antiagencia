@@ -10,8 +10,32 @@ function fmtFechaHoraLarga(iso) {
   return dt.toLocaleString('es-ES', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
 }
 
+// Ajustes del formulario por tipo de reunión. El backend solo guarda las
+// respuestas de preguntas_extra configuradas, así que la web viaja dentro de
+// «notas» con su etiqueta (llega igual al evento, a Supabase y al aviso).
+const FORM_POR_SLUG = {
+  'onboarding-anti-agente': {
+    pedirWeb: true,
+    etiquetaNotas: '¿Qué te gustaría conseguir con los agentes?',
+  },
+};
+
+function normalizarWeb(valor) {
+  const v = valor.trim();
+  if (!v) return null;
+  const conProtocolo = /^https?:\/\//i.test(v) ? v : `https://${v}`;
+  try {
+    const u = new URL(conProtocolo);
+    if (!u.hostname.includes('.') || u.hostname.endsWith('.')) return null;
+    return conProtocolo;
+  } catch {
+    return null;
+  }
+}
+
 export default function Reservar() {
   const { slug } = useParams();
+  const ajustes = FORM_POR_SLUG[slug] || {};
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -21,7 +45,7 @@ export default function Reservar() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [calMonth, setCalMonth] = useState(null); // { year, month(0-idx) }
 
-  const [form, setForm] = useState({ nombre: '', email: '', notas: '' });
+  const [form, setForm] = useState({ nombre: '', email: '', web: '', notas: '' });
   const [respuestas, setRespuestas] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -67,6 +91,18 @@ export default function Reservar() {
       setSubmitError(`Falta responder: ${faltante.nombre}`);
       return;
     }
+    let notas = form.notas.trim() || null;
+    if (ajustes.pedirWeb) {
+      const web = normalizarWeb(form.web);
+      if (!web) {
+        setSubmitError('Escribe la dirección de tu web (por ejemplo, minegocio.com).');
+        return;
+      }
+      notas = [
+        `Web: ${web}`,
+        notas ? `${ajustes.etiquetaNotas} ${notas}` : null,
+      ].filter(Boolean).join('\n');
+    }
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -76,7 +112,7 @@ export default function Reservar() {
         body: JSON.stringify({
           nombre: form.nombre,
           email: form.email,
-          notas: form.notas || null,
+          notas,
           startISO: selectedSlot.startISO,
           endISO: selectedSlot.endISO,
           respuestas,
@@ -166,8 +202,18 @@ export default function Reservar() {
                         <input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
                       </div>
+                      {ajustes.pedirWeb && (
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Web de tu negocio *</label>
+                          <input required type="text" inputMode="url" autoComplete="url" placeholder="minegocio.com"
+                            value={form.web} onChange={e => setForm(f => ({ ...f, web: e.target.value }))}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                        </div>
+                      )}
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Notas (opcional)</label>
+                        <label className="block text-xs text-gray-500 mb-1">
+                          {ajustes.etiquetaNotas ? `${ajustes.etiquetaNotas} (opcional)` : 'Notas (opcional)'}
+                        </label>
                         <textarea value={form.notas} onChange={e => setForm(f => ({ ...f, notas: e.target.value }))} rows={2}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
                       </div>
