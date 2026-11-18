@@ -25,6 +25,8 @@ const ESTADOS = { active: 'activo', trialing: 'activo', past_due: 'impagado', un
 // Desde 2025 Stripe pone el fin del periodo en cada línea de la suscripción, no en la suscripción.
 const finDe = (s) => s.current_period_end || s.items?.data?.[0]?.current_period_end || null;
 const fecha = (seg) => (seg ? new Date(seg * 1000).toISOString() : null);
+// Dada de baja: sigue activa hasta el final del periodo, pero ya no se renovará.
+const seCancela = (s) => !!(s.cancel_at_period_end || s.cancel_at) && s.status !== 'canceled';
 
 async function pagoHecho(sesion, prueba) {
   if (sesion.payment_status === 'unpaid') return;
@@ -33,17 +35,19 @@ async function pagoHecho(sesion, prueba) {
   if (!usuario || !lista.length || !PERIODOS.includes(periodo)) return;
   let estado = 'activo';
   let hasta = null;
+  let cancelada = false;
   if (sesion.subscription) {
     const s = await stripe(`/subscriptions/${sesion.subscription}`);
     estado = ESTADOS[s.status] || 'impagado';
     hasta = fecha(finDe(s));
+    cancelada = seCancela(s);
   }
   const ahora = new Date().toISOString();
   await supabase('accesos_herramientas?on_conflict=usuario,herramienta', {
     metodo: 'POST',
     prefer: 'resolution=merge-duplicates,return=minimal',
     datos: lista.map((herramienta) => ({
-      usuario, herramienta, estado, periodo, hasta, prueba,
+      usuario, herramienta, estado, periodo, hasta, prueba, cancelada,
       cliente_stripe: sesion.customer || null,
       suscripcion_stripe: sesion.subscription || null,
       sesion_stripe: sesion.id,
@@ -56,7 +60,7 @@ async function suscripcionCambiada(s) {
   await supabase(`accesos_herramientas?suscripcion_stripe=eq.${encodeURIComponent(s.id)}`, {
     metodo: 'PATCH',
     prefer: 'return=minimal',
-    datos: { estado: ESTADOS[s.status] || 'impagado', hasta: fecha(s.ended_at || finDe(s)), actualizado: new Date().toISOString() },
+    datos: { estado: ESTADOS[s.status] || 'impagado', hasta: fecha(s.ended_at || s.cancel_at || finDe(s)), cancelada: seCancela(s), actualizado: new Date().toISOString() },
   });
 }
 

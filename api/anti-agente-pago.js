@@ -12,7 +12,7 @@ const MARGEN_RENOVACION = 2 * 24 * 3600 * 1000;
 export function vigente(a, ahora = Date.now()) {
   if (a.estado !== 'activo') return false;
   if (!a.hasta) return true;
-  const margen = a.periodo === 'mes' || a.periodo === 'año' ? MARGEN_RENOVACION : 0;
+  const margen = (a.periodo === 'mes' || a.periodo === 'año') && !a.cancelada ? MARGEN_RENOVACION : 0;
   return new Date(a.hasta).getTime() + margen > ahora;
 }
 
@@ -45,7 +45,7 @@ async function pagar(req, res, usuario) {
   const fiscal = fiscalDe(usuario);
   if (!fiscal) return res.status(428).json({ error: 'Faltan los datos de facturación' });
   const filtro = `usuario=eq.${usuario.id}`;
-  const suyos = await supabase(`accesos_herramientas?${filtro}&select=herramienta,estado,periodo,hasta,cliente_stripe`);
+  const suyos = await supabase(`accesos_herramientas?${filtro}&select=herramienta,estado,periodo,hasta,cancelada,cliente_stripe`);
   const yaTiene = lista.filter((h) => suyos.some((a) => a.herramienta === h && vigente(a)));
   if (yaTiene.length) return res.status(409).json({ error: 'Ya tienes acceso', herramientas: yaTiene });
 
