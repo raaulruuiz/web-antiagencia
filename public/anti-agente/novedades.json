@@ -1,7 +1,19 @@
 {
-  "ultima": { "version": "0.1.14", "fecha": "2026-11-19" },
+  "ultima": { "version": "0.1.15", "fecha": "2026-11-19" },
   "descargas": { "mac": "" },
   "versiones": [
+    {
+      "version": "0.1.15",
+      "fecha": "2026-11-19",
+      "resumen": "Versión de arreglos: las explicaciones que te da un agente antes de una tarjeta ya no se borran, «Trabajando…» vuelve a salir en verde y parar un plan lo para de verdad.",
+      "ca": { "resumen": "Versió d'arranjaments: les explicacions que et dona un agent abans d'una targeta ja no s'esborren, «Treballant…» torna a sortir en verd i aturar un pla l'atura de debò." },
+      "en": { "resumen": "A bug-fix release: explanations an agent gives you before a card no longer disappear, «Working…» shows in green again, and stopping a plan really stops it." },
+      "entradas": [
+        {"id": "texto-antes-tarjeta", "titulo": "Las explicaciones no desaparecen", "texto": "Si le pides a un agente que te aclare algo antes de elegir en una tarjeta, su explicación se queda en el chat, justo encima de la tarjeta. Antes se borraba al terminar y solo volvía a salir la tarjeta.", "ca": {"titulo": "Les explicacions no desapareixen", "texto": "Si demanes a un agent que t'aclareixi alguna cosa abans de triar en una targeta, la seva explicació es queda al xat, just a sobre de la targeta. Abans s'esborrava en acabar i només tornava a sortir la targeta."}, "en": {"titulo": "Explanations no longer disappear", "texto": "If you ask an agent to clarify something before choosing on a card, its explanation stays in the chat, right above the card. Before, it vanished when the agent finished and only the card came back."}},
+        {"id": "trabajando-verde", "titulo": "«Trabajando…» en verde", "texto": "En los agentes con mensajes sin leer, «Trabajando…» salía en negro en la lista. Ahora sale siempre en verde.", "ca": {"titulo": "«Treballant…» en verd", "texto": "Als agents amb missatges sense llegir, «Treballant…» sortia en negre a la llista. Ara surt sempre en verd."}, "en": {"titulo": "«Working…» in green", "texto": "For agents with unread messages, «Working…» showed in black in the list. Now it's always green."}},
+        {"id": "parar-plan", "titulo": "Parar un plan lo para", "texto": "Un plan parado ya no sigue avanzando por su cuenta: los pasos que quedaban en cola se descartan y tienes un botón «Parar plan».", "ca": {"titulo": "Aturar un pla l'atura", "texto": "Un pla aturat ja no continua avançant pel seu compte: els passos que quedaven a la cua es descarten i tens un botó «Atura el pla»."}, "en": {"titulo": "Stopping a plan stops it", "texto": "A stopped plan no longer keeps going on its own: queued steps are dropped and there's a «Stop plan» button."}}
+      ]
+    },
     {
       "version": "0.1.14",
       "fecha": "2026-11-19",
