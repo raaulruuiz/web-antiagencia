@@ -1,4 +1,5 @@
-// Aviso de Stripe (webhook): apunta en accesos_herramientas lo que ha pagado cada cuenta de Anti-Agente.
+// Aviso de Stripe (webhook): apunta en accesos_herramientas lo que ha pagado cada cuenta de Anti-Agente y, en
+// anti_gestor_ventas, los servicios contratados con su enlace de pago (metadata servicio, client_reference_id = cuenta).
 // Solo acepta avisos firmados con STRIPE_WEBHOOK_SECRET. Si Supabase falla, responde 500 para que Stripe lo reintente.
 import crypto from 'node:crypto';
 import { ID_HERRAMIENTA, PERIODOS, stripe, supabase } from './_stripe-anti-agente.js';
@@ -56,6 +57,49 @@ async function pagoHecho(sesion, prueba) {
   });
 }
 
+// ---- Servicios (Anti-Gestor): una venta por pago; la referencia (factura o sesión) es única y no se apunta dos veces ----
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const diaMadrid = (seg) => new Date((seg || Date.now() / 1000) * 1000).toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' });
+
+export async function apuntarVenta(v) {
+  try {
+    await supabase('anti_gestor_ventas?on_conflict=referencia', { metodo: 'POST', prefer: 'resolution=ignore-duplicates,return=minimal', datos: v });
+  } catch (e) {
+    if (!/23503/.test(e.message)) throw e;
+    // Un servicio que ya no existe no se arregla reintentando: queda en el log y Raúl la apunta a mano si hace falta.
+    const existe = await supabase(`anti_gestor_servicios?id=eq.${encodeURIComponent(v.servicio)}&select=id`);
+    if (!existe?.length) return console.error(`Venta de Stripe ${v.referencia}: el servicio «${v.servicio}» no existe en Anti-Gestor`);
+    // La cuenta del enlace no existe (o se borró): la venta se apunta igual, con su email.
+    if (!v.usuario) throw e;
+    await apuntarVenta({ ...v, usuario: null });
+  }
+}
+
+async function servicioPagado(sesion, prueba) {
+  const servicio = sesion.metadata?.servicio;
+  if (!ID_HERRAMIENTA.test(servicio || '') || sesion.payment_status === 'unpaid') return;
+  const usuario = UUID.test(sesion.client_reference_id || '') ? sesion.client_reference_id : null;
+  // Las renovaciones solo traen lo que lleve la suscripción: se le apunta la cuenta para sus facturas siguientes.
+  if (usuario && sesion.subscription) await stripe(`/subscriptions/${sesion.subscription}`, { metodo: 'POST', datos: { metadata: { usuario } } });
+  await apuntarVenta({
+    usuario, email: sesion.customer_details?.email || sesion.customer_email || '', servicio,
+    importe_centimos: sesion.amount_total || 0, fecha: diaMadrid(sesion.created), origen: 'stripe',
+    referencia: sesion.invoice || sesion.id, nota: prueba ? 'modo prueba' : '',
+  });
+}
+
+// La primera factura de una suscripción ya la apunta la sesión de pago (misma referencia): aquí solo las renovaciones.
+async function renovacionPagada(f, prueba) {
+  if (f.billing_reason !== 'subscription_cycle') return;
+  const meta = f.parent?.subscription_details?.metadata || f.subscription_details?.metadata || {};
+  if (!ID_HERRAMIENTA.test(meta.servicio || '')) return;
+  await apuntarVenta({
+    usuario: UUID.test(meta.usuario || '') ? meta.usuario : null, email: f.customer_email || '', servicio: meta.servicio,
+    importe_centimos: f.amount_paid || 0, fecha: diaMadrid(f.status_transitions?.paid_at || f.created), origen: 'stripe',
+    referencia: f.id, nota: prueba ? 'modo prueba' : '',
+  });
+}
+
 async function suscripcionCambiada(s) {
   await supabase(`accesos_herramientas?suscripcion_stripe=eq.${encodeURIComponent(s.id)}`, {
     metodo: 'PATCH',
@@ -77,6 +121,10 @@ export default async function handler(req, res) {
       case 'checkout.session.completed':
       case 'checkout.session.async_payment_succeeded':
         await pagoHecho(objeto, !evento.livemode);
+        await servicioPagado(objeto, !evento.livemode);
+        break;
+      case 'invoice.paid':
+        await renovacionPagada(objeto, !evento.livemode);
         break;
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':

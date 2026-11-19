@@ -44,7 +44,7 @@ export default function PoliticaPrivacidadAntiAgente() {
             <p className="mt-3">Si entras con Google, recibimos de Google tu nombre, tu email y tu foto de perfil para identificarte.</p>
             <p className="mt-3"><strong className="text-white">Uso diario de la app.</strong> Como mucho una vez al día, mientras tienes la sesión iniciada, la app apunta en tu cuenta:</p>
             <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
-              <li>El día en que la usaste por última vez.</li>
+              <li>Los días en que la usas: una marca por día, sin la hora ni lo que haces. Se borran pasados 400 días.</li>
               <li>La versión de la app que tienes instalada.</li>
               <li>Las herramientas que tienes instaladas, con su versión y si están activadas.</li>
             </ul>
@@ -56,6 +56,7 @@ export default function PoliticaPrivacidadAntiAgente() {
               <li>El email de tu cuenta, la versión de la app y quién lo escribe: tú o el nombre del agente que lo propone.</li>
             </ul>
             <p className="mt-3">Nunca se envían tus conversaciones, tus archivos ni tus claves.</p>
+            <p className="mt-3"><strong className="text-white">Servicios que contratas.</strong> En Configuración › Servicios puedes contratar un trabajo o reservar una llamada. Si contratas, el pago se hace en la página de Stripe, que se abre en tu navegador; nosotros nunca vemos los datos de tu tarjeta. Stripe nos dice qué servicio has contratado, cuánto has pagado, la fecha, el número de factura y tu email, y lo apuntamos junto a tu cuenta. Si reservas una llamada, la reserva se hace en antiagencia.es con los datos que pongas allí.</p>
             <p className="mt-3"><strong className="text-white">Agentes que comentan.</strong> Algunos agentes pueden proponer comentarios. De partida solo el coordinador; el permiso de cada uno se cambia en Novedades. El ajuste «Ayudar a mejorar Anti-Agente» (Configuración › General) viene apagado. Mientras esté apagado, de la app no sale nada que no hayas mandado tú: lo que propone un agente se queda en Novedades hasta que pulses «Enviar» o «Descartar». Si lo activas, los agentes con permiso lo envían solos, con los mismos datos de arriba. Cualquier envío futuro para mejorar la app (por ejemplo, registros de errores o soporte) también necesitará este permiso y dirá qué se envía.</p>
             <p className="mt-3"><strong className="text-white">Avisos de versión nueva.</strong> Al abrirse y cada 6 horas, la app descarga <span className="text-white">antiagencia.es/anti-agente/novedades.json</span> para saber si hay una versión nueva. No envía datos personales: nuestro servidor solo ve la petición, como cuando visitas cualquier web. Si pulsas «Instalar actualización», el instalador se descarga desde el enlace que indica ese archivo.</p>
           </section>
@@ -86,6 +87,8 @@ export default function PoliticaPrivacidadAntiAgente() {
               <li>Leer tus comentarios de fallos e ideas, contestarte si hace falta y mejorar la app. La base legal es tu consentimiento: los envías tú o los agentes a los que das permiso con «Ayudar a mejorar Anti-Agente», y puedes apagarlo cuando quieras.</li>
               <li>Avisarte de que hay una versión nueva. La base legal es nuestro interés legítimo en que tengas la app al día; no se tratan datos personales.</li>
               <li>Saber qué cuentas siguen usando la app, con qué versión y con qué herramientas, para darte soporte, avisarte de actualizaciones y gestionar los accesos a las herramientas. La base legal es nuestro interés legítimo en mantener el servicio; puedes oponerte escribiéndonos.</li>
+              <li>Saber qué cuentas usan más la app, con los días de uso de los últimos 400 días. La base legal es nuestro interés legítimo en mantener y mejorar el servicio; puedes oponerte escribiéndonos.</li>
+              <li>Cobrar los servicios que contratas, hacerte la factura y llevar nuestra contabilidad. La base legal es el contrato del servicio y nuestras obligaciones legales.</li>
             </ul>
           </section>
 
@@ -104,7 +107,8 @@ export default function PoliticaPrivacidadAntiAgente() {
             <h2 className="text-lg font-semibold text-white mb-3">7. Con quién compartimos los datos</h2>
             <p>No vendemos tus datos. Los comparten solo los proveedores que necesitamos para dar el servicio, como encargados del tratamiento:</p>
             <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
-              <li><strong className="text-white">Supabase:</strong> aloja las cuentas de usuario y los comentarios que nos envías desde Novedades, en servidores de Europa.</li>
+              <li><strong className="text-white">Supabase:</strong> aloja las cuentas de usuario, el uso de la app, los servicios que contratas y los comentarios que nos envías desde Novedades, en servidores de Europa.</li>
+              <li><strong className="text-white">Stripe:</strong> cobra los servicios y las herramientas de pago y emite sus recibos. Trata tus datos de pago según su propia política.</li>
               <li><strong className="text-white">Google:</strong> si eliges entrar con tu cuenta de Google.</li>
               <li><strong className="text-white">Resend:</strong> envía los emails de confirmación y recuperación de contraseña. También nos hace llegar por email cada comentario, con tu email para poder contestarte.</li>
             </ul>
@@ -113,7 +117,7 @@ export default function PoliticaPrivacidadAntiAgente() {
 
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">8. Cuánto tiempo los guardamos</h2>
-            <p>Mientras tengas la cuenta. Los comentarios que nos envías se guardan también mientras tengas la cuenta, y puedes pedir que los borremos antes. Si pides eliminar la cuenta, borramos sus datos y sus comentarios salvo lo que debamos conservar por ley. Lo que está en tu ordenador se borra al eliminarlo en la app o desinstalarla.</p>
+            <p>Mientras tengas la cuenta. Los comentarios que nos envías se guardan también mientras tengas la cuenta, y puedes pedir que los borremos antes. Si pides eliminar la cuenta, borramos sus datos y sus comentarios salvo lo que debamos conservar por ley. Lo que está en tu ordenador se borra al eliminarlo en la app o desinstalarla. Los días de uso se borran pasados 400 días, y también al eliminar la cuenta. Los pagos y las facturas se guardan el tiempo que exige la ley (en España, seis años), también si eliminas la cuenta: entonces se quedan solo con tu email, sin unirlos a ninguna cuenta.</p>
           </section>
 
           <section>
