@@ -1,7 +1,18 @@
 {
-  "ultima": { "version": "0.1.12", "fecha": "2026-11-18" },
+  "ultima": { "version": "0.1.14", "fecha": "2026-11-19" },
   "descargas": { "mac": "" },
   "versiones": [
+    {
+      "version": "0.1.14",
+      "fecha": "2026-11-19",
+      "resumen": "A partir de ahora la app se actualiza sola: baja las versiones nuevas en segundo plano y Máximo te avisa para reiniciar cuando quieras. Además ya viene firmada por Apple, así que el Mac la abre sin avisos raros.",
+      "ca": { "resumen": "A partir d'ara l'app s'actualitza sola: baixa les versions noves en segon pla i el Màxim t'avisa per reiniciar quan vulguis. A més, ja ve signada per Apple, així que el Mac l'obre sense avisos estranys." },
+      "en": { "resumen": "From now on the app updates itself: it downloads new versions in the background and Máximo lets you know so you can restart whenever you like. It's also signed by Apple now, so your Mac opens it without odd warnings." },
+      "entradas": [
+        {"id": "actualizacion-sola", "titulo": "La app se actualiza sola", "texto": "Busca versiones nuevas al abrirse y cada pocas horas, las baja en segundo plano y Máximo te avisa con un botón para reiniciar. Si no lo pulsas, se instala al cerrar la app. Ya no hace falta borrar la app ni abrir el instalador.", "ca": {"titulo": "L'app s'actualitza sola", "texto": "Busca versions noves en obrir-se i cada poques hores, les baixa en segon pla i el Màxim t'avisa amb un botó per reiniciar. Si no el prems, s'instal·la en tancar l'app. Ja no cal esborrar l'app ni obrir l'instal·lador."}, "en": {"titulo": "The app updates itself", "texto": "It checks for new versions when it opens and every few hours, downloads them in the background, and Máximo gives you a button to restart. If you don't press it, the update installs when you quit. No more deleting the app or opening the installer."}},
+        {"id": "firmada-apple", "titulo": "Firmada por Apple", "texto": "La app está firmada y revisada por Apple, así que el Mac la abre a la primera sin pedirte permisos extra.", "ca": {"titulo": "Signada per Apple", "texto": "L'app està signada i revisada per Apple, així que el Mac l'obre a la primera sense demanar-te permisos extra."}, "en": {"titulo": "Signed by Apple", "texto": "The app is signed and checked by Apple, so your Mac opens it first time without asking for extra permissions."}}
+      ]
+    },
     {
       "version": "0.1.12",
       "fecha": "2026-11-18",
