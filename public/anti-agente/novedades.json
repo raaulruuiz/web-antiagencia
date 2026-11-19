@@ -1,8 +1,60 @@
 {
-  "ultima": { "version": "0.1.17", "fecha": "2026-11-19" },
+  "ultima": { "version": "0.1.18", "fecha": "2026-11-19" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.1.18",
+      "fecha": "2026-11-19",
+      "resumen": "Ya puedes ver los servicios de Raúl dentro de la app y contratarlos o reservar una llamada. Y las herramientas con pantalla pueden ocupar toda la ventana y pasarle encargos a tu agente con un botón.",
+      "ca": {
+        "resumen": "Ja pots veure els serveis d'en Raúl dins l'app i contractar-los o reservar una trucada. I les eines amb pantalla poden ocupar tota la finestra i passar encàrrecs al teu agent amb un botó."
+      },
+      "en": {
+        "resumen": "You can now see Raúl's services inside the app and get them or book a call. And tools with a screen can fill the whole window and pass tasks to your agent with a button."
+      },
+      "entradas": [
+        {
+          "id": "servicios",
+          "titulo": "Servicios en la app",
+          "texto": "En Configuración › Servicios ves cada servicio con su precio y lo que incluye, y con «Ver más», todo el detalle. Lo contratas en la página de pago de Stripe o reservas una llamada en su calendario.",
+          "ca": {
+            "titulo": "Serveis a l'app",
+            "texto": "A Configuració › Serveis veus cada servei amb el seu preu i el que inclou, i amb «Veure més», tot el detall. El contractes a la pàgina de pagament de Stripe o reserves una trucada al seu calendari."
+          },
+          "en": {
+            "titulo": "Services in the app",
+            "texto": "In Settings › Services you can see each service with its price and what it includes, and all the detail with «See more». You get it on Stripe's payment page or book a call in its calendar."
+          }
+        },
+        {
+          "id": "herramientas-chat",
+          "titulo": "Herramientas que le pasan encargos a tu agente",
+          "texto": "Una herramienta con pantalla puede escribir en el chat de tu agente cuando pulsas uno de sus botones, como si lo hubieras escrito tú. Lo que cambie algo te sigue pidiendo permiso.",
+          "ca": {
+            "titulo": "Eines que passen encàrrecs al teu agent",
+            "texto": "Una eina amb pantalla pot escriure al xat del teu agent quan prems un dels seus botons, com si ho haguessis escrit tu. El que canviï alguna cosa et continua demanant permís."
+          },
+          "en": {
+            "titulo": "Tools that pass tasks to your agent",
+            "texto": "A tool with a screen can write in your agent's chat when you press one of its buttons, as if you had written it. Anything that changes something still asks for your permission."
+          }
+        },
+        {
+          "id": "pantalla-completa",
+          "titulo": "Pantalla completa",
+          "texto": "Las herramientas que lo necesitan pueden ocupar toda la ventana, con el chat de tu agente flotando encima. Lo mueves, lo pliegas en una burbuja y sales con Esc.",
+          "ca": {
+            "titulo": "Pantalla completa",
+            "texto": "Les eines que ho necessiten poden ocupar tota la finestra, amb el xat del teu agent flotant a sobre. El mous, el plegues en una bombolla i surts amb Esc."
+          },
+          "en": {
+            "titulo": "Full screen",
+            "texto": "Tools that need it can fill the whole window, with your agent's chat floating on top. You can move it, fold it into a bubble and leave with Esc."
+          }
+        }
+      ]
+    },
     {
       "version": "0.1.17",
       "fecha": "2026-11-19",
