@@ -1,5 +1,69 @@
 {
   "formato": 1,
-  "herramientas": [],
+  "herramientas": [
+    {
+      "id": "webs",
+      "nombre": "Webs",
+      "version": "0.1.0",
+      "descripcion": "Edita tu web hablando con tus bots: señalas lo que quieres cambiar, se prepara en un borrador y solo se publica cuando lo apruebas.",
+      "precio": {
+        "texto": "19 €/mes",
+        "detalle": "o 190 €/año · IVA incluido"
+      },
+      "icono": "https://antiagencia.es/anti-agente/herramientas/webs.svg",
+      "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs.md",
+      "appMinima": "0.1.13",
+      "conexiones": [
+        {
+          "servicio": "shopify",
+          "opcional": true,
+          "motivo": "Ver y editar el tema y el contenido de tu tienda en un borrador, y publicarlo"
+        },
+        {
+          "servicio": "wordpress",
+          "opcional": true,
+          "motivo": "Ver y editar páginas, entradas y plantillas de tu web, y publicarlas"
+        },
+        {
+          "servicio": "woocommerce",
+          "opcional": true,
+          "motivo": "Editar los textos de los productos de tu tienda"
+        },
+        {
+          "servicio": "gohighlevel",
+          "opcional": true,
+          "motivo": "Ver tus embudos y editar el blog y las redirecciones"
+        },
+        {
+          "servicio": "github",
+          "opcional": true,
+          "motivo": "Editar webs hechas a medida que están en GitHub y publicarlas"
+        }
+      ],
+      "capacidades": [
+        "carpetas"
+      ],
+      "sha256": "398cacf48420a8918bfbeca389fa6c07fd75b5f063e62f2c3042ed10a9f491d0",
+      "peso": 102230,
+      "ca": {
+        "nombre": "Webs",
+        "descripcion": "Edita el teu web parlant amb els teus bots: assenyales el que vols canviar, es prepara en un esborrany i només es publica quan ho aproves.",
+        "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-ca.md",
+        "precio": {
+          "texto": "19 €/mes",
+          "detalle": "o 190 €/any · IVA inclòs"
+        }
+      },
+      "en": {
+        "nombre": "Websites",
+        "descripcion": "Edit your website by talking to your bots: point at what to change, it's prepared as a draft and only goes live when you approve it.",
+        "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-en.md",
+        "precio": {
+          "texto": "€19/month",
+          "detalle": "or €190/year · VAT included"
+        }
+      }
+    }
+  ],
   "servicios": []
 }
