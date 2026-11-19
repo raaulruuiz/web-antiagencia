@@ -1,8 +1,73 @@
 {
-  "ultima": { "version": "0.1.18", "fecha": "2026-11-19" },
+  "ultima": { "version": "0.1.19", "fecha": "2026-11-19" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.1.19",
+      "fecha": "2026-11-19",
+      "resumen": "Actualizar la app es ahora un solo botón, y las herramientas te cuentan qué trae cada versión y te dejan volver a la anterior si algo no te convence. Además, la pantalla de Herramientas se lee mucho mejor.",
+      "ca": {
+        "resumen": "Actualitzar l'app ara és un sol botó, i les eines t'expliquen què porta cada versió i et deixen tornar a l'anterior si alguna cosa no et convenç. A més, la pantalla d'Eines es llegeix molt millor."
+      },
+      "en": {
+        "resumen": "Updating the app is now a single button, and tools tell you what each version brings and let you go back to the previous one if something doesn't convince you. Plus, the Tools screen is much easier to read."
+      },
+      "entradas": [
+        {
+          "id": "instalar-actualizacion",
+          "titulo": "Un solo botón para actualizar",
+          "texto": "Cuando hay versión nueva, Máximo te avisa con «Instalar actualización». De un clic, la app se cierra y se vuelve a abrir ya actualizada. Nada se instala sin que lo pulses.",
+          "ca": {
+            "titulo": "Un sol botó per actualitzar",
+            "texto": "Quan hi ha una versió nova, en Màxim t'avisa amb «Instal·lar actualització». D'un clic, l'app es tanca i es torna a obrir ja actualitzada. No s'instal·la res sense que el premis."
+          },
+          "en": {
+            "titulo": "A single button to update",
+            "texto": "When there's a new version, Máximo lets you know with «Install update». With one click, the app closes and reopens already updated. Nothing is installed until you press it."
+          }
+        },
+        {
+          "id": "herramientas-versiones",
+          "titulo": "Qué trae cada versión de una herramienta",
+          "texto": "Cuando una herramienta se actualiza, Máximo te cuenta qué cambia. Si la nueva no te convence, «Volver a la anterior» la deja como estaba, y tus agentes se enteran de lo que pueden hacer con ella.",
+          "ca": {
+            "titulo": "Què porta cada versió d'una eina",
+            "texto": "Quan una eina s'actualitza, en Màxim t'explica què canvia. Si la nova no et convenç, «Tornar a l'anterior» la deixa com estava, i els teus agents s'assabenten del que poden fer-hi."
+          },
+          "en": {
+            "titulo": "What each tool version brings",
+            "texto": "When a tool updates, Máximo tells you what changes. If the new one doesn't convince you, «Go back to the previous one» leaves it as it was, and your agents find out what they can do with it."
+          }
+        },
+        {
+          "id": "herramientas-ficha",
+          "titulo": "Herramientas más claras",
+          "texto": "Cada herramienta dice si es nativa o a medida, enseña sus requisitos con un check o una X y lleva los botones siempre abajo. El detalle, en «Ver más».",
+          "ca": {
+            "titulo": "Eines més clares",
+            "texto": "Cada eina diu si és nativa o a mida, mostra els seus requisits amb un check o una X i porta els botons sempre a baix. El detall, a «Veure més»."
+          },
+          "en": {
+            "titulo": "Clearer tools",
+            "texto": "Each tool says whether it's native or custom, shows its requirements with a check or an X and always has its buttons at the bottom. The detail, in «See more»."
+          }
+        },
+        {
+          "id": "pantalla-completa-caja",
+          "titulo": "Pantalla completa más limpia",
+          "texto": "Cuando una herramienta ocupa toda la ventana, encima solo queda la caja para escribirle a tu agente, abajo y centrada.",
+          "ca": {
+            "titulo": "Pantalla completa més neta",
+            "texto": "Quan una eina ocupa tota la finestra, a sobre només hi queda la caixa per escriure al teu agent, a baix i centrada."
+          },
+          "en": {
+            "titulo": "Cleaner full screen",
+            "texto": "When a tool fills the whole window, only the box to write to your agent stays on top, at the bottom and centred."
+          }
+        }
+      ]
+    },
     {
       "version": "0.1.18",
       "fecha": "2026-11-19",
