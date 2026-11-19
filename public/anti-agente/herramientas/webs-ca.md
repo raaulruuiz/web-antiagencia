@@ -1,4 +1,4 @@
-# Webs
+# Anti-Web
 
 Canvia el teu web parlant amb els teus bots. El veus dins l'app, assenyales el que vols canviar i ho demanes, per escrit o per àudio. Tot es fa primer en un esborrany: el teu web no canvia fins que tu ho aproves.
 
@@ -19,7 +19,7 @@ Una d'aquestes, no totes:
 ## Què toca dels teus comptes
 - **Mentre edites** només canvia l'esborrany: una còpia a part del teu web (a Shopify, un tema sense publicar anomenat «Anti-Agente · Borrador»). El web publicat no es toca.
 - **En publicar** puja només els fitxers o continguts que surten a la targeta.
-- **Tornar a la versió anterior** només desfà l'última publicació feta amb Webs.
+- **Tornar a la versió anterior** només desfà l'última publicació feta amb Anti-Web.
 - No toca claus, contrasenyes ni fitxers de configuració secrets.
 - El que no es pot canviar des d'aquí (per exemple, pàgines fetes amb Elementor o els embuts de GoHighLevel) t'ho avisa, i el teu bot et deixa el canvi preparat per fer-lo a mà.
 

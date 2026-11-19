@@ -1,4 +1,4 @@
-# Websites
+# Anti-Web
 
 Change your website by talking to your bots. You see it inside the app, point at what you want to change and ask for it, in writing or by voice. Everything happens in a draft first: your website doesn't change until you approve it.
 
@@ -19,7 +19,7 @@ One of these, not all:
 ## What it touches in your accounts
 - **While you edit**, only the draft changes: a separate copy of your website (in Shopify, an unpublished theme called «Anti-Agente · Borrador»). Your live website isn't touched.
 - **When you publish**, it only uploads the files or content shown on the card.
-- **Go back to the previous version** only undoes the last publish made with Websites.
+- **Go back to the previous version** only undoes the last publish made with Anti-Web.
 - It doesn't touch keys, passwords or secret configuration files.
 - If something can't be changed from here (for example, pages built with Elementor or GoHighLevel funnels), it tells you, and your bot leaves the change ready for you to make by hand.
 

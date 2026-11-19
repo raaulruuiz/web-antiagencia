@@ -1,4 +1,4 @@
-# Webs
+# Anti-Web
 
 Cambia tu web hablando con tus bots. La ves dentro de la app, señalas lo que quieres cambiar y lo pides, escrito o por audio. Todo se hace primero en un borrador: tu web no cambia hasta que tú lo apruebas.
 
@@ -19,7 +19,7 @@ Una de estas, no todas:
 ## Qué toca de tus cuentas
 - **Mientras editas** solo cambia el borrador: una copia aparte de tu web (en Shopify, un tema sin publicar llamado «Anti-Agente · Borrador»). Tu web publicada no se toca.
 - **Al publicar** sube solo los archivos o contenidos que salen en la tarjeta.
-- **Volver a la versión anterior** solo deshace la última publicación hecha con Webs.
+- **Volver a la versión anterior** solo deshace la última publicación hecha con Anti-Web.
 - No toca claves, contraseñas ni archivos de configuración secretos.
 - Lo que no se puede cambiar desde aquí (por ejemplo, páginas hechas con Elementor o los embudos de GoHighLevel) te lo avisa, y tu bot te deja el cambio preparado para hacerlo a mano.
 

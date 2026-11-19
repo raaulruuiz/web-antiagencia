@@ -3,8 +3,9 @@
   "herramientas": [
     {
       "id": "webs",
-      "nombre": "Webs",
-      "version": "0.1.7",
+      "nombre": "Anti-Web",
+      "version": "0.1.8",
+      "cambios": "Ahora se llama Anti-Web. Todo lo demás sigue igual: tus webs, borradores y cambios guardados se mantienen.",
       "descripcion": "Edita tu web hablando con tus bots: señalas lo que quieres cambiar, se prepara en un borrador y solo se publica cuando lo apruebas.",
       "precio": {
         "texto": "19 €/mes",
@@ -45,10 +46,11 @@
         "chat",
         "pantallaCompleta"
       ],
-      "sha256": "92153a15779741f744322ce6f7bf49460550d2bbc1be5fecbb7b8767dd3486fc",
-      "peso": 160546,
+      "sha256": "ef93f01a8256efe37ded12f470386e512ff8016754998219a4d994f3ff64ca12",
+      "peso": 160766,
       "ca": {
-        "nombre": "Webs",
+        "nombre": "Anti-Web",
+        "cambios": "Ara es diu Anti-Web. Tota la resta continua igual: els teus webs, esborranys i canvis desats es mantenen.",
         "descripcion": "Edita el teu web parlant amb els teus bots: assenyales el que vols canviar, es prepara en un esborrany i només es publica quan ho aproves.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-ca.md",
         "precio": {
@@ -57,7 +59,8 @@
         }
       },
       "en": {
-        "nombre": "Websites",
+        "nombre": "Anti-Web",
+        "cambios": "It's now called Anti-Web. Everything else stays the same: your websites, drafts and saved changes are kept.",
         "descripcion": "Edit your website by talking to your bots: point at what to change, it's prepared as a draft and only goes live when you approve it.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-en.md",
         "precio": {
