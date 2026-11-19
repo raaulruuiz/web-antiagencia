@@ -1,6 +1,7 @@
 {
   "ultima": { "version": "0.1.16", "fecha": "2026-11-19" },
   "descargas": { "mac": "" },
+  "usoDiario": true,
   "versiones": [
     {
       "version": "0.1.16",

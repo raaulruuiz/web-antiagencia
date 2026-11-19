@@ -18,7 +18,7 @@ export default function PoliticaPrivacidadAntiAgente() {
         </Link>
 
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Política de privacidad de Anti-Agente</h1>
-        <p className="text-white/40 text-sm mb-12">Última actualización: 17 de noviembre de 2026</p>
+        <p className="text-white/40 text-sm mb-12">Última actualización: 19 de noviembre de 2026</p>
 
         <div className="space-y-10 text-white/80 leading-relaxed">
 
@@ -42,6 +42,13 @@ export default function PoliticaPrivacidadAntiAgente() {
               <li>La fecha de alta y de último acceso a tu cuenta.</li>
             </ul>
             <p className="mt-3">Si entras con Google, recibimos de Google tu nombre, tu email y tu foto de perfil para identificarte.</p>
+            <p className="mt-3"><strong className="text-white">Uso diario de la app.</strong> Como mucho una vez al día, mientras tienes la sesión iniciada, la app apunta en tu cuenta:</p>
+            <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
+              <li>El día en que la usaste por última vez.</li>
+              <li>La versión de la app que tienes instalada.</li>
+              <li>Las herramientas que tienes instaladas, con su versión y si están activadas.</li>
+            </ul>
+            <p className="mt-3">No se apunta nada de tu negocio, de tus agentes, de tus conversaciones ni de tus archivos.</p>
             <p className="mt-3"><strong className="text-white">Comentarios desde Novedades.</strong> En Configuración › Novedades puedes mandarnos un fallo o una idea. Si lo haces, recibimos:</p>
             <ul className="mt-3 space-y-2 list-disc list-inside pl-2">
               <li>El texto del comentario, hasta 5.000 caracteres.</li>
@@ -78,6 +85,7 @@ export default function PoliticaPrivacidadAntiAgente() {
               <li>Enviarte avisos necesarios sobre tu cuenta o sobre la app.</li>
               <li>Leer tus comentarios de fallos e ideas, contestarte si hace falta y mejorar la app. La base legal es tu consentimiento: los envías tú o los agentes a los que das permiso con «Ayudar a mejorar Anti-Agente», y puedes apagarlo cuando quieras.</li>
               <li>Avisarte de que hay una versión nueva. La base legal es nuestro interés legítimo en que tengas la app al día; no se tratan datos personales.</li>
+              <li>Saber qué cuentas siguen usando la app, con qué versión y con qué herramientas, para darte soporte, avisarte de actualizaciones y gestionar los accesos a las herramientas. La base legal es nuestro interés legítimo en mantener el servicio; puedes oponerte escribiéndonos.</li>
             </ul>
           </section>
 
