@@ -1,7 +1,20 @@
 {
-  "ultima": { "version": "0.1.15", "fecha": "2026-11-19" },
+  "ultima": { "version": "0.1.16", "fecha": "2026-11-19" },
   "descargas": { "mac": "" },
   "versiones": [
+    {
+      "version": "0.1.16",
+      "fecha": "2026-11-19",
+      "resumen": "Máximo se ve mejor cuando te avisa, las actualizaciones se instalan solo con su botón y los anuncios de Meta siempre pasan por tu tarjeta.",
+      "ca": { "resumen": "En Màxim es veu millor quan t'avisa, les actualitzacions s'instal·len només amb el seu botó i els anuncis de Meta sempre passen per la teva targeta." },
+      "en": { "resumen": "Máximo is easier to see when he has news, updates install only with his button, and Meta ads always go through your card." },
+      "entradas": [
+        {"id": "maximo-visible", "titulo": "Máximo se ve mejor", "texto": "Cuando Máximo tiene algo para ti, su icono late en morado y enseña un contador grande, también en el botón flotante. Ya no sale la burbuja de texto que tapaba la pantalla.", "ca": {"titulo": "En Màxim es veu millor", "texto": "Quan en Màxim té alguna cosa per a tu, la seva icona batega en morat i mostra un comptador gran, també al botó flotant. Ja no surt la bombolla de text que tapava la pantalla."}, "en": {"titulo": "Máximo is easier to see", "texto": "When Máximo has something for you, his icon pulses in purple and shows a big counter, on the floating button too. The text bubble that covered the screen is gone."}},
+        {"id": "actualizar-boton", "titulo": "Actualizar, solo con el botón", "texto": "Las versiones nuevas se instalan cuando pulsas «Actualizar ahora» en Máximo: la app se cierra un momento y vuelve a abrirse ya actualizada. Los textos ya no dicen que se instale al cerrarla.", "ca": {"titulo": "Actualitzar, només amb el botó", "texto": "Les versions noves s'instal·len quan prems «Actualitza ara» a en Màxim: l'app es tanca un moment i es torna a obrir ja actualitzada. Els textos ja no diuen que s'instal·li en tancar-la."}, "en": {"titulo": "Updates, only with the button", "texto": "New versions install when you press «Update now» in Máximo: the app closes for a moment and reopens already updated. The texts no longer say it installs when you quit."}},
+        {"id": "meta-tarjeta", "titulo": "Anuncios de Meta, siempre con tu visto bueno", "texto": "Un agente ya no puede crear campañas, conjuntos ni anuncios de Meta por su cuenta: siempre te sale la tarjeta de campaña para revisarlo. Además, ahora sirve para añadir conjuntos o anuncios a una campaña que ya tienes.", "ca": {"titulo": "Anuncis de Meta, sempre amb el teu vistiplau", "texto": "Un agent ja no pot crear campanyes, conjunts ni anuncis de Meta pel seu compte: sempre et surt la targeta de campanya per revisar-ho. A més, ara serveix per afegir conjunts o anuncis a una campanya que ja tens."}, "en": {"titulo": "Meta ads, always with your OK", "texto": "An agent can no longer create Meta campaigns, ad sets or ads on its own: you always get the campaign card to review it. It now also works to add ad sets or ads to a campaign you already have."}},
+        {"id": "herramientas-pago-seguras", "titulo": "Herramientas de pago más protegidas", "texto": "Las herramientas de pago ya no tienen un enlace público: la app las baja solo si tu cuenta tiene acceso, y eso se comprueba en el servidor.", "ca": {"titulo": "Eines de pagament més protegides", "texto": "Les eines de pagament ja no tenen un enllaç públic: l'app les baixa només si el teu compte hi té accés, i això es comprova al servidor."}, "en": {"titulo": "Paid tools, better protected", "texto": "Paid tools no longer have a public link: the app downloads them only if your account has access, and that is checked on the server."}}
+      ]
+    },
     {
       "version": "0.1.15",
       "fecha": "2026-11-19",
