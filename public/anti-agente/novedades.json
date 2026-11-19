@@ -1,8 +1,73 @@
 {
-  "ultima": { "version": "0.1.16", "fecha": "2026-11-19" },
+  "ultima": { "version": "0.1.17", "fecha": "2026-11-19" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.1.17",
+      "fecha": "2026-11-19",
+      "resumen": "Las herramientas de la app pueden hacer mucho más: guardar sus archivos en tu Mac, usar tu propia IA, transcribir, crear imágenes y leer webs. Y las tarjetas que te piden permiso se entienden mejor.",
+      "ca": {
+        "resumen": "Les eines de l'app poden fer molt més: desar els seus fitxers al teu Mac, fer servir la teva pròpia IA, transcriure, crear imatges i llegir webs. I les targetes que et demanen permís s'entenen millor."
+      },
+      "en": {
+        "resumen": "The app's tools can do much more: save their files on your Mac, use your own AI, transcribe, create images and read websites. And the cards asking for your permission are easier to understand."
+      },
+      "entradas": [
+        {
+          "id": "herramientas-datos",
+          "titulo": "Herramientas con sus propios archivos",
+          "texto": "Cada herramienta guarda lo suyo en una carpeta de tu Mac, separada por cuenta. Lo que borra va a una papelera durante 30 días, y tus agentes pueden leer lo que la herramienta les deje.",
+          "ca": {
+            "titulo": "Eines amb els seus propis fitxers",
+            "texto": "Cada eina desa el que és seu en una carpeta del teu Mac, separada per compte. El que esborra va a una paperera durant 30 dies, i els teus agents poden llegir el que l'eina els deixi."
+          },
+          "en": {
+            "titulo": "Tools with their own files",
+            "texto": "Each tool keeps its things in a folder on your Mac, separate for each account. What it deletes goes to a bin for 30 days, and your agents can read whatever the tool allows."
+          }
+        },
+        {
+          "id": "herramientas-ia",
+          "titulo": "Tu IA dentro de las herramientas",
+          "texto": "Las herramientas pueden pedir textos a tu Claude o tu ChatGPT, también con imágenes, y ves cómo avanzan. Como mucho dos a la vez, y se paran al cerrar la pantalla.",
+          "ca": {
+            "titulo": "La teva IA dins de les eines",
+            "texto": "Les eines poden demanar textos al teu Claude o al teu ChatGPT, també amb imatges, i veus com avancen. Com a màxim dos alhora, i s'aturen en tancar la pantalla."
+          },
+          "en": {
+            "titulo": "Your AI inside the tools",
+            "texto": "Tools can ask your Claude or ChatGPT for text, images included, and you see the progress. Two at a time at most, and they stop when you close the screen."
+          }
+        },
+        {
+          "id": "herramientas-sistema",
+          "titulo": "Transcribir, crear imágenes y leer webs",
+          "texto": "Las herramientas pueden transcribir audios, vídeos y vídeos de YouTube en tu Mac, crear imágenes, leer una web y sacar una foto de un diseño. Las webs se abren en una ventana aislada, sin tus sesiones.",
+          "ca": {
+            "titulo": "Transcriure, crear imatges i llegir webs",
+            "texto": "Les eines poden transcriure àudios, vídeos i vídeos de YouTube al teu Mac, crear imatges, llegir una web i fer una foto d'un disseny. Les webs s'obren en una finestra aïllada, sense les teves sessions."
+          },
+          "en": {
+            "titulo": "Transcribe, create images and read websites",
+            "texto": "Tools can transcribe audio, video and YouTube videos on your Mac, create images, read a website and take a picture of a design. Websites open in an isolated window, without your sessions."
+          }
+        },
+        {
+          "id": "tarjetas-claras",
+          "titulo": "Tarjetas más claras y Conectar",
+          "texto": "Cuando una herramienta te pide permiso, la tarjeta explica en palabras normales qué va a hacer, con el detalle técnico plegado debajo. Y si le falta una app, te sale encima el botón para conectarla.",
+          "ca": {
+            "titulo": "Targetes més clares i Connectar",
+            "texto": "Quan una eina et demana permís, la targeta explica amb paraules normals què farà, amb el detall tècnic plegat a sota. I si li falta una app, et surt a sobre el botó per connectar-la."
+          },
+          "en": {
+            "titulo": "Clearer cards and Connect",
+            "texto": "When a tool asks for permission, the card explains in plain words what it will do, with the technical detail folded underneath. And if it is missing an app, the button to connect it shows up on top."
+          }
+        }
+      ]
+    },
     {
       "version": "0.1.16",
       "fecha": "2026-11-19",
