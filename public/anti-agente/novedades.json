@@ -1,8 +1,73 @@
 {
-  "ultima": { "version": "0.1.19", "fecha": "2026-11-19" },
+  "ultima": { "version": "0.1.20", "fecha": "2026-11-19" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.1.20",
+      "fecha": "2026-11-19",
+      "resumen": "Tus herramientas están siempre al día: si te dan una, te la quitan o sale una versión nueva, lo ves al momento y Máximo te avisa a la vez. Además, las fichas de cada herramienta explican mejor qué hacen, qué necesitan y cuánto cuestan.",
+      "ca": {
+        "resumen": "Les teves eines estan sempre al dia: si te'n donen una, te la treuen o surt una versió nova, ho veus al moment i en Màxim t'avisa alhora. A més, les fitxes de cada eina expliquen millor què fan, què necessiten i quant costen."
+      },
+      "en": {
+        "resumen": "Your tools are always up to date: if you're given one, it's taken away or a new version comes out, you see it right away and Máximo lets you know at the same time. Plus, each tool's page explains better what it does, what it needs and what it costs."
+      },
+      "entradas": [
+        {
+          "id": "herramientas-al-momento",
+          "titulo": "Herramientas al día al momento",
+          "texto": "Cuando recibes una herramienta, te la quitan o llega una versión nueva, Herramientas se actualiza enseguida y Máximo te avisa a la vez, sin esperar a la siguiente revisión.",
+          "ca": {
+            "titulo": "Eines al dia al moment",
+            "texto": "Quan reps una eina, te la treuen o arriba una versió nova, Eines s'actualitza de seguida i en Màxim t'avisa alhora, sense esperar a la revisió següent."
+          },
+          "en": {
+            "titulo": "Tools up to date right away",
+            "texto": "When you get a tool, it's taken away or a new version arrives, Tools updates straight away and Máximo lets you know at the same time, without waiting for the next check."
+          }
+        },
+        {
+          "id": "herramientas-fichas",
+          "titulo": "Fichas más completas",
+          "texto": "Cada herramienta trae su descripción, su «Ver más» con formato y su precio. Los requisitos dicen si son obligatorios u opcionales, y «Actualizar» queda a la derecha de los botones.",
+          "ca": {
+            "titulo": "Fitxes més completes",
+            "texto": "Cada eina porta la seva descripció, el seu «Veure més» amb format i el seu preu. Els requisits diuen si són obligatoris u opcionals, i «Actualitzar» queda a la dreta dels botons."
+          },
+          "en": {
+            "titulo": "More complete tool pages",
+            "texto": "Each tool comes with its description, a formatted «See more» and its price. Requirements say whether they're required or optional, and «Update» sits on the right of the buttons."
+          }
+        },
+        {
+          "id": "herramientas-pago",
+          "titulo": "Herramientas de pago",
+          "texto": "Si dejas de pagar una herramienta, vuelve a «Disponibles». Cuando la renuevas, la recuperas tal como la tenías, con los mismos agentes.",
+          "ca": {
+            "titulo": "Eines de pagament",
+            "texto": "Si deixes de pagar una eina, torna a «Disponibles». Quan la renoves, la recuperes tal com la tenies, amb els mateixos agents."
+          },
+          "en": {
+            "titulo": "Paid tools",
+            "texto": "If you stop paying for a tool, it goes back to «Available». When you renew it, you get it back just as you had it, with the same agents."
+          }
+        },
+        {
+          "id": "skills-en-planes",
+          "titulo": "Planes que saben usar tus herramientas",
+          "texto": "Cuando un agente prepara un plan por pasos, también sigue las guías de las herramientas que tienes instaladas.",
+          "ca": {
+            "titulo": "Plans que saben fer servir les teves eines",
+            "texto": "Quan un agent prepara un pla per passos, també segueix les guies de les eines que tens instal·lades."
+          },
+          "en": {
+            "titulo": "Plans that know how to use your tools",
+            "texto": "When an agent prepares a step-by-step plan, it also follows the guides of the tools you have installed."
+          }
+        }
+      ]
+    },
     {
       "version": "0.1.19",
       "fecha": "2026-11-19",
