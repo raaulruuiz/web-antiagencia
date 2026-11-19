@@ -4,9 +4,9 @@ Cambia tu web hablando con tus bots. La ves dentro de la app, señalas lo que qu
 
 ## Cómo se usa
 1. **Elige tu web** en el menú de arriba. Si no sale, «Añadir web…» y eliges su carpeta.
-2. **Navega** por ella con «Páginas» y «Atrás».
-3. **Señala** lo que quieres cambiar (un título, un botón, una imagen) o nómbralo: «la imagen de cabecera».
-4. **Pídeselo a tu bot** en el chat. Lo cambia en el borrador y la vista se actualiza sola.
+2. **Navega** por ella: pulsa la dirección de arriba para ver la lista de páginas, o «Atrás».
+3. **Modificar:** pincha lo que quieres cambiar (un título, un botón, una imagen) y escribe qué cambio quieres. Puedes apilar varios, también de otras páginas.
+4. **«Hacer los cambios»** se los pasa todos a tu bot de una vez. También puedes pedírselo en el chat, escrito o por audio («cambia la imagen de cabecera»). Lo hace en el borrador y la vista se actualiza sola.
 5. **Revisa** los cambios abajo. Cada uno tiene su «Deshacer». Puedes verla como en el ordenador o en el móvil.
 6. **Publicar** sube los cambios a tu web real. Siempre te sale una tarjeta antes y decides tú.
 7. Si algo no te gusta después, **«Volver a la versión anterior»** deshace la última publicación, también con tarjeta.

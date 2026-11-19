@@ -4,15 +4,15 @@
     {
       "id": "webs",
       "nombre": "Webs",
-      "version": "0.1.0",
+      "version": "0.1.7",
       "descripcion": "Edita tu web hablando con tus bots: señalas lo que quieres cambiar, se prepara en un borrador y solo se publica cuando lo apruebas.",
       "precio": {
         "texto": "19 €/mes",
         "detalle": "o 190 €/año · IVA incluido"
       },
-      "icono": "https://antiagencia.es/anti-agente/herramientas/webs.svg",
+      "icono": "https://antiagencia.es/anti-agente/herramientas/webs.png",
       "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs.md",
-      "appMinima": "0.1.13",
+      "appMinima": "0.1.18",
       "conexiones": [
         {
           "servicio": "shopify",
@@ -41,10 +41,12 @@
         }
       ],
       "capacidades": [
-        "carpetas"
+        "carpetas",
+        "chat",
+        "pantallaCompleta"
       ],
-      "sha256": "398cacf48420a8918bfbeca389fa6c07fd75b5f063e62f2c3042ed10a9f491d0",
-      "peso": 102230,
+      "sha256": "92153a15779741f744322ce6f7bf49460550d2bbc1be5fecbb7b8767dd3486fc",
+      "peso": 160546,
       "ca": {
         "nombre": "Webs",
         "descripcion": "Edita el teu web parlant amb els teus bots: assenyales el que vols canviar, es prepara en un esborrany i només es publica quan ho aproves.",

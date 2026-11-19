@@ -4,9 +4,9 @@ Change your website by talking to your bots. You see it inside the app, point at
 
 ## How to use it
 1. **Pick your website** in the menu at the top. If it isn't there, use «Add website…» and choose its folder.
-2. **Browse** it with «Pages» and «Back».
-3. **Point** at what you want to change (a heading, a button, an image) or name it: «the header image».
-4. **Ask your bot** in the chat. It makes the change in the draft and the preview updates by itself.
+2. **Browse** it: click the address at the top to see the list of pages, or «Back».
+3. **Edit:** click what you want to change (a heading, a button, an image) and write the change you want. You can stack several, also from other pages.
+4. **«Make the changes»** hands them all to your bot at once. You can also ask in the chat, typed or by voice («change the header image»). It makes them in the draft and the preview updates by itself.
 5. **Review** the changes at the bottom. Each one has its own «Undo». You can view it as on a computer or on a phone.
 6. **Publish** sends the changes to your live website. You always get a card first, and you decide.
 7. If you don't like something afterwards, **«Go back to the previous version»** undoes the last publish, also with a card.

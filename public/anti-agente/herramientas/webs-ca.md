@@ -4,9 +4,9 @@ Canvia el teu web parlant amb els teus bots. El veus dins l'app, assenyales el q
 
 ## Com es fa servir
 1. **Tria el teu web** al menú de dalt. Si no hi surt, «Afegir web…» i en tries la carpeta.
-2. **Navega-hi** amb «Pàgines» i «Enrere».
-3. **Assenyala** el que vols canviar (un títol, un botó, una imatge) o anomena-ho: «la imatge de capçalera».
-4. **Demana-ho al teu bot** al xat. Ho canvia a l'esborrany i la vista s'actualitza sola.
+2. **Navega-hi:** clica l'adreça de dalt per veure la llista de pàgines, o «Enrere».
+3. **Modificar:** clica el que vols canviar (un títol, un botó, una imatge) i escriu quin canvi vols. En pots apilar uns quants, també d'altres pàgines.
+4. **«Fer els canvis»** els passa tots al teu bot d'un cop. També els hi pots demanar al xat, per escrit o amb àudio («canvia la imatge de capçalera»). Ho fa a l'esborrany i la vista s'actualitza sola.
 5. **Revisa** els canvis a baix. Cadascun té el seu «Desfer». El pots veure com a l'ordinador o al mòbil.
 6. **Publicar** puja els canvis al teu web real. Sempre et surt una targeta abans i decideixes tu.
 7. Si després alguna cosa no t'agrada, **«Tornar a la versió anterior»** desfà l'última publicació, també amb targeta.
