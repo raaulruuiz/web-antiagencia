@@ -4,9 +4,9 @@
     {
       "id": "webs",
       "nombre": "Anti-Web",
-      "version": "0.1.18",
+      "version": "0.1.19",
       "descripcion": "Edita tu web hablando con tus bots: señalas lo que quieres cambiar, se prepara en un borrador y solo se publica cuando lo apruebas.",
-      "cambios": "Nuevo «Modificar»: pincha lo que quieras cambiar, escribe qué quieres y apila varios cambios para que tus bots los hagan de una vez. Tu web siempre se ve dentro de la herramienta, también las tiendas de Shopify con contraseña. Las páginas nuevas se suben primero como borrador y luego decides si van en vivo; en la lista salen marcadas como «borrador». Las webs hechas a medida se cambian y se ven en tu ordenador antes de publicar. Tus webs y borradores se mantienen.",
+      "cambios": "En las webs hechas a medida, la vista se actualiza en cuanto tu bot cambia algo, sin recargar. Si al pedir cambios con «Modificar» pegas código (por ejemplo, un formulario), le llega entero a tu bot.",
       "precio": {
         "texto": "19 €/mes",
         "detalle": "o 190 €/año · IVA incluido"
@@ -53,13 +53,13 @@
         "datos",
         "web"
       ],
-      "sha256": "ea0f2b9959a1be4cab7cfde487bad7384825d7f56ad60fdae57ff438202373c3",
-      "peso": 221646,
+      "sha256": "cb44c340bd0e67c79963cfb6cc4da7ce6601ee8157f55a962bcf85b1ac8f1345",
+      "peso": 222162,
       "ca": {
         "nombre": "Anti-Web",
         "descripcion": "Edita el teu web parlant amb els teus bots: assenyales el que vols canviar, es prepara en un esborrany i només es publica quan ho aproves.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-ca.md",
-        "cambios": "Nou «Modificar»: clica el que vulguis canviar, escriu què vols i apila diversos canvis perquè els teus bots els facin d'una vegada. El teu web sempre es veu dins de l'eina, també les botigues de Shopify amb contrasenya. Les pàgines noves es pugen primer com a esborrany i després decideixes si van en directe; a la llista surten marcades com a «esborrany». Els webs fets a mida es canvien i es veuen al teu ordinador abans de publicar. Els teus webs i esborranys es mantenen.",
+        "cambios": "Als webs fets a mida, la vista s'actualitza tan bon punt el teu bot hi canvia alguna cosa, sense recarregar. Si en demanar canvis amb «Modificar» enganxes codi (per exemple, un formulari), li arriba sencer al teu bot.",
         "precio": {
           "texto": "19 €/mes",
           "detalle": "o 190 €/any · IVA inclòs"
@@ -69,7 +69,7 @@
         "nombre": "Anti-Web",
         "descripcion": "Edit your website by talking to your bots: point at what to change, it's prepared as a draft and only goes live when you approve it.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-en.md",
-        "cambios": "New «Modify»: click what you want to change, write what you want and stack several changes so your bots do them in one go. Your website always shows inside the tool, including password-protected Shopify stores. New pages are uploaded as drafts first and then you decide if they go live; they show in the list marked «draft». Custom-built websites are changed and previewed on your computer before publishing. Your websites and drafts are kept.",
+        "cambios": "On custom-built sites, the preview updates as soon as your bot changes something, without reloading. If you paste code when asking for changes with «Modify» (a form, for example), your bot gets all of it.",
         "precio": {
           "texto": "€19/month",
           "detalle": "or €190/year · VAT included"
