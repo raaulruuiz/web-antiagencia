@@ -1,8 +1,60 @@
 {
-  "ultima": { "version": "0.1.20", "fecha": "2026-11-19" },
+  "ultima": { "version": "0.1.21", "fecha": "2026-11-20" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.1.21",
+      "fecha": "2026-11-20",
+      "resumen": "Versión de arreglos: cada herramienta se abre solo con los agentes que la tienen, la pantalla completa deja a la vista la barra de arriba y los servicios muestran «Comprar» y «Agendar» claros.",
+      "ca": {
+        "resumen": "Versió d'arranjaments: cada eina s'obre només amb els agents que la tenen, la pantalla completa deixa a la vista la barra de dalt i els serveis mostren «Comprar» i «Agendar» clars."
+      },
+      "en": {
+        "resumen": "A fixes release: each tool only opens with the agents that have it, full screen keeps the top bar in view and services show clear «Buy» and «Book» buttons."
+      },
+      "entradas": [
+        {
+          "id": "herramientas-solo-asignadas",
+          "titulo": "Herramientas solo en sus agentes",
+          "texto": "Una herramienta solo se abre en el chat de un agente que la tiene. «Abrir» en Configuración la lleva al chat de uno que sí, y si se la quitas a un agente se cierra en su chat.",
+          "ca": {
+            "titulo": "Eines només als seus agents",
+            "texto": "Una eina només s'obre al xat d'un agent que la té. «Obrir» a Configuració la porta al xat d'un que sí, i si la treus a un agent es tanca al seu xat."
+          },
+          "en": {
+            "titulo": "Tools only with their agents",
+            "texto": "A tool only opens in the chat of an agent that has it. «Open» in Settings takes it to the chat of one that does, and if you take it away from an agent it closes in that chat."
+          }
+        },
+        {
+          "id": "pantalla-completa-barra",
+          "titulo": "Pantalla completa con su barra",
+          "texto": "En pantalla completa, la herramienta empieza debajo de la barra de arriba, con Recargar, Plegar, Salir y Cerrar siempre a la vista.",
+          "ca": {
+            "titulo": "Pantalla completa amb la seva barra",
+            "texto": "A pantalla completa, l'eina comença sota la barra de dalt, amb Recarregar, Plegar, Sortir i Tancar sempre a la vista."
+          },
+          "en": {
+            "titulo": "Full screen with its bar",
+            "texto": "In full screen, the tool starts below the top bar, with Reload, Fold, Exit and Close always in view."
+          }
+        },
+        {
+          "id": "servicios-comprar-agendar",
+          "titulo": "Servicios: Comprar y Agendar",
+          "texto": "Los servicios con precio muestran «Comprar» y los que tienen llamada, «Agendar»; si tienen las dos cosas, salen juntos. Los servicios que ya tienes aparecen como tuyos.",
+          "ca": {
+            "titulo": "Serveis: Comprar i Agendar",
+            "texto": "Els serveis amb preu mostren «Comprar» i els que tenen trucada, «Agendar»; si tenen les dues coses, surten junts. Els serveis que ja tens apareixen com a teus."
+          },
+          "en": {
+            "titulo": "Services: Buy and Book",
+            "texto": "Services with a price show «Buy» and those with a call show «Book»; if they have both, they appear together. Services you already have show as yours."
+          }
+        }
+      ]
+    },
     {
       "version": "0.1.20",
       "fecha": "2026-11-19",
