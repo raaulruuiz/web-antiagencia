@@ -1,8 +1,47 @@
 {
-  "ultima": { "version": "0.1.22", "fecha": "2026-11-20" },
+  "ultima": { "version": "0.1.23", "fecha": "2026-11-20" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.1.23",
+      "fecha": "2026-11-20",
+      "resumen": "Máximo te avisa de una versión nueva sin tener que abrirlo, y las tiendas y webs con contraseña o sesión ya te dejan entrar dentro de su herramienta.",
+      "ca": {
+        "resumen": "El Màxim t'avisa d'una versió nova sense haver d'obrir-lo, i les botigues i webs amb contrasenya o sessió ja et deixen entrar dins de la seva eina."
+      },
+      "en": {
+        "resumen": "Máximo lets you know about a new version without you having to open him, and stores and websites with a password or login now let you in inside their tool."
+      },
+      "entradas": [
+        {
+          "id": "maximo-aviso-version",
+          "titulo": "Avisos de versión al momento",
+          "texto": "Con la app abierta, Máximo mira cada poco si hay versión nueva (también al volver a la ventana y al despertar el Mac) y te enseña el aviso sin que tengas que abrirlo.",
+          "ca": {
+            "titulo": "Avisos de versió al moment",
+            "texto": "Amb l'app oberta, el Màxim mira sovint si hi ha versió nova (també en tornar a la finestra i en despertar el Mac) i t'ensenya l'avís sense que l'hagis d'obrir."
+          },
+          "en": {
+            "titulo": "Version alerts right away",
+            "texto": "With the app open, Máximo checks for a new version regularly (also when you return to the window and when the Mac wakes up) and shows you the alert without you opening him."
+          }
+        },
+        {
+          "id": "iframe-sesion",
+          "titulo": "Entrar en webs con contraseña",
+          "texto": "Si la web que enseña una herramienta pide contraseña o inicio de sesión (una tienda en pruebas, los borradores de WordPress), ahora recuerda que has entrado y no te la vuelve a pedir.",
+          "ca": {
+            "titulo": "Entrar a webs amb contrasenya",
+            "texto": "Si la web que ensenya una eina demana contrasenya o inici de sessió (una botiga en proves, els esborranys de WordPress), ara recorda que hi has entrat i no te la torna a demanar."
+          },
+          "en": {
+            "titulo": "Getting into password-protected sites",
+            "texto": "If the website a tool shows asks for a password or login (a test store, WordPress drafts), it now remembers you're in and doesn't ask again."
+          }
+        }
+      ]
+    },
     {
       "version": "0.1.22",
       "fecha": "2026-11-20",
