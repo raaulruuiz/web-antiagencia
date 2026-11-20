@@ -1,8 +1,73 @@
 {
-  "ultima": { "version": "0.1.21", "fecha": "2026-11-20" },
+  "ultima": { "version": "0.1.22", "fecha": "2026-11-20" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.1.22",
+      "fecha": "2026-11-20",
+      "resumen": "Llegan Holded y PrestaShop a Apps conectadas, Máximo te avisa de su mensaje de bienvenida y las webs que redirigen se quedan dentro de su herramienta en vez de abrirse en el navegador.",
+      "ca": {
+        "resumen": "Arriben Holded i PrestaShop a Apps connectades, el Màxim t'avisa del seu missatge de benvinguda i les webs que redirigeixen es queden dins de la seva eina en lloc d'obrir-se al navegador."
+      },
+      "en": {
+        "resumen": "Holded and PrestaShop arrive in Connected apps, Máximo lets you know about his welcome message and websites that redirect stay inside their tool instead of opening in the browser."
+      },
+      "entradas": [
+        {
+          "id": "holded",
+          "titulo": "Holded",
+          "texto": "Conecta Holded con su API Key y tus agentes leen facturas, presupuestos, contactos, productos, tesorería y contabilidad. Crear o cambiar algo pasa siempre por tu tarjeta, y borrar no se puede.",
+          "ca": {
+            "titulo": "Holded",
+            "texto": "Connecta Holded amb la seva API Key i els teus agents llegeixen factures, pressupostos, contactes, productes, tresoreria i comptabilitat. Crear o canviar alguna cosa passa sempre per la teva targeta, i no es pot esborrar."
+          },
+          "en": {
+            "titulo": "Holded",
+            "texto": "Connect Holded with its API Key and your agents read invoices, estimates, contacts, products, treasury and accounting. Creating or changing anything always goes through your card, and deleting isn't allowed."
+          }
+        },
+        {
+          "id": "prestashop",
+          "titulo": "PrestaShop",
+          "texto": "Conecta tu tienda PrestaShop con la clave del webservice y tus agentes leen productos, pedidos, clientes y existencias. Crear o cambiar algo pasa siempre por tu tarjeta, y borrar no se puede.",
+          "ca": {
+            "titulo": "PrestaShop",
+            "texto": "Connecta la teva botiga PrestaShop amb la clau del webservice i els teus agents llegeixen productes, comandes, clients i existències. Crear o canviar alguna cosa passa sempre per la teva targeta, i no es pot esborrar."
+          },
+          "en": {
+            "titulo": "PrestaShop",
+            "texto": "Connect your PrestaShop store with the webservice key and your agents read products, orders, customers and stock. Creating or changing anything always goes through your card, and deleting isn't allowed."
+          }
+        },
+        {
+          "id": "maximo-saludo",
+          "titulo": "Máximo te avisa",
+          "texto": "El mensaje de bienvenida de Máximo cuenta como mensaje sin leer hasta que lo abres, para que no se te pase.",
+          "ca": {
+            "titulo": "El Màxim t'avisa",
+            "texto": "El missatge de benvinguda del Màxim compta com a missatge sense llegir fins que l'obres, perquè no se't passi."
+          },
+          "en": {
+            "titulo": "Máximo lets you know",
+            "texto": "Máximo's welcome message counts as unread until you open it, so you don't miss it."
+          }
+        },
+        {
+          "id": "redirecciones-dentro",
+          "titulo": "Las webs se quedan dentro",
+          "texto": "Si la web que enseña una herramienta redirige (por ejemplo, una tienda con contraseña), sigue dentro de la herramienta y ya no se abre sola en el navegador.",
+          "ca": {
+            "titulo": "Les webs es queden dins",
+            "texto": "Si la web que mostra una eina redirigeix (per exemple, una botiga amb contrasenya), continua dins de l'eina i ja no s'obre sola al navegador."
+          },
+          "en": {
+            "titulo": "Websites stay inside",
+            "texto": "If the website a tool shows redirects (for example, a password-protected store), it stays inside the tool and no longer opens in the browser on its own."
+          }
+        }
+      ]
+    },
     {
       "version": "0.1.21",
       "fecha": "2026-11-20",
