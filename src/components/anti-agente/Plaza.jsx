@@ -12,6 +12,12 @@ const CLAVE_PUBLICA = "sb_publishable_xK4rKEfqlHloexUQd8BNpQ_a7pdiDp1";
 // esta dirección exacta (está en la lista de redirecciones). La app hará lo mismo.
 const VUELTA = "https://antiagencia.es/anti-agente/descargar";
 export const RUTA_DESCARGA = "/anti-agente/descargar";
+const EVENTO_PLAZA = "anti-agente-plaza";
+// Para formularios propios de registro (p. ej. /inicio-nuevo): mismo cliente, mismos mensajes.
+export const clientePlazas = () => supabase();
+export const VUELTA_CODIGO = VUELTA;
+export const avisarPlazaReservada = () => window.dispatchEvent(new Event(EVENTO_PLAZA));
+export const mensajeFallo = (error) => fallo(error);
 
 const rubik = { fontFamily: "'Rubik', sans-serif" };
 const claseBoton = "inline-block px-6 py-3 rounded-sm font-bold transition-colors bg-[#7000FF] text-white hover:bg-[#0067FD] disabled:opacity-50 disabled:hover:bg-[#7000FF]";
@@ -60,7 +66,9 @@ export function useMiPlaza() {
     const { data } = supabase().auth.onAuthStateChange((evento) => {
       if (evento === "SIGNED_IN" || evento === "SIGNED_OUT") leer();
     });
-    return () => data.subscription.unsubscribe();
+    // Al reservar una plaza en otro bloque de la misma página, todos se enteran.
+    window.addEventListener(EVENTO_PLAZA, leer);
+    return () => { data.subscription.unsubscribe(); window.removeEventListener(EVENTO_PLAZA, leer); };
   }, [leer]);
   return estado;
 }
@@ -131,6 +139,7 @@ export function DesbloquearPlaza({ titulo = "Desbloquea tu plaza", texto }) {
     setOcupado(false);
     if (errReserva) return setError(fallo(errReserva));
     if (!data?.ok) return setFase("agotadas");
+    avisarPlazaReservada();
     setPlaza(data);
     setFase("hecha");
   };

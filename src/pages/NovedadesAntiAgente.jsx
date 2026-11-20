@@ -53,7 +53,7 @@ function LoQuieres() {
       <div className="text-center">
         <Titulo>¿Lo quieres para tu tienda?</Titulo>
         <p className="text-gray-800 text-lg leading-loose mb-6">Empiezo con 5 tiendas. Y con esas 5 lo monto yo.</p>
-        <Boton href="/anti-agente#apuntarme">{TEXTO_BOTON}</Boton>
+        <Boton href="/inicio-nuevo#plaza">{TEXTO_BOTON}</Boton>
         <Contador />
       </div>
     </Hoja>
@@ -79,7 +79,7 @@ export default function NovedadesAntiAgente() {
         <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
           <div className="w-full max-w-4xl">
             <Hoja>
-              <Link to="/anti-agente" className="text-[#0067FD] font-bold hover:underline">← Anti-Agente</Link>
+              <Link to="/inicio-nuevo" className="text-[#0067FD] font-bold hover:underline">← Anti-Agente</Link>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 uppercase mt-6 mb-3" style={rubik}>Novedades</h1>
               <p className="text-gray-800 text-lg leading-loose">Lo que ya está, en qué andamos y lo que viene.</p>
             </Hoja>

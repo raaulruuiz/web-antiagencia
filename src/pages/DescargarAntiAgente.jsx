@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { Apple, Check, Download, Monitor } from "lucide-react";
 import FooterMinimal from "@/components/landing/FooterMinimal";
-import { Hoja, rubik, Titulo } from "./antiStudioComun";
+import { rubik } from "./antiAgenteComun";
 import { useMiPlaza } from "@/components/anti-agente/Plaza";
 
-// /anti-agente/descargar — «Tu Anti-Agente»: resalta el ordenador de quien entra y da la descarga.
+// /anti-agente/descargar — «Tu Anti-Agente»: solo para quien ya tiene plaza (si no, a desbloquearla).
+// Mismo estilo que /inicio-nuevo: portada oscura, tarjetas con sombra negra y el ordenador de quien entra resaltado.
 // Los instaladores son públicos (los protege que la app no deje entrar sin plaza).
 // Enlaces fijos a la última versión (cada release lleva una copia con nombre fijo); si GitHub responde,
 // se usan el .dmg y el .exe de su última versión.
@@ -13,6 +15,8 @@ const REPO = "raaulruuiz/anti-agente-descargas";
 const MAC_FIJO = `https://github.com/${REPO}/releases/latest/download/Anti-Agente-mac-arm64.dmg`;
 const WINDOWS_FIJO = `https://github.com/${REPO}/releases/latest/download/Anti-Agente-win-x64.exe`;
 const WINDOWS_LISTO = true;
+// Sin plaza: a desbloquearla en la portada nueva
+const RUTA_REGISTRO = "/inicio-nuevo#plaza";
 
 function sistema() {
   const p = `${navigator.userAgentData?.platform || ""} ${navigator.platform || ""} ${navigator.userAgent || ""}`.toLowerCase();
@@ -39,17 +43,22 @@ function useUltimaVersion() {
   return ultima;
 }
 
-const claseBoton = "inline-block px-6 py-3 rounded-sm font-bold transition-colors bg-[#7000FF] text-white hover:bg-[#0067FD]";
+const sombraBoton = { ...rubik, boxShadow: "4px 4px 0 #111827" };
+const claseBoton = "inline-flex items-center justify-center gap-2 w-full rounded-sm font-bold bg-[#7000FF] text-white hover:bg-[#0067FD] transition-colors px-6 py-4 text-lg";
 
-function Ordenador({ nombre, requisito, tuyo, children }) {
+function Ordenador({ nombre, requisito, icono, tuyo, children }) {
   return (
-    <div className={`p-6 rounded-sm border-2 ${tuyo ? "border-[#7000FF] shadow-[6px_6px_0_#7000FF]" : "border-gray-900"}`} style={rubik}>
-      <div className="flex items-center justify-between gap-3 mb-1">
-        <h3 className="text-2xl font-bold text-gray-900 uppercase">{nombre}</h3>
-        {tuyo && <span className="text-xs font-bold uppercase bg-[#7000FF] text-white px-2 py-1 rounded-sm">Tu ordenador</span>}
+    <div
+      className={`bg-white text-gray-900 rounded-sm p-6 md:p-8 border-2 flex flex-col ${tuyo ? "border-[#7000FF]" : "border-gray-900"}`}
+      style={{ ...rubik, boxShadow: tuyo ? "6px 6px 0 #7000FF" : "4px 4px 0 #111827" }}
+    >
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <span aria-hidden="true" className="inline-flex w-12 h-12 rounded-sm bg-[#7000FF] text-white items-center justify-center" style={{ boxShadow: "3px 3px 0 #111827" }}>{icono}</span>
+        {tuyo && <span className="text-xs font-bold uppercase tracking-widest bg-[#7000FF] text-white px-2 py-1 rounded-sm">Tu ordenador</span>}
       </div>
-      <p className="text-sm text-gray-600 mb-5">{requisito}</p>
-      {children}
+      <h2 className="text-2xl font-bold mb-1">{nombre}</h2>
+      <p className="text-sm text-gray-600 mb-6">{requisito}</p>
+      <div className="mt-auto">{children}</div>
     </div>
   );
 }
@@ -73,27 +82,31 @@ export default function DescargarAntiAgente() {
   const [suyo, setSuyo] = useState("otro");
   useEffect(() => setSuyo(sistema()), []);
   const ultima = useUltimaVersion();
-  const { cargando, email, plaza } = useMiPlaza();
+  const mia = useMiPlaza();
+  // En la vista previa local (borrador) se enseña con una plaza de ejemplo para poder editarla; en la web publicada, no.
+  const enLocal = typeof window !== "undefined" && ["127.0.0.1", "localhost"].includes(window.location.hostname);
+  const ejemplo = enLocal && !mia.cargando && !mia.plaza;
+  const { cargando, email, plaza } = ejemplo ? { cargando: false, email: "tu@correo.com", plaza: 7 } : mia;
   const pasos = PASOS[suyo === "windows" && WINDOWS_LISTO ? "windows" : "mac"];
 
+  if (!cargando && !plaza) return <Navigate to={RUTA_REGISTRO} replace />;
+
+  const version = ultima.version && <p className="text-sm text-gray-500 mt-3 text-center">Versión {ultima.version}</p>;
   const mac = (
-    <Ordenador key="mac" nombre="Mac" requisito="Con chip Apple (M1 o posterior)" tuyo={suyo === "mac"}>
-      <a href={ultima.mac} className={claseBoton}>Descargar para Mac</a>
-      {ultima.version && <p className="text-sm text-gray-500 mt-3">Versión {ultima.version}</p>}
+    <Ordenador key="mac" nombre="Mac" requisito="Con chip Apple (M1 o posterior)" icono={<Apple className="w-6 h-6" strokeWidth={2} />} tuyo={suyo === "mac"}>
+      <a href={ultima.mac} className={claseBoton} style={sombraBoton}><Download className="w-5 h-5" strokeWidth={2.5} aria-hidden="true" /> Descargar para Mac</a>
+      {version}
     </Ordenador>
   );
   const windows = (
-    <Ordenador key="windows" nombre="Windows" requisito="Windows 10 u 11, de 64 bits" tuyo={suyo === "windows"}>
+    <Ordenador key="windows" nombre="Windows" requisito="Windows 10 u 11, de 64 bits" icono={<Monitor className="w-6 h-6" strokeWidth={2} />} tuyo={suyo === "windows"}>
       {WINDOWS_LISTO ? (
         <>
-          <a href={ultima.windows} className={claseBoton}>Descargar para Windows</a>
-          {ultima.version && <p className="text-sm text-gray-500 mt-3">Versión {ultima.version}</p>}
+          <a href={ultima.windows} className={claseBoton} style={sombraBoton}><Download className="w-5 h-5" strokeWidth={2.5} aria-hidden="true" /> Descargar para Windows</a>
+          {version}
         </>
       ) : (
-        <span className="inline-block px-6 py-3 rounded-sm font-bold bg-gray-200 text-gray-500 cursor-default">Muy pronto</span>
-      )}
-      {!WINDOWS_LISTO && suyo === "windows" && (
-        <p className="text-sm text-gray-600 mt-3">Tu plaza te espera: te escribiremos en cuanto esté lista.</p>
+        <span className="inline-block w-full text-center px-6 py-4 rounded-sm font-bold bg-gray-200 text-gray-500 cursor-default">Muy pronto</span>
       )}
     </Ordenador>
   );
@@ -105,51 +118,60 @@ export default function DescargarAntiAgente() {
         <meta name="description" content="Descarga Anti-Agente para tu ordenador." />
         <meta name="robots" content="noindex" />
       </Helmet>
-      <div className="min-h-screen bg-gray-100 flex flex-col selection:bg-[#7000FF] selection:text-white">
-        <div className="flex-1 flex justify-center px-4 py-12 md:py-20">
-          <div className="w-full max-w-4xl">
-            <Hoja>
-              <Link to="/anti-agente" className="text-[#0067FD] font-bold hover:underline">← Anti-Agente</Link>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 uppercase mt-6 mb-3" style={rubik}>Tu Anti-Agente</h1>
-              {!cargando && plaza && (
-                <p className="text-gray-800 text-lg leading-loose">
-                  Tienes la plaza <strong>{plaza}</strong>{email ? ` con ${email}` : ""}. Descárgalo y entra con ese correo.
-                </p>
-              )}
-              {!cargando && !plaza && (
-                <p className="text-gray-800 text-lg leading-loose">
-                  Para entrar en la app hace falta una plaza.{" "}
-                  <Link to="/anti-agente#apuntarme" className="text-[#0067FD] font-bold underline">Desbloquea la tuya</Link>{" "}
-                  y entra después con ese correo.
-                </p>
-              )}
+      <div className="min-h-screen flex flex-col bg-white selection:bg-[#7000FF] selection:text-white" style={rubik}>
+        <main className="flex-1">
 
-              <div className="grid md:grid-cols-2 gap-6 mt-8">
-                {suyo === "windows" ? [windows, mac] : [mac, windows]}
+          {/* Portada oscura: ya tienes tu plaza + descargas */}
+          <section className="relative overflow-hidden bg-[#0a0a0a] text-white px-5 pt-16 md:pt-24 pb-16 md:pb-24">
+            <div aria-hidden="true" className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full opacity-40 blur-3xl" style={{ background: "radial-gradient(closest-side, #7000FF, transparent)" }} />
+            <div aria-hidden="true" className="pointer-events-none absolute top-1/2 -right-40 w-[500px] h-[500px] rounded-full opacity-25 blur-3xl" style={{ background: "radial-gradient(closest-side, #0067FD, transparent)" }} />
+            <div className="relative max-w-4xl mx-auto">
+              {cargando ? (
+                <div className="min-h-[24rem]" />
+              ) : (
+                <>
+                  <div className="text-center">
+                    <p className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold mb-6 bg-white/10 text-white border border-white/20">
+                      <Check className="w-4 h-4" strokeWidth={3} aria-hidden="true" /> Ya tienes tu plaza · la {plaza}
+                    </p>
+                    <h1 className="text-4xl md:text-6xl font-bold leading-[1.08] mb-5">Tu Anti-Agente</h1>
+                    <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
+                      Descárgalo para tu ordenador y entra con {email ? <strong className="text-white">{email}</strong> : "el correo de tu plaza"}.
+                    </p>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-6 mt-12">
+                    {suyo === "windows" ? [windows, mac] : [mac, windows]}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+
+          {/* Cómo se empieza */}
+          <section className="px-5 py-16 md:py-24 bg-gray-100">
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-12">
+                <p className="text-xs font-bold uppercase tracking-widest text-[#7000FF] mb-3">{suyo === "windows" ? "En Windows" : "En Mac"}</p>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">Cómo se empieza</h2>
               </div>
-            </Hoja>
-
-            <Hoja>
-              <Titulo>Para empezar</Titulo>
-              <ol className="mt-6 space-y-5">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {pasos.map(([titulo, texto], i) => (
-                  <li key={titulo} className="flex gap-4">
-                    <span className="shrink-0 w-9 h-9 flex items-center justify-center rounded-sm bg-[#7000FF] text-white font-bold" style={rubik}>{i + 1}</span>
-                    <div>
-                      <p className="font-bold text-gray-900" style={rubik}>{titulo}</p>
-                      <p className="text-gray-700 leading-relaxed">{texto}</p>
-                    </div>
-                  </li>
+                  <div key={titulo} className="bg-white border border-gray-900 rounded-sm p-6" style={{ boxShadow: "4px 4px 0 #111827" }}>
+                    <span className="w-10 h-10 rounded-full bg-[#7000FF] text-white font-bold flex items-center justify-center mb-4">{i + 1}</span>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{titulo}</h3>
+                    <p className="text-gray-700 leading-relaxed">{texto}</p>
+                  </div>
                 ))}
-              </ol>
-              <p className="text-sm text-gray-600 mt-8" style={rubik}>
+              </div>
+              <p className="text-sm text-gray-600 mt-12 text-center max-w-2xl mx-auto">
                 Todo lo que hace la app sale de tu cuenta de Claude o ChatGPT y, por defecto, nada se publica ni se envía sin tu aprobación.{" "}
                 <Link to="/anti-agente/novedades" className="underline">Novedades</Link> ·{" "}
                 <Link to="/anti-agente/privacidad" className="underline">Privacidad</Link>
               </p>
-            </Hoja>
-          </div>
-        </div>
+            </div>
+          </section>
+
+        </main>
         <FooterMinimal />
       </div>
     </>

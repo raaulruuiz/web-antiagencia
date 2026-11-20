@@ -1,11 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Laptop, Sparkles } from "lucide-react";
+import { Check as IconoCheck, Laptop, Sparkles } from "lucide-react";
 import FooterMinimal from "@/components/landing/FooterMinimal";
-import { ContadorPlazas as Contador } from "@/components/anti-agente/Plaza";
 import {
-  ListaCerrada, PLAZAS_CERRADAS, RUTA_GRACIAS, leerUtm, rubik, utmAQuery,
+  ContadorPlazas as Contador, RUTA_DESCARGA, VUELTA_CODIGO, avisarPlazaReservada, clientePlazas,
+  mensajeFallo, textoPlazas, useMiPlaza, usePlazas,
+} from "@/components/anti-agente/Plaza";
+import {
+  ListaCerrada, PLAZAS_CERRADAS, leerUtm, rubik, utmAQuery,
 } from "./antiAgenteComun";
 
 // Formulario de MailerLite de esta página (solo email): «Copy of Form Podcast», grupo «Lista prioritaria
@@ -13,50 +16,140 @@ import {
 const ML_FORM = "https://assets.mailerlite.com/jsonp/686354/forms/204671545709168354";
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Apunta el correo a la lista de MailerLite en segundo plano (si falla, la plaza ya está reservada igual).
+function apuntarEnMailerLite(email) {
+  const cuerpo = new FormData();
+  cuerpo.append("fields[email]", email);
+  cuerpo.append("ml-submit", "1");
+  cuerpo.append("anticsrf", "true");
+  fetch(`${ML_FORM}/subscribe`, { method: "POST", body: cuerpo, mode: "cors", credentials: "omit" }).catch(() => {});
+}
+
+const claseCampo = "w-full bg-white border border-gray-300 rounded-sm px-4 py-4 text-lg text-gray-900 focus:outline-none focus:border-[#7000FF] focus:ring-2 focus:ring-[#7000FF]/20";
+const claseBotonForm = "rounded-sm font-bold bg-[#7000FF] text-white hover:bg-[#0067FD] transition-colors px-6 py-4 text-lg disabled:opacity-60 disabled:cursor-wait";
+
+// Barra de plazas cogidas (como el contador, sincronizada con Supabase)
+function BarraPlazas({ oscuro = false }) {
+  const plazas = usePlazas();
+  if (!plazas) return null;
+  const pct = Math.min(100, Math.round((plazas.ocupadas / Math.max(1, plazas.total)) * 100));
+  return (
+    <div className="mt-4 text-center" style={rubik}>
+      <div className={`h-2 w-full max-w-xs mx-auto rounded-full overflow-hidden ${oscuro ? "bg-white/15" : "bg-gray-200"}`}>
+        <div className="h-full bg-[#7000FF]" style={{ width: `${Math.max(pct, 3)}%` }} />
+      </div>
+      <p className={`text-sm font-bold mt-2 ${oscuro ? "text-[#c4a3ff]" : "text-[#7000FF]"}`}>{textoPlazas(plazas)}</p>
+    </div>
+  );
+}
+
+// Píldora + botón para quien ya tiene plaza en este navegador
+function YaTienesTuPlaza({ plaza, email, oscuro = false, onSalir }) {
+  return (
+    <div className="flex flex-col items-center text-center" style={rubik}>
+      <p className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold mb-5 ${oscuro ? "bg-white/10 text-white border border-white/20" : "bg-[#7000FF]/10 text-[#7000FF]"}`}>
+        <IconoCheck className="w-4 h-4" strokeWidth={3} aria-hidden="true" /> Ya tienes tu plaza{plaza ? ` · la ${plaza}` : ""}
+      </p>
+      <Link to={RUTA_DESCARGA} className={claseBotonGrande(true)} style={sombraBoton}>Ir a tu Anti-Agente</Link>
+      {email && <p className={`text-sm mt-4 ${oscuro ? "text-gray-400" : "text-gray-600"}`}>Entras con {email}</p>}
+      {onSalir && <button type="button" onClick={onSalir} className={`text-sm underline mt-2 ${oscuro ? "text-gray-400" : "text-gray-500"}`}>No soy yo</button>}
+    </div>
+  );
+}
+
+// Registro: correo → código de 6 cifras → plaza → página de descarga.
+// Si este navegador ya tiene plaza, enseña «Ya tienes tu plaza · Ir a tu Anti-Agente».
 function FormularioEmail({ onEnviado, idCampo = "ml-email" }) {
+  const mia = useMiPlaza();
+  const plazas = usePlazas();
+  const [fase, setFase] = useState("correo"); // correo | codigo | agotadas
   const [email, setEmail] = useState("");
+  const [codigo, setCodigo] = useState("");
   const [acepto, setAcepto] = useState(false);
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
 
   useEffect(() => { fetch(`${ML_FORM}/takel`, { mode: "cors", credentials: "omit" }).catch(() => {}); }, []);
 
-  const enviar = async (e) => {
-    e.preventDefault();
+  const pedirCodigo = async (e) => {
+    e?.preventDefault();
     if (enviando) return;
     if (!EMAIL_OK.test(email.trim())) return setError("Escribe un email correcto.");
     if (!acepto) return setError("Para apuntarte tienes que aceptar la política de privacidad.");
     setError("");
     setEnviando(true);
-    const cuerpo = new FormData();
-    cuerpo.append("fields[email]", email.trim());
-    cuerpo.append("ml-submit", "1");
-    cuerpo.append("anticsrf", "true");
-    try {
-      const r = await fetch(`${ML_FORM}/subscribe`, { method: "POST", body: cuerpo, mode: "cors", credentials: "omit" });
-      const j = await r.json().catch(() => ({}));
-      if (r.ok && j.success) {
-        window.umami?.track?.("anti-agente-apuntado");
-        onEnviado?.();
-        return;
-      }
-      setError("No se ha podido enviar. Revisa el email e inténtalo otra vez.");
-    } catch {
-      setError("No hay conexión o MailerLite no responde. Inténtalo de nuevo en un momento.");
-    }
+    const { error: err } = await clientePlazas().auth.signInWithOtp({
+      email: email.trim(),
+      options: { shouldCreateUser: true, emailRedirectTo: VUELTA_CODIGO },
+    });
     setEnviando(false);
+    if (err) return setError(mensajeFallo(err));
+    setCodigo("");
+    setFase("codigo");
   };
 
+  const comprobar = async (e) => {
+    e.preventDefault();
+    if (enviando) return;
+    setError("");
+    setEnviando(true);
+    const { error: err } = await clientePlazas().auth.verifyOtp({ email: email.trim(), token: codigo, type: "email" });
+    if (err) { setEnviando(false); return setError(mensajeFallo(err)); }
+    const { data, error: errReserva } = await clientePlazas().rpc("reservar_plaza_anti_agente");
+    setEnviando(false);
+    if (errReserva) return setError(mensajeFallo(errReserva));
+    if (!data?.ok) return setFase("agotadas");
+    apuntarEnMailerLite(email.trim());
+    window.umami?.track?.("anti-agente-apuntado");
+    avisarPlazaReservada();
+    onEnviado?.();
+  };
+
+  const salir = async () => {
+    await clientePlazas().auth.signOut();
+    setFase("correo");
+  };
+
+  if (mia.cargando) return <div className="min-h-[9rem]" />;
+  if (mia.plaza) return <YaTienesTuPlaza plaza={mia.plaza} email={mia.email} onSalir={salir} />;
+  if (fase === "agotadas" || (plazas && plazas.libres <= 0)) return <ListaCerrada />;
+
+  if (fase === "codigo") {
+    return (
+      <form onSubmit={comprobar} noValidate style={rubik}>
+        <p className="text-gray-700 text-lg mb-5 text-center">
+          Te he mandado un código de 6 cifras a <strong>{email.trim()}</strong>. Si no lo ves, mira en spam.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <label htmlFor={`${idCampo}-codigo`} className="sr-only">Código de 6 cifras</label>
+          <input
+            id={`${idCampo}-codigo`} inputMode="numeric" autoComplete="one-time-code" maxLength={6} autoFocus placeholder="000000"
+            value={codigo} onChange={(e) => { setCodigo(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
+            className={`${claseCampo} flex-1 text-center text-2xl font-bold tracking-[0.5em]`}
+          />
+          <button type="submit" disabled={enviando || codigo.length !== 6} className={claseBotonForm} style={sombraBoton}>
+            {enviando ? "Comprobando…" : "Desbloquear mi plaza"}
+          </button>
+        </div>
+        {error && <p className="text-sm text-red-700 mt-3" role="alert">{error}</p>}
+        <div className="flex flex-wrap justify-center gap-5 mt-4 text-sm text-gray-600">
+          <button type="button" disabled={enviando} onClick={pedirCodigo} className="underline">Mandar otro código</button>
+          <button type="button" disabled={enviando} onClick={() => { setFase("correo"); setError(""); }} className="underline">Cambiar el correo</button>
+        </div>
+      </form>
+    );
+  }
+
   return (
-    <form onSubmit={enviar} noValidate style={rubik}>
+    <form onSubmit={pedirCodigo} noValidate style={rubik}>
       <div className="flex flex-col sm:flex-row gap-3">
         <label htmlFor={idCampo} className="sr-only">Tu email</label>
         <input
           id={idCampo} type="email" autoComplete="email" inputMode="email" placeholder="Tu email"
           value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }}
-          className="flex-1 bg-white border border-gray-300 rounded-sm px-4 py-4 text-lg text-gray-900 focus:outline-none focus:border-[#7000FF] focus:ring-2 focus:ring-[#7000FF]/20"
+          className={`${claseCampo} flex-1`}
         />
-        <button type="submit" disabled={enviando} className="rounded-sm font-bold bg-[#7000FF] text-white hover:bg-[#0067FD] transition-colors px-6 py-4 text-lg disabled:opacity-60 disabled:cursor-wait" style={sombraBoton}>
+        <button type="submit" disabled={enviando} className={claseBotonForm} style={sombraBoton}>
           {enviando ? "Enviando…" : "Desbloquear mi plaza"}
         </button>
       </div>
@@ -65,7 +158,8 @@ function FormularioEmail({ onEnviado, idCampo = "ml-email" }) {
         <span>Acepto la <a href="/politica-privacidad" target="_blank" rel="noopener noreferrer" className="underline">política de privacidad</a></span>
       </label>
       {error && <p className="text-sm text-red-700 mt-2" role="alert">{error}</p>}
-      <div className="text-center"><Contador /></div>
+      <p className="text-sm text-gray-500 mt-3">Te llegará un código al correo para comprobar que es tuyo. Con ese correo entrarás en la app.</p>
+      <BarraPlazas />
     </form>
   );
 }
@@ -84,6 +178,9 @@ const sombraBoton = { ...rubik, boxShadow: "4px 4px 0 #111827" };
 
 // Botón centrado con el contador de plazas debajo (sincronizado con las plazas reservadas)
 function BotonPlaza({ oscuro = false, grande = false }) {
+  const mia = useMiPlaza();
+  if (mia.cargando) return <div className="min-h-[5.5rem]" />;
+  if (mia.plaza) return <YaTienesTuPlaza plaza={mia.plaza} oscuro={oscuro} />;
   return (
     <div className="flex flex-col items-center text-center">
       <a href="#plaza" className={claseBotonGrande(grande)} style={sombraBoton}>{TEXTO_BOTON}</a>
@@ -130,9 +227,9 @@ const EJEMPLOS = [
 ];
 
 const PASOS = [
-  ["Pides la tarea", "Pídela como se la pedirías a un empleado normal.", "Captura: el equipo de agentes"],
-  ["Tu equipo se coordina", "Tus agentes hablan entre sí para coordinar la tarea.", "Captura: una tarjeta para aprobar"],
-  ["Te la dejan hecha", "Te entregan la tarea lista para revisar y cuando confirmes, la publican.", "Captura: una conversación con un agente"],
+  ["Pides la tarea", "Pídela como se la pedirías a un empleado normal.", ["/images/anti-agente-paso-1.png", "Anti-Agente: pides a un agente que prepare la newsletter del Black Friday"]],
+  ["Tu equipo se coordina", "Tus agentes hablan entre sí para coordinar la tarea.", ["/images/anti-agente-paso-2.png", "Anti-Agente: el agente escribe a otros agentes del equipo para coordinar la tarea"]],
+  ["Te la dejan hecha", "Te entregan la tarea lista para revisar y cuando confirmes, la publican.", ["/images/anti-agente-paso-3.png", "Anti-Agente: la newsletter lista en una tarjeta para revisar y aprobar"]],
 ];
 
 const VENTAJAS_APP = [
@@ -164,18 +261,30 @@ const Check = () => (
 );
 
 export default function InicioAntiAgente() {
-  const { search } = useLocation();
+  const { search, pathname } = useLocation();
+  const enPortada = pathname === "/";
   const utm = useMemo(() => leerUtm(search), [search]);
   const navigate = useNavigate();
-  const gracias = `${RUTA_GRACIAS}${utmAQuery(utm)}`;
-  const alEnviar = useCallback(() => navigate(gracias), [navigate, gracias]);
+  // Tras desbloquear la plaza, directo a la descarga (detecta Mac o Windows)
+  const descarga = `${RUTA_DESCARGA}${utmAQuery(utm)}`;
+  const alEnviar = useCallback(() => navigate(descarga), [navigate, descarga]);
+  const mia = useMiPlaza();
+
+  // Si llegas con #plaza (p. ej. desde la descarga sin plaza), baja al formulario
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash !== "#plaza") return;
+    const t = setTimeout(() => document.getElementById("plaza")?.scrollIntoView({ behavior: "smooth" }), 100);
+    return () => clearTimeout(t);
+  }, [hash]);
 
   return (
     <>
       <Helmet>
         <title>Anti-Agente — Un equipo de agentes de IA que hace tus tareas digitales. Gratis.</title>
         <meta name="description" content="Un equipo de agentes de IA para tu tienda online: correo, emails, contenido, anuncios y web. Gratis, en tu ordenador y con tu Claude o tu ChatGPT." />
-        <meta name="robots" content="noindex" />
+        {/* En «/» es la portada (se indexa); en /inicio-nuevo, copia sin indexar */}
+        {enPortada ? <link rel="canonical" href="https://antiagencia.es/" /> : <meta name="robots" content="noindex" />}
       </Helmet>
       <div className="min-h-screen flex flex-col bg-white selection:bg-[#7000FF] selection:text-white" style={rubik}>
         <main className="flex-1">
@@ -197,7 +306,15 @@ export default function InicioAntiAgente() {
               <div className="mt-14 text-left">
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 text-center">En este vídeo te enseño cómo funciona</p>
                 <div className="rounded-sm border border-white/20 p-2 bg-white/5" style={{ boxShadow: "6px 6px 0 #7000FF" }}>
-                  <Hueco oscuro titulo="▶  Vídeo" texto="Aquí va el vídeo que grabes enseñando Anti-Agente." />
+                  <iframe
+                    src="https://www.youtube-nocookie.com/embed/e7kYzM9M7iQ?rel=0"
+                    title="Anti-Agente en 5 minutos"
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                    className="block w-full aspect-video rounded-sm bg-black border-0"
+                  />
                 </div>
                 <p className="text-sm text-gray-400 mt-4 text-center">Llevo años haciendo marketing para tiendas online. Ahora mi equipo hace todo mi trabajo de un día en menos de 2 horas.</p>
               </div>
@@ -209,7 +326,7 @@ export default function InicioAntiAgente() {
             <div className="max-w-2xl mx-auto">
               <Tarjeta className="p-8 md:p-12">
                 <div className="text-center mb-6">
-                  <H2 className="mb-0">Desbloquea tu plaza</H2>
+                  <H2 className="mb-0">{mia.plaza ? "Tu plaza está reservada" : "Desbloquea tu plaza"}</H2>
                 </div>
                 {PLAZAS_CERRADAS ? <ListaCerrada /> : <FormularioEmail onEnviado={alEnviar} />}
                 <p className="text-sm font-bold text-gray-900 mt-6 text-center">{VENTAJAS}</p>
@@ -224,12 +341,12 @@ export default function InicioAntiAgente() {
               <H2>Un equipo de verdad</H2>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
-              {PASOS.map(([t, d, captura], i) => (
+              {PASOS.map(([t, d, [img, alt]], i) => (
                 <Tarjeta key={t} className="flex flex-col">
                   <span className="w-10 h-10 rounded-full bg-[#7000FF] text-white font-bold flex items-center justify-center mb-4">{i + 1}</span>
                   <h3 className="text-xl font-bold text-gray-900 mb-4">{t}</h3>
                   <div className="mb-5">
-                    <Hueco aspecto="aspect-[4/3]" titulo={captura} texto="Captura real de la app" />
+                    <img src={img} alt={alt} width={2880} height={1800} loading="lazy" decoding="async" className="w-full h-auto rounded-sm border border-gray-900" />
                   </div>
                   <p className="text-gray-700 leading-relaxed">{d}</p>
                 </Tarjeta>
@@ -261,7 +378,7 @@ export default function InicioAntiAgente() {
           {/* 6 · Desbloquear plaza (más grande), con el formulario */}
           <section className="px-5 py-16 md:py-20 bg-[#7000FF] text-white text-center">
             <div className="max-w-2xl mx-auto">
-              <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-8">Quedan pocas plazas. Pilla la tuya.</h2>
+              <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-8">{mia.plaza ? "Tu Anti-Agente te espera." : "Quedan pocas plazas. Pilla la tuya."}</h2>
               <div className="bg-white text-left rounded-sm p-6 md:p-8" style={{ boxShadow: "4px 4px 0 #111827" }}>
                 {PLAZAS_CERRADAS ? <ListaCerrada /> : <FormularioEmail idCampo="ml-email-final" onEnviado={alEnviar} />}
               </div>

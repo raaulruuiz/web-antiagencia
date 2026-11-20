@@ -209,7 +209,8 @@ const AuthenticatedApp = () => {
   return (
     <>
     <Routes>
-      <Route path="/" element={<SmartPage path="/"><PixelLayout><HomeV2 /></PixelLayout></SmartPage>} />
+      {/* Portada: Anti-Agente (antes HomeV2, que sigue en /homev2) */}
+      <Route path="/" element={<PixelLayout><InicioAntiAgente /></PixelLayout>} />
       <Route path="/homev2" element={<PixelLayout><HomeV2 /></PixelLayout>} />
       <Route path="/webtipica" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
