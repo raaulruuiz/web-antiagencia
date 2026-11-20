@@ -4,9 +4,9 @@
     {
       "id": "webs",
       "nombre": "Anti-Web",
-      "version": "0.1.19",
+      "version": "0.1.20",
       "descripcion": "Edita tu web hablando con tus bots: señalas lo que quieres cambiar, se prepara en un borrador y solo se publica cuando lo apruebas.",
-      "cambios": "En las webs hechas a medida, la vista se actualiza en cuanto tu bot cambia algo, sin recargar. Si al pedir cambios con «Modificar» pegas código (por ejemplo, un formulario), le llega entero a tu bot.",
+      "cambios": "Tu bot ve también los textos cortos de la página (contadores, avisos, etiquetas) y los que tardan un poco en salir, y los puede elegir por su nombre. Y las imágenes se pueden reducir y pasar a WebP al subirlas, para que la web cargue más rápido.",
       "precio": {
         "texto": "19 €/mes",
         "detalle": "o 190 €/año · IVA incluido"
@@ -53,13 +53,13 @@
         "datos",
         "web"
       ],
-      "sha256": "cb44c340bd0e67c79963cfb6cc4da7ce6601ee8157f55a962bcf85b1ac8f1345",
-      "peso": 222162,
+      "sha256": "4c8c1470bfd6149f0f6f4f518e076f49df8e685c9ac2b53235da20a6dae1b406",
+      "peso": 224098,
       "ca": {
         "nombre": "Anti-Web",
         "descripcion": "Edita el teu web parlant amb els teus bots: assenyales el que vols canviar, es prepara en un esborrany i només es publica quan ho aproves.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-ca.md",
-        "cambios": "Als webs fets a mida, la vista s'actualitza tan bon punt el teu bot hi canvia alguna cosa, sense recarregar. Si en demanar canvis amb «Modificar» enganxes codi (per exemple, un formulari), li arriba sencer al teu bot.",
+        "cambios": "El teu bot també veu els textos curts de la pàgina (comptadors, avisos, etiquetes) i els que triguen una mica a sortir, i els pot triar pel seu nom. I les imatges es poden reduir i passar a WebP en pujar-les, perquè el web carregui més ràpid.",
         "precio": {
           "texto": "19 €/mes",
           "detalle": "o 190 €/any · IVA inclòs"
@@ -69,7 +69,7 @@
         "nombre": "Anti-Web",
         "descripcion": "Edit your website by talking to your bots: point at what to change, it's prepared as a draft and only goes live when you approve it.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-en.md",
-        "cambios": "On custom-built sites, the preview updates as soon as your bot changes something, without reloading. If you paste code when asking for changes with «Modify» (a form, for example), your bot gets all of it.",
+        "cambios": "Your bot now also sees short texts on the page (counters, notices, labels) and ones that take a moment to appear, and can pick them by name. And images can be resized and converted to WebP when uploaded, so your site loads faster.",
         "precio": {
           "texto": "€19/month",
           "detalle": "or €190/year · VAT included"
