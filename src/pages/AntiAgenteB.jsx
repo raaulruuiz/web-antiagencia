@@ -1,14 +1,19 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import {
-  Boton, Check, Contador, Formulario, Hoja, ListaCerrada, Parrafo, PLAZAS_CERRADAS, PREGUNTAS, rubik, TEXTO_BOTON, Titulo, Video, VIDEO_VISIBLE, leerUtm,
+  Boton, Check, Hoja, Parrafo, PREGUNTAS, rubik, Titulo, Video, VIDEO_VISIBLE,
 } from "./antiAgenteComun";
+import { ContadorPlazas, DesbloquearPlaza, YaTienesPlaza, useMiPlaza } from "@/components/anti-agente/Plaza";
 
 // /anti-agente — landing oficial de la lista prioritaria (versión B, elegida por Raúl el 17-11-2026; noindex).
 // Secciones apiladas en tarjetas (Hoja) sobre fondo gris. La versión A queda de respaldo en /anti-agente-a.
-// Mismo formulario de MailerLite, misma página de gracias y mismo contador (antiAgenteComun.jsx).
+// Registro con plaza (100 plazas): correo → código de 6 cifras → plaza en Supabase (components/anti-agente/Plaza.jsx).
+// Sustituye al formulario de MailerLite y al contador fijo de antiAgenteComun.jsx.
+
+// Texto de los botones que llevan a #apuntarme
+const TEXTO_BOTON = "Desbloquear mi plaza";
 
 // Duración del vídeo para el texto de encima («Antes de nada, mira cómo funciona. (X minutos)»).
 // Se rellena cuando esté el vídeo, p. ej. "3 minutos". Mientras esté vacía, en la vista previa
@@ -51,8 +56,8 @@ function Paso({ numero, titulo, children }) {
 const Subtitulo = ({ children }) => <h3 className="text-xl font-bold text-gray-900 mb-2" style={rubik}>{children}</h3>;
 
 export default function AntiAgenteB() {
-  const { search } = useLocation();
-  const utm = useMemo(() => leerUtm(search), [search]);
+  // Si este navegador ya tiene plaza, la cabecera lleva a la descarga en vez de al registro
+  const { plaza } = useMiPlaza();
 
   return (
     <>
@@ -71,8 +76,12 @@ export default function AntiAgenteB() {
                 Un equipo de agentes para tu tienda online. Gratis.
               </h1>
               <Parrafo className="mb-8">Llevo años haciendo marketing para tiendas online. Ahora mi equipo hace todo mi trabajo de un día en menos de 2 horas. Cada agente se especializa en una tarea e interactúan entre ellos. Y te lo entrego completamente gratis.</Parrafo>
-              <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
-              <Contador />
+              {plaza ? <YaTienesPlaza /> : (
+                <>
+                  <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
+                  <ContadorPlazas />
+                </>
+              )}
             </Seccion>
 
             {/* 2 · Vídeo (en producción no se pinta hasta que exista) */}
@@ -82,7 +91,7 @@ export default function AntiAgenteB() {
                 <Video />
                 <div className="text-center mt-8">
                   <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
-                  <Contador />
+                  <ContadorPlazas />
                 </div>
               </Seccion>
             )}
@@ -131,7 +140,7 @@ export default function AntiAgenteB() {
               <Check titulo="Anti-Studio gratis.">Una app para escribir los emails de tu tienda con IA, pero que no suenan a IA, que te los deja montados o programados en Klaviyo, MailerLite o ActiveCampaign. Por ahora es una app aparte; en la oferta de lanzamiento entra gratis y después será de pago.</Check>
               <div className="text-center mt-8">
                 <Boton href="#apuntarme">{TEXTO_BOTON}</Boton>
-                <Contador />
+                <ContadorPlazas />
               </div>
             </Seccion>
 
@@ -148,9 +157,10 @@ export default function AntiAgenteB() {
 
             {/* 6b · Desbloquea tu plaza */}
             <Seccion id="apuntarme">
-              <Titulo>Desbloquea tu plaza</Titulo>
-              <Parrafo>Apúntate, te escribo yo y en la llamada te enseño la herramienta, lo dejamos a punto juntos y hacemos la auditoría de costes.</Parrafo>
-              {PLAZAS_CERRADAS ? <ListaCerrada /> : <Formulario utm={utm} />}
+              <DesbloquearPlaza
+                titulo="Desbloquea tu plaza"
+                texto="Apúntate, te escribo yo y en la llamada te enseño la herramienta, lo dejamos a punto juntos y hacemos la auditoría de costes."
+              />
               <p className="text-sm font-bold text-gray-900 mt-6 text-center" style={rubik}>{VENTAJAS}</p>
             </Seccion>
 

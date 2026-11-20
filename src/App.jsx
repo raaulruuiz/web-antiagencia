@@ -37,6 +37,7 @@ const AntiAgente = lazy(() => import('./pages/AntiAgente'));
 const AntiAgenteGracias = lazy(() => import('./pages/AntiAgenteGracias'));
 const AntiAgenteB = lazy(() => import('./pages/AntiAgenteB'));
 const NovedadesAntiAgente = lazy(() => import('./pages/NovedadesAntiAgente'));
+const DescargarAntiAgente = lazy(() => import('./pages/DescargarAntiAgente'));
 const NovedadesAntiStudio = lazy(() => import('./pages/NovedadesAntiStudio'));
 const TikTokConnect = lazy(() => import('./pages/TikTokConnect'));
 const JorgeCoronado = lazy(() => import('./pages/JorgeCoronado'));
@@ -236,6 +237,7 @@ const AuthenticatedApp = () => {
       <Route path="/anti-agente" element={<AntiAgenteB />} />
       <Route path="/anti-agente/gracias" element={<AntiAgenteGracias />} />
       <Route path="/anti-agente/novedades" element={<NovedadesAntiAgente />} />
+      <Route path="/anti-agente/descargar" element={<DescargarAntiAgente />} />
       <Route path="/anti-agente/privacidad" element={<PoliticaPrivacidadAntiAgente />} />
       <Route path="/anti-agente/cuenta" element={<CuentaAntiAgente />} />
       <Route path="/anti-agente/pago" element={<PagoAntiAgente />} />
