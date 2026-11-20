@@ -1,8 +1,60 @@
 {
-  "ultima": { "version": "0.2.0", "fecha": "2026-11-20" },
+  "ultima": { "version": "0.2.1", "fecha": "2026-11-20" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.1",
+      "fecha": "2026-11-20",
+      "resumen": "Ahora puedes tener varias herramientas abiertas en el chat de un bot y buscar actualizaciones cuando quieras, sin cerrar la app.",
+      "ca": {
+        "resumen": "Ara pots tenir diverses eines obertes al xat d'un bot i buscar actualitzacions quan vulguis, sense tancar l'app."
+      },
+      "en": {
+        "resumen": "You can now have several tools open in a bot's chat and check for updates whenever you want, without closing the app."
+      },
+      "entradas": [
+        {
+          "id": "varias-herramientas",
+          "titulo": "Varias herramientas a la vez",
+          "texto": "Cada bot puede tener más de una herramienta abierta. Solo se ve una: las demás quedan plegadas en pestañas encima del chat y al abrir una se pliegan las otras.",
+          "ca": {
+            "titulo": "Diverses eines alhora",
+            "texto": "Cada bot pot tenir més d'una eina oberta. Només se'n veu una: les altres queden plegades en pestanyes damunt del xat i en obrir-ne una es pleguen les altres."
+          },
+          "en": {
+            "titulo": "Several tools at once",
+            "texto": "Each bot can have more than one tool open. Only one is shown: the rest stay folded as tabs above the chat, and opening one folds the others."
+          }
+        },
+        {
+          "id": "buscar-actualizaciones",
+          "titulo": "Buscar actualizaciones",
+          "texto": "En Configuración › Herramientas, el icono de recargar junto a la ✕ busca al momento versiones nuevas de la app y de tus herramientas. También puedes pedírselo a Máximo: «busca actualizaciones».",
+          "ca": {
+            "titulo": "Buscar actualitzacions",
+            "texto": "A Configuració › Eines, la icona de recarregar al costat de la ✕ busca a l'instant versions noves de l'app i de les teves eines. També li pots demanar al Màxim: «busca actualitzacions»."
+          },
+          "en": {
+            "titulo": "Check for updates",
+            "texto": "In Settings › Tools, the reload icon next to the ✕ checks right away for new versions of the app and your tools. You can also ask Máximo: «check for updates»."
+          }
+        },
+        {
+          "id": "imagenes-del-equipo",
+          "titulo": "Imágenes del equipo en las herramientas",
+          "texto": "Las herramientas ya pueden usar imágenes que haya creado cualquier bot del equipo (por ejemplo, capturas para meter en una web), sin que tengas que adjuntarlas tú.",
+          "ca": {
+            "titulo": "Imatges de l'equip a les eines",
+            "texto": "Les eines ja poden fer servir imatges que hagi creat qualsevol bot de l'equip (per exemple, captures per posar en una web), sense que les hagis d'adjuntar tu."
+          },
+          "en": {
+            "titulo": "Team images in tools",
+            "texto": "Tools can now use images created by any bot on the team (for example, screenshots to add to a website) without you having to attach them."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.0",
       "fecha": "2026-11-20",
