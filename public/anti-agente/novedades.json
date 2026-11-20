@@ -1,8 +1,47 @@
 {
-  "ultima": { "version": "0.2.1", "fecha": "2026-11-20" },
+  "ultima": { "version": "0.2.3", "fecha": "2026-11-20" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.3",
+      "fecha": "2026-11-20",
+      "resumen": "En Windows, la app ya encuentra Codex en cuanto lo instalas, y Clonify Studio pasa a Apps conectadas, donde eliges qué bots lo usan.",
+      "ca": {
+        "resumen": "A Windows, l'app ja troba Codex tan bon punt l'instal·les, i Clonify Studio passa a Apps connectades, on tries quins bots el fan servir."
+      },
+      "en": {
+        "resumen": "On Windows, the app now finds Codex as soon as you install it, and Clonify Studio moves to Connected apps, where you choose which bots use it."
+      },
+      "entradas": [
+        {
+          "id": "codex-windows",
+          "titulo": "Codex en Windows sin reiniciar",
+          "texto": "«Instalar» usa ahora el instalador oficial de Codex, que no necesita nada más en el ordenador, y la app lo detecta sola en cuanto termina, sin cerrarla. También encuentra el Codex que trae la app de la Microsoft Store.",
+          "ca": {
+            "titulo": "Codex a Windows sense reiniciar",
+            "texto": "«Instal·lar» fa servir ara l'instal·lador oficial de Codex, que no necessita res més a l'ordinador, i l'app el detecta sola tan bon punt acaba, sense tancar-la. També troba el Codex que porta l'app de la Microsoft Store."
+          },
+          "en": {
+            "titulo": "Codex on Windows without restarting",
+            "texto": "«Install» now uses Codex's official installer, which needs nothing else on your computer, and the app detects it on its own as soon as it finishes, without closing it. It also finds the Codex bundled with the Microsoft Store app."
+          }
+        },
+        {
+          "id": "clonify-conexion",
+          "titulo": "Clonify Studio en Apps conectadas",
+          "texto": "Si tienes Clonify Studio instalado, sale en Apps conectadas sin pedir clave: usa la que ya guarda en tu ordenador. Ahí eliges qué bots pueden usarlo, como en las demás apps. Los que ya lo usaban lo conservan, y nunca gastan créditos de pago.",
+          "ca": {
+            "titulo": "Clonify Studio a Apps connectades",
+            "texto": "Si tens Clonify Studio instal·lat, surt a Apps connectades sense demanar clau: fa servir la que ja guarda al teu ordinador. Allà tries quins bots el poden fer servir, com a les altres apps. Els que ja el feien servir el conserven, i mai gasten crèdits de pagament."
+          },
+          "en": {
+            "titulo": "Clonify Studio in Connected apps",
+            "texto": "If you have Clonify Studio installed, it shows up in Connected apps without asking for a key: it uses the one already saved on your computer. There you choose which bots can use it, like with the other apps. Bots that already used it keep it, and they never spend paid credits."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.1",
       "fecha": "2026-11-20",
