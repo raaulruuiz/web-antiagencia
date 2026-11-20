@@ -31,7 +31,16 @@ export function usePlazas() {
   const [plazas, setPlazas] = useState(null);
   useEffect(() => {
     let vivo = true;
-    supabase().rpc("plazas_anti_agente").then(({ data }) => { if (vivo && data) setPlazas(data); });
+    // Petición directa (sin cliente ni sesión): no depende del almacenamiento del navegador,
+    // así también sale en vistas previas incrustadas.
+    fetch(`${URL_CUENTAS}/rest/v1/rpc/plazas_anti_agente`, {
+      method: "POST",
+      headers: { apikey: CLAVE_PUBLICA, "Content-Type": "application/json" },
+      body: "{}",
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (vivo && data && typeof data.total === "number") setPlazas(data); })
+      .catch(() => {});
     return () => { vivo = false; };
   }, []);
   return plazas;

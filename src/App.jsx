@@ -36,6 +36,7 @@ const AntiStudio = lazy(() => import('./pages/AntiStudio'));
 const AntiAgente = lazy(() => import('./pages/AntiAgente'));
 const AntiAgenteGracias = lazy(() => import('./pages/AntiAgenteGracias'));
 const AntiAgenteB = lazy(() => import('./pages/AntiAgenteB'));
+const InicioAntiAgente = lazy(() => import('./pages/InicioAntiAgente'));
 const NovedadesAntiAgente = lazy(() => import('./pages/NovedadesAntiAgente'));
 const DescargarAntiAgente = lazy(() => import('./pages/DescargarAntiAgente'));
 const NovedadesAntiStudio = lazy(() => import('./pages/NovedadesAntiStudio'));
@@ -235,6 +236,8 @@ const AuthenticatedApp = () => {
       <Route path="/anti-studio" element={<AntiStudio />} />
       {/* Lista prioritaria de Anti-Agente: la versión B es la oficial (17-11-2026). */}
       <Route path="/anti-agente" element={<AntiAgenteB />} />
+      {/* Borrador de la nueva portada (noindex). Cuando esté lista, pasa a «/». */}
+      <Route path="/inicio-nuevo" element={<InicioAntiAgente />} />
       <Route path="/anti-agente/gracias" element={<AntiAgenteGracias />} />
       <Route path="/anti-agente/novedades" element={<NovedadesAntiAgente />} />
       <Route path="/anti-agente/descargar" element={<DescargarAntiAgente />} />
