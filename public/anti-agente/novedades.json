@@ -1,8 +1,73 @@
 {
-  "ultima": { "version": "0.1.24", "fecha": "2026-11-20" },
+  "ultima": { "version": "0.2.0", "fecha": "2026-11-20" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.0",
+      "fecha": "2026-11-20",
+      "resumen": "Anti-Agente ya funciona en Windows y se entra con un código que llega al correo. Además, la app es más segura y los planes que se cortan se pueden retomar.",
+      "ca": {
+        "resumen": "Anti-Agente ja funciona a Windows i s'entra amb un codi que arriba al correu. A més, l'app és més segura i els plans que es tallen es poden reprendre."
+      },
+      "en": {
+        "resumen": "Anti-Agente now runs on Windows and you sign in with a code sent to your email. The app is also more secure, and plans that get cut off can be resumed."
+      },
+      "entradas": [
+        {
+          "id": "windows",
+          "titulo": "Anti-Agente en Windows",
+          "texto": "Ya puedes instalar la app en un PC con Windows desde la página de descarga. Windows avisará la primera vez porque el instalador aún no va firmado: pulsa «Más información» y «Ejecutar de todas formas».",
+          "ca": {
+            "titulo": "Anti-Agente a Windows",
+            "texto": "Ja pots instal·lar l'app en un PC amb Windows des de la pàgina de descàrrega. Windows avisarà la primera vegada perquè l'instal·lador encara no va signat: prem «Més informació» i «Executa igualment»."
+          },
+          "en": {
+            "titulo": "Anti-Agente on Windows",
+            "texto": "You can now install the app on a Windows PC from the download page. Windows will warn you the first time because the installer isn't signed yet: click «More info» and «Run anyway»."
+          }
+        },
+        {
+          "id": "entrar-con-codigo",
+          "titulo": "Entrar con un código",
+          "texto": "Para entrar ya no hace falta contraseña: pones tu correo y te llega un código de 6 cifras.",
+          "ca": {
+            "titulo": "Entrar amb un codi",
+            "texto": "Per entrar ja no cal contrasenya: poses el teu correu i et arriba un codi de 6 xifres."
+          },
+          "en": {
+            "titulo": "Sign in with a code",
+            "texto": "You no longer need a password: enter your email and you'll get a 6-digit code."
+          }
+        },
+        {
+          "id": "mas-segura",
+          "titulo": "Más segura",
+          "texto": "Los bots ya no pueden tocar los archivos de la propia app ni sus claves, y cada bot habla con la app con su propia llave.",
+          "ca": {
+            "titulo": "Més segura",
+            "texto": "Els bots ja no poden tocar els fitxers de la mateixa app ni les seves claus, i cada bot parla amb l'app amb la seva pròpia clau."
+          },
+          "en": {
+            "titulo": "More secure",
+            "texto": "Bots can no longer touch the app's own files or keys, and each bot talks to the app with its own key."
+          }
+        },
+        {
+          "id": "planes-retomables",
+          "titulo": "Planes que no se quedan colgados",
+          "texto": "Si un paso de un plan falla a medias, el plan ya no se queda girando: dile «sigue» y el bot retoma ese paso.",
+          "ca": {
+            "titulo": "Plans que no es queden penjats",
+            "texto": "Si un pas d'un pla falla a mitges, el pla ja no es queda girant: digues-li «segueix» i el bot reprèn aquest pas."
+          },
+          "en": {
+            "titulo": "Plans that don't get stuck",
+            "texto": "If a step in a plan fails halfway, the plan no longer keeps spinning: say «continue» and the bot picks that step back up."
+          }
+        }
+      ]
+    },
     {
       "version": "0.1.24",
       "fecha": "2026-11-20",
