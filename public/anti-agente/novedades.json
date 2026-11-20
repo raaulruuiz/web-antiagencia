@@ -1,8 +1,34 @@
 {
-  "ultima": { "version": "0.1.23", "fecha": "2026-11-20" },
+  "ultima": { "version": "0.1.24", "fecha": "2026-11-20" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.1.24",
+      "fecha": "2026-11-20",
+      "resumen": "Las herramientas que se dan gratis ya salen gratis en la app, aunque el catálogo tenga un precio puesto.",
+      "ca": {
+        "resumen": "Les eines que es donen gratis ja surten gratis a l'app, encara que el catàleg tingui un preu posat."
+      },
+      "en": {
+        "resumen": "Tools that are given away for free now show as free in the app, even if the catalogue lists a price."
+      },
+      "entradas": [
+        {
+          "id": "herramientas-gratis-ficha",
+          "titulo": "Herramientas gratis de verdad",
+          "texto": "Si una herramienta pasa a ser gratis, la app la deja instalar sin pagar y deja de enseñar el precio. Y si vuelve a ser de pago, lo sabe al momento.",
+          "ca": {
+            "titulo": "Eines gratis de veritat",
+            "texto": "Si una eina passa a ser gratis, l'app la deixa instal·lar sense pagar i deixa d'ensenyar el preu. I si torna a ser de pagament, ho sap al moment."
+          },
+          "en": {
+            "titulo": "Truly free tools",
+            "texto": "If a tool becomes free, the app lets you install it without paying and stops showing the price. And if it goes back to paid, it knows right away."
+          }
+        }
+      ]
+    },
     {
       "version": "0.1.23",
       "fecha": "2026-11-20",
