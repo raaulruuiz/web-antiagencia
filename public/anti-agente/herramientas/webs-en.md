@@ -11,6 +11,14 @@ Change your website by talking to your bots. You see it inside the app, point at
 6. **Publish** sends the changes to your live website. You always get a card first, and you decide.
 7. If you don't like something afterwards, **«Go back to the previous version»** undoes the last publish, also with a card.
 
+## New pages
+In the page list, **«+ New page»**: give it a name and, if you like, what it should have. It's created in the draft and you see it straight away; your bot builds it with whatever you ask. On WordPress and Shopify it's shown approximately and created on your site when you publish. Not available on GoHighLevel.
+
+## Analysing websites
+Your bots know how to review websites, but only when you ask:
+- **«Analyse my website»**: five reviewers look at it on mobile and desktop (speed, SEO, copy, someone in a hurry and someone who rarely uses the internet) and give you a short report, with what pays off most at the top.
+- **«Make me one like this»** plus the address of a site you like: it builds a similar one in the draft, with your brand and your copy. The structure and ideas are copied, never the other site's text or images.
+
 ## What you need
 One of these, not all:
 - A custom-built website in a folder on your computer with git, or on GitHub.

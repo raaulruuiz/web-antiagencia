@@ -4,16 +4,16 @@
     {
       "id": "webs",
       "nombre": "Anti-Web",
-      "version": "0.1.8",
-      "cambios": "Ahora se llama Anti-Web. Todo lo demás sigue igual: tus webs, borradores y cambios guardados se mantienen.",
+      "version": "0.1.18",
       "descripcion": "Edita tu web hablando con tus bots: señalas lo que quieres cambiar, se prepara en un borrador y solo se publica cuando lo apruebas.",
+      "cambios": "Nuevo «Modificar»: pincha lo que quieras cambiar, escribe qué quieres y apila varios cambios para que tus bots los hagan de una vez. Tu web siempre se ve dentro de la herramienta, también las tiendas de Shopify con contraseña. Las páginas nuevas se suben primero como borrador y luego decides si van en vivo; en la lista salen marcadas como «borrador». Las webs hechas a medida se cambian y se ven en tu ordenador antes de publicar. Tus webs y borradores se mantienen.",
       "precio": {
         "texto": "19 €/mes",
         "detalle": "o 190 €/año · IVA incluido"
       },
       "icono": "https://antiagencia.es/anti-agente/herramientas/webs.png",
       "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs.md",
-      "appMinima": "0.1.18",
+      "appMinima": "0.1.23",
       "conexiones": [
         {
           "servicio": "shopify",
@@ -39,20 +39,27 @@
           "servicio": "github",
           "opcional": true,
           "motivo": "Editar webs hechas a medida que están en GitHub y publicarlas"
+        },
+        {
+          "servicio": "vercel",
+          "opcional": true,
+          "motivo": "Encontrar solas tus webs publicadas en Vercel (su repositorio de GitHub y su dominio) y ver sus vistas previas protegidas dentro de la herramienta"
         }
       ],
       "capacidades": [
         "carpetas",
         "chat",
-        "pantallaCompleta"
+        "pantallaCompleta",
+        "datos",
+        "web"
       ],
-      "sha256": "ef93f01a8256efe37ded12f470386e512ff8016754998219a4d994f3ff64ca12",
-      "peso": 160766,
+      "sha256": "ea0f2b9959a1be4cab7cfde487bad7384825d7f56ad60fdae57ff438202373c3",
+      "peso": 221646,
       "ca": {
         "nombre": "Anti-Web",
-        "cambios": "Ara es diu Anti-Web. Tota la resta continua igual: els teus webs, esborranys i canvis desats es mantenen.",
         "descripcion": "Edita el teu web parlant amb els teus bots: assenyales el que vols canviar, es prepara en un esborrany i només es publica quan ho aproves.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-ca.md",
+        "cambios": "Nou «Modificar»: clica el que vulguis canviar, escriu què vols i apila diversos canvis perquè els teus bots els facin d'una vegada. El teu web sempre es veu dins de l'eina, també les botigues de Shopify amb contrasenya. Les pàgines noves es pugen primer com a esborrany i després decideixes si van en directe; a la llista surten marcades com a «esborrany». Els webs fets a mida es canvien i es veuen al teu ordinador abans de publicar. Els teus webs i esborranys es mantenen.",
         "precio": {
           "texto": "19 €/mes",
           "detalle": "o 190 €/any · IVA inclòs"
@@ -60,9 +67,9 @@
       },
       "en": {
         "nombre": "Anti-Web",
-        "cambios": "It's now called Anti-Web. Everything else stays the same: your websites, drafts and saved changes are kept.",
         "descripcion": "Edit your website by talking to your bots: point at what to change, it's prepared as a draft and only goes live when you approve it.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-en.md",
+        "cambios": "New «Modify»: click what you want to change, write what you want and stack several changes so your bots do them in one go. Your website always shows inside the tool, including password-protected Shopify stores. New pages are uploaded as drafts first and then you decide if they go live; they show in the list marked «draft». Custom-built websites are changed and previewed on your computer before publishing. Your websites and drafts are kept.",
         "precio": {
           "texto": "€19/month",
           "detalle": "or €190/year · VAT included"

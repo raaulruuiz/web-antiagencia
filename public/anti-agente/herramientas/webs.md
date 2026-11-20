@@ -11,6 +11,14 @@ Cambia tu web hablando con tus bots. La ves dentro de la app, señalas lo que qu
 6. **Publicar** sube los cambios a tu web real. Siempre te sale una tarjeta antes y decides tú.
 7. Si algo no te gusta después, **«Volver a la versión anterior»** deshace la última publicación, también con tarjeta.
 
+## Páginas nuevas
+En la lista de páginas, **«+ Nueva página»**: le pones nombre y, si quieres, qué tiene que llevar. Se crea en el borrador y la ves al momento; tu bot la monta con lo que le pidas. En WordPress y Shopify se ve aproximada y se crea en tu web al publicar. En GoHighLevel no se puede.
+
+## Analizar webs
+Tus bots saben revisar webs, pero solo cuando se lo pides:
+- **«Analiza mi web»**: la miran en móvil y en ordenador cinco revisores (velocidad, SEO, textos, alguien con prisa y alguien que usa poco internet) y te dan un informe corto, con lo que más rinde arriba.
+- **«Hazme una como esta»** y le pasas la dirección de una web que te guste: te monta una parecida en el borrador, con tu marca y tus textos. Se copian la estructura y las ideas, nunca los textos ni las imágenes de la otra web.
+
 ## Qué necesitas
 Una de estas, no todas:
 - Una web hecha a medida en una carpeta de tu ordenador con git, o en GitHub.

@@ -11,6 +11,14 @@ Canvia el teu web parlant amb els teus bots. El veus dins l'app, assenyales el q
 6. **Publicar** puja els canvis al teu web real. Sempre et surt una targeta abans i decideixes tu.
 7. Si després alguna cosa no t'agrada, **«Tornar a la versió anterior»** desfà l'última publicació, també amb targeta.
 
+## Pàgines noves
+A la llista de pàgines, **«+ Pàgina nova»**: li poses nom i, si vols, què ha de portar. Es crea a l'esborrany i la veus al moment; el teu bot la munta amb el que li demanis. A WordPress i Shopify es veu aproximada i es crea al teu web en publicar. A GoHighLevel no es pot.
+
+## Analitzar webs
+Els teus bots saben revisar webs, però només quan els ho demanes:
+- **«Analitza el meu web»**: el miren al mòbil i a l'ordinador cinc revisors (velocitat, SEO, textos, algú amb pressa i algú que fa servir poc internet) i et donen un informe curt, amb el que més rendeix a dalt.
+- **«Fes-me'n un com aquest»** i li passes l'adreça d'un web que t'agradi: te'n munta un de semblant a l'esborrany, amb la teva marca i els teus textos. Es copien l'estructura i les idees, mai els textos ni les imatges de l'altre web.
+
 ## Què necessites
 Una d'aquestes, no totes:
 - Un web fet a mida en una carpeta del teu ordinador amb git, o a GitHub.
