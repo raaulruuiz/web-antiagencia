@@ -4,9 +4,9 @@
     {
       "id": "webs",
       "nombre": "Anti-Web",
-      "version": "0.1.20",
+      "version": "0.1.21",
       "descripcion": "Edita tu web hablando con tus bots: señalas lo que quieres cambiar, se prepara en un borrador y solo se publica cuando lo apruebas.",
-      "cambios": "Tu bot ve también los textos cortos de la página (contadores, avisos, etiquetas) y los que tardan un poco en salir, y los puede elegir por su nombre. Y las imágenes se pueden reducir y pasar a WebP al subirlas, para que la web cargue más rápido.",
+      "cambios": "Tus bots saben mejor cuándo usar cada guía de Anti-Web: cambiar tu web, revisarla o hacer una página parecida a otra.",
       "precio": {
         "texto": "19 €/mes",
         "detalle": "o 190 €/año · IVA incluido"
@@ -53,13 +53,13 @@
         "datos",
         "web"
       ],
-      "sha256": "4c8c1470bfd6149f0f6f4f518e076f49df8e685c9ac2b53235da20a6dae1b406",
-      "peso": 224098,
+      "sha256": "207b001db309d7edf8c40e8dd707944b1f5506dbebd792ab1cf081e51813cbad",
+      "peso": 224126,
       "ca": {
         "nombre": "Anti-Web",
         "descripcion": "Edita el teu web parlant amb els teus bots: assenyales el que vols canviar, es prepara en un esborrany i només es publica quan ho aproves.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-ca.md",
-        "cambios": "El teu bot també veu els textos curts de la pàgina (comptadors, avisos, etiquetes) i els que triguen una mica a sortir, i els pot triar pel seu nom. I les imatges es poden reduir i passar a WebP en pujar-les, perquè el web carregui més ràpid.",
+        "cambios": "Els teus bots saben millor quan fer servir cada guia d'Anti-Web: canviar el teu web, revisar-lo o fer una pàgina semblant a una altra.",
         "precio": {
           "texto": "19 €/mes",
           "detalle": "o 190 €/any · IVA inclòs"
@@ -69,7 +69,7 @@
         "nombre": "Anti-Web",
         "descripcion": "Edit your website by talking to your bots: point at what to change, it's prepared as a draft and only goes live when you approve it.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-en.md",
-        "cambios": "Your bot now also sees short texts on the page (counters, notices, labels) and ones that take a moment to appear, and can pick them by name. And images can be resized and converted to WebP when uploaded, so your site loads faster.",
+        "cambios": "Your bots now know better when to use each Anti-Web guide: changing your site, reviewing it or making a page like another one.",
         "precio": {
           "texto": "€19/month",
           "detalle": "or €190/year · VAT included"
