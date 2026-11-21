@@ -1,8 +1,47 @@
 {
-  "ultima": { "version": "0.2.4", "fecha": "2026-11-21" },
+  "ultima": { "version": "0.2.5", "fecha": "2026-11-21" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.5",
+      "fecha": "2026-11-21",
+      "resumen": "Con una herramienta abierta, todo lo que espera tu decisión en ese chat sale en una ventana encima de ella, también lo que piden otros bots, para que no se te pase nada. Y en pantalla completa ya puedes soltar archivos en cualquier parte.",
+      "ca": {
+        "resumen": "Amb una eina oberta, tot el que espera la teva decisió en aquest xat surt en una finestra a sobre, també el que demanen altres bots, perquè no se't passi res. I a pantalla completa ja pots deixar anar arxius a qualsevol lloc."
+      },
+      "en": {
+        "resumen": "With a tool open, everything waiting for your decision in that chat shows up in a window on top of it, including what other bots ask for, so you don't miss anything. And in full screen you can now drop files anywhere."
+      },
+      "entradas": [
+        {
+          "id": "tarjetas-encima-herramienta",
+          "titulo": "Decisiones encima de la herramienta",
+          "texto": "Si tienes una herramienta desplegada, las tarjetas que esperan tu decisión en ese chat (de la herramienta, de otros bots o de sus hilos) salen en una ventana encima, también en pantalla completa. La franja «Espera tu decisión» te lleva a ellas.",
+          "ca": {
+            "titulo": "Decisions a sobre de l'eina",
+            "texto": "Si tens una eina desplegada, les targetes que esperen la teva decisió en aquest xat (de l'eina, d'altres bots o dels seus fils) surten en una finestra a sobre, també a pantalla completa. La franja «Espera la teva decisió» t'hi porta."
+          },
+          "en": {
+            "titulo": "Decisions on top of the tool",
+            "texto": "If you have a tool open, the cards waiting for your decision in that chat (from the tool, from other bots or from their threads) show up in a window on top, also in full screen. The «Waiting for your decision» bar takes you to them."
+          }
+        },
+        {
+          "id": "soltar-pantalla-completa",
+          "titulo": "Soltar archivos en pantalla completa",
+          "texto": "Con una herramienta en pantalla completa, la zona para soltar archivos ocupa toda la ventana bajo la barra de la herramienta, en su sitio.",
+          "ca": {
+            "titulo": "Deixar anar arxius a pantalla completa",
+            "texto": "Amb una eina a pantalla completa, la zona per deixar anar arxius ocupa tota la finestra sota la barra de l'eina, al seu lloc."
+          },
+          "en": {
+            "titulo": "Drop files in full screen",
+            "texto": "With a tool in full screen, the area for dropping files covers the whole window below the tool's bar, where it should be."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.4",
       "fecha": "2026-11-21",
