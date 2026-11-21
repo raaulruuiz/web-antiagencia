@@ -1,8 +1,47 @@
 {
-  "ultima": { "version": "0.2.3", "fecha": "2026-11-20" },
+  "ultima": { "version": "0.2.4", "fecha": "2026-11-21" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.4",
+      "fecha": "2026-11-21",
+      "resumen": "Las herramientas que trabajan con Klaviyo leen los informes de campañas y flujos sin pedirte permiso cada vez, y las tarjetas de varios pasos pueden usar un dato de un paso dentro del texto del siguiente.",
+      "ca": {
+        "resumen": "Les eines que treballen amb Klaviyo llegeixen els informes de campanyes i fluxos sense demanar-te permís cada vegada, i les targetes de diversos passos poden fer servir una dada d'un pas dins del text del següent."
+      },
+      "en": {
+        "resumen": "Tools that work with Klaviyo read campaign and flow reports without asking for your permission every time, and multi-step cards can use data from one step inside the text of the next."
+      },
+      "entradas": [
+        {
+          "id": "klaviyo-informes",
+          "titulo": "Informes de Klaviyo sin tarjeta",
+          "texto": "Leer los informes de campañas y flujos de Klaviyo ya no saca tarjeta: solo leen datos, no cambian nada. Además, cada acción de una herramienta puede usar la versión de Klaviyo que necesita, como las pruebas A/B.",
+          "ca": {
+            "titulo": "Informes de Klaviyo sense targeta",
+            "texto": "Llegir els informes de campanyes i fluxos de Klaviyo ja no treu targeta: només llegeixen dades, no canvien res. A més, cada acció d'una eina pot fer servir la versió de Klaviyo que necessita, com les proves A/B."
+          },
+          "en": {
+            "titulo": "Klaviyo reports without a card",
+            "texto": "Reading Klaviyo campaign and flow reports no longer shows a card: they only read data, they don't change anything. Also, each tool action can use the Klaviyo version it needs, like A/B tests."
+          }
+        },
+        {
+          "id": "pasos-encadenados",
+          "titulo": "Un paso usa lo del anterior",
+          "texto": "En una tarjeta con varios pasos, un dato que sale de un paso (por ejemplo, el enlace de una imagen recién subida) puede ir dentro del texto de otro, como el diseño del correo. En la tarjeta ves de qué paso sale.",
+          "ca": {
+            "titulo": "Un pas fa servir el de l'anterior",
+            "texto": "En una targeta amb diversos passos, una dada que surt d'un pas (per exemple, l'enllaç d'una imatge acabada de pujar) pot anar dins del text d'un altre, com el disseny del correu. A la targeta veus de quin pas surt."
+          },
+          "en": {
+            "titulo": "One step uses the previous one",
+            "texto": "In a card with several steps, data from one step (for example, the link to a just-uploaded image) can go inside the text of another, like the email design. The card shows which step it comes from."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.3",
       "fecha": "2026-11-20",
