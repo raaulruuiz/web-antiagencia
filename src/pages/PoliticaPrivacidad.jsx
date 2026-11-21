@@ -188,7 +188,6 @@ export default function PoliticaPrivacidad() {
 
           <Seccion titulo="7. Anti-Agente">
             <p>Anti-Agente es una aplicación en desarrollo que funcionará en el ordenador de cada usuario. Esta política cubre solo esta web y las listas (como la lista prioritaria), no el uso de la aplicación. La aplicación tendrá su propia política de privacidad, que publicaremos junto con ella.</p>
-            <p>La aplicación Anti-Studio tiene su propia <Link to="/anti-studio/privacidad" className="text-[#0067FD] hover:underline">política de privacidad</Link>.</p>
           </Seccion>
 
           <Seccion titulo="8. Aplicación de Shopify — Antiagencia">

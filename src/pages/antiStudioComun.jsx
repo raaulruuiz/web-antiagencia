@@ -1,14 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 export const rubik = { fontFamily: "'Rubik', sans-serif" };
-
-export function useNovedades() {
-  const [datos, setDatos] = useState({ novedades: [], enCurso: [], pendiente: [] });
-  useEffect(() => {
-    fetch("/anti-studio/novedades.json").then((r) => r.json()).then(setDatos).catch(() => {});
-  }, []);
-  return datos;
-}
 
 export const fecha = (f) => new Date(`${f}T12:00:00`).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
 
@@ -25,14 +17,4 @@ export const claseBoton = (secundario) =>
 
 export function Boton({ href, children, secundario }) {
   return <a href={href} className={claseBoton(secundario)} style={rubik}>{children}</a>;
-}
-
-export function Novedad({ n }) {
-  return (
-    <article className="py-5 border-b border-gray-200 last:border-0">
-      <p className="text-sm text-gray-500 mb-1">{fecha(n.fecha)}</p>
-      <h3 className="text-lg font-bold text-gray-900 mb-1" style={rubik}>{n.titulo}</h3>
-      <p className="text-gray-800 leading-relaxed">{n.texto}</p>
-    </article>
-  );
 }

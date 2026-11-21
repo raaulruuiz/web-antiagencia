@@ -27,19 +27,15 @@ const PlanningQ4 = lazy(() => import('./pages/PlanningQ4'));
 const Reservar = lazy(() => import('./pages/Reservar'));
 const GestionarReserva = lazy(() => import('./pages/GestionarReserva'));
 const PoliticaPrivacidad = lazy(() => import('./pages/PoliticaPrivacidad'));
-const PoliticaPrivacidadAntiStudio = lazy(() => import('./pages/PoliticaPrivacidadAntiStudio'));
 const PoliticaPrivacidadAntiAgente = lazy(() => import('./pages/PoliticaPrivacidadAntiAgente'));
-const CuentaAntiStudio = lazy(() => import('./pages/CuentaAntiStudio'));
 const CuentaAntiAgente = lazy(() => import('./pages/CuentaAntiAgente'));
 const PagoAntiAgente = lazy(() => import('./pages/PagoAntiAgente'));
-const AntiStudio = lazy(() => import('./pages/AntiStudio'));
 const AntiAgente = lazy(() => import('./pages/AntiAgente'));
 const AntiAgenteGracias = lazy(() => import('./pages/AntiAgenteGracias'));
 const AntiAgenteB = lazy(() => import('./pages/AntiAgenteB'));
 const InicioAntiAgente = lazy(() => import('./pages/InicioAntiAgente'));
 const NovedadesAntiAgente = lazy(() => import('./pages/NovedadesAntiAgente'));
 const DescargarAntiAgente = lazy(() => import('./pages/DescargarAntiAgente'));
-const NovedadesAntiStudio = lazy(() => import('./pages/NovedadesAntiStudio'));
 const TikTokConnect = lazy(() => import('./pages/TikTokConnect'));
 const JorgeCoronado = lazy(() => import('./pages/JorgeCoronado'));
 const GraciasJorgeCoronado = lazy(() => import('./pages/GraciasJorgeCoronado'));
@@ -231,10 +227,6 @@ const AuthenticatedApp = () => {
       <Route path="/trabajaconnosotros-old" element={<TrabajaConNosotros2 />} />
       {/* <Route path="/planningq3" element={<PlanningQ3Venta />} /> */}
       <Route path="/politica-privacidad" element={<SmartPage path="/politica-privacidad"><PoliticaPrivacidad /></SmartPage>} />
-      <Route path="/anti-studio/privacidad" element={<PoliticaPrivacidadAntiStudio />} />
-      <Route path="/anti-studio/cuenta" element={<CuentaAntiStudio />} />
-      <Route path="/anti-studio/novedades" element={<NovedadesAntiStudio />} />
-      <Route path="/anti-studio" element={<AntiStudio />} />
       {/* Lista prioritaria de Anti-Agente: la versión B es la oficial (17-11-2026). */}
       <Route path="/anti-agente" element={<AntiAgenteB />} />
       {/* Borrador de la nueva portada (noindex). Cuando esté lista, pasa a «/». */}

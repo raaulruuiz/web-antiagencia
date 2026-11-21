@@ -5,8 +5,7 @@ import FooterMinimal from "@/components/landing/FooterMinimal";
 import { fecha, Hoja, rubik, Titulo } from "./antiStudioComun";
 import { Boton, Contador, TEXTO_BOTON } from "./antiAgenteComun";
 
-// /anti-agente/novedades — registro público de Anti-Agente (noindex), con el mismo diseño
-// que /anti-studio/novedades. El contenido está en public/anti-agente/novedades.json:
+// /anti-agente/novedades — registro público de Anti-Agente (noindex). El contenido está en public/anti-agente/novedades.json:
 // una entrada por versión de la app, más «enCurso» y «pendiente».
 
 function useNovedadesAgente() {

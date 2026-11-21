@@ -1,6 +1,6 @@
 {
   "crons": [
-    { "path": "/api/anti-studio-latido", "schedule": "0 7 */2 * *" }
+    { "path": "/api/cuentas-latido", "schedule": "0 7 */2 * *" }
   ],
   "redirects": [
     { "source": "/newsletter", "destination": "/", "permanent": false },
@@ -12,7 +12,9 @@
     { "source": "/r", "destination": "/", "permanent": true },
     { "source": "/r/", "destination": "/", "permanent": true },
     { "source": "/anti-agente-b", "destination": "/anti-agente", "permanent": false },
-    { "source": "/anti-agente-b/", "destination": "/anti-agente", "permanent": false }
+    { "source": "/anti-agente-b/", "destination": "/anti-agente", "permanent": false },
+    { "source": "/anti-studio", "destination": "/anti-agente", "permanent": true },
+    { "source": "/anti-studio/:ruta*", "destination": "/anti-agente", "permanent": true }
   ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },

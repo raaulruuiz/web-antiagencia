@@ -1,4 +1,4 @@
-// Supabase pausa los proyectos gratuitos tras una semana sin actividad.
+// Supabase pausa los proyectos gratuitos tras una semana sin actividad (aquí están las cuentas de Anti-Agente).
 // Un intento de entrada con una cuenta inexistente consulta la base de datos sin cambiar nada.
 const URL_CUENTAS = 'https://gayctlvlmfvbkvvasrcz.supabase.co';
 const CLAVE_PUBLICA = 'sb_publishable_xK4rKEfqlHloexUQd8BNpQ_a7pdiDp1';
