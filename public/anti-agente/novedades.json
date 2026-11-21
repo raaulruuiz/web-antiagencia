@@ -1,8 +1,47 @@
 {
-  "ultima": { "version": "0.2.5", "fecha": "2026-11-21" },
+  "ultima": { "version": "0.2.6", "fecha": "2026-11-21" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.6",
+      "fecha": "2026-11-21",
+      "resumen": "Las herramientas ya pueden editar vídeo en tu equipo con un motor propio que se baja la primera vez que hace falta, tras tu permiso. Trabajan en segundo plano, con vídeos largos y pesados, transcripción palabra a palabra y exportación a la carpeta que elijas.",
+      "ca": {
+        "resumen": "Les eines ja poden editar vídeo al teu equip amb un motor propi que es baixa la primera vegada que cal, amb el teu permís. Treballen en segon pla, amb vídeos llargs i pesats, transcripció paraula a paraula i exportació a la carpeta que triïs."
+      },
+      "en": {
+        "resumen": "Tools can now edit video on your computer with their own engine, downloaded the first time it's needed, after you allow it. They work in the background, with long and heavy videos, word-by-word transcription and export to the folder you choose."
+      },
+      "entradas": [
+        {
+          "id": "motor-video-herramientas",
+          "titulo": "Motor de vídeo para las herramientas",
+          "texto": "Las herramientas que lo necesitan usan un motor de vídeo propio (24 MB) que se baja con una tarjeta la primera vez y se comprueba antes de usarlo. Los trabajos van en cola y en segundo plano, con su avance, y solo tocan los archivos de la propia herramienta.",
+          "ca": {
+            "titulo": "Motor de vídeo per a les eines",
+            "texto": "Les eines que el necessiten fan servir un motor de vídeo propi (24 MB) que es baixa amb una targeta la primera vegada i es comprova abans de fer-lo servir. Les feines van en cua i en segon pla, amb el seu avenç, i només toquen els arxius de la mateixa eina."
+          },
+          "en": {
+            "titulo": "Video engine for tools",
+            "texto": "Tools that need it use their own video engine (24 MB), downloaded with a card the first time and checked before use. Jobs are queued and run in the background, with their progress, and only touch the tool's own files."
+          }
+        },
+        {
+          "id": "archivos-herramientas",
+          "titulo": "Vídeos grandes, palabras y exportar",
+          "texto": "Las herramientas pueden importar varios archivos a la vez y sin límite de tamaño, transcribir con el tiempo de cada palabra y guardar el resultado en la carpeta que elijas, sin pisar nada de lo que ya tengas.",
+          "ca": {
+            "titulo": "Vídeos grans, paraules i exportar",
+            "texto": "Les eines poden importar diversos arxius alhora i sense límit de mida, transcriure amb el temps de cada paraula i desar el resultat a la carpeta que triïs, sense trepitjar res del que ja tinguis."
+          },
+          "en": {
+            "titulo": "Big videos, words and export",
+            "texto": "Tools can import several files at once with no size limit, transcribe with the timing of each word and save the result to the folder you choose, without overwriting anything you already have."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.5",
       "fecha": "2026-11-21",
