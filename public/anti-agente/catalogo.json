@@ -79,12 +79,12 @@
     {
       "id": "anti-email",
       "nombre": "Anti-Email",
-      "version": "0.9.0",
+      "version": "0.9.1",
       "descripcion": "Escribe emails de marketing con tu IA en una pizarra y llévalos a Klaviyo, MailerLite o ActiveCampaign como borrador. Nada se envía sin tu visto bueno.",
       "precio": null,
       "icono": "https://antiagencia.es/anti-agente/herramientas/anti-email.png",
       "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email.md",
-      "appMinima": "0.2.5",
+      "appMinima": "0.2.6",
       "conexiones": [
         {
           "servicio": "klaviyo",
@@ -126,17 +126,20 @@
         "chat",
         "pantallaCompleta"
       ],
-      "paquete": "https://antiagencia.es/anti-agente/herramientas/anti-email-0.9.0.herramienta",
-      "sha256": "97e1d2bac052c00dffbd35c0dfcf297ca8217eb782cf0253d0f366855e5a3aa5",
-      "peso": 5930566,
+      "paquete": "https://antiagencia.es/anti-agente/herramientas/anti-email-0.9.1.herramienta",
+      "sha256": "c298e1aee6386be8f15ecaa176b387f5f085e4c677e15e0ee160afea8523c944",
+      "peso": 5947810,
       "ca": {
         "nombre": "Anti-Email",
-        "descripcion": "Escriu emails de màrqueting amb la teva IA en una pissarra i porta'ls a Klaviyo, MailerLite o ActiveCampaign com a esborrany. Res no s'envia sense el teu sí."
+        "descripcion": "Escriu emails de màrqueting amb la teva IA en una pissarra i porta'ls a Klaviyo, MailerLite o ActiveCampaign com a esborrany. Res no s'envia sense el teu sí.",
+        "cambios": "Torna el tutorial de cada pantalla la primera vegada que l'obres, amb un botó «?» per tornar-lo a veure. Millor escaneig del logo, els colors i les xarxes de la teva marca. Els correus que portes apareixen a la pissarra i el panell es llegeix millor. El bot de la marca es tria d'una llista i la nota de veu funciona quan el teu Anti-Agente ho permeti; mentrestant, pots pujar un àudio. S'ha acabat el bucle en aprovar amb «Val» i la revisió és més ràpida."
       },
       "en": {
         "nombre": "Anti-Email",
-        "descripcion": "Write marketing emails with your AI on a whiteboard and take them to Klaviyo, MailerLite or ActiveCampaign as drafts. Nothing is sent without your OK."
-      }
+        "descripcion": "Write marketing emails with your AI on a whiteboard and take them to Klaviyo, MailerLite or ActiveCampaign as drafts. Nothing is sent without your OK.",
+        "cambios": "The tutorial for each screen is back the first time you open it, with a \"?\" button to see it again. Better scanning of your brand's logo, colours and social profiles. Emails you bring in now show up on the whiteboard and the panel is easier to read. You pick the brand's bot from a list, and voice notes work once your Anti-Agente allows it; meanwhile you can upload audio. No more loop when approving with \"OK\", and reviews are faster."
+      },
+      "cambios": "Vuelve el tutorial de cada pantalla la primera vez que la abres, con un botón «?» para verlo otra vez. Mejor escaneo del logo, los colores y las redes de tu marca. Los correos que traes aparecen en la pizarra y el panel se lee mejor. El bot de la marca se elige de una lista y la nota de voz funciona cuando tu Anti-Agente lo permita; mientras, puedes subir un audio. Se acabó el bucle al aprobar con «Vale» y la revisión es más rápida."
     }
   ],
   "servicios": []
