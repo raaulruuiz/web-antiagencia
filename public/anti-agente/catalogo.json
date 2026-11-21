@@ -75,6 +75,68 @@
           "detalle": "or €190/year · VAT included"
         }
       }
+    },
+    {
+      "id": "anti-email",
+      "nombre": "Anti-Email",
+      "version": "0.9.0",
+      "descripcion": "Escribe emails de marketing con tu IA en una pizarra y llévalos a Klaviyo, MailerLite o ActiveCampaign como borrador. Nada se envía sin tu visto bueno.",
+      "precio": null,
+      "icono": "https://antiagencia.es/anti-agente/herramientas/anti-email.png",
+      "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email.md",
+      "appMinima": "0.2.5",
+      "conexiones": [
+        {
+          "servicio": "klaviyo",
+          "opcional": true,
+          "motivo": "Leer tus campañas y flujos como contexto y subir los emails como borrador"
+        },
+        {
+          "servicio": "mailerlite",
+          "opcional": true,
+          "motivo": "Leer tus campañas como contexto y subir los emails como borrador"
+        },
+        {
+          "servicio": "activecampaign",
+          "opcional": true,
+          "motivo": "Leer tus campañas como contexto y subir los emails como borrador"
+        },
+        {
+          "servicio": "shopify",
+          "opcional": true,
+          "motivo": "Poner tus productos reales en los emails"
+        },
+        {
+          "servicio": "woocommerce",
+          "opcional": true,
+          "motivo": "Poner tus productos reales en los emails"
+        },
+        {
+          "servicio": "gmail",
+          "opcional": true,
+          "motivo": "Aprender cómo escribes de los correos que has enviado y traer correos de referencia a la pizarra"
+        }
+      ],
+      "capacidades": [
+        "datos",
+        "ia",
+        "transcribir",
+        "imagenes",
+        "web",
+        "chat",
+        "pantallaCompleta"
+      ],
+      "paquete": "https://antiagencia.es/anti-agente/herramientas/anti-email-0.9.0.herramienta",
+      "sha256": "97e1d2bac052c00dffbd35c0dfcf297ca8217eb782cf0253d0f366855e5a3aa5",
+      "peso": 5930566,
+      "ca": {
+        "nombre": "Anti-Email",
+        "descripcion": "Escriu emails de màrqueting amb la teva IA en una pissarra i porta'ls a Klaviyo, MailerLite o ActiveCampaign com a esborrany. Res no s'envia sense el teu sí."
+      },
+      "en": {
+        "nombre": "Anti-Email",
+        "descripcion": "Write marketing emails with your AI on a whiteboard and take them to Klaviyo, MailerLite or ActiveCampaign as drafts. Nothing is sent without your OK."
+      }
     }
   ],
   "servicios": []
