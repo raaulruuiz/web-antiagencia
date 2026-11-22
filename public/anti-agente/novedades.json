@@ -1,8 +1,73 @@
 {
-  "ultima": { "version": "0.2.6", "fecha": "2026-11-21" },
+  "ultima": { "version": "0.2.7", "fecha": "2026-11-22" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.7",
+      "fecha": "2026-11-22",
+      "resumen": "Las herramientas a medida ya no se instalan solas: salen en Disponibles, las instalas cuando quieras y las activas tú, siempre que tengas conectado lo que necesitan. Además pueden trabajar con carpetas y vídeos grandes sin copiarlos, usar el micro y ver tu equipo, y al trabajar con una herramienta ves lo que hacen tus bots.",
+      "ca": {
+        "resumen": "Les eines a mida ja no s'instal·len soles: surten a Disponibles, les instal·les quan vulguis i les actives tu, sempre que tinguis connectat el que necessiten. A més, poden treballar amb carpetes i vídeos grans sense copiar-los, fer servir el micro i veure el teu equip, i mentre treballes amb una eina veus el que fan els teus bots."
+      },
+      "en": {
+        "resumen": "Custom tools no longer install themselves: they show up in Available, you install them when you want and activate them yourself, as long as what they need is connected. They can also work with folders and big videos without copying them, use the microphone and see your team, and while you work in a tool you can see what your bots are doing."
+      },
+      "entradas": [
+        {
+          "id": "herramientas-disponibles-instaladas-activas",
+          "titulo": "Disponibles, instaladas y activas",
+          "texto": "Las herramientas a medida aparecen en Disponibles, pasan a Instaladas al bajarlas y a Activas cuando las activas. Si a una le falta una conexión obligatoria, no se activa y te dice qué tienes que conectar antes.",
+          "ca": {
+            "titulo": "Disponibles, instal·lades i actives",
+            "texto": "Les eines a mida apareixen a Disponibles, passen a Instal·lades en baixar-les i a Actives quan les actives. Si a una li falta una connexió obligatòria, no s'activa i et diu què has de connectar abans."
+          },
+          "en": {
+            "titulo": "Available, installed and active",
+            "texto": "Custom tools show up in Available, move to Installed when you download them and to Active when you activate them. If one is missing a required connection, it won't activate and tells you what to connect first."
+          }
+        },
+        {
+          "id": "soltar-carpetas-sin-copiar",
+          "titulo": "Carpetas y vídeos grandes sin copiar",
+          "texto": "Puedes soltar o elegir carpetas enteras en una herramienta, con sus subcarpetas. Las que lo necesitan trabajan con tus vídeos grandes donde están, sin copiarlos y sin tocar el original.",
+          "ca": {
+            "titulo": "Carpetes i vídeos grans sense copiar",
+            "texto": "Pots deixar anar o triar carpetes senceres en una eina, amb les seves subcarpetes. Les que ho necessiten treballen amb els teus vídeos grans on són, sense copiar-los i sense tocar l'original."
+          },
+          "en": {
+            "titulo": "Folders and big videos without copying",
+            "texto": "You can drop or pick whole folders in a tool, with their subfolders. Tools that need it work with your big videos where they are, without copying them and without touching the original."
+          }
+        },
+        {
+          "id": "micro-y-equipo-herramientas",
+          "titulo": "Micro y equipo para las herramientas",
+          "texto": "Las herramientas que lo piden pueden usar el micro (solo audio, nunca la cámara) mientras están activas, y ver la lista de tus bots para que elijas con cuál trabajar.",
+          "ca": {
+            "titulo": "Micro i equip per a les eines",
+            "texto": "Les eines que ho demanen poden fer servir el micro (només àudio, mai la càmera) mentre estan actives, i veure la llista dels teus bots perquè triïs amb quin treballar."
+          },
+          "en": {
+            "titulo": "Microphone and team for tools",
+            "texto": "Tools that ask for it can use the microphone (audio only, never the camera) while they're active, and see the list of your bots so you can choose which one to work with."
+          }
+        },
+        {
+          "id": "actividad-y-actualizar-windows",
+          "titulo": "Actividad a la vista y actualizar en Windows",
+          "texto": "Con una herramienta abierta o en pantalla completa, una tira te enseña lo que va haciendo el bot. En Windows, al instalar una actualización ves «Instalando la actualización…» antes de que la app se cierre y vuelva a abrirse sola.",
+          "ca": {
+            "titulo": "Activitat a la vista i actualitzar a Windows",
+            "texto": "Amb una eina oberta o a pantalla completa, una franja t'ensenya el que va fent el bot. A Windows, en instal·lar una actualització veus «S'està instal·lant l'actualització…» abans que l'app es tanqui i torni a obrir-se sola."
+          },
+          "en": {
+            "titulo": "Activity in view and updating on Windows",
+            "texto": "With a tool open or in full screen, a strip shows you what the bot is doing. On Windows, when you install an update you see “Installing the update…” before the app closes and reopens by itself."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.6",
       "fecha": "2026-11-21",
