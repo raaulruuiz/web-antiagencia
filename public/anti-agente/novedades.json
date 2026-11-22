@@ -1,8 +1,34 @@
 {
-  "ultima": { "version": "0.2.10", "fecha": "2026-11-22" },
+  "ultima": { "version": "0.2.11", "fecha": "2026-11-22" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.11",
+      "fecha": "2026-11-22",
+      "resumen": "Ya está arreglada de verdad la línea de lo que hacen tus bots que se quedaba pegada en otros chats: la app dejaba copias sueltas al plegar la herramienta o cambiar de chat, y ahora las quita siempre.",
+      "ca": {
+        "resumen": "Ja està arreglada de debò la línia del que fan els teus bots que es quedava enganxada en altres xats: l'app deixava còpies soltes en plegar l'eina o canviar de xat, i ara les treu sempre."
+      },
+      "en": {
+        "resumen": "The line showing what your bots are doing no longer gets stuck in other chats: the app was leaving stray copies behind when you collapsed the tool or switched chats, and now it always removes them."
+      },
+      "entradas": [
+        {
+          "id": "tira-actividad-sin-copias",
+          "titulo": "Sin líneas pegadas",
+          "texto": "Al plegar una herramienta, cambiar de chat o cuando el bot acaba, la línea de actividad se va del todo y no deja rastro.",
+          "ca": {
+            "titulo": "Sense línies enganxades",
+            "texto": "En plegar una eina, canviar de xat o quan el bot acaba, la línia d'activitat se'n va del tot i no deixa rastre."
+          },
+          "en": {
+            "titulo": "No stuck lines",
+            "texto": "When you collapse a tool, switch chats or the bot finishes, the activity line goes away completely and leaves no trace."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.10",
       "fecha": "2026-11-22",
