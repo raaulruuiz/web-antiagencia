@@ -1,8 +1,34 @@
 {
-  "ultima": { "version": "0.2.8", "fecha": "2026-11-22" },
+  "ultima": { "version": "0.2.9", "fecha": "2026-11-22" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.9",
+      "fecha": "2026-11-22",
+      "resumen": "Otro arreglo para la línea de lo que hacen tus bots encima de una herramienta: en algunos Mac se quedaba pintada al plegar la herramienta o al cambiar de chat. Ahora la app la borra de la pantalla en cuanto se va.",
+      "ca": {
+        "resumen": "Un altre arranjament per a la línia del que fan els teus bots damunt d'una eina: en alguns Mac es quedava pintada en plegar l'eina o en canviar de xat. Ara l'app l'esborra de la pantalla tan bon punt se'n va."
+      },
+      "en": {
+        "resumen": "Another fix for the line showing what your bots are doing on top of a tool: on some Macs it stayed painted after collapsing the tool or switching chats. Now the app clears it from the screen as soon as it goes away."
+      },
+      "entradas": [
+        {
+          "id": "tira-actividad-sin-rastro",
+          "titulo": "La actividad no deja rastro",
+          "texto": "Al plegar una herramienta, cambiar de chat o acabar el turno, la línea con lo que hace tu bot desaparece del todo, sin quedarse congelada encima de la caja de escribir.",
+          "ca": {
+            "titulo": "L'activitat no deixa rastre",
+            "texto": "En plegar una eina, canviar de xat o acabar el torn, la línia amb el que fa el teu bot desapareix del tot, sense quedar-se congelada damunt de la caixa d'escriure."
+          },
+          "en": {
+            "titulo": "Activity leaves no trace",
+            "texto": "When you collapse a tool, switch chats or the turn ends, the line showing what your bot is doing disappears completely instead of staying frozen above the message box."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.8",
       "fecha": "2026-11-22",
