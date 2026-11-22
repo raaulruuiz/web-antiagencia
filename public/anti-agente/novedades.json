@@ -1,8 +1,34 @@
 {
-  "ultima": { "version": "0.2.9", "fecha": "2026-11-22" },
+  "ultima": { "version": "0.2.10", "fecha": "2026-11-22" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.10",
+      "fecha": "2026-11-22",
+      "resumen": "La línea de lo que hacen tus bots ya no se pinta encima de la herramienta: ocupa su propio hueco sobre la caja de escribir, así que no puede quedarse pegada al plegarla o cambiar de chat.",
+      "ca": {
+        "resumen": "La línia del que fan els teus bots ja no es pinta damunt de l'eina: ocupa el seu propi espai sobre la caixa d'escriure, així que no es pot quedar enganxada en plegar-la o canviar de xat."
+      },
+      "en": {
+        "resumen": "The line showing what your bots are doing is no longer painted on top of the tool: it takes its own space above the message box, so it can't get stuck when you collapse the tool or switch chats."
+      },
+      "entradas": [
+        {
+          "id": "tira-actividad-en-su-hueco",
+          "titulo": "La actividad, en su sitio",
+          "texto": "Con una herramienta desplegada, la línea con lo que hace tu bot va justo encima de la caja de escribir, sin tapar la herramienta.",
+          "ca": {
+            "titulo": "L'activitat, al seu lloc",
+            "texto": "Amb una eina desplegada, la línia amb el que fa el teu bot va just damunt de la caixa d'escriure, sense tapar l'eina."
+          },
+          "en": {
+            "titulo": "Activity in its place",
+            "texto": "With a tool open, the line showing what your bot is doing sits right above the message box without covering the tool."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.9",
       "fecha": "2026-11-22",
