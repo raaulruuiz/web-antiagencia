@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Check as IconoCheck, Laptop, Sparkles } from "lucide-react";
 import FooterMinimal from "@/components/landing/FooterMinimal";
 import {
-  ContadorPlazas as Contador, RUTA_DESCARGA, VUELTA_CODIGO, avisarPlazaReservada, clientePlazas,
+  AVISO_7_DIAS, ContadorPlazas as Contador, RUTA_DESCARGA, VUELTA_CODIGO, avisarPlazaReservada, clientePlazas,
   mensajeFallo, textoPlazas, useMiPlaza, usePlazas,
 } from "@/components/anti-agente/Plaza";
 import {
@@ -51,6 +51,7 @@ function YaTienesTuPlaza({ plaza, email, oscuro = false, onSalir }) {
         <IconoCheck className="w-4 h-4" strokeWidth={3} aria-hidden="true" /> Ya tienes tu plaza{plaza ? ` · la ${plaza}` : ""}
       </p>
       <Link to={RUTA_DESCARGA} className={claseBotonGrande(true)} style={sombraBoton}>Ir a tu Anti-Agente</Link>
+      <p className={`text-sm font-bold max-w-sm mt-4 ${oscuro ? "text-[#c4a3ff]" : "text-[#7000FF]"}`}>{AVISO_7_DIAS}</p>
       {email && <p className={`text-sm mt-4 ${oscuro ? "text-gray-400" : "text-gray-600"}`}>Entras con {email}</p>}
       {onSalir && <button type="button" onClick={onSalir} className={`text-sm underline mt-2 ${oscuro ? "text-gray-400" : "text-gray-500"}`}>No soy yo</button>}
     </div>

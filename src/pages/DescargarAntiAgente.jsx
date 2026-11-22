@@ -138,6 +138,9 @@ export default function DescargarAntiAgente() {
                     <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
                       Descárgalo para tu ordenador y entra con {email ? <strong className="text-white">{email}</strong> : "el correo de tu plaza"}.
                     </p>
+                    <p className="mt-6 max-w-xl mx-auto rounded-xl border border-[#7000FF]/60 bg-[#7000FF]/15 px-5 py-3 text-base font-bold text-white">
+                      Tienes 7 días desde que reservaste para descargar la app y entrar con este mismo correo. Si no, la plaza pasa a la siguiente persona de la lista.
+                    </p>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6 mt-12">
                     {suyo === "windows" ? [windows, mac] : [mac, windows]}

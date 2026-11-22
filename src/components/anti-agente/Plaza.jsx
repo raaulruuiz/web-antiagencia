@@ -73,6 +73,9 @@ export function useMiPlaza() {
   return estado;
 }
 
+// Regla desde el 22/11/2026: 7 días desde la reserva para entrar en la app (lo aplica y lo recuerda Supabase).
+export const AVISO_7_DIAS = "Tienes 7 días para descargar la app y entrar con tu correo. Si no, la plaza pasa a la siguiente persona de la lista.";
+
 export const textoPlazas = (p) => {
   if (!p) return "";
   if (p.libres <= 0) return `Las ${p.total} plazas están cogidas`;
