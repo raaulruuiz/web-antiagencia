@@ -1,8 +1,99 @@
 {
-  "ultima": { "version": "0.2.11", "fecha": "2026-11-22" },
+  "ultima": { "version": "0.2.12", "fecha": "2026-11-22" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.12",
+      "fecha": "2026-11-22",
+      "resumen": "El dictado sigue aunque cambies de chat, Máximo se da por leído al entrar, solo ves el aviso de la última versión y la entrevista inicial acaba con un plan paso a paso para dejar tu equipo montado.",
+      "ca": {
+        "resumen": "El dictat continua encara que canviïs de xat, Màxim es dona per llegit en entrar, només veus l'avís de l'última versió i l'entrevista inicial acaba amb un pla pas a pas per deixar el teu equip muntat."
+      },
+      "en": {
+        "resumen": "Dictation keeps going when you switch chats, Máximo counts as read when you open it, you only see the notice for the latest version, and the first interview ends with a step-by-step plan to set up your team."
+      },
+      "entradas": [
+        {
+          "id": "dictado-en-segundo-plano",
+          "titulo": "Dicta y sigue trabajando",
+          "texto": "Puedes cambiar de chat mientras se transcribe un audio. Al volver ves cuánto lleva y el texto se suma a lo que ya habías escrito.",
+          "ca": {
+            "titulo": "Dicta i continua treballant",
+            "texto": "Pots canviar de xat mentre es transcriu un àudio. En tornar veus quant porta i el text s'afegeix al que ja havies escrit."
+          },
+          "en": {
+            "titulo": "Dictate and keep working",
+            "texto": "You can switch chats while an audio is being transcribed. When you come back you see how far it has got, and the text is added to what you had already written."
+          }
+        },
+        {
+          "id": "maximo-leido",
+          "titulo": "Máximo, al día",
+          "texto": "Al entrar en Máximo queda leído y el contador solo suma lo nuevo. Con el botón derecho en su logo puedes marcarlo como no leído.",
+          "ca": {
+            "titulo": "Màxim, al dia",
+            "texto": "En entrar a Màxim queda llegit i el comptador només suma el que és nou. Amb el botó dret al logo el pots marcar com a no llegit."
+          },
+          "en": {
+            "titulo": "Máximo, up to date",
+            "texto": "Opening Máximo marks it as read and the counter only adds new items. Right-click its logo to mark it as unread."
+          }
+        },
+        {
+          "id": "un-aviso-de-version",
+          "titulo": "Un solo aviso de actualización",
+          "texto": "Solo ves la última versión disponible y la app baja siempre la más nueva, aunque tuvieras otra preparada.",
+          "ca": {
+            "titulo": "Un sol avís d'actualització",
+            "texto": "Només veus l'última versió disponible i l'app baixa sempre la més nova, encara que en tinguessis una altra preparada."
+          },
+          "en": {
+            "titulo": "A single update notice",
+            "texto": "You only see the latest version available, and the app always downloads the newest one, even if another was already prepared."
+          }
+        },
+        {
+          "id": "entrevista-por-pasos",
+          "titulo": "Entrevista con plan",
+          "texto": "La entrevista inicial pregunta también cuánto gastas al mes y cuántas horas se te van en tareas repetidas, y acaba con un plan por pasos: tus bots, tus conexiones y tus herramientas, cada uno con su tarjeta.",
+          "ca": {
+            "titulo": "Entrevista amb pla",
+            "texto": "L'entrevista inicial pregunta també quant gastes al mes i quantes hores se't van en tasques repetides, i acaba amb un pla per passos: els teus bots, les teves connexions i les teves eines, cadascun amb la seva targeta."
+          },
+          "en": {
+            "titulo": "Interview with a plan",
+            "texto": "The first interview also asks how much you spend a month and how many hours go on repetitive tasks, and ends with a step-by-step plan: your bots, your connections and your tools, each with its own card."
+          }
+        },
+        {
+          "id": "preguntas-explicadas",
+          "titulo": "Opciones explicadas",
+          "texto": "Cuando un bot te pide elegir, la explicación de cada opción va dentro de la misma tarjeta.",
+          "ca": {
+            "titulo": "Opcions explicades",
+            "texto": "Quan un bot et demana triar, l'explicació de cada opció va dins la mateixa targeta."
+          },
+          "en": {
+            "titulo": "Options explained",
+            "texto": "When a bot asks you to choose, the explanation of each option is inside the same card."
+          }
+        },
+        {
+          "id": "herramientas-0212",
+          "titulo": "Más para las herramientas",
+          "texto": "Las herramientas pueden abrir un archivo en su carpeta, recortar personas del fondo y encontrar caras en tus imágenes y vídeos, sin salir de tu ordenador.",
+          "ca": {
+            "titulo": "Més per a les eines",
+            "texto": "Les eines poden obrir un fitxer a la seva carpeta, retallar persones del fons i trobar cares a les teves imatges i vídeos, sense sortir del teu ordinador."
+          },
+          "en": {
+            "titulo": "More for tools",
+            "texto": "Tools can show a file in its folder, cut people out of the background and find faces in your images and videos, without leaving your computer."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.11",
       "fecha": "2026-11-22",
