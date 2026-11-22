@@ -1,8 +1,47 @@
 {
-  "ultima": { "version": "0.2.7", "fecha": "2026-11-22" },
+  "ultima": { "version": "0.2.8", "fecha": "2026-11-22" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.8",
+      "fecha": "2026-11-22",
+      "resumen": "Arreglada la línea de lo que hacen tus bots encima de una herramienta: ya no se queda colgada al acabar el turno y, cuando el bot termina una acción, pasa a decir que está pensando o escribiendo. Y la pantalla de bienvenida con la llamada sale una sola vez por cuenta.",
+      "ca": {
+        "resumen": "Arreglada la línia del que fan els teus bots damunt d'una eina: ja no es queda penjada en acabar el torn i, quan el bot acaba una acció, passa a dir que està pensant o escrivint. I la pantalla de benvinguda amb la trucada surt una sola vegada per compte."
+      },
+      "en": {
+        "resumen": "Fixed the line showing what your bots are doing on top of a tool: it no longer gets stuck after the turn ends, and when the bot finishes an action it switches to thinking or writing. And the welcome screen with the call now shows only once per account."
+      },
+      "entradas": [
+        {
+          "id": "tira-actividad-sin-colgar",
+          "titulo": "La actividad ya no se queda colgada",
+          "texto": "La línea con lo que hace tu bot encima de una herramienta desaparece al acabar el turno y solo sale con la herramienta desplegada o en pantalla completa. Cuando el bot acaba una acción, deja de mostrarla y pasa a «Pensando» o «Escribiendo».",
+          "ca": {
+            "titulo": "L'activitat ja no es queda penjada",
+            "texto": "La línia amb el que fa el teu bot damunt d'una eina desapareix en acabar el torn i només surt amb l'eina desplegada o a pantalla completa. Quan el bot acaba una acció, deixa de mostrar-la i passa a «Pensant» o «Escrivint»."
+          },
+          "en": {
+            "titulo": "Activity no longer gets stuck",
+            "texto": "The line showing what your bot is doing on top of a tool disappears when the turn ends and only shows with the tool expanded or in full screen. When the bot finishes an action, it stops showing it and switches to «Thinking» or «Writing»."
+          }
+        },
+        {
+          "id": "bienvenida-una-vez-por-cuenta",
+          "titulo": "Bienvenida una sola vez",
+          "texto": "La pantalla de bienvenida que ofrece la llamada de puesta en marcha sale una sola vez por cuenta, aunque entres desde otro ordenador o vuelvas a iniciar sesión.",
+          "ca": {
+            "titulo": "Benvinguda una sola vegada",
+            "texto": "La pantalla de benvinguda que ofereix la trucada de posada en marxa surt una sola vegada per compte, encara que entris des d'un altre ordinador o tornis a iniciar sessió."
+          },
+          "en": {
+            "titulo": "Welcome only once",
+            "texto": "The welcome screen offering the onboarding call shows only once per account, even if you sign in from another computer or sign in again."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.7",
       "fecha": "2026-11-22",
