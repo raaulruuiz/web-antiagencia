@@ -21,3 +21,5 @@ Sin conectar nada puedes escribir los emails y descargarlos en HTML.
 ## Tu IA y tus datos
 
 Escribe con el Claude o el ChatGPT que tengas conectado en Anti-Agente, con tu plan. Tus marcas y tus emails se guardan en este Mac, en la carpeta de la herramienta. Nada se envía a tus suscriptores sin que lo confirmes.
+
+**Ayudar a mejorar** (apagado de serie): si lo enciendes, una vez al día se envían a Antiagencia las correcciones que haces a mano o en el chat, sin el nombre de tu marca, enlaces, emails, teléfonos ni datos de tus clientes. Sirven para que Anti-Email escriba mejor para todos. Lo apagas cuando quieras en Marcas.

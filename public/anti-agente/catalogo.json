@@ -79,12 +79,13 @@
     {
       "id": "anti-email",
       "nombre": "Anti-Email",
-      "version": "0.9.2",
+      "version": "0.9.3",
       "descripcion": "Escribe emails de marketing con tu IA en una pizarra y llévalos a Klaviyo, MailerLite o ActiveCampaign como borrador. Nada se envía sin tu visto bueno.",
+      "cambios": "«Ayudar a mejorar» ya funciona: si lo enciendes, una vez al día se envían las correcciones que haces a mano o en el chat, sin datos de tu marca ni de tus clientes, para que Anti-Email escriba mejor para todos. Sigue apagado de serie y lo cambias cuando quieras en Marcas. Anti-Email ya está en catalán e inglés: la pantalla sale en tu idioma, tu IA te habla en él y escribe cada email en el idioma de la marca, con sus reglas para que no suene a IA.",
       "precio": null,
       "icono": "https://antiagencia.es/anti-agente/herramientas/anti-email.png",
       "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email.md",
-      "appMinima": "0.2.6",
+      "appMinima": "0.2.7",
       "conexiones": [
         {
           "servicio": "klaviyo",
@@ -124,22 +125,24 @@
         "imagenes",
         "web",
         "chat",
-        "pantallaCompleta"
+        "pantallaCompleta",
+        "compartir"
       ],
-      "paquete": "https://antiagencia.es/anti-agente/herramientas/anti-email-0.9.2.herramienta",
-      "sha256": "36a6d24896494d9138dd6214bbbf1832372e1ea72f4ccbcdf5546bc9fe483186",
-      "peso": 5959202,
+      "paquete": "https://antiagencia.es/anti-agente/herramientas/anti-email-0.9.3.herramienta",
+      "sha256": "de1378bd1e7356feea7296f569f1a4e6f632e7c2965c8e441494bcf0f10a726b",
+      "peso": 6185954,
       "ca": {
         "nombre": "Anti-Email",
         "descripcion": "Escriu emails de màrqueting amb la teva IA en una pissarra i porta'ls a Klaviyo, MailerLite o ActiveCampaign com a esborrany. Res no s'envia sense el teu sí.",
-        "cambios": "Nou «Ajudar a millorar»: si vols, comparteixes les teves correccions sense dades de la teva marca ni dels teus clients perquè Anti-Email escrigui millor per a tothom. Ve apagat i el pots canviar quan vulguis a Marques. En escriure i en revisar, Anti-Email aprèn d'una biblioteca d'exemples de com era un text i com queda millor. Ara també detecta les frases del tipus «No es tracta de X, sinó de Y»."
+        "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email-ca.md",
+        "cambios": "«Ajudar a millorar» ja funciona: si l'encens, un cop al dia s'envien les correccions que fas a mà o al xat, sense dades de la teva marca ni dels teus clients, perquè Anti-Email escrigui millor per a tothom. Continua apagat de sèrie i el canvies quan vulguis a Marques. Anti-Email ja està en català i anglès: la pantalla surt en el teu idioma, la teva IA et parla en ell i escriu cada email en l'idioma de la marca, amb les seves regles perquè no soni a IA."
       },
       "en": {
         "nombre": "Anti-Email",
         "descripcion": "Write marketing emails with your AI on a whiteboard and take them to Klaviyo, MailerLite or ActiveCampaign as drafts. Nothing is sent without your OK.",
-        "cambios": "New \"Help improve\": if you want, you share your edits, without your brand's or your customers' data, so Anti-Email writes better for everyone. It's off by default and you can change it anytime in Brands. When writing and reviewing, Anti-Email learns from a library of examples of how a text was and how it reads better. It now also spots \"It's not about X, it's about Y\" phrases."
-      },
-      "cambios": "Nuevo «Ayudar a mejorar»: si quieres, compartes tus correcciones sin datos de tu marca ni de tus clientes para que Anti-Email escriba mejor para todos. Viene apagado y lo cambias cuando quieras en Marcas. Al escribir y al revisar, Anti-Email aprende de una biblioteca de ejemplos de cómo estaba un texto y cómo queda mejor. Ahora detecta también las frases tipo «No se trata de X, sino de Y»."
+        "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email-en.md",
+        "cambios": "\"Help improve\" now works: if you turn it on, once a day the edits you make by hand or in the chat are sent, without your brand's or your customers' data, so Anti-Email writes better for everyone. It stays off by default and you can change it anytime in Brands. Anti-Email now speaks English and Catalan: the screen shows in your language, your AI talks to you in it and writes each email in the brand's language, with its own rules so it doesn't sound like AI."
+      }
     }
   ],
   "servicios": []
