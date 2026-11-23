@@ -1,8 +1,60 @@
 {
-  "ultima": { "version": "0.2.13", "fecha": "2026-11-23" },
+  "ultima": { "version": "0.2.14", "fecha": "2026-11-23" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.14",
+      "fecha": "2026-11-23",
+      "resumen": "La app encuentra Claude Code y Codex aunque los hayas instalado a tu manera, los anuncios de Meta pueden llevar imágenes y vídeos de tu equipo o de Drive, y las herramientas recuerdan lo que aprenden y comparten proyectos con permiso.",
+      "ca": {
+        "resumen": "L'app troba Claude Code i Codex encara que els hagis instal·lat a la teva manera, els anuncis de Meta poden portar imatges i vídeos del teu equip o de Drive, i les eines recorden el que aprenen i comparteixen projectes amb permís."
+      },
+      "en": {
+        "resumen": "The app finds Claude Code and Codex however you installed them, Meta ads can use images and videos from your computer or Drive, and tools remember what they learn and share projects with permission."
+      },
+      "entradas": [
+        {
+          "id": "conecta-tu-ia",
+          "titulo": "Conectar tu IA, sin atascos",
+          "texto": "La app busca Claude Code y Codex en muchos más sitios, en Mac y en Windows. Al pulsar «Instalar» o «Conectar» comprueba que la Terminal se ha abierto y, si no, te enseña la orden para copiarla y pegarla tú.",
+          "ca": {
+            "titulo": "Connectar la teva IA, sense embussos",
+            "texto": "L'app busca Claude Code i Codex en molts més llocs, a Mac i a Windows. En prémer «Instal·lar» o «Connectar» comprova que el Terminal s'ha obert i, si no, t'ensenya l'ordre per copiar-la i enganxar-la tu."
+          },
+          "en": {
+            "titulo": "Connect your AI without getting stuck",
+            "texto": "The app looks for Claude Code and Codex in many more places, on Mac and Windows. When you press «Install» or «Connect» it checks that the Terminal has opened and, if not, shows you the command to copy and paste yourself."
+          }
+        },
+        {
+          "id": "medios-meta",
+          "titulo": "Imágenes y vídeos para tus anuncios",
+          "texto": "Los anuncios de Meta, también los de carrusel, pueden usar imágenes y vídeos de este equipo o de Google Drive. Ves la miniatura en la tarjeta y la app los sube solo cuando tú lo apruebas.",
+          "ca": {
+            "titulo": "Imatges i vídeos per als teus anuncis",
+            "texto": "Els anuncis de Meta, també els de carrusel, poden fer servir imatges i vídeos d'aquest equip o de Google Drive. Veus la miniatura a la targeta i l'app els puja només quan tu ho aproves."
+          },
+          "en": {
+            "titulo": "Images and videos for your ads",
+            "texto": "Meta ads, carousels included, can use images and videos from this computer or Google Drive. You see the thumbnail in the card and the app only uploads them when you approve."
+          }
+        },
+        {
+          "id": "memoria-y-proyectos",
+          "titulo": "Herramientas con memoria y proyectos",
+          "texto": "Las herramientas pueden recordar lo que aprenden de ti y trabajar sobre proyectos de otras herramientas. Ver un proyecto ajeno o pasarlo a otra herramienta siempre pide tu permiso con una tarjeta.",
+          "ca": {
+            "titulo": "Eines amb memòria i projectes",
+            "texto": "Les eines poden recordar el que aprenen de tu i treballar sobre projectes d'altres eines. Veure un projecte d'una altra eina o passar-lo a una altra sempre et demana permís amb una targeta."
+          },
+          "en": {
+            "titulo": "Tools with memory and projects",
+            "texto": "Tools can remember what they learn about you and work on projects from other tools. Opening another tool's project or moving it to another tool always asks for your permission with a card."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.13",
       "fecha": "2026-11-23",
