@@ -1,8 +1,34 @@
 {
-  "ultima": { "version": "0.2.12", "fecha": "2026-11-22" },
+  "ultima": { "version": "0.2.13", "fecha": "2026-11-23" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.13",
+      "fecha": "2026-11-23",
+      "resumen": "Los bots ya pueden preparar anuncios de carrusel en Meta, con cada tarjeta a la vista antes de crearlos.",
+      "ca": {
+        "resumen": "Els bots ja poden preparar anuncis de carrusel a Meta, amb cada targeta a la vista abans de crear-los."
+      },
+      "en": {
+        "resumen": "Bots can now prepare carousel ads on Meta, with every card visible before they are created."
+      },
+      "entradas": [
+        {
+          "id": "carrusel-meta",
+          "titulo": "Anuncios de carrusel",
+          "texto": "Al montar una campaña en Meta, un anuncio puede llevar de 2 a 10 tarjetas, cada una con su imagen, título y enlace. En la tarjeta las ves todas y puedes cambiar los textos antes de crearlo.",
+          "ca": {
+            "titulo": "Anuncis de carrusel",
+            "texto": "En muntar una campanya a Meta, un anunci pot portar de 2 a 10 targetes, cadascuna amb la seva imatge, títol i enllaç. A la targeta les veus totes i pots canviar els textos abans de crear-lo."
+          },
+          "en": {
+            "titulo": "Carousel ads",
+            "texto": "When setting up a Meta campaign, an ad can have 2 to 10 cards, each with its own image, headline and link. You see them all in the card and can change the texts before creating it."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.12",
       "fecha": "2026-11-22",
