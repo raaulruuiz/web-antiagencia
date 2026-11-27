@@ -5,14 +5,14 @@ Canvia el teu web parlant amb els teus bots. El veus dins l'app, assenyales el q
 ## Com es fa servir
 1. **Tria el teu web** al menú de dalt. Si no hi surt, «Afegir web…» i en tries la carpeta.
 2. **Navega-hi:** clica l'adreça de dalt per veure la llista de pàgines, o «Enrere».
-3. **Modificar:** clica el que vols canviar (un títol, un botó, una imatge) i escriu quin canvi vols. En pots apilar uns quants, també d'altres pàgines.
-4. **«Fer els canvis»** els passa tots al teu bot d'un cop. També els hi pots demanar al xat, per escrit o amb àudio («canvia la imatge de capçalera»). Ho fa a l'esborrany i la vista s'actualitza sola.
+3. **Modificar:** clica el que vols canviar (un títol, un botó, una imatge) i surt a sobre de la caixa del xat. Escriu el canvi i prem **Retorn** per apuntar-lo; en pots apilar uns quants, també d'altres pàgines. Per parlar amb el teu bot d'una altra cosa, treu l'etiqueta amb la seva X.
+4. **«Fer els canvis»** els passa tots al teu bot d'un cop. També els hi pots demanar al xat, per escrit o amb àudio («fes-ho», «canvia la imatge de capçalera»). Ho fa a l'esborrany i la vista s'actualitza sola.
 5. **Revisa** els canvis a baix. Cadascun té el seu «Desfer». El pots veure com a l'ordinador o al mòbil.
 6. **Publicar** puja els canvis al teu web real. Sempre et surt una targeta abans i decideixes tu.
 7. Si després alguna cosa no t'agrada, **«Tornar a la versió anterior»** desfà l'última publicació, també amb targeta.
 
 ## Pàgines noves
-A la llista de pàgines, **«+ Pàgina nova»**: li poses nom i, si vols, què ha de portar. Es crea a l'esborrany i la veus al moment; el teu bot la munta amb el que li demanis. A WordPress i Shopify es veu aproximada i es crea al teu web en publicar. A GoHighLevel no es pot.
+A la llista de pàgines, **«+ Pàgina nova»**: li poses nom, es crea a l'esborrany i la veus al moment. Després escriu al xat què ha de portar i el teu bot la munta. A WordPress i Shopify es veu aproximada i es crea al teu web en publicar. A GoHighLevel no es pot.
 
 ## Analitzar webs
 Els teus bots saben revisar webs, però només quan els ho demanes:

@@ -5,14 +5,14 @@ Change your website by talking to your bots. You see it inside the app, point at
 ## How to use it
 1. **Pick your website** in the menu at the top. If it isn't there, use «Add website…» and choose its folder.
 2. **Browse** it: click the address at the top to see the list of pages, or «Back».
-3. **Edit:** click what you want to change (a heading, a button, an image) and write the change you want. You can stack several, also from other pages.
-4. **«Make the changes»** hands them all to your bot at once. You can also ask in the chat, typed or by voice («change the header image»). It makes them in the draft and the preview updates by itself.
+3. **Edit:** click what you want to change (a heading, a button, an image) and it shows above the chat box. Type the change and press **Enter** to note it down; you can stack several, also from other pages. To talk to your bot about something else, remove the tag with its X.
+4. **«Make the changes»** hands them all to your bot at once. You can also ask in the chat, typed or by voice («do it», «change the header image»). It makes them in the draft and the preview updates by itself.
 5. **Review** the changes at the bottom. Each one has its own «Undo». You can view it as on a computer or on a phone.
 6. **Publish** sends the changes to your live website. You always get a card first, and you decide.
 7. If you don't like something afterwards, **«Go back to the previous version»** undoes the last publish, also with a card.
 
 ## New pages
-In the page list, **«+ New page»**: give it a name and, if you like, what it should have. It's created in the draft and you see it straight away; your bot builds it with whatever you ask. On WordPress and Shopify it's shown approximately and created on your site when you publish. Not available on GoHighLevel.
+In the page list, **«+ New page»**: give it a name, it's created in the draft and you see it straight away. Then type in the chat what it should have and your bot builds it. On WordPress and Shopify it's shown approximately and created on your site when you publish. Not available on GoHighLevel.
 
 ## Analysing websites
 Your bots know how to review websites, but only when you ask:

@@ -4,16 +4,16 @@
     {
       "id": "webs",
       "nombre": "Anti-Web",
-      "version": "0.1.21",
+      "version": "0.1.22",
       "descripcion": "Edita tu web hablando con tus bots: señalas lo que quieres cambiar, se prepara en un borrador y solo se publica cuando lo apruebas.",
-      "cambios": "Tus bots saben mejor cuándo usar cada guía de Anti-Web: cambiar tu web, revisarla o hacer una página parecida a otra.",
+      "cambios": "Ahora todo se pide en el chat: pincha lo que quieras cambiar con «Modificar», escribe el cambio en la caja del chat y pulsa Enter. Se van apilando y, cuando quieras, pulsa «Hacer los cambios» o díselo a tu bot. Al crear una página, también le dices en el chat qué tiene que llevar.",
       "precio": {
         "texto": "19 €/mes",
         "detalle": "o 190 €/año · IVA incluido"
       },
       "icono": "https://antiagencia.es/anti-agente/herramientas/webs.png",
       "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs.md",
-      "appMinima": "0.1.23",
+      "appMinima": "0.2.16",
       "conexiones": [
         {
           "servicio": "shopify",
@@ -51,15 +51,16 @@
         "chat",
         "pantallaCompleta",
         "datos",
-        "web"
+        "web",
+        "seleccion"
       ],
-      "sha256": "207b001db309d7edf8c40e8dd707944b1f5506dbebd792ab1cf081e51813cbad",
-      "peso": 224126,
+      "sha256": "3dc73b090a2cc7137bc845263f8a39b268adb964c55f79c60fd5e10d16ff35b3",
+      "peso": 225982,
       "ca": {
         "nombre": "Anti-Web",
         "descripcion": "Edita el teu web parlant amb els teus bots: assenyales el que vols canviar, es prepara en un esborrany i només es publica quan ho aproves.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-ca.md",
-        "cambios": "Els teus bots saben millor quan fer servir cada guia d'Anti-Web: canviar el teu web, revisar-lo o fer una pàgina semblant a una altra.",
+        "cambios": "Ara tot es demana al xat: clica el que vulguis canviar amb «Modificar», escriu el canvi a la caixa del xat i prem Retorn. Es van apilant i, quan vulguis, prem «Fer els canvis» o digues-ho al teu bot. En crear una pàgina, també li dius al xat què ha de tenir.",
         "precio": {
           "texto": "19 €/mes",
           "detalle": "o 190 €/any · IVA inclòs"
@@ -69,7 +70,7 @@
         "nombre": "Anti-Web",
         "descripcion": "Edit your website by talking to your bots: point at what to change, it's prepared as a draft and only goes live when you approve it.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-en.md",
-        "cambios": "Your bots now know better when to use each Anti-Web guide: changing your site, reviewing it or making a page like another one.",
+        "cambios": "Now everything is asked in the chat: click what you want to change with «Edit», type the change in the chat box and press Enter. Changes stack up and, whenever you like, press «Make the changes» or tell your bot. When you create a page, you also tell it in the chat what it should have.",
         "precio": {
           "texto": "€19/month",
           "detalle": "or €190/year · VAT included"

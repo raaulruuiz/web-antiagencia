@@ -5,14 +5,14 @@ Cambia tu web hablando con tus bots. La ves dentro de la app, señalas lo que qu
 ## Cómo se usa
 1. **Elige tu web** en el menú de arriba. Si no sale, «Añadir web…» y eliges su carpeta.
 2. **Navega** por ella: pulsa la dirección de arriba para ver la lista de páginas, o «Atrás».
-3. **Modificar:** pincha lo que quieres cambiar (un título, un botón, una imagen) y escribe qué cambio quieres. Puedes apilar varios, también de otras páginas.
-4. **«Hacer los cambios»** se los pasa todos a tu bot de una vez. También puedes pedírselo en el chat, escrito o por audio («cambia la imagen de cabecera»). Lo hace en el borrador y la vista se actualiza sola.
+3. **Modificar:** pincha lo que quieres cambiar (un título, un botón, una imagen) y sale encima de la caja del chat. Escribe el cambio y pulsa **Enter** para apuntarlo; puedes apilar varios, también de otras páginas. Para hablar con tu bot de otra cosa, quita la etiqueta con su X.
+4. **«Hacer los cambios»** se los pasa todos a tu bot de una vez. También puedes pedírselo en el chat, escrito o por audio («hazlo», «cambia la imagen de cabecera»). Lo hace en el borrador y la vista se actualiza sola.
 5. **Revisa** los cambios abajo. Cada uno tiene su «Deshacer». Puedes verla como en el ordenador o en el móvil.
 6. **Publicar** sube los cambios a tu web real. Siempre te sale una tarjeta antes y decides tú.
 7. Si algo no te gusta después, **«Volver a la versión anterior»** deshace la última publicación, también con tarjeta.
 
 ## Páginas nuevas
-En la lista de páginas, **«+ Nueva página»**: le pones nombre y, si quieres, qué tiene que llevar. Se crea en el borrador y la ves al momento; tu bot la monta con lo que le pidas. En WordPress y Shopify se ve aproximada y se crea en tu web al publicar. En GoHighLevel no se puede.
+En la lista de páginas, **«+ Nueva página»**: le pones nombre, se crea en el borrador y la ves al momento. Luego escribe en el chat qué tiene que llevar y tu bot la monta. En WordPress y Shopify se ve aproximada y se crea en tu web al publicar. En GoHighLevel no se puede.
 
 ## Analizar webs
 Tus bots saben revisar webs, pero solo cuando se lo pides:
