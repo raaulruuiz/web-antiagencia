@@ -4,9 +4,9 @@
     {
       "id": "webs",
       "nombre": "Anti-Web",
-      "version": "0.1.22",
+      "version": "0.1.23",
       "descripcion": "Edita tu web hablando con tus bots: señalas lo que quieres cambiar, se prepara en un borrador y solo se publica cuando lo apruebas.",
-      "cambios": "Ahora todo se pide en el chat: pincha lo que quieras cambiar con «Modificar», escribe el cambio en la caja del chat y pulsa Enter. Se van apilando y, cuando quieras, pulsa «Hacer los cambios» o díselo a tu bot. Al crear una página, también le dices en el chat qué tiene que llevar.",
+      "cambios": "Arreglo: si la vista previa de una web de tu ordenador se cae, Anti-Web la vuelve a levantar y reabre la página. Si aun así no carga, te lo dice en vez de quedarse en blanco.",
       "precio": {
         "texto": "19 €/mes",
         "detalle": "o 190 €/año · IVA incluido"
@@ -54,13 +54,13 @@
         "web",
         "seleccion"
       ],
-      "sha256": "3dc73b090a2cc7137bc845263f8a39b268adb964c55f79c60fd5e10d16ff35b3",
-      "peso": 225982,
+      "sha256": "93839d3b13ba89f8a23b2d6955be94c82e10d3425f757108b6e80f4bdb8b551f",
+      "peso": 226618,
       "ca": {
         "nombre": "Anti-Web",
         "descripcion": "Edita el teu web parlant amb els teus bots: assenyales el que vols canviar, es prepara en un esborrany i només es publica quan ho aproves.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-ca.md",
-        "cambios": "Ara tot es demana al xat: clica el que vulguis canviar amb «Modificar», escriu el canvi a la caixa del xat i prem Retorn. Es van apilant i, quan vulguis, prem «Fer els canvis» o digues-ho al teu bot. En crear una pàgina, també li dius al xat què ha de tenir.",
+        "cambios": "Arranjament: si la vista prèvia d'un web del teu ordinador cau, Anti-Web la torna a aixecar i reobre la pàgina. Si tot i així no carrega, t'ho diu en lloc de quedar-se en blanc.",
         "precio": {
           "texto": "19 €/mes",
           "detalle": "o 190 €/any · IVA inclòs"
@@ -70,7 +70,7 @@
         "nombre": "Anti-Web",
         "descripcion": "Edit your website by talking to your bots: point at what to change, it's prepared as a draft and only goes live when you approve it.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/webs-en.md",
-        "cambios": "Now everything is asked in the chat: click what you want to change with «Edit», type the change in the chat box and press Enter. Changes stack up and, whenever you like, press «Make the changes» or tell your bot. When you create a page, you also tell it in the chat what it should have.",
+        "cambios": "Fix: if the preview of a website on your computer goes down, Anti-Web brings it back up and reopens the page. If it still doesn't load, it tells you instead of staying blank.",
         "precio": {
           "texto": "€19/month",
           "detalle": "or €190/year · VAT included"
