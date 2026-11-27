@@ -79,13 +79,13 @@
     {
       "id": "anti-email",
       "nombre": "Anti-Email",
-      "version": "0.9.3",
-      "descripcion": "Escribe emails de marketing con tu IA en una pizarra y llévalos a Klaviyo, MailerLite o ActiveCampaign como borrador. Nada se envía sin tu visto bueno.",
-      "cambios": "«Ayudar a mejorar» ya funciona: si lo enciendes, una vez al día se envían las correcciones que haces a mano o en el chat, sin datos de tu marca ni de tus clientes, para que Anti-Email escriba mejor para todos. Sigue apagado de serie y lo cambias cuando quieras en Marcas. Anti-Email ya está en catalán e inglés: la pantalla sale en tu idioma, tu IA te habla en él y escribe cada email en el idioma de la marca, con sus reglas para que no suene a IA.",
+      "version": "0.10.0",
+      "descripcion": "Escribe emails y flujos con tu IA a partir de lo que tengas y lleva los emails como borrador a Klaviyo, MailerLite o ActiveCampaign. Nada se envía sin tu sí.",
+      "cambios": "Anti-Email se ha rehecho: la pizarra pasa a ser proyectos, cada uno con sus Recursos (lo que das a tu IA), su plantilla y su Resultado. Pide el email a tu bot en el chat: si a tu IA le falta algo, te pregunta en Resultado y contestas allí. Pulsa una parte, un recurso o un paso y dile a tu bot qué cambiarías; al decirle «hazlo», tu IA hace todos los cambios a la vez. También escribe con lo que tu bot sabe de la marca. La cuenta de envío se confirma en cada proyecto. Al actualizar se copia todo lo de antes y la copia no se borra. Llevar flujos enteros a Klaviyo está desactivado por ahora.",
       "precio": null,
       "icono": "https://antiagencia.es/anti-agente/herramientas/anti-email.png",
       "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email.md",
-      "appMinima": "0.2.7",
+      "appMinima": "0.2.16",
       "conexiones": [
         {
           "servicio": "klaviyo",
@@ -115,7 +115,7 @@
         {
           "servicio": "gmail",
           "opcional": true,
-          "motivo": "Aprender cómo escribes de los correos que has enviado y traer correos de referencia a la pizarra"
+          "motivo": "Aprender cómo escribes de los correos que has enviado y traer correos de referencia a los recursos de un proyecto"
         }
       ],
       "capacidades": [
@@ -126,22 +126,25 @@
         "web",
         "chat",
         "pantallaCompleta",
-        "compartir"
+        "compartir",
+        "memoria",
+        "proyectos",
+        "seleccion"
       ],
-      "paquete": "https://antiagencia.es/anti-agente/herramientas/anti-email-0.9.3.herramienta",
-      "sha256": "de1378bd1e7356feea7296f569f1a4e6f632e7c2965c8e441494bcf0f10a726b",
-      "peso": 6185954,
+      "paquete": "https://antiagencia.es/anti-agente/herramientas/anti-email-0.10.0.herramienta",
+      "sha256": "71027476f268755d216e7cbaef9e9c3f9107db2a7e83fb10d8fd209b5aa36de7",
+      "peso": 20175550,
       "ca": {
         "nombre": "Anti-Email",
-        "descripcion": "Escriu emails de màrqueting amb la teva IA en una pissarra i porta'ls a Klaviyo, MailerLite o ActiveCampaign com a esborrany. Res no s'envia sense el teu sí.",
+        "descripcion": "Escriu emails i fluxos amb la teva IA i el que tinguis, i porta els emails en esborrany a Klaviyo, MailerLite o ActiveCampaign. Res no s'envia sense el teu sí.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email-ca.md",
-        "cambios": "«Ajudar a millorar» ja funciona: si l'encens, un cop al dia s'envien les correccions que fas a mà o al xat, sense dades de la teva marca ni dels teus clients, perquè Anti-Email escrigui millor per a tothom. Continua apagat de sèrie i el canvies quan vulguis a Marques. Anti-Email ja està en català i anglès: la pantalla surt en el teu idioma, la teva IA et parla en ell i escriu cada email en l'idioma de la marca, amb les seves regles perquè no soni a IA."
+        "cambios": "Anti-Email s'ha refet: la pissarra passa a ser projectes, cadascun amb Recursos (el que dones a la teva IA), plantilla i Resultat. Demana l'email al teu bot al xat: si a la teva IA li falta res, t'ho pregunta a Resultat i hi contestes. Prem una part, un recurs o un pas i digues al teu bot què canviaries; quan li diguis «fes-ho», la teva IA fa tots els canvis alhora. També escriu amb el que el teu bot sap de la marca. El compte d'enviament es confirma a cada projecte. En actualitzar es copia tot el d'abans i la còpia no s'esborra. Portar fluxos sencers a Klaviyo està desactivat de moment."
       },
       "en": {
         "nombre": "Anti-Email",
-        "descripcion": "Write marketing emails with your AI on a whiteboard and take them to Klaviyo, MailerLite or ActiveCampaign as drafts. Nothing is sent without your OK.",
+        "descripcion": "Write emails and flows with your AI from what you have and take the emails to Klaviyo, MailerLite or ActiveCampaign as drafts. Nothing is sent without your OK.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email-en.md",
-        "cambios": "\"Help improve\" now works: if you turn it on, once a day the edits you make by hand or in the chat are sent, without your brand's or your customers' data, so Anti-Email writes better for everyone. It stays off by default and you can change it anytime in Brands. Anti-Email now speaks English and Catalan: the screen shows in your language, your AI talks to you in it and writes each email in the brand's language, with its own rules so it doesn't sound like AI."
+        "cambios": "Anti-Email has been rebuilt: the whiteboard becomes projects, each with Resources (what you give your AI), a template and a Result. Ask your bot for the email in the chat: if your AI needs something, it asks you in Result and you answer there. Tap a part, a resource or a step and tell your bot what you'd change; when you say “do it”, your AI makes all the changes at once. It also writes with what your bot knows about the brand. The sending account is confirmed in each project. Updating copies everything from before and the copy isn't deleted. Taking whole flows to Klaviyo is off for now."
       }
     }
   ],
