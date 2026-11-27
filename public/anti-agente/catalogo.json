@@ -146,6 +146,43 @@
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email-en.md",
         "cambios": "Anti-Email has been rebuilt: the whiteboard becomes projects, each with Resources (what you give your AI), a template and a Result. Ask your bot for the email in the chat: if your AI needs something, it asks you in Result and you answer there. Tap a part, a resource or a step and tell your bot what you'd change; when you say “do it”, your AI makes all the changes at once. It also writes with what your bot knows about the brand. The sending account is confirmed in each project. Updating copies everything from before and the copy isn't deleted. Taking whole flows to Klaviyo is off for now."
       }
+    },
+    {
+      "id": "editor",
+      "nombre": "Anti-Editor",
+      "version": "0.11.0",
+      "descripcion": "Edita tus vídeos con IA en tu ordenador: sueltas el vídeo, eliges tu plantilla o le dices a tu bot cómo lo quieres, y te lo devuelve editado. Gratis.",
+      "cambios": "Ahora todo se escribe en el chat de tu bot. Toca un archivo del proyecto, «Instrucciones» o «Enlace», o pausa el vídeo editado donde quieras un cambio: sale encima del chat y lo que escribas (con Intro) se apunta en la lista de cambios de la pantalla. Cuando tengas todos los cambios, pulsa «Enviar cambios» o dile «hazlo».",
+      "precio": null,
+      "icono": "https://antiagencia.es/anti-agente/herramientas/editor.png",
+      "masInfo": "https://antiagencia.es/anti-agente/herramientas/editor.md",
+      "appMinima": "0.2.16",
+      "capacidades": [
+        "chat",
+        "pantallaCompleta",
+        "datos",
+        "proyectos",
+        "transcribir",
+        "web",
+        "motor",
+        "imagenes",
+        "seleccion"
+      ],
+      "paquete": "https://antiagencia.es/anti-agente/herramientas/editor-0.11.0.herramienta",
+      "sha256": "276366b58e73a62bced9e49a243a7dd2eb74fff9d5cf930bc0dd9e4936a19d6e",
+      "peso": 1055786,
+      "ca": {
+        "nombre": "Anti-Editor",
+        "descripcion": "Edita els teus vídeos amb IA a l'ordinador: deixes anar el vídeo, tries la teva plantilla o dius al teu bot com el vols, i te'l torna editat. Gratis.",
+        "masInfo": "https://antiagencia.es/anti-agente/herramientas/editor-ca.md",
+        "cambios": "Ara tot s’escriu al xat del teu bot. Toca un arxiu del projecte, «Instruccions» o «Enllaç», o posa en pausa el vídeo editat on vulguis un canvi: surt a sobre del xat i el que escriguis (amb Retorn) s’apunta a la llista de canvis de la pantalla. Quan tinguis tots els canvis, prem «Envia els canvis» o digues-li «fes-ho»."
+      },
+      "en": {
+        "nombre": "Anti-Editor",
+        "descripcion": "Edit your videos with AI on your computer: drop the video, pick your template or tell your bot how you want it, and get it back edited. Free.",
+        "masInfo": "https://antiagencia.es/anti-agente/herramientas/editor-en.md",
+        "cambios": "Now everything is written in your bot’s chat. Tap a project file, “Instructions” or “Link”, or pause the edited video where you want a change: it shows above the chat and whatever you write (with Enter) is noted in the screen’s list of changes. When you have all your changes, press “Send changes” or tell it “do it”."
+      }
     }
   ],
   "servicios": []
