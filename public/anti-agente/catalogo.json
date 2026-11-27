@@ -80,9 +80,9 @@
     {
       "id": "anti-email",
       "nombre": "Anti-Email",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "descripcion": "Escribe emails y flujos con tu IA a partir de lo que tengas y lleva los emails como borrador a Klaviyo, MailerLite o ActiveCampaign. Nada se envía sin tu sí.",
-      "cambios": "Anti-Email se ha rehecho: la pizarra pasa a ser proyectos, cada uno con sus Recursos (lo que das a tu IA), su plantilla y su Resultado. Pide el email a tu bot en el chat: si a tu IA le falta algo, te pregunta en Resultado y contestas allí. Pulsa una parte, un recurso o un paso y dile a tu bot qué cambiarías; al decirle «hazlo», tu IA hace todos los cambios a la vez. También escribe con lo que tu bot sabe de la marca. La cuenta de envío se confirma en cada proyecto. Al actualizar se copia todo lo de antes y la copia no se borra. Llevar flujos enteros a Klaviyo está desactivado por ahora.",
+      "cambios": "Si pides a tu bot un texto tal cual, entre comillas, en el asunto, el preheader o el cuerpo, los lectores que repasan el email ya no lo cambian. Y si al final no ha quedado igual, Anti-Email ya no dice que lo ha conservado: te avisa de qué texto no está igual. Lo que pides quitar o cambiar («quita…», «cambia…») se sigue haciendo como siempre.",
       "precio": null,
       "icono": "https://antiagencia.es/anti-agente/herramientas/anti-email.png",
       "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email.md",
@@ -132,20 +132,20 @@
         "proyectos",
         "seleccion"
       ],
-      "paquete": "https://antiagencia.es/anti-agente/herramientas/anti-email-0.10.0.herramienta",
-      "sha256": "71027476f268755d216e7cbaef9e9c3f9107db2a7e83fb10d8fd209b5aa36de7",
-      "peso": 20175550,
+      "paquete": "https://antiagencia.es/anti-agente/herramientas/anti-email-0.10.1.herramienta",
+      "sha256": "632d8c6ec7bb81fc0a7bf84760c78a755dd18c669e9c1b7a5c56c720ad118b38",
+      "peso": 20176514,
       "ca": {
         "nombre": "Anti-Email",
         "descripcion": "Escriu emails i fluxos amb la teva IA i el que tinguis, i porta els emails en esborrany a Klaviyo, MailerLite o ActiveCampaign. Res no s'envia sense el teu sí.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email-ca.md",
-        "cambios": "Anti-Email s'ha refet: la pissarra passa a ser projectes, cadascun amb Recursos (el que dones a la teva IA), plantilla i Resultat. Demana l'email al teu bot al xat: si a la teva IA li falta res, t'ho pregunta a Resultat i hi contestes. Prem una part, un recurs o un pas i digues al teu bot què canviaries; quan li diguis «fes-ho», la teva IA fa tots els canvis alhora. També escriu amb el que el teu bot sap de la marca. El compte d'enviament es confirma a cada projecte. En actualitzar es copia tot el d'abans i la còpia no s'esborra. Portar fluxos sencers a Klaviyo està desactivat de moment."
+        "cambios": "Si demanes al teu bot un text tal qual, entre cometes, a l'assumpte, al preheader o al cos, els lectors que repassen l'email ja no el canvien. I si al final no ha quedat igual, Anti-Email ja no diu que l'ha conservat: t'avisa de quin text no és igual. El que demanes treure o canviar («treu…», «canvia…») es continua fent com sempre."
       },
       "en": {
         "nombre": "Anti-Email",
         "descripcion": "Write emails and flows with your AI from what you have and take the emails to Klaviyo, MailerLite or ActiveCampaign as drafts. Nothing is sent without your OK.",
         "masInfo": "https://antiagencia.es/anti-agente/herramientas/anti-email-en.md",
-        "cambios": "Anti-Email has been rebuilt: the whiteboard becomes projects, each with Resources (what you give your AI), a template and a Result. Ask your bot for the email in the chat: if your AI needs something, it asks you in Result and you answer there. Tap a part, a resource or a step and tell your bot what you'd change; when you say “do it”, your AI makes all the changes at once. It also writes with what your bot knows about the brand. The sending account is confirmed in each project. Updating copies everything from before and the copy isn't deleted. Taking whole flows to Klaviyo is off for now."
+        "cambios": "If you ask your bot for a text word for word, in quotes, in the subject line, preheader or body, the readers that review the email no longer change it. And if it doesn't end up the same, Anti-Email no longer says it kept it: it tells you which text isn't the same. What you ask to remove or change (“remove…”, “change…”) still works as always."
       }
     },
     {
