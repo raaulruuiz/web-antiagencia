@@ -1,8 +1,73 @@
 {
-  "ultima": { "version": "0.2.14", "fecha": "2026-11-23" },
+  "ultima": { "version": "0.2.16", "fecha": "2026-11-27" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.16",
+      "fecha": "2026-11-27",
+      "resumen": "Un solo chat con tu bot también con una herramienta abierta, el bot termina su turno al responder, YouTube y TikTok funcionan sin instalar nada y borrar un proyecto siempre pide confirmación.",
+      "ca": {
+        "resumen": "Un sol xat amb el teu bot també amb una eina oberta, el bot acaba el seu torn en respondre, YouTube i TikTok funcionen sense instal·lar res i esborrar un projecte sempre demana confirmació."
+      },
+      "en": {
+        "resumen": "One chat with your bot, even with a tool open, the bot ends its turn when it replies, YouTube and TikTok work without installing anything, and deleting a project always asks for confirmation."
+      },
+      "entradas": [
+        {
+          "id": "chat-unico",
+          "titulo": "Un solo chat, también con una herramienta abierta",
+          "texto": "Hablas con tu bot en el mismo chat aunque tengas una herramienta abierta, y el bot sabe cuál es. Seleccionas una parte de la herramienta, escribes el cambio y con Enter se apunta en su lista.",
+          "ca": {
+            "titulo": "Un sol xat, també amb una eina oberta",
+            "texto": "Parles amb el teu bot al mateix xat encara que tinguis una eina oberta, i el bot sap quina és. Selecciones una part de l'eina, escrius el canvi i amb Enter s'apunta a la seva llista."
+          },
+          "en": {
+            "titulo": "One chat, even with a tool open",
+            "texto": "You talk to your bot in the same chat even with a tool open, and the bot knows which one it is. Select part of the tool, type the change and press Enter to add it to its list."
+          }
+        },
+        {
+          "id": "fin-de-turno",
+          "titulo": "El bot termina al responder",
+          "texto": "El bot cierra su turno cuando te responde, aunque deje algo en marcha. Si se queda 20 minutos sin hacer nada, se para solo. Y cuando la app frena algo por seguridad, el bot se detiene y te explica qué intentaba.",
+          "ca": {
+            "titulo": "El bot acaba en respondre",
+            "texto": "El bot tanca el seu torn quan et respon, encara que deixi alguna cosa en marxa. Si es queda 20 minuts sense fer res, s'atura sol. I quan l'app frena alguna cosa per seguretat, el bot s'atura i t'explica què intentava."
+          },
+          "en": {
+            "titulo": "The bot finishes when it replies",
+            "texto": "The bot ends its turn when it replies to you, even if it leaves something running. If it sits idle for 20 minutes, it stops on its own. And when the app blocks something for safety, the bot stops and tells you what it was trying to do."
+          }
+        },
+        {
+          "id": "youtube-sin-instalar",
+          "titulo": "YouTube y TikTok sin instalar nada",
+          "texto": "La primera vez que un bot o una herramienta los usa, sale una tarjeta para bajar el programa que lo hace posible (entre 24 y 38 MB). Si ya lo tienes en el equipo, no ves nada nuevo.",
+          "ca": {
+            "titulo": "YouTube i TikTok sense instal·lar res",
+            "texto": "El primer cop que un bot o una eina els fa servir, surt una targeta per baixar el programa que ho fa possible (entre 24 i 38 MB). Si ja el tens a l'equip, no veus res de nou."
+          },
+          "en": {
+            "titulo": "YouTube and TikTok without installing anything",
+            "texto": "The first time a bot or a tool uses them, a card appears to download the program that makes it work (24 to 38 MB). If you already have it on your computer, nothing changes."
+          }
+        },
+        {
+          "id": "proyectos-y-archivos",
+          "titulo": "Archivos y proyectos con más cuidado",
+          "texto": "Puedes enlazar solo el vídeo y el audio para no copiar archivos grandes, borrar un proyecto siempre pide confirmación y la ventana para instalar la IA dice en qué paso va y cuándo ha terminado.",
+          "ca": {
+            "titulo": "Fitxers i projectes amb més cura",
+            "texto": "Pots enllaçar només el vídeo i l'àudio per no copiar fitxers grans, esborrar un projecte sempre demana confirmació i la finestra per instal·lar la IA diu en quin pas va i quan ha acabat."
+          },
+          "en": {
+            "titulo": "More care with files and projects",
+            "texto": "You can link just video and audio so large files aren't copied, deleting a project always asks for confirmation, and the AI install window shows which step it's on and when it's done."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.14",
       "fecha": "2026-11-23",
