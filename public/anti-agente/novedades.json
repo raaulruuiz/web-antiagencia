@@ -1,8 +1,99 @@
 {
-  "ultima": { "version": "0.2.16", "fecha": "2026-11-27" },
+  "ultima": { "version": "0.2.17", "fecha": "2026-11-27" },
   "descargas": { "mac": "" },
   "usoDiario": true,
   "versiones": [
+    {
+      "version": "0.2.17",
+      "fecha": "2026-11-27",
+      "resumen": "Arreglos para Windows en los enlaces y las imágenes del chat, el micrófono y la forma de recoger las imágenes generadas. Además, la vista previa de una herramienta ya no se apaga mientras la usas y los avisos de Máximo vuelven a funcionar.",
+      "ca": {
+        "resumen": "Arranjaments per a Windows als enllaços i les imatges del xat, el micròfon i la manera de recollir les imatges generades. A més, la vista prèvia d'una eina ja no s'apaga mentre la fas servir i els avisos de Màxim tornen a funcionar."
+      },
+      "en": {
+        "resumen": "Fixes for Windows in chat links and images, the microphone and how generated images are picked up. Also, a tool's preview no longer switches off while you use it, and Máximo's notices work again."
+      },
+      "entradas": [
+        {
+          "id": "windows-imagen",
+          "titulo": "Recoger las imágenes generadas",
+          "texto": "Si ChatGPT genera una imagen pero no la guarda donde la espera la app, la app la busca en la carpeta de esa conversación y te la enseña.",
+          "ca": {
+            "titulo": "Recollir les imatges generades",
+            "texto": "Si ChatGPT genera una imatge però no la desa on l'espera l'app, l'app la busca a la carpeta d'aquella conversa i te la mostra."
+          },
+          "en": {
+            "titulo": "Picking up generated images",
+            "texto": "If ChatGPT generates an image but doesn't save it where the app expects, the app looks for it in that conversation's folder and shows it to you."
+          }
+        },
+        {
+          "id": "windows-enlaces",
+          "titulo": "Enlaces e imágenes del chat en Windows",
+          "texto": "En Windows se abren los archivos que enlaza el bot y se ven su foto, las imágenes del chat, las miniaturas de los adjuntos y los vídeos de YouTube.",
+          "ca": {
+            "titulo": "Enllaços i imatges del xat a Windows",
+            "texto": "A Windows s'obren els fitxers que enllaça el bot i es veuen la seva foto, les imatges del xat, les miniatures dels adjunts i els vídeos de YouTube."
+          },
+          "en": {
+            "titulo": "Chat links and images on Windows",
+            "texto": "On Windows, files linked by the bot open, and you can see its photo, chat images, attachment thumbnails and YouTube videos."
+          }
+        },
+        {
+          "id": "microfono",
+          "titulo": "El micrófono te dice qué hacer",
+          "texto": "Si el dictado no puede usar el micrófono, la app te dice dónde activarlo y tiene un botón que te lleva a esos ajustes. Si el micrófono elegido ya no está, usa el de por defecto.",
+          "ca": {
+            "titulo": "El micròfon et diu què fer",
+            "texto": "Si el dictat no pot fer servir el micròfon, l'app et diu on activar-lo i té un botó que et porta a aquests ajustos. Si el micròfon triat ja no hi és, fa servir el predeterminat."
+          },
+          "en": {
+            "titulo": "The microphone tells you what to do",
+            "texto": "If dictation can't use the microphone, the app tells you where to turn it on and has a button that takes you to those settings. If the chosen microphone is gone, it uses the default one."
+          }
+        },
+        {
+          "id": "vista-previa",
+          "titulo": "La vista previa no se apaga mientras trabajas",
+          "texto": "La vista previa de una herramienta, como la web en Anti-Web, sigue encendida mientras la usas. Solo se apaga tras 30 minutos sin tocarla.",
+          "ca": {
+            "titulo": "La vista prèvia no s'apaga mentre treballes",
+            "texto": "La vista prèvia d'una eina, com el web a Anti-Web, continua encesa mentre la fas servir. Només s'apaga després de 30 minuts sense tocar-la."
+          },
+          "en": {
+            "titulo": "The preview stays on while you work",
+            "texto": "A tool's preview, like the website in Anti-Web, stays on while you use it. It only switches off after 30 minutes untouched."
+          }
+        },
+        {
+          "id": "maximo-avisos",
+          "titulo": "Avisos de Máximo y de versiones",
+          "texto": "Vuelven a funcionar «Abrir», «Descargar» e «Instalar y activar» en los avisos de Máximo, que ahora ocupa todo el alto del panel. Máximo y Herramientas avisan de las mismas versiones, y al instalar una versión de la app se instala la que pulsas.",
+          "ca": {
+            "titulo": "Avisos de Màxim i de versions",
+            "texto": "Tornen a funcionar «Obrir», «Descarregar» i «Instal·lar i activar» als avisos de Màxim, que ara ocupa tota l'alçada del panell. Màxim i Eines avisen de les mateixes versions, i en instal·lar una versió de l'app s'instal·la la que prems."
+          },
+          "en": {
+            "titulo": "Máximo and version notices",
+            "texto": "«Open», «Download» and «Install and activate» work again in Máximo's notices, which now fills the panel's full height. Máximo and Tools announce the same versions, and installing an app version installs the one you click."
+          }
+        },
+        {
+          "id": "meta-activo",
+          "titulo": "Conectar Meta, más claro",
+          "texto": "Al conectar Meta, los pasos avisan de que su app tiene que estar en modo Activo para crear anuncios. Si Meta da el error de modo desarrollo, la tarjeta explica qué cambiar.",
+          "ca": {
+            "titulo": "Connectar Meta, més clar",
+            "texto": "En connectar Meta, els passos avisen que la seva app ha d'estar en mode Actiu per crear anuncis. Si Meta dona l'error de mode desenvolupament, la targeta explica què cal canviar."
+          },
+          "en": {
+            "titulo": "Connecting Meta, clearer",
+            "texto": "When connecting Meta, the steps warn that its app must be in Live mode to create ads. If Meta returns the development mode error, the card explains what to change."
+          }
+        }
+      ]
+    },
     {
       "version": "0.2.16",
       "fecha": "2026-11-27",
